@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.literaturedao
 
 import LiteratureGossiper
 import android.annotation.SuppressLint
+import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -26,34 +27,21 @@ import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.text.PDFTextStripper
 import kotlinx.coroutines.*
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils
-import java.io.*
-import nl.tudelft.trustchain.literaturedao.data_types.*
-import nl.tudelft.trustchain.literaturedao.ui.KeyWordModelView
-import java.util.*
 import org.apache.commons.io.FileUtils
+import java.io.*
 
 
 class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
-    /*
-    val parentActivity = getActivity()
-
-    val localDataLock = if (parentActivity is LiteratureDaoActivity){
-        parentActivity.localDataLock
-    } else{
-        null
-    }*/
 
     private lateinit var selectedFile: DocumentFile
     private var literatureGossiper: LiteratureGossiper? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +56,12 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         val selectFileUpload: Button = view.findViewById(R.id.select_new_lirterature) as Button
         val submitFileUpload: Button = view.findViewById(R.id.submit_new_lirterature) as Button
         val urlTextField: EditText = view.findViewById(R.id.url_text_field) as EditText
+
+        //inside Fragment
+        val job = Job()
+        val uiScope = CoroutineScope(Dispatchers.Main + job)
+
+
 
         selectFileUpload.setOnClickListener {
             // do something
@@ -85,13 +79,14 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         submitFileUpload.setOnClickListener  {
             try {
                 //TODO: Start Loading animation and start thread
-                activity?.runOnUiThread {
-                    view.findViewById<LinearLayout>(R.id.add_literature_content).visibility = View.GONE
-                    view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.VISIBLE
-                }
 
-                lifecycleScope.launch {
 
+                uiScope.launch(Dispatchers.IO) {
+
+                    withContext(Dispatchers.Main) {
+                        view.findViewById<LinearLayout>(R.id.add_literature_content).visibility = View.GONE
+                        view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.VISIBLE
+                    }
 
                     // TODO: Select where you want to select the file from;
                     // case 1: A file location/URI is selected in selectedFile.uri
@@ -104,7 +99,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
                     PDFBoxResourceLoader.init(activity?.baseContext)
 
-                    val strippedString = PdfController().stripText(pdf!!)
+                    val strippedString = stripText(pdf!!)
                     val kws: MutableList<Pair<String, Double>>
 
                     // initilaizing freq's
@@ -124,48 +119,16 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     val literatureTitle = view.findViewById<EditText>(R.id.literature_title).text
                     val newLiterature = LiteratureDaoActivity.Literature(literatureTitle.toString(),magnet?.makeMagnetUri().toString(),kws,true)
 
-                    val literatureObject = Literature(
-                        literatureTitle.toString(),
-                        magnet.toString(),
-                        kws,
-                        true,
-                        Calendar.getInstance().getTime().toString(),
-                        selectedFile.getUri().toString())
                     print(newLiterature)
 
+                    // TODO: Store Result locally
+                    // The newLiteratire model should be stored locally in some kind of json.
+                    // SO it becomes searchable
 
-                    // Load local data
-                    var fileInputStream: FileInputStream? = null
-                    try{
-                        fileInputStream = context?.openFileInput("localData")
-                    } catch (e: FileNotFoundException){
-                        context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
-                            output?.write(Json.encodeToString(LocalData(mutableListOf<Literature>())).toByteArray())
-                        }
-                        fileInputStream = context?.openFileInput("localData")
-                    }
-                    var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
-                    val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-                    val stringBuilder: StringBuilder = StringBuilder()
-                    var text: String? = null
-                    while ({ text = bufferedReader.readLine(); text }() != null) {
-                        stringBuilder.append(text)
-                    }
-                    val localData: LocalData =  Json.decodeFromString<LocalData>(stringBuilder.toString())
 
-                    // add new entry to local data and write
-
-                    localData.content.add(literatureObject)
-
-                    // write modified local data
-                    context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
-                        output?.write(Json.encodeToString(localData).toByteArray())
-                    }
 
                     // TODO: Gossip Result
                     // JSON Serialize to string the newLiterature and gossip it to the connected peers.
-                    // Comment: This should be a constantly running process that uses the locally stored pdf's
-                    // so there should be no need to do anything after we stored it in local storage
 
 
                     // TODO: Move to Home Screen
@@ -181,6 +144,32 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         }
         // Inflate the layout for this fragment
         return view
+    }
+
+    fun stripText(file: InputStream): String {
+        var parsedText = ""
+        var document: PDDocument? = null
+
+        try {
+            document = PDDocument.load(file)
+        } catch (e: IOException) {
+            Log.e("PdfBox-Android-Sample", "Exception thrown while loading document to strip", e)
+        }
+
+        try {
+            val pdfStripper = PDFTextStripper()
+            parsedText = pdfStripper.getText(document)
+        } catch (e: IOException) {
+            Log.e("PdfBox-Android-Sample", "Exception thrown while stripping text", e)
+        } finally {
+            try {
+                document?.close()
+            } catch (e: IOException) {
+                Log.e("PdfBox-Android-Sample", "Exception thrown while closing document", e)
+            }
+        }
+
+        return parsedText
     }
 
     /**
@@ -200,6 +189,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         val input =
             contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
         val outputFilePath = "${context.cacheDir}/$fileName"
+
         FileUtils.copyInputStreamToFile(input, File(outputFilePath))
         return createTorrent(outputFilePath)
     }
