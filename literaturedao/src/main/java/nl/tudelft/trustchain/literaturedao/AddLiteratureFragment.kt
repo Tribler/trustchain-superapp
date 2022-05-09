@@ -77,7 +77,17 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                 }
 
                 lifecycleScope.launch {
+
+
+                    // TODO: Select where you want to select the file from;
+                    // case 1: A file location/URI is selected in selectedFile.uri
                     val pdf = requireContext().contentResolver.openInputStream(selectedFile.uri)
+                    // case2: A internet URL is selected;
+                    // Step 1: Download the file to download directory.
+                    //https://medium.com/mobile-app-development-publication/download-file-in-android-with-kotlin-874d50bccaa2
+                    //val pdf = requireContext().contentResolver.openInputStream(==== Downlaoded file URI (downloads/pdf...)====)
+
+
                     PDFBoxResourceLoader.init(activity?.baseContext)
 
                     val strippedString = PdfController().stripText(pdf!!)
