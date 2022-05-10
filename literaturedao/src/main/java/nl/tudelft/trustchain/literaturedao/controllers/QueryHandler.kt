@@ -3,8 +3,6 @@ package nl.tudelft.trustchain.literaturedao.controllers
 
 import android.util.Log
 import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
-import nl.tudelft.trustchain.literaturedao.data_types.Literature
-import nl.tudelft.trustchain.literaturedao.data_types.LocalData
 import nl.tudelft.trustchain.literaturedao.snowball.Main.main as stem
 
 
@@ -57,16 +55,13 @@ class QueryHandler : LiteratureDaoActivity() {
     }
 
     // Return a sorted list with the scores of local pdf's for a given query
-    fun scoreList(inp: String, content: MutableList<Literature>): MutableList<Pair<String, Double>>{
+    fun scoreList(inp: String, allTheKWLists: MutableList<Pair<String, MutableList<Pair<String, Double>>>>): MutableList<Pair<String, Double>>{
 
         val query = toQuery(inp)
         var scoreList: MutableList<Result> = mutableListOf<Result>()
-        Log.e("litdao", "scoreing")
-        Log.e("litdao", "Content: " + content.toString())
-        for (lit in content){
-            Log.e("litdao", "A piece of lit scored: " + lit.toString())
-            val score: Double = score(query, lit.keywords)
-            val identifier: String = lit.localFileUri
+        for (KWList in allTheKWLists){
+            val score: Double = score(query, KWList.second)
+            val identifier: String = KWList.first
             scoreList.add(Result(identifier, score))
         }
         scoreList.sortBy { it.second }
