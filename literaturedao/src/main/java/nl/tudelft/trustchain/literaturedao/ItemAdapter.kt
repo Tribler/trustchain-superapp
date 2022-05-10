@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.literaturedao
 
+import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -54,7 +55,7 @@ class ItemAdapter(val items: MutableList<Literature>) :
         var i = 0;
 
         if(!item.keywords.isEmpty()) {
-            item.keywords.slice(0..min(10, item.keywords.size - 1)).forEach {
+            item.keywords.slice(0..min(13, item.keywords.size - 1)).forEach {
                 keywords = keywords.plus(it.first.plus(", "));
                 i++;
             }
@@ -65,12 +66,16 @@ class ItemAdapter(val items: MutableList<Literature>) :
         holder.LiteratureFragmentKeywords.text = keywords;
 
         holder.LiteratureFragmentHolder.setOnClickListener {
-            var intent = Intent(Intent.ACTION_VIEW)
-            intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            intent.setDataAndType(item.localFileUri.toUri(), "application/pdf")
-            intent = Intent.createChooser(intent, "Open File")
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            holder.LiteratureFragmentKeywords.context.startActivity(intent)
+            if (item.localFileUri.startsWith("file:")) {
+                holder.LiteratureFragmentKeywords.context.startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+            } else {
+                var intent = Intent(Intent.ACTION_VIEW)
+                intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                intent.setDataAndType(item.localFileUri.toUri(), "application/pdf")
+                intent = Intent.createChooser(intent, "Open File")
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                holder.LiteratureFragmentKeywords.context.startActivity(intent)
+            }
         }
     }
 
