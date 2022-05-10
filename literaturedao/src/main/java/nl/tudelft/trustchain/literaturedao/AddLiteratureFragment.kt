@@ -35,11 +35,12 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
-import nl.tudelft.trustchain.literaturedao.data_types.*
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils
 import org.apache.commons.io.FileUtils
 import java.io.*
+import nl.tudelft.trustchain.literaturedao.data_types.*
+import nl.tudelft.trustchain.literaturedao.utils.CacheUtil
 import java.util.*
 import com.squareup.*
 import okhttp3.OkHttpClient
@@ -153,9 +154,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                         literatureGossiper?.addTorrentInfo(magnet)
                     }
 
-                    // TODO: Create Literature object
                     val literatureTitle = view.findViewById<EditText>(R.id.literature_title).text
-                    val newLiterature = LiteratureDaoActivity.Literature(literatureTitle.toString(),magnet?.makeMagnetUri().toString(),kws,true)
 
                     val literatureObject = Literature(
                         literatureTitle.toString(),
@@ -164,39 +163,12 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                         true,
                         Calendar.getInstance().getTime().toString(),
                         selectedFile.getUri().toString())
-                    print(newLiterature)
 
 
 
-                    Log.e("litdao", "start load")
-                    // Load local data
-                    var fileInputStream: FileInputStream? = null
-
-                    try{
-                        fileInputStream = context?.openFileInput("localData.json")
-                    } catch (e: FileNotFoundException){
-                        context?.openFileOutput("localData.json", Context.MODE_PRIVATE).use { output ->
-                            output?.write(Json.encodeToString(LocalData(mutableListOf<Literature>())).toByteArray())
-                        }
-                        fileInputStream = context?.openFileInput("localData.json")
-                    }
-                    var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
-                    val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-                    val stringBuilder: StringBuilder = StringBuilder()
-                    var text: String? = null
-                    while ({ text = bufferedReader.readLine(); text }() != null) {
-                        stringBuilder.append(text)
-                    }
-                    val localData: LocalData =  Json.decodeFromString<LocalData>(stringBuilder.toString())
-                    Log.e("litdao", "start add")
-                    // add new entry to local data and write
-
+                    val localData = CacheUtil(context).loadLocalData()
                     localData.content.add(literatureObject)
-                    Log.e("litdao", "start write")
-                    // write modified local data
-                    context?.openFileOutput("localData.json", Context.MODE_PRIVATE).use { output ->
-                        output?.write(Json.encodeToString(localData).toByteArray())
-                    }
+                    CacheUtil(context).writeLocalData(localData)
 
                     // TODO: Gossip Result
                     // JSON Serialize to string the newLiterature and gossip it to the connected peers.
