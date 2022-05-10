@@ -173,12 +173,12 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     var fileInputStream: FileInputStream? = null
 
                     try{
-                        fileInputStream = context?.openFileInput("localData")
+                        fileInputStream = context?.openFileInput("localData.json")
                     } catch (e: FileNotFoundException){
-                        context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
+                        context?.openFileOutput("localData.json", Context.MODE_PRIVATE).use { output ->
                             output?.write(Json.encodeToString(LocalData(mutableListOf<Literature>())).toByteArray())
                         }
-                        fileInputStream = context?.openFileInput("localData")
+                        fileInputStream = context?.openFileInput("localData.json")
                     }
                     var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
                     val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
@@ -194,7 +194,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     localData.content.add(literatureObject)
                     Log.e("litdao", "start write")
                     // write modified local data
-                    context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
+                    context?.openFileOutput("localData.json", Context.MODE_PRIVATE).use { output ->
                         output?.write(Json.encodeToString(localData).toByteArray())
                     }
 
