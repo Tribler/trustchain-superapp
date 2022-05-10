@@ -43,6 +43,9 @@ import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
+import android.os.StrictMode
+import java.lang.reflect.Method
+import java.lang.Exception
 
 
 const val DEFAULT_LITERATURE = "2.pdf"
@@ -72,6 +75,15 @@ open class LiteratureDaoActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+        if (Build.VERSION.SDK_INT >= 24) {
+            try {
+                val m: Method = StrictMode::class.java.getMethod("disableDeathOnFileUriExposure")
+                m.invoke(null)
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+        }
 
         /*
         setContentView(R.layout.activity_main);
