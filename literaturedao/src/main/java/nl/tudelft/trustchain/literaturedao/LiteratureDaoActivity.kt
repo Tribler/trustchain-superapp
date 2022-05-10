@@ -82,7 +82,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         transaction.commit();
 */
 
-
         val literatureCommunity = IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
         printPeersInfo(literatureCommunity)
         val myName = literatureCommunity.myPeer.mid
@@ -120,21 +119,6 @@ open class LiteratureDaoActivity : BaseActivity() {
             printToast(e.toString())
         }
 
-
-        //test seeding
-//        val folderToShare = "assets"
-////        val tor = SharedTorrent.create(albumFile, list, 65535, listOf(), "TrustChain-Superapp")
-//        var torrentFile = "$folderToShare.torrent"
-//        if (!File(torrentFile).isFile) {
-//            torrentFile = "$folderToShare.torrent.added"
-//        }
-////        tor.save(FileOutputStream(torrentFile))
-//        val torrentInfo = TorrentInfo(File(torrentFile))
-//        val magnet = torrentInfo.makeMagnetUri()
-//        val torrentInfoName = torrentInfo.name()
-
-
-
         //debug space
         try{
             Log.e("litdao", "load localData: " + CacheUtil(baseContext).loadLocalData().toString())
@@ -142,7 +126,7 @@ open class LiteratureDaoActivity : BaseActivity() {
         } catch (e: Exception){
             Log.e("litdao", e.toString())
         }
-
+        checkStoragePermissions()
     }
 
 
