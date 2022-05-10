@@ -35,6 +35,7 @@ import nl.tudelft.trustchain.literaturedao.ipv8.SearchResult
 import nl.tudelft.trustchain.literaturedao.ipv8.SearchResultList*/
 import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResultList
 import nl.tudelft.trustchain.literaturedao.ui.RemoteSearchFragment
+import nl.tudelft.trustchain.literaturedao.utils.CacheUtil
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils.Companion.torrentDotExtension
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.displayNameAppender
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.preHashString
@@ -42,7 +43,6 @@ import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
-import nl.tudelft.trustchain.literaturedao.utils.CacheUtil
 
 
 const val DEFAULT_LITERATURE = "2.pdf"
