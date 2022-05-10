@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.serialization.decodeFromString
@@ -84,6 +85,10 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
 
         recViewItems.layoutManager = LinearLayoutManager(context )
         recViewItems.adapter = ItemAdapter(json.content);
+
+        if (json.content.size == 0) {
+            view.findViewById<TextView>(R.id.no_local_results).visibility = View.VISIBLE;
+        }
 
 
         // Inflate the layout for this fragment

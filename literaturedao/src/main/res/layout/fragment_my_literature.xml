@@ -122,6 +122,16 @@
                 </LinearLayout>
 
 
+                <TextView
+                    android:id="@+id/no_local_results"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:fontFamily="@font/cheltenhamstd_bold"
+                    android:gravity="center"
+                    android:text="No Literature found locally, please add. "
+                    android:visibility="gone" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_view_items"
                     android:layout_width="match_parent"
@@ -147,12 +157,15 @@
         android:layout_gravity="bottom|right"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="20dp"
+        android:background="#fbcb5e"
+        android:backgroundTint="#fbcb5e"
         android:clickable="true"
         android:contentDescription="Add Literature"
         android:minWidth="48dp"
         android:minHeight="48dp"
+        android:visibility="gone"
         app:fabSize="normal"
-        app:srcCompat="@drawable/ic_add_black_24dp" />
+        app:srcCompat="@drawable/ic_refresh_icon" />
 
     <!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
     <!--        android:layout_width="match_parent"-->
