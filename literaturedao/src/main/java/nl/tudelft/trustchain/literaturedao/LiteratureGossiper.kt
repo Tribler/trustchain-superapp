@@ -154,7 +154,6 @@ class LiteratureGossiper(
             }
             activity.runOnUiThread {
                 logger.info { "Retrying download" }
-//                activity.evaRetryCounter.text = activity.getString(R.string.evaRetries, evaDownload.retryAttempts)
             }
         }
     }
@@ -242,7 +241,7 @@ class LiteratureGossiper(
             val torrentName = payload.message.substringAfter("&dn=")
                 .substringBefore('&')
             activity.runOnUiThread {
-//                activity.createUnsuccessfulTorrentButton(torrentName)
+                // @TODO: Add item to local data
             }
         }
     }
@@ -417,7 +416,6 @@ class LiteratureGossiper(
             activity.createTorrent(torrentName)?.let {
                 torrentInfos.add(it)
             }
-//            activity.showAddedFile(torrentName)
         }
         downloadHasPassed()
     }
@@ -456,37 +454,26 @@ class LiteratureGossiper(
     fun addDownloadToQueue(downloadsInProgressCount: Int) {
         downloadsInProgress = downloadsInProgressCount
         activity.runOnUiThread {
-//            activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
-//            activity.inQueue.text =
-//                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            printToast("Added $downloadsInProgressCount torrents to the queue")
         }
     }
 
     fun updateProgress(progress: Int) {
         activity.runOnUiThread {
-//            activity.progressBar.progress = progress
-//            activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "$progress%")
+            printToast("Download progress: $progress%")
         }
     }
 
     fun downloadHasStarted(torrentName: String) {
         activity.runOnUiThread {
-//            activity.inQueue.text =
-//                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-//            activity.currentDownload.text =
-//                activity.getString(R.string.currentTorrentDownload, "Downloading: $torrentName")
+            printToast("Downloading $torrentName")
         }
     }
 
     fun downloadHasFailed() {
         downloadsInProgress = kotlin.math.max(0, downloadsInProgress - 1)
         activity.runOnUiThread {
-//            activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
-//            activity.inQueue.text =
-//                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-//            activity.currentDownload.text =
-//                activity.getString(R.string.currentTorrentDownload, "No download in progress")
-//            activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString())
+            printToast("Download failed, removing from queue")
         }
         updateProgress(0)
     }
@@ -494,12 +481,7 @@ class LiteratureGossiper(
     fun downloadHasPassed() {
         downloadsInProgress = kotlin.math.max(0, downloadsInProgress - 1)
         activity.runOnUiThread {
-//            activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
-//            activity.inQueue.text =
-//                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-//            activity.currentDownload.text =
-//                activity.getString(R.string.currentTorrentDownload, "No download in progress")
-//            downloadsFinished++
+            printToast("Download passed")
         }
         updateProgress(0)
     }
@@ -508,14 +490,6 @@ class LiteratureGossiper(
         activity.runOnUiThread {
             // Update UI for downloading
             logger.info { "litdao: Initialize UI texts" }
-//            activity.download_count.text = activity.getString(R.string.downloadsInProgress, 0)
-//            activity.inQueue.text =
-//                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-//            activity.currentDownload.text =
-//                activity.getString(R.string.currentTorrentDownload, "No download in progress")
-//            activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "0%")
-//            activity.evaRetryCounter.text = activity.getString(R.string.evaRetries, 0)
-//            activity.failedCounter.text = activity.getString(R.string.failedCounter, "{}")
         }
     }
 }
