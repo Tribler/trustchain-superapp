@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.literaturedao
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.literaturedao.data_types.Literature
 import nl.tudelft.trustchain.literaturedao.data_types.LocalData
+import nl.tudelft.trustchain.literaturedao.utils.CacheUtil
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -33,38 +35,12 @@ private const val ARG_PARAM2 = "param2"
 class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
 
     fun loadLocalData(): LocalData{
-        // Load local data
-        var fileInputStream: FileInputStream? = null
-
-
-        try {
-            try {
-                fileInputStream = context?.openFileInput("localData.json")
-            } catch (e: FileNotFoundException) {
-                context?.openFileOutput("localData.json", Context.MODE_PRIVATE).use { output ->
-                    output?.write(
-                        Json.encodeToString(LocalData(mutableListOf<Literature>())).toByteArray()
-                    )
-                }
-                fileInputStream = context?.openFileInput("localData.json")
-            }
-            var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
-            val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-            val stringBuilder: StringBuilder = StringBuilder()
-            var text: String? = null
-            while ({ text = bufferedReader.readLine(); text }() != null) {
-                stringBuilder.append(text)
-            }
-            val localData: LocalData = Json.decodeFromString<LocalData>(stringBuilder.toString())
-            return localData
-        } catch (e: Exception) {
-            return LocalData(mutableListOf<Literature>());
-        }
+        return CacheUtil(context).loadLocalData()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        Log.e("litdao", "Local data from my lit: " + loadLocalData().toString())
     }
 
     override fun onCreateView(
