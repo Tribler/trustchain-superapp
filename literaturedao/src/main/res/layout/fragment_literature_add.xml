@@ -69,7 +69,7 @@
         android:layout_height="match_parent"
 
 
-        android:layout_marginTop="90dp"
+        android:layout_marginTop="5dp"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <FrameLayout
@@ -143,7 +143,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:layout_weight="1"
-                        android:text="No file selected...." />
+                        android:text="No file selected.... (THIS WILL BE DISTRIBUTED!!!)" />
 
                     <Button
                         android:id="@+id/select_new_lirterature"
