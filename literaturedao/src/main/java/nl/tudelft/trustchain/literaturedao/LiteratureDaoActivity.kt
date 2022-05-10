@@ -106,13 +106,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         }
         */
 
-        val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()!!
-        val demoCommunityName = demoCommunity.myPeer.mid
-        Log.i("personal","I am $demoCommunityName and Im broadcasting a message")
-
-
-        demoCommunity.broadcastGreeting()
-
         this.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN)
         supportActionBar?.hide();
 
