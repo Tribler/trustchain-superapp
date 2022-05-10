@@ -9,11 +9,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.SearchView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import nl.tudelft.trustchain.literaturedao.data_types.LocalData
 import nl.tudelft.trustchain.literaturedao.utils.CacheUtil
+
 
 class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
 
@@ -37,14 +39,39 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
 
         val recViewItems = view.findViewById<RecyclerView>(R.id.recycler_view_items);
 
-
+        val adapter = ItemAdapter(json.content);
 
         recViewItems.layoutManager = LinearLayoutManager(context )
-        recViewItems.adapter = ItemAdapter(json.content);
+        recViewItems.adapter =adapter
 
         if (json.content.size == 0) {
             view.findViewById<TextView>(R.id.no_local_results).visibility = View.VISIBLE;
         }
+
+
+        // Initialize binding local search.
+        val localSearchView = view.findViewById<SearchView>(R.id.searchViewLit);
+
+
+        localSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextChange(newText: String): Boolean {
+                // your text view here
+
+                return true
+            }
+
+            override fun onQueryTextSubmit(query: String): Boolean {
+                //val results = localSearch(query);
+                adapter.items.clear();
+                val results = CacheUtil(context).localSearch(query);
+
+                adapter.items.addAll(results.map {it.first});
+                adapter.notifyDataSetChanged();
+
+                return true
+            }
+        });
+
 
 
         // Inflate the layout for this fragment

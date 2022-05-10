@@ -39,7 +39,7 @@ class QueryHandler : LiteratureDaoActivity() {
     }
 
     // Custom data type in order to be able to sort
-    class Result constructor(identifier: String, score: Double) {
+    class Result constructor(identifier: Literature, score: Double) {
         val first = identifier
         val second = score
         fun second(): Double {
@@ -57,7 +57,7 @@ class QueryHandler : LiteratureDaoActivity() {
     }
 
     // Return a sorted list with the scores of local pdf's for a given query
-    fun scoreList(inp: String, content: MutableList<Literature>): MutableList<Pair<String, Double>>{
+    fun scoreList(inp: String, content: MutableList<Literature>): MutableList<Pair<Literature, Double>>{
 
         val query = toQuery(inp)
         var scoreList: MutableList<Result> = mutableListOf<Result>()
@@ -66,12 +66,12 @@ class QueryHandler : LiteratureDaoActivity() {
         for (lit in content){
             Log.e("litdao", "A piece of lit scored: " + lit.toString())
             val score: Double = score(query, lit.keywords)
-            val identifier: String = lit.localFileUri
+            val identifier: Literature = lit;
             scoreList.add(Result(identifier, score))
         }
         scoreList.sortBy { it.second }
         scoreList.reverse()
-        var result: MutableList<Pair<String, Double>> = mutableListOf<Pair<String, Double>>()
+        var result: MutableList<Pair<Literature, Double>> = mutableListOf<Pair<Literature, Double>>()
         for(res in scoreList){
             result.add(Pair(res.first, res.second))
         }

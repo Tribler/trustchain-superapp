@@ -44,7 +44,7 @@ class CacheUtil(val context: Context?)
         }
     }
 
-    fun localSearch(inp: String): MutableList<Pair<String, Double>>{
+    public fun  localSearch(inp: String): MutableList<Pair<Literature, Double>>{
         var handler = QueryHandler()
         return handler.scoreList(inp, loadLocalData().content)
     }

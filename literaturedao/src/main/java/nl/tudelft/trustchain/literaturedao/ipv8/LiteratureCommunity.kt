@@ -108,7 +108,7 @@ class LiteratureCommunity(
         // Parse data and collect magnet links
         results.sortByDescending { it.second }
         results.take(min(results.size, 10))
-        val parsed = results.map { SearchResult(it.first, it.second, litDaoActivity.createTorrent(it.first)!!.makeMagnetUri()) }
+        val parsed = results.map { SearchResult(it.first.localFileUri, it.second, litDaoActivity.createTorrent(it.first.localFileUri)!!.makeMagnetUri()) }
 
         Log.d("litdao", "replying remote query with list: "+results.toString())
         // Encode and send to peer
