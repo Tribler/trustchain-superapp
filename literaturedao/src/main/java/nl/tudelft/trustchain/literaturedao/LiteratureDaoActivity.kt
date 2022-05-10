@@ -151,7 +151,7 @@ open class LiteratureDaoActivity : BaseActivity() {
 
     }
 
-    fun localSearch(inp: String): MutableList<Pair<String, Double>>{
+    fun localSearch(inp: String): MutableList<Pair<Literature, Double>>{
         return CacheUtil(this.baseContext).localSearch(inp)
     }
 

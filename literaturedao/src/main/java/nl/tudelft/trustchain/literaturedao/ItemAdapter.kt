@@ -54,7 +54,7 @@ class ItemAdapter(val items: MutableList<Literature>) :
         var i = 0;
 
         if(!item.keywords.isEmpty()) {
-            item.keywords.slice(0..min(3, item.keywords.size - 1)).forEach {
+            item.keywords.slice(0..min(10, item.keywords.size - 1)).forEach {
                 keywords = keywords.plus(it.first.plus(", "));
                 i++;
             }
