@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import kotlinx.serialization.Serializable
 import android.view.WindowManager
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -19,8 +18,6 @@ import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
-//import kotlinx.android.synthetic.main.fragment_literature_overview.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -29,21 +26,23 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.trustchain.common.DemoCommunity
-import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
-import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.controllers.QueryHandler
+import nl.tudelft.trustchain.literaturedao.data_types.Literature
+import nl.tudelft.trustchain.literaturedao.data_types.LocalData
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
+/*
+import nl.tudelft.trustchain.literaturedao.ipv8.SearchResult
+import nl.tudelft.trustchain.literaturedao.ipv8.SearchResultList*/
 import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResultList
-import nl.tudelft.trustchain.literaturedao.ui.KeyWordModelView
 import nl.tudelft.trustchain.literaturedao.ui.RemoteSearchFragment
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils.Companion.torrentDotExtension
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.displayNameAppender
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.preHashString
 import java.io.*
 import java.util.*
-import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
+import nl.tudelft.trustchain.literaturedao.utils.CacheUtil
 
 
 const val DEFAULT_LITERATURE = "2.pdf"
@@ -56,9 +55,6 @@ open class LiteratureDaoActivity : BaseActivity() {
     private val myLiteratureFragment = MyLiteratureFragment()
     private lateinit var remoteSearchFragment: RemoteSearchFragment
 
-    public val localDataLock = ReentrantLock()
-
-    val metaDataLock = ReentrantLock()
     private val scope = CoroutineScope(Dispatchers.IO)
     var torrentList = ArrayList<Button>()
     private var progressVisible = false
@@ -138,66 +134,18 @@ open class LiteratureDaoActivity : BaseActivity() {
 //        val torrentInfoName = torrentInfo.name()
 
 
+
+        //debug space
         try{
-
-            val items : ArrayList<String> = arrayListOf("item 1" , "Item 2");
-            Log.e("litdao", items.toString())
-
-            //val inflatedView: View = layoutInflater.inflate(R.layout.fragment_literature_overview, null)
-
-            /*
-            val recViewItems = findViewById<RecyclerView>(R.id.recycler_view_items);
-
-
-
-            recViewItems.layoutManager = LinearLayoutManager(this )
-            recViewItems.adapter = ItemAdapter(items);
-            */
-
-            // Adapter class is initialized and list is passed in the param.
-            /*val itemAdapter = ItemAdapter(this, items)
-
-            // Set the LayoutManager that this RecyclerView will use.
-            recViewItems.setLayoutManager(LinearLayoutManager(itemAdapter.context))
-
-            // adapter instance is set to the recyclerview to inflate the items.
-            recViewItems.setAdapter(itemAdapter)
-            itemAdapter.refresh()
-            */
-
-            checkStoragePermissions()
-            /*
-            val remotePdf = pdfFromUrl(this)
-            remotePdf.startThread()
-            remotePdf.download("https://www.ed.ac.uk/files/atoms/files/sc_online_summer_sessions_bob.pdf")
-            Log.e("litdao", "tested")*/
-        } catch(e: Exception){
+            Log.e("litdao", "load localData: " + CacheUtil(baseContext).loadLocalData().toString())
+            Log.e("litdao", "local search results: " + localSearch("Please de wit give me the scores").toString())
+        } catch (e: Exception){
             Log.e("litdao", e.toString())
         }
 
-
     }
 
 
-    fun initFreqMap(inp: Map<String, Long>){
-        this.freqMap = inp
-        this.freqMapInitialized = true
-        Log.d("litdao", "Init of freq map complete")
-    }
-
-    // Function that loads the average stemmed word occurance
-    suspend fun instantiateAvgFreqMap(parent: LiteratureDaoActivity){
-        Log.d("litdao", "Starting init of freq map")
-        val csv: InputStream = parent.getAssets().open("stemmed_freqs.csv")
-        var res = mutableMapOf<String, Long>()
-        csv.bufferedReader().useLines { lines -> lines.forEach {
-            val key = it.split(",".toRegex())[0]
-            val num = it.split(",".toRegex())[1].toLong()
-            res[key] = num
-            }
-        }
-        parent.initFreqMap(res)
-    }
 
     private fun printPeersInfo(overlay: Overlay) {
         val peers = overlay.getPeers()
@@ -217,58 +165,31 @@ open class LiteratureDaoActivity : BaseActivity() {
             Log.i("litdao", "${peer.mid} ${peer.address} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})")
         }
 
-        fun listAssetFiles(path: String): List<String> {
-            val assetManager = assets
-            val files = assetManager.list(path)
-            if (files != null) {
-                return files.toList()
-            }
-            return listOf<String>()
-        }
-    }
-
-    fun loadMetaData(): KeyWordModelView.Data{
-        var fileInputStream: FileInputStream? = null
-        try{
-            fileInputStream = this.openFileInput("metaData")
-        } catch (e: FileNotFoundException){
-            this.openFileOutput("metaData", Context.MODE_PRIVATE).use { output ->
-                output.write(Json.encodeToString(KeyWordModelView.Data(mutableListOf<Pair<String, MutableList<Pair<String, Double>>>>())).toByteArray())
-            }
-            fileInputStream = this.openFileInput("metaData")
-        }
-        var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
-        val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-        val stringBuilder: StringBuilder = StringBuilder()
-        var text: String? = null
-        while ({ text = bufferedReader.readLine(); text }() != null) {
-            stringBuilder.append(text)
-        }
-        return Json.decodeFromString<KeyWordModelView.Data>(stringBuilder.toString())
     }
 
     fun localSearch(inp: String): MutableList<Pair<String, Double>>{
-        var handler = QueryHandler()
-        return handler.scoreList(inp, loadMetaData().content)
+        return CacheUtil(this.baseContext).localSearch(inp)
     }
 
-    fun writeMetaData(newData: KeyWordModelView.Data){
-        metaDataLock.lock()
-        this.openFileOutput("metaData", Context.MODE_PRIVATE).use { output ->
-            output.write(Json.encodeToString(newData).toByteArray())
+    fun remoteSeach(query: String) {
+        // send to peers
+        IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!.broadcastSearchQuery(query)
+
+//        // DEBUG
+//        updateSearchResults(SearchResultList(listOf(SearchResult("f1", 1.0, "m1"), SearchResult("f2", 2.0, "m2"))))
+    }
+/*
+    fun updateSearchResults(results: SearchResultList){
+        // access UI and append results to some view
+        setContentView(R.layout.fragment_library_search)
+        val list = findViewById<ListView>(R.id.remote_search_results)
+        for (r : SearchResult in results.results){
+            if(!remoteSearchList.contains(r.fileName)){
+                remoteSearchList.add(r.fileName)
+            }
         }
-        metaDataLock.unlock()
-    }
-
-    fun testImportPDF(){
-        PDFBoxResourceLoader.init(getApplicationContext());
-        var i = 1
-        while (i < 4){
-            importPDF(i.toString() + ".pdf")
-            i += 1
-        }
-    }
-
+        remoteSearchListAdapter.notifyDataSetChanged()
+    }*/
     /**
      * Display a short message on the screen
      */
@@ -350,53 +271,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         return ti
     }
 
-    fun operations(path: String, baseContext: Context){
-        PDFBoxResourceLoader.init(baseContext)
-        val csv: InputStream = getAssets().open("stemmed_freqs.csv")
-        val pdf: InputStream = getAssets().open(path)
-        val strippedString = PdfController().stripText(pdf)
-        val kws = KeywordExtractor().extract(strippedString, csv)
-        Log.e("litdao", "newWrite: " + kws.toString())
-        metaDataLock.lock()
-        var metadata = loadMetaData()
-        metadata.content.add(Pair(path, kws))
-        writeMetaData(metadata)
-        metaDataLock.unlock()
-    }
-
-    fun importPDF(path: String){
-        val context = this.baseContext
-        operations(path, context)
-    }
-
-    fun importFromInternalStorage(d: DocumentFile){
-        val pdf = contentResolver.openInputStream(d.uri)
-        PDFBoxResourceLoader.init(baseContext)
-        val strippedString = PdfController().stripText(pdf!!)
-        val kws: MutableList<Pair<String, Double>>
-        if (this.freqMapInitialized){
-            kws = KeywordExtractor().preInitializedExtract(strippedString, this.freqMap)
-        } else{
-            val csv: InputStream = getAssets().open("stemmed_freqs.csv")
-            kws = KeywordExtractor().extract(strippedString, csv)
-        }
-        Log.e("litdao", "Specifically from storage: " + kws.toString())
-        metaDataLock.lock()
-        var metadata = loadMetaData()
-        metadata.content.add(Pair(d.uri.toString(), kws))
-        writeMetaData(metadata)
-        metaDataLock.unlock()
-    }
-
-
-
-    @Serializable
-    data class Literature(
-        var title: String,
-        val magnet: String,
-        val keywords: MutableList<Pair<String, Double>>,
-        val local: Boolean
-    );
 
 
     @RequiresApi(Build.VERSION_CODES.M)
