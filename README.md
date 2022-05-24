@@ -181,6 +181,12 @@ Below is a video demo that shows the steps to do an atomic swap.
 
 [More about The Atomic Swap app](atomic-swap/README.md)
 
+### Literature Dao
+
+LiteratureDao app provides sharing, indexing, and searching of scientific publications in p2p networks.
+
+[More about literature dao app](literaturedao/README.md)
+
 ### Do you want to add your own app?
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
