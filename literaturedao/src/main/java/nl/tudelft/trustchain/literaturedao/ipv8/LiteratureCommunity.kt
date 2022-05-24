@@ -1,6 +1,8 @@
 package nl.tudelft.trustchain.literaturedao.ipv8
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.frostwire.jlibtorrent.TorrentInfo
 import mu.KotlinLogging
 import nl.tudelft.ipv8.IPv4Address
@@ -27,6 +29,7 @@ import kotlin.collections.ArrayList
 
 private val logger = KotlinLogging.logger {}
 
+@RequiresApi(Build.VERSION_CODES.N)
 class LiteratureCommunity(
     context: Context,
     settings: TrustChainSettings,
@@ -94,6 +97,7 @@ class LiteratureCommunity(
      * Received a remote query from other device.
      * Perform local search on the query and respond with a list of relevant docs.
      */
+    @RequiresApi(Build.VERSION_CODES.N)
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun onSearchQueryMessage(packet: Packet) {
         val litDaoActivity = context as LiteratureDaoActivity

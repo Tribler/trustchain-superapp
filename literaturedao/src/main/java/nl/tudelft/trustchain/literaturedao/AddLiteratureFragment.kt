@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.literaturedao
 
-import LiteratureGossiper
 import android.annotation.SuppressLint
 import android.content.ClipboardManager
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -31,9 +29,6 @@ import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import kotlinx.coroutines.*
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils
@@ -42,25 +37,12 @@ import java.io.*
 import nl.tudelft.trustchain.literaturedao.data_types.*
 import nl.tudelft.trustchain.literaturedao.utils.CacheUtil
 import java.util.*
-import com.squareup.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.net.HttpURLConnection
-import java.net.MalformedURLException
-import java.net.URI
-import java.net.URL
 import java.util.concurrent.TimeUnit
 
 
 class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
-    /*
-    val parentActivity = getActivity()
-
-    val localDataLock = if (parentActivity is LiteratureDaoActivity){
-        parentActivity.localDataLock
-    } else{
-        null
-    }*/
     private var downloaded = false
     private lateinit var selectedFile: DocumentFile
     private var literatureGossiper: LiteratureGossiper? = null

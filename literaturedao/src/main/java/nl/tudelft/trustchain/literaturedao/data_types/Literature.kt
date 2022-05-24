@@ -10,5 +10,4 @@ data class Literature(
     val local: Boolean,
     val date: String,
     val localFileUri: String
-){
-}
+)

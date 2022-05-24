@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.literaturedao
 
-import LiteratureGossiper
-import android.content.Context
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,26 +11,16 @@ import android.view.WindowManager
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
-import androidx.documentfile.provider.DocumentFile
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.BaseActivity
-import nl.tudelft.trustchain.common.DemoCommunity
-import nl.tudelft.trustchain.literaturedao.controllers.QueryHandler
 import nl.tudelft.trustchain.literaturedao.data_types.Literature
-import nl.tudelft.trustchain.literaturedao.data_types.LocalData
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
-/*
-import nl.tudelft.trustchain.literaturedao.ipv8.SearchResult
-import nl.tudelft.trustchain.literaturedao.ipv8.SearchResultList*/
 import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResultList
 import nl.tudelft.trustchain.literaturedao.ui.RemoteSearchFragment
 import nl.tudelft.trustchain.literaturedao.utils.CacheUtil
@@ -48,28 +36,18 @@ import java.lang.reflect.Method
 import java.lang.Exception
 
 
-const val DEFAULT_LITERATURE = "2.pdf"
+const val DEFAULT_LITERATURE = "example.pdf"
 
 open class LiteratureDaoActivity : BaseActivity() {
 
     // Setting Menu And Default routing
     override val navigationGraph = R.navigation.nav_literaturedao
     override val bottomNavigationMenu = R.menu.literature_navigation_menu
-    private val myLiteratureFragment = MyLiteratureFragment()
     private lateinit var remoteSearchFragment: RemoteSearchFragment
 
-    private val scope = CoroutineScope(Dispatchers.IO)
-    var torrentList = ArrayList<Button>()
-    private var progressVisible = false
-    private var debugVisible = false
-    private var bufferSize = 1024 * 5
     private val s = SessionManager()
-    private var torrentAmount = 0
 
     private var literatureGossiper: LiteratureGossiper? = null
-
-    var freqMap = emptyMap<String, Long>()
-    var freqMapInitialized = false
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,27 +63,11 @@ open class LiteratureDaoActivity : BaseActivity() {
             }
         }
 
-        /*
-        setContentView(R.layout.activity_main);
-
-
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.fragment_container,myLiteratureFragment)
-        transaction.commit();
-*/
-
         val literatureCommunity = IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
         printPeersInfo(literatureCommunity)
         val myName = literatureCommunity.myPeer.mid
         Log.i("litdao","I am $myName and Im broadcasting: hello")
         literatureCommunity.broadcastDebugMessage("hello")
-        val parent = this
-
-        /*scope.launch {
-            instantiateAvgFreqMap(parent)
-        }
-        */
-
 
         this.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN)
         supportActionBar?.hide();
@@ -161,25 +123,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         return CacheUtil(this.baseContext).localSearch(inp)
     }
 
-    fun remoteSeach(query: String) {
-        // send to peers
-        IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!.broadcastSearchQuery(query)
-
-//        // DEBUG
-//        updateSearchResults(SearchResultList(listOf(SearchResult("f1", 1.0, "m1"), SearchResult("f2", 2.0, "m2"))))
-    }
-/*
-    fun updateSearchResults(results: SearchResultList){
-        // access UI and append results to some view
-        setContentView(R.layout.fragment_library_search)
-        val list = findViewById<ListView>(R.id.remote_search_results)
-        for (r : SearchResult in results.results){
-            if(!remoteSearchList.contains(r.fileName)){
-                remoteSearchList.add(r.fileName)
-            }
-        }
-        remoteSearchListAdapter.notifyDataSetChanged()
-    }*/
     /**
      * Display a short message on the screen
      */

@@ -5,5 +5,4 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LocalData(
     val content: MutableList<Literature>
-){
-}
+)

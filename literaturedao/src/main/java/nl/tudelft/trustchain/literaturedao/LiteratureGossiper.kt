@@ -1,12 +1,11 @@
+package nl.tudelft.trustchain.literaturedao
+
 import android.widget.Toast
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
-//import kotlinx.android.synthetic.main.activity_main_foc.*
-//import kotlinx.android.synthetic.main.fragment_debugging.*
-//import kotlinx.android.synthetic.main.fragment_download.*
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
@@ -27,7 +26,6 @@ import nl.tudelft.trustchain.literaturedao.ipv8.LiteraturePayload
 import nl.tudelft.trustchain.literaturedao.ipv8.EvaDownload
 import nl.tudelft.trustchain.literaturedao.ipv8.LitDaoMessage
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
-import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
 import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -36,7 +34,8 @@ import kotlin.Pair
 import kotlin.collections.HashMap
 
 /**
- * This gossips data about 5 random apps with peers on demoCommunity every 10 seconds and fetches new apps from peers every 20 seconds
+ * This gossips data about 5 random pdfs with peers on literatureCommunity every 10 seconds and
+ * fetches new apps from peers every 20 seconds
  */
 
 lateinit var literatureGossiperInstance: LiteratureGossiper
@@ -76,7 +75,8 @@ class LiteratureGossiper(
             toastingEnabled: Boolean = true
         ): LiteratureGossiper {
             if (!::literatureGossiperInstance.isInitialized) {
-                literatureGossiperInstance = LiteratureGossiper(sessionManager, activity, literatureCommunity, toastingEnabled)
+                literatureGossiperInstance = LiteratureGossiper(sessionManager, activity,
+                    literatureCommunity, toastingEnabled)
             }
             return literatureGossiperInstance
         }
@@ -104,7 +104,7 @@ class LiteratureGossiper(
     }
 
     fun addTorrentInfo(torrentInfo: TorrentInfo) {
-        this.torrentInfos.add(torrentInfo);
+        this.torrentInfos.add(torrentInfo)
     }
 
     private fun initializeEvaCallbacks() {
@@ -364,7 +364,7 @@ class LiteratureGossiper(
                     // wait for at least 10 nodes in the DHT.
                     if (nodes >= 10) {
                         logger.info { "DHT contains $nodes nodes" }
-                        // signal.countDown();
+                        // signal.countDown()
                         timer.cancel()
                     }
                 }

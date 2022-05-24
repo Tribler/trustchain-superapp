@@ -1,14 +1,11 @@
 package nl.tudelft.trustchain.literaturedao.ui
 
-import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -79,8 +76,6 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
 
         progressBar.visibility = View.VISIBLE
 
-//        // DEBUG
-//        updateSearchResults(SearchResultList(listOf(SearchResult("f1", 1.0, "m1"), SearchResult("f2", 2.0, "m2"))))
     }
 
     fun updateSearchResults(newResults: SearchResultList){

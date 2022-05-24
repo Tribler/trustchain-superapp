@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.literaturedao.controllers
 
 
 import android.app.Activity
-import android.content.res.AssetFileDescriptor
 import android.util.Log
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper

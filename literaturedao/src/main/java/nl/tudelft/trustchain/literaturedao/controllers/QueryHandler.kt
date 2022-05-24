@@ -4,7 +4,6 @@ package nl.tudelft.trustchain.literaturedao.controllers
 import android.util.Log
 import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
 import nl.tudelft.trustchain.literaturedao.data_types.Literature
-import nl.tudelft.trustchain.literaturedao.data_types.LocalData
 import nl.tudelft.trustchain.literaturedao.snowball.Main.main as stem
 
 

@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.literaturedao.utils
 
 import android.content.Context
-import android.util.Log
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
