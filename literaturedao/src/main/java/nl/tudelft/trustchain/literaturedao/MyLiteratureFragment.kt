@@ -1,14 +1,11 @@
 package nl.tudelft.trustchain.literaturedao
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.SearchView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,34 +20,30 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
         return CacheUtil(context).loadLocalData()
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         val view : View =  inflater.inflate(R.layout.fragment_my_literature, container, false)
 
 
-        val json = loadLocalData();
+        val json = loadLocalData()
 
-        val recViewItems = view.findViewById<RecyclerView>(R.id.recycler_view_items);
+        val recViewItems = view.findViewById<RecyclerView>(R.id.recycler_view_items)
 
-        val adapter = ItemAdapter(json.content);
+        val adapter = ItemAdapter(json.content)
 
         recViewItems.layoutManager = LinearLayoutManager(context )
         recViewItems.adapter =adapter
 
         if (json.content.size == 0) {
-            view.findViewById<TextView>(R.id.no_local_results).visibility = View.VISIBLE;
+            view.findViewById<TextView>(R.id.no_local_results).visibility = View.VISIBLE
         }
 
 
         // Initialize binding local search.
-        val localSearchView = view.findViewById<SearchView>(R.id.searchViewLit);
+        val localSearchView = view.findViewById<SearchView>(R.id.searchViewLit)
 
 
         localSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -61,26 +54,24 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
             }
 
             override fun onQueryTextSubmit(query: String): Boolean {
-                //val results = localSearch(query);
-                adapter.items.clear();
-                val results = CacheUtil(context).localSearch(query);
+                //val results = localSearch(query)
+                adapter.items.clear()
+                val results = CacheUtil(context).localSearch(query)
 
-                adapter.items.addAll(results.map {it.first});
-                adapter.notifyDataSetChanged();
+                adapter.items.addAll(results.map {it.first})
+                adapter.notifyDataSetChanged()
 
                 return true
             }
-        });
-
-
+        })
 
         // Inflate the layout for this fragment
-        return view;
+        return view
     }
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?) {
 
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
 }
