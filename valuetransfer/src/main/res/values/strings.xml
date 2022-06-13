@@ -61,6 +61,9 @@
     <string name="menu_maps_hybrid_map">Hybrid Map</string>
     <string name="menu_maps_satellite_map">Satellite Map</string>
     <string name="menu_maps_terrain_map">Terrain Map</string>
+    <string name="menu_wallet_overview_trust">Trust Scores</string>
+    <string name="menu_trust_insert_random">Add Random Scores</string>
+    <string name="menu_trust_clear_scores">Clear Scores</string>
 
     // Dialog titles
     <string name="dialog_title_exchange_transfer">Transfer Money</string>
@@ -72,6 +75,7 @@
     <string name="dialog_title_contact_add">Add Contact</string>
     <string name="dialog_title_contact_chat_send_location">Send Location</string>
     <string name="dialog_title_exchange_gateway_connect">Connect to Gateway</string>
+    <string name="dialog_title_exchange_gateway_add">Add Gateway</string>
     <string name="dialog_title_exchange_gateway_sell">Sell to Gateway</string>
     <string name="dialog_title_attestation">Attestation</string>
     <string name="dialog_title_attestation_authorities">Trusted Authorities</string>
@@ -94,6 +98,7 @@
     <string name="dialog_contact_options">Contact Options</string>
     <string name="dialog_exchange_options">Exchange Options</string>
     <string name="dialog_contacts_chats_view">View Chats</string>
+    <string name="dialog_no_gateway_warning">Missing Gateway</string>
 
     // Button text
     <string name="btn_transfer">Transfer</string>
@@ -107,6 +112,7 @@
     <string name="btn_add">Add</string>
     <string name="btn_gateway_connect">Connect to Gateway</string>
     <string name="btn_slide_to_gateway_connect">Slide to Connect</string>
+    <string name="btn_slide_to_gateway_add">Slide to Add</string>
     <string name="btn_sell">Sell</string>
     <string name="btn_slide_to_sell">Slide to Sell</string>
     <string name="btn_authority_add">Add Authority</string>
@@ -139,6 +145,7 @@
     <string name="text_transaction_amount">Enter the transaction amount</string>
     <string name="text_optional_message">(Optional) message to receiver…</string>
     <string name="text_add_to_address_book">Add contact to address book</string>
+    <string name="text_allow_unverified_transfer">Allow users to pay with unverified balance</string>
     <string name="text_select_contact_share">Select the contact to share</string>
     <string name="text_provide_name_for_contact">Provide a name for this contact</string>
     <string name="text_send_publickey_or_qr">Provide QRcode to your friend</string>
@@ -191,7 +198,7 @@
     <string name="text_identity_name_info">The identity name consists of the initials and surname of the contact that are on the official identity document. If the contact is unverified, the contact can choose it\'s own name.</string>
     <string name="text_title_transactions">Transactions</string>
     <string name="text_no_transactions">There are no transactions yet</string>
-    <string name="text_including_unverified_transactions">Including Unverified Transactions</string>
+    <string name="text_including_unverified_transactions">Unverified balance</string>
     <string name="text_tooltip_unverified_balance">Verified balance differs from the correct balance, click the balance to see the difference</string>
     <string name="text_transaction_content">Transaction Content</string>
     <string name="text_transaction_receiver">Receiver</string>
@@ -385,6 +392,19 @@
     <string name="text_transaction_details_signature">Signature</string>
     <string name="text_string_view_chat">View Chat</string>
     <string name="text_string_view_contact">View Contact</string>
+    <string name="text_gateway_warning_first">No gateway has been defined, please make sure to add a gateway by scanning its identifying QR code. </string>
+    <string name="text_gateway_warning_second">A gateway is used to exchange between Euros and Euro tokens, and to verify balances. If no gateway is defined, no balances and transactions can be verified.</string>
+    <string name="text_gateway_warning_third">A gateway can be added now by pressing the add button, or later by scanning the QR code of a gateway via the scanner.</string>
+    <string name="text_trust_score_title">Trust score</string>
+    <string name="text_trust_score">Score</string>
+    <string name="text_trust_score_details">A score indicating the trustworthiness of a user</string>
+    <string name="text_trust_scores">Scores</string>
+    <string name="text_unverified_details">This transaction will be paid for with unverified money. Make sure you trust the other party!</string>
+    <string name="text_unverified_title">Unverified Transaction</string>
+    <string name="text_title_trust_scores">Trust Scores</string>
+    <string name="text_trust_score_format">%1$.2f%%</string>
+    <string name="text_trust_peer_unknown">Unknown contact</string>
+    <string name="text_trust_score_unknown">Unknown score</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>

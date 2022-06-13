@@ -22,7 +22,7 @@ PeerChat implements a fully functional prototype of a distributed messaging app.
 An online indicator and the last message is shown for each contact. Users can exchange text messages and get acknowledgments when a message is delivered.
 
 <img src="https://user-images.githubusercontent.com/1122874/82873653-1c979280-9f35-11ea-9d47-cea4e134a5b4.png" width="180"> <img src="https://user-images.githubusercontent.com/1122874/82873656-1dc8bf80-9f35-11ea-84b7-7139401560a4.png" width="180"> <img src="https://user-images.githubusercontent.com/1122874/82873659-1ef9ec80-9f35-11ea-95f6-99cbbc0510c9.png" width="180">
- 
+
  <img src="https://user-images.githubusercontent.com/1122874/82873643-1a353880-9f35-11ea-8da3-24ce189c939d.png" width="180"> <img src="https://user-images.githubusercontent.com/1122874/82873661-1f928300-9f35-11ea-9955-6a7488936b02.png" width="180">
 
 ### Digital Euro
@@ -32,7 +32,7 @@ The Superapp is connected to the European IBAN Euro system. You can send and rec
 Creative Commons CC0 license - share freely:
 
 <IMG src="https://user-images.githubusercontent.com/325224/110597367-c1135a00-8180-11eb-9a75-207f4630ebb4.jpg" width=300>
- 
+
 Zooming into the actual mechanism of QR-Codes (Creative Commons CC0 license - share freely)
 
 <IMG src="https://user-images.githubusercontent.com/325224/110597621-15b6d500-8181-11eb-828a-0f3409b6608c.jpg" width=150>
@@ -146,15 +146,36 @@ Video 1: <a href="doc/musicdao/thesis2.mp4">Load example.</a> This uses a defaul
 Video 2: <a href="doc/musicdao/thesis3.mp4">Share track.</a> Note: as a fresh magnet link is generated in this video, there is only 1 peer. For this reason it will be difficult to obtain the metadata of the magnet link (cold start issue, write about this in thesis) so the video stops there.
 
 ### Federated, privacy-preserving music recommendations via gossiping
- 
-This is a demonstration of machine learning which relies exclusively on edge computing. Music recommendation inside the MusicDAO is used to demonstrate gossip-based machine learning. 
- 
+
+This is a demonstration of machine learning which relies exclusively on edge computing. Music recommendation inside the MusicDAO is used to demonstrate gossip-based machine learning.
+
 Every time a user opens MusicDAO, they are asked to reload the page in order to get recommendations. The recommendation engine yields two recommendations made by two different models: a musical feature-based model and a collaborative filtering model. The collaborative filtering model is based on federated matrix factorization as introduced in [this paper](https://dmle.iais.fraunhofer.de/papers/hegedus2019decentralized.pdf). The feature-based models are from this [paper](https://arxiv.org/pdf/1109.1396.pdf), called Adaline and Pegasos. These models are trained on audio features extracted from music files with the [Essentia library](https://essentia.upf.edu/).
 <img src="gossipML/docs/imgs/overview.png" height="400px">
- 
+
 The feature-based models are gossiped along random walks through the network. At each peer they are merged and re-trained on peer's local data. The matrix factorization model seeks to learn a factorization of the user-song matrix. This means that one of the two factors contains only information on how users generally rate each song. This matrix can then be gossiped around the network while a user's personal vector as well as their listening history are kept private.
- - [More about federated machine learning using gossiping for music recommendations](gossipML/README.md)
- 
+- [More about federated machine learning using gossiping for music recommendations](gossipML/README.md)
+
+### ConfIDapp
+
+ConfIDapp is an application where multiple functionalities are combined.
+It uses the EuroToken repository to create token and transfer money to other users.
+It uses PeerChat to have an integrated chat, where tokens can also be used.
+ConfIDapp also provides integration with legal documents such as an ID or passport.
+
+**Unverified transfers**
+In addition to transfer with verified balance, there is the option to pay with unverified balance.
+Unverified balance can be useful in an offline scenario where for longer periods of time no money can be verified by the validators.
+
+<img src="valuetransfer/imgs/unverified_transaction.png" width="280">
+
+**Web of trust**
+To improve the security of verified and unverified transfers there is a basic implementation of a web of trust.
+This aims to provide users with a better indicating of the trustworthiness of the other party, these scores are shown before signing a transaction.
+
+<img src="valuetransfer/imgs/trust_score_transaction_before_sign.jpg" width="280">
+
+[More information about ConfIDapp](valuetransfer/README.md)
+
 ### Do you want to add your own app?
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)

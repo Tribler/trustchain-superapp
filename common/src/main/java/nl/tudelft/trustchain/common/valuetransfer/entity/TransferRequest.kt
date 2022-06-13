@@ -27,7 +27,12 @@ data class TransferRequest(
     /**
      * The receiver of the request
      */
-    val receiver: PublicKey
+    val receiver: PublicKey,
+
+    /**
+     * Allow a user to pay with unverified money
+     */
+    val allowUnverified: Boolean
 ) : Serializable {
 
     fun serialize(): ByteArray = JSONObject().apply {
@@ -35,6 +40,7 @@ data class TransferRequest(
         put(TRANSFER_REQUEST_AMOUNT, amount)
         put(TRANSFER_REQUEST_REQUESTOR, requestor.keyToBin().toHex())
         put(TRANSFER_REQUEST_RECEIVER, receiver.keyToBin().toHex())
+        put(TRANSFER_REQUEST_ALLOW_UNVERIFIED, allowUnverified)
     }.toString().toByteArray()
 
     companion object : Deserializable<TransferRequest> {
@@ -42,6 +48,7 @@ data class TransferRequest(
         const val TRANSFER_REQUEST_AMOUNT = "amount"
         const val TRANSFER_REQUEST_REQUESTOR = "requestor"
         const val TRANSFER_REQUEST_RECEIVER = "receiver"
+        const val TRANSFER_REQUEST_ALLOW_UNVERIFIED = "allow_unverified"
 
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<TransferRequest, Int> {
             val offsetBuffer = buffer.copyOfRange(offset, buffer.size)
@@ -55,7 +62,8 @@ data class TransferRequest(
                     ),
                     defaultCryptoProvider.keyFromPublicBin(
                         json.getString(TRANSFER_REQUEST_RECEIVER).hexToBytes()
-                    )
+                    ),
+                    json.getBoolean(TRANSFER_REQUEST_ALLOW_UNVERIFIED)
                 ),
                 0
             )

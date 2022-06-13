@@ -134,6 +134,12 @@ class TransactionRepository(
             Log.d("EuroTokenBlock", "Validation, sending money")
             // block is sending money, but balance is not verified, subtract transfer amount and recurse
             val amount = (block.transaction[KEY_AMOUNT] as BigInteger).toLong()
+            if (block.transaction[KEY_UNVERIFIED] == true) {
+                return getVerifiedBalanceForBlock(
+                    database.getBlockWithHash(block.previousHash),
+                    database
+                )
+            }
             return getVerifiedBalanceForBlock(
                 database.getBlockWithHash(block.previousHash),
                 database
@@ -254,18 +260,47 @@ class TransactionRepository(
         return true
     }
 
-    fun sendTransferProposalSync(recipient: ByteArray, amount: Long): TrustChainBlock? {
-        if (getMyVerifiedBalance() - amount < 0) {
+    fun sendTransferProposalSync(
+        recipient: ByteArray,
+        amount: Long,
+        allowUnverified: Boolean = false
+    ): TrustChainBlock? {
+        Log.d("TransactionRepository", "Allow unverified: $allowUnverified")
+
+        // paying with unverified money is not allowed and the verified balance is too low
+        if (!allowUnverified && getMyVerifiedBalance() - amount < 0) {
+            Log.d("=====", getMyVerifiedBalance().toString())
             return null
         }
-        val transaction = mapOf(
-            KEY_AMOUNT to BigInteger.valueOf(amount),
-            KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount).toLong())
-        )
-        return trustChainCommunity.createProposalBlock(
-            BLOCK_TYPE_TRANSFER, transaction,
-            recipient
-        )
+
+        // if there is enough verified balance, pay with verified balance either way
+        if (getMyVerifiedBalance() - amount >= 0) {
+            val transaction = mapOf(
+                KEY_AMOUNT to BigInteger.valueOf(amount),
+                KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount).toLong()),
+                KEY_UNVERIFIED to false
+            )
+            return trustChainCommunity.createProposalBlock(
+                BLOCK_TYPE_TRANSFER, transaction,
+                recipient
+            )
+        }
+
+        // paying with unverified money if it is allowed and the verified balance is too low
+        if (allowUnverified && getMyVerifiedBalance() - amount < 0) {
+            val transaction = mapOf(
+                KEY_AMOUNT to BigInteger.valueOf(amount),
+                KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount).toLong()),
+                KEY_UNVERIFIED to true
+            )
+            return trustChainCommunity.createProposalBlock(
+                BLOCK_TYPE_TRANSFER, transaction,
+                recipient
+            )
+        }
+
+        // both balances are too low
+        return null
     }
 
     fun verifyBalance() {
@@ -667,22 +702,6 @@ class TransactionRepository(
         trustChainCommunity.registerTransactionValidator(
             BLOCK_TYPE_TRANSFER,
             EuroTokenTransferValidator(this)
-        )
-
-        trustChainCommunity.registerBlockSigner(
-            BLOCK_TYPE_TRANSFER,
-            object : BlockSigner {
-                override fun onSignatureRequest(block: TrustChainBlock) {
-                    Log.w("EuroTokenBlockTransfer", "sig request ${block.transaction}")
-                    // agree if validated
-                    trustChainCommunity.sendBlock(
-                        trustChainCommunity.createAgreementBlock(
-                            block,
-                            block.transaction
-                        )
-                    )
-                }
-            }
         )
 
         trustChainCommunity.addListener(
@@ -1096,6 +1115,7 @@ class TransactionRepository(
 
         const val KEY_AMOUNT = "amount"
         const val KEY_BALANCE = "balance"
+        const val KEY_UNVERIFIED = "unverified"
         const val KEY_TRANSACTION_HASH = "transaction_hash"
         const val KEY_PAYMENT_ID = "payment_id"
         const val KEY_IBAN = "iban"

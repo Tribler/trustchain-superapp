@@ -8,19 +8,24 @@ import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository.Companion.KEY_UNVERIFIED
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.entity.TrustScore
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeTransactionItem
 import nl.tudelft.trustchain.valuetransfer.util.*
+import java.lang.Float.min
 import java.math.BigInteger
 import java.text.SimpleDateFormat
 import java.util.*
@@ -69,6 +74,8 @@ class ExchangeTransactionDialog(
             val additionalToggleView = view.findViewById<RelativeLayout>(R.id.rlTransactionAdditionalTitleRow)
             val additionalIconHiddenView = view.findViewById<ImageView>(R.id.ivTransactionAdditionalHidden)
             val additionalIconShowedView = view.findViewById<ImageView>(R.id.ivTransactionAdditionalShowed)
+            val trustScoreView = view.findViewById<TextView>(R.id.tvTrustScoreValue)
+            val unverifiedWarning = view.findViewById<ConstraintLayout>(R.id.clUnverifiedWarning)
 
             val viewChatView = view.findViewById<ConstraintLayout>(R.id.tvViewChat)
             val viewContactView = view.findViewById<ConstraintLayout>(R.id.tvViewContact)
@@ -231,15 +238,36 @@ class ExchangeTransactionDialog(
                 )
             }
 
+            // Determine if the unverified warning needs to be shown or not.
+            if (transactionItem.canSign) {
+                val unverified = transactionItem.transaction.block.transaction[KEY_UNVERIFIED]
+                if (unverified != null) {
+                    unverifiedWarning.isVisible = unverified as Boolean
+                }
+            }
             transactionSignButton.isVisible = transactionItem.canSign
             transactionSignButton.setOnClickListener {
                 transactionSignButtonView.text = resources.getString(R.string.text_exchange_signing_transaction)
                 getTrustChainCommunity().createAgreementBlock(transactionItem.transaction.block, transactionItem.transaction.block.transaction)
+                lifecycleScope.launch {
+                    // Check if there is an existing score to increase, otherwise create one
+                    val store = getTrustStore().trustDao()
+                    val key = transactionItem.transaction.sender
+                    val currentScore = store.getByKey(key)
+                    if (currentScore != null) {
+                        // Increase by one
+                        val newScore = min(currentScore.trustScore + 1f, 100f)
+                        store.update((TrustScore(key, newScore, currentScore.values)))
+                    } else {
+                        store.insert(TrustScore(key, 1f, arrayListOf()))
+                    }
+                }
 
                 @Suppress("DEPRECATION")
                 Handler().postDelayed(
                     Runnable {
                         transactionSignButton.isVisible = false
+                        unverifiedWarning.isVisible = false
                     },
                     2000
                 )
@@ -283,6 +311,17 @@ class ExchangeTransactionDialog(
                 } else {
                     bottomSheetDialog.dismiss()
                     ContactInfoDialog(publicKey).show(parentFragmentManager, ContactInfoDialog.TAG)
+                }
+            }
+
+            val trustStore = getTrustStore()
+            lifecycleScope.launch {
+                // Retrieve the trust score based on the public key
+                val score = trustStore.trustDao().getByKey(publicKey)
+                score?.let {
+                    trustScoreView.text = getString(R.string.text_trust_score_format, it.trustScore)
+                } ?: run {
+                    trustScoreView.text = getString(R.string.text_trust_score_unknown)
                 }
             }
 

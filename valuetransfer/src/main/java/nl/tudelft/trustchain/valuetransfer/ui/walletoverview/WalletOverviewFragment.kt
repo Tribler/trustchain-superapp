@@ -194,12 +194,26 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         )
 
         // EXCHANGE
+        var verified = 0f
         parentActivity.getBalance(true).observe(
             viewLifecycleOwner,
             Observer {
-                if (it != binding.tvBalanceAmount.text.toString()) {
-                    binding.tvBalanceAmount.text = it
+                verified = it.replace(",", ".").toFloatOrNull() ?: 0f
+                if (it != binding.tvBalanceVerifiedAmount.text.toString()) {
+                    binding.tvBalanceVerifiedAmount.text = it
                     binding.pbBalanceUpdating.isVisible = false
+                }
+            }
+        )
+
+        parentActivity.getBalance(false).observe(
+            viewLifecycleOwner,
+            Observer {
+                val unverified = it.replace(",", ".").toFloatOrNull() ?: 0f
+                val onlyUnverified = unverified - verified
+                val text = onlyUnverified.toString().replace(".", ",")
+                if (text != binding.tvBalanceAmount.text.toString()) {
+                    binding.tvBalanceAmount.text = text
                 }
             }
         )
@@ -293,6 +307,9 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         when (item.itemId) {
             R.id.actionSettings -> {
                 parentActivity.detailFragment(ValueTransferMainActivity.settingsFragmentTag, Bundle())
+            }
+            R.id.actionTrust -> {
+                parentActivity.detailFragment(ValueTransferMainActivity.trustFragmentTag, Bundle())
             }
         }
         return super.onOptionsItemSelected(item)

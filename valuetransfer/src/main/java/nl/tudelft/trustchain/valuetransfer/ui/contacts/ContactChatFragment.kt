@@ -360,12 +360,19 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                         val amount = json.getString(QRScanController.KEY_AMOUNT)
                                         val contact = getContactStore().getContactFromPublicKey(publicKey)
 
+                                        // check if unverified money is allowed
+                                        var allowUnverified = false
+                                        if (json.has(QRScanController.KEY_ALLOW_UNVERIFIED)) {
+                                            allowUnverified = json.getBoolean(QRScanController.KEY_ALLOW_UNVERIFIED)
+                                        }
+
                                         if (contact != null) {
                                             ExchangeTransferMoneyDialog(
                                                 contact,
                                                 amount,
                                                 true,
-                                                description
+                                                description,
+                                                allowUnverified
                                             ).show(parentFragmentManager, tag)
                                         } else {
                                             parentActivity.displayToast(

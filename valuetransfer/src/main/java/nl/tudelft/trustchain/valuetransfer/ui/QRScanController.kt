@@ -98,7 +98,7 @@ class QRScanController : VTFragment() {
     }
 
     fun transferMoney(data: JSONObject) {
-        val variables = listOf(KEY_PUBLIC_KEY, KEY_NAME, KEY_AMOUNT)
+        val variables = listOf(KEY_PUBLIC_KEY, KEY_NAME, KEY_AMOUNT, KEY_ALLOW_UNVERIFIED)
         checkRequiredVariables(variables, data)
 
         try {
@@ -119,12 +119,15 @@ class QRScanController : VTFragment() {
                 contact = Contact(data.optString(KEY_NAME), publicKey)
             }
 
+            val allowUnverified = data.optBoolean(KEY_ALLOW_UNVERIFIED, false)
+
             val message = data.optString(KEY_MESSAGE)
             ExchangeTransferMoneyDialog(
                 contact,
                 amount,
                 true,
-                message
+                message,
+                allowUnverified
             ).show(parentFragmentManager, tag)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -165,6 +168,29 @@ class QRScanController : VTFragment() {
         }
     }
 
+    private fun addGateway(data: JSONObject) {
+        val variables = listOf(KEY_PUBLIC_KEY, KEY_IP, KEY_PORT, KEY_NAME)
+
+        checkRequiredVariables(variables, data)
+
+        try {
+            val publicKey = defaultCryptoProvider.keyFromPublicBin(data.optString(KEY_PUBLIC_KEY).hexToBytes())
+
+            GatewayAddDialog(
+                publicKey,
+                data.optString(KEY_IP),
+                data.optInt(KEY_PORT),
+                data.optString(KEY_NAME),
+            ).show(parentFragmentManager, tag)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            parentActivity.displayToast(
+                requireContext(),
+                resources.getString(R.string.snackbar_invalid_public_key)
+            )
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let { result ->
             try {
@@ -177,6 +203,7 @@ class QRScanController : VTFragment() {
                             VALUE_CREATION -> exchangeMoney(obj, true)
                             VALUE_DESTRUCTION -> exchangeMoney(obj, false)
                             VALUE_CONTACT -> addContact(obj)
+                            VALUE_GATEWAY -> addGateway(obj)
                             else -> throw RuntimeException(
                                 resources.getString(
                                     R.string.text_qr_type_not_recognized,
@@ -252,12 +279,14 @@ class QRScanController : VTFragment() {
         const val KEY_SIGNEE_KEY = "signee_key"
         const val KEY_TYPE = "type"
         const val KEY_VALUE = "value"
+        const val KEY_ALLOW_UNVERIFIED = "allow_unverified"
 
         const val VALUE_ATTESTATION = "attestation"
         const val VALUE_TRANSFER = "transfer"
         const val VALUE_CREATION = "creation"
         const val VALUE_DESTRUCTION = "destruction"
         const val VALUE_CONTACT = "contact"
+        const val VALUE_GATEWAY = "gateway"
 
         const val FALLBACK_UNKNOWN = "UNKNOWN"
     }

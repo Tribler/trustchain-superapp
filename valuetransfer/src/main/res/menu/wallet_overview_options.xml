@@ -6,4 +6,9 @@
         android:icon="@drawable/ic_baseline_settings_24"
         android:title="@string/menu_wallet_overview_settings"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/actionTrust"
+        android:icon="@drawable/ic_baseline_playlist_add_check_24"
+        android:title="@string/menu_wallet_overview_trust"
+        app:showAsAction="never"/>
 </menu>
