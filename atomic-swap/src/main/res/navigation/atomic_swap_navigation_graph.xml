@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/atomic_swap_navigation_graph"
+    app:startDestination="@id/navigation_wallet">
+
+    <fragment
+        android:id="@+id/navigation_wallet"
+        android:name="nl.tudelft.trustchain.atomicswap.ui.wallet.WalletFragment"
+        android:label="@string/title_wallet"
+        tools:layout="@layout/fragment_atomic_wallet" />
+    <fragment
+        android:id="@+id/navigation_swap"
+        android:name="nl.tudelft.trustchain.atomicswap.ui.swap.SwapFragment"
+        android:label="@string/title_swap"
+        tools:layout="@layout/fragment_atomic_swap" />
+    <fragment
+        android:id="@+id/navigation_trade_offers"
+        android:name="nl.tudelft.trustchain.atomicswap.ui.tradeoffers.TradeOffersFragment"
+        android:label="@string/title_trade_offers"
+        tools:layout="@layout/fragment_atomic_trade_offers" />
+
+</navigation>

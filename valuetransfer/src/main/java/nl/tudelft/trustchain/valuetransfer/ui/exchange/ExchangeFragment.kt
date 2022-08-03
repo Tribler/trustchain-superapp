@@ -23,6 +23,7 @@ import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentExchangeVtBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransactionDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransferMoneyDialog
+import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransferMoneyLinkDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import org.json.JSONObject
@@ -118,6 +119,10 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                         null,
                         false
                     ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
+                    R.id.actionRequestTransferLink -> ExchangeTransferMoneyLinkDialog(
+                        null,
+                        false
+                    ).show(parentFragmentManager, ExchangeTransferMoneyLinkDialog.TAG)
                 }
             }.show(parentFragmentManager, tag)
         }

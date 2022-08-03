@@ -20,4 +20,8 @@
         android:id="@+id/actionRequestTransferContact"
         android:icon="@drawable/ic_request"
         android:title="@string/menu_exchange_transfer_request" />
+    <item
+        android:id="@+id/actionRequestTransferLink"
+        android:icon="@drawable/ic_request"
+        android:title="@string/menu_exchange_transfer_request_link" />
 </menu>

@@ -17,10 +17,7 @@ import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.params.TestNet3Params
 import org.bitcoinj.script.Script
-import org.bitcoinj.wallet.DeterministicSeed
-import org.bitcoinj.wallet.KeyChainGroup
-import org.bitcoinj.wallet.KeyChainGroupStructure
-import org.bitcoinj.wallet.SendRequest
+import org.bitcoinj.wallet.*
 import org.bouncycastle.math.ec.ECPoint
 import java.io.File
 import java.math.BigInteger
@@ -307,32 +304,31 @@ class WalletManager(
             Address.fromString(params, addressMuSig)
         )
 
-        newTransaction.addInput(
-            Transaction(
-                params,
-                oldTransactionSerialized.hexToBytes()
-            ).outputs.filter { it.scriptBytes.size == 35 }[0]
-        ).disconnect()
+        val prevTx = Transaction(
+            params,
+            oldTransactionSerialized.hexToBytes()
+        )
+        val prevTxOutput = prevTx.outputs.filter { it.scriptBytes.size == 35 }[0]
 
-        // no fees since we are in a test network and this is a proof of concept still
+        newTransaction.addInput(
+            prevTxOutput
+        )
+
+        // No fees as we are in a test network and this is a proof of concept.
         val req = SendRequest.forTx(newTransaction)
         req.changeAddress = protocolAddress()
         req.feePerKb = Coin.valueOf(0)
         req.ensureMinRequiredFee = false
+
+        // We cannot create a signature for the mult-sig input so we allow it to be unsigned.
+        req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO
         kit.wallet().completeTx(req)
-
-        // BitcoinJ erroneously does not count the multisig input when determining how much to return to our own wallet.
-        // Therefore, we add the entranceFee to not lose any bitcoins
-        val changeOutput = req.tx.outputs.filter { it.scriptBytes.size != 35 }[0]
-        changeOutput.value = changeOutput.value.add(Coin.valueOf(oldMultiSignatureOutput))
-
         kit.wallet().signTransaction(req)
 
         Log.i("Coin", "Joining DAO - newtxid: " + newTransaction.txId.toString())
         Log.i("Coin", "Joining DAO - serialized new tx without signatures: " + newTransaction.bitcoinSerialize().toHex())
 
         // TODO there is probably a bug if multiple vins are required by our own wallet (for example, multiple small txin's combined to 1 big vout)
-
         return req.tx.bitcoinSerialize().toHex()
     }
 

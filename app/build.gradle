@@ -89,6 +89,7 @@ android {
         exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
         exclude 'META-INF/DEPENDENCIES'
     }
+    ndkVersion '21.1.6352462'
 }
 
 repositories {
@@ -129,7 +130,11 @@ dependencies {
     implementation project(':ig-ssi')
     implementation project(':liquidity-pool')
     implementation project(':valuetransfer')
+    implementation project(':atomic-swap')
     api(project(':common')){
+        exclude group: 'net.java.dev.jna'
+    }
+    api(project(':common-ethereum')){
         exclude group: 'net.java.dev.jna'
     }
     api(project(':currencyii')){
