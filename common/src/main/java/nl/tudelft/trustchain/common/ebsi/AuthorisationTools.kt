@@ -81,6 +81,7 @@ object AuthorisationTools {
             wallet.getAccessTokenFromResponse(response) {
 //            printJSONObjectItems("AKE", response)
             }
+
         }
 
         // unencoded/detached signature of va

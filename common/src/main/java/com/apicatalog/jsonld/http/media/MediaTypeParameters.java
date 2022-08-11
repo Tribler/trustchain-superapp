@@ -40,7 +40,7 @@ public final class MediaTypeParameters {
                     : Collections.emptyList();
     }
 
-    public static void checkVirtualMethod() { }
+    public static void checkVirtualMethods() { }
 
     public String firstValue(final String name) {
         return parameters.containsKey(name)

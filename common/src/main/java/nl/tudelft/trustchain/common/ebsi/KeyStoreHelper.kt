@@ -4,6 +4,7 @@ import android.util.Log
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK
+import net.i2p.crypto.eddsa.EdDSASecurityProvider
 import nl.tudelft.ipv8.android.util.AndroidEncodingUtils
 import nl.tudelft.ipv8.messaging.deserializeVarLen
 import nl.tudelft.ipv8.messaging.serializeVarLen
@@ -134,7 +135,21 @@ class KeyStoreHelper(
          * The Spongy Castle Provider needs to be inserted as a provider in list of providers.
          */
         fun initProvider() {
-            Security.insertProviderAt(BouncyCastleProvider(), 1)
+//            Security.insertProviderAt(BouncyCastleProvider(), 1)
+            Security.addProvider(EdDSASecurityProvider())
+            Security.addProvider(BouncyCastleProvider())
+//            Security.addProvider(org.bouncycastle.jce.provider.BouncyCastleProvider())
+
+            /*for (provider in Security.getProviders()) {
+                Log.e("SecServices", "=====PROVIDER: $provider (${provider.name})=====")
+                for (service in provider.services) {
+                    val alg = service.algorithm.lowercase()
+                    if (alg.contains("eddsa") || alg.contains("25519")) {
+                        Log.e("SecServices", "service: ${service.algorithm} (${service.type})")
+//                Log.e("SecServices", "***********************************************")
+                    }
+                }
+            }*/
         }
 
         fun decodeDerPublicKey(data: ByteArray) {

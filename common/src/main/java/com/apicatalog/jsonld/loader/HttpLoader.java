@@ -29,5 +29,5 @@ public class HttpLoader extends DefaultHttpLoader {
         return INSTANCE;
     }
 
-    public static void checkVirtualMethod() { }
+    public static void checkVirtualMethods() { }
 }

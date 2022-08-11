@@ -48,11 +48,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_15
+        targetCompatibility JavaVersion.VERSION_15
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "15"
         allWarningsAsErrors = true
     }
 
@@ -77,6 +77,11 @@ configurations.all {
     /* resolutionStrategy.capabilitiesResolution.withCapability('org.ow2.asm:asm') {
          selectHighestVersion()
      }*/
+
+    exclude group: 'com.github.stephenc.jcip' //, module: "jcip-annotations"
+//    exclude group: 'org.jetbrains.kotlinx', module: "kotlinx-serialization-runtime"
+//    exclude group: 'com.goterl', module: 'lazysodium-android'
+    exclude group: 'decentralized-identity', module: 'jsonld-common-java'
 }
 
 
@@ -91,13 +96,16 @@ repositories {
     mavenCentral()
     maven { url "https://dl.bintray.com/terl/lazysodium-maven" }
     maven { url 'https://jitpack.io' }
-    // maven { url 'https://repo.danubetech.com/repository/maven-public/' }
+    maven { url 'https://repo.danubetech.com/repository/maven-public/' }
+    maven { url 'https://maven.walt.id/repository/waltid/' }
+    maven { url 'https://maven.walt.id/repository/waltid-ssi-kit/'}
 }
 
 dependencies {
     api(project(':ipv8-android')){
         exclude group: 'net.java.dev.jna'
         exclude group: 'org.bouncycastle'
+//        exclude group: 'com.goterl', module: 'lazysodium-android'
     }
 
     api 'com.google.guava:guava:30.0-android'
@@ -131,29 +139,61 @@ dependencies {
     // secp256k1 crypto
     implementation 'com.madgag.spongycastle:core:1.58.0.0'
     implementation 'com.madgag.spongycastle:prov:1.58.0.0'
+//    implementation 'com.madgag.spongycastle:pkix:1.51.0.0'
 
     // JWT
-    implementation 'org.wso2.orbit.com.nimbusds:nimbus-jose-jwt:9.18.0.wso2v1'
+//    implementation 'org.wso2.orbit.com.nimbusds:nimbus-jose-jwt:9.18.0.wso2v1'
 
     // JSON_LD
-//    implementation 'info.weboftrust:ld-signatures-java:1.0.0'
+    implementation 'info.weboftrust:ld-signatures-java:1.0.0'
+
+//    implementation 'com.apicatalog:titanium-json-ld:1.1.0'
+    implementation('io.setl:rdf-urdna:1.1') {
+        exclude group: 'com.apicatalog', module: 'titanium-json-ld'
+    }
+    implementation 'org.glassfish:jakarta.json:2.0.0'
+
+//    implementation 'com.apicatalog:titanium-json-ld-jre8:1.3.1'
+//    implementation('io.setl:rdf-urdna:1.1') {
+//        exclude group: 'com.apicatalog', module: 'titanium-json-ld'
+//    }
+//    implementation "com.squareup.okhttp3:okhttp:4.9.3"
+
 //    implementation 'decentralized-identity:jsonld-common-java:1.0.0'
 //    implementation files('libs/jsonld-common-java-1.0.0.jar',
 //        'libs/ld-signatures-java-1.0.0.jar',
 //        'libs/key-formats-java-1.3.0.jar')
-    // implementation 'com.apicatalog:titanium-json-ld:1.2.0'
-    implementation "com.squareup.okhttp3:okhttp:4.9.3"
-    implementation 'org.glassfish:jakarta.json:2.0.1'
-    implementation 'io.setl:rdf-urdna:1.1'
+
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.2'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.13.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
+
     // caffeine 2.* lower sdk requirement
     implementation 'com.github.ben-manes.caffeine:caffeine:3.0.6'
     implementation 'net.jcip:jcip-annotations:1.0'
 
     // Multibase encoding
     implementation 'com.github.multiformats:java-multibase:1.1.0'
+
+    // SSI Kit (EBSI support)
+    /*implementation("id.walt:waltid-ssi-kit:1.12.0") {
+        exclude group: 'javax.mail', module: 'javax.mail-api'
+        exclude group: 'org.bouncycastle'
+        exclude group: 'org.jetbrains.kotlinx' //, module: 'kotlinx-serialization-runtime-jvm'
+        exclude group: 'com.github.stephenc.jcip', module: 'jcip
+        -annotations'
+        exclude group: 'io.github.microutils', module: 'kotlin-logging-jvm'
+        exclude group: 'javax.validation', module: 'validation-api'
+        exclude group: 'com.sun.mail', module: 'mailapi'
+        exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
+        exclude group: 'com.goterl', module: 'lazysodium-java'
+    }*/
+    implementation("id.walt:waltid-ssikit-vclib:1.22.0") {
+        exclude group: 'org.jetbrains.kotlinx' //, module: 'kotlinx-serialization-runtime-jvm'
+        exclude group: 'org.slf4j' //, module: 'jcip-annotations'
+
+    }
+//    implementation "id.walt.servicematrix:WaltID-ServiceMatrix:1.1.1"
 
     // web3j
     implementation('org.web3j:core:4.8.8-android') {
@@ -186,8 +226,89 @@ dependencies {
     testImplementation "io.mockk:mockk:1.9.3"
     testImplementation 'org.json:json:20190722'
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
-    testImplementation "com.goterl:lazysodium-java:5.0.1"
+    /*testImplementation ("com.goterl:lazysodium-java:5.0.1") {
+        exclude group: 'net.java.dev.jna'
+    }*/
     annotationProcessor 'androidx.room:room-compiler:2.2.5'
+
+
+    // SSI KIT
+    // Encoding
+    implementation "commons-codec:commons-codec:1.15"
+    // Crypto
+    api("com.google.crypto.tink:tink:1.6.1")
+//    api("info.weboftrust:ld-signatures-java:0.5-SNAPSHOT")
+//    api("decentralized-identity:jsonld-common-java:0.2.0")
+    /*implementation("com.goterl:lazysodium-java:5.0.1") { //5.1.1
+        exclude group: 'net.java.dev.jna'
+    }*/
+    implementation("com.goterl:lazysodium-android:5.0.1") {
+        exclude group: 'net.java.dev.jna'
+    }
+//    implementation("com.github.multiformats:java-multibase:v1.1.0")
+    implementation("com.microsoft.azure:azure-keyvault:1.2.6")
+    implementation("com.microsoft.azure:azure-client-authentication:1.7.14")
+    implementation("com.nimbusds:nimbus-jose-jwt:9.23")
+    implementation("com.nimbusds:oauth2-oidc-sdk:9.37.2")
+
+//    implementation("org.bouncycastle:bcprov-jdk15to18:1.71")
+    implementation("org.bouncycastle:bcpkix-jdk15to18:1.71")
+
+    // TEST
+//    implementation("org.bouncycastle:bcprov-jdk15to18:1.71") // right one
+
+//    implementation("org.bouncycastle:bcpkix-jdk15to18:1.71")
+//    implementation("org.bouncycastle:bcutil-jdk15to18:1.71")
+//    implementation("org.bouncycastle:bc-fips:1.0.2")
+
+//    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+//    implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
+
+
+
+    implementation("net.i2p.crypto:eddsa:0.3.0")
+
+    // JSON
+    implementation("org.json:json:20220320")
+    implementation("com.beust:klaxon:5.6")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3")
+    implementation("io.ktor:ktor-client-jackson:2.0.2")
+    implementation("io.ktor:ktor-client-content-negotiation:2.0.2")
+    implementation("com.jayway.jsonpath:json-path:2.7.0")
+
+    /*implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2") {
+        exclude group: 'org.jetbrains.kotlinx', module: "kotlinx-serialization-core-jvm"
+    }*/
+
+    // Config
+    implementation("com.sksamuel.hoplite:hoplite-core:2.1.5")
+    implementation("com.sksamuel.hoplite:hoplite-yaml:2.1.5")
+    implementation("com.sksamuel.hoplite:hoplite-hikaricp:2.1.5")
+
+    implementation("com.sksamuel.hoplite:hoplite-hocon:2.1.2")
+
+    // HTTP
+    implementation("io.ktor:ktor-client-core:2.0.2")
+    implementation("io.ktor:ktor-client-cio:2.0.2")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.0.2") {
+        exclude group: 'org.jetbrains.kotlinx', module: "kotlinx-serialization-core-jvm"
+        exclude group: 'org.jetbrains.kotlinx', module: "kotlinx-serialization-json"
+    }
+    implementation("io.ktor:ktor-client-logging:2.0.2")
+    implementation("io.github.rybalkinsd:kohttp:0.12.0")
+
+    // REST
+    implementation("io.javalin:javalin:4.6.1") {
+        exclude group: 'com.sun.mail', module: 'javax.mail'
+        exclude group: 'javax.activation', module: 'activation'
+    }
+    implementation("io.javalin:javalin-openapi:4.6.1") {
+        exclude group: "javax.validation", module: "validation-api"
+        exclude group: 'javax.activation', module: 'activation'
+        exclude group: "com.sun.mail"//, module: "mailapi"
+
+    }
+    // implementation("io.javalin:javalin-test-tools:4.5.0")
 }
 
 

@@ -471,7 +471,7 @@ public final class JsonLdOptions {
         return uriValidation;
     }
 
-    public static void checkVirtualMethod() { }
+    public static void checkVirtualMethods() { }
 
     /**
      * if disabled only URIs required for processing are parsed and validated.

@@ -1,16 +1,31 @@
 package nl.tudelft.trustchain.common.ebsi
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.util.Log
 import com.android.volley.Response
+import id.walt.auditor.Auditor
+import id.walt.auditor.JsonSchemaPolicy
+import id.walt.auditor.SignaturePolicy
+import id.walt.custodian.Custodian
+import id.walt.model.DidMethod
+import id.walt.servicematrix.ServiceMatrix
+import id.walt.services.did.DidService
+import id.walt.signatory.ProofConfig
+import id.walt.signatory.ProofType
+import id.walt.signatory.Signatory
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.R
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.Security
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 class ConformanceTest(
-    context: Context,
+    private val context: Context,
     private val uuid: UUID
 ) {
     val TAG = ConformanceTest::class.simpleName!!
@@ -27,11 +42,51 @@ class ConformanceTest(
 //        Log.e(TAG, myVolleyError.volleyError?.message ?: "No message")
     }
 
+    fun waltIdTest() {
+        ServiceMatrix(context, "service-matrix.properties")
+
+        val issuerDid = DidService.create(DidMethod.ebsi)
+        val holderDid = DidService.create(DidMethod.key)
+
+        Log.e("WaltID Test", "Issuer: $issuerDid\nHolder: $holderDid")
+
+        val expiration = Instant.now().plus(30, ChronoUnit.DAYS)
+
+        Log.e("WaltID Test", "expiration: $expiration")
+
+        // Issue VC in JSON-LD and JWT format (for show-casing both formats)
+        val vcJsonLd = Signatory.getService().issue("VerifiableId", ProofConfig(issuerDid = issuerDid, subjectDid = holderDid, proofType = ProofType.LD_PROOF, expirationDate = expiration))
+        val vcJwt = Signatory.getService().issue("VerifiableId", ProofConfig(issuerDid = issuerDid, subjectDid = holderDid, proofType = ProofType.JWT, expirationDate = expiration))
+
+        Log.e("WaltID Test", "VC JsonLD: $vcJsonLd")
+        Log.e("WaltID Test", "VC JWT: $vcJwt")
+
+        // Present VC in JSON-LD and JWT format (for show-casing both formats)
+        // expiration date is not needed when JSON-LD format
+        val vpJsonLd = Custodian.getService().createPresentation(listOf(vcJsonLd), holderDid, expirationDate = null)
+        val vpJwt = Custodian.getService().createPresentation(listOf(vcJwt), holderDid, expirationDate = expiration)
+
+        Log.e("WaltID Test", "VP JsonLD: $vpJsonLd")
+        Log.e("WaltID Test", "VP JWT: $vpJwt")
+
+        // Verify VPs, using Signature, JsonSchema and a custom policy
+//        val resJsonLd = Auditor.getService().verify(vpJsonLd, listOf(SignaturePolicy(), JsonSchemaPolicy()))
+        val resJsonLd = Auditor.getService().verify(vpJsonLd, listOf(SignaturePolicy()))
+//        val resJwt = Auditor.getService().verify(vpJwt, listOf(SignaturePolicy(), JsonSchemaPolicy()))
+        val resJwt = Auditor.getService().verify(vpJwt, listOf(SignaturePolicy()))
+
+        Log.e("Ver result", "JSON-LD verification result: ${resJsonLd.valid}")
+        Log.e("Ver result", "JWT verification result: ${resJwt.valid}")
+    }
+
     fun run(){
+        Log.e(TAG, "Conformance Test: $uuid")
         // https://ec.europa.eu/digital-building-blocks/wikis/display/EBSIDOC/EBSI+Wallet+Conformance+Testing
         EBSIRequest.testSetup(uuid)
 
-        onboardTest12() // get verifiable authorisation
+        waltIdTest()
+
+//        onboardTest12() // get verifiable authorisation
 
         // onboarding 1&2 can be skipped if already performed and move on to onboarding 5
 //        onboardTest5() // get access token
@@ -56,7 +111,7 @@ class ConformanceTest(
 
     private fun onboardTest12() {
         // Let the user scan the mobile authentication token on the onboarding service page
-        val onboardSessionToken = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NTA1MjY2NzAsImlhdCI6MTY1MDUyNTc3MCwiaXNzIjoiZGlkOmVic2k6emNHdnFnWlRIQ3Rramd0Y0tSTDdIOGsiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjItMDQtMjFUMDc6MjI6NDlaIiwiaG9zdG5hbWUiOiJhcHAuY29uZm9ybWFuY2UuaW50ZWJzaS54eXoiLCJzY29yZSI6MC43LCJzdWNjZXNzIjp0cnVlfX0.WR-M2l-4InK_WUQI1rKufBec21ql4T1iKxN9re-3ZylTF86JCDXlZWfNRZx-k9Ge0Ui2l3oOESmD0Xy4n_KxeA"
+        val onboardSessionToken = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NTU4Mzc1OTcsImlhdCI6MTY1NTgzNjY5NywiaXNzIjoiZGlkOmVic2k6emNHdnFnWlRIQ3Rramd0Y0tSTDdIOGsiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjItMDYtMjFUMTg6Mzg6MTZaIiwiaG9zdG5hbWUiOiJhcHAuY29uZm9ybWFuY2UuaW50ZWJzaS54eXoiLCJzY29yZSI6MC45LCJzdWNjZXNzIjp0cnVlfX0.r0fk38pGIXYkseBeouXgGwxRtrSehLV_m4H_Vv-qQeRuROGFuyrQm8kO1_gS9uRLJGryYn2M_1KseE2WFs-HXg"
         OnboardingTools.getVerifiableAuthorisation(wallet, onboardSessionToken, errorListener)
     }
 

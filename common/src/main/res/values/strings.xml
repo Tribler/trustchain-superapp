@@ -33,5 +33,4 @@
     <string name="vote_join_request_upvoted">You voted in favor of allowing %1$s into our shared wallet with id: %2$s</string>
     <string name="vote_join_request_downvoted">You voted against allowing %1$s into our shared wallet with id: %2$s</string>
     <string name="vote_join_request_voted">The majority voted, based on the majority we execute the transaction</string>
-
 </resources>

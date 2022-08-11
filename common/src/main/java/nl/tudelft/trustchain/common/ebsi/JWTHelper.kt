@@ -25,7 +25,8 @@ object JWTHelper {
         val signer: JWSSigner = ECDSASigner(wallet.privateKey, Curve.SECP256K1)
         val jwk = wallet.keyPair.jwk()
         val thumb = jwk.computeThumbprint()
-
+        Log.e("JWK", "priv: ${jwk.toJSONString()}")
+        Log.e("JWK", "pub: ${jwk.toPublicJWK().toJSONString()}")
         // Prepare JWT with claims set
         val claimsSet = JWTClaimsSet.Builder()
 

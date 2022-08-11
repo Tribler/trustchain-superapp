@@ -25,6 +25,7 @@ buildscript {
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
         classpath 'com.google.gms:google-services:4.3.10'
+        classpath "org.jacoco:org.jacoco.core:0.8.8"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -40,6 +41,11 @@ allprojects {
         jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+
+        maven { url 'https://maven.walt.id/repository/waltid/' }
+        maven { url 'https://maven.walt.id/repository/waltid-ssi-kit/'}
+        maven { url "https://repo.danubetech.com/repository/maven-public/" }
+        mavenLocal()
     }
 
     // Temp fix for issue https://github.com/mockk/mockk/issues/281

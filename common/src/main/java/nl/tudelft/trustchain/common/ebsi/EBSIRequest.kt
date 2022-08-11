@@ -7,12 +7,12 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.apicatalog.jsonld.JsonLdOptions
+/*import com.apicatalog.jsonld.JsonLdOptions
 import com.apicatalog.jsonld.document.Document
 import com.apicatalog.jsonld.expansion.UriExpansion
 import com.apicatalog.jsonld.http.media.MediaTypeParameters
 import com.apicatalog.jsonld.loader.HttpLoader
-import com.apicatalog.jsonld.uri.UriUtils
+import com.apicatalog.jsonld.uri.UriUtils*/
 import org.json.JSONObject
 import java.net.URI
 import java.net.URLDecoder
@@ -31,12 +31,12 @@ object EBSIRequest {
         requestQueue = Volley.newRequestQueue(context)
 
         // temporary binding correct java files
-        HttpLoader.checkVirtualMethod()
-        JsonLdOptions.checkVirtualMethod()
-        Document.checkVirtualMethod()
-        UriExpansion.checkVirtualMethod()
-        MediaTypeParameters.checkVirtualMethod()
-        UriUtils.checkVirtualMethod()
+        /*HttpLoader.checkVirtualMethods()
+        JsonLdOptions.checkVirtualMethods()
+        Document.checkVirtualMethods()
+        UriExpansion.checkVirtualMethods()
+        MediaTypeParameters.checkVirtualMethods()
+        UriUtils.checkVirtualMethods()*/
     }
 
     fun get(

@@ -45,11 +45,11 @@ android {
 // bytecode that is being built with JVM target 1.6. (e.g. navArgs)
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_15
+        targetCompatibility JavaVersion.VERSION_15
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "15"
         allWarningsAsErrors = true
     }
 
@@ -100,7 +100,7 @@ dependencies {
 
     implementation "com.google.android:flexbox:2.0.1"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc"
 
     // Wallet libraries
     implementation group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.10'

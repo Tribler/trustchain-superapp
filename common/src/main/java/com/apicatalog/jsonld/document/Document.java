@@ -77,7 +77,7 @@ public interface Document {
         return null;
     }
 
-    public static void checkVirtualMethod() { }
+    public static void checkVirtualMethods() { }
 
     /**
      * Get the document content as parsed {@link RdfDataset}.

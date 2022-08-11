@@ -1,10 +1,16 @@
 package nl.tudelft.trustchain.common.ebsi
 
 import android.util.Log
+import com.apicatalog.jsonld.JsonLd
+import com.apicatalog.jsonld.document.JsonDocument
 import com.apicatalog.jsonld.json.JsonCanonicalizer
 import foundation.identity.jsonld.JsonLDObject
 import info.weboftrust.ldsignatures.jsonld.LDSecurityKeywords
 import info.weboftrust.ldsignatures.signer.EcdsaSecp256k1Signature2019LdSigner
+/*
+import foundation.identity.jsonld.JsonLDObject
+import info.weboftrust.ldsignatures.jsonld.LDSecurityKeywords
+import info.weboftrust.ldsignatures.signer.EcdsaSecp256k1Signature2019LdSigner*/
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,13 +42,15 @@ object VerifiableCredentialsTools {
         CoroutineScope(Dispatchers.IO).launch {
             val subject = verifiableCredential.getJSONObject("credentialSubject").getString("id")
 
-            val jsonLdObject = JsonLDObject.fromJson(StringReader(verifiableCredential.toString()))
+//            Log.e("VerPresTest", "http://")
+            Log.e("verPres", verifiableCredential.toString().replace("\\/", "/"))
+//            val jsonLdObject = JsonLDObject.fromJson(StringReader(verifiableCredential.toString().replace("\\/", "/")))
             val privateECKey = ECKey.fromPrivate((wallet.privateKey as ECPrivateKey).s)
             val signer = EcdsaSecp256k1Signature2019LdSigner(privateECKey)
             signer.created = Date()
             signer.proofPurpose = LDSecurityKeywords.JSONLD_TERM_AUTHENTICATION
             signer.verificationMethod = URI.create(wallet.keyAlias)
-            val ldProof = signer.sign(jsonLdObject)
+//            val ldProof = signer.sign(jsonLdObject)
 
             // Log.e("VerPres", "proof: ${ldProof}")
 
@@ -52,7 +60,7 @@ object VerifiableCredentialsTools {
                 put("type", JSONArray().apply { put("VerifiablePresentation") })
                 put("holder", subject)
                 put("verifiableCredential", JSONArray().apply { put(verifiableCredential) })
-                put("proof", JSONObject(ldProof.toString()))
+//                put("proof", JSONObject(ldProof.toString()))
             }
 
             // https://www.npmjs.com/package/canonicalize
@@ -65,9 +73,13 @@ object VerifiableCredentialsTools {
     }
 
     fun canonicalize(jsonObject: JSONObject, makeBase64: Boolean = false): String {
-        val jsonLdObject = JsonLDObject.fromJson(StringReader(jsonObject.toString()))
-        val canonicalized = JsonCanonicalizer.canonicalize(jsonLdObject.toJsonObject())
+//        val jsonLdObject = JsonLDObject.fromJson(StringReader(jsonObject.toString()))
+        /*val document = JsonDocument.of(StringReader(jsonObject.toString())).jsonContent.get().asJsonObject()
+        val canonicalized = JsonCanonicalizer.canonicalize(document)*/
 
+//        val canonicalized = JsonCanonicalizer.canonicalize(jsonLdObject.toJsonObject())
+
+        val canonicalized = jsonObject.toString()
         return if (makeBase64) {
             Base64.getUrlEncoder().encodeToString(canonicalized.toByteArray())
         } else {
