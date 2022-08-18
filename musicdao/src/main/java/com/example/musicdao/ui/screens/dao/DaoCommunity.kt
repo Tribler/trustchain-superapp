@@ -1,7 +1,8 @@
-package nl.tudelft.trustchain.currencyii
+package com.example.musicdao.ui.screens.dao
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -15,7 +16,8 @@ import nl.tudelft.trustchain.currencyii.util.DAOJoinHelper
 import nl.tudelft.trustchain.currencyii.util.DAOTransferFundsHelper
 
 @Suppress("UNCHECKED_CAST")
-class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8db5899c5df5b") : Community() {
+class DaoCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8db5899c5df5c") :
+    Community() {
     override val serviceId = serviceId
 
     private fun getTrustChainCommunity(): TrustChainCommunity {
@@ -73,14 +75,14 @@ class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc
         walletBlockData: TrustChainTransaction,
         blockData: SWSignatureAskBlockTD,
         responses: List<SWResponseSignatureBlockTD>,
-        context: Context
+        context: Context,
     ) {
         daoJoinHelper.joinBitcoinWallet(
             myPeer,
             walletBlockData,
             blockData,
             responses,
-            context
+            context,
         )
     }
 
@@ -225,15 +227,18 @@ class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc
      */
     fun fetchProposalBlocks(): List<TrustChainBlock> {
         val joinProposals = getTrustChainCommunity().database.getBlocksWithType(SIGNATURE_ASK_BLOCK)
-        val transferProposals = getTrustChainCommunity().database.getBlocksWithType(
-            TRANSFER_FUNDS_ASK_BLOCK
-        )
+        val transferProposals = getTrustChainCommunity().database.getBlocksWithType(TRANSFER_FUNDS_ASK_BLOCK)
+
+        Log.d("MVDAO", "fetchProposalBlocks ${joinProposals.size} joinProposals on the network.")
+        Log.d("MVDAO", "fetchProposalBlocks ${transferProposals.size} transferProposals on the network.")
+
+
         return joinProposals
             .union(transferProposals)
-            .filter {
-                fetchSignatureRequestReceiver(it) == myPeer.publicKey.keyToBin()
-                    .toHex() && !checkEnoughFavorSignatures(it)
-            }
+//            .filter {
+//                fetchSignatureRequestReceiver(it) == myPeer.publicKey.keyToBin()
+//                    .toHex() && !checkEnoughFavorSignatures(it)
+//            }
             .distinctBy { fetchSignatureRequestProposalId(it) }
             .sortedByDescending { it.timestamp }
     }
@@ -242,7 +247,10 @@ class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc
      * Fetch all DAO blocks that contain a signature. These blocks are the response of a signature request.
      * Signatures are fetched from [SIGNATURE_AGREEMENT_BLOCK] type blocks.
      */
-    fun fetchProposalResponses(walletId: String, proposalId: String): List<SWResponseSignatureBlockTD> {
+    fun fetchProposalResponses(
+        walletId: String,
+        proposalId: String
+    ): List<SWResponseSignatureBlockTD> {
         return getTrustChainCommunity().database.getBlocksWithType(SIGNATURE_AGREEMENT_BLOCK)
             .filter {
                 val blockData = SWResponseSignatureTransactionData(it.transaction)
@@ -256,7 +264,10 @@ class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc
      * Fetch all DAO blocks that contain a negative signature. These blocks are the response of a negative signature request.
      * Signatures are fetched from [SIGNATURE_AGREEMENT_NEGATIVE_BLOCK] type blocks.
      */
-    fun fetchNegativeProposalResponses(walletId: String, proposalId: String): List<SWResponseNegativeSignatureBlockTD> {
+    fun fetchNegativeProposalResponses(
+        walletId: String,
+        proposalId: String
+    ): List<SWResponseNegativeSignatureBlockTD> {
         return getTrustChainCommunity().database.getBlocksWithType(
             SIGNATURE_AGREEMENT_NEGATIVE_BLOCK
         )
@@ -284,7 +295,14 @@ class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc
         val joinBlock = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
         val oldTransaction = joinBlock.SW_TRANSACTION_SERIALIZED
 
-        DAOJoinHelper.joinAskBlockReceived(oldTransaction, block, joinBlock, myPublicKey, votedInFavor, context)
+        DAOJoinHelper.joinAskBlockReceived(
+            oldTransaction,
+            block,
+            joinBlock,
+            myPublicKey,
+            votedInFavor,
+            context
+        )
     }
 
     /**

@@ -92,6 +92,8 @@ android {
 dependencies {
     implementation project(':gossipML')
     implementation project(':common')
+    implementation project(':currencyii')
+
     api(project(':ipv8-android')){
         exclude group: 'net.java.dev.jna'
         exclude group: 'org.bouncycastle'

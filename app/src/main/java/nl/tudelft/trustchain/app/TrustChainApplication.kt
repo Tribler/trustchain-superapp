@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
 import com.example.musicdao.core.ipv8.MusicCommunity
+import com.example.musicdao.ui.screens.dao.DaoCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import dagger.hilt.android.HiltAndroidApp
@@ -90,6 +91,7 @@ class TrustChainApplication : Application() {
                 createAtomicSwapCommunity(),
                 createMarketCommunity(),
                 createCoinCommunity(),
+                createDaoCommunity(),
                 createVotingCommunity(),
                 createMusicCommunity(),
                 createRecommenderCommunity(),
@@ -339,6 +341,16 @@ class TrustChainApplication : Application() {
         return OverlayConfiguration(
             Overlay.Factory(MarketCommunity::class.java),
             listOf(randomWalk)
+        )
+    }
+
+    private fun createDaoCommunity(): OverlayConfiguration<DaoCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
+
+        return OverlayConfiguration(
+            Overlay.Factory(DaoCommunity::class.java),
+            listOf(randomWalk, nsd)
         )
     }
 

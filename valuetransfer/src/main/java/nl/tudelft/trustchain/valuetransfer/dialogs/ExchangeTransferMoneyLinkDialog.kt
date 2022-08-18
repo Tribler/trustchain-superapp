@@ -286,6 +286,7 @@ class ExchangeTransferMoneyLinkDialog(
         }
 
         val swapped = symbols.substring(4) + symbols.substring(0, 4)
+        @Suppress("DEPRECATION")
         return swapped.toCharArray()
             .map { it.toInt() }
             .fold(0) { previousMod: Int, _char: Int ->

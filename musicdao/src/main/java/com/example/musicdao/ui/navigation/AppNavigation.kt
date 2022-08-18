@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -20,6 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.musicdao.ui.components.player.FullPlayerScreen
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.screens.artists.DiscoverArtistsScreen
+import com.example.musicdao.ui.screens.dao.*
 import com.example.musicdao.ui.screens.debug.Debug
 import com.example.musicdao.ui.screens.donate.DonateScreen
 import com.example.musicdao.ui.screens.home.HomeScreen
@@ -47,6 +49,10 @@ fun AppNavigation(
     ownProfileViewScreenModel: MyProfileScreenViewModel
 ) {
     val bitcoinWalletViewModel: BitcoinWalletViewModel = hiltViewModel()
+    val daoViewModel: DaoViewModel = hiltViewModel()
+
+    val context = LocalContext.current
+    daoViewModel.initManager(context)
 
     AnimatedNavHost(
         modifier = Modifier.fillMaxSize(),
@@ -106,6 +112,61 @@ fun AppNavigation(
                 val settingsScreenViewModel: SettingsScreenViewModel = hiltViewModel()
                 SettingsScreen(settingsScreenViewModel)
             }
+            composable(Screen.DaoRoute.route) {
+                DaoListScreen(navController = navController, daoViewModel = daoViewModel)
+            }
+            composable(Screen.NewDaoRoute.route) {
+                NewDaoScreen(daoViewModel = daoViewModel, navController = navController)
+            }
+
+            composable(
+                Screen.DaoDetailRoute.route,
+                arguments = listOf(
+                    navArgument("daoId") {
+                        type = NavType.StringType
+                    }
+                )
+            ) { navBackStackEntry ->
+                DaoDetailScreen(
+                    navController = navController,
+                    daoId = navBackStackEntry.arguments?.getString(
+                        "daoId"
+                    )!!,
+                    daoViewModel = daoViewModel
+                )
+            }
+            composable(
+                Screen.ProposalDetailRoute.route,
+                arguments = listOf(
+                    navArgument("proposalId") {
+                        type = NavType.StringType
+                    }
+                )
+            ) { navBackStackEntry ->
+                ProposalDetailScreen(
+                    navBackStackEntry.arguments?.getString(
+                        "proposalId"
+                    )!!,
+                    daoViewModel = daoViewModel
+                )
+            }
+            composable(
+                Screen.NewProposalRoute.route,
+                arguments = listOf(
+                    navArgument("daoId") {
+                        type = NavType.StringType
+                    }
+                )
+            ) { navBackStackEntry ->
+                NewProposalScreen(
+                    navBackStackEntry.arguments?.getString(
+                        "daoId"
+                    )!!,
+                    daoViewModel = daoViewModel,
+                    navController = navController
+                )
+            }
+
             composable(
                 Screen.Profile.route,
                 arguments = listOf(
@@ -150,7 +211,7 @@ fun AppNavigation(
                         AnimatedContentScope.SlideDirection.Down,
                         animationSpec = tween(200)
                     )
-                },
+                }
             ) {
                 FullPlayerScreen(playerViewModel)
             }

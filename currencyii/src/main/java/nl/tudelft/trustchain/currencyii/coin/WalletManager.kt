@@ -328,7 +328,7 @@ class WalletManager(
         Log.i("Coin", "Joining DAO - newtxid: " + newTransaction.txId.toString())
         Log.i("Coin", "Joining DAO - serialized new tx without signatures: " + newTransaction.bitcoinSerialize().toHex())
 
-        // TODO there is probably a bug if multiple vins are required by our own wallet (for example, multiple small txin's combined to 1 big vout)
+        // TODO there is probablly a bug if multiple vins are required by our own walet (for example, multiple small txin's combined to 1 big vout)
         return req.tx.bitcoinSerialize().toHex()
     }
 

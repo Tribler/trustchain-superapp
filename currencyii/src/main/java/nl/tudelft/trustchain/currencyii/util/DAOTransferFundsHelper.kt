@@ -132,12 +132,12 @@ class DAOTransferFundsHelper {
         )
 
         if (status) {
-            Log.i("Coin", "successfully submitted taproot transaction to server")
+            Log.d("MVDAO", "successfully submitted taproot transaction to server")
             activity.runOnUiThread {
                 Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
             }
         } else {
-            Log.e("Coin", "taproot transaction submission to server failed")
+            Log.d("MVDAO", "taproot transaction submission to server failed")
             activity.runOnUiThread {
                 Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
             }

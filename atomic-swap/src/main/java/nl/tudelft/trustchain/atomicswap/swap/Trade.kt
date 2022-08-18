@@ -96,6 +96,7 @@ enum class Currency(val currencyCodeStringResourceId: Int) {
 
     companion object {
         fun fromString(coin: String): Currency {
+            @Suppress("DEPRECATION")
             return when (coin.toLowerCase()) {
                 "btc" -> BTC
                 "eth" -> ETH

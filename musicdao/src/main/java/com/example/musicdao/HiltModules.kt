@@ -17,6 +17,7 @@ import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_NETWORK_P
 import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_REGTEST_BOOTSTRAP_IP
 import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_REGTEST_BOOTSTRAP_PORT
 import com.example.musicdao.core.wallet.WalletService
+import com.example.musicdao.ui.screens.dao.DaoCommunity
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.SessionParams
 import com.frostwire.jlibtorrent.SettingsPack
@@ -28,6 +29,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.currencyii.CoinCommunity
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Singleton
@@ -95,6 +97,13 @@ class HiltModules {
             ?: throw IllegalStateException("MusicCommunity is not configured")
     }
 
+    @Provides
+    @Singleton
+    fun daoCommunity(): DaoCommunity {
+        return IPv8Android.getInstance().getOverlay()
+            ?: throw IllegalStateException("DaoCommunity is not configured")
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
@@ -129,6 +138,8 @@ class HiltModules {
             )
         )
     }
+
+
 }
 
 class CachePath(val applicationContext: Context) {

@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.currencyii.util
 
-import android.app.Activity
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -93,8 +91,8 @@ class DAOJoinHelper {
      * Create a bitcoin transaction that creates a new shared wallet. This takes some time to complete.
      *
      * NOTE:
-     *  - the latest walletBlockData should be given, otherwise the serialized transaction is invalid.
-     *  - It takes some time before the shared wallet is accepted on the bitcoin blockchain.
+     *  - the latest walletBlockData should be  given, otherwise the serialized transaction is invalid.
+     *  - It takes some time before the sharedwallet is accepted on the bitcoin blockchain.
      * @param sharedWalletData data of the shared wallet that you want to join.
      */
     private fun createBitcoinSharedWalletForJoining(sharedWalletData: SWJoinBlockTD): String {
@@ -128,8 +126,7 @@ class DAOJoinHelper {
         walletBlockData: TrustChainTransaction,
         blockData: SWSignatureAskBlockTD,
         responses: List<SWResponseSignatureBlockTD>,
-        context: Context,
-        activity: Activity
+        context: Context
     ) {
         val oldWalletBlockData = SWJoinBlockTransactionData(walletBlockData)
         val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
@@ -157,14 +154,14 @@ class DAOJoinHelper {
 
         if (status) {
             Log.i("Coin", "Successfully submitted taproot transaction to server")
-            activity.runOnUiThread {
-                Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
-            }
+//            activity.runOnUiThread {
+//                Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
+//            }
         } else {
             Log.e("Coin", "Taproot transaction submission to server failed")
-            activity.runOnUiThread {
-                Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
-            }
+//            activity.runOnUiThread {
+//                Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
+//            }
         }
 
         oldWalletBlockData.getData().SW_NONCE_PKS = newNonces
@@ -187,7 +184,12 @@ class DAOJoinHelper {
         newData.addBitcoinPk(walletManager.networkPublicECKeyHex())
         newData.addTrustChainPk(myPeer.publicKey.keyToBin().toHex())
         newData.setTransactionSerialized(serializedTransaction)
-        newData.addNoncePk(walletManager.addNewNonceKey(oldBlockData.getData().SW_UNIQUE_ID, context).second.getEncoded(true).toHex())
+        newData.addNoncePk(
+            walletManager.addNewNonceKey(
+                oldBlockData.getData().SW_UNIQUE_ID,
+                context
+            ).second.getEncoded(true).toHex()
+        )
 
         trustchain.createProposalBlock(
             newData.getJsonString(),
@@ -212,7 +214,10 @@ class DAOJoinHelper {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
             val blockData = SWSignatureAskTransactionData(block.transaction).getData()
 
-            Log.i("Coin", "Signature request for joining: ${blockData.SW_RECEIVER_PK}, me: ${myPublicKey.toHex()}")
+            Log.i(
+                "Coin",
+                "Signature request for joining: ${blockData.SW_RECEIVER_PK}, me: ${myPublicKey.toHex()}"
+            )
 
             if (blockData.SW_RECEIVER_PK != myPublicKey.toHex()) {
                 return

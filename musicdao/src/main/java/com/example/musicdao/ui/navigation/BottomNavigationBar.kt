@@ -25,6 +25,7 @@ fun BottomNavigationBar(navController: NavHostController) {
         BottomNavigationItem("Artists", Screen.DiscoverArtists.route, Icons.Filled.Person),
         BottomNavigationItem("Search", Screen.Search.route, Icons.Filled.Search),
         BottomNavigationItem("Creator", Screen.CreatorMenu.route, Icons.Filled.Person),
+        BottomNavigationItem("DAO", Screen.DaoRoute.route, Icons.Filled.Person),
     )
 
     BottomNavigation {
@@ -41,3 +42,4 @@ fun BottomNavigationBar(navController: NavHostController) {
         }
     }
 }
+

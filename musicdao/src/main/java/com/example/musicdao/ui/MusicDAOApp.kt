@@ -35,7 +35,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MusicDAOApp() {
-    MaterialTheme(colors = MusicDAOTheme.DarkColors) {
+    MaterialTheme(colors = MusicDAOTheme.DarkColors, shapes = MusicDAOTheme.Shapes) {
         val navController = rememberAnimatedNavController()
 
         val context = LocalContext.current
@@ -60,7 +60,7 @@ fun MusicDAOApp() {
                 FloatingActionButton(onClick = { openCreateReleaseDialog.value = true }) {
                     Icon(
                         imageVector = Icons.Filled.AddCircle,
-                        contentDescription = null,
+                        contentDescription = null
                     )
                 }
             },
@@ -91,7 +91,7 @@ fun MusicDAOApp() {
                         actionColor = MaterialTheme.colors.onSecondary
                     )
                 }
-            },
+            }
         )
     }
 }
