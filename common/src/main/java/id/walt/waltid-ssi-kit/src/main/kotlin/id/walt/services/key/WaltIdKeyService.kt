@@ -40,6 +40,7 @@ open class WaltIdKeyService : KeyService() {
 
     override fun addAlias(keyId: KeyId, alias: String) = keyStore.addAlias(keyId, alias)
 
+    override fun store(key: Key): Unit = keyStore.store(key)
     override fun load(keyAlias: String): Key = keyStore.load(keyAlias, KeyType.PUBLIC)
     override fun load(keyAlias: String, keyType: KeyType) = keyStore.load(keyAlias, keyType)
 

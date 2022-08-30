@@ -80,13 +80,14 @@ object DIDTools {
     }
 
     private fun getInsertDocumentRpcPayload(wallet: EBSIWallet): JSONObject {
+        wallet.did
         val insertDocumentRpcPayload = JSONObject()
 
         insertDocumentRpcPayload.put("jsonrpc", "2.0")
         insertDocumentRpcPayload.put("method", "insertDidDocument")
         insertDocumentRpcPayload.put("id", 1)
 
-        val params = JSONObject().apply {
+        /*val params = JSONObject().apply {
             val didVersionInfo = VerifiableCredentialsTools.canonicalize(wallet.didDocument(), false)
             val documentHash = sha256(Base64.getUrlEncoder().encode(didVersionInfo.toByteArray()))
 
@@ -118,7 +119,7 @@ object DIDTools {
             )
 //                        put("didVersionMetadata", "") //
         }
-        insertDocumentRpcPayload.put("params", JSONArray().put(params))
+        insertDocumentRpcPayload.put("params", JSONArray().put(params))*/
 
 //        Log.e("RPC", "insertDidDocument payload: $insertDocumentRpcPayload")
         return insertDocumentRpcPayload

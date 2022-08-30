@@ -12,6 +12,7 @@ import com.nimbusds.jose.crypto.ECDSASigner
 import com.nimbusds.jose.crypto.ECDSAVerifier
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jwt.EncryptedJWT
+import io.ipfs.multibase.Multibase
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.util.*
@@ -75,12 +76,12 @@ object JWTHelper {
             val header = parsedJWT.header
             val kid = header.keyID
 
-            /*header.toJSONObject().forEach {
+            header.toJSONObject().forEach {
                 Log.e("JWT Verify", "[header] ${it.key}: ${it.value}")
             }
             payload?.forEach {
               Log.e("JWT Verify", "[payload] ${it.key}: ${it.value}")
-            }*/
+            }
 
             if (verificationKey != null) {
                 val verifier: JWSVerifier = ECDSAVerifier(verificationKey)
@@ -94,10 +95,17 @@ object JWTHelper {
 
             EBSIRequest.get(null,null,
                 {
+                    Log.e("JWT TEST", "ebsi key id: $it")
                     val publicKeys = it.getJSONArray("publicKeys")
                     for (i in 0 until publicKeys.length()) {
                         val publicKeyStr = publicKeys.getString(i)
+                        val decodedKey = Base64.getDecoder().decode(publicKeyStr)
+
+                        Log.e("JWTH TEST", "Decoded pub key: $decodedKey")
+
                         val publicKey = KeyStoreHelper.decodePemPublicKey(publicKeyStr)
+                        Log.e("JWTH TEST", "Decoded PEM pub key: $publicKey")
+
                         val verifier: JWSVerifier = ECDSAVerifier(publicKey)
                         // assertTrue(signedJWT.verify(verifier))
                         if (parsedJWT.verify(verifier)) {

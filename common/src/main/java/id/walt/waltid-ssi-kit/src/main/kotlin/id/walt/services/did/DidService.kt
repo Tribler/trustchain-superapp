@@ -152,7 +152,10 @@ object DidService {
                 else -> null
             }
         } ?: let {
-            DidUrl.generateDidEbsiV1DidUrl().did
+//            DidUrl.generateDidEbsiV1DidUrl().did
+            val publicKeyJwk = keyService.toJwk(keyId.id, KeyType.PUBLIC)
+            val publicKeyJwkThumbprint = publicKeyJwk.computeThumbprint().decode()
+            DidUrl.generateDidEbsiV2DidUrl(publicKeyJwkThumbprint).did
         }
 
         ContextManager.keyStore.addAlias(keyId, didUrlStr!!)

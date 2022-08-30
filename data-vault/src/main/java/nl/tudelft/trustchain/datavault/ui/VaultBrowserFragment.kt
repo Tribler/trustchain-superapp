@@ -295,6 +295,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     }
 
     private fun addImageToVault(uri: Uri) {
+        Log.e("VBF", "Added photo with URI $uri, path: ${uri.path}")
         val filePath = uriPathHelper.getPath(uri)
         val file = File(filePath ?: "")
 

@@ -8,9 +8,11 @@ import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import id.walt.crypto.*
+import id.walt.services.CryptoProvider
 import id.walt.services.key.KeyService
 import mu.KotlinLogging
 import java.security.Provider
+import java.security.PublicKey
 import java.security.interfaces.ECPublicKey
 import java.util.*
 
@@ -122,33 +124,30 @@ open class WaltIdJwtService : JwtService() {
         return jwtStr
     }
 
-    override fun verify(token: String): Boolean {
+    override fun verify(token: String, verifierKey: Key?): Boolean {
         log.debug { "Verifying token:  $token" }
         val jwt = SignedJWT.parse(token)
 
         //TODO: key might also be entirely extracted out of the header",
         // Maybe resolve DID (verification method)
-        val verifierKey = keyService.load(jwt.header.keyID)
-        /*if (verifierKey == null) {
-            log.error { "Could not load verifying key for $jwt.header.keyID" }
-            throw Exception("Could not load verifying key for $jwt.header.keyID")
-        }*/
 
-        val res = when (verifierKey.algorithm) {
-            KeyAlgorithm.EdDSA_Ed25519 -> jwt.verify(Ed25519Verifier(keyService.toEd25519Jwk(verifierKey)))
+        var publicKey = verifierKey ?: keyService.load(jwt.header.keyID)
+
+        val res = when (publicKey.algorithm) {
+            KeyAlgorithm.EdDSA_Ed25519 -> jwt.verify(Ed25519Verifier(keyService.toEd25519Jwk(publicKey)))
             KeyAlgorithm.ECDSA_Secp256k1 -> {
-                val verifier = ECDSAVerifier(PublicKeyHandle(verifierKey.keyId, verifierKey.getPublicKey() as ECPublicKey))
+                val verifier = ECDSAVerifier(PublicKeyHandle(publicKey.keyId, publicKey.getPublicKey() as ECPublicKey))
                 verifier.jcaContext.provider = provider
                 jwt.verify(verifier)
             }
             KeyAlgorithm.EC -> {
-                val verifier = ECDSAVerifier(PublicKeyHandle(verifierKey.keyId, verifierKey.getPublicKey() as ECPublicKey))
+                val verifier = ECDSAVerifier(PublicKeyHandle(publicKey.keyId, publicKey.getPublicKey() as ECPublicKey))
                 verifier.jcaContext.provider = provider
                 jwt.verify(verifier)
             }
             else -> {
-                log.error { "Algorithm ${verifierKey.algorithm} not supported" }
-                throw Exception("Algorithm ${verifierKey.algorithm} not supported")
+                log.error { "Algorithm ${publicKey.algorithm} not supported" }
+                throw Exception("Algorithm ${publicKey.algorithm} not supported")
             }
         }
 

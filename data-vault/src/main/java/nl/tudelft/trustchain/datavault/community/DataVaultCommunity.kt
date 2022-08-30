@@ -346,7 +346,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     private fun sendAccessibleFiles(peer: Peer, id: String?, accessToken: String?, files: List<String>?) {
         Log.e(logTag, "Sending ${files?.size ?: 0} file(s) to ${peer.publicKey.keyToBin().toHex()}")
         val payload = AccessibleFilesPayload(id, accessToken, files ?: listOf())
-        val packet = serializePacket(MessageId.ACCESSIBLE_FILES, payload)
+        val packet = serializePacket(MessageId.ACCESSIBLE_FILES, payload, encrypt = true)
         logger.debug { "-> $payload" }
         send(peer, packet)
     }

@@ -3,6 +3,9 @@ package nl.tudelft.trustchain.common.ebsi
 import android.content.Context
 import android.security.keystore.KeyProperties
 import android.util.Log
+import id.walt.model.Did
+import id.walt.model.DidMethod
+import id.walt.services.did.DidService
 import io.ipfs.multibase.Multibase
 import nl.tudelft.ipv8.util.sha512
 import nl.tudelft.ipv8.util.toHex
@@ -53,7 +56,7 @@ class EBSIWallet(
 
     val did: String get() {
         if (!this::didCache.isInitialized) {
-            didCache = if (didFile.exists()){
+            didCache = if (didFile.exists() && false){ // TODO remove $$ false
                 didFile.readText()
             } else {
                 createDid()
@@ -85,17 +88,24 @@ class EBSIWallet(
 
     fun createDid(): String {
         // Check with /did-registry/v2/identifiers/$did id did exists
-        val seed = Random.nextBytes(16)
+
+        /*val seed = Random.nextBytes(16)
 
         val data = appendBytesToVersion(seed)
         val id = Multibase.encode(Multibase.Base.Base58BTC, data)
-        val did = "did:ebsi:$id"
+        val did = "did:ebsi:$id"*/
+
+        val did = DidService.create(DidMethod.ebsi)
         didFile.createNewFile()
         didFile.writeText(did)
         return did
     }
 
-    fun didDocument(): JSONObject {
+    fun didDocument(): Did? {
+        return DidService.load(did)
+    }
+
+    fun didDocumentJSON(): JSONObject {
         val document = JSONObject()
 
         val verificationMethod = JSONObject().apply {

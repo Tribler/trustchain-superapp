@@ -28,6 +28,7 @@ abstract class KeyService : WaltIdService() {
 
     open fun addAlias(keyId: KeyId, alias: String): Unit = implementation.addAlias(keyId, alias)
 
+    open fun store(key: Key): Unit = implementation.store(key)
     open fun load(keyAlias: String): Key = implementation.load(keyAlias)
     open fun load(keyAlias: String, keyType: KeyType = KeyType.PUBLIC): Key = implementation.load(keyAlias, keyType)
 

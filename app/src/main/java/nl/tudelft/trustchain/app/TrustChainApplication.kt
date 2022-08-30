@@ -9,6 +9,7 @@ import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
+import id.walt.servicematrix.ServiceMatrix
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -191,6 +192,7 @@ class TrustChainApplication : Application() {
     private fun initEBSI() {
         KeyStoreHelper.initProvider()
         EBSIRequest.setup(this)
+        ServiceMatrix(this, "service-matrix.properties")
     }
 
     private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {

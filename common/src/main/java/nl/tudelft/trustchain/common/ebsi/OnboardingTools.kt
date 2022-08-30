@@ -2,6 +2,9 @@ package nl.tudelft.trustchain.common.ebsi
 
 import android.util.Log
 import com.android.volley.Response
+import id.walt.auditor.Auditor
+import id.walt.auditor.SignaturePolicy
+import id.walt.services.jwt.JwtService
 import org.json.JSONObject
 import java.net.URI
 
@@ -20,6 +23,8 @@ object OnboardingTools {
         // =====ONBOARD_01_A Requests Verifiable Authorisation (VA)=====
 
         val authenticationVerificationListener = VerificationListener { payload ->
+            if (true) return@VerificationListener
+
             if (payload != null) {
                 val clientId = payload["client_id"]?.toString()
                 val iss = payload["iss"].toString()
@@ -57,6 +62,15 @@ object OnboardingTools {
                 it.first == "request"
             }?.second
 
+            /*if (authRequestJWT != null) {
+                Log.e("Onbrdng", "auth request jwt: $authRequestJWT")
+//                val resJwt = Auditor.getService().verify(authRequestJWT, listOf(SignaturePolicy()))
+                val valid = JwtService.getService().verify(authRequestJWT)
+                Log.e("Onbrdng result", "JWT verification result: ${valid}")
+            }
+
+            getAuthenticationVerificationListener(wallet, sessionToken, errorListener)*/
+
             if (authRequestJWT != null) {
                 JWTHelper.verifyJWT(authRequestJWT, getAuthenticationVerificationListener(wallet, sessionToken, errorListener))
             }
@@ -70,7 +84,7 @@ object OnboardingTools {
         Log.e(TAG, "did: $did")
         Log.e(TAG, "didDocument: $didDocument")
 
-        val api = "users-onboarding/v1/authentication-requests"
+        val api = "users-onboarding/v2/authentication-requests"
         val scope = "ebsi users onboarding"
         EBSIAPI.getAuthenticationRequest(api, scope, getAuthenticationRequestListener(wallet, sessionToken, errorListener), errorListener)
     }

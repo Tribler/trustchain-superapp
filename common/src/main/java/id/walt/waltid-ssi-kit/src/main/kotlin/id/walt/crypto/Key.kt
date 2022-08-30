@@ -17,6 +17,7 @@ data class KeyId(val id: String) { // TODO Make value class (performance)
 
 data class Key(val keyId: KeyId, val algorithm: KeyAlgorithm, val cryptoProvider: CryptoProvider) {
     fun getPublicKey(): PublicKey = when {
+        _publicKey != null -> _publicKey!!
         keyPair != null -> keyPair!!.public
         keysetHandle != null -> TinkKeyStoreService().loadPublicKey(this) as ECPublicKey
         else -> throw Exception("No public key for $keyId")
@@ -33,14 +34,23 @@ data class Key(val keyId: KeyId, val algorithm: KeyAlgorithm, val cryptoProvider
         this.keyPair = keyPair
     }
 
+    constructor(keyId: KeyId, algorithm: KeyAlgorithm, cryptoProvider: CryptoProvider, publicKey: PublicKey) : this(
+        keyId, algorithm, cryptoProvider
+    ) {
+        this._publicKey = publicKey
+    }
+
     constructor(
         keyId: KeyId, algorithm: KeyAlgorithm, cryptoProvider: CryptoProvider, keysetHandle: KeysetHandle
     ) : this(keyId, algorithm, cryptoProvider) {
         this.keysetHandle = keysetHandle
     }
 
+
+
     override fun toString(): String = "Key[${keyId.id}; Algo: ${algorithm.name}; Provider: ${cryptoProvider.name}]"
 
+    var _publicKey: PublicKey? = null
     var keyPair: KeyPair? = null
     var keysetHandle: KeysetHandle? = null
 }
