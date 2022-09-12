@@ -32,7 +32,7 @@ static def generateVersionCode() {
     if (Os.isFamily(Os.FAMILY_MAC)) {
         return "git rev-list HEAD --count".execute().waitFor().toInteger()
     } else {
-        return "git rev-list HEAD --count".execute().trim().toInteger()
+        return "git rev-list HEAD --count".execute().text.trim().toInteger()
     }
 }
 
