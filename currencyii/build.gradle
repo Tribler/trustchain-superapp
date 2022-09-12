@@ -54,12 +54,6 @@ android {
     }
 }
 
-repositories {
-    maven {
-        url = 'https://raw.githubusercontent.com/blockchain/api-v1-client-java/mvn-repo/'
-    }
-}
-
 dependencies {
     implementation project(':ipv8-android')
     implementation project(':common')
@@ -105,9 +99,6 @@ dependencies {
 
     // Google Core
 //    implementation "com.google.guava:guava:28.2-android"
-
-    // Blockchain Info
-    implementation 'info.blockchain:api:1.1.4'
 
     // GSON
     implementation 'com.google.code.gson:gson:2.8.6'

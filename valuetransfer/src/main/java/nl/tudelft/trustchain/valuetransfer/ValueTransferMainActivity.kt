@@ -198,30 +198,26 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * On initialisation of activity pre-load all fragments to allow instant switching to increase performance
          */
-        fragmentManager.beginTransaction()
-            .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
-            .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
-            .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
-            .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
-            .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
-        if (!requestMoney) {
-            fragmentManager.beginTransaction().add(
-                R.id.container,
-                exchangeTransferMoneyLinkFragment,
-                exchangeTransferMoneyLinkFragmentTag
-            ).hide(exchangeTransferMoneyLinkFragment)
+        if (!requestMoney)
+            fragmentManager.beginTransaction()
+                .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
+                .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
+                .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
+                .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
+                .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
+                .add(R.id.container, exchangeTransferMoneyLinkFragment, exchangeTransferMoneyLinkFragmentTag).hide(exchangeTransferMoneyLinkFragment)
                 .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
                 .commit()
-        } else {
-            fragmentManager.beginTransaction().add(
-                R.id.container,
-                exchangeTransferMoneyLinkFragment,
-                exchangeTransferMoneyLinkFragmentTag
-            )
-                .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
-                .hide(walletOverviewFragment)
+        else
+            fragmentManager.beginTransaction()
+                .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
+                .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
+                .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
+                .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
+                .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
+                .add(R.id.container, exchangeTransferMoneyLinkFragment, exchangeTransferMoneyLinkFragmentTag)
+                .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag).hide(walletOverviewFragment)
                 .commit()
-        }
         fragmentManager.executePendingTransactions()
 
         /**

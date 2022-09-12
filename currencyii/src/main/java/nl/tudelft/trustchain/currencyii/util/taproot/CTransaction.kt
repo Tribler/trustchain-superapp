@@ -377,11 +377,19 @@ val OP_EQUAL = CScriptOp(0x87)
 val OP_1 = CScriptOp(0x51)
 const val ANNEX_TAG = 0x50.toByte()
 
-fun littleEndian(bigChungus: BigInteger): ByteArray {
-    val bb: ByteBuffer = ByteBuffer.allocate(bigChungus.toByteArray().size)
+fun littleEndian(i: BigInteger): ByteArray {
+    val bb: ByteBuffer = ByteBuffer.allocate(i.toByteArray().size)
     bb.order(ByteOrder.BIG_ENDIAN)
-    bb.put(bigChungus.toByteArray())
-    return bb.array().reversedArray().copyOfRange(0, 4)
+    bb.put(i.toByteArray())
+
+    val littleEndian = bb.array().reversedArray()
+    return if (littleEndian.size > 3) {
+        littleEndian.copyOfRange(0, 4)
+    } else {
+        val output = ByteArray(4)
+        littleEndian.forEachIndexed { index, byte -> output[index] = byte }
+        output
+    }
 }
 
 fun serUint256(u_in: BigInteger): ByteArray {
