@@ -181,6 +181,19 @@ Below is a video demo that shows the steps to do an atomic swap.
 
 [More about The Atomic Swap app](atomic-swap/README.md)
 
+### Literature Dao
+
+LiteratureDao app aims to be a decentralized scientific literature repository, proving:
+Sharing, storing, and searching of scientific publications through the p2p ipv8 network.
+
+![local_upload](https://user-images.githubusercontent.com/33283063/167591620-a9547f63-e778-4ea9-a594-a7d1d9a4f169.gif)
+![peers](https://user-images.githubusercontent.com/33283063/167591634-6e0b8aaf-11c8-4ee7-b36d-616255fa5347.PNG)
+![search_in_keywords](https://user-images.githubusercontent.com/33283063/167591635-a68c0d2c-16de-4a44-ba73-fc52688252eb.gif)
+![url_upload](https://user-images.githubusercontent.com/33283063/167591643-75a305ae-2098-4138-9f60-14818f63000e.gif)
+
+
+[More about literature dao app](literaturedao/README.md)
+
 ### Do you want to add your own app?
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
