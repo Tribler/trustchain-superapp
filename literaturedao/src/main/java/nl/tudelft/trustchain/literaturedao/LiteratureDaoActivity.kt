@@ -29,6 +29,7 @@ import java.io.*
 import java.util.*
 import kotlin.math.roundToInt
 import android.os.StrictMode
+import android.view.View
 import java.lang.reflect.Method
 import java.lang.Exception
 
@@ -225,7 +226,7 @@ open class LiteratureDaoActivity : BaseActivity() {
 
 
     @RequiresApi(Build.VERSION_CODES.M)
-    fun filePicker() {
+    fun filePicker(@Suppress("UNUSED_PARAMETER") view: View) {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         startActivityForResult(intent, 100)

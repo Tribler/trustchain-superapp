@@ -16,7 +16,8 @@ class FileStorageController : LiteratureDaoActivity() {
      *
      * Throws an exception if file with the same name already exists.
      */
-    fun saveFile(): String {
+    // TODO: Implement this method.
+    fun saveFile(@Suppress("UNUSED_PARAMETER") file: File): String {
         return "" // replace with path to file
     }
 
@@ -25,7 +26,8 @@ class FileStorageController : LiteratureDaoActivity() {
      *
      * Throws exception if no file found.
      */
-    fun getFile(): File {
+    // TODO: Implement this method.
+    fun getFile(@Suppress("UNUSED_PARAMETER") uri: String): File {
         return File.createTempFile("", "") // replace with retrieved file
     }
 
@@ -34,7 +36,8 @@ class FileStorageController : LiteratureDaoActivity() {
      *
      * Throws exception if no file found at uri.
      */
-    fun removeFile() {
+    // TODO: Implement this method.
+    fun removeFile(@Suppress("UNUSED_PARAMETER") file: File) {
         // remove the file
     }
 
