@@ -70,7 +70,7 @@ class RemoteSearchResultAdapter(val items: MutableList<SearchResult>) :
         val LiteratureFragmentMagnet: TextView = view.findViewById(R.id.search_result_magnet)
     }
 
-    fun refresh(){
+    fun refresh() {
         notifyDataSetChanged()
     }
 }

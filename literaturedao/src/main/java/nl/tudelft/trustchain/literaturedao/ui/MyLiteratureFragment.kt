@@ -20,7 +20,7 @@ class MyLiteratureFragment : BaseFragment(R.layout.fragment_literature_overview)
         super.onDestroy()
     }
 
-    fun filePicker(view: View) {
+    fun filePicker() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         startActivityForResult(intent, 100)

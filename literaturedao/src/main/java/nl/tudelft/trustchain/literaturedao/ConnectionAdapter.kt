@@ -44,7 +44,8 @@ class ConnectionAdapter(val items: List<Peer>) :
         holder.connectionFragmentId.text = item.mid;
         val avgPing = item.getAveragePing()
 
-        val avgPingStr = if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
+        val avgPingStr =
+            if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
 
         holder.connectionFragmentMS.text = avgPingStr;
 
@@ -67,7 +68,7 @@ class ConnectionAdapter(val items: List<Peer>) :
         val connectionFragmentMS: TextView = view.findViewById<TextView>(R.id.connection_ms)
     }
 
-    fun refresh(){
+    fun refresh() {
         notifyDataSetChanged()
     }
 }

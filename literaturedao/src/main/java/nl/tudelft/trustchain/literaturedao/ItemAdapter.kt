@@ -2,12 +2,14 @@ package nl.tudelft.trustchain.literaturedao
 
 import android.app.DownloadManager
 import android.content.Intent
+import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import nl.tudelft.trustchain.literaturedao.data_types.Literature
 import androidx.core.net.toUri
@@ -42,24 +44,30 @@ class ItemAdapter(val items: MutableList<Literature>) :
      * of the given type. You can either create a new View manually or inflate it from an XML
      * layout file.
      */
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         val item = items.get(position)
         Log.e("litdao", item.toString())
 
-        var keywords: String  = "";
+        var keywords = "";
         var i = 0;
 
-        if(!item.keywords.isEmpty()) {
-            item.keywords.slice(0..min(13, item.keywords.size - 1)).forEach {
-                keywords = keywords.plus(it.first.plus(", "));
-                i++;
+        // TODO: Fix for lower Android API levels.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (!item.keywords.isEmpty()) {
+                item.keywords.slice(0..min(13, item.keywords.size - 1)).forEach {
+                    keywords = keywords.plus(it.first.plus(", "));
+                    i++;
+                }
             }
+        } else {
+            throw NotImplementedError("Not implemented for API < 24")
         }
 
-        holder.LiteratureFragmentTitle.text = item.title;
-        holder.LiteratureFragmentDate.text = item.date;
-        holder.LiteratureFragmentKeywords.text = keywords;
+        holder.LiteratureFragmentTitle.text = item.title
+        holder.LiteratureFragmentDate.text = item.date
+        holder.LiteratureFragmentKeywords.text = keywords
 
         holder.LiteratureFragmentHolder.setOnClickListener {
             if (item.localFileUri.startsWith("file:")) {
@@ -88,13 +96,14 @@ class ItemAdapter(val items: MutableList<Literature>) :
      */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // Holds the TextView that will add each item to
-        val LiteratureFragmentTitle: TextView = view.findViewById<TextView>(R.id.literature_fragment_title)
+        val LiteratureFragmentTitle: TextView =
+            view.findViewById<TextView>(R.id.literature_fragment_title)
         val LiteratureFragmentKeywords: TextView = view.findViewById<TextView>(R.id.keywords)
         val LiteratureFragmentDate: TextView = view.findViewById<TextView>(R.id.date)
         val LiteratureFragmentHolder: LinearLayout = view.findViewById<LinearLayout>(R.id.lit_item)
     }
 
-    fun refresh(){
+    fun refresh() {
         notifyDataSetChanged()
     }
 }

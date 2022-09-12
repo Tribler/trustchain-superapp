@@ -1,4 +1,5 @@
 package nl.tudelft.trustchain.literaturedao.ipv8
+
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -35,7 +36,7 @@ class LiteratureCommunity(
     settings: TrustChainSettings,
     database: TrustChainStore,
     crawler: TrustChainCrawler = TrustChainCrawler()
-) : TrustChainCommunity(settings, database, crawler)  {
+) : TrustChainCommunity(settings, database, crawler) {
     override val serviceId: String = "0215eded9b27e6905a6d3fd02cc64d363c03a026"
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
 
@@ -71,7 +72,6 @@ class LiteratureCommunity(
         discoveredAddressesContacted[address] = Date()
     }
 
-    @OptIn(ExperimentalUnsignedTypes::class)
     fun broadcastDebugMessage(message: String) {
         for (peer in getPeers()) {
             val packet = serializePacket(MessageID.DEBUG_MESSAGE, DebugMessage(message))
@@ -79,9 +79,8 @@ class LiteratureCommunity(
         }
     }
 
-    @OptIn(ExperimentalUnsignedTypes::class)
-    fun broadcastSearchQuery(query: String){
-        Log.d("litdao", "broadcasting remote query:\""+query+"\"")
+    fun broadcastSearchQuery(query: String) {
+        Log.d("litdao", "broadcasting remote query:\"$query\"")
         for (peer in getPeers()) {
             val packet = serializePacket(MessageID.SEARCH_QUERY, LitDaoMessage(query))
             send(peer, packet)
@@ -97,14 +96,12 @@ class LiteratureCommunity(
      * Received a remote query from other device.
      * Perform local search on the query and respond with a list of relevant docs.
      */
-    @RequiresApi(Build.VERSION_CODES.N)
-    @OptIn(ExperimentalUnsignedTypes::class)
     private fun onSearchQueryMessage(packet: Packet) {
         val litDaoActivity = context as LiteratureDaoActivity
 
         // Decode packet
         val (peer, payload) = packet.getAuthPayload(LitDaoMessage)
-        Log.d("litdao", "received remote query:\""+payload.message+"\"")
+        Log.d("litdao", "received remote query:\"" + payload.message + "\"")
 
         // Perform local search on the query
         val results = litDaoActivity.localSearch(payload.message)
@@ -112,24 +109,32 @@ class LiteratureCommunity(
         // Parse data and collect magnet links
         results.sortByDescending { it.second }
         results.take(min(results.size, 10))
-        val parsed = results.map { SearchResult(it.first.localFileUri, it.second, litDaoActivity.createTorrent(it.first.localFileUri)!!.makeMagnetUri()) }
+        val parsed = results.map {
+            SearchResult(
+                it.first.localFileUri,
+                it.second,
+                litDaoActivity.createTorrent(it.first.localFileUri)!!.makeMagnetUri()
+            )
+        }
 
-        Log.d("litdao", "replying remote query with list: "+results.toString())
+        Log.d("litdao", "replying remote query with list: " + results.toString())
         // Encode and send to peer
-        val response = serializePacket(MessageID.SEARCH_RESPONSE, SearchResultsMessage(SearchResultList(parsed)))
+        val response = serializePacket(
+            MessageID.SEARCH_RESPONSE,
+            SearchResultsMessage(SearchResultList(parsed))
+        )
         send(peer, response)
     }
 
     /**
      * Received relevant docs for my query
      */
-    @OptIn(ExperimentalUnsignedTypes::class)
     private fun onSearchResponseMessage(packet: Packet) {
         val litDaoActivity = context as LiteratureDaoActivity
 
-        val (peer, payload) = packet.getAuthPayload(SearchResultsMessage)
+        val (_, payload) = packet.getAuthPayload(SearchResultsMessage)
 
-        Log.d("litdao", "Received remote query results list: "+payload.results.toString())
+        Log.d("litdao", "Received remote query results list: " + payload.results.toString())
 
         litDaoActivity.updateSearchResults(payload.results)
     }
@@ -140,7 +145,8 @@ class LiteratureCommunity(
             .substringBefore("&dn=")
         if (torrentMessagesList.none {
                 it.second
-                val existingHash = it.second.message.substringAfter("magnet:?xt=urn:btih:").substringBefore("&dn=")
+                val existingHash =
+                    it.second.message.substringAfter("magnet:?xt=urn:btih:").substringBefore("&dn=")
                 torrentHash == existingHash
             }
         ) {
@@ -220,9 +226,15 @@ class LiteratureCommunity(
     }
 
     private fun sendLiterature(peer: Peer, literatureTorrentInfoHash: String, file: File) {
-        val literaturePayload = LiteraturePayload(literatureTorrentInfoHash, file.name, file.readBytes())
+        val literaturePayload =
+            LiteraturePayload(literatureTorrentInfoHash, file.name, file.readBytes())
         val packet =
-            serializePacket(MessageID.LITERATURE, literaturePayload, encrypt = true, recipient = peer)
+            serializePacket(
+                MessageID.LITERATURE,
+                literaturePayload,
+                encrypt = true,
+                recipient = peer
+            )
         if (evaProtocolEnabled) evaSendBinary(
             peer,
             EVA_LITERATURE_COMMUNITY_ATTACHMENT,
@@ -326,7 +338,12 @@ class LiteratureCommunity(
         }
     }
 
-    private fun onEVAReceiveCompleteCallback(peer: Peer, info: String, id: String, data: ByteArray?) {
+    private fun onEVAReceiveCompleteCallback(
+        peer: Peer,
+        info: String,
+        id: String,
+        data: ByteArray?
+    ) {
         Log.d("LiteratureCommunity", "ON EVA receive complete callback for '$info'")
 
         if (info != EVA_LITERATURE_COMMUNITY_ATTACHMENT) return
@@ -342,7 +359,10 @@ class LiteratureCommunity(
     }
 
     private fun onEVAErrorCallback(peer: Peer, exception: TransferException) {
-        Log.d("LiteratureCommunity", "ON EVA error callback for '${exception.info} from ${peer.mid}'")
+        Log.d(
+            "LiteratureCommunity",
+            "ON EVA error callback for '${exception.info} from ${peer.mid}'"
+        )
 
         if (this::evaErrorCallback.isInitialized) {
             this.evaErrorCallback(peer, exception)

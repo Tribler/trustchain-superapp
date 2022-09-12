@@ -46,7 +46,7 @@ class LiteratureFragment : Fragment() {
 
     private fun printPeersInfo(overlay: Overlay) {
         val peers = overlay.getPeers()
-        Log.i("litdao",overlay::class.simpleName + ": ${peers.size} peers")
+        Log.i("litdao", overlay::class.simpleName + ": ${peers.size} peers")
         for (peer in peers) {
             val avgPing = peer.getAveragePing()
             val lastRequest = peer.lastRequest
@@ -58,8 +58,12 @@ class LiteratureFragment : Fragment() {
             val lastResponseStr = if (lastResponse != null)
                 "" + ((Date().time - lastResponse.time) / 1000.0).roundToInt() + " s" else "?"
 
-            val avgPingStr = if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
-            Log.i("litdao", "${peer.mid} ${peer.address} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})")
+            val avgPingStr =
+                if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
+            Log.i(
+                "litdao",
+                "${peer.mid} ${peer.address} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})"
+            )
         }
     }
 

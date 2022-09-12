@@ -57,7 +57,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         savedInstanceState: Bundle?
     ): View {
 
-        val view : View =  inflater.inflate(R.layout.fragment_literature_add, container, false)
+        val view: View = inflater.inflate(R.layout.fragment_literature_add, container, false)
         val selectFileUpload: Button = view.findViewById(R.id.select_new_lirterature) as Button
         val submitFileUpload: Button = view.findViewById(R.id.submit_new_lirterature) as Button
         val urlTextField: EditText = view.findViewById(R.id.url_text_field) as EditText
@@ -75,37 +75,42 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
             startActivityForResult(intent, 101)
         }
 
-        val clipBoardManager = context?.getSystemService(AppCompatActivity.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipBoardManager =
+            context?.getSystemService(AppCompatActivity.CLIPBOARD_SERVICE) as ClipboardManager
         val urlCopiedTest = clipBoardManager.primaryClip?.getItemAt(0)?.text?.toString()
 
         if (urlCopiedTest != null && URLUtil.isValidUrl(urlCopiedTest))
             urlTextField.setText(urlCopiedTest)
 
-        submitFileUpload.setOnClickListener  {
+        submitFileUpload.setOnClickListener {
             try {
                 //TODO: Start Loading animation and start thread
 
                 uiScope.launch(Dispatchers.IO) {
 
                     withContext(Dispatchers.Main) {
-                        view.findViewById<LinearLayout>(R.id.add_literature_content).visibility = View.GONE
-                        view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.VISIBLE
+                        view.findViewById<LinearLayout>(R.id.add_literature_content).visibility =
+                            View.GONE
+                        view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility =
+                            View.VISIBLE
                     }
 
                     val URLInput = view.findViewById<EditText>(R.id.url_text_field).text.toString()
-                    val nameOfLit = view.findViewById<EditText>(R.id.literature_title).text.toString()
+                    val nameOfLit =
+                        view.findViewById<EditText>(R.id.literature_title).text.toString()
 
                     var pdf: InputStream?
 
-                    if( urlCheck( URLInput)){
+                    if (urlCheck(URLInput)) {
                         val file = downloadFile(nameOfLit, URLInput)
                         pdf = requireContext().contentResolver.openInputStream(Uri.fromFile(file))
-                        val docFile = DocumentFile.fromSingleUri(requireContext(), Uri.fromFile(file))
-                        if( docFile != null){
+                        val docFile =
+                            DocumentFile.fromSingleUri(requireContext(), Uri.fromFile(file))
+                        if (docFile != null) {
                             selectedFile = docFile
                         }
                         downloaded = true
-                    } else{
+                    } else {
                         pdf = requireContext().contentResolver.openInputStream(selectedFile.uri)
                     }
 
@@ -115,7 +120,6 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     // Step 1: Download the file to download directory.
                     //https://medium.com/mobile-app-development-publication/download-file-in-android-with-kotlin-874d50bccaa2
                     //val pdf = requireContext().contentResolver.openInputStream(==== Downlaoded file URI (downloads/pdf...)====)
-
 
 
                     PDFBoxResourceLoader.init(activity?.baseContext)
@@ -144,8 +148,8 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                         kws,
                         true,
                         Calendar.getInstance().getTime().toString(),
-                        selectedFile.getUri().toString())
-
+                        selectedFile.getUri().toString()
+                    )
 
 
                     val localData = CacheUtil(context).loadLocalData()
@@ -160,12 +164,14 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
                     // TODO: Move to Home Screen
                     withContext(Dispatchers.Main) {
-                        view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.GONE
-                        view.findViewById<LinearLayout>(R.id.add_literature_done).visibility = View.VISIBLE
+                        view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility =
+                            View.GONE
+                        view.findViewById<LinearLayout>(R.id.add_literature_done).visibility =
+                            View.VISIBLE
                     }
                 }
 
-            } catch (ex: Exception ) {
+            } catch (ex: Exception) {
                 // TODO: Show error
                 ex.printStackTrace()
                 Log.e("litdao", ex.toString())
@@ -175,11 +181,11 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         return view
     }
 
-    fun urlCheck(url: String): Boolean{
+    fun urlCheck(url: String): Boolean {
         return URLUtil.isValidUrl(url)
     }
 
-    internal fun downloadFile(name: String, url: String): File{
+    internal fun downloadFile(name: String, url: String): File {
 
         val client = OkHttpClient()
         val MEGABYTE = 1024 * 1024
@@ -192,8 +198,9 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         val response = client.newCall(request).execute()
 
         val body = response.body
-        val responseCode = response.code
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        // TODO: refactor this function call.
+        @Suppress("DEPRECATION") val downloadsDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
         var file = File(downloadsDir.toString() + File.separator.toString() + name + ".pdf")
 
@@ -240,17 +247,17 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
      */
     fun createTorrentFromFileUri(context: Context, uri: Uri): TorrentInfo? {
         val contentResolver = context.contentResolver
-        val projection = arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
-        var outputFilePath = ""
+        val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+        var outputFilePath: String
         var fileName = ""
-        if( !downloaded){
+        if (!downloaded) {
             contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) {
                     fileName = cursor.getString(0)
                 }
             }
             if (fileName == "") throw Error("Source file name for creating torrent not found")
-        } else{
+        } else {
             fileName = uri.toFile().name
         }
         val input =
@@ -293,7 +300,12 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
         var os: OutputStream? = null
         try {
-            os = FileOutputStream(File(activity?.applicationContext?.cacheDir, torrentName.split("/").last()),true)
+            os = FileOutputStream(
+                File(
+                    activity?.applicationContext?.cacheDir,
+                    torrentName.split("/").last()
+                ), true
+            )
             os.write(Vectors.byte_vector2bytes(buffer), 0, Vectors.byte_vector2bytes(buffer).size)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -306,19 +318,19 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         }
         try {
             val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
-            val magnetLink = MagnetUtils.preHashString + ti.infoHash() + MagnetUtils.displayNameAppender + ti.name()
+            val magnetLink =
+                MagnetUtils.preHashString + ti.infoHash() + MagnetUtils.displayNameAppender + ti.name()
             Log.i("litdao", magnetLink)
             return ti
-        } catch(e : Exception ) {
+        } catch (e: Exception) {
             print(e)
         }
         return null
     }
 
 
-
     @SuppressLint("SetTextI18n")
-    override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == 101) {
             val fileUri = data?.data
 
@@ -331,7 +343,8 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                 if (d != null) {
                     selectedFile = d
 
-                    view?.findViewById<TextView>(R.id.selected_literature)?.text = "Selected FIle: " + d.name
+                    view?.findViewById<TextView>(R.id.selected_literature)?.text =
+                        "Selected FIle: " + d.name
                     //selected_literature
 
                 }
@@ -359,8 +372,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     // keyword extraction
                     //importFromInternalStorage(d)
 
-                    // TODO add to gossip
-                    val title: String = "sadasasd"
+                    // TODO add `title` to gossip
 
                     //selected_literature
 
@@ -371,7 +383,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     }
                     */
 
-                // TODO: Serialize Object
+                    // TODO: Serialize Object
                     /*
                     Start Intent to Open the file..
 

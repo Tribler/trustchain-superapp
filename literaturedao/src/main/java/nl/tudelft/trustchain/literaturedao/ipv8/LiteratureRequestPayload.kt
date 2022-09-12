@@ -13,7 +13,10 @@ data class LiteratureRequestPayload(
     }
 
     companion object Deserializer : Deserializable<LiteratureRequestPayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<LiteratureRequestPayload, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<LiteratureRequestPayload, Int> {
             var localOffset = offset
             val (appTorrentInfoHash, idSize) = deserializeVarLen(buffer, localOffset)
             localOffset += idSize

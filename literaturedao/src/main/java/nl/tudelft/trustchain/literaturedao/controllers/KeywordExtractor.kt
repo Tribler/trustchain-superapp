@@ -1,4 +1,3 @@
-
 package nl.tudelft.trustchain.literaturedao.controllers
 
 import android.util.Log
@@ -7,19 +6,20 @@ import java.io.InputStream
 import nl.tudelft.trustchain.literaturedao.snowball.Main.main as stem
 
 
-class KeywordExtractor(){
+class KeywordExtractor() {
 
     val hardCodedMagickNumber = 1
     val maxKWs = 99999
 
     // Function that loads the average stemmed word occurance
-    fun instantiateAvgFreqMap(csv: InputStream): Map<String, Long>{
+    fun instantiateAvgFreqMap(csv: InputStream): Map<String, Long> {
 
         var res = mutableMapOf<String, Long>()
-        csv.bufferedReader().useLines { lines -> lines.forEach {
-            val key = it.split(",".toRegex())[0]
-            val num = it.split(",".toRegex())[1].toLong()
-            res[key] = num
+        csv.bufferedReader().useLines { lines ->
+            lines.forEach {
+                val key = it.split(",".toRegex())[0]
+                val num = it.split(",".toRegex())[1].toLong()
+                res[key] = num
             }
         }
         return res
@@ -32,14 +32,15 @@ class KeywordExtractor(){
         fun second(): Double {
             return second
         }
-        override fun toString(): String{
+
+        override fun toString(): String {
             val builder = StringBuilder()
             builder.append("(")
                 .append(first)
                 .append(", ")
                 .append(second.toString())
                 .append(")")
-            return  builder.toString()
+            return builder.toString()
         }
     }
 
@@ -59,11 +60,11 @@ class KeywordExtractor(){
         var total = 0
 
         // Count words known in averageFreqMap in input
-        for (word in input){
+        for (word in input) {
             val avgFreq = avgFreqMap[word]
             if (avgFreq == null) continue
             total += 1
-            if (word !in freqMap.keys){
+            if (word !in freqMap.keys) {
                 freqMap[word] = 1
             } else {
                 freqMap[word] = freqMap.getValue(word) + 1
@@ -74,12 +75,13 @@ class KeywordExtractor(){
         var relativeFreqList = mutableListOf<Result>()
 
         //Calculate relative frequencies per word
-        for ((word, freq) in freqMap.entries){
+        for ((word, freq) in freqMap.entries) {
             var avgFreq = avgFreqMap[word]
             if (avgFreq == null) {
                 avgFreq = 1
             }
-            val relativeFreq = (freq.toDouble() / total.toDouble())  / (avgFreq.toDouble() / avgTotal.toDouble())
+            val relativeFreq =
+                (freq.toDouble() / total.toDouble()) / (avgFreq.toDouble() / avgTotal.toDouble())
             // filter for relevance of the word
             if (relativeFreq > hardCodedMagickNumber) {
                 relativeFreqList.add(Result(word, relativeFreq))
@@ -94,13 +96,16 @@ class KeywordExtractor(){
         }
         Log.d("litdao", relativeFreqList.toString())
         var result: MutableList<Pair<String, Double>> = mutableListOf<Pair<String, Double>>()
-        for(res in relativeFreqList){
+        for (res in relativeFreqList) {
             result.add(Pair(res.first, res.second))
         }
         return result
-        }
+    }
 
-    fun preInitializedExtract(text: String, csv: Map<String, Long>): MutableList<Pair<String, Double>> {
+    fun preInitializedExtract(
+        text: String,
+        csv: Map<String, Long>
+    ): MutableList<Pair<String, Double>> {
 
         // Establish general averages
         val avgTotal = 588089694315
@@ -116,11 +121,11 @@ class KeywordExtractor(){
         var total = 0
 
         // Count words known in averageFreqMap in input
-        for (word in input){
+        for (word in input) {
             val avgFreq = avgFreqMap[word]
             if (avgFreq == null) continue
             total += 1
-            if (word !in freqMap.keys){
+            if (word !in freqMap.keys) {
                 freqMap[word] = 1
             } else {
                 freqMap[word] = freqMap.getValue(word) + 1
@@ -131,12 +136,13 @@ class KeywordExtractor(){
         var relativeFreqList = mutableListOf<Result>()
 
         //Calculate relative frequencies per word
-        for ((word, freq) in freqMap.entries){
+        for ((word, freq) in freqMap.entries) {
             var avgFreq = avgFreqMap[word]
             if (avgFreq == null) {
                 avgFreq = 1
             }
-            val relativeFreq = (freq.toDouble() / total.toDouble())  / (avgFreq.toDouble() / avgTotal.toDouble())
+            val relativeFreq =
+                (freq.toDouble() / total.toDouble()) / (avgFreq.toDouble() / avgTotal.toDouble())
             // filter for relevance of the word
             if (relativeFreq > hardCodedMagickNumber) {
                 relativeFreqList.add(Result(word, relativeFreq))
@@ -151,7 +157,7 @@ class KeywordExtractor(){
         }
         Log.d("litdao", relativeFreqList.toString())
         var result: MutableList<Pair<String, Double>> = mutableListOf<Pair<String, Double>>()
-        for(res in relativeFreqList){
+        for (res in relativeFreqList) {
             result.add(Pair(res.first, res.second))
         }
         return result

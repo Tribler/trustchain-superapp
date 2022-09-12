@@ -1,11 +1,13 @@
 package nl.tudelft.trustchain.literaturedao.ui
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,11 +33,11 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
     ): View {
 
 
-        val view : View =  inflater.inflate(R.layout.fragment_remote_search, container, false)
+        val view: View = inflater.inflate(R.layout.fragment_remote_search, container, false)
 
         //inside Fragment
         val job = Job()
-        val uiScope = CoroutineScope(Dispatchers.Main + job)
+        CoroutineScope(Dispatchers.Main + job)
 
         (context as LiteratureDaoActivity).setRemoteSearchFragment(this)
 
@@ -43,16 +45,21 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
 
         searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                Log.i("litdao", "perform remote search with: "+query)
-                if(!query.isNullOrBlank()){
-                    remoteSeach(query)
+                Log.i("litdao", "perform remote search with: " + query)
+                if (!query.isNullOrBlank()) {
+                    // TODO: Fix for lower Android API levels.
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        remoteSeach(query)
+                    } else {
+                        throw NotImplementedError("Remote search not implemented for Android versions below Oreo")
+                    }
                     return true
                 }
                 return false
             }
 
             override fun onQueryTextChange(query: String?): Boolean {
-                Log.i("litdao", "remote search text changed to: "+query)
+                Log.i("litdao", "remote search text changed to: " + query)
                 return true
             }
         })
@@ -67,9 +74,16 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
         return view
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun remoteSeach(query: String) {
         // send to peers
-        IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!.broadcastSearchQuery(query)
+        // TODO: Fix for lower Android API levels.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
+                .broadcastSearchQuery(query)
+        } else {
+            throw NotImplementedError("Not implemented for API < 24")
+        }
 
         results.clear()
         adapter.refresh()
@@ -78,14 +92,14 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
 
     }
 
-    fun updateSearchResults(newResults: SearchResultList){
+    fun updateSearchResults(newResults: SearchResultList) {
         // access UI and append results to some view
-        Log.d("litdao", "update remote search results with:" +newResults.toString())
+        Log.d("litdao", "update remote search results with:" + newResults.toString())
 
         progressBar.visibility = View.GONE
 
-        for (r : SearchResult in newResults.results){
-            if(!results.contains(r)){
+        for (r: SearchResult in newResults.results) {
+            if (!results.contains(r)) {
                 results.add(r)
             }
         }

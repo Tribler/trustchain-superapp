@@ -13,46 +13,53 @@ import java.io.FileNotFoundException
 import java.io.InputStreamReader
 import java.util.*
 
-class CacheUtil(val context: Context?)
-{
+class CacheUtil(val context: Context?) {
     fun loadLocalData(): LocalData {
-        var fileInputStream: FileInputStream? = null
+        var fileInputStream: FileInputStream?
 
-        try{
+        try {
             fileInputStream = context?.openFileInput("localData.json")
-        } catch (e: FileNotFoundException){
+        } catch (e: FileNotFoundException) {
             context?.openFileOutput("localData.json", Context.MODE_PRIVATE).use { output ->
-                output?.write(Json.encodeToString(LocalData(mutableListOf<Literature>())).toByteArray())
+                output?.write(Json.encodeToString(LocalData(mutableListOf())).toByteArray())
             }
             fileInputStream = context?.openFileInput("localData.json")
         }
-        var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
-        val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
+        var inputStreamReader = InputStreamReader(fileInputStream)
+        val bufferedReader = BufferedReader(inputStreamReader)
         val stringBuilder: StringBuilder = StringBuilder()
-        var text: String? = null
-        while ({ text = bufferedReader.readLine(); text }() != null) {
+        var text: String?
+        while (run {
+                text = bufferedReader.readLine()
+                text
+            } != null) {
             stringBuilder.append(text)
         }
-        val localData: LocalData =  Json.decodeFromString<LocalData>(stringBuilder.toString())
-        return localData
+        return Json.decodeFromString(stringBuilder.toString())
     }
 
-    fun writeLocalData(localData: LocalData){
+    fun writeLocalData(localData: LocalData) {
         context?.openFileOutput("localData.json", Context.MODE_PRIVATE).use { output ->
             output?.write(Json.encodeToString(localData).toByteArray())
         }
     }
 
-    public fun  localSearch(inp: String): MutableList<Pair<Literature, Double>>{
+    fun localSearch(inp: String): MutableList<Pair<Literature, Double>> {
         var handler = QueryHandler()
         return handler.scoreList(inp, loadLocalData().content)
     }
 
-    fun addLocalData(title: String, magnet: String, kwsi: MutableList<Pair<String, Double>>?, local: Boolean, uri: String){
+    fun addLocalData(
+        title: String,
+        magnet: String,
+        kwsi: MutableList<Pair<String, Double>>?,
+        local: Boolean,
+        uri: String
+    ) {
 
         var kws = kwsi
-        if( kws == null){
-            kws = mutableListOf<Pair<String, Double>>()
+        if (kws == null) {
+            kws = mutableListOf()
         }
 
         val literatureObject = Literature(
@@ -61,7 +68,8 @@ class CacheUtil(val context: Context?)
             kws,
             local,
             Calendar.getInstance().getTime().toString(),
-            uri)
+            uri
+        )
 
         val localData = loadLocalData()
 

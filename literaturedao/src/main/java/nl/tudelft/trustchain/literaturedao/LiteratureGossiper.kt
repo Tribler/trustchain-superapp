@@ -1,6 +1,8 @@
 package nl.tudelft.trustchain.literaturedao
 
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
@@ -75,20 +77,28 @@ class LiteratureGossiper(
             toastingEnabled: Boolean = true
         ): LiteratureGossiper {
             if (!::literatureGossiperInstance.isInitialized) {
-                literatureGossiperInstance = LiteratureGossiper(sessionManager, activity,
-                    literatureCommunity, toastingEnabled)
+                literatureGossiperInstance = LiteratureGossiper(
+                    sessionManager, activity,
+                    literatureCommunity, toastingEnabled
+                )
             }
             return literatureGossiperInstance
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun start() {
         printToast("Start gossiper")
         // This call seems redundant, but it's necessary to populate known torrents
         // before downloading starts so we don't retry known downloads
         populateKnownTorrents()
         initializeTorrentSession()
-        initializeEvaCallbacks()
+        // TODO: Fix for lower Android API levels.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            initializeEvaCallbacks()
+        } else {
+            throw NotImplementedError("Eva is not supported on Android versions below M")
+        }
         initialUISettings()
         val sp = SettingsPack()
         sp.seedingOutgoingConnections(true)
@@ -96,10 +106,20 @@ class LiteratureGossiper(
             SessionParams(sp)
         sessionManager.start(params)
         scope.launch {
-            iterativelyShareLiteratures()
+            // TODO: Fix for lower Android API levels.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                iterativelyShareLiteratures()
+            } else {
+                throw NotImplementedError("Literature sharing is not supported on this device")
+            }
         }
         scope.launch {
-            iterativelyDownloadLiteratures()
+            // TODO: Fix for lower Android API levels.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                iterativelyDownloadLiteratures()
+            } else {
+                throw NotImplementedError("Android version not supported")
+            }
         }
     }
 
@@ -107,19 +127,25 @@ class LiteratureGossiper(
         this.torrentInfos.add(torrentInfo)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeEvaCallbacks() {
-        literatureCommunity.setEVAOnReceiveCompleteCallback { peer, _, _, data ->
-            data?.let {
-                val packet = Packet(peer.address, data)
-                val (_, payload) = packet.getDecryptedAuthPayload(
-                    LiteraturePayload.Deserializer, literatureCommunity.myPeer.key as PrivateKey
-                )
-                evaDownload.activeDownload = false
-                activity.runOnUiThread {
-                    printToast("Torrent ${payload.literatureName} fetched through EVA protocol!")
-                    onDownloadSuccess(payload.literatureName)
+        // TODO: Fix for lower Android API levels.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            literatureCommunity.setEVAOnReceiveCompleteCallback { peer, _, _, data ->
+                data?.let {
+                    val packet = Packet(peer.address, data)
+                    val (_, payload) = packet.getDecryptedAuthPayload(
+                        LiteraturePayload.Deserializer, literatureCommunity.myPeer.key as PrivateKey
+                    )
+                    evaDownload.activeDownload = false
+                    activity.runOnUiThread {
+                        printToast("Torrent ${payload.literatureName} fetched through EVA protocol!")
+                        onDownloadSuccess(payload.literatureName)
+                    }
                 }
             }
+        } else {
+            throw NotImplementedError("EVA protocol not supported on Android versions below Nougat")
         }
 
         literatureCommunity.setEVAOnReceiveProgressCallback { _, _, progress ->
@@ -140,9 +166,17 @@ class LiteratureGossiper(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun retryActiveEvaDownload() {
         if (evaDownload.retryAttempts < EVA_RETRIES) {
-            evaDownload.peer?.let { literatureCommunity.sendLiteratureRequest(evaDownload.magnetInfoHash, it) }
+            evaDownload.peer?.let {
+                // TODO: Fix for lower Android API levels.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    literatureCommunity.sendLiteratureRequest(evaDownload.magnetInfoHash, it)
+                } else {
+                    throw NotImplementedError("EVA protocol not supported on Android versions below Nougat")
+                }
+            }
             evaDownload.lastRequest = System.currentTimeMillis()
             evaDownload.retryAttempts++
             if (evaDownload.retryAttempts == EVA_RETRIES) {
@@ -187,7 +221,11 @@ class LiteratureGossiper(
                         logger.info { "Progress: " + p + " for torrent name: " + a.torrentName() }
                         printToast("Download in progress!")
                         updateProgress(p)
-                        logger.info { java.lang.Long.toString(sessionManager.stats().totalDownload()) }
+                        logger.info {
+                            java.lang.Long.toString(
+                                sessionManager.stats().totalDownload()
+                            )
+                        }
                     }
                     AlertType.TORRENT_FINISHED -> {
                         signal.countDown()
@@ -203,11 +241,17 @@ class LiteratureGossiper(
     /**
      * This is a very simplistic way to crawl all chains from the peers you know
      */
+    @RequiresApi(Build.VERSION_CODES.M)
     private suspend fun iterativelyShareLiteratures() {
         while (scope.isActive) {
             if (!gossipingPaused) {
                 try {
-                    randomlyShareFiles()
+                    // TODO: implement for lower API levels.
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        randomlyShareFiles()
+                    } else {
+                        throw NotImplementedError("Literature sharing not supported on Android versions below Marshmallow")
+                    }
                 } catch (e: Exception) {
                     activity.runOnUiThread { printToast(e.toString()) }
                 }
@@ -216,6 +260,7 @@ class LiteratureGossiper(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private suspend fun iterativelyDownloadLiteratures() {
         while (scope.isActive) {
             if (!downloadingPaused) {
@@ -223,7 +268,12 @@ class LiteratureGossiper(
                     downloadPendingFiles()
                     if (evaDownload.activeDownload && evaDownload.lastRequest?.let { it -> System.currentTimeMillis() - it } ?: 0 > 30 * 1000) {
                         activity.runOnUiThread { printToast("EVA Protocol timed out, retrying") }
-                        retryActiveEvaDownload()
+                        // TODO: fix for lower API levels.
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            retryActiveEvaDownload()
+                        } else {
+                            throw NotImplementedError("EVA protocol not supported on Android versions below Nougat")
+                        }
                     }
                 } catch (e: Exception) {
                     activity.runOnUiThread { printToast(e.toString()) }
@@ -238,34 +288,41 @@ class LiteratureGossiper(
             val peer = packet.first
             val payload = packet.second
             logger.info { peer.mid + ": " + payload.message }
-            val torrentName = payload.message.substringAfter("&dn=")
-                .substringBefore('&')
             activity.runOnUiThread {
                 // @TODO: Add item to local data
+                //      val torrentName = payload.message.substringAfter("&dn=")
+                //                .substringBefore('&')
             }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun downloadPendingFiles() {
-        addDownloadToQueue(literatureCommunity.torrentMessagesList.size - downloadsFinished)
-        addButtonsInAdvance(literatureCommunity.torrentMessagesList)
-        for ((peer, payload) in ArrayList(literatureCommunity.torrentMessagesList)) {
-            val torrentName = payload.message.substringAfter(displayNameAppender)
-                .substringBefore('&')
-            val magnetLink = payload.message.substringAfter("LitDao:")
-            val torrentHash = magnetLink.substringAfter(preHashString)
-                .substringBefore(displayNameAppender)
-            if (torrentInfos.none { it.infoHash().toString() == torrentHash }) {
-                if (failedTorrents.containsKey(torrentName)) {
-                    // Wait at least 1000 seconds if torrent failed before
-                    if (failedTorrents[torrentName]!! >= TORRENT_ATTEMPTS_THRESHOLD)
-                        continue
+        // TODO: Fix for lower Android API levels.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            addDownloadToQueue(literatureCommunity.torrentMessagesList.size - downloadsFinished)
+            addButtonsInAdvance(literatureCommunity.torrentMessagesList)
+            for ((peer, payload) in ArrayList(literatureCommunity.torrentMessagesList)) {
+                val torrentName = payload.message.substringAfter(displayNameAppender)
+                    .substringBefore('&')
+                val magnetLink = payload.message.substringAfter("LitDao:")
+                val torrentHash = magnetLink.substringAfter(preHashString)
+                    .substringBefore(displayNameAppender)
+                if (torrentInfos.none { it.infoHash().toString() == torrentHash }) {
+                    if (failedTorrents.containsKey(torrentName)) {
+                        // Wait at least 1000 seconds if torrent failed before
+                        if (failedTorrents[torrentName]!! >= TORRENT_ATTEMPTS_THRESHOLD)
+                            continue
+                    }
+                    getMagnetLink(magnetLink, torrentName, peer)
                 }
-                getMagnetLink(magnetLink, torrentName, peer)
             }
+        } else {
+            throw NotImplementedError("Literature sharing not supported on Android versions below Nougat")
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun randomlyShareFiles() {
         literatureCommunity.run {
             populateKnownTorrents()
@@ -277,7 +334,12 @@ class LiteratureGossiper(
                     toSeed.remove(dup)
                     if (dup != null) {
                         val magnetLink = constructMagnetLink(dup.infoHash(), dup.name())
-                        informAboutTorrent(magnetLink)
+                        // TODO: Fix for lower Android API levels.
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            informAboutTorrent(magnetLink)
+                        } else {
+                            throw NotImplementedError("Not implemented for Android versions below Nougat")
+                        }
                     }
                 } else
                     torrentHandle.pause()
@@ -303,6 +365,7 @@ class LiteratureGossiper(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun downloadAndSeed(torrentInfo: TorrentInfo) {
         if (torrentInfo.isValid) {
             sessionManager.download(torrentInfo, appDirectory)
@@ -314,7 +377,12 @@ class LiteratureGossiper(
                 // an unsolved issue: seeding local torrents often result in an endless "CHECKING_FILES"
                 // state
                 val magnetLink = constructMagnetLink(torrentInfo.infoHash(), torrentInfo.name())
-                literatureCommunity.informAboutTorrent(magnetLink)
+                // TODO: Fix for lower Android API levels.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    literatureCommunity.informAboutTorrent(magnetLink)
+                } else {
+                    throw NotImplementedError("This version of Android is not supported")
+                }
                 torrentHandles.add(torrentHandle)
             }
         }
@@ -328,6 +396,7 @@ class LiteratureGossiper(
         return false
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun getMagnetLink(magnetLink: String, torrentName: String, peer: Peer) {
         // Handling of the case where the user is already downloading the
         // same or another torrent
@@ -379,7 +448,12 @@ class LiteratureGossiper(
         } catch (e: Exception) {
             logger.info { "Failed to retrieve the magnet" }
             activity.runOnUiThread { printToast("Failed to fetch magnet info for $torrentName! error:$e") }
-            onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
+            // TODO: Implement for lower API levels.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
+            } else {
+                throw NotImplementedError("Not implemented for Android versions below Nougat")
+            }
             return
         }
 
@@ -420,6 +494,7 @@ class LiteratureGossiper(
         downloadHasPassed()
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun onTorrentDownloadFailure(
         torrentName: String,
         magnetInfoHash: String,
@@ -437,9 +512,21 @@ class LiteratureGossiper(
                         downloadHasStarted(torrentName)
                         printToast("Torrent download failure threshold reached, attempting to fetch $torrentName through EVA Protocol!")
                     }
-                    literatureCommunity.sendLiteratureRequest(magnetInfoHash, peer)
+                    // TODO: Fix for lower Android API levels.
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        literatureCommunity.sendLiteratureRequest(magnetInfoHash, peer)
+                    } else {
+                        throw NotImplementedError("This version of Android is not supported")
+                    }
                     evaDownload =
-                        EvaDownload(true, System.currentTimeMillis(), magnetInfoHash, peer, 0, torrentName)
+                        EvaDownload(
+                            true,
+                            System.currentTimeMillis(),
+                            magnetInfoHash,
+                            peer,
+                            0,
+                            torrentName
+                        )
                 }
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }

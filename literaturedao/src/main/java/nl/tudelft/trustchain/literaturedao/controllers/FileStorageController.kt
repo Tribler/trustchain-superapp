@@ -9,14 +9,14 @@ import java.io.*
  */
 class FileStorageController : LiteratureDaoActivity() {
 
-    val directory : String = "/direcotry/to/internal/storage/"
+    val directory: String = "/directory/to/internal/storage/"
 
     /**
      * This method saves a file in the internal android storage and returns path to the file (uri).
      *
      * Throws an exception if file with the same name already exists.
      */
-    fun saveFile(file: File) : String {
+    fun saveFile(): String {
         return "" // replace with path to file
     }
 
@@ -25,7 +25,7 @@ class FileStorageController : LiteratureDaoActivity() {
      *
      * Throws exception if no file found.
      */
-    fun getFile(uri: String) : File {
+    fun getFile(): File {
         return File.createTempFile("", "") // replace with retrieved file
     }
 
@@ -34,7 +34,7 @@ class FileStorageController : LiteratureDaoActivity() {
      *
      * Throws exception if no file found at uri.
      */
-    fun removeFile(file: File) {
+    fun removeFile() {
         // remove the file
     }
 

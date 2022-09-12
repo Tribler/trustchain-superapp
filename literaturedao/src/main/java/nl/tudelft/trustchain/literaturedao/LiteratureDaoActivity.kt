@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -15,7 +14,6 @@ import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
-import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.BaseActivity
@@ -29,7 +27,6 @@ import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.displayNa
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.preHashString
 import java.io.*
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 import android.os.StrictMode
 import java.lang.reflect.Method
@@ -49,16 +46,16 @@ open class LiteratureDaoActivity : BaseActivity() {
 
     private var literatureGossiper: LiteratureGossiper? = null
 
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
+        // TODO: Fix for lower Android API levels.
         if (Build.VERSION.SDK_INT >= 24) {
             try {
                 val m: Method = StrictMode::class.java.getMethod("disableDeathOnFileUriExposure")
                 m.invoke(null)
-            } catch (e: java.lang.Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
@@ -66,10 +63,19 @@ open class LiteratureDaoActivity : BaseActivity() {
         val literatureCommunity = IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
         printPeersInfo(literatureCommunity)
         val myName = literatureCommunity.myPeer.mid
-        Log.i("litdao","I am $myName and Im broadcasting: hello")
-        literatureCommunity.broadcastDebugMessage("hello")
+        Log.i("litdao", "I am $myName and Im broadcasting: hello")
 
-        this.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        // TODO: Fix for lower Android API levels.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            literatureCommunity.broadcastDebugMessage("hello")
+        } else {
+            throw NotImplementedError("Broadcasting is not supported on this version of Android")
+        }
+
+        @Suppress("DEPRECATION") this.window.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )
         supportActionBar?.hide();
 
         try {
@@ -80,28 +86,36 @@ open class LiteratureDaoActivity : BaseActivity() {
             // TODO fetch all local literatures.
 
             literatureGossiper =
-                IPv8Android.getInstance().getOverlay<LiteratureCommunity>()?.let { LiteratureGossiper.getInstance(s, this, it) }
-            literatureGossiper?.start()
+                IPv8Android.getInstance().getOverlay<LiteratureCommunity>()
+                    ?.let { LiteratureGossiper.getInstance(s, this, it) }
+            // TODO: Fix for lower Android API levels.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                literatureGossiper?.start()
+            } else {
+                throw NotImplementedError("Gossiping is not supported on this version of Android")
+            }
 
         } catch (e: Exception) {
             printToast(e.toString())
         }
 
         //debug space
-        try{
+        try {
             Log.e("litdao", "load localData: " + CacheUtil(baseContext).loadLocalData().toString())
-            Log.e("litdao", "local search results: " + localSearch("Please de wit give me the scores").toString())
-        } catch (e: Exception){
+            Log.e(
+                "litdao",
+                "local search results: " + localSearch("Please de wit give me the scores").toString()
+            )
+        } catch (e: Exception) {
             Log.e("litdao", e.toString())
         }
         checkStoragePermissions()
     }
 
 
-
     private fun printPeersInfo(overlay: Overlay) {
         val peers = overlay.getPeers()
-        Log.i("litdao",overlay::class.simpleName + ": ${peers.size} peers")
+        Log.i("litdao", overlay::class.simpleName + ": ${peers.size} peers")
         for (peer in peers) {
             val avgPing = peer.getAveragePing()
             val lastRequest = peer.lastRequest
@@ -113,13 +127,17 @@ open class LiteratureDaoActivity : BaseActivity() {
             val lastResponseStr = if (lastResponse != null)
                 "" + ((Date().time - lastResponse.time) / 1000.0).roundToInt() + " s" else "?"
 
-            val avgPingStr = if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
-            Log.i("litdao", "${peer.mid} ${peer.address} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})")
+            val avgPingStr =
+                if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
+            Log.i(
+                "litdao",
+                "${peer.mid} ${peer.address} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})"
+            )
         }
 
     }
 
-    fun localSearch(inp: String): MutableList<Pair<Literature, Double>>{
+    fun localSearch(inp: String): MutableList<Pair<Literature, Double>> {
         return CacheUtil(this.baseContext).localSearch(inp)
     }
 
@@ -135,7 +153,8 @@ open class LiteratureDaoActivity : BaseActivity() {
      */
     private fun copyDefaultLiterature() {
         try {
-            val file = File(this.applicationContext.cacheDir.absolutePath + "/" + DEFAULT_LITERATURE)
+            val file =
+                File(this.applicationContext.cacheDir.absolutePath + "/" + DEFAULT_LITERATURE)
             if (!file.exists()) {
                 val outputStream = FileOutputStream(file)
                 val ins = assets.open(DEFAULT_LITERATURE)
@@ -205,9 +224,8 @@ open class LiteratureDaoActivity : BaseActivity() {
     }
 
 
-
     @RequiresApi(Build.VERSION_CODES.M)
-    fun filePicker(view: View) {
+    fun filePicker() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         startActivityForResult(intent, 100)
@@ -242,9 +260,16 @@ open class LiteratureDaoActivity : BaseActivity() {
      */
     @RequiresApi(Build.VERSION_CODES.M)
     private fun checkStoragePermissions() {
-        if ((ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
+        if ((ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED)
+        ) {
             requestPermissions(
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ),
                 PERMISSION_STORAGE_REQUEST_CODE
             )
         }
@@ -270,7 +295,7 @@ open class LiteratureDaoActivity : BaseActivity() {
         }
     }
 
-    fun setRemoteSearchFragment(fragment: RemoteSearchFragment){
+    fun setRemoteSearchFragment(fragment: RemoteSearchFragment) {
         this.remoteSearchFragment = fragment
     }
 

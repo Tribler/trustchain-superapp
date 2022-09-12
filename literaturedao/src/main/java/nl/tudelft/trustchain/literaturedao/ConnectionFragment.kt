@@ -38,7 +38,7 @@ class ConnectionFragment : Fragment(R.layout.fragment_connection) {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view  = inflater.inflate(R.layout.fragment_connection, container, false);
+        val view = inflater.inflate(R.layout.fragment_connection, container, false);
 
         val recViewItems = view.findViewById<RecyclerView>(R.id.recycler_view_connections);
 
@@ -49,7 +49,7 @@ class ConnectionFragment : Fragment(R.layout.fragment_connection) {
 
 
 
-        recViewItems.layoutManager = LinearLayoutManager(context )
+        recViewItems.layoutManager = LinearLayoutManager(context)
         recViewItems.adapter = ConnectionAdapter(peers);
         return view;
     }

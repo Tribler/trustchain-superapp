@@ -16,7 +16,7 @@ import nl.tudelft.trustchain.literaturedao.utils.CacheUtil
 
 class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
 
-    fun loadLocalData(): LocalData{
+    fun loadLocalData(): LocalData {
         return CacheUtil(context).loadLocalData()
     }
 
@@ -25,8 +25,7 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
         savedInstanceState: Bundle?
     ): View {
 
-        val view : View =  inflater.inflate(R.layout.fragment_my_literature, container, false)
-
+        val view: View = inflater.inflate(R.layout.fragment_my_literature, container, false)
 
         val json = loadLocalData()
 
@@ -34,13 +33,12 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
 
         val adapter = ItemAdapter(json.content)
 
-        recViewItems.layoutManager = LinearLayoutManager(context )
-        recViewItems.adapter =adapter
+        recViewItems.layoutManager = LinearLayoutManager(context)
+        recViewItems.adapter = adapter
 
         if (json.content.size == 0) {
             view.findViewById<TextView>(R.id.no_local_results).visibility = View.VISIBLE
         }
-
 
         // Initialize binding local search.
         val localSearchView = view.findViewById<SearchView>(R.id.searchViewLit)
@@ -58,7 +56,7 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
                 adapter.items.clear()
                 val results = CacheUtil(context).localSearch(query)
 
-                adapter.items.addAll(results.map {it.first})
+                adapter.items.addAll(results.map { it.first })
                 adapter.notifyDataSetChanged()
 
                 return true
@@ -69,7 +67,7 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
         return view
     }
 
-    override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         super.onActivityResult(requestCode, resultCode, data)
     }
