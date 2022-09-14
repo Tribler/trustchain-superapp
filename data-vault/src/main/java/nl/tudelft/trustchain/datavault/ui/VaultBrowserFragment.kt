@@ -79,11 +79,17 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                 "PERFORMANCE_TEST"
             ).apply {mkdirs()}
 
+            testDir.listFiles()?.forEach {
+                it.delete()
+            }
+
             requireContext().assets.list("vault/PERFORMANCE_TEST")?.forEach {
-                Log.e("Files", it)
+//                Log.e("Files", it)
                 val inputStream = requireContext().assets.open("vault/PERFORMANCE_TEST/$it")
                 File(testDir, it).writeBytes(inputStream.readBytes())
             }
+
+            PerformanceTest(getDataVaultCommunity()).measureEncryption()
         }
     }
 
@@ -201,7 +207,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             Log.e(logTag, "Chosen peer: ${peer.publicKey.keyToBin().toHex()}")
 
             if (PERFORMANCE_TEST) {
-                PerformanceTest(peer, getDataVaultCommunity(), attestationCommunity).run()
+                PerformanceTest(getDataVaultCommunity()).testFileRequests(peer, attestationCommunity)
                 return@setItems
             }
 
@@ -353,13 +359,8 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     }
 
     private fun deleteTestFiles() {
-        if (!currentFolder.file.canRead()) {
-            //
-        } else {
-            currentFolder.file.list()?.forEach { fileName ->
-                val testFile = File(currentFolder.file, fileName)
-                testFile.delete()
-            }
+        if (currentFolder.file.canRead()) {
+            currentFolder.file.listFiles()?.forEach { it.delete() }
         }
 
         updateAdapter(localVaultFiles())

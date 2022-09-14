@@ -28,9 +28,9 @@ class DataVaultMainActivity : BaseActivity() {
         initVault()
         currentFolder.value = LocalVaultFileItem(this, VAULT, null)
 
-        VAULT.listFiles()?.forEach {
+        /*VAULT.listFiles()?.forEach {
             Log.e(logTag, "vault file: ${it.path}")
-        }
+        }*/
     }
 
     private fun initVault() {
