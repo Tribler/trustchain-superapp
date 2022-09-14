@@ -30,6 +30,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
 import org.json.JSONArray
 import org.json.JSONObject
+import java.lang.Exception
 import java.nio.charset.Charset
 import java.security.Security
 import java.security.interfaces.ECPublicKey
@@ -94,6 +95,7 @@ class ConformanceTest(
         Log.e(TAG, "Conformance Test: $uuid")
         // https://ec.europa.eu/digital-building-blocks/wikis/display/EBSIDOC/EBSI+Wallet+Conformance+Testing
         EBSIRequest.testSetup(uuid)
+
 //        test()
 
 //        waltIdTest()
@@ -118,33 +120,40 @@ class ConformanceTest(
         }
 
 //         vaRequestTest1()
-
     }
 
     private fun test() {
-        val jwt = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QiLCJraWQiOiJodHRwczovL2FwaS5jb25mb3JtYW5jZS5pbnRlYnNpLnh5ei90cnVzdGVkLWFwcHMtcmVnaXN0cnkvdjMvYXBwcy91c2Vycy1vbmJvYXJkaW5nLWFwaV9jb25mb3JtYW5jZS1lYnNpLTAxIn0.eyJzY29wZSI6Im9wZW5pZCBkaWRfYXV0aG4iLCJyZXNwb25zZV90eXBlIjoiaWRfdG9rZW4iLCJyZXNwb25zZV9tb2RlIjoicG9zdCIsImNsaWVudF9pZCI6Imh0dHBzOi8vYXBpLmNvbmZvcm1hbmNlLmludGVic2kueHl6L3VzZXJzLW9uYm9hcmRpbmcvdjIvYXV0aGVudGljYXRpb24tcmVzcG9uc2VzIiwicmVkaXJlY3RfdXJpIjoiaHR0cHM6Ly9hcGkuY29uZm9ybWFuY2UuaW50ZWJzaS54eXovdXNlcnMtb25ib2FyZGluZy92Mi9hdXRoZW50aWNhdGlvbi1yZXNwb25zZXMiLCJub25jZSI6IjIwOTc3YjAwLTdmZTYtNDVhOS05NTY2LTg3YzkzZjE1MGVlZiIsImlhdCI6MTY2MDI1NjcxNywiaXNzIjoidXNlcnMtb25ib2FyZGluZy1hcGlfY29uZm9ybWFuY2UtZWJzaS0wMSIsImV4cCI6MTY2MDI1NzAxN30.r4Uw9GYARsIBFal_w2VI37saoLSVTcIvWVhM75u-uuhljW9b449mqGVS9NRQfIX2KJ8TG4ZBuosIo0Zp1NA31g"
+        val jwt = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NjI4OTA5MTYsImlhdCI6MTY2Mjg5MDAxNiwiaXNzIjoiZGlkOmVic2k6emNHdnFnWlRIQ3Rramd0Y0tSTDdIOGsiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjItMDktMTFUMDk6NTM6MzRaIiwiaG9zdG5hbWUiOiJhcHAucHJlcHJvZC5lYnNpLmV1Iiwic2NvcmUiOjAuOSwic3VjY2VzcyI6dHJ1ZX19.Uama77ZH8VqxvjpTf0CK05XtxgMyUdNNMAlGd2IboGAQVxY4GRoRcmo4ufTa3t3ShojAXyBOOJoTVyYHDmad4Q"
         val encodedKey = "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUUvMm8zYXBIaVF4VHAxcVBPVEN6OG1sUG9tWjFsS0NodAp2bldGdVVhL1pkdGJ5d2g2TFRNd2xKUHBlRHVaYlE2R3o4cTVTek9XSVl0Z3d2OVNydVljNWc9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0="
 
         val decodedKey = Base64.getDecoder().decode(encodedKey)
         Log.e("JWTH TEST", "Decoded FROM HEX pub key: ${decodedKey.toString(Charset.defaultCharset())}")
 
-//        val publicKey = KeyStoreHelper.decodePemPublicKey(encodedKey)
-        val publicKey = wallet.keyPair.public as ECPublicKey
+        val publicKey = KeyStoreHelper.decodePemPublicKey(encodedKey)
+//        val publicKey = wallet.keyPair.public as ECPublicKey
 
 //        val publicKey = buildKey("keyid", "EC", "SC", encodedKey, null).getPublicKey() as ECPublicKey
 
         Log.e("JWTH TEST", "Decoded PEM pub key: $publicKey")
         Log.e("JWTH TEST", "Format: ${publicKey.format}, algo: ${publicKey.algorithm}, point: ${publicKey.w}")
 
-//        KeyService.getService().
+
 
 //        JwtService.defaultImplementation().verify(jwt, publicKey)
 
-        val waltKey = Key(KeyId("test_ebsi_key"), KeyAlgorithm.ECDSA_Secp256k1, CryptoProvider.SUN, publicKey)
+//        val waltKey = Key(KeyId("test_ebsi_key"), KeyAlgorithm.ECDSA_Secp256k1, CryptoProvider.SUN, publicKey)
+//        KeyService.defaultImplementation().keyStore.store(waltKey)
 
-        KeyService.defaultImplementation().keyStore.store(waltKey)
+//        JwtService.defaultImplementation().verify(jwt, waltKey)
 
-        JwtService.defaultImplementation().verify(jwt, waltKey)
+        try {
+            val parsedJwt = SignedJWT.parse(jwt)
+
+            val verified = JwtService.defaultImplementation().secp256k1Verify(publicKey, parsedJwt)
+            Log.e("ConfTest", "jwt verified: $verified")
+        } catch (e: Exception) {
+            Log.e("ConfTest", "Exception verifying jwt", e)
+        }
 
         /*val verifier: JWSVerifier = ECDSAVerifier(publicKey)
         // assertTrue(signedJWT.verify(verifier))
@@ -156,7 +165,7 @@ class ConformanceTest(
 
     private fun onboardTest12() {
         // Let the user scan the mobile authentication token on the onboarding service page
-        val onboardSessionToken = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NjAzMTI2NDYsImlhdCI6MTY2MDMxMTc0NiwiaXNzIjoiZGlkOmVic2k6emNHdnFnWlRIQ3Rramd0Y0tSTDdIOGsiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjItMDgtMTJUMTM6NDI6MjJaIiwiaG9zdG5hbWUiOiJhcHAucHJlcHJvZC5lYnNpLmV1Iiwic2NvcmUiOjAuNywic3VjY2VzcyI6dHJ1ZX19.CzC4piqIXuA7wibRTpvFW-_IuxLD12HikXu0rtrK8MonKJ83Ph5oR6ioJesuJZ_PCLuy7q16_Q8LvxomiJBxyA"
+        val onboardSessionToken = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NjI5NzM2ODYsImlhdCI6MTY2Mjk3Mjc4NiwiaXNzIjoiZGlkOmVic2k6emFBNTlzYWdXbzliWUZ6anRvNjhYc2YiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjItMDktMTJUMDg6NTM6MDVaIiwiaG9zdG5hbWUiOiJhcHAuY29uZm9ybWFuY2UuaW50ZWJzaS54eXoiLCJzY29yZSI6MC45LCJzdWNjZXNzIjp0cnVlfX0.FcWo_vf84fJ_s_1cYQ53q6jhd7b7f9JnsdnMG8HWAhuwjRG1JA300qWrcllVqiM93yGRgHgkl7zrKaz0iNHZDA"
         OnboardingTools.getVerifiableAuthorisation(wallet, onboardSessionToken, errorListener)
     }
 

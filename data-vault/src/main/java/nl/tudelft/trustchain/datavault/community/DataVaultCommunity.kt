@@ -22,6 +22,7 @@ import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.datavault.DataVaultMainActivity
 import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
+import nl.tudelft.trustchain.datavault.accesscontrol.Policy
 import nl.tudelft.trustchain.datavault.tools.isImage
 import nl.tudelft.trustchain.datavault.ui.ImageViewHolder
 import nl.tudelft.trustchain.datavault.ui.PeerVaultFileItem
@@ -57,11 +58,13 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         pendingPeerVaultFolders[peerVaultFileItem.cacheKey] = peerVaultFileItem
     }
 
-    private val VAULT by lazy { File(context.filesDir, VAULT_DIR) }
+    val VAULT by lazy { File(context.filesDir, VAULT_DIR) }
 
     init {
         messageHandlers[MessageId.FILE] = ::onFilePacket
+        messageHandlers[MessageId.TEST_FILE] = ::onTestFilePacket
         messageHandlers[MessageId.FILE_REQUEST] = ::onFileRequestPacket
+        messageHandlers[MessageId.TEST_FILE_REQUEST] = ::onTestFileRequestPacket
         messageHandlers[MessageId.FILE_REQUEST_FAILED] = ::onFileRequestFailedPacket
         messageHandlers[MessageId.ACCESSIBLE_FILES_REQUEST] = ::onAccessibleFilesRequestPacket
         messageHandlers[MessageId.ACCESSIBLE_FILES] = ::onAccessibleFilesPacket
@@ -135,6 +138,14 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
     ///////////////////////////////////
 
+    fun onTestFilePacket(packet: Packet) {
+        val (peer, payload) = packet.getDecryptedAuthPayload(
+            AttachmentPayload.Deserializer, myPeer.key as PrivateKey
+        )
+        logger.debug { "<- $payload" }
+        onTestFile(peer, payload)
+    }
+
     fun onFilePacket(packet: Packet) {
         val (peer, payload) = packet.getDecryptedAuthPayload(
             AttachmentPayload.Deserializer, myPeer.key as PrivateKey
@@ -147,6 +158,11 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         val (peer, payload) = packet.getAuthPayload(AccessibleFilesPayload.Deserializer)
         logger.debug { "<- $payload" }
         onAccessibleFiles(peer, payload)
+    }
+
+    private fun onTestFile(peer: Peer, payload: AttachmentPayload) {
+        Log.e(logTag, "Test File ${payload.id} received  from $peer")
+//        onFile(peer, payload.id, payload.data)
     }
 
     private fun onFile(peer: Peer, payload: AttachmentPayload) {
@@ -188,6 +204,12 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         }
     }
 
+    private fun onTestFileRequestPacket(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(VaultFileRequestPayload.Deserializer)
+        logger.debug { "<- $payload" }
+        onTestFileRequest(peer, payload)
+    }
+
     private fun onFileRequestPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(VaultFileRequestPayload.Deserializer)
         logger.debug { "<- $payload" }
@@ -224,8 +246,12 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         return absolutePath.split(VAULT.absolutePath + "/").last()
     }
 
+    private fun onTestFileRequest(peer: Peer, payload: VaultFileRequestPayload) {
+        Log.e(logTag, "Received test file request from $peer. Access token: ${payload.accessTokenType}")
+    }
+
     private fun onFileRequest(peer: Peer, payload: VaultFileRequestPayload) {
-        Log.e(logTag, "Received file request. Access token: ${payload.accessToken}")
+        Log.e(logTag, "Received file request. Access token: ${payload.accessTokenType}")
         try {
             val (file, accessPolicy) = vaultFile(payload.id!!)
             if (!file.exists()) {
@@ -234,7 +260,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
             } else if (file.isDirectory) {
                 Log.e(logTag, "The requested file is a directory")
                 sendFileRequestFailed(peer, payload.id, "The requested file is a directory")
-            } else if (!accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessToken, payload.attestations)) {
+            } else if (!accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessTokenType, payload.accessTokens)) {
                 Log.e(logTag, "Access Policy not met")
                 sendFileRequestFailed(peer, payload.id, "Access Policy not met")
                 //sendFile(peer, payload.id, file)
@@ -256,12 +282,12 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     }
 
     private fun onAccessibleFilesRequest(peer: Peer, payload: VaultFileRequestPayload) {
-        Log.e(logTag, "accessible files request id: ${payload.id}, access mode: ${payload.accessMode}, token: ${payload.accessToken}")
+        Log.e(logTag, "accessible files request id: ${payload.id}, access mode: ${payload.accessMode}, token: ${payload.accessTokenType}")
 
         val fileFilter = FileFilter { file ->
             val fileName = file.name
             val (_, accessPolicy) = vaultFile(file)
-            !fileName.startsWith(".") && !fileName.endsWith(".acl") && accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessToken, payload.attestations)
+            !fileName.startsWith(".") && !fileName.endsWith(".acl") && accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessTokenType, payload.accessTokens)
         }
 
         val filteredFiles = if (payload.id == null || payload.id == VAULT_DIR) {
@@ -275,8 +301,16 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
         //val filteredFiles = filterFiles(peer, payload.accessMode, payload.accessToken, payload.attestations, allFiles)
 
+        val accessToken = if (payload.accessTokenType == Policy.AccessTokenType.SESSION_TOKEN) {
+            payload.accessTokens[0]
+        } else {
+            generateToken()
+        }
+
+        sendAccessibleFiles(peer, payload.id, accessToken, filteredFiles)
+
         // Clean this up. No conditions necessary (except for token generation)
-        if (payload.attestations != null && payload.attestations.isNotEmpty()) {
+        /*if (payload.attestations != null && payload.attestations.isNotEmpty()) {
             Log.e(logTag, "Attestations for accessible files (${payload.attestations.size} att(s))")
             val accessToken: String? = generateToken(payload.attestations)
             sendAccessibleFiles(peer, payload.id, accessToken, filteredFiles)
@@ -288,25 +322,25 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
             Log.e(logTag, "No credentials. Check public files")
             // no credentials
             sendAccessibleFiles(peer, payload.id,null, filteredFiles)
-        }
+        }*/
     }
 
-    private fun filterFiles(peer: Peer, accessMode: String, accessToken: String?, attestations: List<AttestationBlob>?, files: List<String>?): List<String>{
+    private fun filterFiles(peer: Peer, accessMode: String, accessTokenType: Policy.AccessTokenType, accessTokens: List<String>, files: List<String>?): List<String>{
         if (files != null) {
             return files.filter { fileName -> !fileName.startsWith(".") && !fileName.endsWith(".acl") }.
                 filter { fileName ->
                     val (_, accessPolicy) = vaultFile(fileName)
-                    accessPolicy.verifyAccess(peer, accessMode, accessToken, attestations)
+                    accessPolicy.verifyAccess(peer, accessMode, accessTokenType, accessTokens)
                 }
         }
 
         return listOf()
     }
 
-    private fun generateToken(attestations: List<AttestationBlob>): String? {
-        if (attestations.isEmpty()) {
+    private fun generateToken(): String {
+        /*if (attestations.isEmpty()) {
             return null
-        }
+        }*/
 
         return "TEMP_TOKEN"
     }
@@ -351,21 +385,34 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         send(peer, packet)
     }
 
-    fun sendAccessibleFilesRequest(peerVaultFileItem: PeerVaultFileItem, id: String?, accessMode: String, accessToken: String?, attestations: List<AttestationBlob>?) {
+    fun sendAccessibleFilesRequest(peerVaultFileItem: PeerVaultFileItem, id: String?, accessMode: String, accessTokenType: Policy.AccessTokenType, accessTokens: List<String>) {
         Log.e(logTag, "Sending accessible files request")
-        Log.e(logTag, "including ${attestations?.size ?: 0} attestation(s)")
-        val payload = VaultFileRequestPayload(id, accessMode, accessToken, attestations)
+        Log.e(logTag, "including ${accessTokens.size} access token(s)")
+        val payload = VaultFileRequestPayload(id, accessMode, accessTokenType, accessTokens)
         val packet = serializePacket(MessageId.ACCESSIBLE_FILES_REQUEST, payload)
         logger.debug { "-> $payload" }
         addPendingPeerVaultFolders(peerVaultFileItem)
         send(peerVaultFileItem.peer, packet)
     }
 
-    fun sendFileRequest(peer: Peer, accessMode: String, id: String, accessToken: String? = null, attestations: List<AttestationBlob>? = null) {
+    fun sendTestFileRequest(peer: Peer,
+                            accessMode: String,
+                            id: String,
+                            accessTokenType: Policy.AccessTokenType,
+                            accessTokens: List<String>) {
+        Log.e(logTag, "Sending test file request ($accessTokenType)")
+
+        val payload = VaultFileRequestPayload(id, accessMode, accessTokenType, accessTokens)
+        val packet = serializePacket(MessageId.TEST_FILE_REQUEST, payload)
+        logger.debug { "-> $payload" }
+        send(peer, packet)
+    }
+
+    fun sendFileRequest(peer: Peer, accessMode: String, id: String, sessionToken: String) {
         Log.e(logTag, "Sending file request")
         // Log.e(logTag, "accessToken: $accessToken, includFing ${attestations?.size ?: 0} attestation(s)")
 
-        val payload = VaultFileRequestPayload(id, accessMode, accessToken, attestations)
+        val payload = VaultFileRequestPayload(id, accessMode, Policy.AccessTokenType.SESSION_TOKEN, listOf(sessionToken))
         val packet = serializePacket(MessageId.FILE_REQUEST, payload)
         logger.debug { "-> $payload" }
         send(peer, packet)
@@ -400,6 +447,8 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         const val FILE_REQUEST_FAILED = 13
         const val ACCESSIBLE_FILES_REQUEST = 14
         const val ACCESSIBLE_FILES = 15
+        const val TEST_FILE = 21
+        const val TEST_FILE_REQUEST = 22
     }
 
     /**

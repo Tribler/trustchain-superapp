@@ -54,4 +54,15 @@ class Policy(
         const val WRITE = "write"
         const val APPEND = "append"
     }
+
+    enum class AccessTokenType {
+        SESSION_TOKEN, TCID, JWT, JSONLD
+    }
+
+    object ATT {
+        const val SESSION_TOKEN = "session_token"
+        const val TCID = "tcid"
+        const val JWT = "jwt"
+        const val JSONLD = "JSONLD"
+    }
 }

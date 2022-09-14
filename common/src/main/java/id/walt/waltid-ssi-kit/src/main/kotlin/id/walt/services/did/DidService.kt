@@ -12,9 +12,9 @@ import id.walt.services.context.ContextManager
 import id.walt.services.crypto.CryptoService
 import id.walt.services.hkvstore.HKVKey
 import id.walt.services.key.KeyService
-import id.walt.services.keystore.KeyType
 import id.walt.services.vc.JsonLdCredentialService
 import id.walt.signatory.ProofConfig
+import io.ipfs.multibase.Multibase
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -25,11 +25,13 @@ import nl.tudelft.trustchain.common.ebsi.AndroidKeyStoreService
 import org.bouncycastle.asn1.edec.EdECObjectIdentifiers
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.security.KeyFactory
 import java.security.KeyPair
+import java.security.SecureRandom
 import java.security.spec.X509EncodedKeySpec
 import java.util.*
 
@@ -145,17 +147,19 @@ object DidService {
                     DidUrl.generateDidEbsiV1DidUrl().did
                 }
                 2 -> {
-                    val publicKeyJwk = keyService.toJwk(keyId.id, KeyType.PUBLIC)
-                    val publicKeyJwkThumbprint = publicKeyJwk.computeThumbprint().decode()
-                    DidUrl.generateDidEbsiV2DidUrl(publicKeyJwkThumbprint).did
+//                    val publicKeyJwk = keyService.toJwk(keyId.id, KeyType.PUBLIC)
+//                    val publicKeyJwkThumbprint = publicKeyJwk.computeThumbprint().decode()
+//                    DidUrl.generateDidEbsiV2DidUrl(publicKeyJwkThumbprint).did
+                    ebsiv1Did()
                 }
                 else -> null
             }
         } ?: let {
 //            DidUrl.generateDidEbsiV1DidUrl().did
-            val publicKeyJwk = keyService.toJwk(keyId.id, KeyType.PUBLIC)
-            val publicKeyJwkThumbprint = publicKeyJwk.computeThumbprint().decode()
-            DidUrl.generateDidEbsiV2DidUrl(publicKeyJwkThumbprint).did
+//            val publicKeyJwk = keyService.toJwk(keyId.id, KeyType.PUBLIC)
+//            val publicKeyJwkThumbprint = publicKeyJwk.computeThumbprint().decode()
+//            DidUrl.generateDidEbsiV2DidUrl(publicKeyJwkThumbprint).did
+            ebsiv1Did()
         }
 
         ContextManager.keyStore.addAlias(keyId, didUrlStr!!)
@@ -176,6 +180,23 @@ object DidService {
         storeDid(didUrlStr, ebsiDid)
 
         return didUrlStr
+    }
+
+    private fun ebsiv1Did(): String {
+//        var seed = Random.nextBytes(16)
+        val seed = SecureRandom().generateSeed(16)
+
+        val data = appendBytesToVersion(seed)
+        val id = Multibase.encode(Multibase.Base.Base58BTC, data)
+        Log.e("DIDServ", "did: $id")
+        return "did:ebsi:$id"
+    }
+
+    private fun appendBytesToVersion(arr: ByteArray, version: Int = 1): ByteArray {
+        val baos = ByteArrayOutputStream()
+        baos.write(version)
+        baos.write(arr)
+        return baos.toByteArray()
     }
 
     private fun createDidKey(keyAlias: String?): String {

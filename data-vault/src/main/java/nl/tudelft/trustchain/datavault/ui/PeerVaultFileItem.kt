@@ -10,7 +10,7 @@ import java.io.File
 class PeerVaultFileItem(
     private val dataVaultCommunity: DataVaultCommunity,
     val peer: Peer,
-    private val accessToken: String?,
+    private val sessionToken: String?,
     private val _fileName: String,
     var subFiles: List<PeerVaultFileItem>?
 ): VaultFileItem() {
@@ -38,14 +38,14 @@ class PeerVaultFileItem(
      fun requestRemoteBitmap(viewHolder: ImageViewHolder) {
          Log.e("PeerVault", "Requesting data for $fileName")
          dataVaultCommunity.addPendingImageViewHolders(this, viewHolder)
-         dataVaultCommunity.sendFileRequest(peer, Policy.READ, fileName, accessToken)
+         dataVaultCommunity.sendFileRequest(peer, Policy.READ, fileName, sessionToken!!)
     }
 
     fun fetchSubFolderAccessibleFiles() {
         Log.e("PeerVault", "Fetching sub files for $_fileName (${subFiles?.size ?: 0})")
 
         if (isDirectory()) {
-            dataVaultCommunity.sendAccessibleFilesRequest(this, fileName, Policy.READ, accessToken, null)
+            dataVaultCommunity.sendAccessibleFilesRequest(this, fileName, Policy.READ, Policy.AccessTokenType.SESSION_TOKEN, listOf(sessionToken!!))
         }
     }
 

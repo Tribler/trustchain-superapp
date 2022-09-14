@@ -5,16 +5,22 @@ import com.google.common.io.BaseEncoding
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.ECDHDecrypter
 import com.nimbusds.jose.crypto.ECDHEncrypter
-import com.nimbusds.jwt.SignedJWT
-import java.text.ParseException
-import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jose.crypto.ECDSASigner
 import com.nimbusds.jose.crypto.ECDSAVerifier
+import com.nimbusds.jose.crypto.impl.ECDSA
 import com.nimbusds.jose.jwk.Curve
+import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jwt.EncryptedJWT
-import io.ipfs.multibase.Multibase
+import com.nimbusds.jwt.JWTClaimsSet
+import com.nimbusds.jwt.SignedJWT
+import id.walt.crypto.Key
+import id.walt.crypto.KeyAlgorithm
+import java.nio.charset.Charset
+import java.security.PublicKey
+import java.security.Signature
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
+import java.text.ParseException
 import java.util.*
 
 
@@ -23,20 +29,22 @@ object JWTHelper {
     val stringClaims = listOf("state", "nonce") //client_id, scope, response_type
 
     fun createJWT(wallet: EBSIWallet, aud: String?, payload: Map<String, Any>?, claims: Map<String, Any>?, selfIssued: Boolean = false, detached: Boolean = false): String {
-        val signer: JWSSigner = ECDSASigner(wallet.privateKey, Curve.SECP256K1)
+//        val signer: JWSSigner = ECDSASigner(wallet.privateKey, Curve.SECP256K1)
         val jwk = wallet.keyPair.jwk()
         val thumb = jwk.computeThumbprint()
-        Log.e("JWK", "priv: ${jwk.toJSONString()}")
-        Log.e("JWK", "pub: ${jwk.toPublicJWK().toJSONString()}")
+//        Log.e("JWK", "priv: ${jwk.toJSONString()}")
+//        Log.e("JWK", "pub: ${jwk.toPublicJWK().toJSONString()}")
         // Prepare JWT with claims set
         val claimsSet = JWTClaimsSet.Builder()
 
         claimsSet.issueTime(Date())
             .expirationTime(Date(Date().time + (5 * 60 * 1000)))
-            .issuer(if (selfIssued) wallet.did else wallet.did).apply {
+            .issuer(if (selfIssued) "https://self-issued.me" else wallet.did).apply {
                 claim("sub", BaseEncoding.base64().encode(thumb.decode()).urlSafe())
                 claim("sub_did_verification_method_uri", wallet.keyAlias)
-                claim("sub_jwk", jwk.toPublicJWK().toJSONObject())
+                claim("sub_jwk", jwk.toPublicJWK().toJSONObject().also {
+                    it["kid"] = wallet.keyAlias
+                })
             }
 
         if (aud != null) claimsSet.audience(aud)
@@ -58,18 +66,57 @@ object JWTHelper {
             claimsSet.build()
         )
 
+        val signature: Signature = Signature.getInstance("SHA256withECDSA", "SC")
+        signature.initSign(wallet.privateKey)
+        signature.update(signedJWT.signingInput)
+        val signatureBytes = Base64URL.encode(
+            ECDSA.transcodeSignatureToConcat(
+                signature.sign(),
+                ECDSA.getSignatureByteArrayLength(signedJWT.header.algorithm)
+            ))
+
+        /*val verSignature: Signature = Signature.getInstance("SHA256withECDSA", "SC")
+        verSignature.initVerify(wallet.publicKey)
+        verSignature.update(signedJWT.signingInput)
+        val testVer = verSignature.verify(signatureBytes.decode())
+        Log.e("CreateJWT", "Test verification: $testVer")*/
+
+
+        val serializedJWT = serializeJWT(signedJWT, signatureBytes, false)
+        Log.e("CreateJWT", "serialized jwt: $serializedJWT")
+
+
+        verifyJWT(serializedJWT, VerificationListener {
+            Log.e("SignJWT", "Signature verified: ${it != null}")
+        }, wallet.publicKey as ECPublicKey, isDer = false)
+
         // Compute the EC signature
-        signedJWT.sign(signer)
+        /*signedJWT.sign(signer)
 
         verifyJWT(signedJWT.serialize(), VerificationListener {
             Log.e("SignJWT", "Signature verified: ${it != null}")
-        }, wallet.publicKey as ECPublicKey)
+        }, wallet.publicKey as ECPublicKey)*/
 
         // Serialize the JWS to compact form
-        return signedJWT.serialize(detached)
+//        return signedJWT.serialize(detached)
+        return serializeJWT(signedJWT, signatureBytes, detached)
     }
 
-    fun verifyJWT(jwt: String, onVerified: VerificationListener, verificationKey: ECPublicKey? = null) {
+    fun serializeJWT(jwt: JWSObject, signature: Base64URL, detachedPayload: Boolean): String {
+        return when {
+            detachedPayload -> {
+                jwt.header.toBase64URL().toString() + '.' + '.' + signature.toString()
+            }
+            jwt.header.isBase64URLEncodePayload -> {
+                jwt.header.toBase64URL().toString() + '.' + jwt.payload.toBase64URL().toString() + '.' + signature.toString()
+            }
+            else -> {
+                jwt.header.toBase64URL().toString() + '.' + jwt.payload.toString() + '.' + signature.toString()
+            }
+        }
+    }
+
+    fun verifyJWT(jwt: String, onVerified: VerificationListener, verificationKey: PublicKey? = null, isDer: Boolean = false) {
         try {
             val parsedJWT = SignedJWT.parse(jwt)
             val payload = parsedJWT.payload.toJSONObject()
@@ -84,11 +131,15 @@ object JWTHelper {
             }
 
             if (verificationKey != null) {
-                val verifier: JWSVerifier = ECDSAVerifier(verificationKey)
-                // assertTrue(signedJWT.verify(verifier))
-                if (parsedJWT.verify(verifier)) {
+//                val verifier: JWSVerifier = ECDSAVerifier(verificationKey)
+//                 assertTrue(signedJWT.verify(verifier))
+//                if (parsedJWT.verify(verifier)) {
+                if (secp256k1Verify(verificationKey, parsedJWT, isDer)) {
+                    Log.e("JWT Verify", "Verified with provided key")
                     onVerified(payload)
-                    Log.e("JWT Verify", "Verified")
+                } else {
+                    Log.e("JWT Verify", "Not verified with provided key")
+                    onVerified(null)
                 }
                 return
             }
@@ -106,11 +157,12 @@ object JWTHelper {
                         val publicKey = KeyStoreHelper.decodePemPublicKey(publicKeyStr)
                         Log.e("JWTH TEST", "Decoded PEM pub key: $publicKey")
 
-                        val verifier: JWSVerifier = ECDSAVerifier(publicKey)
+//                        val verifier: JWSVerifier = ECDSAVerifier(publicKey)
                         // assertTrue(signedJWT.verify(verifier))
-                        if (parsedJWT.verify(verifier)) {
-                            onVerified(payload)
+//                        if (parsedJWT.verify(verifier)) {
+                        if (secp256k1Verify(publicKey, parsedJWT, isDer)) {
                             Log.e("JWT Verify", "Verified")
+                            onVerified(payload)
                             return@get
                         }
                     }
@@ -127,6 +179,29 @@ object JWTHelper {
             onVerified(null)
         }
     }
+
+    fun secp256k1Verify(pk: PublicKey, jwt: JWSObject, isDer: Boolean = false): Boolean {
+        val jwsSignature: ByteArray = jwt.signature.decode()
+
+        val signature: Signature = Signature.getInstance("SHA256withECDSA", "SC")
+        signature.initVerify(pk)
+        signature.update(jwt.signingInput)
+        return signature.verify(if (isDer) jwsSignature else ECDSA.transcodeSignatureToDER(jwsSignature))
+//        return signature.verify(jwsSignature)
+    }
+
+    private fun getSignature(key: Key): Signature {
+        val sig = when (key.algorithm) {
+            KeyAlgorithm.EC -> Signature.getInstance("SHA256withECDSA")
+            KeyAlgorithm.ECDSA_Secp256k1 -> Signature.getInstance("SHA256withECDSA")
+//            KeyAlgorithm.EdDSA_Ed25519 -> Signature.getInstance("Ed25519")
+            KeyAlgorithm.EdDSA_Ed25519 -> Signature.getInstance("NONEwithEdDSA")
+
+            KeyAlgorithm.RSA -> Signature.getInstance("SHA256withRSA")
+        }
+        return sig
+    }
+
 
     fun encrypt(publicKey: ECPublicKey, encJWT: EncryptedJWT): EncryptedJWT {
         val encrypter: JWEEncrypter = ECDHEncrypter(publicKey)

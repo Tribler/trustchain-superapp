@@ -2,17 +2,18 @@ package id.walt.services.jwt
 
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.*
+import com.nimbusds.jose.crypto.impl.ECDSA
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import id.walt.crypto.*
-import id.walt.services.CryptoProvider
 import id.walt.services.key.KeyService
 import mu.KotlinLogging
 import java.security.Provider
 import java.security.PublicKey
+import java.security.Signature
 import java.security.interfaces.ECPublicKey
 import java.util.*
 
@@ -132,6 +133,8 @@ open class WaltIdJwtService : JwtService() {
         // Maybe resolve DID (verification method)
 
         var publicKey = verifierKey ?: keyService.load(jwt.header.keyID)
+        log.error { "JWT key id: ${jwt.header.keyID}, public key: $publicKey" }
+        log.error { "JWT key id: header: ${jwt.header}, signing input: ${jwt.signingInput}, signature: ${jwt.signature}" }
 
         val res = when (publicKey.algorithm) {
             KeyAlgorithm.EdDSA_Ed25519 -> jwt.verify(Ed25519Verifier(keyService.toEd25519Jwk(publicKey)))
@@ -153,6 +156,15 @@ open class WaltIdJwtService : JwtService() {
 
         log.debug { "JWT verified returned:  $res" }
         return res
+    }
+
+    fun secp256k1Verify(pk: PublicKey, jwt: JWSObject): Boolean {
+        val jwsSignature: ByteArray = jwt.signature.decode()
+
+        val signature: Signature = Signature.getInstance("SHA256withECDSA", "SC")
+        signature.initVerify(pk)
+        signature.update(jwt.signingInput)
+        return signature.verify(ECDSA.transcodeSignatureToDER(jwsSignature))
     }
 
     override fun parseClaims(token: String): MutableMap<String, Any>? {

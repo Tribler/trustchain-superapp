@@ -23,21 +23,20 @@ object OnboardingTools {
         // =====ONBOARD_01_A Requests Verifiable Authorisation (VA)=====
 
         val authenticationVerificationListener = VerificationListener { payload ->
-            if (true) return@VerificationListener
-
             if (payload != null) {
                 val clientId = payload["client_id"]?.toString()
-                val iss = payload["iss"].toString()
-                val filteredPayload = payload.filter { JWTHelper.stringClaims.contains(it.key) }
-                val responseJWT = JWTHelper.createJWT(wallet, iss, filteredPayload, null)
-
-                Log.e(TAG, "Response jwt: $responseJWT")
 
                 if (clientId.isNullOrEmpty()) {
                     errorListener.onErrorResponse(MyVolleyError("No client id to redirect to"))
                     return@VerificationListener
                 }
 
+//                val iss = payload["iss"].toString()
+                val filteredPayload = payload.filter { JWTHelper.stringClaims.contains(it.key) }
+//                val responseJWT = JWTHelper.createJWT(wallet, iss, filteredPayload, null, selfIssued = true)
+                val responseJWT = JWTHelper.createJWT(wallet, clientId, filteredPayload, null, selfIssued = true)
+
+                Log.e(TAG, "Response jwt: $responseJWT")
 
                 // =====ONBOARD_02A Proves control of DID key=====
                 EBSIAPI.getVerifiableAuthorisation(sessionToken,

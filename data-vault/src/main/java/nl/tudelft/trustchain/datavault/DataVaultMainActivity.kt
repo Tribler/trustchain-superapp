@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.findNavController
 import nl.tudelft.trustchain.common.BaseActivity
+import nl.tudelft.trustchain.datavault.accesscontrol.DirectoryTree
 import nl.tudelft.trustchain.datavault.ui.LocalVaultFileItem
 import nl.tudelft.trustchain.datavault.ui.VaultBrowserFragment
 import nl.tudelft.trustchain.datavault.ui.VaultFileItem
@@ -26,6 +27,10 @@ class DataVaultMainActivity : BaseActivity() {
 
         initVault()
         currentFolder.value = LocalVaultFileItem(this, VAULT, null)
+
+        VAULT.listFiles()?.forEach {
+            Log.e(logTag, "vault file: ${it.path}")
+        }
     }
 
     private fun initVault() {

@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.datavault.accesscontrol
 
 import android.util.Log
+import id.walt.crypto.fromHexString
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
@@ -30,21 +31,32 @@ class AccessControlList(
         return getACL().getString(LAST_CHANGED)
     }
 
-    fun verifyAccess(peer: Peer, accessMode: String, accessToken: String?, attestations: List<AttestationBlob>?) : Boolean {
+    fun verifyAccess(peer: Peer, accessMode: String, accessTokenType: Policy.AccessTokenType, accessTokens: List<String>) : Boolean {
         if (!isPublic()) {
-            if (accessToken != null) {
-                //verify access token
-                Log.e(logTag, "Access token")
-                return true
-            }
 
-            val candidateAttestations = filterAttestations(peer, attestations)
-            if (candidateAttestations != null && candidateAttestations.isNotEmpty()){
+            when (accessTokenType) {
+                Policy.AccessTokenType.SESSION_TOKEN -> {
+                    //                verify session token
+                    val sessionToken = accessTokens[0]
+                    Log.e(logTag, "Session token: $sessionToken")
+                    return true
+                }
+                Policy.AccessTokenType.TCID -> {
+                    val attestations = accessTokens.map {
+                        AttestationBlob.deserialize(it.fromHexString()).first
+                    }
+                    val candidateAttestations = filterAttestations(peer, attestations)
+                    if (candidateAttestations != null && candidateAttestations.isNotEmpty()){
 
-                val policies = getPolicies()
+                        val policies = getPolicies()
 
-                for (policy in policies) {
-                    if (policy.evaluate(accessMode, candidateAttestations)) return true
+                        for (policy in policies) {
+                            if (policy.evaluate(accessMode, candidateAttestations)) return true
+                        }
+                    }
+                }
+                else -> {
+                    Log.e(logTag, "Access token type $accessTokenType not implemented")
                 }
             }
 

@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.datavault.ui
 
-import android.app.Activity
 import android.app.AlertDialog
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -10,14 +8,13 @@ import android.util.Log
 import android.view.View
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
+import id.walt.crypto.toHexString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.messaging.Packet
@@ -25,6 +22,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.datavault.DataVaultMainActivity
+import nl.tudelft.trustchain.datavault.PerformanceTest
 import nl.tudelft.trustchain.datavault.R
 import nl.tudelft.trustchain.datavault.accesscontrol.Policy
 import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
@@ -45,9 +43,11 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     }
 
     private lateinit var adapter: BrowserGridAdapter
-    lateinit var uriPathHelper: URIPathHelper
+    private lateinit var uriPathHelper: URIPathHelper
 
     private var areFABsVisible = false
+
+    private val PERFORMANCE_TEST = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,6 +72,19 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                 }
             }
         }
+
+        if (PERFORMANCE_TEST) {
+            val testDir = File(
+                getDataVaultCommunity().VAULT,
+                "PERFORMANCE_TEST"
+            ).apply {mkdirs()}
+
+            requireContext().assets.list("vault/PERFORMANCE_TEST")?.forEach {
+                Log.e("Files", it)
+                val inputStream = requireContext().assets.open("vault/PERFORMANCE_TEST/$it")
+                File(testDir, it).writeBytes(inputStream.readBytes())
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -83,13 +96,13 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
         setFABs()
 
-        dataVaultActivity.getCurrentFolder().observe(viewLifecycleOwner, { vaultFile ->
+        dataVaultActivity.getCurrentFolder().observe(viewLifecycleOwner) { vaultFile ->
             Log.e(logTag, "Current folder changed: ${vaultFile.name}")
-            when(vaultFile) {
+            when (vaultFile) {
                 is LocalVaultFileItem -> updateAdapter(localVaultFiles())
                 is PeerVaultFileItem -> updateAdapter(vaultFile.subFiles)
             }
-        })
+        }
     }
 
     private fun setFABs() {
@@ -137,12 +150,12 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     private fun showFabs() {
         if (currentFolder !is PeerVaultFileItem){
             binding.requestAccessibleFilesFab.show()
-            binding.deleteFilesFab.show()
+//            binding.deleteFilesFab.show()
             binding.createFolderFab.show()
             binding.addFileFab.show()
 
             binding.requestAccessibleFilesText.visibility = View.VISIBLE
-            binding.deleteFilesText.visibility = View.VISIBLE
+//            binding.deleteFilesText.visibility = View.VISIBLE
             binding.createFolderText.visibility = View.VISIBLE
             binding.addFileText.visibility = View.VISIBLE
 
@@ -187,13 +200,21 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             val peer = peers[index]
             Log.e(logTag, "Chosen peer: ${peer.publicKey.keyToBin().toHex()}")
 
+            if (PERFORMANCE_TEST) {
+                PerformanceTest(peer, getDataVaultCommunity(), attestationCommunity).run()
+                return@setItems
+            }
+
             // Currently all attestations. There must come a way to choose your attestations
             val attestations = attestationCommunity.database.getAllAttestations()
-                .filter { attestationBlob -> attestationBlob.signature != null }
+                .filter { attestationBlob -> attestationBlob.signature != null }.map {
+                    it.serialize().toHexString()
+                }
 
             val peerVaultFolder = PeerVaultFileItem(getDataVaultCommunity(), peer, null, VAULT_DIR, null)
-            getDataVaultCommunity().sendAccessibleFilesRequest(peerVaultFolder, VAULT_DIR, Policy.READ, null, attestations)
             navigateToFolder(peerVaultFolder, peer.mid)
+
+            getDataVaultCommunity().sendAccessibleFilesRequest(peerVaultFolder, VAULT_DIR, Policy.READ, Policy.AccessTokenType.TCID, attestations)
         }
 
         // Create the AlertDialog
@@ -257,7 +278,28 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     }
 
     private fun addTestFile() {
-        pickImage.launch("image/*")
+//        pickImage.launch("image/*")
+        if (currentFolder.name.lowercase().contains("vacation")) {
+            requireContext().assets.list("vault/vacation")?.forEach {
+                Log.e("Files", it)
+                val inputStream = requireContext().assets.open("vault/vacation/$it")
+                File(currentFolder.file, it).writeBytes(inputStream.readBytes())
+            }
+        } else if (currentFolder.name.lowercase().contains("architecture")) {
+            requireContext().assets.list("vault/architecture")?.forEach {
+                Log.e("Files", it)
+                val inputStream = requireContext().assets.open("vault/architecture/$it")
+                File(currentFolder.file, it).writeBytes(inputStream.readBytes())
+            }
+        } else {
+            requireContext().assets.list("vault/root")?.forEach {
+                Log.e("Files", it)
+                val inputStream = requireContext().assets.open("vault/root/$it")
+                File(currentFolder.file, it).writeBytes(inputStream.readBytes())
+            }
+        }
+
+        updateAdapter(localVaultFiles())
     }
 
     private fun createFolder() {
@@ -337,7 +379,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         }
     }
 
-    fun getDataVaultCommunity(): DataVaultCommunity {
+    private fun getDataVaultCommunity(): DataVaultCommunity {
         return getIpv8().getOverlay()
             ?: throw java.lang.IllegalStateException("DataVaultCommunity is not configured")
     }

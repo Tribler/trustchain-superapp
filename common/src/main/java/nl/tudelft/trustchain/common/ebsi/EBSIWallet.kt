@@ -75,18 +75,20 @@ class EBSIWallet(
 
     private fun newKeyPair(store: Boolean = false): KeyPair {
 //        Log.e(TAG, "Creating new key pair")
+
         val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
             KeyProperties.KEY_ALGORITHM_EC,
             KEYSTORE_PROVIDER
         )
         val parameterSpec = ECGenParameterSpec("secp256k1")
-        kpg.initialize(parameterSpec)
+        kpg.initialize(parameterSpec, SecureRandom())
         val keyPair = kpg.generateKeyPair()
         if (store) keyStoreHelper.storeKey(keyPair)
         return keyPair
     }
 
     fun createDid(): String {
+//        Log.e("DID", "Creating new DID")
         // Check with /did-registry/v2/identifiers/$did id did exists
 
         /*val seed = Random.nextBytes(16)
