@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/actionAddEBSIAttestation"
+        android:icon="@drawable/ic_attestation"
+        android:title="@string/menu_identity_EBSI_attestations_add" />
+</menu>

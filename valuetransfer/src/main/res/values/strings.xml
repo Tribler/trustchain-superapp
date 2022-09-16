@@ -50,6 +50,7 @@
     <string name="menu_contacts_add">Add Contact</string>
     <string name="menu_identity_attribute_add">Add Identity Attribute</string>
     <string name="menu_identity_attestations_add">Add Attestation</string>
+    <string name="menu_identity_EBSI_attestations_add">Add EBSI Attestation</string>
     <string name="menu_identity_attestations_authority_add">Add Attestation Authority</string>
     <string name="menu_identity_edit">Edit Identity</string>
     <string name="menu_identity_remove">Remove Identity</string>
@@ -84,6 +85,7 @@
     <string name="dialog_title_attestation_invalid">Invalid Attestation</string>
     <string name="dialog_title_attestation_valid">Valid Attestation</string>
     <string name="dialog_title_attribute_details">Attribute Details</string>
+    <string name="dialog_title_add_ebsi_attestation">Adding EBSI Attestation</string>
     <string name="dialog_title_attribute_share">Share Identity Attribute</string>
     <string name="dialog_title_identity_details">Identity Details</string>
     <string name="dialog_title_scan_options">Choose an option below</string>
@@ -106,6 +108,7 @@
     <string name="btn_slide_to_request_qr">Slide to Request QR</string>
     <string name="btn_share">Share</string>
     <string name="btn_save">Save</string>
+    <string name="btn_ok">OK</string>
     <string name="btn_add">Add</string>
     <string name="btn_gateway_connect">Connect to Gateway</string>
     <string name="btn_slide_to_gateway_connect">Slide to Connect</string>
@@ -248,7 +251,9 @@
     <string name="text_title_identity_attribute">Identity attribute</string>
     <string name="text_tooltip_identity_attributes">Identity attributes extend your official identity with shareable additional information about you</string>
     <string name="text_tooltip_attestations">Attestations declare that a claim about a piece of information is validated by an authority</string>
-    <string name="text_no_attestations">There are no attestations yet</string>
+    <string name="text_no_attestations">There are no attestations</string>
+    <string name="text_no_your_attestations">You do not have any attestations</string>
+    <string name="text_no_issued_attestations">You have not issued any attestations</string>
     <string name="text_public_key">Public Key</string>
     <string name="text_title_attestations">Attestations</string>
     <string name="text_attestation_malformed">MALFORMED ATTESTATION</string>

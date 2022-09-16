@@ -254,7 +254,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
         }
 
-        binding.rvAttestations.apply {
+        binding.rvYourAttestations.apply {
             adapter = adapterAttestations
             layoutManager = LinearLayoutManager(context)
             val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_attestation, requireContext().theme)
@@ -303,33 +303,53 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             ).show(parentFragmentManager, tag)
         }
 
-        binding.tvShowIdentityAttributes.setOnClickListener {
-            if (binding.clIdentityAttributes.isVisible) return@setOnClickListener
-
-            binding.tvShowIdentityAttributes.apply {
-                setTypeface(null, Typeface.BOLD)
-                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
-            }
-            binding.tvShowAttestations.apply {
-                setTypeface(null, Typeface.NORMAL)
-                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
-            }
-
-            binding.clAttestations.exitEnterView(requireContext(), binding.clIdentityAttributes, false)
+        binding.ivAddAttestation.setOnClickListener {
+            OptionsDialog(
+                R.menu.identity_add_attestation_options,
+                resources.getString(R.string.dialog_choose_option),
+                menuMods = { menu ->
+                    menu.apply {
+                        findItem(R.id.actionAddEBSIAttestation).isVisible = getIdentityCommunity().getUnusedAttributeNames().isNotEmpty()
+                    }
+                },
+                optionSelected = { _, item ->
+                    when (item.itemId) {
+                        R.id.actionAddEBSIAttestation -> addEBSIAttestation()
+                    }
+                }
+            ).show(parentFragmentManager, tag)
         }
 
-        binding.tvShowAttestations.setOnClickListener {
-            if (binding.clAttestations.isVisible) return@setOnClickListener
+        binding.tvShowIdentityAttributes.setOnClickListener {
+            if (binding.clIdentityAttributes.isVisible) return@setOnClickListener
+        }
 
-            binding.tvShowIdentityAttributes.apply {
+        binding.tvShowIssuedAttestations.setOnClickListener {
+            if (binding.clIssuedAttestations.isVisible) return@setOnClickListener
+
+            binding.tvShowYourAttestations.apply {
                 setTypeface(null, Typeface.NORMAL)
                 background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
             }
-            binding.tvShowAttestations.apply {
+            binding.tvShowIssuedAttestations.apply {
                 setTypeface(null, Typeface.BOLD)
                 background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
             }
-            binding.clIdentityAttributes.exitEnterView(requireContext(), binding.clAttestations, true)
+            binding.clYourAttestations.exitEnterView(requireContext(), binding.clIssuedAttestations, true)
+        }
+
+        binding.tvShowYourAttestations.setOnClickListener {
+            if (binding.clYourAttestations.isVisible) return@setOnClickListener
+
+            binding.tvShowYourAttestations.apply {
+                setTypeface(null, Typeface.BOLD)
+                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
+            }
+            binding.tvShowIssuedAttestations.apply {
+                setTypeface(null, Typeface.NORMAL)
+                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
+            }
+            binding.clIssuedAttestations.exitEnterView(requireContext(), binding.clYourAttestations, false)
         }
     }
 
@@ -358,7 +378,8 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     }
 
     private fun toggleVisibility() {
-        binding.tvNoAttestations.isVisible = adapterAttestations.itemCount == 0
+        binding.tvNoYourAttestations.isVisible = adapterAttestations.itemCount == 0
+        binding.tvNoIssuedAttestations.isVisible = adapterAttestations.itemCount == 0
         binding.tvNoAttributes.isVisible = adapterAttributes.itemCount == 0
     }
 
@@ -371,6 +392,10 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         )
     }
 
+    private fun addEBSIAttestation(){
+        IdentityAddEBSIAttestationDialog(null).show(parentFragmentManager, tag)
+    }
+
     private fun updateAttestations() {
         val oldCount = adapterAttestations.itemCount
         val itemsAttestations = getAttestationCommunity().database.getAllAttestations()
@@ -380,7 +405,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                 createAttestationItems(itemsAttestations)
             )
 
-            binding.rvAttestations.setItemViewCacheSize(itemsAttestations.size)
+            binding.rvYourAttestations.setItemViewCacheSize(itemsAttestations.size)
         }
 
         toggleVisibility()
