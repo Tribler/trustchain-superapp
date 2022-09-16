@@ -392,7 +392,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         )
     }
 
-    private fun addEBSIAttestation(){
+    private fun addEBSIAttestation() {
         IdentityAddEBSIAttestationDialog(null).show(parentFragmentManager, tag)
     }
 
