@@ -10,7 +10,6 @@ import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
-import id.walt.crypto.toHexString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,7 +46,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
     private var areFABsVisible = false
 
-    private val PERFORMANCE_TEST = true
+    private val PERFORMANCE_TEST = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,7 +88,18 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                 File(testDir, it).writeBytes(inputStream.readBytes())
             }
 
-            PerformanceTest(getDataVaultCommunity()).measureEncryption()
+            val performanceTest = PerformanceTest(getDataVaultCommunity())
+
+//            Be careful turning this on
+//            performanceTest.measureEncDecryption(false)
+
+            val attestationCount = attestationCommunity.database.getAllAttestations().size
+            val rest = 5 - attestationCount
+            if (rest > 0) {
+                for (i in 1..rest) performanceTest.addTestAttestation(attestationCommunity)
+            }
+//            performanceTest.testTCID(attestationCommunity)
+
         }
     }
 
@@ -214,7 +224,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             // Currently all attestations. There must come a way to choose your attestations
             val attestations = attestationCommunity.database.getAllAttestations()
                 .filter { attestationBlob -> attestationBlob.signature != null }.map {
-                    it.serialize().toHexString()
+                    it.serialize().toHex()
                 }
 
             val peerVaultFolder = PeerVaultFileItem(getDataVaultCommunity(), peer, null, VAULT_DIR, null)

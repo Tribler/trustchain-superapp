@@ -8,7 +8,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
-import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.PrivateKey
@@ -18,6 +17,7 @@ import nl.tudelft.ipv8.messaging.eva.*
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
+import nl.tudelft.trustchain.common.util.TimingUtils
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityInfo
 import nl.tudelft.trustchain.common.valuetransfer.entity.TransferRequest
@@ -275,10 +275,14 @@ class PeerChatCommunity(
         send(peer, packet)
     }
 
+    private val requestTimes = mutableMapOf<String, Long>()
+
     fun sendAttachmentRequest(peer: Peer, id: String) {
+        Log.e("PChat", "Sending attachment request: $id")
         val payload = AttachmentRequestPayload(id)
         val packet = serializePacket(MessageId.ATTACHMENT_REQUEST, payload)
         logger.debug { "-> $payload" }
+        requestTimes[id] = TimingUtils.getTimestamp()
         send(peer, packet)
     }
 
@@ -430,6 +434,8 @@ class PeerChatCommunity(
     }
 
     private fun onAttachment(payload: AttachmentPayload) {
+        val receiveTime = TimingUtils.getTimestamp()
+        val requestTime = requestTimes[payload.id]
         try {
             val file = MessageAttachment.getFile(context, payload.id)
             if (!file.exists()) {
@@ -437,6 +443,16 @@ class PeerChatCommunity(
                 val os = FileOutputStream(file)
                 os.write(payload.data)
             }
+
+            if (requestTime == null) {
+                Log.e("PChat", "No request time for ${payload.id}")
+            } else {
+                Log.e(
+                    "PChat",
+                    "Received ${file.length() / 1000} KB (${payload.id}) in ${receiveTime - requestTime} ms"
+                )
+            }
+
             // Mark attachment as fetched
             database.setAttachmentFetched(payload.id)
         } catch (e: SQLiteConstraintException) {

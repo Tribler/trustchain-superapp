@@ -1,14 +1,17 @@
 package nl.tudelft.trustchain.datavault.community
 
+import android.util.Log
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.deserializeVarLen
 import nl.tudelft.ipv8.messaging.serializeVarLen
 import nl.tudelft.trustchain.datavault.accesscontrol.Policy
+import org.json.JSONArray
 import java.nio.charset.Charset
 
 class VaultFileRequestPayload(
-    val id: String?,
+//    val id: String?,
+    val ids: List<String>,
     val accessMode: String,
     val accessTokenType: Policy.AccessTokenType,
     val accessTokens: List<String>
@@ -16,7 +19,9 @@ class VaultFileRequestPayload(
 //    val attestations: List<AttestationBlob>?
 ) : Serializable {
     override fun serialize(): ByteArray {
-        var serialized = serializeVarLen((id ?: NULL).toByteArray()) +
+        val idsJsonString = JSONArray(ids).toString()
+//        var serialized = serializeVarLen((id ?: NULL).toByteArray()) +
+        var serialized = serializeVarLen((idsJsonString).toByteArray()) +
             serializeVarLen(accessMode.toByteArray()) +
             serializeVarLen(accessTokenType.name.toByteArray())
 
@@ -34,8 +39,19 @@ class VaultFileRequestPayload(
     companion object Deserializer : Deserializable<VaultFileRequestPayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<VaultFileRequestPayload, Int> {
             var localOffset = offset
-            val (id, idSize) = deserializeVarLen(buffer, localOffset)
-            localOffset += idSize
+            /*val (id, idSize) = deserializeVarLen(buffer, localOffset)
+            localOffset += idSize*/
+
+            val (idsJsonString, idsSize) = deserializeVarLen(buffer, localOffset)
+            localOffset += idsSize
+
+            val idsJson = JSONArray(idsJsonString)
+            val ids = mutableListOf<String>().apply {
+                for (i in 0 until idsJson.length()) {
+                    add(idsJson.getString(i))
+                }
+            }
+
             val (accessMode, accessModeSize) = deserializeVarLen(buffer, localOffset)
             localOffset += accessModeSize
 //            val (accessToken, tokenSize) = deserializeVarLen(buffer, localOffset)
@@ -44,10 +60,10 @@ class VaultFileRequestPayload(
             val (accessTokenTypeBytes, accessTokenTypeSize) = deserializeVarLen(buffer, localOffset)
             localOffset += accessTokenTypeSize
 
-            var stringId: String? = id.toString(Charset.defaultCharset())
+           /* var stringId: String? = id.toString(Charset.defaultCharset())
             if (stringId == NULL) {
                 stringId = null
-            }
+            }*/
 
             val accessTokenType = Policy.AccessTokenType.valueOf(accessTokenTypeBytes.toString(Charset.defaultCharset()))
            /* var stringToken: String? = accessToken.toString(Charset.defaultCharset())
@@ -82,7 +98,8 @@ class VaultFileRequestPayload(
 
             return Pair(
                 VaultFileRequestPayload(
-                    stringId,
+                    ids,
+//                    stringId,
                     accessMode.toString(Charset.defaultCharset()),
                     accessTokenType,
                     accessTokens

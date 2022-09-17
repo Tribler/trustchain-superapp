@@ -1,45 +1,31 @@
 package nl.tudelft.trustchain.common.ebsi
 
 import android.content.Context
-import android.content.res.AssetManager
 import android.util.Log
 import com.android.volley.Response
-import com.nimbusds.jose.JWSVerifier
-import com.nimbusds.jose.crypto.ECDSAVerifier
 import com.nimbusds.jwt.SignedJWT
 import id.walt.auditor.Auditor
-import id.walt.auditor.JsonSchemaPolicy
 import id.walt.auditor.SignaturePolicy
-import id.walt.crypto.Key
-import id.walt.crypto.KeyAlgorithm
-import id.walt.crypto.KeyId
-import id.walt.crypto.buildKey
 import id.walt.custodian.Custodian
 import id.walt.model.DidMethod
-import id.walt.servicematrix.ServiceMatrix
-import id.walt.services.CryptoProvider
+import id.walt.services.context.ContextManager
 import id.walt.services.did.DidService
 import id.walt.services.jwt.JwtService
-import id.walt.services.key.KeyService
-import id.walt.services.key.WaltIdKeyService
 import id.walt.signatory.ProofConfig
 import id.walt.signatory.ProofType
 import id.walt.signatory.Signatory
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.R
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
 import java.nio.charset.Charset
-import java.security.Security
-import java.security.interfaces.ECPublicKey
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
 
 class ConformanceTest(
-    private val context: Context,
+    context: Context,
     private val uuid: UUID
 ) {
     val TAG = ConformanceTest::class.simpleName!!
@@ -54,41 +40,6 @@ class ConformanceTest(
 //        Log.e(TAG, myVolleyError.volleyError?.networkResponse?.allHeaders?.map { h -> "${h.name}: ${h.value}, " }?.reduce { acc, s -> acc + s } ?: "No headers")
         Log.e(TAG, myVolleyError.volleyError?.networkResponse?.data?.toString(Charsets.UTF_8) ?: "No network response")
 //        Log.e(TAG, myVolleyError.volleyError?.message ?: "No message")
-    }
-
-    fun waltIdTest() {
-        val issuerDid = DidService.create(DidMethod.ebsi)
-        val holderDid = DidService.create(DidMethod.key)
-
-        Log.e("WaltID Test", "Issuer: $issuerDid\nHolder: $holderDid")
-
-        val expiration = Instant.now().plus(30, ChronoUnit.DAYS)
-
-//        Log.e("WaltID Test", "expiration: $expiration")
-
-        // Issue VC in JSON-LD and JWT format (for show-casing both formats)
-        val vcJsonLd = Signatory.getService().issue("VerifiableId", ProofConfig(issuerDid = issuerDid, subjectDid = holderDid, proofType = ProofType.LD_PROOF, expirationDate = expiration))
-        val vcJwt = Signatory.getService().issue("VerifiableId", ProofConfig(issuerDid = issuerDid, subjectDid = holderDid, proofType = ProofType.JWT, expirationDate = expiration))
-
-//        Log.e("WaltID Test", "VC JsonLD: $vcJsonLd")
-//        Log.e("WaltID Test", "VC JWT: $vcJwt")
-
-        // Present VC in JSON-LD and JWT format (for show-casing both formats)
-        // expiration date is not needed when JSON-LD format
-        val vpJsonLd = Custodian.getService().createPresentation(listOf(vcJsonLd), holderDid, expirationDate = null)
-        val vpJwt = Custodian.getService().createPresentation(listOf(vcJwt), holderDid, expirationDate = expiration)
-
-//        Log.e("WaltID Test", "VP JsonLD: $vpJsonLd")
-//        Log.e("WaltID Test", "VP JWT: $vpJwt")
-
-        // Verify VPs, using Signature, JsonSchema and a custom policy
-//        val resJsonLd = Auditor.getService().verify(vpJsonLd, listOf(SignaturePolicy(), JsonSchemaPolicy()))
-        val resJsonLd = Auditor.getService().verify(vpJsonLd, listOf(SignaturePolicy()))
-//        val resJwt = Auditor.getService().verify(vpJwt, listOf(SignaturePolicy(), JsonSchemaPolicy()))
-        val resJwt = Auditor.getService().verify(vpJwt, listOf(SignaturePolicy()))
-
-        Log.e("Ver result", "JSON-LD verification result: ${resJsonLd.valid}")
-        Log.e("Ver result", "JWT verification result: ${resJwt.valid}")
     }
 
     fun run(){
@@ -163,9 +114,44 @@ class ConformanceTest(
         Log.e("JWT Verify", "Verified: $verified")*/
     }
 
+    fun waltIdTest() {
+        val issuerDid = DidService.create(DidMethod.ebsi)
+        val holderDid = DidService.create(DidMethod.key)
+
+        Log.e("WaltID Test", "Issuer: $issuerDid\nHolder: $holderDid")
+
+        val expiration = Instant.now().plus(30, ChronoUnit.DAYS)
+
+//        Log.e("WaltID Test", "expiration: $expiration")
+
+        // Issue VC in JSON-LD and JWT format (for show-casing both formats)
+        val vcJsonLd = Signatory.getService().issue("VerifiableId", ProofConfig(issuerDid = issuerDid, subjectDid = holderDid, proofType = ProofType.LD_PROOF, expirationDate = expiration))
+        val vcJwt = Signatory.getService().issue("VerifiableId", ProofConfig(issuerDid = issuerDid, subjectDid = holderDid, proofType = ProofType.JWT, expirationDate = expiration))
+
+//        Log.e("WaltID Test", "VC JsonLD: $vcJsonLd")
+        Log.e("WaltID Test", "VC JWT: $vcJwt")
+
+        // Present VC in JSON-LD and JWT format (for show-casing both formats)
+        // expiration date is not needed when JSON-LD format
+        val vpJsonLd = Custodian.getService().createPresentation(listOf(vcJsonLd), holderDid, expirationDate = null)
+        val vpJwt = Custodian.getService().createPresentation(listOf(vcJwt), holderDid, expirationDate = expiration)
+
+//        Log.e("WaltID Test", "VP JsonLD: $vpJsonLd")
+        Log.e("WaltID Test", "VP JWT: $vpJwt")
+
+        // Verify VPs, using Signature, JsonSchema and a custom policy
+//        val resJsonLd = Auditor.getService().verify(vpJsonLd, listOf(SignaturePolicy(), JsonSchemaPolicy()))
+        val resJsonLd = Auditor.getService().verify(vpJsonLd, listOf(SignaturePolicy()))
+//        val resJwt = Auditor.getService().verify(vpJwt, listOf(SignaturePolicy(), JsonSchemaPolicy()))
+        val resJwt = Auditor.getService().verify(vpJwt, listOf(SignaturePolicy()))
+
+        Log.e("Ver result", "JSON-LD verification result: ${resJsonLd.valid}")
+        Log.e("Ver result", "JWT verification result: ${resJwt.valid}")
+    }
+
     private fun onboardTest12() {
         // Let the user scan the mobile authentication token on the onboarding service page
-        val onboardSessionToken = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NjI5NzM2ODYsImlhdCI6MTY2Mjk3Mjc4NiwiaXNzIjoiZGlkOmVic2k6emFBNTlzYWdXbzliWUZ6anRvNjhYc2YiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjItMDktMTJUMDg6NTM6MDVaIiwiaG9zdG5hbWUiOiJhcHAuY29uZm9ybWFuY2UuaW50ZWJzaS54eXoiLCJzY29yZSI6MC45LCJzdWNjZXNzIjp0cnVlfX0.FcWo_vf84fJ_s_1cYQ53q6jhd7b7f9JnsdnMG8HWAhuwjRG1JA300qWrcllVqiM93yGRgHgkl7zrKaz0iNHZDA"
+        val onboardSessionToken = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NjMyNDM0MTcsImlhdCI6MTY2MzI0MjUxNywiaXNzIjoiZGlkOmVic2k6emFBNTlzYWdXbzliWUZ6anRvNjhYc2YiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjItMDktMTVUMTE6NDg6MjlaIiwiaG9zdG5hbWUiOiJhcHAuY29uZm9ybWFuY2UuaW50ZWJzaS54eXoiLCJzY29yZSI6MC45LCJzdWNjZXNzIjp0cnVlfX0.D8-mFzrtDB4GitSMXl3_uvD9aGre3KRMCeKSFCOl2A0gvcknFj6Ggn12MKx_6TqyMpFCNN7Qk9UIBrqtXs5BlQ"
         OnboardingTools.getVerifiableAuthorisation(wallet, onboardSessionToken, errorListener)
     }
 

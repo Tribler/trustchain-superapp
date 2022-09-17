@@ -188,7 +188,6 @@ object DidService {
 
         val data = appendBytesToVersion(seed)
         val id = Multibase.encode(Multibase.Base.Base58BTC, data)
-        Log.e("DIDServ", "did: $id")
         return "did:ebsi:$id"
     }
 

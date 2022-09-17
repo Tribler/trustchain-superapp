@@ -12,7 +12,6 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Packet
@@ -20,6 +19,10 @@ import nl.tudelft.ipv8.messaging.eva.EVACommunity
 import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.ebsi.EBSIWallet
+import nl.tudelft.trustchain.common.ebsi.JWTHelper
+import nl.tudelft.trustchain.common.ebsi.VerificationListener
+import nl.tudelft.trustchain.common.util.TimingUtils
 import nl.tudelft.trustchain.datavault.DataVaultMainActivity
 import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
 import nl.tudelft.trustchain.datavault.accesscontrol.Policy
@@ -45,6 +48,9 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     private val attestationCommunity: AttestationCommunity by lazy {
         IPv8Android.getInstance().getOverlay()!!
     }
+
+//    val sessionTokenCache = SessionTokenCache()
+    val ebsiWallet: EBSIWallet get() {return EBSIWallet(context)}
 
     private val pendingImageViewHolders = mutableMapOf<String, Pair<PeerVaultFileItem, ImageViewHolder>>()
     private val pendingPeerVaultFolders = mutableMapOf<String, PeerVaultFileItem>()
@@ -186,7 +192,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     }
 
     private fun onAccessibleFiles(peer: Peer, payload: AccessibleFilesPayload) {
-        Log.e("ACCESSIBLE FILES", "Token: ${payload.accessToken}, files: ${payload.files}")
+        Log.e("ACCESSIBLE FILES", "Token: ${payload.sessionToken}, files: ${payload.files}")
 
         if (!::vaultBrowserFragment.isInitialized) {
             return
@@ -198,7 +204,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         if (pendingPeerVaultFolder != null) {
             Log.e("ACCESSIBLE FILES", "Pending peer vault found ($peerFileId)")
             pendingPeerVaultFolders.remove(peerFileId)
-            vaultBrowserFragment.updateAccessibleFiles(pendingPeerVaultFolder, payload.accessToken, payload.files)
+            vaultBrowserFragment.updateAccessibleFiles(pendingPeerVaultFolder, payload.sessionToken, payload.files)
         } else {
             Log.e("ACCESSIBLE FILES", "No pending peer vault found ($peerFileId)")
         }
@@ -234,7 +240,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     }
 
     private fun vaultFile(file: File): Pair<File, AccessControlList> {
-        return Pair(file, AccessControlList(file, attestationCommunity))
+        return Pair(file, AccessControlList(file, this, attestationCommunity))
     }
 
     private fun vaultFile(filename: String): Pair<File, AccessControlList> {
@@ -252,97 +258,135 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
     private fun onFileRequest(peer: Peer, payload: VaultFileRequestPayload) {
         Log.e(logTag, "Received file request. Access token: ${payload.accessTokenType}")
-        try {
-            val (file, accessPolicy) = vaultFile(payload.id!!)
-            if (!file.exists()) {
-                Log.e(logTag, "The requested file does not exist")
-                sendFileRequestFailed(peer, payload.id, "The requested file does not exist")
-            } else if (file.isDirectory) {
-                Log.e(logTag, "The requested file is a directory")
-                sendFileRequestFailed(peer, payload.id, "The requested file is a directory")
-            } else if (!accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessTokenType, payload.accessTokens)) {
-                Log.e(logTag, "Access Policy not met")
-                sendFileRequestFailed(peer, payload.id, "Access Policy not met")
-                //sendFile(peer, payload.id, file)
-            } else {
-                when {
-                    file.isImage() -> {
-                        Log.e(logTag, "File being sent is image")
-                        sendImage(peer, payload.id, file)
-                    }
-                    else -> {
-                        sendFile(peer, payload.id, file)
+
+        val vaultFiles = mutableListOf<Triple<String, File, AccessControlList>>().apply {
+            payload.ids.forEach { id ->
+                val (file, accessPolicy) = vaultFile(id)
+                add(Triple(id, file, accessPolicy))
+            }
+        }
+
+//        val (file, accessPolicy) = vaultFile(payload.id!!)
+
+
+        if (payload.accessTokenType == Policy.AccessTokenType.SESSION_TOKEN) {
+            val tempSessionToken = payload.accessTokens[0]
+            JWTHelper.verifyJWT(tempSessionToken, VerificationListener { jwtPayload ->
+                if (jwtPayload == null) {
+//                    Invalid session token (not verified)
+                    sendFileRequestFailed(peer, payload.ids,"Invalid session token")
+                } else {
+//                    Valid session token
+                    if (jwtPayload["exp"]?.toString()?.toLongOrNull() ?: Long.MAX_VALUE > TimingUtils.getTimestamp()) {
+//                        Expired
+                        sendFileRequestFailed(peer, payload.ids,"Session token expired")
+                    } else {
+                        verifyAndSendFiles(vaultFiles, peer, payload)
                     }
                 }
-                logger.debug { "$peer.mid" }
+            }, ebsiWallet.publicKey)
+        } else {
+            verifyAndSendFiles(vaultFiles, peer, payload)
+        }
+    }
+
+    private fun verifyAndSendFiles(vaultFiles: List<Triple<String, File, AccessControlList>>, peer: Peer, payload: VaultFileRequestPayload) {
+        vaultFiles.forEach { vaultFile ->
+            val id = vaultFile.first
+            val file = vaultFile.second
+            val accessPolicy = vaultFile.third
+
+            if (!file.exists()) {
+                Log.e(logTag, "The requested file does not exist")
+                sendFileRequestFailed(peer, listOf(id), "The requested file does not exist")
+            } else if (file.isDirectory) {
+                Log.e(logTag, "The requested file is a directory")
+                sendFileRequestFailed(peer, listOf(id), "The requested file is a directory")
+            } else if (!accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessTokenType, payload.accessTokens)) {
+                Log.e(logTag, "Access Policy not met")
+                sendFileRequestFailed(peer, listOf(id), "Access Policy not met")
+            } else {
+                try {
+                    when {
+                        file.isImage() -> {
+                            Log.e(logTag, "File being sent is image")
+                            sendImage(peer, id, file)
+                        }
+                        else -> {
+                            sendFile(peer, id, file)
+                        }
+                    }
+                } catch (e: SQLiteConstraintException) {
+                    e.printStackTrace()
+                }
             }
-        } catch (e: SQLiteConstraintException) {
-            e.printStackTrace()
         }
     }
 
     private fun onAccessibleFilesRequest(peer: Peer, payload: VaultFileRequestPayload) {
-        Log.e(logTag, "accessible files request id: ${payload.id}, access mode: ${payload.accessMode}, token: ${payload.accessTokenType}")
+        val folderId = payload.ids.firstOrNull()
+        Log.e(logTag, "accessible files request id: $folderId, access mode: ${payload.accessMode}, token: ${payload.accessTokenType}")
 
+        if (payload.accessTokenType == Policy.AccessTokenType.SESSION_TOKEN) {
+            val tempSessionToken = payload.accessTokens.first()
+            JWTHelper.verifyJWT(tempSessionToken, VerificationListener { jwtPayload ->
+                if (jwtPayload == null) {
+//                    Invalid session token (not verified)
+                    sendAccessibleFilesRequestFailed(peer, folderId,"Invalid session token")
+                } else {
+//                    Valid session token
+                    if (jwtPayload["exp"]?.toString()?.toLongOrNull() ?: Long.MAX_VALUE > TimingUtils.getTimestamp()) {
+//                        Expired
+                        sendAccessibleFilesRequestFailed(peer, folderId,"Session token expired")
+                    } else {
+                        filterAndSendAccessibleFiles(peer, payload, tempSessionToken)
+                    }
+                }
+            }, ebsiWallet.publicKey)
+
+//            val tempSessionToken = sessionTokenCache.get(payload.accessTokens[0])
+//            if (tempSessionToken == null) {
+//                sendAccessibleFilesRequestFailed(peer, payload.id,"Invalid session token")
+//                return
+//            } else if (tempSessionToken.isExpired()) {
+//                sendAccessibleFilesRequestFailed(peer, payload.id,"Session token expired")
+//                return
+//            }
+//            tempSessionToken.extend()
+//            sessionTokenCache.set(tempSessionToken.value, tempSessionToken)
+//            tempSessionToken
+
+        } else {
+            val sessionToken = generateToken(peer)
+            filterAndSendAccessibleFiles(peer, payload, sessionToken)
+        }
+    }
+
+    private fun filterAndSendAccessibleFiles(peer: Peer, payload: VaultFileRequestPayload, sessionToken: String) {
         val fileFilter = FileFilter { file ->
             val fileName = file.name
             val (_, accessPolicy) = vaultFile(file)
             !fileName.startsWith(".") && !fileName.endsWith(".acl") && accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessTokenType, payload.accessTokens)
         }
 
-        val filteredFiles = if (payload.id == null || payload.id == VAULT_DIR) {
+        val folderId = payload.ids.firstOrNull()
+        val filteredFiles = if (folderId == null || folderId == VAULT_DIR) {
             VAULT.listFiles(fileFilter)
         } else {
-            File(VAULT, payload.id).listFiles(fileFilter)
+            File(VAULT, folderId).listFiles(fileFilter)
         }?.map { file ->
             Log.e("PATHS", "VAULT PATH: ${vaultPath(file.absolutePath)}")
             if (file.isDirectory) "${vaultPath(file.absolutePath)}/" else vaultPath(file.absolutePath)
         }
 
-        //val filteredFiles = filterFiles(peer, payload.accessMode, payload.accessToken, payload.attestations, allFiles)
-
-        val accessToken = if (payload.accessTokenType == Policy.AccessTokenType.SESSION_TOKEN) {
-            payload.accessTokens[0]
-        } else {
-            generateToken()
-        }
-
-        sendAccessibleFiles(peer, payload.id, accessToken, filteredFiles)
-
-        // Clean this up. No conditions necessary (except for token generation)
-        /*if (payload.attestations != null && payload.attestations.isNotEmpty()) {
-            Log.e(logTag, "Attestations for accessible files (${payload.attestations.size} att(s))")
-            val accessToken: String? = generateToken(payload.attestations)
-            sendAccessibleFiles(peer, payload.id, accessToken, filteredFiles)
-        } else if (payload.accessToken != null) {
-            Log.e(logTag, "Access token for accessible files (${payload.accessToken})")
-            // Currently accessibleFilesRequest don't contain an access token, only attestations
-            sendAccessibleFiles(peer, payload.id, payload.accessToken, filteredFiles)
-        } else {
-            Log.e(logTag, "No credentials. Check public files")
-            // no credentials
-            sendAccessibleFiles(peer, payload.id,null, filteredFiles)
-        }*/
+        sendAccessibleFiles(peer, folderId, sessionToken, filteredFiles)
     }
 
-    private fun filterFiles(peer: Peer, accessMode: String, accessTokenType: Policy.AccessTokenType, accessTokens: List<String>, files: List<String>?): List<String>{
-        if (files != null) {
-            return files.filter { fileName -> !fileName.startsWith(".") && !fileName.endsWith(".acl") }.
-                filter { fileName ->
-                    val (_, accessPolicy) = vaultFile(fileName)
-                    accessPolicy.verifyAccess(peer, accessMode, accessTokenType, accessTokens)
-                }
-        }
-
-        return listOf()
-    }
-
-    private fun generateToken(): String {
-        /*if (attestations.isEmpty()) {
-            return null
-        }*/
-
-        return "TEMP_TOKEN"
+    private fun generateToken(peer: Peer): String {
+        return JWTHelper.createSessionToken(ebsiWallet, peer.mid)
+//        val sessionToken = SessionToken(peer)
+//        sessionTokenCache.set(sessionToken.value, sessionToken)
+//        return sessionToken
     }
 
     private fun sendBytes(peer: Peer, id: String, evaId: String, data: ByteArray) {
@@ -385,10 +429,11 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         send(peer, packet)
     }
 
+//    fun sendAccessibleFilesRequest(peerVaultFileItem: PeerVaultFileItem, id: String?, accessMode: String, accessTokenType: Policy.AccessTokenType, accessTokens: List<String>) {
     fun sendAccessibleFilesRequest(peerVaultFileItem: PeerVaultFileItem, id: String?, accessMode: String, accessTokenType: Policy.AccessTokenType, accessTokens: List<String>) {
         Log.e(logTag, "Sending accessible files request")
         Log.e(logTag, "including ${accessTokens.size} access token(s)")
-        val payload = VaultFileRequestPayload(id, accessMode, accessTokenType, accessTokens)
+        val payload = VaultFileRequestPayload(if (id == null) listOf() else listOf(id), accessMode, accessTokenType, accessTokens)
         val packet = serializePacket(MessageId.ACCESSIBLE_FILES_REQUEST, payload)
         logger.debug { "-> $payload" }
         addPendingPeerVaultFolders(peerVaultFileItem)
@@ -397,30 +442,41 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
     fun sendTestFileRequest(peer: Peer,
                             accessMode: String,
-                            id: String,
+                            ids: List<String>,
                             accessTokenType: Policy.AccessTokenType,
                             accessTokens: List<String>) {
         Log.e(logTag, "Sending test file request ($accessTokenType)")
 
-        val payload = VaultFileRequestPayload(id, accessMode, accessTokenType, accessTokens)
+        val payload = VaultFileRequestPayload(ids, accessMode, accessTokenType, accessTokens)
         val packet = serializePacket(MessageId.TEST_FILE_REQUEST, payload)
         logger.debug { "-> $payload" }
         send(peer, packet)
     }
 
-    fun sendFileRequest(peer: Peer, accessMode: String, id: String, sessionToken: String) {
+//    fun sendFileRequest(peer: Peer, accessMode: String, id: String, sessionToken: String) {
+    fun sendFileRequest(peer: Peer, accessMode: String, ids: List<String>, sessionToken: String) {
         Log.e(logTag, "Sending file request")
         // Log.e(logTag, "accessToken: $accessToken, includFing ${attestations?.size ?: 0} attestation(s)")
 
-        val payload = VaultFileRequestPayload(id, accessMode, Policy.AccessTokenType.SESSION_TOKEN, listOf(sessionToken))
+        val payload = VaultFileRequestPayload(ids, accessMode, Policy.AccessTokenType.SESSION_TOKEN, listOf(sessionToken))
         val packet = serializePacket(MessageId.FILE_REQUEST, payload)
         logger.debug { "-> $payload" }
         send(peer, packet)
     }
 
-    private fun sendFileRequestFailed(peer: Peer, id: String, message: String) {
-        Log.e(logTag, "Sending file request failed")
-        val payload = VaultFileRequestFailedPayload("Vault file request $id: $message")
+//    private fun sendFileRequestFailed(peer: Peer, id: String, message: String) {
+    private fun sendFileRequestFailed(peer: Peer, ids: List<String>, message: String) {
+        Log.e(logTag, "File request $ids failed ($message)")
+        val payload = VaultFileRequestFailedPayload(ids, "Vault file request $ids: $message")
+        val packet = serializePacket(MessageId.FILE_REQUEST_FAILED, payload)
+        logger.debug { "-> $payload" }
+        send(peer, packet)
+    }
+
+    private fun sendAccessibleFilesRequestFailed(peer: Peer, id: String?, message: String) {
+        Log.e(logTag, "Accessible files request failed ($message)")
+        val payload = VaultFileRequestFailedPayload(if (id == null) listOf() else listOf(id), "Accessible files request $id: $message")
+        // TODO own MessageId?
         val packet = serializePacket(MessageId.FILE_REQUEST_FAILED, payload)
         logger.debug { "-> $payload" }
         send(peer, packet)

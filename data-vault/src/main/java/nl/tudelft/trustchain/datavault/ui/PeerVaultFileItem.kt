@@ -38,7 +38,7 @@ class PeerVaultFileItem(
      fun requestRemoteBitmap(viewHolder: ImageViewHolder) {
          Log.e("PeerVault", "Requesting data for $fileName")
          dataVaultCommunity.addPendingImageViewHolders(this, viewHolder)
-         dataVaultCommunity.sendFileRequest(peer, Policy.READ, fileName, sessionToken!!)
+         dataVaultCommunity.sendFileRequest(peer, Policy.READ, listOf(fileName), sessionToken!!)
     }
 
     fun fetchSubFolderAccessibleFiles() {

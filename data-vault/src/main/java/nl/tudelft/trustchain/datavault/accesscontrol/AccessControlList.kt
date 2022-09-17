@@ -8,7 +8,8 @@ import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.util.sha1
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
+import nl.tudelft.trustchain.common.util.TimingUtils
+import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -19,6 +20,7 @@ import java.util.*
 
 class AccessControlList(
     private val file: File,
+    private val dataVaultCommunity: DataVaultCommunity?,
     private val attestationCommunity: AttestationCommunity?
     ) {
 
@@ -36,10 +38,12 @@ class AccessControlList(
 
             when (accessTokenType) {
                 Policy.AccessTokenType.SESSION_TOKEN -> {
-                    //                verify session token
+//                    verify session token
                     val sessionToken = accessTokens[0]
-                    Log.e(logTag, "Session token: $sessionToken")
-                    return true
+                    val aft = SessionToken.getAFT(sessionToken)
+                    Log.e(logTag, "AFT: $aft")
+//                    TODO Validate AFT
+                    return aft == "AFT"
                 }
                 Policy.AccessTokenType.TCID -> {
                     val attestations = accessTokens.map {
@@ -66,10 +70,11 @@ class AccessControlList(
         return true
     }
 
-    private fun filterAttestations(peer: Peer, attestations: List<AttestationBlob>?): List<AttestationBlob>? {
+    fun filterAttestations(peer: Peer, attestations: List<AttestationBlob>?): List<AttestationBlob>? {
 
         return attestations?.filter {
             if (it.metadata == null || it.attestorKey == null || it.signature == null) {
+                Log.e("PerfTest", "Missing data")
                 false
             } else {
                 val parsedMetadata = JSONObject(it.metadata!!)
@@ -86,18 +91,18 @@ class AccessControlList(
 
     private fun getACL(): JSONObject {
         if (aclCache == null) {
-            if (aclFile.exists()) {
-                    try {
-                        val rd = aclFile.readText()
-                        Log.e(logTag, "ACL contents: $rd")
-                        aclCache = JSONObject(rd)
-                    } catch (e: Exception) {
-                        Log.e(logTag, "Corrupt ACL file: ${file.absolutePath}", e)
-                        aclCache = newACL()
-                    }
+            aclCache = if (aclFile.exists()) {
+                try {
+                    val rd = aclFile.readText()
+                    Log.e(logTag, "ACL contents: $rd")
+                    JSONObject(rd)
+                } catch (e: Exception) {
+                    Log.e(logTag, "Corrupt ACL file: ${file.absolutePath}", e)
+                    newACL()
+                }
             } else {
                 Log.e(logTag, "No acl file yet")
-                aclCache = newACL()
+                newACL()
             }
         }
 

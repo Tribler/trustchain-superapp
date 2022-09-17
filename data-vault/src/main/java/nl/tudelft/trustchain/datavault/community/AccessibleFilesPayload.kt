@@ -1,26 +1,23 @@
 package nl.tudelft.trustchain.datavault.community
 
-import android.util.Log
-import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.deserializeVarLen
 import nl.tudelft.ipv8.messaging.serializeVarLen
-import nl.tudelft.ipv8.util.toHex
 import org.json.JSONArray
 import java.nio.charset.Charset
 
 class AccessibleFilesPayload(
     val id: String?,
-    val accessToken: String?,
+    val sessionToken: String?,
     val files: List<String>
 ): Serializable {
     override fun serialize(): ByteArray {
         var serialized = serializeVarLen((id ?: NULL).toByteArray())
-        val finalToken = when (accessToken) {
+        val finalToken = when (sessionToken) {
             null -> NULL
             "" -> NULL
-            else -> accessToken
+            else -> sessionToken
         }
         serialized += serializeVarLen(finalToken.toByteArray()) + serializeVarLen(JSONArray(files).toString().toByteArray())
         return serialized
@@ -35,7 +32,7 @@ class AccessibleFilesPayload(
             localOffset += tokenSize
             val (filesBin, _) = deserializeVarLen(buffer, localOffset)
 
-            var files = mutableListOf<String>()
+            val files = mutableListOf<String>()
             val jsonFiles = JSONArray(filesBin.toString(Charset.defaultCharset()))
             var i = 0
             while ( i < jsonFiles.length()) {

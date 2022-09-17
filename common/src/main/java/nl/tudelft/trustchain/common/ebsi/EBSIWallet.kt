@@ -3,10 +3,13 @@ package nl.tudelft.trustchain.common.ebsi
 import android.content.Context
 import android.security.keystore.KeyProperties
 import android.util.Log
+import id.walt.crypto.KeyAlgorithm
+import id.walt.crypto.KeyId
 import id.walt.model.Did
 import id.walt.model.DidMethod
+import id.walt.services.CryptoProvider
+import id.walt.services.context.ContextManager
 import id.walt.services.did.DidService
-import io.ipfs.multibase.Multibase
 import nl.tudelft.ipv8.util.sha512
 import nl.tudelft.ipv8.util.toHex
 import org.json.JSONArray
@@ -16,9 +19,9 @@ import org.web3j.crypto.ECKeyPair
 import org.web3j.crypto.WalletUtils
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.lang.Exception
 import java.security.*
 import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import javax.crypto.Cipher
 import javax.crypto.KeyAgreement
@@ -71,6 +74,19 @@ class EBSIWallet(
             keyPairCache = kPair ?: newKeyPair()
         }
         return keyPairCache
+    }
+
+    val waltIdKey: id.walt.crypto.Key get() {
+        // TODO maybe cache
+        return try {
+            ContextManager.keyStore.load(keyAlias)
+        } catch (e: Exception) {
+            val keyId = KeyId(keyAlias)
+            val key =
+                id.walt.crypto.Key(keyId, KeyAlgorithm.ECDSA_Secp256k1, CryptoProvider.SUN, keyPair)
+            ContextManager.keyStore.store(key)
+            key
+        }
     }
 
     private fun newKeyPair(store: Boolean = false): KeyPair {

@@ -5,17 +5,13 @@ import com.google.common.io.BaseEncoding
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.ECDHDecrypter
 import com.nimbusds.jose.crypto.ECDHEncrypter
-import com.nimbusds.jose.crypto.ECDSASigner
-import com.nimbusds.jose.crypto.ECDSAVerifier
 import com.nimbusds.jose.crypto.impl.ECDSA
-import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jwt.EncryptedJWT
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import id.walt.crypto.Key
 import id.walt.crypto.KeyAlgorithm
-import java.nio.charset.Charset
 import java.security.PublicKey
 import java.security.Signature
 import java.security.interfaces.ECPrivateKey
@@ -66,22 +62,7 @@ object JWTHelper {
             claimsSet.build()
         )
 
-        val signature: Signature = Signature.getInstance("SHA256withECDSA", "SC")
-        signature.initSign(wallet.privateKey)
-        signature.update(signedJWT.signingInput)
-        val signatureBytes = Base64URL.encode(
-            ECDSA.transcodeSignatureToConcat(
-                signature.sign(),
-                ECDSA.getSignatureByteArrayLength(signedJWT.header.algorithm)
-            ))
-
-        /*val verSignature: Signature = Signature.getInstance("SHA256withECDSA", "SC")
-        verSignature.initVerify(wallet.publicKey)
-        verSignature.update(signedJWT.signingInput)
-        val testVer = verSignature.verify(signatureBytes.decode())
-        Log.e("CreateJWT", "Test verification: $testVer")*/
-
-
+        val signatureBytes = signJWT(wallet, signedJWT)
         val serializedJWT = serializeJWT(signedJWT, signatureBytes, false)
         Log.e("CreateJWT", "serialized jwt: $serializedJWT")
 
@@ -91,15 +72,27 @@ object JWTHelper {
         }, wallet.publicKey as ECPublicKey, isDer = false)
 
         // Compute the EC signature
-        /*signedJWT.sign(signer)
+//        signedJWT.sign(signer)
 
-        verifyJWT(signedJWT.serialize(), VerificationListener {
-            Log.e("SignJWT", "Signature verified: ${it != null}")
-        }, wallet.publicKey as ECPublicKey)*/
-
-        // Serialize the JWS to compact form
-//        return signedJWT.serialize(detached)
         return serializeJWT(signedJWT, signatureBytes, detached)
+    }
+
+    fun createSessionToken(wallet: EBSIWallet, aud: String): String {
+        val claimsSet = JWTClaimsSet.Builder()
+
+        claimsSet.issueTime(Date())
+            .expirationTime(Date(Date().time + (15 * 60 * 1000)))
+            .issuer(wallet.did)
+            .audience(aud)
+            .claim("AFT", "AFT")
+
+        val signedJWT = SignedJWT(
+            JWSHeader.Builder(JWSAlgorithm.ES256K).keyID(wallet.keyAlias).type(JOSEObjectType.JWT).build(),
+            claimsSet.build()
+        )
+
+        val signatureBytes = signJWT(wallet, signedJWT)
+        return serializeJWT(signedJWT, signatureBytes, false)
     }
 
     fun serializeJWT(jwt: JWSObject, signature: Base64URL, detachedPayload: Boolean): String {
@@ -114,6 +107,18 @@ object JWTHelper {
                 jwt.header.toBase64URL().toString() + '.' + jwt.payload.toString() + '.' + signature.toString()
             }
         }
+    }
+
+    fun signJWT(wallet: EBSIWallet, signedJWT: SignedJWT): Base64URL {
+        val signature: Signature = Signature.getInstance("SHA256withECDSA", "SC")
+        signature.initSign(wallet.privateKey)
+        signature.update(signedJWT.signingInput)
+        return Base64URL.encode(
+            ECDSA.transcodeSignatureToConcat(
+                signature.sign(),
+                ECDSA.getSignatureByteArrayLength(signedJWT.header.algorithm)
+            )
+        )
     }
 
     fun verifyJWT(jwt: String, onVerified: VerificationListener, verificationKey: PublicKey? = null, isDer: Boolean = false) {
@@ -188,6 +193,11 @@ object JWTHelper {
         signature.update(jwt.signingInput)
         return signature.verify(if (isDer) jwsSignature else ECDSA.transcodeSignatureToDER(jwsSignature))
 //        return signature.verify(jwsSignature)
+    }
+
+    fun getJWTPayload(jwt: String): MutableMap<String, Any> {
+        val parsedJWT = SignedJWT.parse(jwt)
+        return parsedJWT.payload.toJSONObject()
     }
 
     private fun getSignature(key: Key): Signature {

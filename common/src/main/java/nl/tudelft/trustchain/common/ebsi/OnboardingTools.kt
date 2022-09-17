@@ -2,15 +2,15 @@ package nl.tudelft.trustchain.common.ebsi
 
 import android.util.Log
 import com.android.volley.Response
-import id.walt.auditor.Auditor
-import id.walt.auditor.SignaturePolicy
-import id.walt.services.jwt.JwtService
+import nl.tudelft.trustchain.common.util.TimingUtils
 import org.json.JSONObject
 import java.net.URI
 
 object OnboardingTools {
 
     private const val TAG  = "OnbrdngTools"
+
+    var requestTime = 0L
 
     private fun getVerifiableAuthorisationListener(wallet: EBSIWallet): Response.Listener<JSONObject> {
         return Response.Listener<JSONObject> { response ->
@@ -23,7 +23,9 @@ object OnboardingTools {
         // =====ONBOARD_01_A Requests Verifiable Authorisation (VA)=====
 
         val authenticationVerificationListener = VerificationListener { payload ->
+            val duration = TimingUtils.getTimestamp() - requestTime
             if (payload != null) {
+                Log.e("PerfTest", "Verified EBSI credential in $duration ms")
                 val clientId = payload["client_id"]?.toString()
 
                 if (clientId.isNullOrEmpty()) {
@@ -47,6 +49,7 @@ object OnboardingTools {
                 )
             } else {
                 Log.e(TAG, "Auth request verification failed")
+                Log.e("PerfTest", "Failed to verify EBSI credential in $duration ms")
             }
         }
 
@@ -77,14 +80,15 @@ object OnboardingTools {
     }
 
     fun getVerifiableAuthorisation(wallet: EBSIWallet, sessionToken: String, errorListener: Response.ErrorListener) {
-        val did = wallet.did
+       /* val did = wallet.did
         val didDocument = wallet.didDocument()
 
         Log.e(TAG, "did: $did")
         Log.e(TAG, "didDocument: $didDocument")
-
+*/
         val api = "users-onboarding/v2/authentication-requests"
         val scope = "ebsi users onboarding"
+        requestTime = TimingUtils.getTimestamp()
         EBSIAPI.getAuthenticationRequest(api, scope, getAuthenticationRequestListener(wallet, sessionToken, errorListener), errorListener)
     }
 }

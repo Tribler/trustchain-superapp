@@ -38,7 +38,7 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
 
         val fileName = args.fileName
         val file = File(fileName)
-        accessControlList = AccessControlList(file, null)
+        accessControlList = AccessControlList(file, null, null)
 
         val fileSizeMb = file.length() / (1024.0 * 1024)
         binding.fileNameTextView.text = file.name
@@ -87,7 +87,7 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
     private fun getEditablePolicy(policyIndex: Int): Policy {
         val policy = acmViewModel.getModifiedPolicy(policyIndex) ?: policies[policyIndex]
         val modifiedActive = acmViewModel.isPolicyActive(policyIndex)
-        val active = if (modifiedActive != null) modifiedActive else policy.isActive
+        val active = modifiedActive ?: policy.isActive
         // Log.e(logTag, "Policy $policyIndex active (cache): $modifiedActive, (stored) ${policy.isActive}, (final): $active")
         policy.setActive(active)
         return policy
