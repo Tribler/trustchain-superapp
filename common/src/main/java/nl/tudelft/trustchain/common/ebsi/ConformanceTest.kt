@@ -42,6 +42,7 @@ class ConformanceTest(
 //        Log.e(TAG, myVolleyError.volleyError?.message ?: "No message")
     }
 
+
     fun run(){
         Log.e(TAG, "Conformance Test: $uuid")
         // https://ec.europa.eu/digital-building-blocks/wikis/display/EBSIDOC/EBSI+Wallet+Conformance+Testing

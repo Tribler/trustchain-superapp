@@ -357,12 +357,11 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 //            tempSessionToken
 
         } else {
-            val sessionToken = generateToken(peer)
-            filterAndSendAccessibleFiles(peer, payload, sessionToken)
+            filterAndSendAccessibleFiles(peer, payload, null)
         }
     }
 
-    private fun filterAndSendAccessibleFiles(peer: Peer, payload: VaultFileRequestPayload, sessionToken: String) {
+    private fun filterAndSendAccessibleFiles(peer: Peer, payload: VaultFileRequestPayload, sessionToken: String?) {
         val fileFilter = FileFilter { file ->
             val fileName = file.name
             val (_, accessPolicy) = vaultFile(file)
@@ -379,10 +378,11 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
             if (file.isDirectory) "${vaultPath(file.absolutePath)}/" else vaultPath(file.absolutePath)
         }
 
-        sendAccessibleFiles(peer, folderId, sessionToken, filteredFiles)
+        sendAccessibleFiles(peer, folderId, sessionToken ?: generateToken(peer), filteredFiles)
     }
 
     private fun generateToken(peer: Peer): String {
+//        TODO pass filtered files to generate DirectoryTree
         return JWTHelper.createSessionToken(ebsiWallet, peer.mid)
 //        val sessionToken = SessionToken(peer)
 //        sessionTokenCache.set(sessionToken.value, sessionToken)
@@ -421,9 +421,9 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         sendBytes(peer, id, EVAId.EVA_DATA_VAULT_FILE, os.toByteArray())
     }
 
-    private fun sendAccessibleFiles(peer: Peer, id: String?, accessToken: String?, files: List<String>?) {
+    private fun sendAccessibleFiles(peer: Peer, id: String?, sessionToken: String, files: List<String>?) {
         Log.e(logTag, "Sending ${files?.size ?: 0} file(s) to ${peer.publicKey.keyToBin().toHex()}")
-        val payload = AccessibleFilesPayload(id, accessToken, files ?: listOf())
+        val payload = AccessibleFilesPayload(id, sessionToken, files ?: listOf())
         val packet = serializePacket(MessageId.ACCESSIBLE_FILES, payload, encrypt = true)
         logger.debug { "-> $payload" }
         send(peer, packet)
@@ -431,8 +431,8 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
 //    fun sendAccessibleFilesRequest(peerVaultFileItem: PeerVaultFileItem, id: String?, accessMode: String, accessTokenType: Policy.AccessTokenType, accessTokens: List<String>) {
     fun sendAccessibleFilesRequest(peerVaultFileItem: PeerVaultFileItem, id: String?, accessMode: String, accessTokenType: Policy.AccessTokenType, accessTokens: List<String>) {
-        Log.e(logTag, "Sending accessible files request")
-        Log.e(logTag, "including ${accessTokens.size} access token(s)")
+        Log.e(logTag, "Sending accessible files request for $id")
+        Log.e(logTag, "including ${accessTokens.size} access token(s) ($accessTokenType)")
         val payload = VaultFileRequestPayload(if (id == null) listOf() else listOf(id), accessMode, accessTokenType, accessTokens)
         val packet = serializePacket(MessageId.ACCESSIBLE_FILES_REQUEST, payload)
         logger.debug { "-> $payload" }

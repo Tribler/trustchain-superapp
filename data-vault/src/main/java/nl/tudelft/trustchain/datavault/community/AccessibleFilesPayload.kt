@@ -9,17 +9,17 @@ import java.nio.charset.Charset
 
 class AccessibleFilesPayload(
     val id: String?,
-    val sessionToken: String?,
+    val sessionToken: String,
     val files: List<String>
 ): Serializable {
     override fun serialize(): ByteArray {
         var serialized = serializeVarLen((id ?: NULL).toByteArray())
-        val finalToken = when (sessionToken) {
+        /*val finalToken = when (sessionToken) {
             null -> NULL
             "" -> NULL
             else -> sessionToken
-        }
-        serialized += serializeVarLen(finalToken.toByteArray()) + serializeVarLen(JSONArray(files).toString().toByteArray())
+        }*/
+        serialized += serializeVarLen(sessionToken.toByteArray()) + serializeVarLen(JSONArray(files).toString().toByteArray())
         return serialized
     }
 
@@ -45,11 +45,11 @@ class AccessibleFilesPayload(
                 stringId = null
             }
 
-            val finalToken: String? = when(token.toString(Charset.defaultCharset())) {
+            /*val finalToken: String? = when(token.toString(Charset.defaultCharset())) {
                 NULL -> null
                 else -> token.toString(Charset.defaultCharset())
-            }
-            return Pair(AccessibleFilesPayload(stringId, finalToken, files), 0)
+            }*/
+            return Pair(AccessibleFilesPayload(stringId, token.toString(Charset.defaultCharset()), files), 0)
         }
 
         const val NULL = "NULL"

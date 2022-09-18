@@ -100,6 +100,8 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             }
 //            performanceTest.testTCID(attestationCommunity)
 
+//            performanceTest.testDirectoryTree()
+
         }
     }
 

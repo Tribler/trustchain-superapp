@@ -14,6 +14,7 @@ import nl.tudelft.ipv8.util.sha1
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.TimingUtils
 import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
+import nl.tudelft.trustchain.datavault.accesscontrol.DirectoryTree
 import nl.tudelft.trustchain.datavault.accesscontrol.Policy
 import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import org.json.JSONArray
@@ -228,6 +229,24 @@ class PerformanceTest(
         filterAttestations(dataVaultCommunity.myPeer, attestations)?.size ?: 0 > 0
         val duration = TimingUtils.getTimestamp() - start
         Log.e("PerfTest", "$duration ms to verify ($verified) ${attestations.size} attestations")
+    }
+
+    fun testDirectoryTree() {
+        val directoryTree = DirectoryTree("data_vault")
+        directoryTree.addPath("dir1")
+            .addPath("dir2/filex")
+            .addPath("dir2/filey")
+            .addPath("dir1/filea")
+            .addPath("dir3/dir4/filez")
+
+        val flat = directoryTree.flatten()
+
+        Log.e(logTag, "flatten dir tree: $flat")
+
+        val parsed = DirectoryTree.parse(flat.toString())
+
+        Log.e(logTag, "Parsed dir tree: ${parsed.flatten()}")
+
     }
 
     companion object {

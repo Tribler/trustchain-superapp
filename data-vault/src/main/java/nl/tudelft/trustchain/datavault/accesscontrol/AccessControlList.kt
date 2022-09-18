@@ -155,6 +155,7 @@ class AccessControlList(
     }
 
     fun isPublic(): Boolean {
+//        TODO
         if (1==1) return true
 
         val acl = File(file.absolutePath + ".acl")
