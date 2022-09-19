@@ -18,9 +18,9 @@
         style="@style/DialogTitle"
         android:layout_marginTop="8dp"
         android:text="@string/dialog_title_add_ebsi_attestation"
-        app:layout_constraintTop_toBottomOf="@+id/dialogHandle"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle" />
 
     <TextView
         android:id="@+id/tvAttributeNameTitle"
@@ -32,90 +32,33 @@
         android:textColor="?attr/onWidgetColor"
         android:textSize="12sp"
         android:textStyle="italic"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clAttributeName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:layout_marginEnd="4dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/etAttributeValue"
-        app:layout_constraintTop_toBottomOf="@+id/tvAttributeNameTitle">
+        app:layout_constraintTop_toBottomOf="@+id/tvAttributeNameTitle"/>
 
-    <Spinner
-        android:id="@+id/spinnerAttributeName"
-        android:layout_width="match_parent"
-        android:minWidth="125dp"
-        android:layout_height="40dp"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/light_gray"
-        android:paddingVertical="8dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/etAttributeName"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:minWidth="100dp"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/light_gray"
-        android:inputType="none"
-        android:paddingVertical="8dp"
-        android:paddingHorizontal="8dp"
-        android:textSize="14sp"
-        android:textColor="@color/gray"
-        android:clickable="false"
-        android:focusable="false"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <TextView
-        android:id="@+id/tvAttributeValueTitle"
+    <RelativeLayout
+        android:id="@+id/loadingPanel"
+        android:layout_height="match_parent"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="4dp"
-        android:paddingStart="8dp"
-        android:text="@string/text_value"
-        android:textColor="?attr/onWidgetColor"
-        android:textSize="12sp"
-        android:textStyle="italic"
-        app:layout_constraintStart_toStartOf="@+id/etAttributeValue"
-        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
-
-    <EditText
-        android:id="@+id/etAttributeValue"
-        android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/light_gray"
-        android:inputType="textCapWords"
-        android:paddingVertical="8dp"
-        android:paddingStart="8dp"
-        android:textSize="14sp"
-        android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/clAttributeName"
-        app:layout_constraintTop_toBottomOf="@+id/tvAttributeValueTitle" />
-
-    <Button
-        android:id="@+id/btnSaveAttribute"
-        style="@style/ButtonGreenRounded"
-        android:layout_marginTop="8dp"
-        android:enabled="false"
-        android:text="@string/btn_ok"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="center"
+        app:layout_constraintEnd_toStartOf="@+id/tvAttributeNameTitle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etAttributeValue" />
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle">
 
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="visible"/>
+    </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
