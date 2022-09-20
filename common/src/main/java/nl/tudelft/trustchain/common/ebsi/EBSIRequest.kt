@@ -6,6 +6,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 /*import com.apicatalog.jsonld.JsonLdOptions
 import com.apicatalog.jsonld.document.Document
@@ -29,14 +30,6 @@ object EBSIRequest {
 
     fun setup(context: Context){
         requestQueue = Volley.newRequestQueue(context)
-
-        // temporary binding correct java files
-        /*HttpLoader.checkVirtualMethods()
-        JsonLdOptions.checkVirtualMethods()
-        Document.checkVirtualMethods()
-        UriExpansion.checkVirtualMethods()
-        MediaTypeParameters.checkVirtualMethods()
-        UriUtils.checkVirtualMethods()*/
     }
 
     fun get(
@@ -70,6 +63,38 @@ object EBSIRequest {
             apiURL(api, redirect),
             EBSIHeaders,
             jsonRequest,
+            listener,
+            errorListener
+        )
+
+        requestQueue.add(req)
+    }
+
+    fun stringPost(api: String?,
+                    stringRequest: String,
+                    listener: Response.Listener<String>,
+                    errorListener: Response.ErrorListener?,
+                    redirect: String? = null) {
+        val req = EBSIStringRequest(Request.Method.POST,
+            apiURL(api, redirect),
+            EBSIHeaders,
+            stringRequest,
+            listener,
+            errorListener
+        )
+
+        requestQueue.add(req)
+    }
+
+    fun stringGet(api: String?,
+                   stringRequest: String?,
+                   listener: Response.Listener<String>,
+                   errorListener: Response.ErrorListener?,
+                   redirect: String? = null) {
+        val req = EBSIStringRequest(Request.Method.GET,
+            apiURL(api, redirect),
+            EBSIHeaders,
+            stringRequest,
             listener,
             errorListener
         )
@@ -125,6 +150,37 @@ class EBSIJsonObjectRequest(
 //        error?.printStackTrace()
         super.deliverError(MyVolleyError(error, myUrl))
     }
+}
+
+class EBSIStringRequest(
+    method: Int,
+    private val myUrl: String,
+    private val extraHeaders: Map<String, String>?,
+    private val stringRequest: String?,
+    listener: Response.Listener<String>,
+    errorListener: Response.ErrorListener?
+): StringRequest(method,myUrl, listener, errorListener) {
+
+    override fun getHeaders(): MutableMap<String, String> {
+        val allHeaders = mutableMapOf<String, String>()
+        allHeaders.putAll(super.getHeaders())
+        allHeaders.putAll(extraHeaders ?: mapOf())
+        return allHeaders
+    }
+
+    override fun deliverError(error: VolleyError?) {
+//        error?.printStackTrace()
+        super.deliverError(MyVolleyError(error, myUrl))
+    }
+
+    override fun getBodyContentType(): String {
+        return "application/x-www-form-urlencoded"
+    }
+
+    override fun getBody(): ByteArray {
+        return (stringRequest ?: "").toByteArray()
+    }
+
 }
 
 class MyVolleyError: VolleyError {

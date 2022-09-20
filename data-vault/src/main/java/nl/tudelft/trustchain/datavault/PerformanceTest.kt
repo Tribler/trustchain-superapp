@@ -12,6 +12,7 @@ import nl.tudelft.ipv8.util.ByteArrayKey
 import nl.tudelft.ipv8.util.defaultEncodingUtils
 import nl.tudelft.ipv8.util.sha1
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.ebsi.EBSIWallet
 import nl.tudelft.trustchain.common.util.TimingUtils
 import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
 import nl.tudelft.trustchain.datavault.accesscontrol.DirectoryTree
@@ -130,19 +131,24 @@ class PerformanceTest(
         return total / rounds
     }
 
-    fun testFileRequests(peer: Peer, attestationCommunity: AttestationCommunity) {
+    fun testFileRequests(att: Policy.AccessTokenType, peer: Peer, attestationCommunity: AttestationCommunity) {
         val filename = "PERFORMANCE_TEST/1.jpg"
-        testFileRequestSessionToken(peer, filename)
-        testFileRequestTCID(peer, attestationCommunity, filename)
-//        testFileRequestJWT
+        for (i in 0 until 50) {
+            when(att) {
+                Policy.AccessTokenType.SESSION_TOKEN -> testFileRequestSessionToken(peer, filename)
+                Policy.AccessTokenType.TCID -> testFileRequestTCID(peer, attestationCommunity, filename)
+                Policy.AccessTokenType.JWT -> testFileRequestJWT(peer, filename, EBSIWallet.MY_TEST_CREDENTIAL)
+                Policy.AccessTokenType.JSONLD -> dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.JSONLD, listOf())
+            }
+        }
     }
 
-    fun testFileRequestSessionToken(peer: Peer, filename: String) {
+    private fun testFileRequestSessionToken(peer: Peer, filename: String) {
 //        val nonce = SecureRandom.getSeed(16).toString()
         dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.SESSION_TOKEN, listOf("session-token"))
     }
 
-    fun testFileRequestTCID(peer: Peer, attestationCommunity: AttestationCommunity, filename: String) {
+    private fun testFileRequestTCID(peer: Peer, attestationCommunity: AttestationCommunity, filename: String) {
 //        val nonce = SecureRandom.getSeed(16).toString()
 
         val attestations = attestationCommunity.database.getAllAttestations()
@@ -153,7 +159,7 @@ class PerformanceTest(
         dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.TCID, attestations)
     }
 
-    fun testFileRequestJWT(peer: Peer, filename: String, jwt: String) {
+    private fun testFileRequestJWT(peer: Peer, filename: String, jwt: String) {
 //        val nonce = SecureRandom.getSeed(16).toString()
         dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.JWT, listOf(jwt))
     }

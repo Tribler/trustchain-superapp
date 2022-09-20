@@ -23,9 +23,8 @@ object OnboardingTools {
         // =====ONBOARD_01_A Requests Verifiable Authorisation (VA)=====
 
         val authenticationVerificationListener = VerificationListener { payload ->
-            val duration = TimingUtils.getTimestamp() - requestTime
             if (payload != null) {
-                Log.e("PerfTest", "Verified EBSI credential in $duration ms")
+//                Log.e("PerfTest", "Verified EBSI credential in $duration ms")
                 val clientId = payload["client_id"]?.toString()
 
                 if (clientId.isNullOrEmpty()) {
@@ -37,19 +36,28 @@ object OnboardingTools {
                 val filteredPayload = payload.filter { JWTHelper.stringClaims.contains(it.key) }
 //                val responseJWT = JWTHelper.createJWT(wallet, iss, filteredPayload, null, selfIssued = true)
                 val responseJWT = JWTHelper.createJWT(wallet, clientId, filteredPayload, null, selfIssued = true)
+                Log.e(TAG, "Length authentication response: ${responseJWT.length}")
 
                 Log.e(TAG, "Response jwt: $responseJWT")
 
+                requestTime = TimingUtils.getTimestamp()
+                errorListener.toString()
                 // =====ONBOARD_02A Proves control of DID key=====
                 EBSIAPI.getVerifiableAuthorisation(sessionToken,
                     clientId,
                     responseJWT,
                     getVerifiableAuthorisationListener(wallet),
-                    errorListener
+                    Response.ErrorListener {
+                        val duration = TimingUtils.getTimestamp() - requestTime
+                        Log.e("PerfTest", "EBSI auth response call in $duration ms")
+                        val myVolleyError = it as MyVolleyError
+                        Log.e(TAG, myVolleyError.volleyError?.networkResponse?.data?.toString(Charsets.UTF_8) ?: "No network response")
+                    }
+//                    errorListener
                 )
             } else {
                 Log.e(TAG, "Auth request verification failed")
-                Log.e("PerfTest", "Failed to verify EBSI credential in $duration ms")
+//                Log.e("PerfTest", "Failed to verify EBSI credential in $duration ms")
             }
         }
 
@@ -88,7 +96,6 @@ object OnboardingTools {
 */
         val api = "users-onboarding/v2/authentication-requests"
         val scope = "ebsi users onboarding"
-        requestTime = TimingUtils.getTimestamp()
         EBSIAPI.getAuthenticationRequest(api, scope, getAuthenticationRequestListener(wallet, sessionToken, errorListener), errorListener)
     }
 }

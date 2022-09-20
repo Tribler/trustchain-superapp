@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
@@ -46,7 +47,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
     private var areFABsVisible = false
 
-    private val PERFORMANCE_TEST = false
+    val PERFORMANCE_TEST = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +67,13 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                     CoroutineScope(Dispatchers.Main).launch {
                         if (data != null) {
                             getDataVaultCommunity().onFilePacket(Packet(peer.address, data))
+                        }
+                    }
+                }
+                DataVaultCommunity.EVAId.TEST_EVA_DATA_VAULT_FILE -> {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        if (data != null) {
+                            getDataVaultCommunity().onTestFilePacket(Packet(peer.address, data))
                         }
                     }
                 }
@@ -168,12 +176,12 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     private fun showFabs() {
         if (currentFolder !is PeerVaultFileItem){
             binding.requestAccessibleFilesFab.show()
-//            binding.deleteFilesFab.show()
+            binding.deleteFilesFab.show()
             binding.createFolderFab.show()
             binding.addFileFab.show()
 
             binding.requestAccessibleFilesText.visibility = View.VISIBLE
-//            binding.deleteFilesText.visibility = View.VISIBLE
+            binding.deleteFilesText.visibility = View.VISIBLE
             binding.createFolderText.visibility = View.VISIBLE
             binding.addFileText.visibility = View.VISIBLE
 
@@ -219,7 +227,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             Log.e(logTag, "Chosen peer: ${peer.publicKey.keyToBin().toHex()}")
 
             if (PERFORMANCE_TEST) {
-                PerformanceTest(getDataVaultCommunity()).testFileRequests(peer, attestationCommunity)
+                PerformanceTest(getDataVaultCommunity()).testFileRequests(attTypeTest, peer, attestationCommunity)
                 return@setItems
             }
 
@@ -370,7 +378,20 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         updateAdapter(localVaultFiles())
     }
 
+    var attTypeTest = Policy.AccessTokenType.SESSION_TOKEN
     private fun deleteTestFiles() {
+        if (PERFORMANCE_TEST) {
+            attTypeTest = when (attTypeTest) {
+                Policy.AccessTokenType.SESSION_TOKEN -> Policy.AccessTokenType.TCID
+                Policy.AccessTokenType.TCID -> Policy.AccessTokenType.JWT
+                Policy.AccessTokenType.JWT -> Policy.AccessTokenType.JSONLD
+                Policy.AccessTokenType.JSONLD -> Policy.AccessTokenType.SESSION_TOKEN
+            }
+
+            Toast.makeText(requireContext(), "Chosen AccessTokenType: $attTypeTest", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         if (currentFolder.file.canRead()) {
             currentFolder.file.listFiles()?.forEach { it.delete() }
         }

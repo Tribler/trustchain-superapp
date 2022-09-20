@@ -4,6 +4,7 @@ import android.util.Log
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.util.Base64URL
 import id.walt.crypto.buildKey
 import net.i2p.crypto.eddsa.EdDSASecurityProvider
 import nl.tudelft.ipv8.android.util.AndroidEncodingUtils

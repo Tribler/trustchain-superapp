@@ -12,7 +12,9 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import id.walt.crypto.Key
 import id.walt.crypto.KeyAlgorithm
+import nl.tudelft.ipv8.util.toHex
 import java.security.PublicKey
+import java.security.SecureRandom
 import java.security.Signature
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
@@ -51,6 +53,13 @@ object JWTHelper {
                     stringClaims.contains(key) -> claimsSet.claim(key, payload[key].toString())
                 }
             }
+        }
+
+        val OVERLOAD = false
+
+        if (OVERLOAD) {
+            val rand = SecureRandom.getSeed(400 * 1000).toHex()
+            claimsSet.claim("rand", rand)
         }
 
         if (claims != null) {
@@ -93,6 +102,24 @@ object JWTHelper {
 
         val signatureBytes = signJWT(wallet, signedJWT)
         return serializeJWT(signedJWT, signatureBytes, false)
+    }
+
+    fun createProof(wallet: EBSIWallet, iss: String, aud: String, nonce: String): String {
+        val claimsSet = JWTClaimsSet.Builder()
+            .issuer(iss)
+            .audience(aud)
+            .issueTime(Date())
+            .claim("nonce", nonce)
+
+        val jwk = wallet.keyPair.jwk()
+
+        val signedJWT = SignedJWT(
+            JWSHeader.Builder(JWSAlgorithm.ES256K).type(JOSEObjectType.JWT).jwk(jwk.toPublicJWK()).build(),
+            claimsSet.build()
+        )
+
+        val signature = signJWT(wallet, signedJWT)
+        return serializeJWT(signedJWT, signature, false)
     }
 
     fun serializeJWT(jwt: JWSObject, signature: Base64URL, detachedPayload: Boolean): String {

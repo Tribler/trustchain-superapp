@@ -107,18 +107,20 @@ object DidService {
         return@runBlocking didDoc
     }
 
-    fun resolveDidEbsi(did: String): DidEbsi = resolveDidEbsi(DidUrl.from(did))
-    fun resolveDidEbsi(didUrl: DidUrl): DidEbsi = runBlocking {
+    fun resolveDidEbsi(did: String, resolver: String? = null): DidEbsi = resolveDidEbsi(DidUrl.from(did), resolver)
+    fun resolveDidEbsi(didUrl: DidUrl, resolver: String? = null): DidEbsi = runBlocking {
 
         log.debug { "Resolving DID ${didUrl.did}..." }
 
         var didDoc: String
         var lastEx: ClientRequestException? = null
 
+        val finalResolver = "${resolver ?: "https://api.preprod.ebsi.eu/did-registry/v2/identifiers/"}${didUrl.did}"
+
         for (i in 1..5) {
             try {
-                log.debug { "Resolving did:ebsi at: https://api.preprod.ebsi.eu/did-registry/v2/identifiers/${didUrl.did}" }
-                didDoc = WaltIdServices.http.get("https://api.preprod.ebsi.eu/did-registry/v2/identifiers/${didUrl.did}").bodyAsText()
+                log.debug { "Resolving did:ebsi at: $finalResolver" }
+                didDoc = WaltIdServices.http.get(finalResolver).bodyAsText()
                 log.debug { "Result: $didDoc" }
                 return@runBlocking Did.decode(didDoc)!! as DidEbsi
             } catch (e: ClientRequestException) {

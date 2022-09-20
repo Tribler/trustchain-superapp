@@ -32,9 +32,12 @@ import nl.tudelft.trustchain.datavault.ui.PeerVaultFileItem
 import nl.tudelft.trustchain.datavault.ui.VaultBrowserFragment
 import nl.tudelft.trustchain.datavault.ui.VaultBrowserFragment.Companion.VAULT_DIR
 import nl.tudelft.trustchain.peerchat.community.AttachmentPayload
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileFilter
+import java.lang.Exception
 
 private val logger = KotlinLogging.logger {}
 
@@ -166,9 +169,25 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         onAccessibleFiles(peer, payload)
     }
 
+    val durations = JSONObject().apply {
+        put(Policy.AccessTokenType.SESSION_TOKEN.name, JSONArray())
+        put(Policy.AccessTokenType.TCID.name, JSONArray())
+        put(Policy.AccessTokenType.JWT.name, JSONArray())
+    }
     private fun onTestFile(peer: Peer, payload: AttachmentPayload) {
         Log.e(logTag, "Test File ${payload.id} received  from $peer")
 //        onFile(peer, payload.id, payload.data)
+        try {
+            val sendTime = payload.id.toLong()
+            val receiveTime = TimingUtils.getTimestamp()
+            val duration = receiveTime - sendTime
+            Log.e(logTag, "onTestFile: ${vaultBrowserFragment.attTypeTest} duration $duration")
+            durations.getJSONArray(vaultBrowserFragment.attTypeTest.name).put(duration)
+            Log.e(logTag, "durations: $durations")
+
+        } catch (exception: Exception) {
+            Log.e(logTag, "onTestFile: id not a timestamp")
+        }
     }
 
     private fun onFile(peer: Peer, payload: AttachmentPayload) {
@@ -254,6 +273,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
     private fun onTestFileRequest(peer: Peer, payload: VaultFileRequestPayload) {
         Log.e(logTag, "Received test file request from $peer. Access token: ${payload.accessTokenType}")
+        onFileRequest(peer, payload )
     }
 
     private fun onFileRequest(peer: Peer, payload: VaultFileRequestPayload) {
@@ -292,7 +312,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
     private fun verifyAndSendFiles(vaultFiles: List<Triple<String, File, AccessControlList>>, peer: Peer, payload: VaultFileRequestPayload) {
         vaultFiles.forEach { vaultFile ->
-            val id = vaultFile.first
+            val id = if (vaultBrowserFragment.PERFORMANCE_TEST) payload.accessMode else vaultFile.first
             val file = vaultFile.second
             val accessPolicy = vaultFile.third
 
@@ -418,7 +438,11 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         val os = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os)
 
-        sendBytes(peer, id, EVAId.EVA_DATA_VAULT_FILE, os.toByteArray())
+        if (vaultBrowserFragment.PERFORMANCE_TEST) {
+            sendBytes(peer, id, EVAId.TEST_EVA_DATA_VAULT_FILE, os.toByteArray())
+        } else {
+            sendBytes(peer, id, EVAId.EVA_DATA_VAULT_FILE, os.toByteArray())
+        }
     }
 
     private fun sendAccessibleFiles(peer: Peer, id: String?, sessionToken: String, files: List<String>?) {
@@ -514,6 +538,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
      */
     object EVAId {
         const val EVA_DATA_VAULT_FILE = "eva_data_vault_file"
+        const val TEST_EVA_DATA_VAULT_FILE = "test_eva_data_vault_file"
     }
 
     class Factory(
