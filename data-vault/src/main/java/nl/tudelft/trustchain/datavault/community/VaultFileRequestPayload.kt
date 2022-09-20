@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.datavault.community
 
-import android.util.Log
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.deserializeVarLen

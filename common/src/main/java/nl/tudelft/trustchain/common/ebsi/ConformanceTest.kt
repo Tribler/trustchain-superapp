@@ -156,9 +156,6 @@ class ConformanceTest(
 //        verCredAuthReq()
 //        verCredTokReq()
 
-        EBSIVerifier.verifyJWT(EBSIWallet.MY_TEST_CREDENTIAL, VerificationListener {
-            Log.e(TAG, "Verify EBSI credential: $it")
-        })
 //        testKeys()
 
 //        waltIdTest()

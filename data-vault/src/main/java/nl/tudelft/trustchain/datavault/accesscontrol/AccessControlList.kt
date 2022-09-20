@@ -1,14 +1,13 @@
 package nl.tudelft.trustchain.datavault.accesscontrol
 
 import android.util.Log
-import id.walt.crypto.fromHexString
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.util.sha1
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.util.TimingUtils
+import nl.tudelft.trustchain.common.ebsi.JWTHelper
 import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import org.json.JSONArray
 import org.json.JSONObject
@@ -33,34 +32,46 @@ class AccessControlList(
         return getACL().getString(LAST_CHANGED)
     }
 
-    fun verifyAccess(peer: Peer, accessMode: String, accessTokenType: Policy.AccessTokenType, accessTokens: List<String>) : Boolean {
-        if (!isPublic()) {
+    fun verifyAccess(accessMode: String, accessTokenType: Policy.AccessTokenType, accessTokens: List<Any>) : Boolean {
+        if (!isPublic() || dataVaultCommunity?.vaultBrowserFragment?.PERFORMANCE_TEST == true) {
+            Log.e(logTag, "Verifying $accessMode access for att $accessTokenType")
 
             when (accessTokenType) {
                 Policy.AccessTokenType.SESSION_TOKEN -> {
 //                    verify session token
-                    val sessionToken = accessTokens[0]
+                    val sessionToken = accessTokens[0] as String
                     val aft = SessionToken.getAFT(sessionToken)
                     Log.e(logTag, "AFT: $aft")
 //                    TODO Validate AFT
-                    return aft == "AFT"
+                    return true
                 }
                 Policy.AccessTokenType.TCID -> {
-                    val attestations = accessTokens.map {
-                        AttestationBlob.deserialize(it.fromHexString()).first
-                    }
-                    val candidateAttestations = filterAttestations(peer, attestations)
-                    if (candidateAttestations != null && candidateAttestations.isNotEmpty()){
+                    /*val attestations = accessTokens.map {
+                        AttestationBlob.deserialize((it as String).fromHexString()).first
+                    }*/
+//                    val candidateAttestations = filterAttestations(peer, attestations)
+                    val candidateAttestations = accessTokens.map { at -> at as AttestationBlob }
+                    if (candidateAttestations.isNotEmpty()){
 
                         val policies = getPolicies()
 
                         for (policy in policies) {
-                            if (policy.evaluate(accessMode, candidateAttestations)) return true
+//                            TODO verify policy for specific access mode
+//                            if (policy.evaluate(accessMode, candidateAttestations))
+                            return true
                         }
+                    }
+                }
+                Policy.AccessTokenType.JWT -> {
+                    accessTokens.forEach { jwt ->
+                        val jwtPayload = JWTHelper.getJWTPayload(jwt as String)
+                        return jwtPayload.toString().isNotEmpty()
                     }
                 }
                 else -> {
                     Log.e(logTag, "Access token type $accessTokenType not implemented")
+//                    todo return false or implement
+                    return true
                 }
             }
 
@@ -68,25 +79,6 @@ class AccessControlList(
         }
 
         return true
-    }
-
-    fun filterAttestations(peer: Peer, attestations: List<AttestationBlob>?): List<AttestationBlob>? {
-
-        return attestations?.filter {
-            if (it.metadata == null || it.attestorKey == null || it.signature == null) {
-                Log.e("PerfTest", "Missing data")
-                false
-            } else {
-                val parsedMetadata = JSONObject(it.metadata!!)
-                val attesteeKeyHash = parsedMetadata.optString("trustchain_address_hash")
-                val isOwner = peer.publicKey.keyToHash().toHex() == attesteeKeyHash
-                val isSignatureValid = it.attestorKey!!.verify(it.signature!!,
-                    sha1(it.attestationHash + it.metadata!!.toByteArray())
-                )
-
-                isOwner && isSignatureValid
-            }
-        }
     }
 
     private fun getACL(): JSONObject {
@@ -214,6 +206,25 @@ class AccessControlList(
 	]
 }
 """
+        fun filterAttestations(peer: Peer, attestations: List<AttestationBlob>?): List<AttestationBlob>? {
+
+            return attestations?.filter {
+                if (it.metadata == null || it.attestorKey == null || it.signature == null) {
+                    Log.e("PerfTest", "Missing data")
+                    false
+                } else {
+                    val parsedMetadata = JSONObject(it.metadata!!)
+                    val attesteeKeyHash = parsedMetadata.optString("trustchain_address_hash")
+                    val isOwner = peer.publicKey.keyToHash().toHex() == attesteeKeyHash
+                    val isSignatureValid = it.attestorKey!!.verify(it.signature!!,
+                        sha1(it.attestationHash + it.metadata!!.toByteArray())
+                    )
+
+                    isOwner && isSignatureValid
+                }
+            }
+        }
+
         private fun toJSONArray(policies: List<Policy>): JSONArray {
             val jsonArray = JSONArray()
             policies.forEach {

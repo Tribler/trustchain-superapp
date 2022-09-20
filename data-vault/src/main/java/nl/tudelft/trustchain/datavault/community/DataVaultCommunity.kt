@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteConstraintException
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import id.walt.crypto.fromHexString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -12,6 +13,7 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Packet
@@ -19,6 +21,7 @@ import nl.tudelft.ipv8.messaging.eva.EVACommunity
 import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.ebsi.EBSIVerifier
 import nl.tudelft.trustchain.common.ebsi.EBSIWallet
 import nl.tudelft.trustchain.common.ebsi.JWTHelper
 import nl.tudelft.trustchain.common.ebsi.VerificationListener
@@ -47,7 +50,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     private val logTag = "DataVaultCommunity"
 
     private lateinit var dataVaultMainActivity: DataVaultMainActivity
-    private lateinit var vaultBrowserFragment: VaultBrowserFragment
+    lateinit var vaultBrowserFragment: VaultBrowserFragment
     private val attestationCommunity: AttestationCommunity by lazy {
         IPv8Android.getInstance().getOverlay()!!
     }
@@ -78,7 +81,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         messageHandlers[MessageId.ACCESSIBLE_FILES_REQUEST] = ::onAccessibleFilesRequestPacket
         messageHandlers[MessageId.ACCESSIBLE_FILES] = ::onAccessibleFilesPacket
 
-        evaProtocolEnabled = true
+        evaProtocolEnabled = false //TODO true
     }
 
     override fun load() {
@@ -86,10 +89,10 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
         // evaProtocol must be instantiated for DataVaultCommunity.
         // Make sure evaProtocolEnabled is set to true in init{}
-        evaProtocol!!.setOnEVASendCompleteCallback(::onEVASendCompleteCallback)
-        evaProtocol!!.setOnEVAReceiveProgressCallback(::onEVAReceiveProgressCallback)
-        evaProtocol!!.setOnEVAReceiveCompleteCallback(::onEVAReceiveCompleteCallback)
-        evaProtocol!!.setOnEVAErrorCallback(::onEVAErrorCallback)
+        evaProtocol?.setOnEVASendCompleteCallback(::onEVASendCompleteCallback)
+        evaProtocol?.setOnEVAReceiveProgressCallback(::onEVAReceiveProgressCallback)
+        evaProtocol?.setOnEVAReceiveCompleteCallback(::onEVAReceiveCompleteCallback)
+        evaProtocol?.setOnEVAErrorCallback(::onEVAErrorCallback)
     }
 
     /**
@@ -253,8 +256,12 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         onFileRequestFailed(payload)
     }
 
+    var TEST_SESSION_TOKEN: String? = null
     private fun onFileRequestFailed(payload: VaultFileRequestFailedPayload) {
         Log.e(logTag, payload.message)
+        if (payload.message.contains("Invalid session token")) {
+            TEST_SESSION_TOKEN = payload.message.split("=")[1].trim()
+        }
         // notify("Failed", payload.message)
     }
 
@@ -288,29 +295,49 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
 //        val (file, accessPolicy) = vaultFile(payload.id!!)
 
-
-        if (payload.accessTokenType == Policy.AccessTokenType.SESSION_TOKEN) {
-            val tempSessionToken = payload.accessTokens[0]
-            JWTHelper.verifyJWT(tempSessionToken, VerificationListener { jwtPayload ->
-                if (jwtPayload == null) {
+        when(payload.accessTokenType) {
+            Policy.AccessTokenType.SESSION_TOKEN -> {
+                val tempSessionToken = payload.accessTokens[0]
+                JWTHelper.verifyJWT(tempSessionToken, VerificationListener { jwtPayload ->
+                    if (jwtPayload == null) {
 //                    Invalid session token (not verified)
-                    sendFileRequestFailed(peer, payload.ids,"Invalid session token")
-                } else {
-//                    Valid session token
-                    if (jwtPayload["exp"]?.toString()?.toLongOrNull() ?: Long.MAX_VALUE > TimingUtils.getTimestamp()) {
-//                        Expired
-                        sendFileRequestFailed(peer, payload.ids,"Session token expired")
+                        sendFileRequestFailed(peer, payload.ids,"Invalid session token. New token=${generateToken(peer)}")
                     } else {
-                        verifyAndSendFiles(vaultFiles, peer, payload)
+//                    Valid session token
+                        if (jwtPayload["exp"]?.toString()?.toLongOrNull() ?: Long.MAX_VALUE > TimingUtils.getTimestamp()) {
+//                        Expired
+                            sendFileRequestFailed(peer, payload.ids,"Session token expired")
+                        } else {
+                            verifyAndSendFiles(vaultFiles, peer, payload)
+                        }
                     }
+                }, ebsiWallet.publicKey)
+            }
+            Policy.AccessTokenType.TCID -> {
+                val attestations = AccessControlList.filterAttestations(
+                    peer,
+                    payload.accessTokens.map {
+                        AttestationBlob.deserialize(it.fromHexString()).first
+                    }
+                )
+                verifyAndSendFiles(vaultFiles, peer, payload, attestations)
+            }
+            Policy.AccessTokenType.JWT -> {
+                payload.accessTokens.forEach { jwt ->
+                    EBSIVerifier.verifyJWT(jwt, VerificationListener { jwtPayload ->
+                        if (jwtPayload == null) {
+                            sendFileRequestFailed(peer, payload.ids,"Invalid jwt")
+                        } else {
+                            verifyAndSendFiles(vaultFiles, peer, payload)
+                        }
+                    })
                 }
-            }, ebsiWallet.publicKey)
-        } else {
-            verifyAndSendFiles(vaultFiles, peer, payload)
+            }
+            else -> verifyAndSendFiles(vaultFiles, peer, payload)
         }
     }
 
-    private fun verifyAndSendFiles(vaultFiles: List<Triple<String, File, AccessControlList>>, peer: Peer, payload: VaultFileRequestPayload) {
+    private fun verifyAndSendFiles(vaultFiles: List<Triple<String, File, AccessControlList>>, peer: Peer, payload: VaultFileRequestPayload, attestations: List<AttestationBlob>? = null) {
         vaultFiles.forEach { vaultFile ->
             val id = if (vaultBrowserFragment.PERFORMANCE_TEST) payload.accessMode else vaultFile.first
             val file = vaultFile.second
@@ -322,7 +349,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
             } else if (file.isDirectory) {
                 Log.e(logTag, "The requested file is a directory")
                 sendFileRequestFailed(peer, listOf(id), "The requested file is a directory")
-            } else if (!accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessTokenType, payload.accessTokens)) {
+            } else if (!accessPolicy.verifyAccess(payload.accessMode, payload.accessTokenType, attestations ?: payload.accessTokens)) {
                 Log.e(logTag, "Access Policy not met")
                 sendFileRequestFailed(peer, listOf(id), "Access Policy not met")
             } else {
@@ -343,28 +370,53 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         }
     }
 
+    /*
+    else {
+                accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessTokenType, payload.accessTokens, nl.tudelft.trustchain.datavault.accesscontrol.VerificationListener { verified ->
+                    if (verified) {
+                        try {
+                            when {
+                                file.isImage() -> {
+                                    Log.e(logTag, "File being sent is image")
+                                    sendImage(peer, id, file)
+                                }
+                                else -> {
+                                    sendFile(peer, id, file)
+                                }
+                            }
+                        } catch (e: SQLiteConstraintException) {
+                            e.printStackTrace()
+                        }
+                    } else {
+                        Log.e(logTag, "Access Policy not met")
+                        sendFileRequestFailed(peer, listOf(id), "Access Policy not met")
+                    }
+                })
+            }
+*/
     private fun onAccessibleFilesRequest(peer: Peer, payload: VaultFileRequestPayload) {
         val folderId = payload.ids.firstOrNull()
         Log.e(logTag, "accessible files request id: $folderId, access mode: ${payload.accessMode}, token: ${payload.accessTokenType}")
 
-        if (payload.accessTokenType == Policy.AccessTokenType.SESSION_TOKEN) {
-            val tempSessionToken = payload.accessTokens.first()
-            JWTHelper.verifyJWT(tempSessionToken, VerificationListener { jwtPayload ->
-                if (jwtPayload == null) {
+        when(payload.accessTokenType) {
+            Policy.AccessTokenType.SESSION_TOKEN -> {
+                val tempSessionToken = payload.accessTokens[0]
+                JWTHelper.verifyJWT(tempSessionToken, VerificationListener { jwtPayload ->
+                    if (jwtPayload == null) {
 //                    Invalid session token (not verified)
-                    sendAccessibleFilesRequestFailed(peer, folderId,"Invalid session token")
-                } else {
-//                    Valid session token
-                    if (jwtPayload["exp"]?.toString()?.toLongOrNull() ?: Long.MAX_VALUE > TimingUtils.getTimestamp()) {
-//                        Expired
-                        sendAccessibleFilesRequestFailed(peer, folderId,"Session token expired")
+                        sendAccessibleFilesRequestFailed(peer, folderId,"Invalid session token")
                     } else {
-                        filterAndSendAccessibleFiles(peer, payload, tempSessionToken)
+//                    Valid session token
+                        if (jwtPayload["exp"]?.toString()?.toLongOrNull() ?: Long.MAX_VALUE > TimingUtils.getTimestamp()) {
+//                        Expired
+                            sendAccessibleFilesRequestFailed(peer, folderId,"Session token expired")
+                        } else {
+                            filterAndSendAccessibleFiles(peer, payload, tempSessionToken)
+                        }
                     }
-                }
-            }, ebsiWallet.publicKey)
+                }, ebsiWallet.publicKey)
 
-//            val tempSessionToken = sessionTokenCache.get(payload.accessTokens[0])
+                //            val tempSessionToken = sessionTokenCache.get(payload.accessTokens[0])
 //            if (tempSessionToken == null) {
 //                sendAccessibleFilesRequestFailed(peer, payload.id,"Invalid session token")
 //                return
@@ -375,17 +427,36 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 //            tempSessionToken.extend()
 //            sessionTokenCache.set(tempSessionToken.value, tempSessionToken)
 //            tempSessionToken
-
-        } else {
-            filterAndSendAccessibleFiles(peer, payload, null)
+            }
+            Policy.AccessTokenType.TCID -> {
+                val attestations = AccessControlList.filterAttestations(
+                    peer,
+                    payload.accessTokens.map {
+                        AttestationBlob.deserialize(it.fromHexString()).first
+                    }
+                )
+                filterAndSendAccessibleFiles(peer, payload, null, attestations)
+            }
+            Policy.AccessTokenType.JWT -> {
+                payload.accessTokens.forEach { jwt ->
+                    EBSIVerifier.verifyJWT(jwt, VerificationListener { jwtPayload ->
+                        if (jwtPayload == null) {
+                            sendFileRequestFailed(peer, payload.ids,"Invalid jwt")
+                        } else {
+                            filterAndSendAccessibleFiles(peer, payload, null)
+                        }
+                    })
+                }
+            }
+            else -> filterAndSendAccessibleFiles(peer, payload, null)
         }
     }
 
-    private fun filterAndSendAccessibleFiles(peer: Peer, payload: VaultFileRequestPayload, sessionToken: String?) {
+    private fun filterAndSendAccessibleFiles(peer: Peer, payload: VaultFileRequestPayload, sessionToken: String?, attestations: List<AttestationBlob>? = null) {
         val fileFilter = FileFilter { file ->
             val fileName = file.name
             val (_, accessPolicy) = vaultFile(file)
-            !fileName.startsWith(".") && !fileName.endsWith(".acl") && accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessTokenType, payload.accessTokens)
+            !fileName.startsWith(".") && !fileName.endsWith(".acl") && accessPolicy.verifyAccess(payload.accessMode, payload.accessTokenType, attestations ?: payload.accessTokens)
         }
 
         val folderId = payload.ids.firstOrNull()
@@ -411,7 +482,8 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
     private fun sendBytes(peer: Peer, id: String, evaId: String, data: ByteArray) {
         val payload = AttachmentPayload(id, data)
-        val packet = serializePacket(MessageId.FILE, payload, encrypt = true, recipient = peer)
+        val messageId = if (vaultBrowserFragment.PERFORMANCE_TEST) MessageId.TEST_FILE else MessageId.FILE
+        val packet = serializePacket(messageId, payload, encrypt = true, recipient = peer)
         logger.debug { "-> $payload" }
 
         if (evaProtocolEnabled) {
@@ -517,9 +589,9 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         dataVaultMainActivity = activity
     }
 
-    fun setVaultBrowserFragment(fragment: VaultBrowserFragment) {
+    /*fun setVaultBrowserFragment(fragment: VaultBrowserFragment) {
         vaultBrowserFragment = fragment
-    }
+    }*/
 
     object MessageId {
         const val FILE = 11

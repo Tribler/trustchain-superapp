@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.datavault
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.schema.*
@@ -133,19 +134,22 @@ class PerformanceTest(
 
     fun testFileRequests(att: Policy.AccessTokenType, peer: Peer, attestationCommunity: AttestationCommunity) {
         val filename = "PERFORMANCE_TEST/1.jpg"
-        for (i in 0 until 50) {
-            when(att) {
-                Policy.AccessTokenType.SESSION_TOKEN -> testFileRequestSessionToken(peer, filename)
-                Policy.AccessTokenType.TCID -> testFileRequestTCID(peer, attestationCommunity, filename)
-                Policy.AccessTokenType.JWT -> testFileRequestJWT(peer, filename, EBSIWallet.MY_TEST_CREDENTIAL)
-                Policy.AccessTokenType.JSONLD -> dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.JSONLD, listOf())
+        CoroutineScope(Dispatchers.IO).launch {
+            for (i in 0 until 1) {
+                when(att) {
+                    Policy.AccessTokenType.SESSION_TOKEN -> testFileRequestSessionToken(peer, filename)
+                    Policy.AccessTokenType.TCID -> testFileRequestTCID(peer, attestationCommunity, filename)
+                    Policy.AccessTokenType.JWT -> testFileRequestJWT(peer, filename, EBSIWallet.MY_TEST_CREDENTIAL)
+                    Policy.AccessTokenType.JSONLD -> dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.JSONLD, listOf())
+                }
+                delay(2500)
             }
         }
     }
 
     private fun testFileRequestSessionToken(peer: Peer, filename: String) {
 //        val nonce = SecureRandom.getSeed(16).toString()
-        dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.SESSION_TOKEN, listOf("session-token"))
+        dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.SESSION_TOKEN, listOf(dataVaultCommunity.TEST_SESSION_TOKEN ?: ""))
     }
 
     private fun testFileRequestTCID(peer: Peer, attestationCommunity: AttestationCommunity, filename: String) {
@@ -231,8 +235,7 @@ class PerformanceTest(
         Log.e("PerfTest", "Attestations: ${attestations.size}")
 
         val start = TimingUtils.getTimestamp()
-        val verified = AccessControlList(dataVaultCommunity.VAULT, dataVaultCommunity, attestationCommunity).
-        filterAttestations(dataVaultCommunity.myPeer, attestations)?.size ?: 0 > 0
+        val verified = AccessControlList.filterAttestations(dataVaultCommunity.myPeer, attestations)?.size ?: 0 > 0
         val duration = TimingUtils.getTimestamp() - start
         Log.e("PerfTest", "$duration ms to verify ($verified) ${attestations.size} attestations")
     }

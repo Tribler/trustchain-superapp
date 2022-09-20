@@ -47,7 +47,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
     private var areFABsVisible = false
 
-    val PERFORMANCE_TEST = true
+    val PERFORMANCE_TEST = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +60,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         uriPathHelper = URIPathHelper(requireContext())
 
         getDataVaultCommunity().setDataVaultActivity(dataVaultActivity)
-        getDataVaultCommunity().setVaultBrowserFragment(this)
+        getDataVaultCommunity().vaultBrowserFragment = this
         getDataVaultCommunity().setEVAOnReceiveCompleteCallback { peer, info, _, data ->
             when (info) {
                 DataVaultCommunity.EVAId.EVA_DATA_VAULT_FILE -> {
