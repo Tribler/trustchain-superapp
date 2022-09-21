@@ -81,7 +81,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         messageHandlers[MessageId.ACCESSIBLE_FILES_REQUEST] = ::onAccessibleFilesRequestPacket
         messageHandlers[MessageId.ACCESSIBLE_FILES] = ::onAccessibleFilesPacket
 
-        evaProtocolEnabled = false //TODO true
+        evaProtocolEnabled = true //TODO true
     }
 
     override fun load() {
@@ -145,7 +145,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     }
 
     private fun isDataVaultEVA(info: String): Boolean {
-        return listOf(EVAId.EVA_DATA_VAULT_FILE).contains(info)
+        return listOf(EVAId.EVA_DATA_VAULT_FILE, EVAId.TEST_EVA_DATA_VAULT_FILE).contains(info)
     }
 
     ///////////////////////////////////
@@ -179,15 +179,13 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         put(Policy.AccessTokenType.JSONLD.name, JSONArray())
     }
     private fun onTestFile(peer: Peer, payload: AttachmentPayload) {
-        Log.e(logTag, "Test File ${payload.id} received  from $peer")
-//        onFile(peer, payload.id, payload.data)
         try {
             val testTimestamp = payload.id.split("=")
             val att = testTimestamp[0]
             val sendTime = testTimestamp[1].toLong()
             val receiveTime = TimingUtils.getTimestamp()
             val duration = receiveTime - sendTime
-//            Log.e(logTag, "onTestFile: $att duration $duration")
+            Log.e(logTag, "onTestFile $att duration: $duration (rec: $receiveTime - sent: $sendTime) from ${peer.mid}")
             durations.getJSONArray(att).put(duration)
             Log.e(logTag, "durations: $durations")
 
@@ -361,7 +359,6 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
                 try {
                     when {
                         file.isImage() -> {
-                            Log.e(logTag, "File being sent is image")
                             sendImage(peer, id, file)
                         }
                         else -> {
@@ -504,7 +501,11 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     }
 
     private fun sendFile(peer: Peer, id: String, file: File) {
-        sendBytes(peer, id, EVAId.EVA_DATA_VAULT_FILE, file.readBytes())
+        if (vaultBrowserFragment.PERFORMANCE_TEST) {
+            sendBytes(peer, id, EVAId.TEST_EVA_DATA_VAULT_FILE, file.readBytes())
+        } else {
+            sendBytes(peer, id, EVAId.EVA_DATA_VAULT_FILE, file.readBytes())
+        }
     }
 
     private fun sendImage(peer: Peer, id: String, file: File) {
@@ -546,8 +547,6 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
                             ids: List<String>,
                             accessTokenType: Policy.AccessTokenType,
                             accessTokens: List<String>) {
-        Log.e(logTag, "Sending test file request ($accessTokenType)")
-
         val payload = VaultFileRequestPayload(ids, accessMode, accessTokenType, accessTokens)
         val packet = serializePacket(MessageId.TEST_FILE_REQUEST, payload)
         logger.debug { "-> $payload" }

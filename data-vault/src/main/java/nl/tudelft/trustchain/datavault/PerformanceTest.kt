@@ -151,10 +151,16 @@ class PerformanceTest(
             }*/
 
 
-            for (att in Policy.AccessTokenType.values()) {
-                var rounds = 2
+            for (att in listOf(
+                Policy.AccessTokenType.SESSION_TOKEN,
+                Policy.AccessTokenType.JWT,
+                Policy.AccessTokenType.TCID,
+                Policy.AccessTokenType.JSONLD
+            )) {
+                var rounds = 1
                 if (att == Policy.AccessTokenType.SESSION_TOKEN) rounds += 1
                 for (i in 0 until rounds) {
+                    Log.e(logTag, "TFR $i ($att)")
                     when (att) {
                         Policy.AccessTokenType.SESSION_TOKEN -> testFileRequestSessionToken(
                             peer,
@@ -178,7 +184,7 @@ class PerformanceTest(
                             listOf()
                         )
                     }
-                    delay(3000)
+                    delay(4000)
                 }
             }
         }

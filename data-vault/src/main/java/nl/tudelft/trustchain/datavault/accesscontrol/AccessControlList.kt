@@ -69,7 +69,7 @@ class AccessControlList(
                     }
                 }
                 Policy.AccessTokenType.JSONLD -> {
-                    Log.e(logTag, "Access token type $accessTokenType not implemented")
+//                    Log.e(logTag, "Access token type $accessTokenType not implemented")
 //                    todo return false or implement
                     return true
                 }
