@@ -68,7 +68,7 @@ class AccessControlList(
                         return jwtPayload.toString().isNotEmpty()
                     }
                 }
-                else -> {
+                Policy.AccessTokenType.JSONLD -> {
                     Log.e(logTag, "Access token type $accessTokenType not implemented")
 //                    todo return false or implement
                     return true

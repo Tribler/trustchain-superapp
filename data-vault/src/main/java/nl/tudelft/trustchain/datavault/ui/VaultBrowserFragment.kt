@@ -47,7 +47,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
     private var areFABsVisible = false
 
-    val PERFORMANCE_TEST = false
+    val PERFORMANCE_TEST = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

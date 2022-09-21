@@ -22,7 +22,7 @@ import java.util.*
 
 
 object EBSIRequest {
-    private var server = "https://api.preprod.ebsi.eu" //Change to prod server
+    private var server =  "https://api.conformance.intebsi.xyz" // "https://api.preprod.ebsi.eu" //Change to prod server
 
     private var isTest = false
     private val EBSIHeaders = mutableMapOf<String, String>()

@@ -132,24 +132,61 @@ class PerformanceTest(
         return total / rounds
     }
 
-    fun testFileRequests(att: Policy.AccessTokenType, peer: Peer, attestationCommunity: AttestationCommunity) {
+    fun testTimestamp(accessTokenType: Policy.AccessTokenType): String {
+        return "${accessTokenType.name}=${TimingUtils.getTimestamp()}"
+    }
+
+    fun testFileRequests(accessTokenType: Policy.AccessTokenType, peer: Peer, attestationCommunity: AttestationCommunity) {
         val filename = "PERFORMANCE_TEST/1.jpg"
+        accessTokenType.name
         CoroutineScope(Dispatchers.IO).launch {
-            for (i in 0 until 1) {
+            /*for (i in 0 until 3) {
                 when(att) {
                     Policy.AccessTokenType.SESSION_TOKEN -> testFileRequestSessionToken(peer, filename)
                     Policy.AccessTokenType.TCID -> testFileRequestTCID(peer, attestationCommunity, filename)
                     Policy.AccessTokenType.JWT -> testFileRequestJWT(peer, filename, EBSIWallet.MY_TEST_CREDENTIAL)
                     Policy.AccessTokenType.JSONLD -> dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.JSONLD, listOf())
                 }
-                delay(2500)
+                delay(3500)
+            }*/
+
+
+            for (att in Policy.AccessTokenType.values()) {
+                var rounds = 2
+                if (att == Policy.AccessTokenType.SESSION_TOKEN) rounds += 1
+                for (i in 0 until rounds) {
+                    when (att) {
+                        Policy.AccessTokenType.SESSION_TOKEN -> testFileRequestSessionToken(
+                            peer,
+                            filename
+                        )
+                        Policy.AccessTokenType.TCID -> testFileRequestTCID(
+                            peer,
+                            attestationCommunity,
+                            filename
+                        )
+                        Policy.AccessTokenType.JWT -> testFileRequestJWT(
+                            peer,
+                            filename,
+                            EBSIWallet.MY_TEST_CREDENTIAL
+                        )
+                        Policy.AccessTokenType.JSONLD -> dataVaultCommunity.sendTestFileRequest(
+                            peer,
+                            testTimestamp(Policy.AccessTokenType.JSONLD),
+                            listOf(filename),
+                            Policy.AccessTokenType.JSONLD,
+                            listOf()
+                        )
+                    }
+                    delay(3000)
+                }
             }
         }
     }
 
     private fun testFileRequestSessionToken(peer: Peer, filename: String) {
 //        val nonce = SecureRandom.getSeed(16).toString()
-        dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.SESSION_TOKEN, listOf(dataVaultCommunity.TEST_SESSION_TOKEN ?: ""))
+        dataVaultCommunity.sendTestFileRequest(peer, testTimestamp(Policy.AccessTokenType.SESSION_TOKEN), listOf(filename), Policy.AccessTokenType.SESSION_TOKEN, listOf(dataVaultCommunity.TEST_SESSION_TOKEN ?: ""))
     }
 
     private fun testFileRequestTCID(peer: Peer, attestationCommunity: AttestationCommunity, filename: String) {
@@ -160,12 +197,12 @@ class PerformanceTest(
                 it.serialize().toHex()
             }
 
-        dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.TCID, attestations)
+        dataVaultCommunity.sendTestFileRequest(peer, testTimestamp(Policy.AccessTokenType.TCID), listOf(filename), Policy.AccessTokenType.TCID, attestations)
     }
 
     private fun testFileRequestJWT(peer: Peer, filename: String, jwt: String) {
 //        val nonce = SecureRandom.getSeed(16).toString()
-        dataVaultCommunity.sendTestFileRequest(peer, TimingUtils.getTimestamp().toString(), listOf(filename), Policy.AccessTokenType.JWT, listOf(jwt))
+        dataVaultCommunity.sendTestFileRequest(peer, testTimestamp(Policy.AccessTokenType.JWT), listOf(filename), Policy.AccessTokenType.JWT, listOf(jwt))
     }
 
     fun addTestAttestation(attestationCommunity: AttestationCommunity) {

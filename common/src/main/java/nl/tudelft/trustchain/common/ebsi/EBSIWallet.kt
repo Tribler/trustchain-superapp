@@ -71,7 +71,7 @@ class EBSIWallet(
     val keyPair: KeyPair get() {
         if (!this::keyPairCache.isInitialized) {
             val kPair = keyStoreHelper.getKeyPair()
-            keyPairCache = kPair ?: newKeyPair()
+            keyPairCache = kPair ?: newKeyPair(true)
         }
         return keyPairCache
     }

@@ -176,20 +176,23 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         put(Policy.AccessTokenType.SESSION_TOKEN.name, JSONArray())
         put(Policy.AccessTokenType.TCID.name, JSONArray())
         put(Policy.AccessTokenType.JWT.name, JSONArray())
+        put(Policy.AccessTokenType.JSONLD.name, JSONArray())
     }
     private fun onTestFile(peer: Peer, payload: AttachmentPayload) {
         Log.e(logTag, "Test File ${payload.id} received  from $peer")
 //        onFile(peer, payload.id, payload.data)
         try {
-            val sendTime = payload.id.toLong()
+            val testTimestamp = payload.id.split("=")
+            val att = testTimestamp[0]
+            val sendTime = testTimestamp[1].toLong()
             val receiveTime = TimingUtils.getTimestamp()
             val duration = receiveTime - sendTime
-            Log.e(logTag, "onTestFile: ${vaultBrowserFragment.attTypeTest} duration $duration")
-            durations.getJSONArray(vaultBrowserFragment.attTypeTest.name).put(duration)
+//            Log.e(logTag, "onTestFile: $att duration $duration")
+            durations.getJSONArray(att).put(duration)
             Log.e(logTag, "durations: $durations")
 
         } catch (exception: Exception) {
-            Log.e(logTag, "onTestFile: id not a timestamp")
+            Log.e(logTag, "onTestFile: id not a timestamp", exception)
         }
     }
 
@@ -260,6 +263,8 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     private fun onFileRequestFailed(payload: VaultFileRequestFailedPayload) {
         Log.e(logTag, payload.message)
         if (payload.message.contains("Invalid session token")) {
+            Log.e(logTag, "Error contains invalid session token: ${payload.message.split("=")}")
+            Log.e(logTag, "Session token: ${payload.message.split("=")[1].trim()}")
             TEST_SESSION_TOKEN = payload.message.split("=")[1].trim()
         }
         // notify("Failed", payload.message)
