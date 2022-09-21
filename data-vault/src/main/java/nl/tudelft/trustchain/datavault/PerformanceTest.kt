@@ -150,43 +150,46 @@ class PerformanceTest(
                 delay(3500)
             }*/
 
-
-            for (att in listOf(
-                Policy.AccessTokenType.SESSION_TOKEN,
-                Policy.AccessTokenType.JWT,
-                Policy.AccessTokenType.TCID,
-                Policy.AccessTokenType.JSONLD
-            )) {
-                var rounds = 4
-                if (att == Policy.AccessTokenType.SESSION_TOKEN) rounds += 1
-                for (i in 0 until rounds) {
-                    Log.e(logTag, "TFR $i ($att)")
-                    when (att) {
-                        Policy.AccessTokenType.SESSION_TOKEN -> testFileRequestSessionToken(
-                            peer,
-                            filename
-                        )
-                        Policy.AccessTokenType.TCID -> testFileRequestTCID(
-                            peer,
-                            attestationCommunity,
-                            filename
-                        )
-                        Policy.AccessTokenType.JWT -> testFileRequestJWT(
-                            peer,
-                            filename,
-                            EBSIWallet.MY_TEST_CREDENTIAL
-                        )
-                        Policy.AccessTokenType.JSONLD -> dataVaultCommunity.sendTestFileRequest(
-                            peer,
-                            testTimestamp(Policy.AccessTokenType.JSONLD),
-                            listOf(filename),
-                            Policy.AccessTokenType.JSONLD,
-                            listOf()
-                        )
+            listOf(5000L, 2000L, 1000L).forEach { delta ->
+                for (att in listOf(
+                    Policy.AccessTokenType.SESSION_TOKEN,
+                    Policy.AccessTokenType.JWT,
+                    Policy.AccessTokenType.TCID,
+                    Policy.AccessTokenType.JSONLD
+                )) {
+                    var rounds = 25
+                    if (att == Policy.AccessTokenType.SESSION_TOKEN) rounds += 1
+                    for (i in 0 until rounds) {
+                        Log.e(logTag, "TFR $i ($att)")
+                        when (att) {
+                            Policy.AccessTokenType.SESSION_TOKEN -> testFileRequestSessionToken(
+                                peer,
+                                filename
+                            )
+                            Policy.AccessTokenType.TCID -> testFileRequestTCID(
+                                peer,
+                                attestationCommunity,
+                                filename
+                            )
+                            Policy.AccessTokenType.JWT -> testFileRequestJWT(
+                                peer,
+                                filename,
+                                EBSIWallet.MY_TEST_CREDENTIAL
+                            )
+                            Policy.AccessTokenType.JSONLD -> dataVaultCommunity.sendTestFileRequest(
+                                peer,
+                                testTimestamp(Policy.AccessTokenType.JSONLD),
+                                listOf(filename),
+                                Policy.AccessTokenType.JSONLD,
+                                listOf()
+                            )
+                        }
+                        delay(delta)
                     }
-                    delay(5000)
+                    delay(15000)
                 }
-                delay(10000)
+                delay(30000)
+                dataVaultCommunity.clearDurations(delta)
             }
         }
     }

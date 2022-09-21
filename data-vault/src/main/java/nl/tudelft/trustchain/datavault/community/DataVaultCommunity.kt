@@ -172,7 +172,20 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         onAccessibleFiles(peer, payload)
     }
 
-    val durations = JSONObject().apply {
+
+    fun clearDurations(currentDelta: Long) {
+        Log.e(logTag, "=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=durations for delta $currentDelta=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=")
+        Log.e(logTag, "durations: $durations")
+        durations = JSONObject().apply {
+            put(Policy.AccessTokenType.SESSION_TOKEN.name, JSONArray())
+            put(Policy.AccessTokenType.TCID.name, JSONArray())
+            put(Policy.AccessTokenType.JWT.name, JSONArray())
+            put(Policy.AccessTokenType.JSONLD.name, JSONArray())
+        }
+    }
+
+
+    var durations = JSONObject().apply {
         put(Policy.AccessTokenType.SESSION_TOKEN.name, JSONArray())
         put(Policy.AccessTokenType.TCID.name, JSONArray())
         put(Policy.AccessTokenType.JWT.name, JSONArray())
@@ -185,7 +198,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
             val sendTime = testTimestamp[1].toLong()
             val receiveTime = TimingUtils.getTimestamp()
             val duration = receiveTime - sendTime
-            Log.e(logTag, "onTestFile $att duration: $duration (rec: $receiveTime - sent: $sendTime) from ${peer.mid}")
+//            Log.e(logTag, "onTestFile $att duration: $duration (rec: $receiveTime - sent: $sendTime) from ${peer.mid}")
             durations.getJSONArray(att).put(duration)
             Log.e(logTag, "durations: $durations")
 
