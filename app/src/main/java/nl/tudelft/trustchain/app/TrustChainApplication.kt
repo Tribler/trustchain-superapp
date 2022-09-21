@@ -52,6 +52,7 @@ import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.gossipML.RecommenderCommunity
 import nl.tudelft.trustchain.gossipML.db.RecommenderStore
+import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
@@ -88,6 +89,7 @@ class TrustChainApplication : Application() {
                 createCoinCommunity(),
                 createVotingCommunity(),
                 createMusicCommunity(),
+                createLiteratureCommunity(),
                 createRecommenderCommunity(),
                 createIdentityCommunity(),
                 createFOCCommunity()
@@ -366,6 +368,17 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             MusicCommunity.Factory(settings, store),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createLiteratureCommunity(): OverlayConfiguration<LiteratureCommunity> {
+        val settings = TrustChainSettings()
+        val driver = AndroidSqliteDriver(Database.Schema, this, "music.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            LiteratureCommunity.Factory(this, settings, store),
             listOf(randomWalk)
         )
     }

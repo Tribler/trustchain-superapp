@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    >
+
+    <item
+        android:id="@+id/MyLiteratureFragment"
+        android:icon="@drawable/ic_myliterature"
+        android:title="My Literature" />
+
+    <item
+    android:id="@+id/AddLiteratureFragment"
+    android:icon="@drawable/ic_myliterature"
+    android:title="Add Literature" />
+
+    <item
+        android:id="@+id/RemoteSearchFragment"
+        android:icon="@drawable/ic_library"
+        android:title="Remote Search" />
+
+    <item
+        android:id="@+id/ConnectionFragment"
+        android:icon="@drawable/ic_connections_icon"
+        android:title="Connections" />
+
+
+
+</menu>

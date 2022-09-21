@@ -1,0 +1,7 @@
+<resources>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="litdao_file_picker_button_text">Share pdf from storage</string>
+    <string name="litdao_permission_storage_granted">Permission has been granted</string>
+    <string name="litdao_permission_denied">Permission has been denied!</string>
+</resources>

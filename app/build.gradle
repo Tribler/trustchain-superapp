@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
@@ -27,10 +29,13 @@ ktlint {
 
 // Generate a version code from git commit count
 static def generateVersionCode() {
-    int versionCode = "git rev-list HEAD --count".execute().text.trim().toInteger()
-    print("Version code: $versionCode")
-    return versionCode
+    if (Os.isFamily(Os.FAMILY_MAC)) {
+        return "git rev-list HEAD --count".execute().waitFor().toInteger()
+    } else {
+        return "git rev-list HEAD --count".execute().text.trim().toInteger()
+    }
 }
+
 
 android {
     compileSdkVersion 30
@@ -125,6 +130,7 @@ dependencies {
     implementation project(':liquidity-pool')
     implementation project(':valuetransfer')
     implementation project(':atomic-swap')
+    implementation project(':literaturedao')
     api(project(':common')){
         exclude group: 'net.java.dev.jna'
     }
