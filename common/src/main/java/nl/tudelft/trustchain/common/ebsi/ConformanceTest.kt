@@ -149,10 +149,11 @@ class ConformanceTest(
 
     fun run(){
         Log.e(TAG, "Conformance Test: $uuid")
+        Log.e(TAG, "DID: ${wallet.did}")
         // https://ec.europa.eu/digital-building-blocks/wikis/display/EBSIDOC/EBSI+Wallet+Conformance+Testing
         EBSIRequest.testSetup(uuid)
 
-
+//        ebsiVPTest()
 
 //        verCredAuthReq()
 //        verCredTokReq()
@@ -181,6 +182,16 @@ class ConformanceTest(
         }
 
 //         vaRequestTest1()
+    }
+
+    private fun ebsiVPTest() {
+        val vcJwt = EBSIWallet.MY_TEST_CREDENTIAL
+        val expiration = Instant.now().plus(30, ChronoUnit.DAYS)
+        val vpJwt = Custodian.getService().createPresentation(listOf(vcJwt), wallet.did, expirationDate = expiration)
+        Log.e(TAG, "verifiable presentation: $vpJwt")
+        val resJwt = Auditor.getService().verify(vpJwt, listOf(SignaturePolicy()))
+
+        Log.e("Ver result", "JWT verification result: ${resJwt.valid}")
     }
 
     private fun testKeys() {

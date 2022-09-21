@@ -18,35 +18,52 @@ object EBSIVerifier {
         val header = parsedJWT.header
         val kid = header.keyID
 
-        Log.e(TAG, "kid: $kid")
+//        Log.e(TAG, "kid: $kid")
         val did = kid.split("#")[0]
 
+//        TODO mock call to get holder did and pub key
         EBSIAPI.getDidDocument(
             did,
-            { didDocument ->
-                Log.e(TAG, "$didDocument")
-                val verificationMethods = didDocument.getJSONArray("verificationMethod")
-                for (i in 0 until verificationMethods.length()) {
-                    val verificationMethod = verificationMethods.getJSONObject(i)
-                    if (verificationMethod.getString("id") == kid) {
-                        val publicKeyJwk = verificationMethod.getJSONObject("publicKeyJwk")
-                        val x = publicKeyJwk.getString("x")
-                        val y = publicKeyJwk.getString("y")
+            {
+                EBSIAPI.getDidDocument(
+                    did,
+                    { didDocument ->
+                        Log.e(TAG, "$didDocument")
+                        val verificationMethods = didDocument.getJSONArray("verificationMethod")
+                        var keyFound = false
+                        for (i in 0 until verificationMethods.length()) {
+                            val verificationMethod = verificationMethods.getJSONObject(i)
+                            if (verificationMethod.getString("id") == kid) {
+                                val publicKeyJwk = verificationMethod.getJSONObject("publicKeyJwk")
+                                val x = publicKeyJwk.getString("x")
+                                val y = publicKeyJwk.getString("y")
 
-                        val ecPubKey = ECKey.Builder(Curve.SECP256K1, Base64URL(x), Base64URL(y)).build().toECPublicKey()
-                        JWTHelper.verifyJWT(jwt, onVerified, verificationKey = ecPubKey)
-                        return@getDidDocument
-                    }
-                }
+                                val ecPubKey = ECKey.Builder(Curve.SECP256K1, Base64URL(x), Base64URL(y)).build().toECPublicKey()
+                                JWTHelper.verifyJWT(jwt, onVerified, verificationKey = ecPubKey)
+                                keyFound = true
+                                break
+                            }
+                        }
 
-                onVerified(null)
-        }, {
+                        if (!keyFound) {
+                            onVerified(null)
+                        }
+                    }, {
+                        val myVolleyError = it as MyVolleyError
+                        Log.e(TAG, "Api error during conformance test (${myVolleyError.url})")
+                        Log.e(TAG, myVolleyError.volleyError?.networkResponse?.data?.toString(Charsets.UTF_8) ?: "No network response")
+
+                        onVerified(null)
+                    })
+            },
+            {
                 val myVolleyError = it as MyVolleyError
                 Log.e(TAG, "Api error during conformance test (${myVolleyError.url})")
                 Log.e(TAG, myVolleyError.volleyError?.networkResponse?.data?.toString(Charsets.UTF_8) ?: "No network response")
 
                 onVerified(null)
-        })
+            }
+        )
 
 //        val issuerDidDocument = DidService.resolveDidEbsi(kid, "https://api.conformance.intebsi.xyz/did-registry/v2/identifiers/")
 //        Log.e(TAG, "$issuerDidDocument")

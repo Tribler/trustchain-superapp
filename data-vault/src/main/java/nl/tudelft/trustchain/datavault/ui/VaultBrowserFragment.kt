@@ -102,7 +102,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 //            performanceTest.measureEncDecryption(false)
 
             val attestationCount = attestationCommunity.database.getAllAttestations().size
-            val rest = 5 - attestationCount
+            val rest = 3 - attestationCount
             if (rest > 0) {
                 for (i in 1..rest) performanceTest.addTestAttestation(attestationCommunity)
             }

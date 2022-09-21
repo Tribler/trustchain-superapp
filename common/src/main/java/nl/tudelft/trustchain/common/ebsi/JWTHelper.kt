@@ -155,12 +155,12 @@ object JWTHelper {
             val header = parsedJWT.header
             val kid = header.keyID
 
-            header.toJSONObject().forEach {
+            /*header.toJSONObject().forEach {
                 Log.e("JWT Verify", "[header] ${it.key}: ${it.value}")
             }
             payload?.forEach {
               Log.e("JWT Verify", "[payload] ${it.key}: ${it.value}")
-            }
+            }*/
 
             if (verificationKey != null) {
 //                val verifier: JWSVerifier = ECDSAVerifier(verificationKey)

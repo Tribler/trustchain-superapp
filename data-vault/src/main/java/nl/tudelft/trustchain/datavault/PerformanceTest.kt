@@ -157,7 +157,7 @@ class PerformanceTest(
                 Policy.AccessTokenType.TCID,
                 Policy.AccessTokenType.JSONLD
             )) {
-                var rounds = 3
+                var rounds = 4
                 if (att == Policy.AccessTokenType.SESSION_TOKEN) rounds += 1
                 for (i in 0 until rounds) {
                     Log.e(logTag, "TFR $i ($att)")
@@ -186,7 +186,7 @@ class PerformanceTest(
                     }
                     delay(5000)
                 }
-                delay(15000)
+                delay(10000)
             }
         }
     }

@@ -296,8 +296,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
             }
         }
 
-//        val (file, accessPolicy) = vaultFile(payload.id!!)
-
+        val beginVer = TimingUtils.getTimestamp()
         when(payload.accessTokenType) {
             Policy.AccessTokenType.SESSION_TOKEN -> {
                 val tempSessionToken = payload.accessTokens[0]
@@ -314,6 +313,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
                             verifyAndSendFiles(vaultFiles, peer, payload)
                         }
                     }
+                    Log.e(logTag, "Verified ${payload.accessTokenType} in ${TimingUtils.getTimestamp() - beginVer}")
                 }, ebsiWallet.publicKey)
             }
             Policy.AccessTokenType.TCID -> {
@@ -324,6 +324,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
                     }
                 )
                 verifyAndSendFiles(vaultFiles, peer, payload, attestations)
+                Log.e(logTag, "Verified ${payload.accessTokenType} in ${TimingUtils.getTimestamp() - beginVer}")
             }
             Policy.AccessTokenType.JWT -> {
                 payload.accessTokens.forEach { jwt ->
@@ -333,6 +334,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
                         } else {
                             verifyAndSendFiles(vaultFiles, peer, payload)
                         }
+                        Log.e(logTag, "Verified ${payload.accessTokenType} in ${TimingUtils.getTimestamp() - beginVer}")
                     })
                 }
             }
