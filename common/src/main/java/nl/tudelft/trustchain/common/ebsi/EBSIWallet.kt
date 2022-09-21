@@ -52,7 +52,7 @@ class EBSIWallet(
 //    val publicKey: ECPublicKey = keyPair.public as ECPublicKey
     val privateKey: PrivateKey = keyPair.private
     val publicKey: PublicKey = keyPair.public
-    val keyAlias = "$did#keys-1"
+    val keyAlias: String get() {return "$did#keys-1" }
     var accessToken: Map<String, Any>? = null
     private var vaCache: JSONObject? = null
     private var ethCredentialsCache: Credentials? = null

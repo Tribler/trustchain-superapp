@@ -56,7 +56,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     }
 
 //    val sessionTokenCache = SessionTokenCache()
-    val ebsiWallet: EBSIWallet get() {return EBSIWallet(context)}
+    val ebsiWallet = EBSIWallet(context)
 
     private val pendingImageViewHolders = mutableMapOf<String, Pair<PeerVaultFileItem, ImageViewHolder>>()
     private val pendingPeerVaultFolders = mutableMapOf<String, PeerVaultFileItem>()
@@ -99,7 +99,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
      * EVA Callbacks
      */
     private fun onEVASendCompleteCallback(peer: Peer, info: String, nonce: ULong) {
-        Log.e(simpleName, "ON EVA send complete callback for '$info'")
+//        Log.e(simpleName, "ON EVA send complete callback for '$info'")
 
         if (!isDataVaultEVA(info)) return
 
@@ -282,7 +282,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     }
 
     private fun onTestFileRequest(peer: Peer, payload: VaultFileRequestPayload) {
-        Log.e(logTag, "Received test file request from $peer. Access token: ${payload.accessTokenType}")
+//        Log.e(logTag, "Received test file request from $peer. Access token: ${payload.accessTokenType}")
         onFileRequest(peer, payload )
     }
 

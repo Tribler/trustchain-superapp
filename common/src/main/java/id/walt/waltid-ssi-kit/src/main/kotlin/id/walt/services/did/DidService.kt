@@ -418,14 +418,14 @@ object DidService {
 
     fun storeDid(didUrlStr: String, didDoc: String) {
         val key = HKVKey("did", "created", didUrlStr)
-        Log.e("DidService TEST", "Adding $didUrlStr to ${ContextManager.hkvStore} ($key)")
+//        Log.e("DidService TEST", "Adding $didUrlStr to ${ContextManager.hkvStore} ($key)")
         ContextManager.hkvStore.put(key, didDoc)
     }
 
     private fun loadDid(didUrlStr: String): String? {
         val key = HKVKey("did", "created", didUrlStr)
-        Log.e("DidService TEST", "Loading $didUrlStr from ${ContextManager.hkvStore} ($key)")
-        return ContextManager.hkvStore.getAsString(HKVKey("did", "created", didUrlStr))
+//        Log.e("DidService TEST", "Loading $didUrlStr from ${ContextManager.hkvStore} ($key)")
+        return ContextManager.hkvStore.getAsString(key)
     }
 
 

@@ -106,6 +106,8 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             if (rest > 0) {
                 for (i in 1..rest) performanceTest.addTestAttestation(attestationCommunity)
             }
+
+
 //            performanceTest.testTCID(attestationCommunity)
 
 //            performanceTest.testDirectoryTree()

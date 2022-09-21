@@ -38,10 +38,8 @@ class AccessControlList(
 
             when (accessTokenType) {
                 Policy.AccessTokenType.SESSION_TOKEN -> {
-//                    verify session token
-                    val sessionToken = accessTokens[0] as String
-                    val aft = SessionToken.getAFT(sessionToken)
-                    Log.e(logTag, "AFT: $aft")
+//                    val sessionToken = accessTokens[0] as String
+//                    val aft = SessionToken.getAFT(sessionToken)
 //                    TODO Validate AFT
                     return true
                 }
@@ -53,13 +51,14 @@ class AccessControlList(
                     val candidateAttestations = accessTokens.map { at -> at as AttestationBlob }
                     if (candidateAttestations.isNotEmpty()){
 
-                        val policies = getPolicies()
+                        /*val policies = getPolicies()
 
                         for (policy in policies) {
 //                            TODO verify policy for specific access mode
 //                            if (policy.evaluate(accessMode, candidateAttestations))
                             return true
-                        }
+                        }*/
+                        return true
                     }
                 }
                 Policy.AccessTokenType.JWT -> {
