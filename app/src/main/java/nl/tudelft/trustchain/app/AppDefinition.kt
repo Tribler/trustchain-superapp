@@ -7,18 +7,16 @@ import com.example.musicdao.MusicService
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.atomicswap.AtomicSwapActivity
 import nl.tudelft.trustchain.common.R
-import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
-import nl.tudelft.trustchain.ssi.SSIMainActivity
+import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
 import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.voting.VotingActivity
 
 enum class AppDefinition(
@@ -28,13 +26,13 @@ enum class AppDefinition(
     val activity: Class<out Activity>,
     val disableImageTint: Boolean = false
 ) {
-    EIGHTEEN_PLUS(
-        R.drawable.ic_18_plus,
-        "18+",
-        R.color.red,
-        SSIMainActivity::class.java,
-        true,
-    ),
+//    EIGHTEEN_PLUS(
+//        R.drawable.ic_18_plus,
+//        "18+",
+//        R.color.red,
+//        SSIMainActivity::class.java,
+//        true,
+//    ),
     PEERCHAT(
         R.drawable.ic_chat_black_24dp,
         "PeerChat",
@@ -107,13 +105,13 @@ enum class AppDefinition(
         R.color.blue,
         LiquidityPoolMainActivity::class.java
     ),
-    VALUETRANSFER(
-        R.drawable.ic_idelft_logo,
-        "IDelft",
-        R.color.colorPrimaryValueTransfer,
-        ValueTransferMainActivity::class.java,
-        true,
-    ),
+//    VALUETRANSFER(
+//        R.drawable.ic_idelft_logo,
+//        "IDelft",
+//        R.color.colorPrimaryValueTransfer,
+//        ValueTransferMainActivity::class.java,
+//        true,
+//    ),
     ATOMIC_SWAP(
         R.drawable.ic_atomic_swap_24dp,
         "Atomic Swap",

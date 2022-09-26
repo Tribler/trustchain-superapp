@@ -1,9 +1,13 @@
 package nl.tudelft.trustchain.app
 
+//import nl.tudelft.ipv8.attestation.wallet.AttestationSQLiteStore
+//import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
+//import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import android.app.Application
 import android.bluetooth.BluetoothManager
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
@@ -18,15 +22,15 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.messaging.bluetooth.BluetoothLeDiscovery
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
-import nl.tudelft.ipv8.attestation.schema.SchemaManager
+import nl.tudelft.ipv8.attestation.common.SchemaManager
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
-import nl.tudelft.ipv8.attestation.wallet.AttestationSQLiteStore
 import nl.tudelft.ipv8.attestation.wallet.cryptography.bonehexact.BonehPrivateKey
+import nl.tudelft.ipv8.attestation.wallet.store.AttestationSQLiteStore
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.tftp.TFTPCommunity
@@ -55,8 +59,6 @@ import nl.tudelft.trustchain.gossipML.db.RecommenderStore
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
-import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
-import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.voting.VotingCommunity
 import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
@@ -91,7 +93,7 @@ class TrustChainApplication : Application() {
                 createMusicCommunity(),
                 createLiteratureCommunity(),
                 createRecommenderCommunity(),
-                createIdentityCommunity(),
+//                createIdentityCommunity(),
                 createFOCCommunity()
             ),
             walkerInterval = 5.0
@@ -308,14 +310,14 @@ class TrustChainApplication : Application() {
         )
     }
 
-    private fun createIdentityCommunity(): OverlayConfiguration<IdentityCommunity> {
-        val randomWalk = RandomWalk.Factory()
-        val store = IdentityStore.getInstance(this)
-        return OverlayConfiguration(
-            IdentityCommunity.Factory(store, this),
-            listOf(randomWalk)
-        )
-    }
+//    private fun createIdentityCommunity(): OverlayConfiguration<IdentityCommunity> {
+//        val randomWalk = RandomWalk.Factory()
+//        val store = IdentityStore.getInstance(this)
+//        return OverlayConfiguration(
+//            IdentityCommunity.Factory(store, this),
+//            listOf(randomWalk)
+//        )
+//    }
 
     private fun createTFTPCommunity(): OverlayConfiguration<TFTPCommunity> {
         return OverlayConfiguration(
@@ -372,6 +374,7 @@ class TrustChainApplication : Application() {
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun createLiteratureCommunity(): OverlayConfiguration<LiteratureCommunity> {
         val settings = TrustChainSettings()
         val driver = AndroidSqliteDriver(Database.Schema, this, "music.db")
