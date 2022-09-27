@@ -4,7 +4,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_identity_attestation_authorities.view.*
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.util.toHex // OK3
 import nl.tudelft.trustchain.ssi.ui.peers.AuthorityItem
 import nl.tudelft.trustchain.valuetransfer.R
 

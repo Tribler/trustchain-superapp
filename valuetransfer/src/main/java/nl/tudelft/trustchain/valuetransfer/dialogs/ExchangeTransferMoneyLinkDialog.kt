@@ -16,8 +16,8 @@ import com.android.volley.toolbox.Volley
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.dialog_exchange_transfer_link.*
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.android.IPv8Android // OK3
+import nl.tudelft.ipv8.util.toHex // OK3
 import nl.tudelft.trustchain.common.BuildConfig
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore

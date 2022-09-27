@@ -24,8 +24,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import nl.tudelft.ipv8.keyvault.PublicKey
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.keyvault.PublicKey // OK3
+import nl.tudelft.ipv8.util.toHex // OK3
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.util.getColorByHash

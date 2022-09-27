@@ -10,9 +10,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.Peer // OK3
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider // OK3
+import nl.tudelft.ipv8.util.toHex // OK3
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.TrustChainHelper

@@ -6,7 +6,7 @@ import androidx.core.view.*
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_identity.view.*
 import kotlinx.android.synthetic.main.item_identity_detail.view.*
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.util.toHex // OK3
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.entity.Identity

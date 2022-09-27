@@ -5,8 +5,8 @@ import android.widget.Button
 import android.widget.EditText
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import nl.tudelft.ipv8.keyvault.PublicKey
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.keyvault.PublicKey // OK3
+import nl.tudelft.ipv8.util.toHex // OK3
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor

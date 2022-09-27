@@ -12,9 +12,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.jaredrummler.blockingdialog.BlockingDialogFragment
 import com.ncorti.slidetoact.SlideToActView
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.common.consts.SchemaConstants.ID_METADATA_RANGE_18PLUS // OK
-import nl.tudelft.ipv8.attestation.common.consts.SchemaConstants.ID_METADATA_RANGE_UNDERAGE // OK
+import nl.tudelft.ipv8.android.IPv8Android // OK3
+import nl.tudelft.ipv8.attestation.common.consts.SchemaConstants.ID_METADATA_RANGE_18PLUS // OK4
+import nl.tudelft.ipv8.attestation.common.consts.SchemaConstants.ID_METADATA_RANGE_UNDERAGE // OK4
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity

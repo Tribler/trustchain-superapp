@@ -15,8 +15,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
-import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.Peer // OK3
+import nl.tudelft.ipv8.util.toHex // OK3
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -49,11 +49,11 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
     private val identityImage = MutableLiveData<String?>()
     private val myPeerConnected = MutableLiveData(false)
 
-    private val itemsIdentity: LiveData<List<Item>> by lazy {
-        combine(getIdentityStore().getAllIdentities(), identityImage.asFlow(), myPeerConnected.asFlow()) { identities, identityImage, connected ->
-            createIdentityItems(identities, identityImage, connected)
-        }.asLiveData()
-    }
+//    private val itemsIdentity: LiveData<List<Item>> by lazy {
+//        combine(getIdentityStore().getAllIdentities(), identityImage.asFlow(), myPeerConnected.asFlow()) { identities, identityImage, connected ->
+//            createIdentityItems(identities, identityImage, connected)
+//        }.asLiveData()
+//    }
 
     private val peers = MutableStateFlow<List<Peer>>(listOf())
 
@@ -153,15 +153,15 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                 null
             )
             toggleActionBar(false)
-            toggleBottomNavigation(getIdentityStore().hasIdentity())
+//            toggleBottomNavigation(getIdentityStore().hasIdentity())
         }
     }
 
     override fun onResume() {
         super.onResume()
 
-        binding.clNoIdentity.isVisible = !getIdentityStore().hasIdentity()
-        binding.svHasIdentity.isVisible = getIdentityStore().hasIdentity()
+//        binding.clNoIdentity.isVisible = !getIdentityStore().hasIdentity()
+//        binding.svHasIdentity.isVisible = getIdentityStore().hasIdentity()
 
         observeContactsItems(viewLifecycleOwner, adapterContacts, itemsContacts)
     }
@@ -183,12 +183,12 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
             IdentityOnboardingDialog().show(parentFragmentManager, tag)
         }
 
-        itemsIdentity.observe(
-            viewLifecycleOwner,
-            Observer {
-                adapterIdentity.updateItems(it)
-            }
-        )
+//        itemsIdentity.observe(
+//            viewLifecycleOwner,
+//            Observer {
+//                adapterIdentity.updateItems(it)
+//            }
+//        )
 
         // EXCHANGE
         parentActivity.getBalance(true).observe(

@@ -16,7 +16,6 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.common.valuetransfer.extensions.setPadding
 import nl.tudelft.trustchain.common.valuetransfer.extensions.toSquare
@@ -25,18 +24,15 @@ import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
-import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
-import java.math.BigInteger
 
 class NotificationHandler(
     private val parentActivity: ValueTransferMainActivity
 ) {
     private val peerChatStore: PeerChatStore = parentActivity.getStore()!!
     private val contactStore: ContactStore = parentActivity.getStore()!!
-    private val transactionRepository: TransactionRepository = parentActivity.getStore()!!
+//    private val transactionRepository: TransactionRepository = parentActivity.getStore()!!
 
     private val notificationManager by lazy {
         parentActivity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -89,12 +85,12 @@ class NotificationHandler(
             TYPE_ATTACHMENT -> chatMessage.attachment?.let { attachment ->
                 attachment(peer, attachment.type, chatMessage.message, isAppInForeground)
             }
-            TYPE_TRANSACTION -> transaction(
-                peer,
-                chatMessage.message,
-                chatMessage.transactionHash!!,
-                isAppInForeground
-            )
+//            TYPE_TRANSACTION -> transaction(
+//                peer,
+//                chatMessage.message,
+//                chatMessage.transactionHash!!,
+//                isAppInForeground
+//            )
         }
     }
 
@@ -239,66 +235,66 @@ class NotificationHandler(
         }
     }
 
-    private fun transaction(
-        peer: Peer,
-        message: String,
-        transactionHash: ByteArray,
-        isAppInForeground: Boolean = true
-    ) = with(parentActivity) {
-        val transaction = transactionRepository.getTransactionWithHash(transactionHash)
-
-        val transactionText = if (transaction != null) {
-            val map = transaction.transaction.toMap()
-            if (map.containsKey(QRScanController.KEY_AMOUNT)) {
-                listOf(
-                    getEmojiByUnicode(EMOJI_TRANSACTION),
-                    resources.getString(
-                        R.string.text_contact_chat_incoming_transfer_of,
-                        formatBalance((map[QRScanController.KEY_AMOUNT] as BigInteger).toLong())
-                    )
-                )
-            } else listOf(getEmojiByUnicode(EMOJI_TRANSACTION), resources.getString(R.string.text_contact_chat_incoming_transfer))
-        } else {
-            listOf(getEmojiByUnicode(EMOJI_TRANSACTION), resources.getString(R.string.text_contact_chat_incoming_transfer))
-        }.joinToString(" ")
-
-        val text = if (message.isNotBlank()) {
-            getString(
-                R.string.text_contact_chat_incoming_transfer_with_message,
-                transactionText,
-                message
-            )
-        } else transactionText
-
-        if (isAppInForeground) {
-            sendInternalNotification(peer, text)
-        } else {
-            val intent = Intent(this, ValueTransferMainActivity::class.java).apply {
-                putExtra(
-                    ValueTransferMainActivity.ARG_FRAGMENT,
-                    ValueTransferMainActivity.exchangeFragmentTag
-                )
-                putExtra(
-                    ValueTransferMainActivity.ARG_PUBLIC_KEY,
-                    peer.publicKey.keyToBin().toHex()
-                )
-                addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-            }
-            val pendingIntent = PendingIntent.getActivity(
-                this,
-                ValueTransferMainActivity.NOTIFICATION_INTENT_TRANSACTION,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-
-            sendNotification(
-                peer,
-                text,
-                pendingIntent,
-                NOTIFICATION_CHANNEL_TRANSACTIONS_ID
-            )
-        }
-    }
+//    private fun transaction(
+//        peer: Peer,
+//        message: String,
+//        transactionHash: ByteArray,
+//        isAppInForeground: Boolean = true
+//    ) = with(parentActivity) {
+//        val transaction = transactionRepository.getTransactionWithHash(transactionHash)
+//
+//        val transactionText = if (transaction != null) {
+//            val map = transaction.transaction.toMap()
+//            if (map.containsKey(QRScanController.KEY_AMOUNT)) {
+//                listOf(
+//                    getEmojiByUnicode(EMOJI_TRANSACTION),
+//                    resources.getString(
+//                        R.string.text_contact_chat_incoming_transfer_of,
+//                        formatBalance((map[QRScanController.KEY_AMOUNT] as BigInteger).toLong())
+//                    )
+//                )
+//            } else listOf(getEmojiByUnicode(EMOJI_TRANSACTION), resources.getString(R.string.text_contact_chat_incoming_transfer))
+//        } else {
+//            listOf(getEmojiByUnicode(EMOJI_TRANSACTION), resources.getString(R.string.text_contact_chat_incoming_transfer))
+//        }.joinToString(" ")
+//
+//        val text = if (message.isNotBlank()) {
+//            getString(
+//                R.string.text_contact_chat_incoming_transfer_with_message,
+//                transactionText,
+//                message
+//            )
+//        } else transactionText
+//
+//        if (isAppInForeground) {
+//            sendInternalNotification(peer, text)
+//        } else {
+//            val intent = Intent(this, ValueTransferMainActivity::class.java).apply {
+//                putExtra(
+//                    ValueTransferMainActivity.ARG_FRAGMENT,
+//                    ValueTransferMainActivity.exchangeFragmentTag
+//                )
+//                putExtra(
+//                    ValueTransferMainActivity.ARG_PUBLIC_KEY,
+//                    peer.publicKey.keyToBin().toHex()
+//                )
+//                addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+//            }
+//            val pendingIntent = PendingIntent.getActivity(
+//                this,
+//                ValueTransferMainActivity.NOTIFICATION_INTENT_TRANSACTION,
+//                intent,
+//                PendingIntent.FLAG_UPDATE_CURRENT
+//            )
+//
+//            sendNotification(
+//                peer,
+//                text,
+//                pendingIntent,
+//                NOTIFICATION_CHANNEL_TRANSACTIONS_ID
+//            )
+//        }
+//    }
 
     private fun sendInternalNotification(peer: Peer, text: String) = with(parentActivity) {
         val contact = contactStore.getContactFromPublicKey(peer.publicKey)

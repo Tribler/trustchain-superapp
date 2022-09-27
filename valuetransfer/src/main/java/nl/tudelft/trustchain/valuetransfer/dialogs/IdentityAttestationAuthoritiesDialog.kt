@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.mattskala.itemadapter.ItemAdapter
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider // OK3
+import nl.tudelft.ipv8.util.hexToBytes // OK3
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController

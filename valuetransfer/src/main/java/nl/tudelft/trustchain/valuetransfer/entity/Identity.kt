@@ -1,6 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.entity
 
-import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.keyvault.PublicKey // OK3
 import java.util.*
 
 data class Identity(

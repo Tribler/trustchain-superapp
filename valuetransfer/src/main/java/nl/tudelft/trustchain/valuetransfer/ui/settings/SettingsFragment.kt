@@ -13,13 +13,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentSettingsBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.ConfirmDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityDetailsDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityOnboardingDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
+import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 
 class SettingsFragment : VTFragment(R.layout.fragment_settings) {
     private val binding by viewBinding(FragmentSettingsBinding::bind)
@@ -81,11 +81,11 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
         }
 
         binding.llSettingsIdentity.apply {
-            isVisible = getIdentityCommunity().hasIdentity()
+//            isVisible = getIdentityCommunity().hasIdentity()
         }
 
         binding.clIdentityEdit.apply {
-            isVisible = !getIdentityCommunity().isVerified()
+//            isVisible = !getIdentityCommunity().isVerified()
             setOnClickListener {
                 IdentityDetailsDialog().show(parentFragmentManager, this@SettingsFragment.tag)
             }

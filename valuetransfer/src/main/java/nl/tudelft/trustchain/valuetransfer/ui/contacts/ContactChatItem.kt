@@ -1,8 +1,8 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
 import com.mattskala.itemadapter.Item
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock // OK
-import nl.tudelft.ipv8.messaging.eva.TransferProgress
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock // OK4
+import nl.tudelft.ipv8.messaging.eva.TransferProgress // OK3
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 
 data class ContactChatItem(
