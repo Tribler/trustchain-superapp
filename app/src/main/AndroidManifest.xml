@@ -113,31 +113,31 @@
             android:name="nl.tudelft.trustchain.atomicswap.AtomicSwapActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
-<!--        <activity-->
-<!--            android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"-->
-<!--            android:parentActivityName=".ui.dashboard.DashboardActivity"-->
-<!--            android:theme="@style/Theme.ValueTransfer"-->
-<!--            android:screenOrientation="portrait"-->
-<!--            android:launchMode="singleTop">-->
-<!--            <tools:validation testUrl="http://trustchain.tudelft.nl/requestMoney?receiver=Tat&amp;amount=15.23&amp;message=party" />-->
-<!--            <intent-filter android:autoVerify="true">-->
-<!--                <action android:name="android.intent.action.VIEW" />-->
+        <activity
+            android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity"
+            android:theme="@style/Theme.ValueTransfer"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop">
+            <tools:validation testUrl="http://trustchain.tudelft.nl/requestMoney?receiver=Tat&amp;amount=15.23&amp;message=party" />
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
 
-<!--                <category android:name="android.intent.category.DEFAULT" />-->
-<!--                <category android:name="android.intent.category.BROWSABLE" />-->
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-<!--                <data android:scheme="http" />-->
-<!--                <data android:scheme="https" />-->
-<!--                <data android:host="trustchain.tudelft.nl"/>-->
-<!--                <data android:pathPrefix="/requestMoney" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="trustchain.tudelft.nl"/>
+                <data android:pathPrefix="/requestMoney" />
+            </intent-filter>
+        </activity>
 
-<!--        <activity-->
-<!--            android:name="nl.tudelft.trustchain.valuetransfer.passport.PassportCaptureActivity"-->
-<!--            android:screenOrientation="portrait"-->
-<!--            android:stateNotNeeded="true"-->
-<!--            android:windowSoftInputMode="stateAlwaysHidden" />-->
+        <activity
+            android:name="nl.tudelft.trustchain.valuetransfer.passport.PassportCaptureActivity"
+            android:screenOrientation="portrait"
+            android:stateNotNeeded="true"
+            android:windowSoftInputMode="stateAlwaysHidden" />
 
         <activity
             android:name="com.example.musicdao.MusicService"

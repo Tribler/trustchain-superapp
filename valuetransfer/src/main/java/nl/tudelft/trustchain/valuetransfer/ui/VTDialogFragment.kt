@@ -1,8 +1,8 @@
 package nl.tudelft.trustchain.valuetransfer.ui
 
 import androidx.fragment.app.DialogFragment
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity // OK
+import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity // OK
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository

@@ -1,8 +1,8 @@
 package nl.tudelft.trustchain.valuetransfer.util
 
-import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
+import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK // OK
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock // OK
+import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ // OK
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeTransactionItem

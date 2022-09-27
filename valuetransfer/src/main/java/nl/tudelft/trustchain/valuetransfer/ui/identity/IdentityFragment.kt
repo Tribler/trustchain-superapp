@@ -4,48 +4,35 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.ImageDecoder
-import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
-import android.widget.*
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.isVisible
 import androidx.lifecycle.*
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.schema.SchemaManager
-import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.QRCodeUtils
-import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
-import nl.tudelft.trustchain.valuetransfer.util.mapToJSON
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
-import nl.tudelft.trustchain.valuetransfer.databinding.FragmentIdentityBinding
-import nl.tudelft.trustchain.valuetransfer.dialogs.*
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.common.valuetransfer.extensions.decodeImage
 import nl.tudelft.trustchain.common.valuetransfer.extensions.encodeImage
+import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.FragmentIdentityBinding
+import nl.tudelft.trustchain.valuetransfer.dialogs.*
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
-import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
-import nl.tudelft.trustchain.valuetransfer.util.DividerItemDecorator
+import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
+import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
 import nl.tudelft.trustchain.valuetransfer.util.getInitials
+import nl.tudelft.trustchain.valuetransfer.util.mapToJSON
 import org.json.JSONObject
-import java.util.*
 
 class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     private val binding by viewBinding(FragmentIdentityBinding::bind)
@@ -186,54 +173,54 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             }
         )
 
-        adapterAttestations.registerRenderer(
-            AttestationItemRenderer(
-                parentActivity,
-                {
-                    val blob = it.attestationBlob
-
-                    if (blob.signature != null) {
-                        val manager = SchemaManager()
-                        manager.registerDefaultSchemas()
-                        val attestation = manager.deserialize(blob.blob, blob.idFormat)
-                        val parsedMetadata = JSONObject(blob.metadata!!)
-
-                        val map = mapOf(
-                            QRScanController.KEY_PRESENTATION to QRScanController.VALUE_ATTESTATION,
-                            QRScanController.KEY_METADATA to blob.metadata,
-                            QRScanController.KEY_ATTESTATION_HASH to attestation.getHash().toHex(),
-                            QRScanController.KEY_SIGNATURE to blob.signature!!.toHex(),
-                            QRScanController.KEY_SIGNEE_KEY to IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex(),
-                            QRScanController.KEY_ATTESTOR_KEY to blob.attestorKey!!.keyToBin().toHex()
-                        )
-
-                        QRCodeDialog(
-                            resources.getString(R.string.dialog_title_attestation),
-                            StringBuilder()
-                                .append(
-                                    parsedMetadata.optString(
-                                        QRScanController.KEY_ATTRIBUTE,
-                                        QRScanController.FALLBACK_UNKNOWN
-                                    )
-                                )
-                                .append(
-                                    parsedMetadata.optString(
-                                        QRScanController.KEY_VALUE,
-                                        QRScanController.FALLBACK_UNKNOWN
-                                    )
-                                )
-                                .toString(),
-                            mapToJSON(map).toString()
-                        )
-                            .show(parentFragmentManager, tag)
-                    } else {
-                        deleteAttestation(it)
-                    }
-                }
-            ) {
-                deleteAttestation(it)
-            }
-        )
+//        adapterAttestations.registerRenderer(
+//            AttestationItemRenderer(
+//                parentActivity,
+//                {
+//                    val blob = it.attestationBlob
+//
+//                    if (blob.signature != null) {
+//                        val manager = SchemaManager()
+//                        manager.registerDefaultSchemas()
+//                        val attestation = manager.deserialize(blob.blob, blob.idFormat)
+//                        val parsedMetadata = JSONObject(blob.metadata!!)
+//
+//                        val map = mapOf(
+//                            QRScanController.KEY_PRESENTATION to QRScanController.VALUE_ATTESTATION,
+//                            QRScanController.KEY_METADATA to blob.metadata,
+//                            QRScanController.KEY_ATTESTATION_HASH to attestation.getHash().toHex(),
+//                            QRScanController.KEY_SIGNATURE to blob.signature!!.toHex(),
+//                            QRScanController.KEY_SIGNEE_KEY to IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex(),
+//                            QRScanController.KEY_ATTESTOR_KEY to blob.attestorKey!!.keyToBin().toHex()
+//                        )
+//
+//                        QRCodeDialog(
+//                            resources.getString(R.string.dialog_title_attestation),
+//                            StringBuilder()
+//                                .append(
+//                                    parsedMetadata.optString(
+//                                        QRScanController.KEY_ATTRIBUTE,
+//                                        QRScanController.FALLBACK_UNKNOWN
+//                                    )
+//                                )
+//                                .append(
+//                                    parsedMetadata.optString(
+//                                        QRScanController.KEY_VALUE,
+//                                        QRScanController.FALLBACK_UNKNOWN
+//                                    )
+//                                )
+//                                .toString(),
+//                            mapToJSON(map).toString()
+//                        )
+//                            .show(parentFragmentManager, tag)
+//                    } else {
+//                        deleteAttestation(it)
+//                    }
+//                }
+//            ) {
+//                deleteAttestation(it)
+//            }
+//        )
     }
 
     @SuppressLint("RestrictedApi")
@@ -242,24 +229,24 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
 
         initView()
 
-        binding.rvIdentities.apply {
-            adapter = adapterIdentity
-            layoutManager = LinearLayoutManager(context)
-        }
-
-        binding.rvAttributes.apply {
-            adapter = adapterAttributes
-            layoutManager = LinearLayoutManager(context)
-            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_identity_attribute, requireContext().theme)
-            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
-        }
-
-        binding.rvYourAttestations.apply {
-            adapter = adapterAttestations
-            layoutManager = LinearLayoutManager(context)
-            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_attestation, requireContext().theme)
-            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
-        }
+//        binding.rvIdentities.apply {
+//            adapter = adapterIdentity
+//            layoutManager = LinearLayoutManager(context)
+//        }
+//
+//        binding.rvAttributes.apply {
+//            adapter = adapterAttributes
+//            layoutManager = LinearLayoutManager(context)
+//            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_identity_attribute, requireContext().theme)
+//            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
+//        }
+//
+//        binding.rvYourAttestations.apply {
+//            adapter = adapterAttestations
+//            layoutManager = LinearLayoutManager(context)
+//            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_attestation, requireContext().theme)
+//            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
+//        }
 
         itemsIdentity.observe(
             viewLifecycleOwner,
@@ -284,73 +271,73 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             }
         )
 
-        binding.ivAddAttributeAttestation.setOnClickListener {
-            OptionsDialog(
-                R.menu.identity_add_options,
-                resources.getString(R.string.dialog_choose_option),
-                menuMods = { menu ->
-                    menu.apply {
-                        findItem(R.id.actionAddIdentityAttribute).isVisible = getIdentityCommunity().getUnusedAttributeNames().isNotEmpty()
-                    }
-                },
-                optionSelected = { _, item ->
-                    when (item.itemId) {
-                        R.id.actionAddIdentityAttribute -> addIdentityAttribute()
-                        R.id.actionAddAttestation -> addAttestation()
-                        R.id.actionAddAuthority -> addAuthority()
-                    }
-                }
-            ).show(parentFragmentManager, tag)
-        }
-
-        binding.ivAddAttestation.setOnClickListener {
-            OptionsDialog(
-                R.menu.identity_add_attestation_options,
-                resources.getString(R.string.dialog_choose_option),
-                menuMods = { menu ->
-                    menu.apply {
-                        findItem(R.id.actionAddEBSIAttestation).isVisible = getIdentityCommunity().getUnusedAttributeNames().isNotEmpty()
-                    }
-                },
-                optionSelected = { _, item ->
-                    when (item.itemId) {
-                        R.id.actionAddEBSIAttestation -> addEBSIAttestation()
-                    }
-                }
-            ).show(parentFragmentManager, tag)
-        }
-
-        binding.tvShowIdentityAttributes.setOnClickListener {
-            if (binding.clIdentityAttributes.isVisible) return@setOnClickListener
-        }
-
-        binding.tvShowIssuedAttestations.setOnClickListener {
-            if (binding.clIssuedAttestations.isVisible) return@setOnClickListener
-
-            binding.tvShowYourAttestations.apply {
-                setTypeface(null, Typeface.NORMAL)
-                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
-            }
-            binding.tvShowIssuedAttestations.apply {
-                setTypeface(null, Typeface.BOLD)
-                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
-            }
-            binding.clYourAttestations.exitEnterView(requireContext(), binding.clIssuedAttestations, true)
-        }
-
-        binding.tvShowYourAttestations.setOnClickListener {
-            if (binding.clYourAttestations.isVisible) return@setOnClickListener
-
-            binding.tvShowYourAttestations.apply {
-                setTypeface(null, Typeface.BOLD)
-                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
-            }
-            binding.tvShowIssuedAttestations.apply {
-                setTypeface(null, Typeface.NORMAL)
-                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
-            }
-            binding.clIssuedAttestations.exitEnterView(requireContext(), binding.clYourAttestations, false)
-        }
+//        binding.ivAddAttributeAttestation.setOnClickListener {
+//            OptionsDialog(
+//                R.menu.identity_add_options,
+//                resources.getString(R.string.dialog_choose_option),
+//                menuMods = { menu ->
+//                    menu.apply {
+//                        findItem(R.id.actionAddIdentityAttribute).isVisible = getIdentityCommunity().getUnusedAttributeNames().isNotEmpty()
+//                    }
+//                },
+//                optionSelected = { _, item ->
+//                    when (item.itemId) {
+//                        R.id.actionAddIdentityAttribute -> addIdentityAttribute()
+//                        R.id.actionAddAttestation -> addAttestation()
+//                        R.id.actionAddAuthority -> addAuthority()
+//                    }
+//                }
+//            ).show(parentFragmentManager, tag)
+//        }
+//
+//        binding.ivAddAttestation.setOnClickListener {
+//            OptionsDialog(
+//                R.menu.identity_add_attestation_options,
+//                resources.getString(R.string.dialog_choose_option),
+//                menuMods = { menu ->
+//                    menu.apply {
+//                        findItem(R.id.actionAddEBSIAttestation).isVisible = getIdentityCommunity().getUnusedAttributeNames().isNotEmpty()
+//                    }
+//                },
+//                optionSelected = { _, item ->
+//                    when (item.itemId) {
+//                        R.id.actionAddEBSIAttestation -> addEBSIAttestation()
+//                    }
+//                }
+//            ).show(parentFragmentManager, tag)
+//        }
+//
+//        binding.tvShowIdentityAttributes.setOnClickListener {
+//            if (binding.clIdentityAttributes.isVisible) return@setOnClickListener
+//        }
+//
+//        binding.tvShowIssuedAttestations.setOnClickListener {
+//            if (binding.clIssuedAttestations.isVisible) return@setOnClickListener
+//
+//            binding.tvShowYourAttestations.apply {
+//                setTypeface(null, Typeface.NORMAL)
+//                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
+//            }
+//            binding.tvShowIssuedAttestations.apply {
+//                setTypeface(null, Typeface.BOLD)
+//                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
+//            }
+//            binding.clYourAttestations.exitEnterView(requireContext(), binding.clIssuedAttestations, true)
+//        }
+//
+//        binding.tvShowYourAttestations.setOnClickListener {
+//            if (binding.clYourAttestations.isVisible) return@setOnClickListener
+//
+//            binding.tvShowYourAttestations.apply {
+//                setTypeface(null, Typeface.BOLD)
+//                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
+//            }
+//            binding.tvShowIssuedAttestations.apply {
+//                setTypeface(null, Typeface.NORMAL)
+//                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
+//            }
+//            binding.clIssuedAttestations.exitEnterView(requireContext(), binding.clYourAttestations, false)
+//        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -378,9 +365,9 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     }
 
     private fun toggleVisibility() {
-        binding.tvNoYourAttestations.isVisible = adapterAttestations.itemCount == 0
-        binding.tvNoIssuedAttestations.isVisible = adapterAttestations.itemCount == 0
-        binding.tvNoAttributes.isVisible = adapterAttributes.itemCount == 0
+//        binding.tvNoYourAttestations.isVisible = adapterAttestations.itemCount == 0
+//        binding.tvNoIssuedAttestations.isVisible = adapterAttestations.itemCount == 0
+//        binding.tvNoAttributes.isVisible = adapterAttributes.itemCount == 0
     }
 
     private fun addAttestation() {
@@ -397,16 +384,16 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     }
 
     private fun updateAttestations() {
-        val oldCount = adapterAttestations.itemCount
-        val itemsAttestations = getAttestationCommunity().database.getAllAttestations()
+//        val oldCount = adapterAttestations.itemCount
+//        val itemsAttestations = getAttestationCommunity().database.getAllAttestations()
 
-        if (oldCount != itemsAttestations.size) {
-            adapterAttestations.updateItems(
-                createAttestationItems(itemsAttestations)
-            )
-
-            binding.rvYourAttestations.setItemViewCacheSize(itemsAttestations.size)
-        }
+//        if (oldCount != itemsAttestations.size) {
+//            adapterAttestations.updateItems(
+//                createAttestationItems(itemsAttestations)
+//            )
+//
+////            binding.rvYourAttestations.setItemViewCacheSize(itemsAttestations.size)
+//        }
 
         toggleVisibility()
     }
@@ -499,19 +486,19 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         }
     }
 
-    private fun createAttestationItems(attestations: List<AttestationBlob>): List<Item> {
-        return attestations
-            .map { blob ->
-                AttestationItem(blob)
-            }
-            .sortedBy {
-                if (it.attestationBlob.metadata != null) {
-                    return@sortedBy JSONObject(it.attestationBlob.metadata!!).optString(QRScanController.KEY_ATTRIBUTE)
-                } else {
-                    return@sortedBy ""
-                }
-            }
-    }
+//    private fun createAttestationItems(attestations: List<AttestationBlob>): List<Item> {
+//        return attestations
+//            .map { blob ->
+//                AttestationItem(blob)
+//            }
+//            .sortedBy {
+//                if (it.attestationBlob.metadata != null) {
+//                    return@sortedBy JSONObject(it.attestationBlob.metadata!!).optString(QRScanController.KEY_ATTRIBUTE)
+//                } else {
+//                    return@sortedBy ""
+//                }
+//            }
+//    }
 
     private fun createIdentityItems(identities: List<Identity>, imageString: String?): List<Item> {
         return identities.map { identity ->

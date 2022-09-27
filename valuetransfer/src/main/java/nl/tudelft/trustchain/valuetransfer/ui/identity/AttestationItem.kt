@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.ui.identity
 
 import com.mattskala.itemadapter.Item
-import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
+import nl.tudelft.ipv8.attestation.wallet.store.AttestationBlob // OK
 
 data class AttestationItem(
     val attestationBlob: AttestationBlob

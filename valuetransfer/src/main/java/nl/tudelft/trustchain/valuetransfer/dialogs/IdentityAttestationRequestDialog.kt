@@ -12,15 +12,10 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.schema.ID_METADATA_BIG
-import nl.tudelft.ipv8.attestation.schema.ID_METADATA_HUGE
-import nl.tudelft.ipv8.attestation.wallet.cryptography.bonehexact.BonehPrivateKey
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
-import java.lang.IllegalStateException
 
 class IdentityAttestationRequestDialog(
     private val peer: Peer,
@@ -95,32 +90,32 @@ class IdentityAttestationRequestDialog(
             bottomSheetDialog.show()
 
             requestButton.setOnClickListener {
-                attributeNameView.text.toString().let { attributeName ->
-                    val idFormat = attributeTypeSpinner.selectedItem.toString()
-                    val myPeer = getTrustChainCommunity().myPeer
-
-                    var privateKey: BonehPrivateKey? = null
-
-                    try {
-                        privateKey = when (idFormat) {
-                            ID_METADATA_BIG -> myPeer.identityPrivateKeyBig!!
-                            ID_METADATA_HUGE -> myPeer.identityPrivateKeyHuge!!
-                            else -> myPeer.identityPrivateKeySmall!!
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    } finally {
-                        getAttestationCommunity().requestAttestation(
-                            peer,
-                            attributeName,
-                            privateKey!!,
-                            hashMapOf(QRScanController.KEY_ID_FORMAT to idFormat),
-                            true
-                        )
-                    }
-
-                    bottomSheetDialog.dismiss()
-                }
+//                attributeNameView.text.toString().let { attributeName ->
+//                    val idFormat = attributeTypeSpinner.selectedItem.toString()
+//                    val myPeer = getTrustChainCommunity().myPeer
+//
+//                    var privateKey: BonehPrivateKey? = null
+//
+//                    try {
+//                        privateKey = when (idFormat) {
+//                            ID_METADATA_BIG -> myPeer.identityPrivateKeyBig!!
+//                            ID_METADATA_HUGE -> myPeer.identityPrivateKeyHuge!!
+//                            else -> myPeer.identityPrivateKeySmall!!
+//                        }
+//                    } catch (e: Exception) {
+//                        e.printStackTrace()
+//                    } finally {
+////                        getAttestationCommunity().requestAttestation(
+////                            peer,
+////                            attributeName,
+////                            privateKey!!,
+////                            hashMapOf(QRScanController.KEY_ID_FORMAT to idFormat),
+////                            true
+////                        )
+//                    }
+//
+//                    bottomSheetDialog.dismiss()
+//                }
             }
 
             bottomSheetDialog

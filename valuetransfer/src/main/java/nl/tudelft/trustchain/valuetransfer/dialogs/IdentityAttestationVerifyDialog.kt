@@ -1,23 +1,21 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.os.Bundle
-import android.os.Handler
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ProgressBar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import org.json.JSONObject
-import java.lang.IllegalStateException
 
 class IdentityAttestationVerifyDialog(
     private val attesteeKey: ByteArray,
@@ -61,24 +59,24 @@ class IdentityAttestationVerifyDialog(
                 verificationSummaryView.isVisible = false
                 loadingSpinner.isVisible = true
 
-                getAttestationCommunity().verifyAttestationLocally(
-                    Peer(defaultCryptoProvider.keyFromPublicBin(attesteeKey)),
-                    attestationHash,
-                    metadata,
-                    signature,
-                    defaultCryptoProvider.keyFromPublicBin(authorityKey)
-                ).let { result ->
-                    @Suppress("DEPRECATION")
-                    Handler().postDelayed(
-                        {
-                            loadingSpinner.isVisible = false
-
-                            IdentityAttestationVerificationResultDialog(result).show(parentFragmentManager, tag)
-                            bottomSheetDialog.dismiss()
-                        },
-                        1000
-                    )
-                }
+//                getAttestationCommunity().verifyAttestationLocally(
+//                    Peer(defaultCryptoProvider.keyFromPublicBin(attesteeKey)),
+//                    attestationHash,
+//                    metadata,
+//                    signature,
+//                    defaultCryptoProvider.keyFromPublicBin(authorityKey)
+//                ).let { result ->
+//                    @Suppress("DEPRECATION")
+//                    Handler().postDelayed(
+//                        {
+//                            loadingSpinner.isVisible = false
+//
+//                            IdentityAttestationVerificationResultDialog(result).show(parentFragmentManager, tag)
+//                            bottomSheetDialog.dismiss()
+//                        },
+//                        1000
+//                    )
+//                }
             }
 
             bottomSheetDialog

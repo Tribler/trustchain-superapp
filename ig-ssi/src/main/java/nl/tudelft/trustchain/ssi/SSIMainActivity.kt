@@ -9,7 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.identity.datastructures.IdentityAttestation
+import nl.tudelft.ipv8.attestation.identity.datastructures.IdentityAttestation // OK
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 

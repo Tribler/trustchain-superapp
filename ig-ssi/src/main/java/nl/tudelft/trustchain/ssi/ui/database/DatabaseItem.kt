@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.ssi.ui.database
 
 import com.mattskala.itemadapter.Item
-import nl.tudelft.ipv8.attestation.communication.AttestationPresentation
+import nl.tudelft.ipv8.attestation.communication.AttestationPresentation // OK
 
 class DatabaseItem(val index: Int, val attestation: AttestationPresentation) : Item() {
 

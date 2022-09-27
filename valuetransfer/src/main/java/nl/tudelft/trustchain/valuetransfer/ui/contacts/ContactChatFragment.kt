@@ -27,12 +27,11 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.dialog_image.*
 import kotlinx.android.synthetic.main.fragment_contacts_chat.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock // OK
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.ipv8.util.hexToBytes
@@ -64,7 +63,6 @@ import android.graphics.PorterDuffColorFilter
 import android.util.Log
 import androidx.core.widget.doAfterTextChanged
 import androidx.documentfile.provider.DocumentFile
-import com.google.android.gms.location.*
 import nl.tudelft.ipv8.messaging.eva.TransferState
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository

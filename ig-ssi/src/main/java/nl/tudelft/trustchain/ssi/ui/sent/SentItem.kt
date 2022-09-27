@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.ssi.ui.sent
 
 import com.mattskala.itemadapter.Item
-import nl.tudelft.ipv8.attestation.communication.SubjectAttestationPresentation
+import nl.tudelft.ipv8.attestation.communication.SubjectAttestationPresentation // OK
 
 class SentItem(val index: Int, val attestation: SubjectAttestationPresentation) : Item() {
 

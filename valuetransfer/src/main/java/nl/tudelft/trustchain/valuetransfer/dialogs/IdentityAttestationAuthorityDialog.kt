@@ -1,7 +1,8 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.os.Bundle
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.ipv8.keyvault.PublicKey
@@ -9,7 +10,6 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
-import java.lang.IllegalStateException
 
 class IdentityAttestationAuthorityDialog(
     private val authorityKey: PublicKey,
@@ -37,23 +37,23 @@ class IdentityAttestationAuthorityDialog(
             bottomSheetDialog.show()
 
             addAuthorityButton.setOnClickListener {
-                getAttestationCommunity().trustedAuthorityManager.let { authorityManager ->
-                    when (!authorityManager.contains(authorityKey.keyToHash().toHex())) {
-                        true -> {
-                            authorityManager.addTrustedAuthority(authorityKey)
-                            parentActivity.displayToast(
-                                requireContext(),
-                                resources.getString(R.string.snackbar_authority_add_success)
-                            )
-                        }
-                        else -> {
-                            parentActivity.displayToast(
-                                requireContext(),
-                                resources.getString(R.string.snackbar_authority_add_error)
-                            )
-                        }
-                    }
-                }
+//                getAttestationCommunity().trustedAuthorityManager.let { authorityManager ->
+//                    when (!authorityManager.contains(authorityKey.keyToHash().toHex())) {
+//                        true -> {
+//                            authorityManager.addTrustedAuthority(authorityKey)
+//                            parentActivity.displayToast(
+//                                requireContext(),
+//                                resources.getString(R.string.snackbar_authority_add_success)
+//                            )
+//                        }
+//                        else -> {
+//                            parentActivity.displayToast(
+//                                requireContext(),
+//                                resources.getString(R.string.snackbar_authority_add_error)
+//                            )
+//                        }
+//                    }
+//                }
 
                 bottomSheetDialog.dismiss()
             }

@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.ssi
 
-import nl.tudelft.ipv8.attestation.communication.CommunicationChannel
-import nl.tudelft.ipv8.attestation.communication.CommunicationManager
+import nl.tudelft.ipv8.attestation.communication.CommunicationChannel // OK
+import nl.tudelft.ipv8.attestation.communication.CommunicationManager // OK
 
 const val DEFAULT_PSEUDONYM = "MY_PEER"
 val DEFAULT_RENDEZVOUS_TOKEN = null
