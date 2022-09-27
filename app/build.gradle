@@ -126,7 +126,7 @@ dependencies {
     implementation project(':freedomOfComputing')
     implementation project(':peerchat')
     implementation project(':eurotoken')
-//    implementation project(':ig-ssi')
+    implementation project(':ig-ssi')
     implementation project(':liquidity-pool')
 //    implementation project(':valuetransfer')
     implementation project(':atomic-swap')

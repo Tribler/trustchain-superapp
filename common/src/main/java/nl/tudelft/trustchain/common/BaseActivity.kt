@@ -9,6 +9,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import nl.tudelft.trustchain.common.databinding.ActivityBaseBinding
 import nl.tudelft.trustchain.common.util.viewBinding
 
@@ -19,6 +20,7 @@ abstract class BaseActivity : AppCompatActivity() {
         AppBarConfiguration(setOf())
     }
 
+    protected lateinit var bottomNavigation: BottomNavigationView
     /**
      * The resource ID of the navigation graph.
      */
@@ -43,6 +45,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
         // Setup ActionBar
         println("---")
+        bottomNavigation = binding.bottomNavigation
         println(navController)
         println(appBarConfiguration)
         println("---")
