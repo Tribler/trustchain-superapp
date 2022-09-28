@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.datavault.ui
 
-import android.graphics.Bitmap
 import com.mattskala.itemadapter.Item
-import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
 import java.io.File
 
 abstract class VaultFileItem(): Item() {

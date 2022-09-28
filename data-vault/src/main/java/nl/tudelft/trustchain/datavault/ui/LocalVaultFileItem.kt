@@ -3,16 +3,14 @@ package nl.tudelft.trustchain.datavault.ui
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
-import nl.tudelft.trustchain.datavault.R
-import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
+import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlFile
 import java.io.File
 import java.lang.IllegalArgumentException
 
 class LocalVaultFileItem(
     val context: Context,
     override val file: File,
-    val accessControlList: AccessControlList?
+    val accessControlFile: AccessControlFile?
 ): VaultFileItem() {
     override val name: String get() {
         return file.name

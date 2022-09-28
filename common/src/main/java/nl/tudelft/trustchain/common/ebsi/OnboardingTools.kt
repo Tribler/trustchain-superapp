@@ -41,20 +41,23 @@ object OnboardingTools {
                 Log.e(TAG, "Response jwt: $responseJWT")
 
                 requestTime = TimingUtils.getTimestamp()
-                errorListener.toString()
+
                 // =====ONBOARD_02A Proves control of DID key=====
                 EBSIAPI.getVerifiableAuthorisation(sessionToken,
                     clientId,
                     responseJWT,
-                    getVerifiableAuthorisationListener(wallet),
-                    Response.ErrorListener {
-                        val duration = TimingUtils.getTimestamp() - requestTime
-                        Log.e("PerfTest", "EBSI auth response call in $duration ms")
-                        val myVolleyError = it as MyVolleyError
-                        Log.e(TAG, myVolleyError.volleyError?.networkResponse?.data?.toString(Charsets.UTF_8) ?: "No network response")
-                    }
+                    getVerifiableAuthorisationListener(wallet)
+                ) {
+                    val duration = TimingUtils.getTimestamp() - requestTime
+                    Log.e("PerfTest", "EBSI auth response call in $duration ms")
+                    val myVolleyError = it as MyVolleyError
+                    Log.e(TAG,
+                        myVolleyError.volleyError?.networkResponse?.data?.toString(Charsets.UTF_8)
+                            ?: "No network response"
+                    )
+                }
 //                    errorListener
-                )
+
             } else {
                 Log.e(TAG, "Auth request verification failed")
 //                Log.e("PerfTest", "Failed to verify EBSI credential in $duration ms")

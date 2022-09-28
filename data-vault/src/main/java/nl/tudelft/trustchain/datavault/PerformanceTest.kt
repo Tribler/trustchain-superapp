@@ -15,7 +15,7 @@ import nl.tudelft.ipv8.util.sha1
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ebsi.EBSIWallet
 import nl.tudelft.trustchain.common.util.TimingUtils
-import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
+import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlFile
 import nl.tudelft.trustchain.datavault.accesscontrol.DirectoryTree
 import nl.tudelft.trustchain.datavault.accesscontrol.Policy
 import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
@@ -150,14 +150,14 @@ class PerformanceTest(
                 delay(3500)
             }*/
 
-            listOf(5000L, 2000L, 1000L).forEach { delta ->
+            listOf(2000L).forEach { delta ->
                 for (att in listOf(
                     Policy.AccessTokenType.SESSION_TOKEN,
                     Policy.AccessTokenType.JWT,
                     Policy.AccessTokenType.TCID,
                     Policy.AccessTokenType.JSONLD
                 )) {
-                    var rounds = 25
+                    var rounds = 3
                     if (att == Policy.AccessTokenType.SESSION_TOKEN) rounds += 1
                     for (i in 0 until rounds) {
                         Log.e(logTag, "TFR $i ($att)")
@@ -186,10 +186,10 @@ class PerformanceTest(
                         }
                         delay(delta)
                     }
-                    delay(15000)
+                    delay(5000)
                 }
-                delay(30000)
-                dataVaultCommunity.clearDurations(delta)
+//                delay(30000)
+//                dataVaultCommunity.clearDurations(delta)
             }
         }
     }
@@ -282,7 +282,7 @@ class PerformanceTest(
         Log.e("PerfTest", "Attestations: ${attestations.size}")
 
         val start = TimingUtils.getTimestamp()
-        val verified = AccessControlList.filterAttestations(dataVaultCommunity.myPeer, attestations)?.size ?: 0 > 0
+        val verified = AccessControlFile.filterAttestations(dataVaultCommunity.myPeer, attestations)?.size ?: 0 > 0
         val duration = TimingUtils.getTimestamp() - start
         Log.e("PerfTest", "$duration ms to verify ($verified) ${attestations.size} attestations")
     }

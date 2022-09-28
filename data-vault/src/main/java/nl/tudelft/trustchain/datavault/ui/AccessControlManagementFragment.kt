@@ -13,7 +13,7 @@ import androidx.navigation.fragment.navArgs
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.datavault.R
-import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
+import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlFile
 import nl.tudelft.trustchain.datavault.accesscontrol.Policy
 import nl.tudelft.trustchain.datavault.accesscontrol.Rules
 import nl.tudelft.trustchain.datavault.databinding.AccessControlManagementFragmentBinding
@@ -26,10 +26,10 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
 
     private val acmViewModel: ACMViewModel by activityViewModels()
     private val args: AccessControlManagementFragmentArgs by navArgs()
-    private lateinit var accessControlList: AccessControlList
+    private lateinit var accessControlFile: AccessControlFile
 
     private val policies: List<Policy> get() {
-        return accessControlList.getPolicies()
+        return accessControlFile.getPolicies()
     }
 
     @SuppressLint("SetTextI18n")
@@ -38,12 +38,12 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
 
         val fileName = args.fileName
         val file = File(fileName)
-        accessControlList = AccessControlList(file, null, null)
+        accessControlFile = AccessControlFile(file, null, null)
 
         val fileSizeMb = file.length() / (1024.0 * 1024)
         binding.fileNameTextView.text = file.name
         binding.fileSizeTextView.text = "%.2f MB".format(fileSizeMb)
-        binding.lastModifiedTextView.text = accessControlList.lastModified
+        binding.lastModifiedTextView.text = accessControlFile.lastModified
 
         val modifiedCredentialTriple = acmViewModel.getModifiedCredential()
 
@@ -96,7 +96,7 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
     private fun savePolicies() {
         val finalPolicies = policies.mapIndexed { index, _ -> getEditablePolicy(index) }
         Log.e(logTag, "final policies: ${finalPolicies.map { p -> p.toString() }}")
-        accessControlList.savePolicies(finalPolicies)
+        accessControlFile.savePolicies(finalPolicies)
     }
 
     private fun getPolicyView(policy: Policy, index: Int): View {

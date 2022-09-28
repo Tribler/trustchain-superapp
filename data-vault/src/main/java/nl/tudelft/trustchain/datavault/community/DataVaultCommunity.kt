@@ -27,7 +27,7 @@ import nl.tudelft.trustchain.common.ebsi.JWTHelper
 import nl.tudelft.trustchain.common.ebsi.VerificationListener
 import nl.tudelft.trustchain.common.util.TimingUtils
 import nl.tudelft.trustchain.datavault.DataVaultMainActivity
-import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
+import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlFile
 import nl.tudelft.trustchain.datavault.accesscontrol.Policy
 import nl.tudelft.trustchain.datavault.tools.isImage
 import nl.tudelft.trustchain.datavault.ui.ImageViewHolder
@@ -198,6 +198,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
             val sendTime = testTimestamp[1].toLong()
             val receiveTime = TimingUtils.getTimestamp()
             val duration = receiveTime - sendTime
+            peer.mid
 //            Log.e(logTag, "onTestFile $att duration: $duration (rec: $receiveTime - sent: $sendTime) from ${peer.mid}")
             durations.getJSONArray(att).put(duration)
             Log.e(logTag, "durations: $durations")
@@ -281,11 +282,11 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         // notify("Failed", payload.message)
     }
 
-    private fun vaultFile(file: File): Pair<File, AccessControlList> {
-        return Pair(file, AccessControlList(file, this, attestationCommunity))
+    private fun vaultFile(file: File): Pair<File, AccessControlFile> {
+        return Pair(file, AccessControlFile(file, this, attestationCommunity))
     }
 
-    private fun vaultFile(filename: String): Pair<File, AccessControlList> {
+    private fun vaultFile(filename: String): Pair<File, AccessControlFile> {
         val file = File(VAULT, filename)
         return vaultFile(file)
     }
@@ -302,7 +303,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     private fun onFileRequest(peer: Peer, payload: VaultFileRequestPayload) {
         Log.e(logTag, "Received file request. Access token: ${payload.accessTokenType}")
 
-        val vaultFiles = mutableListOf<Triple<String, File, AccessControlList>>().apply {
+        val vaultFiles = mutableListOf<Triple<String, File, AccessControlFile>>().apply {
             payload.ids.forEach { id ->
                 val (file, accessPolicy) = vaultFile(id)
                 add(Triple(id, file, accessPolicy))
@@ -330,7 +331,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
                 }, ebsiWallet.publicKey)
             }
             Policy.AccessTokenType.TCID -> {
-                val attestations = AccessControlList.filterAttestations(
+                val attestations = AccessControlFile.filterAttestations(
                     peer,
                     payload.accessTokens.map {
                         AttestationBlob.deserialize(it.fromHexString()).first
@@ -355,7 +356,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         }
     }
 
-    private fun verifyAndSendFiles(vaultFiles: List<Triple<String, File, AccessControlList>>, peer: Peer, payload: VaultFileRequestPayload, attestations: List<AttestationBlob>? = null) {
+    private fun verifyAndSendFiles(vaultFiles: List<Triple<String, File, AccessControlFile>>, peer: Peer, payload: VaultFileRequestPayload, attestations: List<AttestationBlob>? = null) {
         vaultFiles.forEach { vaultFile ->
             val id = if (vaultBrowserFragment.PERFORMANCE_TEST) payload.accessMode else vaultFile.first
             val file = vaultFile.second
@@ -446,7 +447,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 //            tempSessionToken
             }
             Policy.AccessTokenType.TCID -> {
-                val attestations = AccessControlList.filterAttestations(
+                val attestations = AccessControlFile.filterAttestations(
                     peer,
                     payload.accessTokens.map {
                         AttestationBlob.deserialize(it.fromHexString()).first

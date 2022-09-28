@@ -20,10 +20,12 @@ import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.common.util.TimingUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.datavault.DataVaultMainActivity
 import nl.tudelft.trustchain.datavault.PerformanceTest
 import nl.tudelft.trustchain.datavault.R
+import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlFile
 import nl.tudelft.trustchain.datavault.accesscontrol.Policy
 import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import nl.tudelft.trustchain.datavault.databinding.VaultBrowserFragmentBinding
@@ -111,6 +113,18 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 //            performanceTest.testTCID(attestationCommunity)
 
 //            performanceTest.testDirectoryTree()
+
+            val att = attestationCommunity.database.getAllAttestations().first()
+            val rounds = 10
+            var tot = 0L
+            for (i in  0 until rounds) {
+                val start = TimingUtils.getTimestamp()
+                val filtered = AccessControlFile.filterAttestations(attestationCommunity.myPeer, listOf(att))
+                val duration = TimingUtils.getTimestamp() - start
+                Log.e(tag, "${duration} ms Attestation verified=${filtered?.size ?: 0 > 0}")
+                tot += duration
+            }
+            Log.e(tag, "${tot / rounds} ms Average attestation verification time")
 
         }
     }

@@ -6,7 +6,6 @@ import com.android.volley.Response
 import com.nimbusds.jwt.SignedJWT
 import id.walt.auditor.Auditor
 import id.walt.auditor.SignaturePolicy
-import id.walt.common.urlEncode
 import id.walt.custodian.Custodian
 import id.walt.model.DidMethod
 import id.walt.services.did.DidService
@@ -14,15 +13,15 @@ import id.walt.services.jwt.JwtService
 import id.walt.signatory.ProofConfig
 import id.walt.signatory.ProofType
 import id.walt.signatory.Signatory
-import id.walt.vclib.model.VerifiableCredential
 import kotlinx.coroutines.*
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.util.toHex
-import org.apache.http.client.utils.URLEncodedUtils
+import nl.tudelft.trustchain.common.util.TimingUtils
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
 import java.net.URI
-import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.security.SecureRandom
 import java.time.Instant
@@ -153,6 +152,17 @@ class ConformanceTest(
         // https://ec.europa.eu/digital-building-blocks/wikis/display/EBSIDOC/EBSI+Wallet+Conformance+Testing
         EBSIRequest.testSetup(uuid)
 
+        /*for (i in 0 until 10) {
+            val st = JWTHelper.createSessionToken(wallet, "test")
+            val start = TimingUtils.getTimestamp()
+            JWTHelper.verifyJWT(st, VerificationListener {
+                Log.e(TAG, "(${TimingUtils.getTimestamp() - start}) ms Session token: $it")
+            }, wallet.publicKey)
+        }*/
+
+
+
+
 //        ebsiVPTest()
 
 //        verCredAuthReq()
@@ -272,7 +282,7 @@ class ConformanceTest(
 
     private fun onboardTest12() {
         // Let the user scan the mobile authentication token on the onboarding service page
-        val onboardSessionToken = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NjM1MDAyMDcsImlhdCI6MTY2MzQ5OTMwNywiaXNzIjoiZGlkOmVic2k6emFBNTlzYWdXbzliWUZ6anRvNjhYc2YiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjItMDktMThUMTE6MDg6MjNaIiwiaG9zdG5hbWUiOiJhcHAuY29uZm9ybWFuY2UuaW50ZWJzaS54eXoiLCJzY29yZSI6MC45LCJzdWNjZXNzIjp0cnVlfX0.pMmRWdbL1e7_DXoJef2BV0BKP1IEc7sA9lTV-D8c7vfgAccnwR9ZWwkIHr7TjflvwDbqy-A_7Qm1rUtUknsuLA"
+        val onboardSessionToken = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NjM5NDU2NDAsImlhdCI6MTY2Mzk0NDc0MCwiaXNzIjoiZGlkOmVic2k6emFBNTlzYWdXbzliWUZ6anRvNjhYc2YiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjItMDktMjNUMTQ6NTI6MTNaIiwiaG9zdG5hbWUiOiJhcHAuY29uZm9ybWFuY2UuaW50ZWJzaS54eXoiLCJzY29yZSI6MC45LCJzdWNjZXNzIjp0cnVlfX0.NbiBDVoEO4q-59eyp58ixyja5J66x8sKCB-6fSMbglGdK6j09uPLZi9Bs-lE7Nv2zQSKrqe_2rLZG1eXmzUeCg"
         OnboardingTools.getVerifiableAuthorisation(wallet, onboardSessionToken, errorListener)
     }
 
@@ -281,7 +291,7 @@ class ConformanceTest(
     }
 
     private fun onboardTest6() {
-        DIDTools.registerDID(wallet, errorListener)
+        DIDRegistryTools.registerDID(wallet, errorListener)
     }
 
     private fun vaRequestTest1() {

@@ -16,7 +16,7 @@ import org.web3j.rlp.RlpList
 import java.math.BigInteger
 import java.util.*
 
-object DIDTools {
+object DIDRegistryTools {
 
     private const val TAG = "DIDTools"
 

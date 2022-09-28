@@ -17,7 +17,7 @@ import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AccessControlList(
+class AccessControlFile(
     private val file: File,
     private val dataVaultCommunity: DataVaultCommunity?,
     private val attestationCommunity: AttestationCommunity?

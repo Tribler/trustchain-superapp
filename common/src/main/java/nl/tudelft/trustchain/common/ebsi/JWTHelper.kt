@@ -93,7 +93,7 @@ object JWTHelper {
             .expirationTime(Date(Date().time + (15 * 60 * 1000)))
             .issuer(wallet.did)
             .audience(aud)
-            .claim("AFT", "AFT")
+            .claim("AFT", SecureRandom.getSeed(1000).toString())
 
         val signedJWT = SignedJWT(
             JWSHeader.Builder(JWSAlgorithm.ES256K).keyID(wallet.keyAlias).type(JOSEObjectType.JWT).build(),
@@ -182,12 +182,9 @@ object JWTHelper {
                     val publicKeys = it.getJSONArray("publicKeys")
                     for (i in 0 until publicKeys.length()) {
                         val publicKeyStr = publicKeys.getString(i)
-                        val decodedKey = Base64.getDecoder().decode(publicKeyStr)
-
-                        Log.e("JWTH TEST", "Decoded pub key: $decodedKey")
 
                         val publicKey = KeyStoreHelper.decodePemPublicKey(publicKeyStr)
-                        Log.e("JWTH TEST", "Decoded PEM pub key: $publicKey")
+//                        Log.e("JWTH TEST", "Decoded PEM pub key: $publicKey")
 
 //                        val verifier: JWSVerifier = ECDSAVerifier(publicKey)
                         // assertTrue(signedJWT.verify(verifier))

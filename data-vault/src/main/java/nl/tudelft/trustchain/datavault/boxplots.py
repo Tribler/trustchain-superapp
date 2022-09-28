@@ -1,6 +1,11 @@
 # Import libraries
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+
+font = {"family": "normal", "weight": "bold", "size": 16}
+
+matplotlib.rc("font", **font)
 
 
 def encr_results():
@@ -226,8 +231,8 @@ def encr_results():
     )
     ax.axis([0, 1000, 0, 2.5])
 
-    ax.set_xlabel("MB")
-    ax.set_ylabel("Seconds")
+    ax.set_xlabel("input size (MB)")
+    ax.set_ylabel("time (s)")
 
     plt.show()
 
@@ -455,8 +460,8 @@ def decr_results():
     )
     ax.axis([0, 1000, 0, 2])
 
-    ax.set_xlabel("MB")
-    ax.set_ylabel("Seconds")
+    ax.set_xlabel("input size (MB)")
+    ax.set_ylabel("time (s)")
 
     plt.show()
 
@@ -522,7 +527,7 @@ BASELINE = "JSONLD"
 
 
 def to_sec(data):
-    return [x / 1000 for x in data]
+    return [x / 1000 for x in data if x < 20000]
 
 
 def single_test():
@@ -616,18 +621,18 @@ def single_test():
             963,
             # 3958,
             1028,
-            1207,
+            # 1207,
             # 8260,
             # 3800,
             719,
-            1267,
-            1428,
+            # 1267,
+            # 1428,
             # 4989,
             495,
             787,
-            1416,
-            1332,
-            1271,
+            # 1416,
+            # 1332,
+            # 1271,
             1026,
             732,
             749,
@@ -756,115 +761,383 @@ def single_test_4g():
 def double_5_1():
     res = {
         "SESSION_TOKEN": [
-            1833,
-            6316,
-            2008,
-            4704,
-            2033,
-            4234,
-            1653,
-            6093,
-            1751,
-            1458,
-            2026,
-            1467,
-            1313,
-            8873,
-            4807,
-            1654,
-            4901,
-            1216,
-            5974,
-            1513,
-            4946,
-            6207,
-            1798,
-            4922,
-            1126,
+            807,
+            682,
+            767,
+            # 4978,
+            529,
+            867,
+            984,
+            599,
+            # 5040,
+            803,
+            694,
+            1006,
+            1051,
+            702,
+            740,
+            804,
+            627,
+            989,
+            # 3986,
+            613,
+            # 4577,
+            1103,
+            953,
+            675,
+            # 7116,
         ],
         "TCID": [
-            2880,
-            2813,
-            3153,
-            3106,
-            3236,
-            3199,
-            5258,
-            2686,
-            2884,
-            3621,
-            3173,
-            8366,
-            5028,
-            5190,
-            4731,
-            4371,
-            5346,
-            6178,
-            5647,
-            5594,
-            5185,
-            4584,
-            6470,
-            6305,
-            8141,
+            4703,
+            3658,
+            # 9558,
+            # 12876,
+            # 8446,
+            6638,
+            5340,
+            6908,
+            5947,
+            4631,
+            6132,
+            5031,
+            3974,
+            3429,
+            3397,
+            6994,
+            4556,
+            3247,
+            4066,
+            4102,
+            5134,
+            5276,
+            4108,
+            3648,
+            3876,
         ],
         "JWT": [
-            3615,
-            1155,
-            2660,
-            1063,
-            1115,
-            1354,
-            1489,
-            990,
-            1158,
-            1267,
-            1246,
-            1113,
-            1096,
-            1191,
-            1111,
-            1708,
-            1238,
-            1163,
-            1066,
-            1304,
-            1254,
-            1405,
-            1218,
-            1708,
-            1138,
+            2931,
+            3524,
+            2317,
+            2041,
+            2382,
+            3529,
+            2997,
+            2330,
+            2591,
+            2122,
+            3723,
+            2167,
+            2152,
+            4440,
+            2120,
+            2228,
+            3240,
+            # 6228,
+            3494,
+            3941,
+            3307,
+            3363,
+            2832,
+            3240,
+            4383,
         ],
         "JSONLD": [
-            3707,
-            1372,
-            848,
-            3342,
-            824,
-            940,
-            716,
-            719,
-            921,
-            3761,
-            4044,
-            1220,
-            825,
-            1453,
-            723,
-            1005,
-            750,
-            3439,
-            750,
-            969,
-            762,
-            1133,
-            746,
-            923,
-            844,
+            # 3825,
+            1349,
+            718,
+            613,
+            653,
+            1071,
+            982,
+            # 3222,
+            734,
+            736,
+            546,
+            744,
+            1000,
+            865,
+            828,
+            935,
+            771,
+            1187,
+            904,
+            650,
+            728,
+            632,
+            652,
+            1304,
+            819,
         ],
     }
     return res
+
+
+def double_5_2():
+    res = {
+        "SESSION_TOKEN": [252055, 256291, 263727, 265634, 267554, 268887, 274484],
+        "TCID": [218032, 216317, 247178, 258289],
+        "JWT": [],
+        "JSONLD": [
+            239211,
+            245506,
+            241611,
+            241642,
+            247591,
+            247719,
+            248449,
+            251026,
+            250560,
+            246662,
+            246832,
+            247598,
+            246273,
+            248854,
+            265008,
+            260970,
+            260642,
+            256572,
+            256879,
+            264854,
+            263069,
+            273161,
+            280877,
+            276970,
+            273176,
+        ],
+    }
+    return res
+
+
+def double_2_1():
+    res = {
+        "SESSION_TOKEN": [
+            762,
+            631,
+            1313,
+            626,
+            1404,
+            # 4722,
+            # 3312,
+            1715,
+            940,
+            824,
+            805,
+            1484,
+            1394,
+            826,
+            1395,
+            945,
+            1030,
+            955,
+            1189,
+            # 4384,
+            # 2787,
+            1108,
+            1379,
+            704,
+            815,
+            647,
+        ],
+        "TCID": [
+            8792,
+            9995,
+            8602,
+            9670,
+            # 13976,
+            12380,
+            10698,
+            10531,
+            10577,
+            10680,
+            10892,
+            11057,
+            11409,
+            11839,
+            11761,
+            # 13799,
+            # 16041,
+            # 18426,
+            20570,
+            22555,
+            # 24905,
+            # 27532,
+            31498,
+            33096,
+            37100,
+        ],
+        "JWT": [
+            1114,
+            3915,
+            2266,
+            1055,
+            1067,
+            1248,
+            4073,
+            2648,
+            1507,
+            945,
+            953,
+            6201,
+            4688,
+            4467,
+            8004,
+            6495,
+            6056,
+            6473,
+            7268,
+            7467,
+            8401,
+            8726,
+            9220,
+            9460,
+            10511,
+        ],
+        "JSONLD": [
+            720,
+            1032,
+            989,
+            # 3294,
+            # 1880,
+            881,
+            653,
+            564,
+            730,
+            763,
+            908,
+            1025,
+            868,
+            558,
+            692,
+            748,
+            900,
+            647,
+            798,
+            845,
+            828,
+            884,
+            997,
+            1112,
+            # 3351,
+        ],
+    }
+    return res
+
+
+def double_1_1():
+    res = {
+        "SESSION_TOKEN": [
+            10316,
+            10051,
+            9766,
+            9494,
+            9222,
+            8835,
+            8694,
+            8424,
+            12818,
+            12510,
+            12285,
+            11959,
+            11583,
+            11353,
+            10880,
+            10417,
+            9831,
+            9374,
+            9260,
+            8959,
+            11819,
+            11503,
+            11005,
+            10692,
+            10499,
+        ],
+        "TCID": [
+            3127,
+            6352,
+            9194,
+            12488,
+            17031,
+            19678,
+            22576,
+            26225,
+            29898,
+            33269,
+            36052,
+            39787,
+            42943,
+            48493,
+            49322,
+            54719,
+            # 61760,
+            # 61325,
+            # 61758,
+            # 70488,
+            # 74524,
+            # 83515,
+            # 90673,
+            # 97424,
+            # 96958,
+        ],
+        "JWT": [
+            3380,
+            4925,
+            6182,
+            7846,
+            9511,
+            11632,
+            13302,
+            17245,
+            16847,
+            18179,
+            23293,
+            22827,
+            23644,
+            24900,
+            33550,
+            33281,
+            39573,
+            41459,
+            41009,
+            40537,
+            40281,
+            46712,
+            46395,
+            45882,
+            45692,
+        ],
+        "JSONLD": [
+            5292,
+            4921,
+            4480,
+            4394,
+            4297,
+            3815,
+            4033,
+            3695,
+            7345,
+            7133,
+            7196,
+            6929,
+            6757,
+            7089,
+            6740,
+            6433,
+            6056,
+            5912,
+            5639,
+            5346,
+            8564,
+            8116,
+            7634,
+            7083,
+            6580,
+        ],
+    }
+    return res
+
+
+######################################
 
 
 def ac_ver_single():
@@ -919,11 +1192,11 @@ def ac_ver_single():
     )
 
     # ax.boxplot(data)
-    ax.set_title("File transfer time (220kB) - Single requester")
+    ax.set_title("File transfer time (220kB) - 1 requester")
     # ax.set_xlabel('xlabel')
-    ax.set_ylabel("Seconds")
+    ax.set_ylabel("time (s)")
 
-    ticks = ["Baseline", "Session token", "TCID", "EBSI VC"]
+    ticks = ["Baseline", "Session token", "TCID", "EBSI VP"]
     # ax.set_xticks([1, 2, 3, 4], ticks)
 
     def define_box_properties(plot_name, color_code, label):
@@ -951,8 +1224,117 @@ def ac_ver_single():
     plt.show()
 
 
+def ac_ver_double():
+    d5 = double_5_1()
+
+    data_d5 = [
+        to_sec(d5[BASELINE]),
+        to_sec(d5[ST]),
+        to_sec(d5[TCID]),
+        to_sec(d5[EBSI]),
+    ]
+
+    d2 = double_2_1()
+
+    data_d2 = [
+        to_sec(d2[BASELINE]),
+        to_sec(d2[ST]),
+        to_sec(d2[TCID]),
+        to_sec(d2[EBSI]),
+    ]
+
+    d1 = double_1_1()
+
+    data_d1 = [
+        to_sec(d1[BASELINE]),
+        to_sec(d1[ST]),
+        to_sec(d1[TCID]),
+        to_sec(d1[EBSI]),
+    ]
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot()
+
+    d5_plot = ax.boxplot(
+        data_d5,
+        positions=np.array(np.arange(len(data_d5)) * 2.0 - 0.5),
+        widths=0.4,
+    )
+
+    d2_plot = ax.boxplot(
+        data_d2, positions=np.array(np.arange(len(data_d2))) * 2.0, widths=0.4
+    )
+
+    d1_plot = ax.boxplot(
+        data_d1, positions=np.array(np.arange(len(data_d1))) * 2.0 + 0.5, widths=0.4
+    )
+
+    # ax.boxplot(data)
+    ax.set_title("File transfer time (220kB) - 2 requesters")
+    # ax.set_xlabel('xlabel')
+    ax.set_ylabel("time (s)")
+
+    ticks = ["Baseline", "Session token", "TCID", "EBSI VP"]
+    # ax.set_xticks([1, 2, 3, 4], ticks)
+
+    def define_box_properties(plot_name, color_code, label):
+        for k, v in plot_name.items():
+            plt.setp(plot_name.get(k), color=color_code)
+
+        # use plot function to draw a small line to name the legend.
+        plt.plot([], c=color_code, label=label)
+        plt.legend()
+
+    # setting colors for each groups
+    define_box_properties(d5_plot, "#D7191C", "5 sec")
+    define_box_properties(d2_plot, "#2C7BB6", "2 sec")
+    define_box_properties(d1_plot, "#447604", "1 sec")
+
+    # set the x label values
+    plt.xticks(np.arange(0, len(ticks) * 2, 2), ticks)
+
+    # set the limit for x axis
+    plt.xlim(-2, len(ticks) * 2)
+
+    # Creating plot
+    # plt.boxplot(data)
+
+    # show plot
+    plt.show()
+
+
+def double_climb():
+    points = [x * 10 for x in range(1, 101)]
+
+    raw_data = double_5_1()
+    data = [
+        to_sec(raw_data[BASELINE]),
+        to_sec(raw_data[ST]),
+        to_sec(raw_data[TCID]),
+        to_sec(raw_data[EBSI]),
+    ]
+    cbc = []
+    ctr = []
+
+    fig = plt.figure(figsize=(10, 7))
+    fig.suptitle("CTR vs CBC encryption", fontsize=14, fontweight="bold")
+
+    ax = fig.add_subplot()
+
+    ax.plot(
+        points, cbc, "r--", points, ctr, "b--", points, cbc, "r.", points, ctr, "b."
+    )
+    ax.axis([0, 1000, 0, 2.5])
+
+    ax.set_xlabel("MB")
+    ax.set_ylabel("Seconds")
+
+    plt.show()
+
+
 if __name__ == "__main__":
     # encr_results()
     # decr_results()
     # ac_verification_results()
-    ac_ver_single()
+    # ac_ver_single()
+    ac_ver_double()
