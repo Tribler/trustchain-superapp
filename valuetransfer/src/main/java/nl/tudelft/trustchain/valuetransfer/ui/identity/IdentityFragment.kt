@@ -8,11 +8,12 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.*
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
@@ -42,17 +43,17 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
 
     private val identityImage = MutableLiveData<String?>()
 
-//    private val itemsIdentity: LiveData<List<Item>> by lazy {
-//        combine(getIdentityStore().getAllIdentities(), identityImage.asFlow()) { identities, identityImage ->
-//            createIdentityItems(identities, identityImage)
-//        }.asLiveData()
-//    }
+    private val itemsIdentity: LiveData<List<Item>> by lazy {
+        combine(getIdentityStore().getAllIdentities(), identityImage.asFlow()) { identities, identityImage ->
+            createIdentityItems(identities, identityImage)
+        }.asLiveData()
+    }
 
-//    private val itemsAttributes: LiveData<List<Item>> by lazy {
-//        getIdentityStore().getAllAttributes().map { attributes ->
-//            createAttributeItems(attributes)
-//        }.asLiveData()
-//    }
+    private val itemsAttributes: LiveData<List<Item>> by lazy {
+        getIdentityStore().getAllAttributes().map { attributes ->
+            createAttributeItems(attributes)
+        }.asLiveData()
+    }
 
     private var scanIntent: Int = -1
 

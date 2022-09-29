@@ -64,6 +64,8 @@ import nl.tudelft.trustchain.gossipML.db.RecommenderStore
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
+import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
+import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.voting.VotingCommunity
 import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
@@ -90,7 +92,7 @@ class TrustChainApplication : Application() {
                 createEuroTokenCommunity(),
                 createTFTPCommunity(),
                 createDemoCommunity(),
-//                createWalletCommunity(),
+                createAttestationCommunity(),
                 createAtomicSwapCommunity(),
                 createMarketCommunity(),
                 createCoinCommunity(),
@@ -98,7 +100,7 @@ class TrustChainApplication : Application() {
                 createMusicCommunity(),
                 createLiteratureCommunity(),
                 createRecommenderCommunity(),
-//                createIdentityCommunity(),
+                createIdentityCommunity(),
                 createFOCCommunity()
             ),
             walkerInterval = 5.0
@@ -262,17 +264,17 @@ class TrustChainApplication : Application() {
         )
     }
 
-//    private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {
-//        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "wallet.db")
-//        val database = Database(driver)
-//        val store = AttestationSQLiteStore(database)
-//        val randomWalk = RandomWalk.Factory()
-//
-//        return OverlayConfiguration(
-//            AttestationCommunity.Factory(store),
-//            listOf(randomWalk)
-//        )
-//    }
+    private fun createAttestationCommunity(): OverlayConfiguration<AttestationCommunity> {
+        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "wallet.db")
+        val database = Database(driver)
+        val store = AttestationSQLiteStore(database)
+        val randomWalk = RandomWalk.Factory()
+
+        return OverlayConfiguration(
+            AttestationCommunity.Factory(store),
+            listOf(randomWalk)
+        )
+    }
 
     private fun createAtomicSwapCommunity(): OverlayConfiguration<AtomicSwapCommunity> {
         val randomWalk = RandomWalk.Factory()
@@ -335,14 +337,14 @@ class TrustChainApplication : Application() {
         )
     }
 
-//    private fun createIdentityCommunity(): OverlayConfiguration<IdentityCommunity> {
-//        val randomWalk = RandomWalk.Factory()
-//        val store = IdentityStore.getInstance(this)
-//        return OverlayConfiguration(
-//            IdentityCommunity.Factory(store, this),
-//            listOf(randomWalk)
-//        )
-//    }
+    private fun createIdentityCommunity(): OverlayConfiguration<IdentityCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        val store = IdentityStore.getInstance(this)
+        return OverlayConfiguration(
+            IdentityCommunity.Factory(store, this),
+            listOf(randomWalk)
+        )
+    }
 
     private fun createTFTPCommunity(): OverlayConfiguration<TFTPCommunity> {
         return OverlayConfiguration(

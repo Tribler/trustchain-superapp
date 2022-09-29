@@ -15,8 +15,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
-import nl.tudelft.ipv8.Peer // OK3
-import nl.tudelft.ipv8.util.toHex // OK3
+import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView

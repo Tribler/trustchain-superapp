@@ -20,7 +20,7 @@ import com.ncorti.slidetoact.SlideToActView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.util.toHex // OK3
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.valuetransfer.entity.TransferRequest
 import nl.tudelft.trustchain.valuetransfer.R

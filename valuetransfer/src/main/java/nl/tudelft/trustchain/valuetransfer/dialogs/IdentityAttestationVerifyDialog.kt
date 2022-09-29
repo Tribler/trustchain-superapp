@@ -10,7 +10,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import nl.tudelft.ipv8.util.toHex // OK3
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment

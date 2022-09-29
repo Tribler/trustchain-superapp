@@ -1,9 +1,9 @@
 package nl.tudelft.trustchain.valuetransfer.ui
 
 import android.content.Intent
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider // OK3
-import nl.tudelft.ipv8.util.hexToBytes // OK3
-import nl.tudelft.ipv8.util.toHex // OK3
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.valuetransfer.R

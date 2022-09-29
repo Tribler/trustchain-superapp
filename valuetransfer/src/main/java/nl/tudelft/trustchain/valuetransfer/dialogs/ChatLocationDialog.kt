@@ -21,7 +21,7 @@ import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import nl.tudelft.ipv8.keyvault.PublicKey // OK3
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment

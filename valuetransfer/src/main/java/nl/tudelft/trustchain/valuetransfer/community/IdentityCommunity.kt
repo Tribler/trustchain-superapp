@@ -1,11 +1,11 @@
 package nl.tudelft.trustchain.valuetransfer.community
 
 import android.content.Context
-import nl.tudelft.ipv8.Community // OK4
-import nl.tudelft.ipv8.Overlay // OK4
+import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.Overlay
+import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityInfo
-import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
 import nl.tudelft.trustchain.valuetransfer.util.getInitials

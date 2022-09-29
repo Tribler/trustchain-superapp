@@ -7,7 +7,7 @@ import kotlinx.android.synthetic.main.item_contacts.view.*
 import kotlinx.android.synthetic.main.item_contacts.view.ivContactImage
 import kotlinx.android.synthetic.main.item_contacts.view.ivIdenticon
 import kotlinx.android.synthetic.main.item_contacts_chat.view.*
-import nl.tudelft.ipv8.util.toHex // OK3
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.valuetransfer.R

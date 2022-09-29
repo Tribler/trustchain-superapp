@@ -9,10 +9,10 @@ import androidx.core.view.*
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
-import nl.tudelft.ipv8.Peer // OK3
-import nl.tudelft.ipv8.keyvault.PublicKey // OK3
-import nl.tudelft.ipv8.messaging.eva.TransferState // OK3
-import nl.tudelft.ipv8.util.toHex // OK3
+import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.messaging.eva.TransferState
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment

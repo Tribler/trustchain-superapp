@@ -51,6 +51,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.common.consts.SchemaConstants.ID_METADATA
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
+import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.attestation.wallet.cryptography.WalletAttestation
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
@@ -64,12 +65,14 @@ import nl.tudelft.trustchain.common.valuetransfer.extensions.bytesToImage
 import nl.tudelft.trustchain.common.valuetransfer.extensions.decodeBytes
 import nl.tudelft.trustchain.common.valuetransfer.extensions.imageBytes
 import nl.tudelft.trustchain.common.valuetransfer.extensions.resize
+import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.entity.ContactImage
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
+import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityAttestationConfirmDialog
 import nl.tudelft.trustchain.valuetransfer.passport.PassportHandler
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
@@ -119,18 +122,18 @@ class ValueTransferMainActivity : BaseActivity() {
      */
     val communities: Map<Class<out Community>, Community> = mapOf(
         TrustChainCommunity::class.java to IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!,
-//        IdentityCommunity::class.java to IPv8Android.getInstance().getOverlay<IdentityCommunity>()!!,
+        IdentityCommunity::class.java to IPv8Android.getInstance().getOverlay<IdentityCommunity>()!!,
         PeerChatCommunity::class.java to IPv8Android.getInstance().getOverlay<PeerChatCommunity>()!!,
-//        EuroTokenCommunity::class.java to IPv8Android.getInstance().getOverlay<EuroTokenCommunity>()!!,
-//        AttestationCommunity::class.java to IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
+        EuroTokenCommunity::class.java to IPv8Android.getInstance().getOverlay<EuroTokenCommunity>()!!,
+        AttestationCommunity::class.java to IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
     )
     val stores: Map<Any, Any> = mapOf(
-//        IdentityStore::class.java to IdentityStore.getInstance(this),
+        IdentityStore::class.java to IdentityStore.getInstance(this),
         PeerChatStore::class.java to PeerChatStore.getInstance(this),
         GatewayStore::class.java to GatewayStore.getInstance(this),
         ContactStore::class.java to ContactStore.getInstance(this),
         TransactionRepository::class.java to TransactionRepository(getCommunity()!!, GatewayStore.getInstance(this)),
-        TrustChainHelper::class.java to TrustChainHelper(getCommunity()!!),
+        TrustChainHelper::class.java to TrustChainHelper(getCommunity()!!)
     )
 
     @SuppressLint("RestrictedApi")
@@ -145,7 +148,6 @@ class ValueTransferMainActivity : BaseActivity() {
         appPreferences.switchTheme(currentTheme)
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity_vt)
         // Set status bar to black on Lollipop when in day mode
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             window.statusBarColor = if (currentTheme == AppPreferences.APP_THEME_NIGHT) {
@@ -160,6 +162,7 @@ class ValueTransferMainActivity : BaseActivity() {
                 Color.BLACK
             }
         }
+        setContentView(R.layout.main_activity_vt)
 
         val action: String? = intent?.action
         val data: Uri? = intent?.data
@@ -169,9 +172,9 @@ class ValueTransferMainActivity : BaseActivity() {
         }
 
         // Create identity database tables if not exist
-//        val identityCommunity = getCommunity<IdentityCommunity>()!!
-//        identityCommunity.createIdentitiesTable()
-//        identityCommunity.createAttributesTable()
+        val identityCommunity = getCommunity<IdentityCommunity>()!!
+        identityCommunity.createIdentitiesTable()
+        identityCommunity.createAttributesTable()
 
         /**
          * Initialize notification and passport handler
@@ -244,7 +247,7 @@ class ValueTransferMainActivity : BaseActivity() {
         peerChatCommunity.setOnContactImageCallback(::onContactImageCallback)
         peerChatCommunity.createContactStateTable()
         peerChatCommunity.createContactImageTable()
-//        peerChatCommunity.identityInfo = identityCommunity.getIdentityInfo(appPreferences.getIdentityFaceHash())
+        peerChatCommunity.identityInfo = identityCommunity.getIdentityInfo(appPreferences.getIdentityFaceHash())
 
         /**
          * Attestation community callbacks and register own key as trusted authority
@@ -268,12 +271,12 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Enable click on notification when app is currently not on foreground
          */
-//        if (intent != null && identityCommunity.hasIdentity() && !lifecycle.currentState.isAtLeast(
-//                Lifecycle.State.RESUMED
-//            )
-//        ) {
-//            onNewIntent(intent)
-//        }
+        if (intent != null && identityCommunity.hasIdentity() && !lifecycle.currentState.isAtLeast(
+                Lifecycle.State.RESUMED
+            )
+        ) {
+            onNewIntent(intent)
+        }
 
         checkCameraPermissions()
     }
@@ -1122,13 +1125,13 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * On receipt of an attestation request (initiated by the other party) execute the following
      */
+
     private fun attestationRequestCallback(peer: Peer, attributeName: String, metadata: String): ByteArray {
 
         val parsedMetadata = JSONObject(metadata)
         val idFormat = parsedMetadata.optString("id_format", ID_METADATA)
 
         closeAllDialogs()
-
         val input = BlockingDialogManager.getInstance()
             .showAndWait<String?>(this, IdentityAttestationConfirmDialog(attributeName, idFormat, this))
             ?: throw RuntimeException("User cancelled dialog.")

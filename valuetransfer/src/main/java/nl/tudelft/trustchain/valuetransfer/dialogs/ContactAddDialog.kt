@@ -9,10 +9,10 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import nl.tudelft.ipv8.keyvault.PublicKey // OK3
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider // OK3
-import nl.tudelft.ipv8.util.hexToBytes // OK3
-import nl.tudelft.ipv8.util.toHex // OK3
+import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.*
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
