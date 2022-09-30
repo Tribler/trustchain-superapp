@@ -46,16 +46,20 @@ import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.jaredrummler.blockingdialog.BlockingDialogManager
 import kotlinx.android.synthetic.main.main_activity_vt.*
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.common.consts.SchemaConstants.ID_METADATA
+import nl.tudelft.ipv8.attestation.communication.AttributePointer
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.attestation.wallet.cryptography.WalletAttestation
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.util.*
 import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
@@ -125,7 +129,7 @@ class ValueTransferMainActivity : BaseActivity() {
         IdentityCommunity::class.java to IPv8Android.getInstance().getOverlay<IdentityCommunity>()!!,
         PeerChatCommunity::class.java to IPv8Android.getInstance().getOverlay<PeerChatCommunity>()!!,
         EuroTokenCommunity::class.java to IPv8Android.getInstance().getOverlay<EuroTokenCommunity>()!!,
-        AttestationCommunity::class.java to IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
+        AttestationCommunity::class.java to IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!,
     )
     val stores: Map<Any, Any> = mapOf(
         IdentityStore::class.java to IdentityStore.getInstance(this),
@@ -133,7 +137,7 @@ class ValueTransferMainActivity : BaseActivity() {
         GatewayStore::class.java to GatewayStore.getInstance(this),
         ContactStore::class.java to ContactStore.getInstance(this),
         TransactionRepository::class.java to TransactionRepository(getCommunity()!!, GatewayStore.getInstance(this)),
-        TrustChainHelper::class.java to TrustChainHelper(getCommunity()!!)
+        TrustChainHelper::class.java to TrustChainHelper(getCommunity()!!),
     )
 
     @SuppressLint("RestrictedApi")
@@ -252,12 +256,12 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Attestation community callbacks and register own key as trusted authority
          */
-//        val attestationCommunity = getCommunity<AttestationCommunity>()!!
-//        attestationCommunity.setAttestationRequestCallback(::attestationRequestCallback)
-//        attestationCommunity.setAttestationRequestCompleteCallback(::attestationRequestCompleteCallbackWrapper)
-//        attestationCommunity.setAttestationChunkCallback(::attestationChunkCallback)
-//        attestationCommunity.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
-
+        val attestationCommunity = getCommunity<AttestationCommunity>()!!
+        attestationCommunity.setAttestationRequestCallback(::onRequestAttestationAsync)
+        attestationCommunity.setAttestationRequestCompleteCallback(::onAttestationComplete)
+        attestationCommunity.setAttestationChunkCallback(::attestationChunkCallback)
+//        AuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
+//        attestationCommunity.printerrr()
         /**
          * Create a (centered) custom action bar with a title and subtitle
          */
@@ -1084,18 +1088,54 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * After the attestation request has been successfully completed execute the following
      */
-    private fun attestationRequestCompleteCallbackWrapper(
+    @Suppress("UNUSED_PARAMETER")
+    private fun onAttestationComplete(
         forPeer: Peer,
         attributeName: String,
         attestation: WalletAttestation,
         attributeHash: ByteArray,
         idFormat: String,
         fromPeer: Peer?,
-        metaData: String?,
-        signature: ByteArray?
+        value: ByteArray?
     ) {
-        attestationRequestCompleteCallback(forPeer, attributeName, attestation, attributeHash, idFormat, fromPeer, metaData, signature, applicationContext)
+        val metadata = this.attestationMetadata[AttributePointer(forPeer, attributeName)]!!
+        value?.let { metadata["value"] = defaultEncodingUtils.encodeBase64ToString(sha3_256(it)) }
+
+//        if (forPeer == myPeer) {
+//            if (fromPeer == myPeer) {
+//                @Suppress("UNCHECKED_CAST")
+//                this.identityOverlay.selfAdvertise(
+//                    attributeHash, attributeName, idFormat,
+//                    metadata as HashMap<String, String>?
+//                )
+//            } else {
+//                @Suppress("UNCHECKED_CAST")
+//                this.identityOverlay.advertiseAttestation(
+//                    fromPeer!!, attributeHash, attributeName, idFormat,
+//                    metadata as HashMap<String, String>?
+//                )
+//            }
+//        } else {
+//            @Suppress("UNCHECKED_CAST")
+//            this.identityOverlay.addKnownHash(
+//                attributeHash, attributeName, value, forPeer.publicKey,
+//                metadata as HashMap<String, String>?
+//            )
+//        }
     }
+
+//    private fun attestationRequestCompleteCallbackWrapper(
+//        forPeer: Peer,
+//        attributeName: String,
+//        attestation: WalletAttestation,
+//        attributeHash: ByteArray,
+//        idFormat: String,
+//        fromPeer: Peer?,
+//        metaData: String?,
+//        signature: ByteArray?
+//    ) {
+//        attestationRequestCompleteCallback(forPeer, attributeName, attestation, attributeHash, idFormat, fromPeer, metaData, signature, applicationContext)
+//    }
 
     @Suppress("UNUSED_PARAMETER")
     fun attestationRequestCompleteCallback(
@@ -1125,12 +1165,19 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * On receipt of an attestation request (initiated by the other party) execute the following
      */
-
-    private fun attestationRequestCallback(peer: Peer, attributeName: String, metadata: String): ByteArray {
-
-        val parsedMetadata = JSONObject(metadata)
+    private val attestationRequests =
+        hashMapOf<AttributePointer, Triple<SettableDeferred<ByteArray?>, String, String?>>()
+    private val attestationMetadata = hashMapOf<AttributePointer, MutableMap<String, String>>()
+    private fun onRequestAttestationAsync(
+        peer: Peer,
+        attributeName: String,
+        metadataString: String,
+        proposedValue: String?
+    ): Deferred<ByteArray?> {
+        // Promise some ByteArray.
+        val deferred = SettableDeferred<ByteArray?>()
+        val parsedMetadata = JSONObject(metadataString)
         val idFormat = parsedMetadata.optString("id_format", ID_METADATA)
-
         closeAllDialogs()
         val input = BlockingDialogManager.getInstance()
             .showAndWait<String?>(this, IdentityAttestationConfirmDialog(attributeName, idFormat, this))
@@ -1141,12 +1188,36 @@ class ValueTransferMainActivity : BaseActivity() {
         Handler(Looper.getMainLooper()).post {
             displayToast(applicationContext, "Signing attestation for $attributeName for peer ${peer.mid} ...", isShort = false)
         }
+        this.attestationRequests[AttributePointer(peer, attributeName)] =
+            Triple(deferred, metadataString, proposedValue)
+        @Suppress("UNCHECKED_CAST")
+        this.attestationMetadata[AttributePointer(peer, attributeName)] =
+            JSONObject(metadataString).asMap() as MutableMap<String, String>
 
-        return when (idFormat) {
-            "id_metadata_range_18plus" -> byteArrayOf(input.toByte())
-            else -> input.toByteArray()
-        }
+        return GlobalScope.async(start = CoroutineStart.LAZY) { deferred.await() }
     }
+//  OUDE FUNCTIE:
+//    private fun attestationRequestCallback(peer: Peer, attributeName: String, metadata: String): ByteArray {
+//
+//        val parsedMetadata = JSONObject(metadata)
+//        val idFormat = parsedMetadata.optString("id_format", ID_METADATA)
+//
+//        closeAllDialogs()
+//        val input = BlockingDialogManager.getInstance()
+//            .showAndWait<String?>(this, IdentityAttestationConfirmDialog(attributeName, idFormat, this))
+//            ?: throw RuntimeException("User cancelled dialog.")
+//
+//        Log.i("VTLOG", "Signing attestation with value $input with format $idFormat.")
+//
+//        Handler(Looper.getMainLooper()).post {
+//            displayToast(applicationContext, "Signing attestation for $attributeName for peer ${peer.mid} ...", isShort = false)
+//        }
+//
+//        return when (idFormat) {
+//            "id_metadata_range_18plus" -> byteArrayOf(input.toByte())
+//            else -> input.toByteArray()
+//        }
+//    }
 
     /**
      * Check camera permissions
