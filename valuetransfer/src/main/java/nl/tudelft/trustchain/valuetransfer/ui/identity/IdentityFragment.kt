@@ -8,7 +8,10 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
@@ -29,6 +32,7 @@ import nl.tudelft.trustchain.valuetransfer.dialogs.*
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
+import nl.tudelft.trustchain.valuetransfer.util.DividerItemDecorator
 import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
 import nl.tudelft.trustchain.valuetransfer.util.getInitials
 import nl.tudelft.trustchain.valuetransfer.util.mapToJSON
@@ -229,17 +233,17 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
 
         initView()
 
-//        binding.rvIdentities.apply {
-//            adapter = adapterIdentity
-//            layoutManager = LinearLayoutManager(context)
-//        }
+        binding.rvIdentities.apply {
+            adapter = adapterIdentity
+            layoutManager = LinearLayoutManager(context)
+        }
 //
-//        binding.rvAttributes.apply {
-//            adapter = adapterAttributes
-//            layoutManager = LinearLayoutManager(context)
-//            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_identity_attribute, requireContext().theme)
-//            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
-//        }
+        binding.rvAttributes.apply {
+            adapter = adapterAttributes
+            layoutManager = LinearLayoutManager(context)
+            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_identity_attribute, requireContext().theme)
+            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
+        }
 //
 //        binding.rvYourAttestations.apply {
 //            adapter = adapterAttestations
@@ -248,13 +252,13 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
 //            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
 //        }
 
-//        itemsIdentity.observe(
-//            viewLifecycleOwner,
-//            Observer {
-//                adapterIdentity.updateItems(it)
-//                toggleVisibility()
-//            }
-//        )
+        itemsIdentity.observe(
+            viewLifecycleOwner,
+            Observer {
+                adapterIdentity.updateItems(it)
+                toggleVisibility()
+            }
+        )
 
         lifecycleScope.launchWhenStarted {
             while (isActive) {

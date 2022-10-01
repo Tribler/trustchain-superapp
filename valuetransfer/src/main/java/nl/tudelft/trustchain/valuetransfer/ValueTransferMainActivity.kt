@@ -256,10 +256,10 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Attestation community callbacks and register own key as trusted authority
          */
-        val attestationCommunity = getCommunity<AttestationCommunity>()!!
-        attestationCommunity.setAttestationRequestCallback(::onRequestAttestationAsync)
-        attestationCommunity.setAttestationRequestCompleteCallback(::onAttestationComplete)
-        attestationCommunity.setAttestationChunkCallback(::attestationChunkCallback)
+//        val attestationCommunity = getCommunity<AttestationCommunity>()!!
+//        attestationCommunity.setAttestationRequestCallback(::onRequestAttestationAsync)
+//        attestationCommunity.setAttestationRequestCompleteCallback(::onAttestationComplete)
+//        attestationCommunity.setAttestationChunkCallback(::attestationChunkCallback)
 //        AuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
 //        attestationCommunity.printerrr()
         /**
