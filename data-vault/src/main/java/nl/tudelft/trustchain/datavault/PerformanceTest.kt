@@ -150,14 +150,14 @@ class PerformanceTest(
                 delay(3500)
             }*/
 
-            listOf(2000L).forEach { delta ->
+            listOf(3000L).forEach { delta ->
                 for (att in listOf(
                     Policy.AccessTokenType.SESSION_TOKEN,
                     Policy.AccessTokenType.JWT,
                     Policy.AccessTokenType.TCID,
                     Policy.AccessTokenType.JSONLD
                 )) {
-                    var rounds = 3
+                    var rounds = 50
                     if (att == Policy.AccessTokenType.SESSION_TOKEN) rounds += 1
                     for (i in 0 until rounds) {
                         Log.e(logTag, "TFR $i ($att)")
@@ -186,7 +186,7 @@ class PerformanceTest(
                         }
                         delay(delta)
                     }
-                    delay(5000)
+                    delay(60000)
                 }
 //                delay(30000)
 //                dataVaultCommunity.clearDurations(delta)

@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.datavault.ui
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -78,6 +79,16 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
         binding.saveButton.setOnClickListener {
             savePolicies()
             requireActivity().onBackPressed()
+        }
+
+        binding.deleteButton.setOnClickListener {
+            Log.e("ACM", "File: $file")
+            AlertDialog.Builder(requireContext()).setMessage(R.string.text_confirm_are_you_sure)
+                .setPositiveButton(R.string.text_confirm_ok) { _, _ ->
+                    file.delete()
+                    requireActivity().onBackPressed()
+                }.setNegativeButton(R.string.text_confirm_cancel) { _, _ ->
+                }.create().show()
         }
     }
 

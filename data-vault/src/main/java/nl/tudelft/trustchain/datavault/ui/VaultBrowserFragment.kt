@@ -31,6 +31,7 @@ import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import nl.tudelft.trustchain.datavault.databinding.VaultBrowserFragmentBinding
 import nl.tudelft.trustchain.datavault.tools.URIPathHelper
 import java.io.File
+import java.nio.charset.Charset
 
 class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     private val binding by viewBinding(VaultBrowserFragmentBinding::bind)
@@ -115,7 +116,8 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 //            performanceTest.testDirectoryTree()
 
             val att = attestationCommunity.database.getAllAttestations().first()
-            val rounds = 10
+            Log.e(tag, "TCID length: ${att.serialize().toString(Charset.defaultCharset()).length}")
+            /*val rounds = 10
             var tot = 0L
             for (i in  0 until rounds) {
                 val start = TimingUtils.getTimestamp()
@@ -124,7 +126,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                 Log.e(tag, "${duration} ms Attestation verified=${filtered?.size ?: 0 > 0}")
                 tot += duration
             }
-            Log.e(tag, "${tot / rounds} ms Average attestation verification time")
+            Log.e(tag, "${tot / rounds} ms Average attestation verification time")*/
 
         }
     }

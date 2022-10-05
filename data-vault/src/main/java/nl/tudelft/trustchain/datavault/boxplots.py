@@ -2,6 +2,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import operator
 
 font = {"family": "normal", "weight": "bold", "size": 16}
 
@@ -226,13 +227,28 @@ def encr_results():
 
     ax = fig.add_subplot()
 
-    ax.plot(
-        points, cbc, "r--", points, ctr, "b--", points, cbc, "r.", points, ctr, "b."
-    )
+    ax.plot(points, cbc, "r-", label="CBC")
+    ax.plot(points, ctr, "b-", label="CTR")
+    ax.plot(points, ctr, "b.")
+    ax.plot(points, cbc, "r.")
+
+    # ax.plot(
+    #     points, cbc, "r--", points, ctr, "b--", points, cbc, "r.", points, ctr, "b."
+    # )
     ax.axis([0, 1000, 0, 2.5])
+
+    # handles, labels = ax.get_legend_handles_labels()
+    # print(handles)
+    # print(labels)
+
+    # hl = sorted(zip(handles, labels), key=operator.itemgetter(1))
+    # handles2, labels2 = zip(*hl)
+
+    # ax.legend(handles2, labels2)
 
     ax.set_xlabel("input size (MB)")
     ax.set_ylabel("time (s)")
+    ax.legend()
 
     plt.show()
 
@@ -455,13 +471,20 @@ def decr_results():
 
     ax = fig.add_subplot()
 
-    ax.plot(
-        points, cbc, "r--", points, ctr, "b--", points, cbc, "ro", points, ctr, "bo"
-    )
+    ax.plot(points, cbc, "r-", label="CBC")
+    ax.plot(points, ctr, "b-", label="CTR")
+    ax.plot(points, ctr, "b.")
+    ax.plot(points, cbc, "r.")
+
+    # ax.plot(
+    #     points, cbc, "r--", points, ctr, "b--", points, cbc, "ro", points, ctr, "bo"
+    # )
     ax.axis([0, 1000, 0, 2])
 
     ax.set_xlabel("input size (MB)")
     ax.set_ylabel("time (s)")
+
+    ax.legend()
 
     plt.show()
 
@@ -527,7 +550,7 @@ BASELINE = "JSONLD"
 
 
 def to_sec(data):
-    return [x / 1000 for x in data if x < 20000]
+    return [x / 1000 for x in data]  # if x < 20000
 
 
 def single_test():
@@ -943,7 +966,7 @@ def double_2_1():
             9995,
             8602,
             9670,
-            # 13976,
+            13976,
             12380,
             10698,
             10531,
@@ -954,13 +977,13 @@ def double_2_1():
             11409,
             11839,
             11761,
-            # 13799,
-            # 16041,
-            # 18426,
+            13799,  #
+            16041,
+            18426,
             20570,
             22555,
-            # 24905,
-            # 27532,
+            24905,
+            27532,
             31498,
             33096,
             37100,
@@ -1068,11 +1091,11 @@ def double_1_1():
             42943,
             48493,
             49322,
-            54719,
-            # 61760,
-            # 61325,
-            # 61758,
-            # 70488,
+            54719,  ###
+            61760,
+            61325,
+            61758,
+            70488,
             # 74524,
             # 83515,
             # 90673,
@@ -1137,7 +1160,156 @@ def double_1_1():
     return res
 
 
+def no_data():
+    res = {
+        "SESSION_TOKEN": [
+            222,
+            219,
+            82,
+            197,
+            116,
+            180,
+            113,
+            48,
+            193,
+            127,
+            107,
+            74,
+            119,
+            136,
+            112,
+            114,
+            166,
+            110,
+            118,
+            136,
+            208,
+        ],
+        "TCID": [
+            982,
+            1190,
+            1407,
+            1356,
+            1317,
+            1275,
+            1179,
+            1289,
+            1525,
+            1390,
+            1887,
+            1918,
+            1859,
+            2134,
+            1959,
+            1904,
+            2093,
+            2339,
+            2056,
+            2247,
+        ],
+        "JWT": [
+            # 934,
+            # 1065,
+            439,
+            787,
+            651,
+            638,
+            608,
+            443,
+            541,
+            598,
+            732,
+            638,
+            689,
+            528,
+            751,
+            # 1018,
+            643,
+            541,
+            630,
+            663,
+        ],
+        "JSONLD": [
+            121,
+            52,
+            99,
+            73,
+            93,
+            83,
+            55,
+            125,
+            176,
+            93,
+            194,
+            134,
+            228,
+            77,
+            101,
+            173,
+            160,
+            99,
+            149,
+            62,
+        ],
+    }
+    return res
+
+
 ######################################
+
+
+def no_data_plot():
+    res_nodata = no_data()
+
+    data_no = [
+        to_sec(res_nodata[BASELINE]),
+        to_sec(res_nodata[ST]),
+        to_sec(res_nodata[TCID]),
+        to_sec(res_nodata[EBSI]),
+    ]
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot()
+
+    nodata_plot = ax.boxplot(
+        data_no,
+        positions=np.array(np.arange(len(data_no))) * 2.0,
+        widths=0.6,
+        patch_artist=True,
+    )
+
+    # ax.boxplot(data)
+    ax.set_title("File transfer time (1kB) - 1 requester")
+    # ax.set_xlabel('xlabel')
+    ax.set_ylabel("time (s)")
+
+    ticks = ["Baseline", "Session token", "TCID", "EBSI VP"]
+    # ax.set_xticks([1, 2, 3, 4], ticks)
+
+    def define_box_properties(plot_name, color_code, label):
+        for k, v in plot_name.items():
+            plt.setp(plot_name.get(k), color="#000000")
+            for box in plot_name["boxes"]:
+                box.set_facecolor(color_code)
+
+        # use plot function to draw a small line to name the legend.
+        # plt.plot([], c=color_code, label=label)
+        # plt.legend()
+
+    # setting colors for each groups
+    define_box_properties(nodata_plot, "#2C7BB6", "WiFi")
+
+    # set the x label values
+    plt.xticks(np.arange(0, len(ticks) * 2, 2), ticks)
+
+    # set the limit for x axis
+    plt.xlim(-2, len(ticks) * 2)
+
+    # Creating plot
+    # plt.boxplot(data)
+
+    # show plot
+    plt.show()
 
 
 def ac_ver_single():
@@ -1186,9 +1358,13 @@ def ac_ver_single():
         data_wifi,
         positions=np.array(np.arange(len(data_wifi))) * 2.0 - 0.35,
         widths=0.6,
+        patch_artist=True,
     )
     g4_plot = ax.boxplot(
-        data_4g, positions=np.array(np.arange(len(data_4g))) * 2.0 + 0.35, widths=0.6
+        data_4g,
+        positions=np.array(np.arange(len(data_4g))) * 2.0 + 0.35,
+        widths=0.6,
+        patch_artist=True,
     )
 
     # ax.boxplot(data)
@@ -1201,15 +1377,17 @@ def ac_ver_single():
 
     def define_box_properties(plot_name, color_code, label):
         for k, v in plot_name.items():
-            plt.setp(plot_name.get(k), color=color_code)
+            plt.setp(plot_name.get(k), color="#000000")
+            for box in plot_name["boxes"]:
+                box.set_facecolor(color_code)
 
         # use plot function to draw a small line to name the legend.
         plt.plot([], c=color_code, label=label)
         plt.legend()
 
     # setting colors for each groups
-    define_box_properties(wifi_plot, "#D7191C", "WiFi")
-    define_box_properties(g4_plot, "#2C7BB6", "4G")
+    define_box_properties(wifi_plot, "#2C7BB6", "WiFi")
+    define_box_properties(g4_plot, "#447604", "4G")
 
     # set the x label values
     plt.xticks(np.arange(0, len(ticks) * 2, 2), ticks)
@@ -1259,14 +1437,21 @@ def ac_ver_double():
         data_d5,
         positions=np.array(np.arange(len(data_d5)) * 2.0 - 0.5),
         widths=0.4,
+        patch_artist=True,
     )
 
     d2_plot = ax.boxplot(
-        data_d2, positions=np.array(np.arange(len(data_d2))) * 2.0, widths=0.4
+        data_d2,
+        positions=np.array(np.arange(len(data_d2))) * 2.0,
+        widths=0.4,
+        patch_artist=True,
     )
 
     d1_plot = ax.boxplot(
-        data_d1, positions=np.array(np.arange(len(data_d1))) * 2.0 + 0.5, widths=0.4
+        data_d1,
+        positions=np.array(np.arange(len(data_d1))) * 2.0 + 0.5,
+        widths=0.4,
+        patch_artist=True,
     )
 
     # ax.boxplot(data)
@@ -1279,16 +1464,18 @@ def ac_ver_double():
 
     def define_box_properties(plot_name, color_code, label):
         for k, v in plot_name.items():
-            plt.setp(plot_name.get(k), color=color_code)
+            plt.setp(plot_name.get(k), color="#000000")
+            for box in plot_name["boxes"]:
+                box.set_facecolor(color_code)
 
         # use plot function to draw a small line to name the legend.
         plt.plot([], c=color_code, label=label)
         plt.legend()
 
     # setting colors for each groups
-    define_box_properties(d5_plot, "#D7191C", "5 sec")
-    define_box_properties(d2_plot, "#2C7BB6", "2 sec")
-    define_box_properties(d1_plot, "#447604", "1 sec")
+    define_box_properties(d5_plot, "#2C7BB6", "5 sec")
+    define_box_properties(d2_plot, "#447604", "2 sec")
+    define_box_properties(d1_plot, "#D7191C", "1 sec")
 
     # set the x label values
     plt.xticks(np.arange(0, len(ticks) * 2, 2), ticks)
@@ -1337,4 +1524,6 @@ if __name__ == "__main__":
     # decr_results()
     # ac_verification_results()
     # ac_ver_single()
-    ac_ver_double()
+    # ac_ver_double()
+
+    no_data_plot()
