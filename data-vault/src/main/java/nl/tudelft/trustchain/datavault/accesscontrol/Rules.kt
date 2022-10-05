@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.datavault.accesscontrol
 import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.ebsi.JWTHelper
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import org.json.JSONArray
 import org.json.JSONObject
@@ -13,25 +14,26 @@ class Rules(
 ) {
     private val logTag = "Rules"
 
-    fun evaluate(attestations: List<AttestationBlob>): Boolean {
+//    fun evaluate(attestations: List<AttestationBlob>): Boolean {
+    fun evaluate(credentialTokens: Any): Boolean {
         return when {
             isPublic() -> {
                 true
             }
             isLeaf() -> {
-                val result = matchCredential(credential!!, attestations)
+                val result = matchCredential(credential!!, credentialTokens)
                 result
             }
             isNegation() -> {
-                val result = !matchCredential(credential!!, attestations)
+                val result = !matchCredential(credential!!, credentialTokens)
                 result
             }
             isBinaryExpression() -> {
                 val result = when (operand) {
-                    AND -> (childRule(true)?.evaluate(attestations) ?: false) &&
-                        (childRule(false)?.evaluate(attestations) ?: false)
-                    OR -> (childRule(true)?.evaluate(attestations) ?: false) ||
-                        (childRule(false)?.evaluate(attestations) ?: false)
+                    AND -> (childRule(true)?.evaluate(credentialTokens) ?: false) &&
+                        (childRule(false)?.evaluate(credentialTokens) ?: false)
+                    OR -> (childRule(true)?.evaluate(credentialTokens) ?: false) ||
+                        (childRule(false)?.evaluate(credentialTokens) ?: false)
                     else -> false
                 }
                 result
@@ -42,22 +44,54 @@ class Rules(
         }
     }
 
-    private fun matchCredential(credential: JSONObject, attestations: List<AttestationBlob>): Boolean{
+    private fun matchCredential(credential: JSONObject, credentialTokens: Any): Boolean{
+        return when (credentialTokens) {
+            is List<*> -> matchAttestations(credential, credentialTokens)
+            is String -> matchJWT(credential, credentialTokens)
+            else -> throw Exception("Access token has to be of type SignedJWT or List<AttestationBlob>")
+        }
+    }
+
+    private fun matchJWT(credential: JSONObject, jwt: String): Boolean {
+        try {
+            val jwtPayload = JWTHelper.getJWTPayload(jwt)
+
+            if (credential.has(ISSUER)) {
+                assert(jwtPayload["iss"] == credential.getString(ISSUER))
+            }
+
+            if (credential.has(ATTRIBUTE)) {
+                val credSubject = jwtPayload["credentialSubject"] as Map<*, *>
+                val attributeKey = credential.getString(ATTRIBUTE).split(":").last()
+                assert(credSubject.containsKey(attributeKey))
+
+                if (credential.has(VALUE)) {
+                    assert(credSubject[attributeKey] == credential.getString(VALUE))
+                }
+            }
+
+            return true
+        } catch (exception: Exception) {
+            return false
+        }
+    }
+
+    private fun matchAttestations(credential: JSONObject, attestations: List<*>): Boolean{
         val candidateAttestations = attestations.toMutableList()
 
         if (credential.has(ISSUER)) candidateAttestations.retainAll {
             // {"issuer": "IG-SSI:123456789"}
-            it.attestorKey!!.keyToHash().toHex() == credential.getString(ISSUER).split(":").last()
+            (it as AttestationBlob).attestorKey!!.keyToHash().toHex() == credential.getString(ISSUER).split(":").last()
         }
 
         if (credential.optBoolean(TRUSTED_AUTHORITY, false)) candidateAttestations.retainAll {
             // {"attribute": "IG-SSI:id_metadata_range_18plus:age", "value": "18+", "trusted_authority": true}
-            attestationCommunity!!.trustedAuthorityManager.contains(it.attestorKey!!.keyToHash().toHex())
+            attestationCommunity!!.trustedAuthorityManager.contains((it as AttestationBlob).attestorKey!!.keyToHash().toHex())
         }
 
         if (credential.has(ATTRIBUTE)) candidateAttestations.retainAll {
             // {"attribute": "IG-SSI:id_metadata_range_18plus:age", "value": "18+", "trusted_authority": true}
-            val parsedMetadata = JSONObject(it.metadata!!)
+            val parsedMetadata = JSONObject((it as AttestationBlob).metadata!!)
             val idFormat = parsedMetadata.getString(QRScanController.KEY_ID_FORMAT)
             val attribute = parsedMetadata.getString(QRScanController.KEY_ATTRIBUTE)
             credential.getString(ATTRIBUTE).equals("$IG_SSI:$idFormat:${attribute}", ignoreCase = true)
@@ -65,7 +99,7 @@ class Rules(
 
         if (credential.has(VALUE)) candidateAttestations.retainAll {
             // {"attribute": "IG-SSI:id_metadata_range_18plus:age", "value": "18+", "trusted_authority": true}
-            val parsedMetadata = JSONObject(it.metadata!!)
+            val parsedMetadata = JSONObject((it as AttestationBlob).metadata!!)
             val value = parsedMetadata.optString(QRScanController.KEY_VALUE)
             value == credential.getString(VALUE)
         }

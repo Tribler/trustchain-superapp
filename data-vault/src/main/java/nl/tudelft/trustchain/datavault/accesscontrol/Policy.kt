@@ -10,10 +10,10 @@ class Policy(
 ) {
     private val logTag = "Policy"
 
-    fun evaluate(accessMode: String, attestations: List<AttestationBlob>): Boolean {
+    fun evaluate(accessMode: String, credentialTokens: Any): Boolean {
         if (!checkAccessMode(accessMode)) return false
 
-        return rules.evaluate(attestations)
+        return rules.evaluate(credentialTokens)
     }
 
     private fun checkAccessMode(requestMode: String): Boolean {

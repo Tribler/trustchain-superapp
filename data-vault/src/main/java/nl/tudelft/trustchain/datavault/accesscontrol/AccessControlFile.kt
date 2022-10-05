@@ -38,39 +38,34 @@ class AccessControlFile(
 
             when (accessTokenType) {
                 Policy.AccessTokenType.SESSION_TOKEN -> {
-//                    val sessionToken = accessTokens[0] as String
-//                    val aft = SessionToken.getAFT(sessionToken)
-//                    TODO Validate AFT
-                    return true
+                    val sessionToken = accessTokens[0] as String
+                    val aft = DirectoryTree.parse(SessionToken.getAFT(sessionToken))
+                    return aft.contains(file.path)
                 }
                 Policy.AccessTokenType.TCID -> {
-                    /*val attestations = accessTokens.map {
-                        AttestationBlob.deserialize((it as String).fromHexString()).first
-                    }*/
-//                    val candidateAttestations = filterAttestations(peer, attestations)
+                    val policies = getPolicies(accessMode)
                     val candidateAttestations = accessTokens.map { at -> at as AttestationBlob }
-                    if (candidateAttestations.isNotEmpty()){
 
-                        /*val policies = getPolicies()
-
-                        for (policy in policies) {
-//                            TODO verify policy for specific access mode
-//                            if (policy.evaluate(accessMode, candidateAttestations))
+                    policies.forEach { policy ->
+                        if (policy.evaluate(accessMode, candidateAttestations)) {
                             return true
-                        }*/
-                        return true
+                        }
                     }
                 }
                 Policy.AccessTokenType.JWT -> {
                     accessTokens.forEach { jwt ->
-                        val jwtPayload = JWTHelper.getJWTPayload(jwt as String)
-                        return jwtPayload.toString().isNotEmpty()
+                        val policies = getPolicies(accessMode)
+                        policies.forEach { policy ->
+                            if (policy.evaluate(accessMode, jwt as String)) {
+                                return true
+                            }
+                        }
                     }
                 }
                 Policy.AccessTokenType.JSONLD -> {
-//                    Log.e(logTag, "Access token type $accessTokenType not implemented")
+                    Log.e(logTag, "Access token type $accessTokenType not implemented")
 //                    todo return false or implement
-                    return true
+                    return false
                 }
             }
 
@@ -85,14 +80,14 @@ class AccessControlFile(
             aclCache = if (aclFile.exists()) {
                 try {
                     val rd = aclFile.readText()
-                    Log.e(logTag, "ACL contents: $rd")
+                    Log.d(logTag, "ACL contents: $rd")
                     JSONObject(rd)
                 } catch (e: Exception) {
-                    Log.e(logTag, "Corrupt ACL file: ${file.absolutePath}", e)
+                    Log.d(logTag, "Corrupt ACL file: ${file.absolutePath}", e)
                     newACL()
                 }
             } else {
-                Log.e(logTag, "No acl file yet")
+                Log.d(logTag, "No acl file yet")
                 newACL()
             }
         }
@@ -116,6 +111,12 @@ class AccessControlFile(
         }
     }
 
+    fun getPolicies(accessMode: String): List<Policy> {
+        return getPolicies().filter {
+            it.accessMode == accessMode
+        }
+    }
+
     fun savePolicies(policies: List<Policy>) {
         CoroutineScope(Dispatchers.IO).launch {
             val acl = getACL()
@@ -133,16 +134,16 @@ class AccessControlFile(
     }
 
     private fun newACL(): JSONObject {
-        /*val newACL = JSONObject()
+        val newACL = JSONObject()
         newACL.put(VERSION, AP_VERSION)
         newACL.put(RESOURCE, file.absolutePath)
         val timestamp = Date().time
         val sdf = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
         newACL.put(LAST_CHANGED, sdf.format(timestamp))
         newACL.put(POLICIES, JSONArray())
-        return newACL*/
+        return newACL
 
-        return JSONObject(TEST_ACL)
+//        return JSONObject(TEST_ACL)
     }
 
     fun isPublic(): Boolean {
