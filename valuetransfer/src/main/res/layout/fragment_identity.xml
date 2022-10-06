@@ -111,6 +111,20 @@
 
             </LinearLayout>
         </LinearLayout>
+        <TextView
+            android:id="@+id/attestationWarning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="8dp"
+            android:text="Attestations are currently dysfunctional in IDelft, if you wish to develop on attestations within IDelft, please contact Erwin Nieuwlaar"
+            android:textColor="?attr/onBackgroundColor"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvAttributesInfo"
+            tools:visibility="visible" />
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/clYourAttestations"
@@ -122,8 +136,10 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
+
+
                 <TextView
-                    android:id="@+id/tvNoYourAttestations"
+                    android:id="@+id/tvNoYourAttestations2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="12dp"

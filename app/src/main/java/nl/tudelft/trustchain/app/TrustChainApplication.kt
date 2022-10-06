@@ -1,8 +1,5 @@
 package nl.tudelft.trustchain.app
 
-//import nl.tudelft.ipv8.attestation.wallet.AttestationSQLiteStore
-//import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
-//import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import android.app.Application
 import android.bluetooth.BluetoothManager
 import android.os.Build
