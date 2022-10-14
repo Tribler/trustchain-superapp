@@ -86,7 +86,8 @@ fun ProposalDetailPure(proposal: Proposal, daoViewModel: DaoViewModel) {
                                     OutlinedButton(
                                         onClick = {
                                             proposal.proposalId
-                                            val block = daoViewModel.getProposal(proposal.proposalId)
+                                            val block =
+                                                daoViewModel.getProposal(proposal.proposalId)
 
                                             if (block?.second != null) {
                                                 daoViewModel.upvoteJoin(
@@ -191,17 +192,12 @@ fun ProposalDetailPure(proposal: Proposal, daoViewModel: DaoViewModel) {
                                     Text(
                                         "You have not signed this proposal yet, you can do so below. "
                                     )
-                                    Text(
-                                        "${proposal.signatures}"
-                                    )
-                                    Text(
-                                        "${daoViewModel.myKey()}"
-                                    )
                                     Spacer(modifier = Modifier.size(10.dp))
                                     OutlinedButton(
                                         onClick = {
                                             proposal.proposalId
-                                            val block = daoViewModel.getProposal(proposal.proposalId)
+                                            val block =
+                                                daoViewModel.getProposal(proposal.proposalId)
 
                                             if (block?.second != null) {
                                                 daoViewModel.upvoteTransfer(
