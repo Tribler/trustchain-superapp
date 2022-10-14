@@ -1,31 +1,31 @@
 package com.example.musicdao.ui.screens.dao
 
-import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import com.example.musicdao.core.dao.DAO
+import com.example.musicdao.core.dao.JoinProposal
+import com.example.musicdao.core.dao.Proposal
+import com.example.musicdao.core.dao.TransferProposal
 import com.example.musicdao.ui.components.EmptyState
 import com.example.musicdao.ui.navigation.Screen
+import com.example.musicdao.ui.util.Chip
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
@@ -51,7 +51,7 @@ fun DaoDetailScreen(navController: NavController, daoId: String, daoViewModel: D
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun DaoDetailPure(
-    dao: DAO,
+    daoInitial: DAO,
     navigateToProposal: (proposalId: String) -> Unit = {},
     navigateToNewProposal: (daoId: String) -> Unit = {},
     daoViewModel: DaoViewModel
@@ -64,74 +64,259 @@ fun DaoDetailPure(
         "about" to "About"
     )
 
-    val navhostDao: NavHostController = rememberNavController()
-    val context = LocalContext.current
-    val coroutine = rememberCoroutineScope()
+    val isRefreshing by daoViewModel.isRefreshing.collectAsState()
+    val refreshState = rememberSwipeRefreshState(isRefreshing)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState())
+    val daos by daoViewModel.daos.collectAsState()
+    val daoDerivedState = derivedStateOf {
+        daos.toList().find { daoInitial.daoId == it.second.daoId }?.second
+    }
+    val dao = daoDerivedState.value
+
+    if (dao == null) {
+        EmptyState("Not found.", daoInitial.daoId)
+        return
+    }
+
+    SwipeRefresh(
+        state = refreshState,
+        onRefresh = {
+            daoViewModel.refreshOneShot()
+        }
     ) {
-        Card() {
-            Column() {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(20.dp)
-                ) {
-                    DaoIcon(daoId = dao.name, size = 64)
-                    Spacer(modifier = Modifier.size(20.dp))
-                    Column() {
-                        Text(dao.name, style = MaterialTheme.typography.h6)
-                        Text("${dao.members.size} members", style = MaterialTheme.typography.body1)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Card() {
+                Column() {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        DaoIcon(daoId = dao.name, size = 64)
+                        Spacer(modifier = Modifier.size(20.dp))
+                        Column() {
+                            Text(
+                                dao.name,
+                                style = MaterialTheme.typography.h6,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
+                            )
+                            Text(
+                                "${dao.members.size} member(s)",
+                                style = MaterialTheme.typography.body1
+                            )
+                            Text("₿ ${dao.balance}", style = MaterialTheme.typography.body1)
+                        }
+                        Spacer(Modifier.weight(1f))
+                        OutlinedButton(onClick = {}) {
+                            Text("Join")
+                        }
                     }
-                    Spacer(Modifier.weight(1f))
-                    OutlinedButton(onClick = {}) {
-                        Text("Join")
+
+                    TabRow(selectedTabIndex = state) {
+                        titles.onEachIndexed() { index, (key, title) ->
+                            Tab(
+                                text = { Text(title) },
+                                selected = state == index,
+                                enabled = !(!daoViewModel.userInDao(dao) && key == "new"),
+                                onClick = {
+                                    when (key) {
+                                        "list" -> state = 0
+                                        "new" -> {
+                                            state = 1
+                                            navigateToNewProposal(dao.daoId)
+                                        }
+                                        "about" -> state = 2
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
+            }
 
-                TabRow(selectedTabIndex = state) {
-                    titles.onEachIndexed() { index, (key, title) ->
-                        Tab(
-                            text = { Text(title) },
-                            selected = state == index,
-                            onClick = {
-                                when (key) {
-                                    "list" -> state = 0
-                                    "new" -> {
-                                        state = 1
-                                        navigateToNewProposal(dao.daoId)
-                                    }
-                                    "about" -> state = 2
-                                }
-                            }
+            Column() {
+                when (state) {
+                    0 -> {
+                        ProposalList(dao, navigateToProposal, daoViewModel)
+                    }
+                    2 -> {
+                        About(dao)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProposalList(
+    dao: DAO,
+    navigateToProposal: (proposalId: String) -> Unit,
+    daoViewModel: DaoViewModel
+) {
+    if (!daoViewModel.userInDao(dao)) {
+        Card(
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(20.dp)
+                    .fillMaxWidth()
+            ) {
+                Text("You are not a member of this DAO, you will not see any proposals.")
+            }
+        }
+
+        return
+    }
+
+    Column() {
+        dao.proposals.map { proposal ->
+            ProposalCard(proposal.key, navigateToProposal)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ProposalCard(proposal: Proposal, navigateToProposal: ((proposalId: String) -> Unit)?) {
+    when (proposal) {
+        is JoinProposal -> {
+            Card(
+                modifier = Modifier.padding(top = 10.dp),
+                onClick = {
+                    if (navigateToProposal != null) {
+                        navigateToProposal(proposal.proposalId)
+                    }
+                }
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Chip(contentDescription = "", label = "Join Proposal", color = Color.Black)
+                        if (proposal.isClosed()) {
+                            Chip(contentDescription = "", label = "Closed", color = Color.Red)
+                        } else {
+                            Chip(contentDescription = "", label = "Open")
+                        }
+                    }
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text(
+                        proposal.proposalId,
+                        style = MaterialTheme.typography.h6,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                        Text(text = "Creator", fontWeight = FontWeight.Bold)
+                        Text(
+                            text = proposal.proposalCreator,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    }
+                    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                        Text(text = "Creation Time", fontWeight = FontWeight.Bold)
+                        Text(text = proposal.proposalTime)
+                    }
+                    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                        Text(text = "Amount", fontWeight = FontWeight.Bold)
+                        Text(text = proposal.transferAmountBitcoinSatoshi.toString())
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            tint = MaterialTheme.colors.primary,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text(
+                            "${proposal.signatures.size} of ${proposal.signaturesRequired} signatures",
+                            style = MaterialTheme.typography.caption
                         )
                     }
                 }
             }
         }
-
-//        OutlinedButton(
-//            onClick = { navigateToNewProposal(dao.daoId) },
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(top = 10.dp)
-//        ) {
-//            Text("Create Proposal")
-//        }
-
-        Column() {
-            when (state) {
-                0 -> {
-                    Proposals(dao, navigateToProposal)
+        is TransferProposal -> Card(
+            modifier = Modifier.padding(top = 10.dp),
+            onClick = {
+                if (navigateToProposal != null) {
+                    navigateToProposal(proposal.proposalId)
                 }
-                1 -> {
-                    NewProposal(dao)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(20.dp)
+                    .fillMaxWidth()
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Chip(
+                        contentDescription = "",
+                        label = "Transfer Funds Proposal",
+                        color = Color.Black
+                    )
+                    if (proposal.isClosed()) {
+                        Chip(contentDescription = "", label = "Closed", color = Color.Red)
+                    } else {
+                        Chip(contentDescription = "", label = "Open")
+                    }
                 }
-                2 -> {
-                    About(dao)
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    proposal.proposalId,
+                    style = MaterialTheme.typography.h6,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                    Text(text = "Creator", fontWeight = FontWeight.Bold)
+                    Text(
+                        text = proposal.proposalCreator,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+                }
+                Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                    Text(text = "Creation Time", fontWeight = FontWeight.Bold)
+                    Text(text = proposal.proposalTime)
+                }
+                Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                    Text(text = "Amount", fontWeight = FontWeight.Bold)
+                    Text(text = proposal.transferAmountBitcoinSatoshi.toString())
+                }
+                Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                    Text(text = "To", fontWeight = FontWeight.Bold)
+                    Text(
+                        text = proposal.transferAddress,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.size(5.dp))
+                    Text(
+                        "${proposal.signatures.size} of ${proposal.signaturesRequired} signatures",
+                        style = MaterialTheme.typography.caption
+                    )
                 }
             }
         }
@@ -160,318 +345,12 @@ fun About(dao: DAO) {
                 Text(text = "Members", fontWeight = FontWeight.Bold)
                 Column() {
                     dao.members.map { member ->
-                        Text(text = member.trustchainPublicKey.toString())
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NewProposal(dao: DAO) {
-    Column() {
-    }
-}
-
-@Composable
-fun Proposals(dao: DAO, navigateToProposal: (proposalId: String) -> Unit) {
-    Column() {
-        dao.proposals.map { proposal ->
-            ProposalCard(proposal, navigateToProposal)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun ProposalCard(proposal: Proposal, navigateToProposal: (proposalId: String) -> Unit) {
-    Card(
-        modifier = Modifier.padding(top = 10.dp),
-        onClick = {
-            navigateToProposal(proposal.proposalId)
-        }
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(20.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                "by ${proposal.proposalCreator}",
-                style = MaterialTheme.typography.caption,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                proposal.proposalTitle,
-                style = MaterialTheme.typography.h6,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                proposal.proposalText,
-                style = MaterialTheme.typography.body2,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.size(10.dp))
-            Text(
-                "For ${proposal.transferAmountBitcoinSatoshi} satoshi to ${proposal.transferAddress} ${proposal.transferAmountBitcoinSatoshi}",
-                style = MaterialTheme.typography.caption,
-                softWrap = true
-            )
-            Spacer(modifier = Modifier.size(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    tint = MaterialTheme.colors.primary,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.size(5.dp))
-                Text(
-                    "Closed, ${proposal.signatures.size} of ${proposal.signaturesRequired} signatures",
-                    style = MaterialTheme.typography.caption
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ProposalDetailScreen(proposalId: String, daoViewModel: DaoViewModel) {
-    val proposal = daoViewModel.getProposal(proposalId)
-
-    if (proposal != null) {
-        ProposalDetailPure(proposal)
-    } else {
-        EmptyState("Not found.", proposalId)
-    }
-}
-
-@Composable
-fun ProposalDetailPure(proposal: Proposal) {
-    Column(
-        modifier = Modifier
-            .padding(20.dp)
-    ) {
-        Card() {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-            ) {
-                Text(
-                    "by ${proposal.proposalCreator}",
-                    style = MaterialTheme.typography.caption,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    proposal.proposalTitle,
-                    style = MaterialTheme.typography.h6,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (proposal.proposalText != "") {
-                    Text(
-                        proposal.proposalText,
-                        style = MaterialTheme.typography.body2,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(
-                    "For ${proposal.transferAmountBitcoinSatoshi} satoshi to ${proposal.transferAddress} ${proposal.transferAmountBitcoinSatoshi}",
-                    style = MaterialTheme.typography.caption,
-                    softWrap = true
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        tint = MaterialTheme.colors.primary,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.size(5.dp))
-                    Text(
-                        "Closed, ${proposal.signatures.size} of ${proposal.signaturesRequired} signatures",
-                        style = MaterialTheme.typography.caption
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.size(10.dp))
-
-        Card() {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-            ) {
-                Text(
-                    "You have not signed this proposal yet, you can do so below.",
-                    style = MaterialTheme.typography.body2
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                OutlinedButton(onClick = { /*TODO*/ }) {
-                    Text("Sign this proposal")
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.size(10.dp))
-
-        Card() {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-            ) {
-                Text(
-                    "Votes",
-                    style = MaterialTheme.typography.subtitle2,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                proposal.signatures.map { vote ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 10.dp)
-                    ) {
-                        Row() {
-                            Box(
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colors.primary)
-                            )
-                            Spacer(modifier = Modifier.size(5.dp))
-                            Text(
-                                vote.trustchainPublicKey,
-                                style = MaterialTheme.typography.caption,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
                         Text(
-                            "Upvote",
-                            style = MaterialTheme.typography.caption
+                            text = member.trustchainPublicKey,
+                            modifier = Modifier.padding(bottom = 5.dp)
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun NewDaoScreen(daoViewModel: DaoViewModel, navController: NavController) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var threshHold by rememberSaveable { mutableStateOf("") }
-    var entranceFee by rememberSaveable { mutableStateOf("") }
-
-    val context = LocalContext.current
-
-    Card(
-        modifier = Modifier
-            .padding(20.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-        ) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Title") }
-            )
-            OutlinedTextField(
-                value = threshHold,
-                onValueChange = { threshHold = it },
-                label = { Text("Threshold") },
-                singleLine = false,
-                maxLines = 5
-            )
-            OutlinedTextField(
-                value = entranceFee,
-                onValueChange = { entranceFee = it },
-                label = { Text("Amount (satoshi)") }
-            )
-            Spacer(modifier = Modifier.size(10.dp))
-            OutlinedButton(onClick = {
-                daoViewModel.createGenesisDAO(entranceFee.toLong(), threshHold.toInt(), context)
-                daoViewModel.refreshOneShot()
-                navController.popBackStack()
-            }) {
-                Text("Create")
-            }
-        }
-    }
-}
-
-@Composable
-fun NewProposalScreen(daoId: String, daoViewModel: DaoViewModel, navController: NavController) {
-    var title by rememberSaveable { mutableStateOf("") }
-    var about by rememberSaveable { mutableStateOf("Lorem ipsum") }
-    var satoshi by rememberSaveable { mutableStateOf("6000") }
-    var address by rememberSaveable { mutableStateOf("my4VbT52jXKdpbjZz9sSvxMbmbFC86mMDb") }
-
-    val local = LocalContext.current
-
-    Card(
-        modifier = Modifier
-            .padding(20.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-        ) {
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Title") }
-            )
-            OutlinedTextField(
-                value = about,
-                onValueChange = { about = it },
-                label = { Text("About\n\n\n\n\n\n") },
-                singleLine = false,
-                maxLines = 5
-            )
-            OutlinedTextField(
-                value = satoshi,
-                onValueChange = { satoshi = it },
-                label = { Text("Amount (satoshi)") }
-            )
-            OutlinedTextField(
-                value = address,
-                onValueChange = { address = it },
-                label = { Text("Address") }
-            )
-            Spacer(modifier = Modifier.size(10.dp))
-            OutlinedButton(onClick = {
-                daoViewModel.transferFundsClicked(
-                    bitcoinPublicKey = address,
-                    satoshiTransferAmount = satoshi.toLong(),
-                    blockHash = daoViewModel.getDao(daoId)!!.first.calculateHash(),
-                    context = local,
-                    activityRequired = local as Activity
-                )
-                daoViewModel.refreshOneShot()
-                navController.popBackStack()
-            }) {
-                Text("Create")
             }
         }
     }

@@ -7,7 +7,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
@@ -22,8 +21,8 @@ fun BottomNavigationBar(navController: NavHostController) {
 
     val items = listOf(
         BottomNavigationItem("Home", Screen.Home.route, Icons.Filled.Home),
-        BottomNavigationItem("Artists", Screen.DiscoverArtists.route, Icons.Filled.Person),
-        BottomNavigationItem("Search", Screen.Search.route, Icons.Filled.Search),
+//        BottomNavigationItem("Artists", Screen.DiscoverArtists.route, Icons.Filled.Person),
+//        BottomNavigationItem("Search", Screen.Search.route, Icons.Filled.Search),
         BottomNavigationItem("Creator", Screen.CreatorMenu.route, Icons.Filled.Person),
         BottomNavigationItem("DAO", Screen.DaoRoute.route, Icons.Filled.Person),
     )
@@ -42,4 +41,3 @@ fun BottomNavigationBar(navController: NavHostController) {
         }
     }
 }
-

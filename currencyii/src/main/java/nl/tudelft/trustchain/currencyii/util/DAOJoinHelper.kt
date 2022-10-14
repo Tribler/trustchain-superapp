@@ -220,6 +220,10 @@ class DAOJoinHelper {
             )
 
             if (blockData.SW_RECEIVER_PK != myPublicKey.toHex()) {
+                Log.i(
+                    "Coin",
+                    "${blockData.SW_RECEIVER_PK} != ${myPublicKey.toHex()}"
+                )
                 return
             }
             Log.i("Coin", "Signing join block transaction: $blockData")

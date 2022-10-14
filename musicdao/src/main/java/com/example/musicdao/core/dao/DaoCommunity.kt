@@ -1,4 +1,4 @@
-package com.example.musicdao.ui.screens.dao
+package com.example.musicdao.core.dao
 
 import android.app.Activity
 import android.content.Context
@@ -75,14 +75,14 @@ class DaoCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8
         walletBlockData: TrustChainTransaction,
         blockData: SWSignatureAskBlockTD,
         responses: List<SWResponseSignatureBlockTD>,
-        context: Context,
+        context: Context
     ) {
         daoJoinHelper.joinBitcoinWallet(
             myPeer,
             walletBlockData,
             blockData,
             responses,
-            context,
+            context
         )
     }
 
@@ -227,18 +227,21 @@ class DaoCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8
      */
     fun fetchProposalBlocks(): List<TrustChainBlock> {
         val joinProposals = getTrustChainCommunity().database.getBlocksWithType(SIGNATURE_ASK_BLOCK)
-        val transferProposals = getTrustChainCommunity().database.getBlocksWithType(TRANSFER_FUNDS_ASK_BLOCK)
+        val transferProposals =
+            getTrustChainCommunity().database.getBlocksWithType(TRANSFER_FUNDS_ASK_BLOCK)
 
         Log.d("MVDAO", "fetchProposalBlocks ${joinProposals.size} joinProposals on the network.")
-        Log.d("MVDAO", "fetchProposalBlocks ${transferProposals.size} transferProposals on the network.")
-
+        Log.d(
+            "MVDAO",
+            "fetchProposalBlocks ${transferProposals.size} transferProposals on the network."
+        )
 
         return joinProposals
             .union(transferProposals)
-//            .filter {
-//                fetchSignatureRequestReceiver(it) == myPeer.publicKey.keyToBin()
-//                    .toHex() && !checkEnoughFavorSignatures(it)
-//            }
+            .filter {
+                fetchSignatureRequestReceiver(it) == myPeer.publicKey.keyToBin()
+                    .toHex() || it.publicKey.contentEquals(myPeer.publicKey.keyToBin())
+            }
             .distinctBy { fetchSignatureRequestProposalId(it) }
             .sortedByDescending { it.timestamp }
     }
@@ -294,6 +297,11 @@ class DaoCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8
             ?: throw IllegalStateException("Most recent DAO block not found")
         val joinBlock = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
         val oldTransaction = joinBlock.SW_TRANSACTION_SERIALIZED
+
+        Log.d(
+            "MVDAO",
+            "Calling joinAskBlockReceived 2"
+        )
 
         DAOJoinHelper.joinAskBlockReceived(
             oldTransaction,

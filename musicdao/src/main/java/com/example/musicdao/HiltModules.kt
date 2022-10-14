@@ -2,6 +2,7 @@ package com.example.musicdao
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import androidx.room.Room
@@ -17,7 +18,7 @@ import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_NETWORK_P
 import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_REGTEST_BOOTSTRAP_IP
 import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_REGTEST_BOOTSTRAP_PORT
 import com.example.musicdao.core.wallet.WalletService
-import com.example.musicdao.ui.screens.dao.DaoCommunity
+import com.example.musicdao.core.dao.DaoCommunity
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.SessionParams
 import com.frostwire.jlibtorrent.SettingsPack
@@ -29,7 +30,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.currencyii.coin.*
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Singleton
@@ -43,7 +44,8 @@ class HiltModules {
     fun provideDatabase(@ApplicationContext applicationContext: Context): CacheDatabase {
         return Room.databaseBuilder(
             applicationContext,
-            CacheDatabase::class.java, "musicdao-database"
+            CacheDatabase::class.java,
+            "musicdao-database"
         ).fallbackToDestructiveMigration()
             .addTypeConverter(Converters(GsonParser(Gson())))
             .build()
@@ -126,6 +128,7 @@ class HiltModules {
     @Singleton
     fun provideWalletService(
         @ApplicationContext applicationContext: Context,
+        walletManager: WalletManager
     ): WalletService {
         return WalletService(
             WalletConfig(
@@ -135,11 +138,46 @@ class HiltModules {
                 regtestFaucetEndPoint = DEFAULT_FAUCET_ENDPOINT,
                 regtestBootstrapIp = DEFAULT_REGTEST_BOOTSTRAP_IP,
                 regtestBootstrapPort = DEFAULT_REGTEST_BOOTSTRAP_PORT
-            )
+            ),
+            walletManager.kit
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Provides
+    @Singleton
+    fun provideWalletManager(
+        @ApplicationContext context: Context
+    ): WalletManager {
+        Log.d("MVDAO", "INITIATING DAO MODULE.")
+        if (WalletManagerAndroid.isInitialized()) {
+            Log.d("MVDAO", "DAO MODULE ALREADY INITIALIZED, SKIPPING")
+            return WalletManagerAndroid.getInstance()
+        }
+        val params = BitcoinNetworkOptions.REG_TEST
 
+//        val seed = WalletManager.generateRandomDeterministicSeed(params)
+//        val seed = SerializedDeterministicKey(
+//            "spell seat genius horn argue family steel buyer spawn chef guard vast",
+//            1583488954L
+//        )
+//        val seed_word = seed.seed
+//        val creationNumber = seed.creationTime.toLong()
+
+        val config = WalletManagerConfiguration(
+            params,
+            null,
+            null
+        )
+
+        WalletManagerAndroid.Factory(context)
+            .setConfiguration(config)
+            .init()
+
+        Log.d("MVDAO", "Wallet manager: ${WalletManagerAndroid.getInstance()}")
+
+        return WalletManagerAndroid.getInstance()
+    }
 }
 
 class CachePath(val applicationContext: Context) {

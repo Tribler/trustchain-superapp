@@ -23,10 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.musicdao.AppContainer
 import com.example.musicdao.ui.SnackbarHandler
 import com.example.musicdao.ui.dateToLongString
@@ -38,7 +37,7 @@ import java.time.Instant
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalComposeUiApi
 @Composable
-fun CreateReleaseDialog(closeDialog: () -> Unit) {
+fun CreateReleaseDialog(navController: NavController) {
 
     val viewModel: CreateReleaseDialogViewModel = hiltViewModel()
 
@@ -83,17 +82,14 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
             )
             if (result) {
                 SnackbarHandler.displaySnackbar(text = "Successfully published your release.")
-                closeDialog()
+                navController.popBackStack()
             } else {
                 SnackbarHandler.displaySnackbar(text = "Could not publish your release.")
             }
         }
     }
 
-    Dialog(
-        onDismissRequest = { closeDialog() },
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
+    Column() {
         Surface(
             modifier = Modifier
                 .requiredWidth(LocalConfiguration.current.screenWidthDp.dp * 1f)
@@ -105,7 +101,7 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
                     TopAppBar(
                         title = { Text("Create Release") },
                         navigationIcon = {
-                            IconButton(onClick = { closeDialog() }) {
+                            IconButton(onClick = { navController.popBackStack() }) {
                                 Icon(Icons.Filled.Close, contentDescription = null)
                             }
                         },

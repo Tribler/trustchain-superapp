@@ -31,6 +31,7 @@ class BitcoinWalletViewModel @Inject constructor(val walletService: WalletServic
     val isStarted: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     init {
+
         viewModelScope.launch {
 
             while (isActive) {

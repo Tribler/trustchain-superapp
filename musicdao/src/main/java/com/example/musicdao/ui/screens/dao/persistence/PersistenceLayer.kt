@@ -1,6 +1,8 @@
 package com.example.musicdao.ui.screens.dao.persistence
 
-import com.example.musicdao.ui.screens.dao.DaoCommunity
+import com.example.musicdao.core.dao.DaoCommunity
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import kotlinx.coroutines.flow.Flow
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -11,26 +13,36 @@ import kotlin.reflect.KClass
 typealias BlockType = String
 typealias ResourceID = String
 
-val availableBlocks = mapOf<String, PersistentTrustChainBlock>()
-
 sealed class PersistentTrustChainBlock() {
-    abstract var blockType: BlockType
+
+    data class RequestBlock(
+        val name: String,
+        val age: Int
+    ) : PersistentTrustChainBlock() {
+        companion object {
+            const val blockType: BlockType = "test"
+        }
+    }
+
+    data class AnswerBlock(
+        val blockType: String = "tes2t"
+    ) : PersistentTrustChainBlock() {
+        companion object {
+            const val blockType: BlockType = "test"
+        }
+    }
+
+    companion object {
+        val mapping = mapOf(
+            RequestBlock.blockType to RequestBlock::class,
+            AnswerBlock.blockType to AnswerBlock::class
+        )
+    }
 }
 
 sealed class PersistentTrustChainBlockResource : PersistentTrustChainBlock() {
     abstract var resourceID: ResourceID
 }
-
-data class RequestBlock(
-    override var blockType: BlockType = "REQUEST_BLOCK",
-    val name: String,
-    val age: Int
-) : PersistentTrustChainBlock()
-
-data class AnswerBlock(
-    override var blockType: BlockType = "ANSWER_BLOCK",
-    val test: Boolean
-) : PersistentTrustChainBlock()
 
 interface PersistenceLayerInterface {
     fun post(data: PersistentTrustChainBlock)
@@ -41,18 +53,14 @@ interface PersistenceLayerInterface {
 }
 
 class SampleUsage() {
-    fun main() {
+    suspend fun main() {
         val trustChainCommunity = getTrustChainCommunity()
         val daoCommunity = getDaoCommunity()
         val trustChainHelper = TrustChainHelper(trustChainCommunity)
         val trustChainPersistence =
             PersistenceLayer(trustChainCommunity, trustChainHelper, daoCommunity)
 
-        val testObject = RequestBlock(
-            name = "sada",
-            age = 21312,
-            blockType = "sad"
-        )
+        val test = trustChainPersistence.get(PersistentTrustChainBlock.RequestBlock.blockType)
     }
 
     private fun getTrustChainCommunity(): TrustChainCommunity {
@@ -79,8 +87,7 @@ class PersistenceLayer(
 
         trustChainHelper.createProposalBlock(
             message = jsonString,
-            publicKey = me.publicKey.keyToBin(),
-            blockType = data.blockType
+            publicKey = me.publicKey.keyToBin()
         )
     }
 
@@ -91,8 +98,7 @@ class PersistenceLayer(
 
         trustChainHelper.createProposalBlock(
             message = jsonString,
-            publicKey = me.publicKey.keyToBin(),
-            blockType = data.blockType
+            publicKey = me.publicKey.keyToBin()
         )
     }
 
@@ -106,45 +112,20 @@ class PersistenceLayer(
             val filtered = chain.filter { it.type == type }
             filtered
         }.flatten()
-//            .map { it ->
-//                {
-//
-//                    // find type
-//                    // find class instance
-//                    // instantiate class instance
-//
-// //                    val subclasses = PersistentTrustChainBlock::class.sealedSubclasses
-// //                    val types = subclasses.associate {
-// //                        val classType = it as PersistentTrustChainBlock
-// //                        classType::blockType.get() to it
-// //                    }
-// //
-// //                    val instantiation = types.get(it.type)!!
-// //                    val jsonString = it.transaction["message"] as String
-// //                    val result = Gson().fromJson(jsonString, instantiation::class.java)
-//
-//                    val subclasses = PersistentTrustChainBlock::class.sealedSubclasses
-//                    val types = subclasses.associate {
-//                        val classType = it as PersistentTrustChainBlock
-//                        classType::blockType.get() to it
-//                    }
-//
-//                    val instantiation = types.get(it.type)!!
-//                    val jsonString = it.transaction["message"] as String
-//
-// //                    val rta = RuntimeTypeAdapterFactory.of(PersistentTrustChainBlock::class.java)
-// //                    types.forEach() { (key, value) ->
-// //                        rta.registerSubtype(value::class.java, key)
-// //                    }
-// //                    val gson = GsonBuilder()
-// //                        .registerTypeAdapterFactory(rta)
-// //                        .create()
-//
-//                    val result = Json.fromJsonWithClass(jsonString, instantiation::class.java)
-//
-//                    result
-//                }
-//            }
+            .map { it ->
+                val block: KClass<out PersistentTrustChainBlock>? =
+                    PersistentTrustChainBlock.mapping[it.type]?.let { classType ->
+                        val jsonObject = Gson().fromJson(
+                            it.transaction["message"].toString(),
+                            JsonObject::class.java
+                        )
+                        val json: KClass<out PersistentTrustChainBlock> = Gson().fromJson(
+                            jsonObject.toString(),
+                            classType::class.java
+                        )
+                        json
+                    }
+            }
 
         return listOf()
     }

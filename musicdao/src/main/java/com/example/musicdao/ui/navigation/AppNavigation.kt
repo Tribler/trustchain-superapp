@@ -11,6 +11,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,6 +28,7 @@ import com.example.musicdao.ui.screens.donate.DonateScreen
 import com.example.musicdao.ui.screens.home.HomeScreen
 import com.example.musicdao.ui.screens.home.HomeScreenViewModel
 import com.example.musicdao.ui.screens.profile.*
+import com.example.musicdao.ui.screens.release.CreateReleaseDialog
 import com.example.musicdao.ui.screens.release.ReleaseScreen
 import com.example.musicdao.ui.screens.search.DebugScreenViewModel
 import com.example.musicdao.ui.screens.search.SearchScreen
@@ -41,7 +43,7 @@ import com.google.accompanist.navigation.animation.composable
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
@@ -63,9 +65,11 @@ fun AppNavigation(
         builder = {
             composable(Screen.Home.route) {
                 val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
+                val searchScreenViewModel: SearchScreenViewModel = hiltViewModel()
                 HomeScreen(
                     navController = navController,
-                    homeScreenViewModel = homeScreenViewModel
+                    homeScreenViewModel = homeScreenViewModel,
+                    screenViewModel = searchScreenViewModel
                 )
             }
             composable(Screen.Search.route) {
@@ -117,6 +121,9 @@ fun AppNavigation(
             }
             composable(Screen.NewDaoRoute.route) {
                 NewDaoScreen(daoViewModel = daoViewModel, navController = navController)
+            }
+            composable(Screen.CreateRelease.route) {
+                CreateReleaseDialog(navController = navController)
             }
 
             composable(

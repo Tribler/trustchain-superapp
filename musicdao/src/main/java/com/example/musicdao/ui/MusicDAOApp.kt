@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,11 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.navigation.AppNavigation
 import com.example.musicdao.ui.navigation.Drawer
+import com.example.musicdao.ui.navigation.Screen
 import com.example.musicdao.ui.screens.profile.MyProfileScreenViewModel
-import com.example.musicdao.ui.screens.release.CreateReleaseDialog
 import com.example.musicdao.ui.styling.MusicDAOTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
@@ -57,9 +58,14 @@ fun MusicDAOApp() {
             scaffoldState = scaffoldState,
             floatingActionButtonPosition = FabPosition.End,
             floatingActionButton = {
-                FloatingActionButton(onClick = { openCreateReleaseDialog.value = true }) {
+                FloatingActionButton(
+                    onClick = {
+                        val x = navController as NavController
+                        x.navigate(Screen.FullPlayerScreen.route)
+                    }
+                ) {
                     Icon(
-                        imageVector = Icons.Filled.AddCircle,
+                        imageVector = Icons.Filled.PlayArrow,
                         contentDescription = null
                     )
                 }
@@ -76,9 +82,6 @@ fun MusicDAOApp() {
                         modifier = Modifier
                             .align(Alignment.End)
                     )
-                    if (openCreateReleaseDialog.value) {
-                        CreateReleaseDialog(closeDialog = closeDialog)
-                    }
                 }
             },
             bottomBar = { BottomNavigationBar(navController) },

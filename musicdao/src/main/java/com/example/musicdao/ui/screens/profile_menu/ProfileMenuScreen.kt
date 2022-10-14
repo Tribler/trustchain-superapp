@@ -58,6 +58,12 @@ fun ProfileMenuScreen(navController: NavController) {
                 }
             )
             CustomMenuItem(
+                text = "Create a new Release",
+                onClick = {
+                    navController.navigate(Screen.CreateRelease.route)
+                }
+            )
+            CustomMenuItem(
                 text = "Wallet",
                 onClick = {
                     navController.navigate(Screen.BitcoinWallet.route)

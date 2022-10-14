@@ -17,22 +17,24 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.lifecycleScope
-import com.example.musicdao.core.repositories.album.BatchPublisher
 import com.example.musicdao.core.ipv8.SetupMusicCommunity
 import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.repositories.ArtistRepository
 import com.example.musicdao.core.repositories.MusicGossipingService
+import com.example.musicdao.core.repositories.album.BatchPublisher
 import com.example.musicdao.core.torrent.TorrentEngine
 import com.example.musicdao.core.wallet.WalletService
 import com.example.musicdao.ui.MusicDAOApp
 import com.example.musicdao.ui.screens.profile.ProfileScreenViewModel
 import com.example.musicdao.ui.screens.release.ReleaseScreenViewModel
 import com.frostwire.jlibtorrent.SessionManager
+import com.google.common.util.concurrent.Service
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
 import kotlinx.coroutines.*
+import nl.tudelft.trustchain.currencyii.coin.WalletManager
 import javax.inject.Inject
 
 /**
@@ -57,6 +59,9 @@ class MusicActivity : AppCompatActivity() {
     lateinit var walletService: WalletService
 
     @Inject
+    lateinit var walletManager: WalletManager
+
+    @Inject
     lateinit var batchPublisher: BatchPublisher
 
     @Inject
@@ -75,39 +80,91 @@ class MusicActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         AppContainer.provide(this)
 
+        Log.d(
+            "MusicDao2",
+            "`32131`"
+        )
+
         lifecycleScope.launchWhenStarted {
             setupMusicCommunity.registerListeners()
             albumRepository.refreshCache()
             torrentEngine.seedStrategy()
-            GlobalScope.launch(Dispatchers.IO) {
-                walletService.start()
-            }
-            Log.d(
-                "MusicDao",
-                "Releases: ${albumRepository.getAlbums()}"
-            )
         }
+        Log.d(
+            "MusicDao2",
+            "`sada`"
+        )
         iterativelyFetchReleases()
         Intent(this, MusicGossipingService::class.java).also { intent ->
             startService(intent)
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
         }
 
-        walletService.addOnSetupCompletedListener {
+        Log.d(
+            "MusicDao2",
+            "DEBUG: $walletManager"
+        )
+
+        Log.d(
+            "MusicDao2",
+            "${walletManager.kit.state()}"
+        )
+
+        if (walletManager.kit.state() == Service.State.RUNNING) {
             val scope = CoroutineScope(Dispatchers.IO)
             val address = walletService.protocolAddress().toString()
-            Log.d("MusicDao", "onSetupCompletedListener (1)")
+            Log.d("MusicDao2", "onSetupCompletedListener (1)")
 
             scope.launch {
                 val me = artistRepository.getMyself()
-                Log.d("MusicDao", "onSetupCompletedListener (2)")
+                Log.d("MusicDao2", "onSetupCompletedListener (2)")
                 if (me != null) {
                     if (me.bitcoinAddress != address) {
-                        Log.d("MusicDao", "onSetupCompletedListener (3)")
+                        Log.d("MusicDao2", "onSetupCompletedListener (3)")
                         artistRepository.edit(me.name, address, me.socials, me.biography)
                     }
                 } else {
-                    Log.d("MusicDao", "onSetupCompletedListener (4)")
+                    Log.d("MusicDao2", "onSetupCompletedListener (4)")
+                    artistRepository.edit("Name", address, "Socials", "Biography")
+                }
+            }
+        }
+
+        walletManager.addOnSetupCompletedListener {
+            val scope = CoroutineScope(Dispatchers.IO)
+            val address = walletService.protocolAddress().toString()
+            Log.d("MusicDao2", "onSetupCompletedListener (1)")
+
+            scope.launch {
+                val me = artistRepository.getMyself()
+                Log.d("MusicDao2", "onSetupCompletedListener (2)")
+                if (me != null) {
+                    if (me.bitcoinAddress != address) {
+                        Log.d("MusicDao2", "onSetupCompletedListener (3)")
+                        artistRepository.edit(me.name, address, me.socials, me.biography)
+                    }
+                } else {
+                    Log.d("MusicDao2", "onSetupCompletedListener (4)")
+                    artistRepository.edit("Name", address, "Socials", "Biography")
+                }
+            }
+        }
+
+        walletService?.addOnSetupCompletedListener {
+            val scope = CoroutineScope(Dispatchers.IO)
+            val address = walletService.protocolAddress().toString()
+            Log.d("MusicDao2", "onSetupCompletedListener (1)")
+
+            scope.launch {
+                val me = artistRepository.getMyself()
+                Log.d("MusicDao2", "onSetupCompletedListener (2)")
+                if (me != null) {
+                    if (me.bitcoinAddress != address) {
+                        Log.d("MusicDao2", "onSetupCompletedListener (3)")
+                        artistRepository.edit(me.name, address, me.socials, me.biography)
+                    }
+                } else {
+                    Log.d("MusicDao2", "onSetupCompletedListener (4)")
                     artistRepository.edit("Name", address, "Socials", "Biography")
                 }
             }
@@ -133,7 +190,6 @@ class MusicActivity : AppCompatActivity() {
     private val mConnection = object : ServiceConnection {
         // Called when the connection with the service is established
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-
             val binder = service as MusicGossipingService.LocalBinder
             mService = binder.getService()
             mBound = true

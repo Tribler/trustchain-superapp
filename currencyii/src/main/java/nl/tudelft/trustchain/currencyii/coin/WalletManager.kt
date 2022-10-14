@@ -68,6 +68,12 @@ class WalletManager(
     var progress: Int = 0
     val key = addressPrivateKeyPair
 
+    val onSetupCompletedListeners = mutableListOf<() -> Unit>()
+
+    fun addOnSetupCompletedListener(listener: () -> Unit) {
+        onSetupCompletedListeners.add(listener)
+    }
+
     /**
      * Initializes WalletManager.
      */
@@ -95,6 +101,10 @@ class WalletManager(
                 }
                 wallet().allowSpendingUnconfirmedTransactions()
                 Log.i("Coin", "Coin: WalletManager started successfully.")
+                onSetupCompletedListeners.forEach {
+                    Log.i("Coin", "Coin: calling listener $it")
+                    it()
+                }
             }
         }
 

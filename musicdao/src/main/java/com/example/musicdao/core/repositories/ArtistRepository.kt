@@ -1,7 +1,6 @@
 package com.example.musicdao.core.repositories
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.ipv8.blocks.artist_announce.ArtistAnnounceBlock

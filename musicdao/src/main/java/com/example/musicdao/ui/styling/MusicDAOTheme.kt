@@ -25,6 +25,4 @@ object MusicDAOTheme {
         medium = RoundedCornerShape(16.dp),
         large = RoundedCornerShape(0.dp)
     )
-
-
 }

@@ -1,27 +1,26 @@
 package com.example.musicdao.core.wallet
 
 import android.util.Log
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.bitcoinj.core.*
+import kotlinx.coroutines.withContext
+import org.bitcoinj.core.Address
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.Transaction
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.RegTestParams
-import org.bitcoinj.utils.BriefLogFormatter
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
 import java.io.IOException
 import java.io.InputStream
 import java.math.BigDecimal
-import java.net.InetAddress
 import java.net.URL
-import java.net.UnknownHostException
 import java.util.*
 
-class WalletService(val config: WalletConfig) {
+class WalletService(val config: WalletConfig, private val app: WalletAppKit) {
     private var started = false
     private var percentageSynced = 0
-    private val app: WalletAppKit
 
     val userTransactions: MutableStateFlow<List<UserWalletTransaction>> = MutableStateFlow(listOf())
     val onSetupCompletedListeners = mutableListOf<() -> Unit>()
@@ -31,71 +30,25 @@ class WalletService(val config: WalletConfig) {
     }
 
     init {
-        BriefLogFormatter.initWithSilentBitcoinJ()
-
-        app = object : WalletAppKit(config.networkParams, config.cacheDir, config.filePrefix) {
-            override fun onSetupCompleted() {
-                if (wallet().keyChainGroupSize < 1) {
-                    val key = ECKey()
-                    wallet().importKey(key)
-                }
-                wallet().addCoinsReceivedEventListener { w, tx, _, _ ->
-                    val value: Coin = tx.getValueSentToMe(w)
-                    if (value != wallet().balance && value != wallet().getBalance(Wallet.BalanceType.ESTIMATED)) {
-//                        musicService.showToast(
-//                            "Received coins: ${value.toFriendlyString()}",
-//                            Toast.LENGTH_SHORT
-//                        )
-                    }
-                }
-                onSetupCompletedListeners.forEach {
-                    it()
-                }
-                setWalletReceiveListener()
+        app.setDownloadListener(object : DownloadProgressTracker() {
+            override fun progress(
+                pct: Double,
+                blocksSoFar: Int,
+                date: Date?
+            ) {
+                super.progress(pct, blocksSoFar, date)
+                val percentage = pct.toInt()
+                percentageSynced = percentageSynced
+                Log.i("MusicDao2", "Progress: $percentage")
             }
-        }
-    }
 
-    @DelicateCoroutinesApi
-    fun start() {
-        if (started) return
-
-        app.setBlockingStartup(false)
-        app.setDownloadListener(
-            object : DownloadProgressTracker() {
-                override fun progress(
-                    pct: Double,
-                    blocksSoFar: Int,
-                    date: Date?
-                ) {
-                    super.progress(pct, blocksSoFar, date)
-                    percentageSynced = pct.toInt()
-                }
-
-                override fun doneDownload() {
-                    super.doneDownload()
-                    percentageSynced = 100
-                }
+            override fun doneDownload() {
+                super.doneDownload()
+                percentageSynced = 100
+                Log.d("MusicDao2", "Download Complete!")
+                Log.d("MusicDao2", "Balance: ${app.wallet().balance}")
             }
-        )
-
-        if (isRegTest()) {
-            try {
-                val bootstrap = InetAddress.getByName(config.regtestBootstrapIp)
-                app.setPeerNodes(
-                    PeerAddress(
-                        config.networkParams,
-                        bootstrap,
-                        config.networkParams.port
-                    )
-                )
-            } catch (e: UnknownHostException) {
-                // Borked machine with no loopback adapter configured properly.
-                throw RuntimeException(e)
-            }
-        }
-
-        app.startAsync()
+        })
         started = true
     }
 
@@ -164,11 +117,17 @@ class WalletService(val config: WalletConfig) {
             try {
                 val con: InputStream? = obj.openStream()
                 con?.close()
-                Log.d("MusicDao", "requestFaucet (2): $address using ${config.regtestFaucetEndPoint}/addBTC?address=$address")
+                Log.d(
+                    "MusicDao",
+                    "requestFaucet (2): $address using ${config.regtestFaucetEndPoint}/addBTC?address=$address"
+                )
                 true
             } catch (exception: IOException) {
                 exception.printStackTrace()
-                Log.d("MusicDao", "requestFaucet failed (3): $address using ${config.regtestFaucetEndPoint}/addBTC?address=$address")
+                Log.d(
+                    "MusicDao",
+                    "requestFaucet failed (3): $address using ${config.regtestFaucetEndPoint}/addBTC?address=$address"
+                )
                 Log.d("MusicDao", "requestFaucet failed (4): $exception")
                 false
             }

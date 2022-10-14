@@ -124,11 +124,11 @@ class MusicCommunity(
         return this.myPeer.publicKey.keyToBin().toHex()
     }
 
-    fun publicKeyStringToPublicKey(publicKey: String) : PublicKey {
+    fun publicKeyStringToPublicKey(publicKey: String): PublicKey {
         return defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
     }
 
-    fun publicKeyStringToByteArray(publicKey: String) : ByteArray {
+    fun publicKeyStringToByteArray(publicKey: String): ByteArray {
         return publicKeyStringToPublicKey(publicKey).keyToBin()
     }
 

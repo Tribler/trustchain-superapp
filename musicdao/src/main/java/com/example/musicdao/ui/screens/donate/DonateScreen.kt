@@ -77,19 +77,28 @@ fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: Stri
         )
         OutlinedTextField(value = amount.value, onValueChange = { amount.value = it }, modifier = Modifier.padding(bottom = 10.dp))
         Row() {
-            Button(onClick = {
-                amount.value = "0.001"
-            }, modifier = Modifier.padding(end = 10.dp)) {
+            Button(
+                onClick = {
+                    amount.value = "0.001"
+                },
+                modifier = Modifier.padding(end = 10.dp)
+            ) {
                 Text("0.001")
             }
-            Button(onClick = {
-                amount.value = "0.01"
-            }, modifier = Modifier.padding(end = 10.dp)) {
+            Button(
+                onClick = {
+                    amount.value = "0.01"
+                },
+                modifier = Modifier.padding(end = 10.dp)
+            ) {
                 Text("0.01")
             }
-            Button(onClick = {
-                amount.value = "0.1"
-            }, modifier = Modifier.padding(end = 10.dp)) {
+            Button(
+                onClick = {
+                    amount.value = "0.1"
+                },
+                modifier = Modifier.padding(end = 10.dp)
+            ) {
                 Text("0.1")
             }
         }

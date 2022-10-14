@@ -2,68 +2,51 @@ package com.example.musicdao.ui.screens.dao
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.musicdao.core.dao.*
+import com.example.musicdao.core.repositories.ArtistRepository
+import com.example.musicdao.core.repositories.model.Artist
 import com.example.musicdao.ui.SnackbarHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.currencyii.CoinCommunity.Companion.SIGNATURE_AGREEMENT_BLOCK
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
-import nl.tudelft.trustchain.currencyii.coin.*
+import nl.tudelft.trustchain.currencyii.coin.WalletManager
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.*
+import nl.tudelft.trustchain.currencyii.util.DAOTransferFundsHelper
 import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import org.bitcoinj.core.Coin
 import prettyPrint
 import javax.inject.Inject
 
 @HiltViewModel
-class DaoViewModel @Inject constructor() : ViewModel() {
+class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) : ViewModel() {
 
     private val _daos: MutableStateFlow<List<DAO>> = MutableStateFlow(listOf())
 
     var walletManager: WalletManager? = null
     var daos: MutableStateFlow<Map<TrustChainBlock, DAO>> = MutableStateFlow(mapOf())
 
+    var isRefreshing = MutableStateFlow(false)
+    var daoPeers = MutableStateFlow(0)
+
     fun initManager(context: Context) {
-        Log.d("MVDAO", "INITIATING DAO MODULE.")
-        if (WalletManagerAndroid.isInitialized()) {
-            Log.d("MVDAO", "DAO MODULE ALREADY INITIALIZED, SKIPPING")
-            return
-        }
-        val params = BitcoinNetworkOptions.REG_TEST
-
-//        val seed = WalletManager.generateRandomDeterministicSeed(params)
-        val seed = SerializedDeterministicKey(
-            "spell seat genius horn argue family steel buyer spawn chef guard vast",
-            1583488954L
-        )
-        val seed_word = seed.seed
-        val creationNumber = seed.creationTime.toLong()
-
-        val config = WalletManagerConfiguration(
-            params,
-            SerializedDeterministicKey(seed_word, creationNumber),
-            null
-        )
-
-        WalletManagerAndroid.Factory(context)
-            .setConfiguration(config)
-            .init()
-
-        this.walletManager = WalletManagerAndroid.getInstance()
-        Log.d("MVDAO", "Wallet manager: $walletManager")
-        Log.d("MVDAO", walletManager?.kit?.wallet().toString())
-        viewModelScope.launch {
-            refresh()
-        }
+        refreshOneShot()
     }
 
     fun createGenesisDAO(currentEntranceFee: Long, currentThreshold: Int, context: Context) {
@@ -74,7 +57,7 @@ class DaoViewModel @Inject constructor() : ViewModel() {
                 context
             )
             walletManager?.addNewNonceKey(newDAO.getData().SW_UNIQUE_ID, context)
-            SnackbarHandler.displaySnackbar("DAO successfully created and broadcast.")
+            SnackbarHandler.displaySnackbar("DAO ${newDAO.getData().SW_UNIQUE_ID} successfully created and broadcast.")
         } catch (e: Exception) {
             SnackbarHandler.displaySnackbar("Unexpected error occurred. Try again")
             e.printStackTrace()
@@ -83,12 +66,38 @@ class DaoViewModel @Inject constructor() : ViewModel() {
 
     fun refreshOneShot() {
         viewModelScope.launch {
-            refresh()
+            withContext(Dispatchers.IO) {
+                isRefreshing.value = true
+                refresh()
+                isRefreshing.value = false
+            }
         }
     }
 
-    suspend fun refresh() {
+    /**
+     * Fetch all DAO blocks that contain a signature. These blocks are the response of a signature request.
+     * Signatures are fetched from [SIGNATURE_AGREEMENT_BLOCK] type blocks.
+     */
+    fun fetchProposalResponses(
+        walletId: String,
+        proposalId: String
+    ): List<SWResponseSignatureBlockTD> {
+        return getTrustChainCommunity().database.getBlocksWithType(SIGNATURE_AGREEMENT_BLOCK)
+            .filter {
+                val blockData = SWResponseSignatureTransactionData(it.transaction)
+                blockData.matchesProposal(walletId, proposalId)
+            }.map {
+                SWResponseSignatureTransactionData(it.transaction).getData()
+            }
+    }
+
+    /**
+     * Refresh the state of the DAOs/proposals
+     */
+    private suspend fun refresh() {
         Log.d("MVDAO", "Updating DAOs from network. ")
+
+        daoPeers.value = getDaoCommunity().getPeers().size
 
         // Crawl for new wallets on the network.
         crawlAvailableSharedWallets()
@@ -100,80 +109,86 @@ class DaoViewModel @Inject constructor() : ViewModel() {
         Log.d("MVDAO", "Found ${wallets.size} DAOs on the network.")
         Log.d("MVDAO", "Found ${proposals.size} proposals on the network.")
 
-        proposals.forEach { proposalBlock ->
-            val daoId = daoIdFromProposal(proposalBlock)
-            Log.d("MVDAO", daoId)
-        }
-
-        val aggregated = wallets.associateWith { daoBlock ->
+        daos.value = wallets.associateWith { daoBlock ->
             val blockData = SWJoinBlockTransactionData(daoBlock.transaction).getData()
-            aggregate(
+            aggregateDaosAndProposals(
                 daoBlock,
                 proposals.filter { proposalBlock ->
-                    Log.d("MVDAO", "Check ${daoIdFromProposal(proposalBlock)} == ${blockData.SW_UNIQUE_ID}")
-
                     daoIdFromProposal(proposalBlock) == blockData.SW_UNIQUE_ID
                 }
             )
         }
 
-        daos.value = aggregated
-
         Log.d("MVDAO", "Currently ${daos.value.size} DAOs in the network.")
-        daos.value.forEach() {
+        daos.value.forEach {
             Log.d("MVDAO", it.prettyPrint())
         }
     }
 
-    fun aggregate(
+    private fun aggregateDaosAndProposals(
         trustChainWalletBlock: TrustChainBlock,
         proposalBlocks: List<TrustChainBlock>
     ): DAO {
         val blockData = SWJoinBlockTransactionData(trustChainWalletBlock.transaction).getData()
 
-        Log.d("MVDAO", "1 - ${proposalBlocks.size}")
         val proposals = proposalBlocks.mapNotNull { block ->
-            Log.d("MVDAO", "1.5 - ${block.type}")
-
-            if (block.type == DaoCommunity.SIGNATURE_ASK_BLOCK) {
-                Log.d("MVDAO", "1.51")
-
-                val data = SWSignatureAskTransactionData(block.transaction).getData()
-                return@mapNotNull Proposal(
-                    proposalId = data.SW_UNIQUE_PROPOSAL_ID,
-                    daoId = data.SW_UNIQUE_ID,
-                    signaturesRequired = data.SW_SIGNATURES_REQUIRED,
-                    proposalCreator = block.publicKey.toHex(),
-                    proposalTime = block.timestamp.toString(),
-                    proposalText = "",
-                    proposalTitle = "",
-                    signatures = listOf(),
-                    transferAmountBitcoinSatoshi = 20,
-                    transferAddress = "TRANSFER_ADDRESS"
-                )
-            } else if (block.type == DaoCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
-                Log.d("MVDAO", "1.52")
-
-                val data = SWTransferFundsAskTransactionData(block.transaction).getData()
-                return@mapNotNull Proposal(
-                    proposalId = data.SW_UNIQUE_PROPOSAL_ID,
-                    daoId = data.SW_UNIQUE_ID,
-                    signaturesRequired = data.SW_SIGNATURES_REQUIRED,
-                    proposalCreator = block.publicKey.toHex(),
-                    proposalTime = block.timestamp.toString(),
-                    proposalText = data.SW_UNIQUE_ID,
-                    proposalTitle = "",
-                    signatures = listOf(),
-                    transferAmountBitcoinSatoshi = data.SW_TRANSFER_FUNDS_AMOUNT.toInt(),
-                    transferAddress = data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
-                )
-            } else {
-                return@mapNotNull null
+            when (block.type) {
+                DaoCommunity.SIGNATURE_ASK_BLOCK -> {
+                    val data = SWSignatureAskTransactionData(block.transaction).getData()
+                    val signatures = getDaoCommunity().fetchProposalResponses(
+                        data.SW_UNIQUE_ID,
+                        data.SW_UNIQUE_PROPOSAL_ID
+                    )
+                    return@mapNotNull JoinProposal(
+                        proposalId = data.SW_UNIQUE_PROPOSAL_ID,
+                        daoId = data.SW_UNIQUE_ID,
+                        signaturesRequired = data.SW_SIGNATURES_REQUIRED,
+                        proposalCreator = block.publicKey.toHex(),
+                        proposalTime = block.timestamp.toString(),
+                        proposalText = "",
+                        proposalTitle = "",
+                        signatures = signatures.map {
+                            ProposalSignature(
+                                bitcoinPublicKey = it.SW_BITCOIN_PK,
+                                trustchainPublicKey = block.publicKey.toHex(),
+                                proposalId = it.SW_UNIQUE_PROPOSAL_ID
+                            )
+                        },
+                        transferAmountBitcoinSatoshi = blockData.SW_ENTRANCE_FEE.toInt()
+                    ) to block
+                }
+                DaoCommunity.TRANSFER_FUNDS_ASK_BLOCK -> {
+                    val data = SWTransferFundsAskTransactionData(block.transaction).getData()
+                    val signatures = getDaoCommunity().fetchProposalResponses(
+                        data.SW_UNIQUE_ID,
+                        data.SW_UNIQUE_PROPOSAL_ID
+                    )
+                    return@mapNotNull TransferProposal(
+                        proposalId = data.SW_UNIQUE_PROPOSAL_ID,
+                        daoId = data.SW_UNIQUE_ID,
+                        signaturesRequired = data.SW_SIGNATURES_REQUIRED,
+                        proposalCreator = block.publicKey.toHex(),
+                        proposalTime = block.timestamp.toString(),
+                        proposalText = data.SW_UNIQUE_ID,
+                        proposalTitle = "",
+                        signatures = signatures.map {
+                            ProposalSignature(
+                                bitcoinPublicKey = it.SW_BITCOIN_PK,
+                                trustchainPublicKey = block.publicKey.toHex(),
+                                proposalId = it.SW_UNIQUE_PROPOSAL_ID
+                            )
+                        },
+                        transferAmountBitcoinSatoshi = data.SW_TRANSFER_FUNDS_AMOUNT.toInt(),
+                        transferAddress = data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
+                    ) to block
+                }
+                else -> {
+                    return@mapNotNull null
+                }
             }
+        }.toMap()
 
-        }
-        Log.d("MVDAO", "2 - ${proposals.size}")
-        val dao = DAO(
+        return DAO(
             daoId = blockData.SW_UNIQUE_ID,
             name = blockData.SW_UNIQUE_ID,
             about = "",
@@ -189,8 +204,6 @@ class DaoViewModel @Inject constructor() : ViewModel() {
             previousTransaction = blockData.SW_TRANSACTION_SERIALIZED,
             balance = getBalance(trustChainWalletBlock.calculateHash()).value
         )
-
-        return dao
     }
 
     /**
@@ -217,18 +230,12 @@ class DaoViewModel @Inject constructor() : ViewModel() {
                     "MVDAO",
                     "Crawl result: ${crawlResult.size} proposals found (from ${peer.address})"
                 )
-                if (crawlResult.isNotEmpty()) {
-//                    updateProposals(crawlResult)
-//                    updateProposalListUI()
-                }
-//                }
             } catch (t: Throwable) {
                 val message = t.message ?: "no message"
                 Log.d("MVDAO", "Crawling failed for: ${peer.address} message: $message")
             }
         }
     }
-
 
     private fun daoIdFromProposal(block: TrustChainBlock): String {
         if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
@@ -244,7 +251,7 @@ class DaoViewModel @Inject constructor() : ViewModel() {
 
     private suspend fun crawlAvailableSharedWallets() {
         val allUsers = getDaoCommunity().getPeers()
-        Log.i("Coin", "Found ${allUsers.size} peers, crawling")
+        Log.d("MVDAO", "Found ${allUsers.size} peers, crawling")
 
         for (peer in allUsers) {
             try {
@@ -255,66 +262,75 @@ class DaoViewModel @Inject constructor() : ViewModel() {
                     .getChainByUser(peer.publicKey.keyToBin())
             } catch (t: Throwable) {
                 val message = t.message ?: "No further information"
-                Log.e("MVDAO", "Crawling failed for: ${peer.publicKey}. $message.")
+                Log.d("MVDAO", "Crawling failed for: ${peer.publicKey}. $message.")
             }
         }
     }
 
     fun joinSharedWalletClicked(daoId: String, context: Context) {
-        Log.d("MVDAO", "joinSharedWalletClicked 1")
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val block = getDao(daoId)?.first
+                val dao = getDao(daoId)?.second
 
-        val block = getDao(daoId)?.first
-        val dao = getDao(daoId)?.second
+                if (block == null || dao == null) {
+                    SnackbarHandler.displaySnackbar("DAO not found")
+                    return@withContext
+                }
 
-        Log.d("MVDAO", "joinSharedWalletClicked 3")
+                // Add a proposal to trust chain to join a shared wallet
+                val proposeBlockData = try {
+                    getDaoCommunity().proposeJoinWallet(block).getData()
+                } catch (t: Throwable) {
+                    Log.d(
+                        "MVDAO",
+                        "Join wallet proposal failed. ${t.message ?: "No further information"}."
+                    )
+                    SnackbarHandler.displaySnackbar("Join wallet proposal failed. ${t.message ?: "No further information"}.")
+                    return@withContext
+                }
 
-        if (block == null) {
-            SnackbarHandler.displaySnackbar("DAO not found")
-            return
-        }
+                // Wait and collect signatures
+                SnackbarHandler.displaySnackbar("Please wait for all signatures to be collected.")
 
-        // Add a proposal to trust chain to join a shared wallet
-        val proposeBlockData = try {
-            getDaoCommunity().proposeJoinWallet(block).getData()
-        } catch (t: Throwable) {
-            Log.d("MVDAO", "Join wallet proposal failed. ${t.message ?: "No further information"}.")
-            SnackbarHandler.displaySnackbar("Unexpected error occurred. Try again")
-            return
-        }
-        Log.d("MVDAO", "joinSharedWalletClicked 4")
+                var signatures: List<SWResponseSignatureBlockTD>? = null
+                while (signatures == null) {
+                    Thread.sleep(1000)
+                    val old_signature_count = signatures?.size ?: 0
+                    signatures = collectJoinWalletResponses(proposeBlockData)
+                    if (signatures != null && signatures.size != old_signature_count) {
+                        SnackbarHandler.displaySnackbar(
+                            "Received a new signature: ${signatures.size}/${
+                            requiredSignatures(
+                                dao
+                            )
+                            }"
+                        )
+                    }
+                }
 
-        // Wait and collect signatures
-        SnackbarHandler.displaySnackbar("Please wait for all signatures to be collected.")
+                // Create a new shared wallet using the signatures of the others.
+                // Broadcast the new shared bitcoin wallet on trust chain.
+                try {
+                    getDaoCommunity().joinBitcoinWallet(
+                        block.transaction,
+                        proposeBlockData,
+                        signatures,
+                        context
+                    )
+                    // Add new nonceKey after joining a DAO
+                    WalletManagerAndroid.getInstance()
+                        .addNewNonceKey(proposeBlockData.SW_UNIQUE_ID, context)
+                } catch (t: Throwable) {
+                    Log.d("MVDAO", "Joining failed. ${t.message ?: "No further information"}.")
+                    SnackbarHandler.displaySnackbar("Unexpected error occurred. Try again")
+                }
+                Log.d("MVDAO", "joinSharedWalletClicked 5")
 
-        var signatures: List<SWResponseSignatureBlockTD>? = null
-        while (signatures == null) {
-            Thread.sleep(1000)
-            val old_signature_count = signatures?.size ?: 0
-            signatures = collectJoinWalletResponses(proposeBlockData)
-            if (signatures != null && signatures.size != old_signature_count) {
-                SnackbarHandler.displaySnackbar("Received a new signature: ${signatures.size}/${dao?.threshHold}")
+                SnackbarHandler.displaySnackbar("You joined ${proposeBlockData.SW_UNIQUE_ID}!")
+                refreshOneShot()
             }
         }
-
-        // Create a new shared wallet using the signatures of the others.
-        // Broadcast the new shared bitcoin wallet on trust chain.
-        try {
-            getDaoCommunity().joinBitcoinWallet(
-                block.transaction,
-                proposeBlockData,
-                signatures,
-                context
-            )
-            // Add new nonceKey after joining a DAO
-            WalletManagerAndroid.getInstance()
-                .addNewNonceKey(proposeBlockData.SW_UNIQUE_ID, context)
-        } catch (t: Throwable) {
-            Log.d("MVDAO", "Joining failed. ${t.message ?: "No further information"}.")
-            SnackbarHandler.displaySnackbar("Unexpected error occurred. Try again")
-        }
-        Log.d("MVDAO", "joinSharedWalletClicked 5")
-
-        SnackbarHandler.displaySnackbar("You joined ${proposeBlockData.SW_UNIQUE_ID}!")
     }
 
     private fun collectJoinWalletResponses(
@@ -330,61 +346,45 @@ class DaoViewModel @Inject constructor() : ViewModel() {
             "Waiting for signatures. ${responses.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
         )
 
-//        setAlertText(
-//            "Collecting signatures: ${responses.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
-//        )
-
         if (responses.size >= blockData.SW_SIGNATURES_REQUIRED) {
             return responses
         }
         return null
     }
 
-    fun getDao(daoId: String): Pair<TrustChainBlock, DAO>? {
-        return daos.value.entries.find { it.value.daoId == daoId }?.toPair()
+    private fun requiredSignatures(dao: DAO): Int {
+        return SWUtil.percentageToIntThreshold(dao.members.size, dao.threshHold)
     }
 
-    fun getProposal(proposalId: String): Proposal? {
-        for (dao in daos.value.values) {
-            for (proposal in dao.proposals) {
-                if (proposal.proposalId == proposalId) {
-                    return proposal
-                }
-            }
-        }
-        return null
+    fun hasMadeProposalVote(proposal: Proposal): Boolean {
+        val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
+        val find = proposal.signatures.find { it.trustchainPublicKey == publicKey }
+        Log.d("MUSICAO3", "${proposal.signatures}")
+        Log.d("MUSICAO3", "$publicKey")
+        return find != null
     }
 
-    private fun getBalance(blockHash: ByteArray): Coin {
-        val swJoinBlock: TrustChainBlock =
-            getDaoCommunity().fetchLatestSharedWalletBlock(blockHash!!)
-                ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
-        val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
-
-        val previousTransaction =
-            CTransaction().deserialize(walletData.SW_TRANSACTION_SERIALIZED.hexToBytes())
-        return Coin.valueOf(previousTransaction.vout.filter { it.scriptPubKey.size == 35 }[0].nValue)
-    }
-
-    fun transferFundsClicked(
-        bitcoinPublicKey: String,
+    fun transferFundsClickedByMe(
+        publicKey: String,
         satoshiTransferAmount: Long,
         blockHash: ByteArray,
         context: Context,
         activityRequired: Activity
     ) {
         viewModelScope.launch {
-            transferFundsClickedLong(
-                bitcoinPublicKey,
-                satoshiTransferAmount,
-                blockHash,
-                context,
-                activityRequired
-            )
+            withContext(Dispatchers.IO) {
+                transferFundsClickedLong(
+                    publicKey,
+                    satoshiTransferAmount,
+                    blockHash,
+                    context,
+                    activityRequired
+                )
+            }
         }
     }
 
-    suspend fun transferFundsClickedLong(
+    private suspend fun transferFundsClickedLong(
         bitcoinPublicKey: String,
         satoshiTransferAmount: Long,
         blockHash: ByteArray,
@@ -414,6 +414,11 @@ class DaoViewModel @Inject constructor() : ViewModel() {
             return
         }
 
+        Log.d(
+            "MVDAO",
+            "Calling transferFundsData."
+        )
+
         val transferFundsData = try {
             getDaoCommunity().proposeTransferFunds(
                 swJoinBlock,
@@ -429,12 +434,20 @@ class DaoViewModel @Inject constructor() : ViewModel() {
                 "MVDAO",
                 t.message ?: "Unexpected error occurred. Try again"
             )
+            SnackbarHandler.displaySnackbar("Proposing transfer funds failed. ${t.message ?: "No further information"}.")
             return
         }
 //        val context = requireContext()
 //        val activityRequired = requireActivity()
 
+        SnackbarHandler.displaySnackbar("Proposal has been made. Waiting for signatures...")
+
         val responses = collectResponses(transferFundsData)
+        Log.d(
+            "MVDAO",
+            "Collected all signatures, continuing..."
+        )
+        SnackbarHandler.displaySnackbar("Collected all signatures, continuing...")
         try {
             getDaoCommunity().transferFunds(
                 walletData,
@@ -449,8 +462,10 @@ class DaoViewModel @Inject constructor() : ViewModel() {
 
             Log.d(
                 "MVDAO",
-                "Funds transfered!"
+                "Funds transferred!"
             )
+            SnackbarHandler.displaySnackbar("Funds have been transferred!")
+            refreshOneShot()
         } catch (t: Throwable) {
             Log.d("MVDAO", "Transferring funds failed. ${t.message ?: "No further information"}.")
 //            resetWalletInitializationValues()
@@ -458,25 +473,8 @@ class DaoViewModel @Inject constructor() : ViewModel() {
                 "MVDAO",
                 t.message ?: "Unexpected error occurred. Try again"
             )
+            SnackbarHandler.displaySnackbar("Transferring funds failed. ${t.message ?: "No further information"}.")
         }
-    }
-
-    private suspend fun collectResponses(data: SWTransferFundsAskTransactionData): List<SWResponseSignatureBlockTD> {
-        var responses: List<SWResponseSignatureBlockTD>? = null
-        Log.d(
-            "MVDAO",
-            "Loading... This might take some time."
-        )
-
-        while (responses == null) {
-            responses =
-                checkSufficientResponses(data, data.getData().SW_SIGNATURES_REQUIRED)
-            if (responses == null) {
-                delay(1000L)
-            }
-        }
-
-        return responses
     }
 
     private fun checkSufficientResponses(
@@ -499,10 +497,134 @@ class DaoViewModel @Inject constructor() : ViewModel() {
             "Collecting signatures: ${responses.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
         )
 
+//        SnackbarHandler.displaySnackbar("Collecting signatures: ${responses.size}/${blockData.SW_SIGNATURES_REQUIRED} received!")
+
         if (responses.size >= requiredSignatures) {
             return responses
         }
         return null
+    }
+
+    private suspend fun collectResponses(data: SWTransferFundsAskTransactionData): List<SWResponseSignatureBlockTD> {
+        var responses: List<SWResponseSignatureBlockTD>? = null
+        Log.d(
+            "MVDAO",
+            "Loading... This might take some time."
+        )
+
+        // Wait and collect signatures
+        SnackbarHandler.displaySnackbar("Please wait for all signatures to be collected.")
+
+        while (responses == null) {
+            responses =
+                checkSufficientResponses(data, data.getData().SW_SIGNATURES_REQUIRED)
+            if (responses == null) {
+                delay(1000L)
+            }
+        }
+
+        return responses
+    }
+
+    fun upvoteTransfer(context: Context, proposal: Proposal) {
+        Log.d(
+            "MVDAO",
+            "Attempting to upvote transfer on DAO ${proposal.daoId} for proposal ${proposal.proposalId}."
+        )
+
+        val proposalId = proposal.proposalId
+        val proposalReceived = getProposal(proposalId)!!
+        val proposalBlock = proposalReceived.second!!
+
+        val daoReceived = getDao(proposal.daoId)!!
+        val daoBlock = daoReceived.first
+
+        val transferBlock = SWTransferDoneTransactionData(daoBlock.transaction).getData()
+        val oldTransaction = transferBlock.SW_TRANSACTION_SERIALIZED
+
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
+
+                DAOTransferFundsHelper.transferFundsBlockReceived(
+                    oldTransaction,
+                    proposalBlock,
+                    transferBlock,
+                    myPublicKey,
+                    true,
+                    context
+                )
+
+                Log.d(
+                    "MVDAO",
+                    "Upvoted transfer on DAO ${proposal.daoId} for proposal ${proposal.proposalId}."
+                )
+            }
+            refreshOneShot()
+        }
+    }
+
+    fun upvoteJoin(context: Context, proposal: Proposal) {
+        Log.d(
+            "MVDAO",
+            "Attempting to upvote transfer on DAO ${proposal.daoId} for proposal ${proposal.proposalId}."
+        )
+
+        val id = proposal.proposalId
+        val proposalReceived = getProposal(id)!!
+
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
+                val votedInFavor = true
+
+                getDaoCommunity().joinAskBlockReceived(
+                    proposalReceived.second!!,
+                    myPublicKey,
+                    votedInFavor,
+                    context
+                )
+
+                SnackbarHandler.displaySnackbar("Voting on proposal ${proposalReceived.first.proposalId}")
+                Log.d(
+                    "MVDAO",
+                    "Upvoted transfer on DAO ${proposal.daoId} for proposal ${proposal.proposalId}."
+                )
+
+                refreshOneShot()
+            }
+        }
+    }
+
+    fun getDao(daoId: String): Pair<TrustChainBlock, DAO>? {
+        return daos.value.entries.find { it.value.daoId == daoId }?.toPair()
+    }
+
+    fun getProposal(proposalId: String): Pair<Proposal, TrustChainBlock?>? {
+        for (dao in daos.value.values) {
+            for (proposal in dao.proposals) {
+                if (proposal.key.proposalId == proposalId) {
+                    return proposal.toPair()
+                }
+            }
+        }
+        return null
+    }
+
+    private fun getBalance(blockHash: ByteArray): Coin {
+        val swJoinBlock: TrustChainBlock =
+            getDaoCommunity().fetchLatestSharedWalletBlock(blockHash!!)
+                ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
+        val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
+
+        val previousTransaction =
+            CTransaction().deserialize(walletData.SW_TRANSACTION_SERIALIZED.hexToBytes())
+        return Coin.valueOf(previousTransaction.vout.filter { it.scriptPubKey.size == 35 }[0].nValue)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getListsOfArtists(): List<Artist> {
+        return artistRepository.getArtists()
     }
 
     private fun getDaoCommunity(): DaoCommunity {
@@ -531,75 +653,8 @@ class DaoViewModel @Inject constructor() : ViewModel() {
     private fun isPrivateKeyValid(privateKey: String): Boolean {
         return privateKey.length in 51..52 || privateKey.length == 64
     }
+
+    fun myKey(): String {
+        return getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
+    }
 }
-
-val dao_2 = DAO(
-    daoId = "2032102",
-    name = "ENS",
-    about = "This is an about section.",
-    proposals = listOf(
-        Proposal(
-            proposalCreator = "0x128937219838921378921",
-            daoId = "dsda",
-            proposalId = "1",
-            proposalTime = "asd",
-            proposalTitle = "Proposal Title22",
-            proposalText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus cursus enim nec hendrerit iaculis. Pellentesque scelerisque dapibus nibh, ut porttitor erat efficitur ut. Nulla lacinia mollis dui, quis tincidunt massa condimentum quis. Donec congue laoreet bibendum. Fusce nec neque nibh.",
-            signatures = listOf(
-                ProposalSignature(
-                    proposalId = "1",
-                    bitcoinPublicKey = "asdasd",
-                    trustchainPublicKey = "asdasd"
-                ),
-                ProposalSignature(
-                    proposalId = "1",
-                    bitcoinPublicKey = "asdasd",
-                    trustchainPublicKey = "asdasd"
-                ),
-                ProposalSignature(
-                    proposalId = "1",
-                    bitcoinPublicKey = "asdasd",
-                    trustchainPublicKey = "asdasd"
-                )
-            ),
-            signaturesRequired = 10,
-            transferAddress = "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-            transferAmountBitcoinSatoshi = 213
-        ),
-        Proposal(
-            proposalCreator = "0x128937219838921378921",
-            daoId = "dsda",
-            proposalId = "321",
-            proposalTime = "asd",
-            proposalTitle = "Proposal Title333",
-            proposalText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus cursus enim nec hendrerit iaculis. Pellentesque scelerisque dapibus nibh, ut porttitor erat efficitur ut. Nulla lacinia mollis dui, quis tincidunt massa condimentum quis. Donec congue laoreet bibendum. Fusce nec neque nibh.",
-            signatures = listOf(
-                ProposalSignature(
-                    proposalId = "1",
-                    bitcoinPublicKey = "asdasd",
-                    trustchainPublicKey = "asdasd"
-                ),
-                ProposalSignature(
-                    proposalId = "1",
-                    bitcoinPublicKey = "asdasd",
-                    trustchainPublicKey = "asdasd"
-                ),
-                ProposalSignature(
-                    proposalId = "1",
-                    bitcoinPublicKey = "asdasd",
-                    trustchainPublicKey = "asdasd"
-                )
-            ),
-            signaturesRequired = 10,
-            transferAddress = "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-            transferAmountBitcoinSatoshi = 213
-        )
-
-    ),
-    members = listOf(),
-    threshHold = 10,
-    entranceFee = 10,
-    previousTransaction = "",
-    balance = 0
-
-)

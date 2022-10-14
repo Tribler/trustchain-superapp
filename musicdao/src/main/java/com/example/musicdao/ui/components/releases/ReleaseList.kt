@@ -28,7 +28,7 @@ import com.example.musicdao.ui.navigation.Screen
 fun ReleaseList(
     releasesState: List<Album>,
     navController: NavController,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier) {
         item(0) {
@@ -53,7 +53,7 @@ fun ReleaseList(
 fun NonLazyReleaseList(
     releasesState: List<Album>,
     navController: NavController,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         releasesState.map {
