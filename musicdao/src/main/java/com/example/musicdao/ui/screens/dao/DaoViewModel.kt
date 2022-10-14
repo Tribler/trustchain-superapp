@@ -32,6 +32,7 @@ import nl.tudelft.trustchain.currencyii.util.DAOTransferFundsHelper
 import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import org.bitcoinj.core.Coin
 import prettyPrint
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -119,6 +120,15 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
             )
         }
 
+        // Only show DAOs after 14th of october.
+        daos.value = daos.value.filter {
+            it.key.timestamp >= GregorianCalendar(
+                2022,
+                Calendar.OCTOBER,
+                14
+            ).time
+        }
+
         Log.d("MVDAO", "Currently ${daos.value.size} DAOs in the network.")
         daos.value.forEach {
             Log.d("MVDAO", it.prettyPrint())
@@ -135,7 +145,7 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
             when (block.type) {
                 DaoCommunity.SIGNATURE_ASK_BLOCK -> {
                     val data = SWSignatureAskTransactionData(block.transaction).getData()
-                    val signatures = getDaoCommunity().fetchProposalResponses(
+                    val signatures = getDaoCommunity().fetchProposalResponsesWithBlocks(
                         data.SW_UNIQUE_ID,
                         data.SW_UNIQUE_PROPOSAL_ID
                     )
@@ -149,9 +159,9 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
                         proposalTitle = "",
                         signatures = signatures.map {
                             ProposalSignature(
-                                bitcoinPublicKey = it.SW_BITCOIN_PK,
-                                trustchainPublicKey = block.publicKey.toHex(),
-                                proposalId = it.SW_UNIQUE_PROPOSAL_ID
+                                bitcoinPublicKey = it.key.SW_BITCOIN_PK,
+                                trustchainPublicKey = it.value.publicKey.toHex(),
+                                proposalId = it.key.SW_UNIQUE_PROPOSAL_ID
                             )
                         },
                         transferAmountBitcoinSatoshi = blockData.SW_ENTRANCE_FEE.toInt()
@@ -159,7 +169,7 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
                 }
                 DaoCommunity.TRANSFER_FUNDS_ASK_BLOCK -> {
                     val data = SWTransferFundsAskTransactionData(block.transaction).getData()
-                    val signatures = getDaoCommunity().fetchProposalResponses(
+                    val signatures = getDaoCommunity().fetchProposalResponsesWithBlocks(
                         data.SW_UNIQUE_ID,
                         data.SW_UNIQUE_PROPOSAL_ID
                     )
@@ -173,9 +183,9 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
                         proposalTitle = "",
                         signatures = signatures.map {
                             ProposalSignature(
-                                bitcoinPublicKey = it.SW_BITCOIN_PK,
-                                trustchainPublicKey = block.publicKey.toHex(),
-                                proposalId = it.SW_UNIQUE_PROPOSAL_ID
+                                bitcoinPublicKey = it.key.SW_BITCOIN_PK,
+                                trustchainPublicKey = it.value.publicKey.toHex(),
+                                proposalId = it.key.SW_UNIQUE_PROPOSAL_ID
                             )
                         },
                         transferAmountBitcoinSatoshi = data.SW_TRANSFER_FUNDS_AMOUNT.toInt(),
@@ -358,9 +368,11 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
 
     fun hasMadeProposalVote(proposal: Proposal): Boolean {
         val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
+        val publicKey2 = getDaoCommunity().myPeer.publicKey.keyToBin().toHex()
         val find = proposal.signatures.find { it.trustchainPublicKey == publicKey }
         Log.d("MUSICAO3", "${proposal.signatures}")
         Log.d("MUSICAO3", "$publicKey")
+        Log.d("MUSICAO3", "$publicKey2")
         return find != null
     }
 
@@ -437,8 +449,6 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
             SnackbarHandler.displaySnackbar("Proposing transfer funds failed. ${t.message ?: "No further information"}.")
             return
         }
-//        val context = requireContext()
-//        val activityRequired = requireActivity()
 
         SnackbarHandler.displaySnackbar("Proposal has been made. Waiting for signatures...")
 
@@ -449,6 +459,11 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
         )
         SnackbarHandler.displaySnackbar("Collected all signatures, continuing...")
         try {
+            responses.forEach {
+                Log.d("ATM", it.SW_BITCOIN_PK)
+                Log.d("ATM", it.SW_NONCE)
+                Log.d("ATM", it.SW_UNIQUE_PROPOSAL_ID)
+            }
             getDaoCommunity().transferFunds(
                 walletData,
                 swJoinBlock.transaction,

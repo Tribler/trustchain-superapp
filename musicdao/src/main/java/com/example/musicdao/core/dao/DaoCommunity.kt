@@ -264,6 +264,23 @@ class DaoCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8
     }
 
     /**
+     * Fetch all DAO blocks that contain a signature. These blocks are the response of a signature request.
+     * Signatures are fetched from [SIGNATURE_AGREEMENT_BLOCK] type blocks.
+     */
+    fun fetchProposalResponsesWithBlocks(
+        walletId: String,
+        proposalId: String
+    ): Map<SWResponseSignatureBlockTD, TrustChainBlock> {
+        return getTrustChainCommunity().database.getBlocksWithType(SIGNATURE_AGREEMENT_BLOCK)
+            .filter {
+                val blockData = SWResponseSignatureTransactionData(it.transaction)
+                blockData.matchesProposal(walletId, proposalId)
+            }.associateBy {
+                SWResponseSignatureTransactionData(it.transaction).getData()
+            }
+    }
+
+    /**
      * Fetch all DAO blocks that contain a negative signature. These blocks are the response of a negative signature request.
      * Signatures are fetched from [SIGNATURE_AGREEMENT_NEGATIVE_BLOCK] type blocks.
      */
