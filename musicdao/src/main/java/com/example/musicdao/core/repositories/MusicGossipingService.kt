@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import com.example.musicdao.core.ipv8.ArtistBlockGossiper
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.ipv8.ReleaseBlockGossiper
 import com.example.musicdao.core.ipv8.SwarmHealth
@@ -29,6 +30,9 @@ class MusicGossipingService : Service() {
     @Inject
     lateinit var releaseBlockGossiper: ReleaseBlockGossiper
 
+    @Inject
+    lateinit var artistBlockGossiper: ArtistBlockGossiper
+
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -49,13 +53,13 @@ class MusicGossipingService : Service() {
     override fun onCreate() {
         super.onCreate()
         releaseBlockGossiper.startGossip(scope)
+        artistBlockGossiper.startGossip(scope)
         scope.launch {
             iterativelyGossipSwarmHealth()
         }
     }
 
     override fun onDestroy() {
-
         scope.cancel()
         super.onDestroy()
 
