@@ -79,21 +79,11 @@ class MusicActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppContainer.provide(this)
-
-        Log.d(
-            "MusicDao2",
-            "`32131`"
-        )
-
         lifecycleScope.launchWhenStarted {
             setupMusicCommunity.registerListeners()
             albumRepository.refreshCache()
             torrentEngine.seedStrategy()
         }
-        Log.d(
-            "MusicDao2",
-            "`sada`"
-        )
         iterativelyFetchReleases()
         Intent(this, MusicGossipingService::class.java).also { intent ->
             startService(intent)
@@ -125,7 +115,7 @@ class MusicActivity : AppCompatActivity() {
                     }
                 } else {
                     Log.d("MusicDao2", "onSetupCompletedListener (4)")
-                    artistRepository.edit("Name", address, "Socials", "Biography")
+                    artistRepository.edit("Artist ${(0..10_000).random()}", address, "Socials", "Biography")
                 }
             }
         }
@@ -145,7 +135,12 @@ class MusicActivity : AppCompatActivity() {
                     }
                 } else {
                     Log.d("MusicDao2", "onSetupCompletedListener (4)")
-                    artistRepository.edit("Name", address, "Socials", "Biography")
+                    artistRepository.edit(
+                        "Artist ${(0..10_000).random()}",
+                        address,
+                        "Socials",
+                        "Biography"
+                    )
                 }
             }
         }
@@ -165,7 +160,7 @@ class MusicActivity : AppCompatActivity() {
                     }
                 } else {
                     Log.d("MusicDao2", "onSetupCompletedListener (4)")
-                    artistRepository.edit("Name", address, "Socials", "Biography")
+                    artistRepository.edit("Artist ${(0..10_000).random()}", address, "Socials", "Biography")
                 }
             }
         }
