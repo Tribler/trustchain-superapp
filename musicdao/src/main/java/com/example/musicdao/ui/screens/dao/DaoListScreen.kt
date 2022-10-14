@@ -79,7 +79,7 @@ fun DaoListScreen(navController: NavController, daoViewModel: DaoViewModel) {
                     )
                 }
                 LazyColumn() {
-                    daos.toList().sortedBy { !daoViewModel.userInDao(it.second) }
+                    daos.toList().sortedByDescending { it.first.timestamp }
                         .forEachIndexed { index, (_, dao) ->
                             item(index) {
                                 Card(
