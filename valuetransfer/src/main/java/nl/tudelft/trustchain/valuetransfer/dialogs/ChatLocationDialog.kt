@@ -232,7 +232,7 @@ class ChatLocationDialog(
                 longitude,
                 1
             ).let { address ->
-                address[0].getAddressLine(0)
+                address!![0].getAddressLine(0)
             }
         } catch (e: Exception) {
             e.printStackTrace()

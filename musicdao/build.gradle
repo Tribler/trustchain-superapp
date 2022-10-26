@@ -5,7 +5,7 @@ apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 33
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         minSdkVersion 22
-        targetSdkVersion 29
+        targetSdkVersion 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'

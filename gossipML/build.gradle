@@ -19,7 +19,7 @@ repositories {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
@@ -30,7 +30,7 @@ android {
 
     defaultConfig {
         minSdkVersion 22
-        targetSdkVersion 30
+        targetSdkVersion 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
