@@ -19,8 +19,8 @@ repositories {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
@@ -31,9 +31,7 @@ android {
 
     defaultConfig {
         minSdkVersion 22
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 30
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -49,7 +47,7 @@ android {
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
-            version "3.10.2"
+            version "3.22.1"
         }
     }
 
@@ -94,7 +92,7 @@ android {
             universalApk true
         }
     }
-    ndkVersion '23.1.7779620'
+    ndkVersion '21.4.7075529'
 }
 
 dependencies {

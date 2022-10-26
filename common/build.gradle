@@ -21,7 +21,6 @@ sqldelight {
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.3"
 
     defaultConfig {
         minSdkVersion 22
@@ -118,11 +117,11 @@ dependencies {
     implementation group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.10'
 
     // BitTorrent
-    api files('libs/jlibtorrent-1.2.10.0.jar')
-    api files('libs/jlibtorrent-android-arm64-1.2.10.0.jar')
-    api files('libs/jlibtorrent-android-arm-1.2.10.0.jar')
-    api files('libs/jlibtorrent-android-x86-1.2.10.0.jar')
-    api files('libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
+    implementation files('libs/jlibtorrent-1.2.10.0.jar')
+    implementation files('libs/jlibtorrent-android-arm64-1.2.10.0.jar')
+    implementation files('libs/jlibtorrent-android-arm-1.2.10.0.jar')
+    implementation files('libs/jlibtorrent-android-x86-1.2.10.0.jar')
+    implementation files('libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
 
     // Testing
     testImplementation 'junit:junit:4.12'

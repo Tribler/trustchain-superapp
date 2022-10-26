@@ -38,6 +38,14 @@ dependencies {
     implementation project(':common')
     api project(':common')
 
+    // TODO fix direct import, this should rely on common.
+    implementation files('../common/libs/jlibtorrent-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm64-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
+
+
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.2.0'

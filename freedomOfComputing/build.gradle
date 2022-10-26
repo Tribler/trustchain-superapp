@@ -12,13 +12,10 @@ ktlint {
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.3"
 
     defaultConfig {
         minSdkVersion 22
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -51,7 +48,13 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // TODO fix direct import, this should rely on common.
+    implementation files('../common/libs/jlibtorrent-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm64-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
+
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.2.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'

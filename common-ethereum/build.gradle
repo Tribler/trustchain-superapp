@@ -5,7 +5,12 @@ plugins {
 
 android {
     compileSdkVersion 31
-    buildToolsVersion "29.0.3"
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['../common/libs']
+        }
+    }
 
     defaultConfig {
         minSdkVersion 22
@@ -39,12 +44,6 @@ android {
     }
 }
 
-repositories {
-    flatDir {
-        dirs '../common/libs'
-    }
-}
-
 dependencies {
 
     api project(':common')
@@ -52,7 +51,8 @@ dependencies {
     api(group: 'org.web3j', name: 'core', version: '4.6.0-android') {
         exclude group: 'org.bouncycastle'
     }
-    api group: 'org.ethereum', name: 'geth-android-all-1.10.1-c2d2f4ed', ext: 'aar'
+
+    implementation files("../common/libs/geth-android-all-1.10.1-c2d2f4ed.aar")
 
     implementation 'androidx.core:core-ktx:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'

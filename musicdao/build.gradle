@@ -6,7 +6,6 @@ apply plugin: 'androidx.navigation.safeargs.kotlin'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.3"
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
@@ -18,8 +17,6 @@ android {
     defaultConfig {
         minSdkVersion 22
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -68,6 +65,13 @@ dependencies {
         exclude group: 'net.java.dev.jna'
         exclude group: 'org.bouncycastle'
     }
+
+    // TODO fix direct import, this should rely on common.
+    implementation files('../common/libs/jlibtorrent-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm64-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86-1.2.10.0.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.2.0'

@@ -7,21 +7,18 @@ apply plugin: "kotlinx-serialization"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.3"
 
     useLibrary "android.test.base"
     useLibrary "android.test.mock"
 
 
-    viewBinding {
-        enabled = true
+    buildFeatures {
+        viewBinding = true
     }
 
     defaultConfig {
         minSdkVersion 22
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -44,9 +41,14 @@ android {
         }
     }
 
-// To inline the bytecode built with JVM target 1.8 into
-// bytecode that is being built with JVM target 1.6. (e.g. navArgs)
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
 
+    // To inline the bytecode built with JVM target 1.8 into
+    // bytecode that is being built with JVM target 1.6. (e.g. navArgs)
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -76,9 +78,6 @@ android {
 allprojects {
     repositories {
         jcenter()
-        flatDir {
-            dirs '../common/libs'
-        }
     }
 }
 
