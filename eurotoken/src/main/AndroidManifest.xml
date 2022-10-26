@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="nl.tudelft.trustchain.eurotoken">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
         <activity android:name=".EuroTokenMainActivity"></activity>

@@ -44,6 +44,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    namespace 'nl.tudelft.trustchain.FOC'
 
 }
 
@@ -56,7 +57,7 @@ dependencies {
     implementation files('../common/libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.core:core-ktx:1.2.0'
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
@@ -80,7 +81,7 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-Xopt-in=kotlin.RequiresOptIn"
+        "-opt-in=kotlin.RequiresOptIn"
     ]
 }
 

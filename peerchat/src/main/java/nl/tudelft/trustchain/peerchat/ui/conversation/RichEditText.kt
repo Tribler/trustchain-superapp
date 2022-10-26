@@ -24,6 +24,7 @@ class RichEditText @JvmOverloads constructor(
                 onCommitContentListener?.onCommitContent(inputContentInfo, flags, opts) ?: false
             }
 
+        @Suppress("DEPRECATION")
         return InputConnectionCompat.createWrapper(ic, editorInfo, callback)
     }
 }

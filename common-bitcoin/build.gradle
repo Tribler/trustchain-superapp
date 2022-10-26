@@ -29,6 +29,7 @@ android {
         jvmTarget = '1.8'
         allWarningsAsErrors = true
     }
+    namespace 'com.example.common.bitcoin'
 }
 
 dependencies {
@@ -37,7 +38,7 @@ dependencies {
 
     api group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.10'
 
-    implementation 'androidx.core:core-ktx:1.2.0'
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
 

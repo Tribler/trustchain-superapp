@@ -95,6 +95,7 @@ class BlockItemRenderer(
                     )
                 )
             }
+            else -> {}
         }
     }
 

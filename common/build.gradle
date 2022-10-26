@@ -68,6 +68,7 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+    namespace 'nl.tudelft.trustchain.common'
 }
 
 repositories {
@@ -84,7 +85,7 @@ dependencies {
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.core:core-ktx:1.2.0'
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation "androidx.recyclerview:recyclerview:1.1.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
@@ -138,6 +139,6 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-Xopt-in=kotlin.RequiresOptIn"
+        "-opt-in=kotlin.RequiresOptIn"
     ]
 }

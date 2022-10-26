@@ -11,8 +11,7 @@
         <action
             android:id="@+id/action_payloadFragment_to_payloadCreateFragment"
             app:destination="@id/payloadCreateFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_close_exit" />
+            app:enterAnim="@animator/nav_default_enter_anim" />
     </fragment>
     <fragment
         android:id="@+id/payloadCreateFragment"
@@ -21,8 +20,7 @@
         <action
             android:id="@+id/action_payloadCreateFragment_to_payloadFragment"
             app:destination="@id/payloadFragment"
-            app:enterAnim="@anim/fragment_close_enter"
-            app:exitAnim="@anim/fragment_close_exit"
+             app:enterAnim="@animator/nav_default_enter_anim"
             app:popUpTo="@id/payloadFragment"
             app:popUpToInclusive="true" />
     </fragment>
