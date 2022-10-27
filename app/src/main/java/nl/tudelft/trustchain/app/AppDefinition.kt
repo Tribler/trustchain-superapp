@@ -26,7 +26,7 @@ enum class AppDefinition(
     val appName: String,
     @ColorRes val color: Int,
     val activity: Class<out Activity>,
-    val disableImageTint: Boolean = false
+    val disableImageTint: Boolean = false,
 ) {
     EIGHTEEN_PLUS(
         R.drawable.ic_18_plus,

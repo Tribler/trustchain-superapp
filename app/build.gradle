@@ -27,8 +27,7 @@ ktlint {
 
 // Generate a version code from git commit count
 static def generateVersionCode() {
-//        return "git rev-list HEAD --count".execute().waitFor().toInteger()
-        return "git rev-list HEAD --count".execute().text.trim().toInteger()
+    return "git rev-list HEAD --count".execute().text.trim().toInteger()
 }
 
 
@@ -123,25 +122,26 @@ dependencies {
     implementation project(':valuetransfer')
     implementation project(':atomic-swap')
     implementation project(':literaturedao')
-    api(project(':common')){
+    api(project(':common')) {
         exclude group: 'net.java.dev.jna'
     }
-    api(project(':common-ethereum')){
+    api(project(':common-ethereum')) {
         exclude group: 'net.java.dev.jna'
     }
-    api(project(':currencyii')){
+    api(project(':currencyii')) {
         exclude group: 'net.java.dev.jna'
     }
-    api(project(':musicdao')){
+    api(project(':musicdao')) {
         exclude group: 'net.java.dev.jna'
     }
-    api(project(':gossipML')){
+    api(project(':gossipML')) {
         exclude group: 'net.java.dev.jna'
     }
 
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc'
 
     // AndroidX
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -150,7 +150,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.fragment:fragment-ktx:$fragment_version"
     implementation "androidx.preference:preference-ktx:1.2.0"
-    implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
@@ -171,7 +171,7 @@ dependencies {
 
     // Logging
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
-    implementation ('net.java.dev.jna:jna:5.8.0@aar')
+    implementation('net.java.dev.jna:jna:5.8.0@aar')
     implementation('com.github.tony19:logback-android:2.0.0')
 
     implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
