@@ -52,6 +52,10 @@
         </activity>
 
         <activity
+            android:name=".ui.dashboard.DashboardSelectorActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+
+        <activity
             android:name="nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 

@@ -9,10 +9,10 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.app.AppDefinition
 import nl.tudelft.trustchain.app.R
 import nl.tudelft.trustchain.app.TrustChainApplication
 import nl.tudelft.trustchain.app.databinding.ActivityDashboardBinding
@@ -31,13 +31,17 @@ class DashboardActivity : AppCompatActivity() {
     private val BLUETOOTH_PERMISSIONS_CONNECT = "android.permission.BLUETOOTH_CONNECT"
     private val BLUETOOTH_PERMISSIONS_ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE"
 
+    override fun onResume() {
+        super.onResume()
+        adapter.updateItems((application as TrustChainApplication).appLoader.preferredApps)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Handle init of IPv8 after requesting permissions; only if Android 12 or higher.
         // onPermissionsDenied() is run until user has accepted permissions.
-        val BUILD_VERSION_CODE_S = 31
-        if (Build.VERSION.SDK_INT >= BUILD_VERSION_CODE_S) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!hasBluetoothPermissions()) {
                 requestBluetoothPermissions()
             } else {
@@ -63,13 +67,11 @@ class DashboardActivity : AppCompatActivity() {
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
 
-        val appList = getAppList().sortedBy { it.app.appName }
-        adapter.updateItems(appList)
-    }
+        adapter.updateItems((application as TrustChainApplication).appLoader.preferredApps)
 
-    private fun getAppList(): List<DashboardItem> {
-        return AppDefinition.values().map {
-            DashboardItem(it)
+        binding.fab.setOnClickListener {
+            val intent = Intent(this, DashboardSelectorActivity::class.java)
+            startActivity(intent)
         }
     }
 
