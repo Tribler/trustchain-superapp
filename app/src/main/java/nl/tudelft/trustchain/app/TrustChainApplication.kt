@@ -461,16 +461,18 @@ class TrustChainApplication : Application() {
     }
 
     private suspend fun checkFirstRun(): Boolean {
+        val key = booleanPreferencesKey(
+            FIRST_RUN)
         val preferredApps: Flow<Boolean> = dataStore.data
             .map { preferences ->
-                preferences[FIRST_RUN] ?: true
+                preferences[key] ?: true
             }
 
         val firstRun = preferredApps.first()
 
         if (firstRun) {
             dataStore.edit { settings ->
-                settings[FIRST_RUN] = false
+                settings[key] = false
             }
         }
         return firstRun
@@ -483,6 +485,6 @@ class TrustChainApplication : Application() {
         private const val PREF_ID_METADATA_HUGE_KEY = "id_metadata_huge"
         private const val PREF_ID_METADATA_RANGE_18PLUS_KEY = "id_metadata_range_18plus"
         private const val BLOCK_TYPE = "demo_block"
-        private const val FIRST_RUN = booleanPreferencesKey("first_run")
+        private const val FIRST_RUN = "first_run"
     }
 }
