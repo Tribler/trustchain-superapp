@@ -7,7 +7,6 @@ on:
 
 jobs:
   test:
-    if: ${{ false }}  # disable for now
     name: Run Tests
     runs-on: ubuntu-latest
     steps:
