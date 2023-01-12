@@ -88,8 +88,8 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
     testImplementation "io.mockk:mockk:1.9.3"
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     // BitcoinJ
     implementation 'org.bitcoinj:bitcoinj-core:0.15.10'

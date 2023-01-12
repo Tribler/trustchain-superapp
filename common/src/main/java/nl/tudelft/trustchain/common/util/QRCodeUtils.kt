@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // TODO: Use new method of handing intent results.
+
 package nl.tudelft.trustchain.common.util
 
 import android.content.Context

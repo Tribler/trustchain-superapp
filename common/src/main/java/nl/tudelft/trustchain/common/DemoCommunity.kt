@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.common
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.BroadcastChannel
 import nl.tudelft.ipv8.Community

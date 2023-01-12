@@ -18,7 +18,6 @@ import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.IPv8Configuration
@@ -214,12 +213,12 @@ class TrustChainApplication : Application() {
                     database: TrustChainStore
                 ): ValidationResult {
                     if ((
-                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_COIN] != null &&
-                                block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_TO_COIN] != null &&
-                                block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_AMOUNT] != null &&
-                                block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_TO_AMOUNT] != null &&
-                                block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_OFFER_ID] != null
-                            ) ||
+                        block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_COIN] != null &&
+                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_TO_COIN] != null &&
+                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_AMOUNT] != null &&
+                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_TO_AMOUNT] != null &&
+                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_OFFER_ID] != null
+                        ) ||
                         block.isAgreement
                     ) {
                         return ValidationResult.Valid
@@ -390,6 +389,8 @@ class TrustChainApplication : Application() {
         )
     }
 
+    // TODO: Fix for older Android versions.
+    @SuppressLint("NewApi")
     private fun createLiteratureCommunity(): OverlayConfiguration<LiteratureCommunity> {
         val settings = TrustChainSettings()
         val driver = AndroidSqliteDriver(Database.Schema, this, "music.db")
@@ -462,7 +463,8 @@ class TrustChainApplication : Application() {
 
     private suspend fun checkFirstRun(): Boolean {
         val key = booleanPreferencesKey(
-            FIRST_RUN)
+            FIRST_RUN
+        )
         val preferredApps: Flow<Boolean> = dataStore.data
             .map { preferences ->
                 preferences[key] ?: true

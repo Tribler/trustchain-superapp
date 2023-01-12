@@ -36,6 +36,4 @@ class DashboardSelectorActivity : AppCompatActivity() {
 
         adapter.updateItems((application as TrustChainApplication).appLoader.apps.toList())
     }
-
-
 }

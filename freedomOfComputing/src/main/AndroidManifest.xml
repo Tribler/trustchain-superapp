@@ -11,6 +11,7 @@
     <application>
         <activity
             android:name=".ExecutionActivity"
+            android:exported="false"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name="nl.tudelft.trustchain.FOC.MainActivityFOC"

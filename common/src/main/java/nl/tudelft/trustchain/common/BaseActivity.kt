@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.common
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.annotation.MenuRes
 import androidx.appcompat.app.AppCompatActivity
@@ -50,7 +51,11 @@ abstract class BaseActivity : AppCompatActivity() {
 
         // Setup bottom navigation
         binding.bottomNavigation.setupWithNavController(navController)
+
+        // Usage is valid for now, as we check whether it has been set.
+        @SuppressLint("ResourceType")
         binding.bottomNavigation.isVisible = bottomNavigationMenu > 0
+        @SuppressLint("ResourceType")
         if (bottomNavigationMenu > 0) {
             binding.bottomNavigation.inflateMenu(bottomNavigationMenu)
         }

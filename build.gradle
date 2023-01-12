@@ -2,7 +2,7 @@
 
 buildscript {
     ext.kotlin_version = '1.7.10'
-    ext.ktlint_version = '0.40.0'
+    ext.ktlint_version = '0.44.0'
     ext.coroutines_version = '1.6.4'
     ext.ktlint_gradle_version = '11.0.0'
     ext.sqldelight_version = '1.5.2'
@@ -40,9 +40,6 @@ allprojects {
         jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-        flatDir {
-            dirs 'common/libs'
-        }
     }
 
     // Temp fix for issue https://github.com/mockk/mockk/issues/281

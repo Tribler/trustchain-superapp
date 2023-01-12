@@ -3,9 +3,7 @@ package nl.tudelft.trustchain.app.ui.dashboard
 import android.content.res.ColorStateList
 import androidx.core.content.res.ResourcesCompat
 import com.mattskala.itemadapter.BindingItemRenderer
-import nl.tudelft.trustchain.app.databinding.ItemDashboardBinding
 import nl.tudelft.trustchain.app.databinding.ItemSelectorBinding
-import org.web3j.abi.datatypes.Bool
 
 class DashboardSelectorRenderer(
     private val onItemClick: (DashboardItem, Boolean) -> Unit
@@ -27,5 +25,4 @@ class DashboardSelectorRenderer(
             onItemClick(item, isChecked)
         }
     }
-
 }
