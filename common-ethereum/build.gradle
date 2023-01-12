@@ -53,7 +53,7 @@ dependencies {
         exclude group: 'org.bouncycastle'
     }
 
-    implementation files("../common/libs/geth-android-all-1.10.1-c2d2f4ed.aar")
+    api project(':geth-android')
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'

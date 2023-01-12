@@ -117,6 +117,7 @@ dependencies {
 
     implementation group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.10'
 
+    api project(':geth-android')
     // BitTorrent
     implementation files('libs/jlibtorrent-1.2.10.0.jar')
     implementation files('libs/jlibtorrent-android-arm64-1.2.10.0.jar')
@@ -132,7 +133,7 @@ dependencies {
     testImplementation "io.mockk:mockk:1.9.3"
     testImplementation 'org.json:json:20190722'
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
-    testImplementation "com.goterl:lazysodium-java:5.0.1"
+    testImplementation "com.goterl:lazysodium-java:5.1.4"
     annotationProcessor 'androidx.room:room-compiler:2.2.5'
 }
 

@@ -97,7 +97,7 @@ dependencies {
     implementation 'org.knowm.xchange:xchange-binance:5.0.1'
 
     // Crypto library for testing
-    testImplementation "com.goterl:lazysodium-java:5.0.1"
+    testImplementation "com.goterl:lazysodium-java:5.1.4"
 
     // Testing
     testImplementation 'junit:junit:4.12'
