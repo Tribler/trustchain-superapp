@@ -7,7 +7,8 @@
 
     <application>
 <!--        <activity android:name=".LiteratureDaoActivity$Test" />-->
-        <activity android:name=".LiteratureDaoActivity">
+        <activity android:name=".LiteratureDaoActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
