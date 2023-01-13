@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.ui.settings
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -118,6 +119,7 @@ class NotificationHandler(
             setGroupSummary(true)
         }
 
+        @Suppress("MissingPermission") // TODO: Fix permission issue.
         with(NotificationManagerCompat.from(parentActivity)) {
             notify(notificationCount, builder.build())
         }
