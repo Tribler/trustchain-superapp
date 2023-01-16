@@ -124,6 +124,7 @@ class TrustChainApplication : Application() {
         initTrustChain()
     }
 
+    @OptIn(DelicateCoroutinesApi::class) // TODO: Verify whether usage is correct.
     private fun initWallet() {
         GlobalScope.launch {
             // Generate keys in a coroutine as this significantly impacts first launch.
@@ -402,6 +403,7 @@ class TrustChainApplication : Application() {
         )
     }
 
+    @OptIn(DelicateCoroutinesApi::class) // TODO: Verify whether usage is correct.
     private fun createRecommenderCommunity(): OverlayConfiguration<RecommenderCommunity> {
         val settings = TrustChainSettings()
         val musicDriver = AndroidSqliteDriver(Database.Schema, this, "music.db")

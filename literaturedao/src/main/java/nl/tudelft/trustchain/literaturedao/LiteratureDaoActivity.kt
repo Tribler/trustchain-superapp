@@ -229,6 +229,7 @@ open class LiteratureDaoActivity : BaseActivity() {
     fun filePicker(@Suppress("UNUSED_PARAMETER") view: View) {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
+        @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
         startActivityForResult(intent, 100)
     }
 

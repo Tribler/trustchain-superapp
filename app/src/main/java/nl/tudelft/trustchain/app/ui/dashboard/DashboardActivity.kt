@@ -117,8 +117,12 @@ class DashboardActivity : AppCompatActivity() {
                     onPermissionsDenied()
                 }
             }
-            else -> super.onActivityResult(requestCode, resultCode, data)
+            else -> {
+                @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
+                super.onActivityResult(requestCode, resultCode, data)
+            }
         }
+        @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
         super.onActivityResult(requestCode, resultCode, data)
     }
 
@@ -132,6 +136,7 @@ class DashboardActivity : AppCompatActivity() {
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         val uri: Uri = Uri.fromParts("package", packageName, null)
                         intent.data = uri
+                        @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
                         startActivityForResult(intent, SETTINGS_INTENT_CODE)
                     }
                 }.create()

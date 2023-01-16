@@ -72,6 +72,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
             // do something
             val intent = Intent(Intent.ACTION_GET_CONTENT)
             intent.type = "*/*"
+            @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
             startActivityForResult(intent, 101)
         }
 
@@ -397,6 +398,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                 }
             }
         }
+        @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
         super.onActivityResult(requestCode, resultCode, data)
     }
 
