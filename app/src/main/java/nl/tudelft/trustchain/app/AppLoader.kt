@@ -22,15 +22,17 @@ class AppLoader(
     init {
         runBlocking {
             if (firstRun) {
+                apps = AppDefinition.values().map { DashboardItem(it) }.toSet()
                 setPreferredAppList(DEFAULT_APPS)
+            } else {
+                val pApps = getPreferredAppList()
+                apps = AppDefinition.values().map { app ->
+                    DashboardItem(
+                        app,
+                        isPreferred = pApps.contains(app.appName)
+                    )
+                }.toSet()
             }
-            val pApps = getPreferredAppList()
-            apps = AppDefinition.values().map { app ->
-                DashboardItem(
-                    app,
-                    isPreferred = pApps.contains(app.appName)
-                )
-            }.toSet()
         }
     }
 
