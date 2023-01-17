@@ -307,7 +307,8 @@ class ValueTransferMainActivity : BaseActivity() {
             val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.getActivity(
                     this,
-                    0, Intent(this, javaClass).addFlags(
+                    0,
+                    Intent(this, javaClass).addFlags(
                         Intent.FLAG_ACTIVITY_SINGLE_TOP
                     ),
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
@@ -315,7 +316,8 @@ class ValueTransferMainActivity : BaseActivity() {
             } else {
                 PendingIntent.getActivity(
                     this,
-                    0, Intent(this, javaClass).addFlags(
+                    0,
+                    Intent(this, javaClass).addFlags(
                         Intent.FLAG_ACTIVITY_SINGLE_TOP
                     ),
                     PendingIntent.FLAG_UPDATE_CURRENT
