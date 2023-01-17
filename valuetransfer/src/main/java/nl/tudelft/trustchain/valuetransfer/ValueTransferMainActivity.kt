@@ -8,7 +8,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteConstraintException
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Build
@@ -21,6 +24,7 @@ import android.view.*
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.core.app.ActivityCompat
@@ -72,6 +76,7 @@ import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeFragment
+import nl.tudelft.trustchain.valuetransfer.ui.exchangelink.ExchangeTransferMoneyLinkFragment
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.ui.settings.NotificationHandler
@@ -81,11 +86,6 @@ import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
 import java.util.*
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.net.Uri
-import android.widget.Toast
-import nl.tudelft.trustchain.valuetransfer.ui.exchangelink.ExchangeTransferMoneyLinkFragment
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
@@ -304,7 +304,23 @@ class ValueTransferMainActivity : BaseActivity() {
         if (passportHandler.getNFCAdapter() != null) {
             val intent = Intent(applicationContext, this.javaClass)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.getActivity(
+                    this,
+                    0, Intent(this, javaClass).addFlags(
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    ),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                )
+            } else {
+                PendingIntent.getActivity(
+                    this,
+                    0, Intent(this, javaClass).addFlags(
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    ),
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            }
             val filter = arrayOf(arrayOf("android.nfc.tech.IsoDep"))
             passportHandler.getNFCAdapter()!!.enableForegroundDispatch(this, pendingIntent, null, filter)
         }
