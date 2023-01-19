@@ -40,12 +40,11 @@ dependencies {
     api project(':common')
 
     // TODO fix direct import, this should rely on common.
-    implementation files('../common/libs/jlibtorrent-1.2.10.0.jar')
-    implementation files('../common/libs/jlibtorrent-android-arm64-1.2.10.0.jar')
-    implementation files('../common/libs/jlibtorrent-android-arm-1.2.10.0.jar')
-    implementation files('../common/libs/jlibtorrent-android-x86-1.2.10.0.jar')
-    implementation files('../common/libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
-
+    implementation files('../common/libs/jlibtorrent-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm64-' + jlibtorrent_version + '.jar ')
+    implementation files('../common/libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar ')
+    implementation files('../common/libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar ')
+    implementation files('../common/libs/jlibtorrent-android-x86_64' + jlibtorrent_version + '.jar ')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -60,7 +59,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
-    //implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version")
 

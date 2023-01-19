@@ -76,7 +76,7 @@ repositories {
 }
 
 dependencies {
-    api(project(':ipv8-android')){
+    api(project(':ipv8-android')) {
         exclude group: 'net.java.dev.jna'
         exclude group: 'org.bouncycastle'
     }
@@ -119,11 +119,11 @@ dependencies {
     api project(':geth-android')
 
     // BitTorrent
-    implementation files('libs/jlibtorrent-1.2.10.0.jar')
-    implementation files('libs/jlibtorrent-android-arm64-1.2.10.0.jar')
-    implementation files('libs/jlibtorrent-android-arm-1.2.10.0.jar')
-    implementation files('libs/jlibtorrent-android-x86-1.2.10.0.jar')
-    implementation files('libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
+    implementation files('libs/jlibtorrent-' + jlibtorrent_version + '.jar')
+    implementation files('libs/jlibtorrent-android-arm64-' + jlibtorrent_version + '.jar ')
+    implementation files('libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar ')
+    implementation files('libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar ')
+    implementation files('libs/jlibtorrent-android-x86_64' + jlibtorrent_version + '.jar ')
 
     // Testing
     testImplementation 'junit:junit:4.12'
