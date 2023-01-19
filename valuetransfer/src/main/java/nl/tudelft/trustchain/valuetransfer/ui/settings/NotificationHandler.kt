@@ -87,9 +87,11 @@ class NotificationHandler(
         val activeFragment = parentActivity.getActiveFragment()
         val publicKeyString = peer.publicKey.keyToBin().toHex()
 
-        if (isAppInForeground && (activeFragment is ContactChatFragment) && (activeFragment.arguments?.getString(
-                ValueTransferMainActivity.ARG_PUBLIC_KEY
-            ) == publicKeyString)
+        if (isAppInForeground && (activeFragment is ContactChatFragment) && (
+            activeFragment.arguments?.getString(
+                    ValueTransferMainActivity.ARG_PUBLIC_KEY
+                ) == publicKeyString
+            )
         ) return
 
         when (typeOfMessage(chatMessage)) {
@@ -234,7 +236,8 @@ class NotificationHandler(
             MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> listOf(
                 getEmojiByUnicode(
                     EMOJI_IDENTITY_ATTRIBUTE
-                ), ATTACHMENT_TYPE_IDENTITY_ATTRIBUTE
+                ),
+                ATTACHMENT_TYPE_IDENTITY_ATTRIBUTE
             )
             MessageAttachment.TYPE_TRANSFER_REQUEST -> {
                 when {
@@ -378,8 +381,10 @@ class NotificationHandler(
             putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, peer.publicKey.keyToBin().toHex())
             putString(
                 ValueTransferMainActivity.ARG_NAME,
-                contact?.name ?: (identityName
-                    ?: resources.getString(R.string.text_unknown_contact))
+                contact?.name ?: (
+                    identityName
+                        ?: resources.getString(R.string.text_unknown_contact)
+                    )
             )
             putString(
                 ValueTransferMainActivity.ARG_PARENT,
