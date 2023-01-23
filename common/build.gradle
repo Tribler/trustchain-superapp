@@ -120,10 +120,10 @@ dependencies {
 
     // BitTorrent
     implementation files('libs/jlibtorrent-' + jlibtorrent_version + '.jar')
-    implementation files('libs/jlibtorrent-android-arm64-' + jlibtorrent_version + '.jar ')
-    implementation files('libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar ')
-    implementation files('libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar ')
-    implementation files('libs/jlibtorrent-android-x86_64' + jlibtorrent_version + '.jar ')
+    implementation files('libs/jlibtorrent-android-arm64-' + jlibtorrent_version + '.jar')
+    implementation files('libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar')
+    implementation files('libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar')
+    implementation files('libs/jlibtorrent-android-x86_64-' + jlibtorrent_version + '.jar')
 
     // Testing
     testImplementation 'junit:junit:4.12'

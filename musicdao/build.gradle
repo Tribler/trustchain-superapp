@@ -63,10 +63,10 @@ dependencies {
     // TODO fix direct import, this should rely on common.
     // BitTorrent
     implementation files('../common/libs/jlibtorrent-' + jlibtorrent_version + '.jar')
-    implementation files('../common/libs/jlibtorrent-android-arm64-' + jlibtorrent_version + '.jar ')
-    implementation files('../common/libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar ')
-    implementation files('../common/libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar ')
-    implementation files('../common/libs/jlibtorrent-android-x86_64' + jlibtorrent_version + '.jar ')
+    implementation files('../common/libs/jlibtorrent-android-arm64-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86_64-' + jlibtorrent_version + '.jar')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.2.0'
