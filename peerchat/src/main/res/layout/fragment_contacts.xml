@@ -27,7 +27,7 @@
         <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:tint="@color/mild_gray"
+            app:tint="@color/mild_gray"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"

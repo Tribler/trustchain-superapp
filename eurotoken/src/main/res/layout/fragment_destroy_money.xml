@@ -163,7 +163,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/txtGatewayName"
                     app:layout_constraintTop_toBottomOf="@id/txtGatewayName"
-                    tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />kkkzz
+                    tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

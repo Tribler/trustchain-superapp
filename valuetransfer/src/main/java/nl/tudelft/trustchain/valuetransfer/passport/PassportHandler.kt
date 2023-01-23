@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.passport
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Bitmap
 import android.nfc.NfcAdapter
@@ -43,6 +44,7 @@ class PassportHandler(
         init()
     }
 
+    @SuppressLint("NullSafeMutableLiveData") // TODO fix non-§§§§§§§§§§§nullable data.
     fun init() {
         documentType = DOCUMENT_TYPE_OTHER
 
@@ -69,6 +71,7 @@ class PassportHandler(
     /**
      * Activate the NFC adapter
      */
+    @SuppressLint("NullSafeMutableLiveData") // TODO: fix non-nullable data.
     fun activateNFCAdapter() {
         nfcAdapter = NfcAdapter.getDefaultAdapter(activity)
         isoDep.postValue(null)

@@ -1,6 +1,6 @@
 package nl.tudelft.trustchain.common
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.BroadcastChannel
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
@@ -20,7 +20,7 @@ class DemoCommunity : Community() {
 
     val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
 
-    @ExperimentalCoroutinesApi
+    @OptIn(ObsoleteCoroutinesApi::class)
     val punctureChannel = BroadcastChannel<Pair<Address, PuncturePayload>>(10000)
 
     // Retrieve the trustchain community
@@ -58,9 +58,9 @@ class DemoCommunity : Community() {
         messageHandlers[MessageId.PUNCTURE_TEST] = ::onPunctureTest
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @OptIn(ObsoleteCoroutinesApi::class)
     private fun onPunctureTest(packet: Packet) {
         val payload = packet.getPayload(PuncturePayload.Deserializer)
-        punctureChannel.offer(Pair(packet.source, payload))
+        punctureChannel.trySend(Pair(packet.source, payload)).isSuccess
     }
 }

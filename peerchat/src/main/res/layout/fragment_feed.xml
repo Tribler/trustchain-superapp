@@ -27,12 +27,12 @@
         <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:tint="@color/mild_gray"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_baseline_dynamic_feed_24" />
+            app:srcCompat="@drawable/ic_baseline_dynamic_feed_24"
+            app:tint="@color/mild_gray" />
 
         <TextView
             android:layout_width="wrap_content"

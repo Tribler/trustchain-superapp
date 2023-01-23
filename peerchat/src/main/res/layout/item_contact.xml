@@ -44,14 +44,14 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:src="@drawable/ic_wifi_black_24dp"
-            android:tint="@color/green" />
+            app:tint="@color/green" />
 
         <ImageView
             android:id="@+id/imgBluetooth"
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:src="@drawable/ic_bluetooth_black_24dp"
-            android:tint="@color/green" />
+            app:tint="@color/green" />
     </LinearLayout>
 
     <TextView

@@ -53,7 +53,6 @@ class VerifyAttestationDialog(private val databaseBlob: AttestationBlob) : Dialo
                         )
                     }
                 )
-
                 .setNegativeButton(
                     R.string.cancel,
                     DialogInterface.OnClickListener { _, _ -> }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="nl.tudelft.trustchain.FOC">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -12,6 +11,7 @@
     <application>
         <activity
             android:name=".ExecutionActivity"
+            android:exported="false"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name="nl.tudelft.trustchain.FOC.MainActivityFOC"

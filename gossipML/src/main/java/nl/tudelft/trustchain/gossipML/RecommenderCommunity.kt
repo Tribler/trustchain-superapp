@@ -176,7 +176,12 @@ open class RecommenderCommunity(
             val data = recommendStore.getLocalSongData()
             val songFeatures = data.first
             val playcounts = data.second
-            val models = mergeFeatureModel(localModel as OnlineModel, peerModel as OnlineModel, songFeatures, playcounts)
+            val models = mergeFeatureModel(
+                localModel as OnlineModel,
+                peerModel as OnlineModel,
+                songFeatures,
+                playcounts
+            )
             Log.i("Recommend", "Walking an random models are merged")
             recommendStore.storeModelLocally(models.first)
             if (payload.checkTTL()) performRemoteModelExchange(models.second)
@@ -185,7 +190,10 @@ open class RecommenderCommunity(
             localModel = localModel as MatrixFactorization
             if (localModel.songFeatures.size == 0) {
                 localModel = MatrixFactorization(peerModel.peerFeatures)
-                localModel.updateRatings(recommendStore.getSongIds().zip(recommendStore.getPlaycounts()).toMap().toSortedMap())
+                localModel.updateRatings(
+                    recommendStore.getSongIds().zip(recommendStore.getPlaycounts()).toMap()
+                        .toSortedMap()
+                )
                 recommendStore.storeModelLocally(localModel)
                 val maxPeersToAsk = 5
                 var count = 0
@@ -195,7 +203,11 @@ open class RecommenderCommunity(
                         peer,
                         serializePacket(
                             MessageId.REQUEST_MODEL,
-                            RequestModelMessage(myPeer.publicKey.keyToBin(), 2u, "MatrixFactorization")
+                            RequestModelMessage(
+                                myPeer.publicKey.keyToBin(),
+                                2u,
+                                "MatrixFactorization"
+                            )
                         )
                     )
                     count += 1
@@ -203,7 +215,10 @@ open class RecommenderCommunity(
                 Log.i("Recommend", "Model request sent to $count peer(s)")
             } else {
                 Log.i("Recommend", "Merging MatrixFactorization")
-                localModel.updateRatings(recommendStore.getSongIds().zip(recommendStore.getPlaycounts()).toMap().toSortedMap())
+                localModel.updateRatings(
+                    recommendStore.getSongIds().zip(recommendStore.getPlaycounts()).toMap()
+                        .toSortedMap()
+                )
                 localModel.merge(peerModel.peerFeatures)
                 recommendStore.storeModelLocally(localModel)
                 Log.i("Recommend", "Stored new MatrixFactorization")
@@ -267,17 +282,23 @@ open class RecommenderCommunity(
         labels: IntArray
     ):
         Pair<OnlineModel, OnlineModel> {
-            localModel.merge(incomingModel)
-            incomingModel.update(features, labels.map { it.toDouble() }.toTypedArray())
-            return Pair(localModel, incomingModel)
-        }
+        localModel.merge(incomingModel)
+        incomingModel.update(features, labels.map { it.toDouble() }.toTypedArray())
+        return Pair(localModel, incomingModel)
+    }
 
     object MessageId {
         val MODEL_EXCHANGE_MESSAGE: Int
-            get() { return 27 }
+            get() {
+                return 27
+            }
         val REQUEST_MODEL: Int
-            get() { return 40 }
+            get() {
+                return 40
+            }
         val EXCHANGE_FEATURES: Int
-            get() { return 99 }
+            get() {
+                return 99
+            }
     }
 }

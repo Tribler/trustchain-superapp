@@ -68,7 +68,7 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
+        @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
         super.onActivityResult(requestCode, resultCode, data)
     }
 

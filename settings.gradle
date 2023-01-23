@@ -9,10 +9,8 @@ project(':ipv8-android').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8-an
 include 'ipv8-jvm'
 project(':ipv8-jvm').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8-jvm')
 
-
 include 'demo-jvm'
 project(':demo-jvm').projectDir = new File(settingsDir, 'kotlin-ipv8/demo-jvm')
-
 
 include ':app'
 include ':common'
@@ -36,3 +34,4 @@ include ':liquidity-pool'
 include ':valuetransfer'
 include ':atomic-swap'
 include ':literaturedao'
+include ':geth-android'
