@@ -114,7 +114,3 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         "-opt-in=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
     ]
 }
-
-tasks.withType(Test) {
-    systemProperty "java.library.path", "./src/main/jniLibs"
-}

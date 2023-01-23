@@ -21,7 +21,7 @@ dependencies {
     implementation "com.squareup.sqldelight:coroutines-extensions:$sqldelight_version"
     implementation 'org.bitcoinj:bitcoinj-core:0.15.10'
 
-    implementation files('libs/jlibtorrent-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-' + jlibtorrent_version + '.jar')
 }
 
 application {
