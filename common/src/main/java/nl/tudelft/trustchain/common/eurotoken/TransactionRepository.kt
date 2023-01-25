@@ -15,15 +15,17 @@ import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.bitcoin.WalletService
+import nl.tudelft.trustchain.common.eurotoken.blocks.EuroTokenCheckpointValidator
+import nl.tudelft.trustchain.common.eurotoken.blocks.EuroTokenDestructionValidator
+import nl.tudelft.trustchain.common.eurotoken.blocks.EuroTokenRollBackValidator
+import nl.tudelft.trustchain.common.eurotoken.blocks.EuroTokenTransferValidator
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.wallet.SendRequest
-import nl.tudelft.trustchain.common.eurotoken.blocks.*
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import java.lang.Math.abs
 import java.math.BigInteger
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class TransactionRepository(
     val trustChainCommunity: TrustChainCommunity,
     val gatewayStore: GatewayStore

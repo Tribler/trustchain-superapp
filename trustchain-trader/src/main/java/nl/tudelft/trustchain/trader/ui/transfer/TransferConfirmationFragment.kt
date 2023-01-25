@@ -17,7 +17,7 @@ class TransferConfirmationFragment : BaseFragment(R.layout.fragment_transfer_con
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         animation_view.run {
             animation_view.addAnimatorListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     super.onAnimationEnd(animation)
                     view.findNavController()
                         .navigate(TransferConfirmationFragmentDirections.actionTransferConfirmationFragmentToTransferFragment())

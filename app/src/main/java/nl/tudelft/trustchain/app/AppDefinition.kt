@@ -14,6 +14,7 @@ import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.ssi.SSIMainActivity
 import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
+import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
@@ -25,7 +26,7 @@ enum class AppDefinition(
     val appName: String,
     @ColorRes val color: Int,
     val activity: Class<out Activity>,
-    val disableImageTint: Boolean = false
+    val disableImageTint: Boolean = false,
 ) {
     EIGHTEEN_PLUS(
         R.drawable.ic_18_plus,
@@ -107,8 +108,8 @@ enum class AppDefinition(
         LiquidityPoolMainActivity::class.java
     ),
     VALUETRANSFER(
-        R.drawable.ic_confidapp_logo,
-        "ConfIDapp",
+        R.drawable.ic_idelft_logo,
+        "IDelft",
         R.color.colorPrimaryValueTransfer,
         ValueTransferMainActivity::class.java,
         true,
@@ -118,5 +119,11 @@ enum class AppDefinition(
         "Atomic Swap",
         R.color.blue,
         AtomicSwapActivity::class.java
-    )
+    ),
+    LITERATUREDAO(
+        R.drawable.ic_book_hover_over_hand,
+        "LiteratureDao",
+        R.color.green,
+        LiteratureDaoActivity::class.java
+    ),
 }

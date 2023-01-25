@@ -16,9 +16,9 @@
             android:id="@+id/action_databaseFragment_to_verificationFragment"
             app:destination="@id/verificationFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/verificationFragment"
@@ -28,10 +28,10 @@
             android:id="@+id/action_verificationFragment_to_databaseFragment"
             app:destination="@id/databaseFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
+
             app:launchSingleTop="false"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim"
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim"
             app:popUpTo="@id/nav_graph_ssi"
             app:popUpToInclusive="true" />
         <argument
@@ -47,9 +47,9 @@
             android:id="@+id/action_verificationFragment_to_peersFragment2"
             app:destination="@id/peersFragment2"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim"
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim"
             app:popUpTo="@id/databaseFragment"
             app:popUpToInclusive="false" />
     </fragment>

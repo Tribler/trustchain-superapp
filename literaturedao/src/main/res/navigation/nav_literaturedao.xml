@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/MyLiteratureFragment">
+
+    <fragment
+        android:id="@+id/MyLiteratureFragment"
+        android:name="nl.tudelft.trustchain.literaturedao.MyLiteratureFragment"
+        android:label="My literature"
+        tools:layout="@layout/fragment_my_literature" />
+
+    <fragment
+        android:id="@+id/AddLiteratureFragment"
+        android:name="nl.tudelft.trustchain.literaturedao.AddLiteratureFragment"
+        android:label="Add literature"
+        tools:layout="@layout/fragment_literature_add" />
+
+    <fragment
+        android:id="@+id/RemoteSearchFragment"
+        android:name="nl.tudelft.trustchain.literaturedao.ui.RemoteSearchFragment"
+        android:label="Remote Search"
+        tools:layout="@layout/fragment_remote_search" />
+
+    <fragment
+        android:id="@+id/ConnectionFragment"
+        android:name="nl.tudelft.trustchain.literaturedao.ConnectionFragment"
+        android:label="Connections"
+        tools:layout="@layout/fragment_connection" />
+
+
+
+</navigation>
+
+
+<!--
+    <fragment
+        android:id="@+id/MyLiteratureFragment"
+        android:name="nl.tudelft.trustchain.literaturedao.ui.MyLiteratureFragment"
+        android:label="My Literature"
+        tools:layout="@layout/fragment_literature_overview" >
+        <action
+            android:id="@+id/action_MyLiteratureFragment_to_LibraryFragment"
+            app:destination="@id/LibraryFragment" />
+        <action
+            android:id="@+id/action_MyLiteratureFragment_to_AddLiteratureFragment"
+            app:destination="@id/AddLiteratureFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/LibraryFragment"
+        android:name="nl.tudelft.trustchain.literaturedao.ui.LibraryFragment"
+        android:label="Remote Search"
+        tools:layout="@layout/fragment_library" >
+        <action
+            android:id="@+id/action_LibraryFragment_to_MyLiteratureFragment"
+            app:destination="@id/MyLiteratureFragment" />
+    </fragment>
+
+-->

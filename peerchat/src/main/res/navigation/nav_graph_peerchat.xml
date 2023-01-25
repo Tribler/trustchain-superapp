@@ -13,21 +13,18 @@
             android:id="@+id/action_contactsFragment_to_addRemoteFragment"
             app:destination="@id/addRemoteFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_contactsFragment_to_conversationFragment"
             app:destination="@id/conversationFragment"
-            app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
+             app:enterAnim="@animator/nav_default_enter_anim"
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_contactsFragment_to_addNearbyFragment"
             app:destination="@id/addNearbyFragment"
-            app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
+             app:enterAnim="@animator/nav_default_enter_anim"
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
     </fragment>
@@ -38,8 +35,7 @@
         <action
             android:id="@+id/action_addRemoteFragment_to_addContactFragment"
             app:destination="@id/addContactFragment"
-            app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
+             app:enterAnim="@animator/nav_default_enter_anim"
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
     </fragment>
@@ -66,8 +62,7 @@
         <action
             android:id="@+id/action_addNearbyFragment_to_addContactFragment"
             app:destination="@id/addContactFragment"
-            app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
+             app:enterAnim="@animator/nav_default_enter_anim"
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
     </fragment>
@@ -80,7 +75,6 @@
             android:id="@+id/action_feedFragment_to_newPostFragment"
             app:destination="@id/newPostFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
     </fragment>

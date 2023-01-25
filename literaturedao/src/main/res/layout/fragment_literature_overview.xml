@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FEFCF7">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
+
+        android:layout_width="match_parent"
+        android:layout_height="90dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/design_default_color_background"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="25dp">
+
+            <!--            <ImageView-->
+            <!--                android:id="@+id/imageView2"-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="match_parent"-->
+            <!--                android:layout_weight="1"-->
+            <!--                android:src="@drawable/ic_menu" />-->
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginLeft="20dp"
+                android:layout_weight="2"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/logo_text_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/cheltenhamstd_bold"
+                    android:text="Literature"
+                    android:textColor="#4765FF"
+                    android:textSize="28sp" />
+
+                <TextView
+                    android:id="@+id/logo_text_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/logo_text_1"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/cheltenhamstd_light"
+                    android:text="Dao"
+                    android:textColor="#4765FF"
+                    android:textSize="28sp" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        tools:context=".LiteratureDaoActivity">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".LiteratureOverview">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:paddingRight="10dp">
+
+                        <TextView
+                            android:id="@+id/textView8"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/cheltenhamstd_bold"
+                            android:text="My Literature"
+                            android:textColor="#000000"
+                            android:textSize="34sp" />
+
+                        <SearchView
+                            android:id="@+id/searchViewLit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:background="#F5F9FC"
+                            android:queryHint="Title, Author, Keywords ..."
+                            android:iconifiedByDefault="false"
+                            />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/imageView3"
+                        android:layout_width="225dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_undraw_bibliophile_re_xarc" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/litdao_pick_file_button"
+                    android:layout_width="141dp"
+                    android:layout_height="wrap_content"
+                    android:onClick="filePicker"
+                    android:text="@string/litdao_file_picker_button_text" />
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_items"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:listitem="@layout/fragment_literature" />
+
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:clickable="true"
+        android:contentDescription="Add Literature"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:fabSize="normal"
+        app:srcCompat="@drawable/ic_add_black_24dp" />
+
+    <!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_gravity="bottom"-->
+    <!--        android:background="#FFFFFF"-->
+    <!--        android:padding="10dp">-->
+
+    <!--        <LinearLayout-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="match_parent"-->
+    <!--            android:gravity="center"-->
+    <!--            android:orientation="horizontal">-->
+
+    <!--            <LinearLayout-->
+    <!--                android:layout_width="wrap_content"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_marginRight="20dp"-->
+    <!--                android:orientation="vertical">-->
+
+    <!--                <ImageView-->
+    <!--                    android:id="@+id/imageView"-->
+    <!--                    android:layout_width="match_parent"-->
+    <!--                    android:layout_height="wrap_content"-->
+    <!--                    android:paddingBottom="5dp"-->
+    <!--                    app:srcCompat="@drawable/ic_myliterature" />-->
+
+    <!--                <TextView-->
+    <!--                    android:id="@+id/textView3"-->
+    <!--                    android:layout_width="wrap_content"-->
+    <!--                    android:layout_height="wrap_content"-->
+    <!--                    android:fontFamily="@font/cheltenhamstd_bold"-->
+    <!--                    android:text="My Literature"-->
+    <!--                    android:textColor="#000000" />-->
+    <!--            </LinearLayout>-->
+
+    <!--            <LinearLayout-->
+    <!--                android:layout_width="wrap_content"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_marginLeft="20dp"-->
+    <!--                android:orientation="vertical">-->
+
+    <!--                <ImageView-->
+    <!--                    android:id="@+id/imageView4"-->
+    <!--                    android:layout_width="match_parent"-->
+    <!--                    android:layout_height="wrap_content"-->
+    <!--                    android:paddingBottom="5dp"-->
+    <!--                    app:srcCompat="@drawable/ic_library" />-->
+
+    <!--                <TextView-->
+    <!--                    android:id="@+id/nav_library"-->
+    <!--                    android:layout_width="match_parent"-->
+    <!--                    android:layout_height="wrap_content"-->
+    <!--                    android:fontFamily="@font/cheltenhamstd_bold"-->
+    <!--                    android:text="Library"-->
+    <!--                    android:textColor="#000000" />-->
+    <!--            </LinearLayout>-->
+
+    <!--        </LinearLayout>-->
+
+    <!--    </com.google.android.material.bottomnavigation.BottomNavigationView>-->
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

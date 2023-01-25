@@ -10,4 +10,4 @@ insert_final_newline = true
 end_of_line = lf
 
 # ktlint
-disabled_rules = no-wildcard-imports, import-ordering, max-line-length
+disabled_rules = no-wildcard-imports, import-ordering, max-line-length, no-unused-imports

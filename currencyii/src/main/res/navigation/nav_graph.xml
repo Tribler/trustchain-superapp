@@ -14,16 +14,16 @@
             android:id="@+id/action_bitcoinFragment_to_blockchainDownloadFragment"
             app:destination="@id/blockchainDownloadFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_bitcoinFragment_to_daoImportOrCreate"
             app:destination="@id/daoImportOrCreate"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/daoLoginChoice"
@@ -33,16 +33,16 @@
             android:id="@+id/action_daoLoginChoice_to_daoImportOrCreate"
             app:destination="@id/daoImportOrCreate"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_daoLoginChoice_to_myDAOsFragment"
             app:destination="@id/myDAOsFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim"
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim"
             app:popUpTo="@id/myDAOsFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -54,9 +54,9 @@
             android:id="@+id/action_daoImportOrCreate_to_myDAOsFragment"
             app:destination="@id/myDAOsFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim"
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim"
             app:popUpTo="@id/myDAOsFragment"
             app:popUpToInclusive="true" />
         <argument
@@ -88,18 +88,18 @@
             android:id="@+id/action_blockchainDownloadFragment_to_bitcoinFragment"
             app:destination="@id/bitcoinFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim"
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim"
             app:popUpTo="@+id/bitcoinFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_blockchainDownloadFragment_to_myDAOsFragment"
             app:destination="@id/myDAOsFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim"
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim"
             app:popUpTo="@id/myDAOsFragment"
             app:popUpToInclusive="true" />
         <argument
@@ -116,9 +116,9 @@
             android:id="@+id/action_mySharedWalletsFragment_to_sharedWalletTransaction"
             app:destination="@id/sharedWalletTransaction"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/sharedWalletTransaction"
@@ -159,53 +159,53 @@
             android:id="@+id/action_myDAOsFragment_to_createSWFragment"
             app:destination="@id/createSWFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_myDAOsFragment_to_joinNetworkFragment"
             app:destination="@id/joinNetworkFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim"
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim"
             app:popUpTo="@+id/bitcoinFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_myDAOsFragment_to_mySharedWalletsFragment"
             app:destination="@id/mySharedWalletsFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_myDAOsFragment_to_sharedWalletTransaction"
             app:destination="@id/sharedWalletTransaction"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_enter_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_myDAOsFragment_to_blockchainDownloadFragment"
             app:destination="@id/blockchainDownloadFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_myDAOsFragment_to_daoLoginChoice"
             app:destination="@id/daoLoginChoice"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_myDAOsFragment_to_daoImportOrCreate"
             app:destination="@id/daoImportOrCreate"
             app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@animator/nav_default_exit_anim" />
+
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/myProposals"

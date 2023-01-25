@@ -4,8 +4,7 @@ plugins {
 }
 
 dependencies {
-//    implementation project(':common')
-    api(project(':ipv8-jvm')){
+    api(project(':ipv8-jvm')) {
         exclude group: 'org.slf4j'
         exclude group: 'com.goterl'
         exclude group: 'org.bouncycastle'
@@ -22,16 +21,15 @@ dependencies {
     implementation "com.squareup.sqldelight:coroutines-extensions:$sqldelight_version"
     implementation 'org.bitcoinj:bitcoinj-core:0.15.10'
 
-    implementation files('libs/jlibtorrent-1.2.15.2.jar')
+    implementation files('../common/libs/jlibtorrent-' + jlibtorrent_version + '.jar')
 }
 
 application {
     mainClassName = 'com.example.musicdao_datafeeder.DataFeederKt'
-//    mainClassName = 'com.example.musicdao_datafeeder.DataPropagatorKt'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
+        "-opt-in=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
     ]
 }

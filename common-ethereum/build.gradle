@@ -4,12 +4,17 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 33
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['../common/libs']
+        }
+    }
 
     defaultConfig {
         minSdkVersion 22
-        targetSdkVersion 31
+        targetSdkVersion 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -37,12 +42,7 @@ android {
         jvmTarget = '1.8'
         allWarningsAsErrors = true
     }
-}
-
-repositories {
-    flatDir {
-        dirs '../common/libs'
-    }
+    namespace 'nl.tudelft.trustchain.common.ethereum'
 }
 
 dependencies {
@@ -52,13 +52,14 @@ dependencies {
     api(group: 'org.web3j', name: 'core', version: '4.6.0-android') {
         exclude group: 'org.bouncycastle'
     }
-    api group: 'org.ethereum', name: 'geth-android-all-1.10.1-c2d2f4ed', ext: 'aar'
 
-    implementation 'androidx.core:core-ktx:1.2.0'
+    api project(':geth-android')
+
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }

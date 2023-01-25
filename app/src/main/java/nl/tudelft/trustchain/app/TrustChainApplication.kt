@@ -1,10 +1,17 @@
 package nl.tudelft.trustchain.app
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.preference.PreferenceManager
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.dao.DaoCommunity
@@ -14,6 +21,10 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.OverlayConfiguration
@@ -55,6 +66,7 @@ import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.gossipML.RecommenderCommunity
 import nl.tudelft.trustchain.gossipML.db.RecommenderStore
+import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
@@ -62,18 +74,26 @@ import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.voting.VotingCommunity
 import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
 @OptIn(DelicateCoroutinesApi::class)
 @ExperimentalUnsignedTypes
 @HiltAndroidApp
 class TrustChainApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
 
+    var isFirstRun: Boolean = false
+    lateinit var appLoader: AppLoader
+
+    override fun onCreate() = runBlocking {
+        super.onCreate()
+        launch {
+            isFirstRun = checkFirstRun()
+            appLoader = AppLoader(dataStore, isFirstRun)
+        }
         defaultCryptoProvider = AndroidCryptoProvider
 
         // Only start IPv8 here if we are on Android 11 or below.
-        val BUILD_VERSION_CODE_S = 31
-        if (Build.VERSION.SDK_INT < BUILD_VERSION_CODE_S) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             initIPv8()
         }
     }
@@ -94,6 +114,7 @@ class TrustChainApplication : Application() {
                 createDaoCommunity(),
                 createVotingCommunity(),
                 createMusicCommunity(),
+                createLiteratureCommunity(),
                 createRecommenderCommunity(),
                 createIdentityCommunity(),
                 createFOCCommunity()
@@ -111,6 +132,7 @@ class TrustChainApplication : Application() {
         initTrustChain()
     }
 
+    @OptIn(DelicateCoroutinesApi::class) // TODO: Verify whether usage is correct.
     private fun initWallet() {
         GlobalScope.launch {
             // Generate keys in a coroutine as this significantly impacts first launch.
@@ -387,6 +409,20 @@ class TrustChainApplication : Application() {
         )
     }
 
+    // TODO: Fix for older Android versions.
+    @SuppressLint("NewApi")
+    private fun createLiteratureCommunity(): OverlayConfiguration<LiteratureCommunity> {
+        val settings = TrustChainSettings()
+        val driver = AndroidSqliteDriver(Database.Schema, this, "music.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            LiteratureCommunity.Factory(this, settings, store),
+            listOf(randomWalk)
+        )
+    }
+
+    @OptIn(DelicateCoroutinesApi::class) // TODO: Verify whether usage is correct.
     private fun createRecommenderCommunity(): OverlayConfiguration<RecommenderCommunity> {
         val settings = TrustChainSettings()
         val musicDriver = AndroidSqliteDriver(Database.Schema, this, "music.db")
@@ -446,6 +482,25 @@ class TrustChainApplication : Application() {
         }
     }
 
+    private suspend fun checkFirstRun(): Boolean {
+        val key = booleanPreferencesKey(
+            FIRST_RUN
+        )
+        val preferredApps: Flow<Boolean> = dataStore.data
+            .map { preferences ->
+                preferences[key] ?: true
+            }
+
+        val firstRun = preferredApps.first()
+
+        if (firstRun) {
+            dataStore.edit { settings ->
+                settings[key] = false
+            }
+        }
+        return firstRun
+    }
+
     companion object {
         private const val PREF_PRIVATE_KEY = "private_key"
         private const val PREF_ID_METADATA_KEY = "id_metadata"
@@ -453,5 +508,6 @@ class TrustChainApplication : Application() {
         private const val PREF_ID_METADATA_HUGE_KEY = "id_metadata_huge"
         private const val PREF_ID_METADATA_RANGE_18PLUS_KEY = "id_metadata_range_18plus"
         private const val BLOCK_TYPE = "demo_block"
+        private const val FIRST_RUN = "first_run"
     }
 }

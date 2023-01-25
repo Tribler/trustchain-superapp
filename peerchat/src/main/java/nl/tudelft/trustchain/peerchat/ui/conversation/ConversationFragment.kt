@@ -163,11 +163,13 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
             fab.collapse()
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
+            @Suppress("DEPRECATION")
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
         when (requestCode) {
             PICK_IMAGE -> if (resultCode == Activity.RESULT_OK && data != null) {
                 val uri = data.data

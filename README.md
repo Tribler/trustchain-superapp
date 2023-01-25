@@ -94,8 +94,8 @@ The bid and asks can either be generated automatically or manually. Those bids a
 <img src="trustchain-payloadgenerator/GeneratorImages/PayloadFragment.png" width="180"><br />
 [More about Market Bot](trustchain-payloadgenerator/readme.md)
 
-### Luxury Communism
-We build a DAO for a better world. Luxury communism is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). It is a proof-of-concept implementation of a DAO system using Trustchain and Bitcoin. Trustchain is used for communication and bookkeeping while the Bitcoin blockchain is used to have collective multi-signature wallets for each DAO. The content of the app is split up in several tabs:
+### Luxury Socialism
+{_recent events have turned this into_ **really bad naming**} We build a DAO for a better world. Luxury socialism is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). It is a proof-of-concept implementation of a DAO system using Trustchain and Bitcoin. Trustchain is used for communication and bookkeeping while the Bitcoin blockchain is used to have collective multi-signature wallets for each DAO. The content of the app is split up in several tabs:
 * **First Time Launch**: The first time the app is launched, the user must setup his bitcoin wallet. Afterwhich the chain will sync and he is routed to the main screens.
 * **My DAO's**: A list of all DAO's that the user participates in. Selecting a DAO will allow a user to create a transfer proposal from that DAO.
 * **All DAO's**: A list of all discovered DAO's in the network which the user can propose to join.
@@ -103,7 +103,7 @@ We build a DAO for a better world. Luxury communism is an Android application bu
 * **My Wallet**: Overview of the used Bitcoin wallet and the ability to chain this to another.
 * **Duplicate Wallet**: In case the user has wallet files for TestNet, Production or Regtest, the user is allowed to select which one to keep. After the user selected either one, the files belonging to other network type are backed up. This, thus, ensures that the wallet is not lost.
 
-Currently, the Luxury Communism app only allows Regtest, since it uses a future update of Bitcoin called Taproot. Once Taproot is officially released, the app can support TestNet or Production again. Taproot allows the DAO to scale to thousands or even millions of users. The beauty of Taproot is that it uses Schnorr signatures for each transaction. This enables transaction sizes that are equal independent of the number of users in a DAO, since each user combines their signature collaberatively into one for the whole DAO. This also ensures privacy, since it is no longer possible to tell if a transaction's is from a single person, or a million of persons.
+Currently, the Luxury Socialism app only allows Regtest, since it uses a future update of Bitcoin called Taproot. Once Taproot is officially released, the app can support TestNet or Production again. Taproot allows the DAO to scale to thousands or even millions of users. The beauty of Taproot is that it uses Schnorr signatures for each transaction. This enables transaction sizes that are equal independent of the number of users in a DAO, since each user combines their signature collaberatively into one for the whole DAO. This also ensures privacy, since it is no longer possible to tell if a transaction's is from a single person, or a million of persons.
 
 <img src="currencyii/docs/images/screenshot_7.png" width="200px"> <img src="currencyii/docs/images/screenshot_6.png" width="200px"> <img src="currencyii/docs/images/screenshot_10.png" width="200px">
 <br />
@@ -118,7 +118,7 @@ Currently, the Luxury Communism app only allows Regtest, since it uses a future 
 https://user-images.githubusercontent.com/23526224/116259903-85efd900-a776-11eb-93b1-384936d215c4.mp4
 
 
-[More about Luxury Communism](currencyii/README.md)
+[More about Luxury Socialism](currencyii/README.md)
 
 ### TrustChain Voter
 The TrustChain Voter can be used to create a proposal on which the community can vote. The functionality has been split up in two parts: a Voting API, which provides the core voting functionality, and a TrustChain Voter submodule, which serves to demonstrate the capabilities of the voting API. Below, the process of creating a proposal (left) and casting a vote (right) can be seen.
@@ -180,6 +180,19 @@ Below is a video demo that shows the steps to do an atomic swap.
 <a href="https://user-images.githubusercontent.com/21971137/164297537-e8b4ff5f-a999-4e6d-b1e8-17135399848e.mp4" title="Swap Demo"><img src="https://user-images.githubusercontent.com/21971137/164298818-a152b7ca-6ebe-4038-a449-e6a246c7f1ab.png" alt="Alternate Text" /></a>
 
 [More about The Atomic Swap app](atomic-swap/README.md)
+
+### Literature Dao
+
+LiteratureDao app aims to be a decentralized scientific literature repository, proving:
+Sharing, storing, and searching of scientific publications through the p2p ipv8 network.
+
+![local_upload](https://user-images.githubusercontent.com/33283063/167591620-a9547f63-e778-4ea9-a594-a7d1d9a4f169.gif)
+![peers](https://user-images.githubusercontent.com/33283063/167591634-6e0b8aaf-11c8-4ee7-b36d-616255fa5347.PNG)
+![search_in_keywords](https://user-images.githubusercontent.com/33283063/167591635-a68c0d2c-16de-4a44-ba73-fc52688252eb.gif)
+![url_upload](https://user-images.githubusercontent.com/33283063/167591643-75a305ae-2098-4138-9f60-14818f63000e.gif)
+
+
+[More about literature dao app](literaturedao/README.md)
 
 ### Do you want to add your own app?
 

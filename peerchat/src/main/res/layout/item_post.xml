@@ -95,8 +95,8 @@
             android:layout_marginStart="0dp"
             android:background="?selectableItemBackgroundBorderless"
             android:padding="8dp"
-            android:tint="@color/text_secondary"
-            app:srcCompat="@drawable/ic_baseline_thumb_up_24" />
+            app:srcCompat="@drawable/ic_baseline_thumb_up_24"
+            app:tint="@color/text_secondary" />
 
         <TextView
             android:id="@+id/txtLikeCount"
@@ -113,10 +113,10 @@
             android:layout_marginStart="16dp"
             android:background="?selectableItemBackgroundBorderless"
             android:padding="6dp"
-            android:tint="@color/text_secondary"
             app:layout_constraintStart_toEndOf="@id/btnLike"
             app:layout_constraintTop_toBottomOf="@id/txtMessage"
-            app:srcCompat="@drawable/ic_baseline_reply_24" />
+            app:srcCompat="@drawable/ic_baseline_reply_24"
+            app:tint="@color/text_secondary" />
 
         <TextView
             android:id="@+id/txtCommentCount"

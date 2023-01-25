@@ -1,0 +1,93 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'kotlin-android-extensions'
+}
+
+apply plugin: 'kotlinx-serialization'
+
+android {
+    compileSdkVersion 33
+    defaultConfig {
+        minSdkVersion 22
+        targetSdkVersion 33
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    namespace 'nl.tudelft.trustchain.literaturedao'
+}
+
+dependencies {
+    // Other classpath declarations
+    implementation project(':common')
+    api project(':common')
+
+    // TODO fix direct import, this should rely on common.
+    implementation files('../common/libs/jlibtorrent-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm64-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86_64-' + jlibtorrent_version + '.jar')
+
+    // AndroidX
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation "androidx.recyclerview:recyclerview:1.1.0"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+    implementation "androidx.fragment:fragment-ktx:$fragment_version"
+    implementation "androidx.preference:preference:1.1.0"
+    implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version")
+
+    // Material and gson
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'com.google.code.gson:gson:2.8.8'
+
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc'
+    implementation 'androidx.gridlayout:gridlayout:1.0.0'
+
+    // Logging
+    implementation 'io.github.microutils:kotlin-logging:1.7.7'
+
+    implementation 'com.tom-roush:pdfbox-android:2.0.16.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.databinding:databinding-runtime:4.2.2'
+
+    // File io
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.1.0'
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions.freeCompilerArgs += [
+        "-opt-in=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
+    ]
+}

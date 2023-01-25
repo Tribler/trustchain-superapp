@@ -17,20 +17,20 @@ class IdentityStore(context: Context) {
     private val database = Database(driver)
 
     private val identityMapper = {
-        id: String,
-        publicKey: ByteArray,
-        name: String?,
-        surname: String?,
-        gender: Long?,
-        dateOfBirth: Long?,
-        placeOfBirth: String?,
-        nationality: String?,
-        personalNumber: Long?,
-        documentNumber: String?,
-        added: Long,
-        modified: Long,
-        verified: Long,
-        dateOfExpiry: Long?
+            id: String,
+            publicKey: ByteArray,
+            name: String?,
+            surname: String?,
+            gender: Long?,
+            dateOfBirth: Long?,
+            placeOfBirth: String?,
+            nationality: String?,
+            personalNumber: Long?,
+            documentNumber: String?,
+            added: Long,
+            modified: Long,
+            verified: Long,
+            dateOfExpiry: Long?
         ->
         Identity(
             id,
@@ -53,11 +53,11 @@ class IdentityStore(context: Context) {
     }
 
     private val attributeMapper = {
-        id: String,
-        name: String,
-        value: String,
-        added: Long,
-        modified: Long
+            id: String,
+            name: String,
+            value: String,
+            added: Long,
+            modified: Long
         ->
         IdentityAttribute(
             id,

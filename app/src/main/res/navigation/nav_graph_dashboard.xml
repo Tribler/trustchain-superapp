@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/dashboard_nav_graph"
+    app:startDestination="@id/dashboardActivity">
+    <activity
+        android:id="@+id/dashboardActivity"
+        android:name="nl.tudelft.trustchain.app.ui.dashboard.DashboardActivity"
+        android:label="DashboardActivity" />
+    <activity
+        android:id="@+id/dashboardSelectorActivity"
+        android:name="nl.tudelft.trustchain.app.ui.dashboard.DashboardSelectorActivity"
+        android:label="DashboardSelectorActivity" />
+</navigation>
