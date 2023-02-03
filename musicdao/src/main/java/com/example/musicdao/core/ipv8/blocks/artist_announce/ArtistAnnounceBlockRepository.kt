@@ -1,5 +1,6 @@
 package com.example.musicdao.core.ipv8.repositories
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.ipv8.blocks.Constants
@@ -60,6 +61,7 @@ class ArtistAnnounceBlockRepository @Inject constructor(
             .map { ArtistAnnounceBlock.fromTrustChainTransaction(it.transaction) }
     }
 
+    @SuppressLint("NewApi")
     private suspend fun crawl(publicKey: String) {
         val key = musicCommunity.publicKeyStringToByteArray(publicKey)
         val peer = musicCommunity.network.getVerifiedByPublicKeyBin(key)

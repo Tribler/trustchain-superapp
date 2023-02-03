@@ -1,5 +1,6 @@
 package com.example.musicdao.ui.screens.dao
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -95,6 +96,7 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
     /**
      * Refresh the state of the DAOs/proposals
      */
+    @SuppressLint("NewApi")
     private suspend fun refresh() {
         Log.d("MVDAO", "Updating DAOs from network. ")
 
@@ -396,6 +398,7 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
         }
     }
 
+    @SuppressLint("NewApi")
     private suspend fun transferFundsClickedLong(
         bitcoinPublicKey: String,
         satoshiTransferAmount: Long,

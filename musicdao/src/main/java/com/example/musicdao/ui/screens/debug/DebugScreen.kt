@@ -1,5 +1,6 @@
 package com.example.musicdao.ui.screens.debug
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import com.example.musicdao.ui.screens.search.DebugScreenViewModel
 
 @ExperimentalMaterialApi
 @Composable
+@SuppressLint("NewApi")
 fun Debug(debugScreenViewModel: DebugScreenViewModel) {
 
     val torrentHandleStatus by debugScreenViewModel.status.collectAsState(listOf())

@@ -1,5 +1,6 @@
 package com.example.musicdao.ui.screens.dao.persistence
 
+import android.annotation.SuppressLint
 import com.example.musicdao.core.dao.DaoCommunity
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -145,6 +146,7 @@ class PersistenceLayer(
         TODO("Not yet implemented")
     }
 
+    @SuppressLint("NewApi")
     suspend fun crawl() {
         val peers = daoCommunity.getPeers()
 

@@ -1,5 +1,6 @@
 package com.example.musicdao.core.ipv8
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.example.musicdao.core.ipv8.modules.search.KeywordSearchMessage
 import com.frostwire.jlibtorrent.Sha1Hash
@@ -100,6 +101,7 @@ class MusicCommunity(
      * Filter local databse to find a release block that matches a certain title or artist, using
      * keyword search
      */
+    @SuppressLint("NewApi")
     fun localKeywordSearch(keyword: String): TrustChainBlock? {
         database.getBlocksWithType("publish_release").forEach {
             val transaction = it.transaction
