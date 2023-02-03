@@ -17,8 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.musicdao.ui.components.player.FullPlayerScreen
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.screens.artists.DiscoverArtistsScreen
@@ -58,8 +58,8 @@ fun AppNavigation(
 
     AnimatedNavHost(
         modifier = Modifier.fillMaxSize(),
-        enterTransition = { _, _ -> EnterTransition.None },
-        exitTransition = { _, _ -> ExitTransition.None },
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
         navController = navController,
         startDestination = Screen.Home.route,
         builder = {
@@ -207,13 +207,13 @@ fun AppNavigation(
             }
             composable(
                 Screen.FullPlayerScreen.route,
-                enterTransition = { _, _ ->
+                enterTransition = {
                     slideIntoContainer(
                         AnimatedContentScope.SlideDirection.Up,
                         animationSpec = tween(200)
                     )
                 },
-                exitTransition = { initial, _ ->
+                exitTransition = { ->
                     slideOutOfContainer(
                         AnimatedContentScope.SlideDirection.Down,
                         animationSpec = tween(200)

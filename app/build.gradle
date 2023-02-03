@@ -10,7 +10,7 @@ apply plugin: "dagger.hilt.android.plugin"
 apply plugin: "kotlin-kapt"
 
 buildscript {
-    ext.hilt_ver = '2.38.1'
+    ext.hilt_ver = '2.44.2'
 
     repositories {
         google()
@@ -192,8 +192,8 @@ dependencies {
 
     // Hilt
     implementation("com.google.dagger:hilt-android:$hilt_ver")
-    implementation("androidx.hilt:hilt-navigation-fragment:1.0.0-alpha03")
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0-alpha03")
+    implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
     kapt("com.google.dagger:hilt-android-compiler:$hilt_ver")
 
     // Room

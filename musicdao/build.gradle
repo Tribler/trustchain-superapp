@@ -7,8 +7,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: "dagger.hilt.android.plugin"
 
 buildscript {
-    ext.kotlin_version = '1.5.21'
-    ext.hilt_ver = '2.38.1'
+    ext.hilt_ver = '2.44.2'
 
     repositories {
         google()
@@ -60,7 +59,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
 //        allWarningsAsErrors = true
-        useIR = true
+//        useIR = true
     }
 
     testOptions {
@@ -75,7 +74,7 @@ android {
 
     composeOptions {
         kotlinCompilerVersion kotlin_version
-        kotlinCompilerExtensionVersion "1.0.1"
+        kotlinCompilerExtensionVersion "1.3.1"
     }
 
     namespace 'com.example.musicdao'
@@ -159,12 +158,11 @@ dependencies {
     // UI Tests
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.1'
     // Compose
-    implementation "androidx.navigation:navigation-compose:2.4.0-alpha08"
     // Runtime
     implementation "androidx.compose.runtime:runtime-livedata:1.0.1"
 
     implementation("com.google.accompanist:accompanist-swiperefresh:0.17.0")
-    implementation "com.google.accompanist:accompanist-navigation-animation:0.17.0"
+    implementation "com.google.accompanist:accompanist-navigation-animation:0.29.1-alpha"
 
     // Room
     implementation "androidx.room:room-runtime:2.3.0"

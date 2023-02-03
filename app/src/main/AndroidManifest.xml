@@ -147,7 +147,8 @@
 
         <activity
             android:name="com.example.musicdao.MusicActivity"
-            android:label=" "
+            android:label="Music App"
+            android:exported="true"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MusicDaoTheme">

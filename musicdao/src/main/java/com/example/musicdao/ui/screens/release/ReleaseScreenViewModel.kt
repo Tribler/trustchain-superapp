@@ -36,7 +36,7 @@ class ReleaseScreenViewModel @AssistedInject constructor(
             assistedFactory: ReleaseScreenViewModelFactory,
             releaseId: String
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return assistedFactory.create(releaseId) as T
             }
         }
@@ -51,7 +51,7 @@ class ReleaseScreenViewModel @AssistedInject constructor(
     init {
         viewModelScope.launch {
             releaseLiveData = database.dao.getLiveData(releaseId)
-            saturatedReleaseState = Transformations.map(releaseLiveData) { it.toAlbum() }
+            saturatedReleaseState = releaseLiveData.map { it.toAlbum() }
 
             val release = database.dao.get(releaseId)
 

@@ -3,7 +3,7 @@ package com.example.musicdao.core.repositories
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.map
 import com.example.musicdao.core.cache.CacheDatabase
 import com.example.musicdao.core.cache.entities.AlbumEntity
 import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlock
@@ -32,11 +32,11 @@ class AlbumRepository @Inject constructor(
     }
 
     fun getAlbumFlow(id: String): LiveData<Album> {
-        return Transformations.map(database.dao.getLiveData(id)) { it.toAlbum() }
+        return database.dao.getLiveData(id).map { it.toAlbum() }
     }
 
     fun getAlbumsFlow(): LiveData<List<Album>> {
-        return Transformations.map(database.dao.getAllLiveData()) { it.map { it.toAlbum() } }
+        return database.dao.getAllLiveData().map { it.map { it.toAlbum() } }
     }
 
     suspend fun getAlbumsFromArtist(publicKey: String): List<Album> {
