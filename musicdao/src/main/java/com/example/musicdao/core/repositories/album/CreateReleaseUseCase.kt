@@ -34,22 +34,13 @@ class CreateReleaseUseCase @Inject constructor(
             return false
         }
 
-//        val contentFolder = TorrentEngine.rootToContentFolder(root) ?: return false
-//        val torrentInfo = TorrentEngine.createTorrentInfo(contentFolder)
-//        val torrentFile = Paths.get("${cachePath.getPath()}/torrents/$releaseId.torrent").toFile()
-//        torrentFile.writeBytes(torrentInfo.bencode())
-//        if (torrentInfo == null) {
-//            Log.d("MusicDao", "CreateReleaseUseCase: could not calculate info-hash")
-//            return false
-//        }
-
         val magnet = root.second.makeMagnetUri()
         val publishResult = albumRepository.createAlbum(
             releaseId = releaseId,
             magnet = magnet,
             title = title,
             artist = artist,
-            releaseDate = releaseDate,
+            releaseDate = releaseDate
         )
         if (!publishResult) {
             Log.d("MusicDao", "Release: publishing to network failed")

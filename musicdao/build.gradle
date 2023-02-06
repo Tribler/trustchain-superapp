@@ -7,8 +7,6 @@ apply plugin: 'kotlin-kapt'
 apply plugin: "dagger.hilt.android.plugin"
 
 buildscript {
-    ext.hilt_ver = '2.44.2'
-
     repositories {
         google()
         mavenCentral()
@@ -83,7 +81,7 @@ dependencies {
     implementation project(':common')
     implementation project(':currencyii')
 
-    api(project(':ipv8-android')){
+    api(project(':ipv8-android')) {
         exclude group: 'net.java.dev.jna'
         exclude group: 'org.bouncycastle'
     }
@@ -185,16 +183,8 @@ repositories {
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions.freeCompilerArgs += [
-        "-opt-in=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
-    ]
+    kotlinOptions.freeCompilerArgs += ["-opt-in=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",]
 }
-
-//tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-//    kotlinOptions {
-//        freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalUnsignedTypes"
-//    }
-//}
 
 
 tasks.withType(Test) {

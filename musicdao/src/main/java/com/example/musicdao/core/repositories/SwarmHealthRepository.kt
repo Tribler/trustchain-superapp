@@ -13,9 +13,6 @@ class SwarmHealthRepository(
 
     var mergedSwarmHealth: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf()
 
-//    val localSwarmHealthMap: MutableMap<Sha1Hash, SwarmHealth>
-//        get() = torrentRepository.swarmHealthMap
-
     val remoteSwarmHealthMap: MutableMap<Sha1Hash, SwarmHealth>
         get() = musicCommunity.swarmHealthMap
 

@@ -154,14 +154,8 @@ class DAOJoinHelper {
 
         if (status) {
             Log.i("Coin", "Successfully submitted taproot transaction to server")
-//            activity.runOnUiThread {
-//                Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
-//            }
         } else {
             Log.e("Coin", "Taproot transaction submission to server failed")
-//            activity.runOnUiThread {
-//                Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
-//            }
         }
 
         oldWalletBlockData.getData().SW_NONCE_PKS = newNonces

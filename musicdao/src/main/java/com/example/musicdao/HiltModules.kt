@@ -156,14 +156,6 @@ class HiltModules {
         }
         val params = BitcoinNetworkOptions.REG_TEST
 
-//        val seed = WalletManager.generateRandomDeterministicSeed(params)
-//        val seed = SerializedDeterministicKey(
-//            "spell seat genius horn argue family steel buyer spawn chef guard vast",
-//            1583488954L
-//        )
-//        val seed_word = seed.seed
-//        val creationNumber = seed.creationTime.toLong()
-
         val config = WalletManagerConfiguration(
             params,
             null,

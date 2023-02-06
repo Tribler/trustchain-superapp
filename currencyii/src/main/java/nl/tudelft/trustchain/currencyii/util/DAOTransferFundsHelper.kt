@@ -138,9 +138,9 @@ class DAOTransferFundsHelper {
             }
         } else {
             Log.d("MVDAO", "taproot transaction submission to server failed")
-//            activity.runOnUiThread {
-//                Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
-//            }
+            activity.runOnUiThread {
+                Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
+            }
         }
 
         oldWalletBlockData.getData().SW_NONCE_PKS = newNonces
