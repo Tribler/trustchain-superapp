@@ -1,8 +1,8 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.dao
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -47,8 +47,8 @@ fun DaoDetailScreen(navController: NavController, daoId: String, daoViewModel: D
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @RequiresApi(Build.VERSION_CODES.N)
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun DaoDetailPure(
     daoInitial: DAO,
@@ -58,7 +58,7 @@ fun DaoDetailPure(
 ) {
     var state by remember { mutableStateOf(0) }
 
-    val titles = mapOf<String, String>(
+    val titles = mapOf(
         "list" to "Proposals",
         "new" to "New Proposal",
         "about" to "About"
@@ -90,15 +90,15 @@ fun DaoDetailPure(
                 .padding(20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Card() {
-                Column() {
+            Card {
+                Column {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(20.dp)
                     ) {
                         DaoIcon(daoId = dao.name, size = 64)
                         Spacer(modifier = Modifier.size(20.dp))
-                        Column() {
+                        Column {
                             Text(
                                 dao.name,
                                 style = MaterialTheme.typography.h6,
@@ -118,7 +118,7 @@ fun DaoDetailPure(
                     }
 
                     TabRow(selectedTabIndex = state) {
-                        titles.onEachIndexed() { index, (key, title) ->
+                        titles.onEachIndexed { index, (key, title) ->
                             Tab(
                                 text = { Text(title) },
                                 selected = state == index,
@@ -139,7 +139,7 @@ fun DaoDetailPure(
                 }
             }
 
-            Column() {
+            Column {
                 when (state) {
                     0 -> {
                         ProposalList(dao, navigateToProposal, daoViewModel)
@@ -177,7 +177,7 @@ fun ProposalList(
         return
     }
 
-    Column() {
+    Column {
         dao.proposals.map { proposal ->
             ProposalCard(proposal.key, navigateToProposal)
         }
@@ -343,7 +343,7 @@ fun About(dao: DAO) {
             }
             Column(modifier = Modifier.padding(bottom = 20.dp)) {
                 Text(text = "Members", fontWeight = FontWeight.Bold)
-                Column() {
+                Column {
                     dao.members.map { member ->
                         Text(
                             text = member.trustchainPublicKey,

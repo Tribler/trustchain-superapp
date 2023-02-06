@@ -39,15 +39,13 @@ import javax.inject.Inject
 @HiltViewModel
 class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) : ViewModel() {
 
-    private val _daos: MutableStateFlow<List<DAO>> = MutableStateFlow(listOf())
-
     var walletManager: WalletManager? = null
     var daos: MutableStateFlow<Map<TrustChainBlock, DAO>> = MutableStateFlow(mapOf())
 
     var isRefreshing = MutableStateFlow(false)
     var daoPeers = MutableStateFlow(0)
 
-    fun initManager(context: Context) {
+    fun initManager() {
         refreshOneShot()
     }
 
@@ -308,9 +306,9 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
                 var signatures: List<SWResponseSignatureBlockTD>? = null
                 while (signatures == null) {
                     Thread.sleep(1000)
-                    val old_signature_count = signatures?.size ?: 0
+                    val oldSignatureCounbt = signatures?.size ?: 0
                     signatures = collectJoinWalletResponses(proposeBlockData)
-                    if (signatures != null && signatures.size != old_signature_count) {
+                    if (signatures != null && signatures.size != oldSignatureCounbt) {
                         SnackbarHandler.displaySnackbar(
                             "Received a new signature: ${signatures.size}/${
                             requiredSignatures(
@@ -373,8 +371,8 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
         val publicKey2 = getDaoCommunity().myPeer.publicKey.keyToBin().toHex()
         val find = proposal.signatures.find { it.trustchainPublicKey == publicKey }
         Log.d("MUSICAO3", "${proposal.signatures}")
-        Log.d("MUSICAO3", "$publicKey")
-        Log.d("MUSICAO3", "$publicKey2")
+        Log.d("MUSICAO3", publicKey)
+        Log.d("MUSICAO3", publicKey2)
         return find != null
     }
 
@@ -662,17 +660,5 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
     fun userInDao(dao: DAO): Boolean {
         val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
         return dao.members.find { it.trustchainPublicKey == publicKey } != null
-    }
-
-    private fun isAddressValid(address: String): Boolean {
-        return address.length in 26..35
-    }
-
-    private fun isPrivateKeyValid(privateKey: String): Boolean {
-        return privateKey.length in 51..52 || privateKey.length == 64
-    }
-
-    fun myKey(): String {
-        return getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
     }
 }

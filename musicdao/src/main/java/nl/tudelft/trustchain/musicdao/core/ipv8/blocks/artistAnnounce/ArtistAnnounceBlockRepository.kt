@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artist_announce
+package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artistAnnounce
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class ArtistAnnounceBlockRepository @Inject constructor(
     private val musicCommunity: MusicCommunity,
-    private val artistAnnounceBlockValidator: ArtistAnnounceBlockValidator,
+    private val artistAnnounceBlockValidator: ArtistAnnounceBlockValidator
 ) {
 
     /**
@@ -111,7 +111,7 @@ class ArtistAnnounceBlockRepository @Inject constructor(
             val bitcoinAddress: String,
             val name: String,
             val biography: String,
-            val socials: String,
+            val socials: String
         )
     }
 }

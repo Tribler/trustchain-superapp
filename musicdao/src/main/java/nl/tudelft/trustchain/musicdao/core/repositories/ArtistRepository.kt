@@ -3,8 +3,8 @@ package nl.tudelft.trustchain.musicdao.core.repositories
 import android.os.Build
 import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artist_announce.ArtistAnnounceBlock
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artist_announce.ArtistAnnounceBlockRepository
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artistAnnounce.ArtistAnnounceBlock
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artistAnnounce.ArtistAnnounceBlockRepository
 import nl.tudelft.trustchain.musicdao.core.repositories.model.Album
 import nl.tudelft.trustchain.musicdao.core.repositories.model.Artist
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,12 +21,6 @@ class ArtistRepository @Inject constructor(
 ) {
 
     val stateFlows: MutableMap<String, MutableStateFlow<Artist?>> = mutableMapOf()
-
-    val optimisticUpdateListeners = mutableListOf<() -> Unit>()
-    fun addOptimisticUpdateListener(listener: () -> Unit) {
-        optimisticUpdateListeners.add(listener)
-    }
-
     suspend fun getArtist(publicKey: String): Artist? {
         return artistAnnounceBlockRepository.getOrCrawl(publicKey)?.let { toArtist(it) }
     }

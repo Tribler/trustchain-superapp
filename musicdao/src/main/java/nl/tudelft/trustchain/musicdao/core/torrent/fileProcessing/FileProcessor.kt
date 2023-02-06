@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.musicdao.core.torrent.file_processing
+package nl.tudelft.trustchain.musicdao.core.torrent.fileProcessing
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -46,11 +46,6 @@ class FileProcessor {
                 }
             }
         }
-
-        fun folderExistsAndHasFiles(folder: File): Boolean {
-            return folder.exists() && getFiles(folder)?.isEmpty() == false
-        }
-
         fun getTitle(mp3: Mp3File): String {
             val title = Util.getTitle(mp3)
             if (title != null) {
@@ -118,6 +113,7 @@ class FileProcessor {
                     cover = coverFile
                     break
                 } catch (exception: Exception) {
+                    return null
                 }
             }
 

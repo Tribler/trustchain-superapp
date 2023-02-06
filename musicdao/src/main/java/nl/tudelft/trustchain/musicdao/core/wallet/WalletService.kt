@@ -9,7 +9,6 @@ import org.bitcoinj.core.Coin
 import org.bitcoinj.core.Transaction
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.kits.WalletAppKit
-import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
 import java.io.IOException
@@ -38,7 +37,7 @@ class WalletService(val config: WalletConfig, private val app: WalletAppKit) {
             ) {
                 super.progress(pct, blocksSoFar, date)
                 val percentage = pct.toInt()
-                percentageSynced = percentageSynced
+                percentageSynced = percentage
                 Log.i("MusicDao2", "Progress: $percentage")
             }
 
@@ -86,13 +85,13 @@ class WalletService(val config: WalletConfig, private val app: WalletAppKit) {
 
         val sendRequest = SendRequest.to(targetAddress, Coin.valueOf(satoshiAmount))
 
-        try {
+        return try {
             app.wallet().sendCoins(sendRequest)
             Log.d("MusicDao", "Wallet (2): successfully sent $coinsAmount to $publicKey")
-            return true
+            true
         } catch (e: Exception) {
             Log.d("MusicDao", "Wallet (3): failed sending $coinsAmount to $publicKey")
-            return false
+            false
         }
     }
 
@@ -132,10 +131,6 @@ class WalletService(val config: WalletConfig, private val app: WalletAppKit) {
                 false
             }
         }
-    }
-
-    private fun isRegTest(): Boolean {
-        return config.networkParams == RegTestParams.get()
     }
 
     fun walletStatus(): String {

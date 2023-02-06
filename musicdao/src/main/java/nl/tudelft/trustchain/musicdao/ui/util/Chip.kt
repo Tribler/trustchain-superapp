@@ -7,9 +7,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,36 +76,4 @@ fun Chip(
             }
         }
     }
-}
-
-@Composable
-fun SelectableChip(
-    label: String,
-    contentDescription: String,
-    selected: Boolean,
-    onClick: (nowSelected: Boolean) -> Unit
-) {
-    Chip(
-        startIcon = { if (selected) Icons.Default.Check else null },
-        startIconTint = Color.Black.copy(alpha = 0.5f),
-        contentDescription = contentDescription,
-        label = label,
-        isClickable = true,
-        onClick = { onClick(!selected) }
-    )
-}
-
-@Composable
-fun RemovableChip(
-    label: String,
-    contentDescription: String,
-    onRemove: () -> Unit
-) {
-    Chip(
-        endIcon = { Icons.Default.Close },
-        endIconTint = Color.Black.copy(alpha = 0.5f),
-        contentDescription = contentDescription,
-        label = label,
-        onEndIconClicked = { onRemove() }
-    )
 }

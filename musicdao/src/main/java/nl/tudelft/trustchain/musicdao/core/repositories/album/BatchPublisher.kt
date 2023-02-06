@@ -9,7 +9,6 @@ import nl.tudelft.trustchain.musicdao.core.torrent.TorrentEngine
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import java.io.File
-import java.nio.file.Paths
 import java.time.Instant
 import java.util.*
 import javax.inject.Inject
@@ -67,9 +66,5 @@ class BatchPublisher @Inject constructor(
                 Log.d("MusicDao", "Batchpublisher: $infoHash $result")
             }
         }
-    }
-
-    suspend fun publish() {
-        publish(Paths.get("${cachePath.getPath()}/output.csv").toFile())
     }
 }

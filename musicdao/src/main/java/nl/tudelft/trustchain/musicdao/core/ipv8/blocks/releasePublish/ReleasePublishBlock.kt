@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish
+package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish
 
 data class ReleasePublishBlock(
     val releaseId: String,
@@ -10,6 +10,6 @@ data class ReleasePublishBlock(
     val protocolVersion: String
 ) {
     companion object {
-        val BLOCK_TYPE = "publish_release"
+        const val BLOCK_TYPE = "publish_release"
     }
 }

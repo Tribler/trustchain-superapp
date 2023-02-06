@@ -6,8 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
 import nl.tudelft.trustchain.musicdao.core.cache.entities.AlbumEntity
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlock
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockRepository
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlock
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlockRepository
 import nl.tudelft.trustchain.musicdao.core.repositories.model.Album
 import nl.tudelft.trustchain.musicdao.core.torrent.TorrentEngine
 import javax.inject.Inject
@@ -17,22 +17,13 @@ import javax.inject.Inject
  * the data that the UI/CMD interface can work with.
  */
 @RequiresApi(Build.VERSION_CODES.O)
-
 class AlbumRepository @Inject constructor(
     private val database: CacheDatabase,
     private val releasePublishBlockRepository: ReleasePublishBlockRepository
 ) {
 
-    suspend fun getAlbum(id: String): Album {
-        return database.dao.get(id).toAlbum()
-    }
-
     suspend fun getAlbums(): List<Album> {
         return database.dao.getAll().map { it.toAlbum() }
-    }
-
-    fun getAlbumFlow(id: String): LiveData<Album> {
-        return database.dao.getLiveData(id).map { it.toAlbum() }
     }
 
     fun getAlbumsFlow(): LiveData<List<Album>> {
@@ -52,16 +43,15 @@ class AlbumRepository @Inject constructor(
         magnet: String,
         title: String,
         artist: String,
-        releaseDate: String,
+        releaseDate: String
     ): Boolean {
-
         // Create and publish the Trustchain block.
         val block = releasePublishBlockRepository.create(
             releaseId = releaseId,
             magnet = magnet,
             title = title,
             artist = artist,
-            releaseDate = releaseDate,
+            releaseDate = releaseDate
         )
 
         // If successful, we optimistically add it to our local cache.

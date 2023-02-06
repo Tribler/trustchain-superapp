@@ -29,7 +29,6 @@ fun FullPlayerScreen(playerViewModel: PlayerViewModel) {
             .fillMaxSize()
             .padding(20.dp)
     ) {
-
         ReleaseCover(
             file = coverFile,
             modifier = Modifier
@@ -52,7 +51,7 @@ fun FullPlayerScreen(playerViewModel: PlayerViewModel) {
             )
         }
 
-        Column() {
+        Column {
             DisposableEffect(
                 AndroidView(
                     factory = {

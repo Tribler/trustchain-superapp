@@ -10,7 +10,7 @@ import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
 import nl.tudelft.trustchain.musicdao.core.cache.parser.GsonParser
 import nl.tudelft.trustchain.musicdao.core.cache.parser.Converters
 import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
-import nl.tudelft.trustchain.musicdao.core.torrent.file_processing.DownloadFinishUseCase
+import nl.tudelft.trustchain.musicdao.core.torrent.fileProcessing.DownloadFinishUseCase
 import nl.tudelft.trustchain.musicdao.core.wallet.WalletConfig
 import nl.tudelft.trustchain.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_FAUCET_ENDPOINT
 import nl.tudelft.trustchain.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_FILE_PREFIX

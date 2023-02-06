@@ -22,10 +22,8 @@ import nl.tudelft.trustchain.musicdao.ui.screens.profile_menu.CustomMenuItem
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
-
     val confirmedBalance = bitcoinWalletViewModel.confirmedBalance.collectAsState()
     val estimatedBalance = bitcoinWalletViewModel.estimatedBalance.collectAsState()
     val syncProgress = bitcoinWalletViewModel.syncProgress.collectAsState()
@@ -51,7 +49,6 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,7 +86,7 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
                         .align(Alignment.CenterVertically)
                 )
                 LinearProgressIndicator(
-                    syncProgress.value?.let { (it.toFloat() / 100).toFloat() }
+                    syncProgress.value?.let { (it.toFloat() / 100) }
                         ?: 0f,
                     color = MaterialTheme.colors.onPrimary,
                     modifier = Modifier
@@ -155,7 +152,7 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
                         Column(modifier = Modifier.fillMaxSize()) {
                             walletTransactions.value.map {
                                 TransactionItem(
-                                    userWalletTransaction = it,
+                                    userWalletTransaction = it
                                 )
                             }
                         }

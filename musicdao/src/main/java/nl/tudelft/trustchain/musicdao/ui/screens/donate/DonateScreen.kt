@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: String, navController: NavController) {
-
     val donateScreenViewModel: DonateScreenViewModel = hiltViewModel()
     val artist = donateScreenViewModel.artist.collectAsState()
     val amount = rememberSaveable { mutableStateOf("0.1") }
@@ -39,7 +38,6 @@ fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: Stri
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun send() {
-
         // Check if enough balance available
         val confirmedBalance = bitcoinWalletViewModel.confirmedBalance.value
         if (confirmedBalance == null || confirmedBalance.isZero || confirmedBalance.isNegative) {
@@ -64,7 +62,6 @@ fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: Stri
     }
 
     Column(modifier = Modifier.padding(20.dp)) {
-
         Text(
             text = "Your balance is ${bitcoinWalletViewModel.confirmedBalance.value?.toFriendlyString() ?: "0.00 BTC"}",
             fontWeight = FontWeight.SemiBold,
@@ -76,7 +73,7 @@ fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: Stri
             modifier = Modifier.padding(bottom = 5.dp)
         )
         OutlinedTextField(value = amount.value, onValueChange = { amount.value = it }, modifier = Modifier.padding(bottom = 10.dp))
-        Row() {
+        Row {
             Button(
                 onClick = {
                     amount.value = "0.001"

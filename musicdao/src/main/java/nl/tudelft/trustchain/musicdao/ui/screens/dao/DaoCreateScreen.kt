@@ -10,17 +10,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.ui.SnackbarHandler
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun NewDaoScreen(daoViewModel: DaoViewModel, navController: NavController) {
-    var name by rememberSaveable { mutableStateOf("") }
+fun DaoCreateScreen(daoViewModel: DaoViewModel, navController: NavController) {
     var threshHold by rememberSaveable { mutableStateOf("") }
     var entranceFee by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current

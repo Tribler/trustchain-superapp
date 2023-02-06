@@ -18,9 +18,6 @@ import java.io.File
 
 class PlayerViewModel(context: Context) : ViewModel() {
 
-    private val _isPlaying: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isPlaying: StateFlow<Boolean> = _isPlaying
-
     private val _playingTrack: MutableStateFlow<Song?> = MutableStateFlow(null)
     val playingTrack: StateFlow<Song?> = _playingTrack
 

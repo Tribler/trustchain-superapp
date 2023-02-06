@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.musicdao.core.ipv8
 
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artist_announce.ArtistAnnounceBlock
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artist_announce.ArtistAnnounceBlockValidator
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artistAnnounce.ArtistAnnounceBlock
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artistAnnounce.ArtistAnnounceBlockValidator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 class ArtistBlockGossiper @Inject constructor(
     private val musicCommunity: MusicCommunity,
-    private val artistAnnounceBlockSigner: ArtistAnnounceBlockValidator,
+    private val artistAnnounceBlockSigner: ArtistAnnounceBlockValidator
 ) {
 
     fun startGossip(coroutineScope: CoroutineScope) {

@@ -92,6 +92,6 @@ class SearchScreenViewModel @Inject constructor(
     }
 
     companion object {
-        private val DEBOUNCE_DELAY = 200L
+        private const val DEBOUNCE_DELAY = 200L
     }
 }

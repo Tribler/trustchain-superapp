@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.dao
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,7 +23,6 @@ import nl.tudelft.trustchain.musicdao.ui.screens.profile_menu.CustomMenuItem
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterialApi
 @Composable
 fun DaoListScreen(navController: NavController, daoViewModel: DaoViewModel) {
@@ -47,7 +45,7 @@ fun DaoListScreen(navController: NavController, daoViewModel: DaoViewModel) {
                 .fillMaxSize()
                 .padding(20.dp)
         ) {
-            Column() {
+            Column {
                 CustomMenuItem(
                     text = "Create a new DAO",
                     onClick = {
@@ -78,7 +76,7 @@ fun DaoListScreen(navController: NavController, daoViewModel: DaoViewModel) {
                         secondLine = "Please wait for DAOs to load."
                     )
                 }
-                LazyColumn() {
+                LazyColumn {
                     daos.toList().sortedByDescending { it.first.timestamp }
                         .forEachIndexed { index, (_, dao) ->
                             item(index) {

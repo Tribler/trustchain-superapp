@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.release.create
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -33,14 +34,14 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.launch
 import java.time.Instant
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalComposeUiApi
 @Composable
 fun CreateReleaseDialog(navController: NavController) {
-
     val viewModel: CreateReleaseDialogViewModel = hiltViewModel()
 
-    val fileList: MutableState<List<Uri>> = remember { mutableStateOf(listOf<Uri>()) }
+    val fileList: MutableState<List<Uri>> = remember { mutableStateOf(listOf()) }
     val title = rememberSaveable { mutableStateOf("") }
     val artist = rememberSaveable { mutableStateOf("") }
     val date = rememberSaveable { mutableStateOf("") }
@@ -88,7 +89,7 @@ fun CreateReleaseDialog(navController: NavController) {
         }
     }
 
-    Column() {
+    Column {
         Surface(
             modifier = Modifier
                 .requiredWidth(LocalConfiguration.current.screenWidthDp.dp * 1f)
@@ -103,7 +104,7 @@ fun CreateReleaseDialog(navController: NavController) {
                             IconButton(onClick = { navController.popBackStack() }) {
                                 Icon(Icons.Filled.Close, contentDescription = null)
                             }
-                        },
+                        }
                     )
                 },
                 content = {
@@ -114,7 +115,6 @@ fun CreateReleaseDialog(navController: NavController) {
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-
                         Text(
                             text = "Fill in the form below to create a new release",
                             style = MaterialTheme.typography.body1,
@@ -149,7 +149,7 @@ fun CreateReleaseDialog(navController: NavController) {
                                 value = if (fileList.value.isEmpty()) "" else fileList.value.toString(),
                                 onValueChange = {},
                                 label = { Text("Files") },
-                                enabled = false,
+                                enabled = false
                             )
                         }
 
@@ -165,7 +165,7 @@ fun CreateReleaseDialog(navController: NavController) {
                                 value = dateToLongString(date.value),
                                 onValueChange = {},
                                 enabled = false,
-                                label = { Text("Release Date") },
+                                label = { Text("Release Date") }
                             )
                         }
 

@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.musicdao.core.torrent.file_processing
+package nl.tudelft.trustchain.musicdao.core.torrent.fileProcessing
 
 import android.os.Build
 import android.util.Log

@@ -62,14 +62,13 @@ fun ProposalDetailPure(proposal: Proposal, daoViewModel: DaoViewModel) {
             )
             Spacer(modifier = Modifier.size(10.dp))
 
-            Card() {
+            Card {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
                 ) {
                     val dao = daoViewModel.getDao(proposal.daoId)
-                    val proposalBlock = daoViewModel.getProposal(proposal.proposalId)!!.second
 
                     if (proposal.isClosed()) {
                         Text(
@@ -118,7 +117,7 @@ fun ProposalDetailPure(proposal: Proposal, daoViewModel: DaoViewModel) {
 
             Spacer(modifier = Modifier.size(10.dp))
 
-            Card() {
+            Card {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -141,7 +140,7 @@ fun ProposalDetailPure(proposal: Proposal, daoViewModel: DaoViewModel) {
                                 .fillMaxWidth()
                                 .padding(bottom = 2.dp)
                         ) {
-                            Row() {
+                            Row {
                                 Box(
                                     modifier = Modifier
                                         .size(16.dp)
@@ -172,14 +171,13 @@ fun ProposalDetailPure(proposal: Proposal, daoViewModel: DaoViewModel) {
             )
             Spacer(modifier = Modifier.size(10.dp))
 
-            Card() {
+            Card {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
                 ) {
                     val dao = daoViewModel.getDao(proposal.daoId)
-                    val proposalBlock = daoViewModel.getProposal(proposal.proposalId)!!.second
 
                     if (proposal.isClosed()) {
                         Text(
@@ -228,7 +226,7 @@ fun ProposalDetailPure(proposal: Proposal, daoViewModel: DaoViewModel) {
 
             Spacer(modifier = Modifier.size(10.dp))
 
-            Card() {
+            Card {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -251,7 +249,7 @@ fun ProposalDetailPure(proposal: Proposal, daoViewModel: DaoViewModel) {
                                 .fillMaxWidth()
                                 .padding(bottom = 2.dp)
                         ) {
-                            Row() {
+                            Row {
                                 Box(
                                     modifier = Modifier
                                         .size(16.dp)

@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artist_announce
+package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artistAnnounce
 
 import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner

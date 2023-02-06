@@ -58,7 +58,7 @@ fun AppNavigation(
     val daoViewModel: DaoViewModel = hiltViewModel()
 
     val context = LocalContext.current
-    daoViewModel.initManager(context)
+    daoViewModel.initManager()
 
     AnimatedNavHost(
         modifier = Modifier.fillMaxSize(),
@@ -124,7 +124,7 @@ fun AppNavigation(
                 DaoListScreen(navController = navController, daoViewModel = daoViewModel)
             }
             composable(Screen.NewDaoRoute.route) {
-                NewDaoScreen(daoViewModel = daoViewModel, navController = navController)
+                DaoCreateScreen(daoViewModel = daoViewModel, navController = navController)
             }
             composable(Screen.CreateRelease.route) {
                 CreateReleaseDialog(navController = navController)
@@ -217,7 +217,7 @@ fun AppNavigation(
                         animationSpec = tween(200)
                     )
                 },
-                exitTransition = { ->
+                exitTransition = {
                     slideOutOfContainer(
                         AnimatedContentScope.SlideDirection.Down,
                         animationSpec = tween(200)
