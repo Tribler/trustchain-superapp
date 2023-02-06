@@ -146,7 +146,7 @@
             android:windowSoftInputMode="stateAlwaysHidden" />
 
         <activity
-            android:name="com.example.musicdao.MusicActivity"
+            android:name="nl.tudelft.trustchain.musicdao.MusicActivity"
             android:label="Music App"
             android:exported="true"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
@@ -173,7 +173,7 @@
             android:exported="false" />
 
         <service
-            android:name="com.example.musicdao.core.repositories.MusicGossipingService"
+            android:name="nl.tudelft.trustchain.musicdao.core.repositories.MusicGossipingService"
             android:enabled="true"
             android:exported="false" />
 

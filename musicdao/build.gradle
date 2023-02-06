@@ -73,7 +73,7 @@ android {
         kotlinCompilerExtensionVersion "1.3.1"
     }
 
-    namespace 'com.example.musicdao'
+    namespace 'nl.tudelft.trustchain.musicdao'
 }
 
 dependencies {

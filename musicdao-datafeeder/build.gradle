@@ -25,7 +25,7 @@ dependencies {
 }
 
 application {
-    mainClassName = 'com.example.musicdao_datafeeder.DataFeederKt'
+    mainClassName = 'nl.trustchain.tudelft.musicdaodatafeeder.DataFeederKt'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

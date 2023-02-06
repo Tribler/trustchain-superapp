@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.app
 import android.app.Activity
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import com.example.musicdao.MusicActivity
+import nl.tudelft.trustchain.musicdao.MusicActivity
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.atomicswap.AtomicSwapActivity
 import nl.tudelft.trustchain.common.R

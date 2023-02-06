@@ -13,8 +13,8 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.preference.PreferenceManager
-import com.example.musicdao.core.ipv8.MusicCommunity
-import com.example.musicdao.core.dao.DaoCommunity
+import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
+import nl.tudelft.trustchain.musicdao.core.dao.DaoCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import dagger.hilt.android.HiltAndroidApp

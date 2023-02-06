@@ -2,7 +2,7 @@ package nl.tudelft.trustchain.gossipML.db
 
 import android.annotation.SuppressLint
 import android.util.Log
-import com.example.musicdao_datafeeder.AudioFileFilter
+import nl.tudelft.trustchain.musicdaodatafeeder.AudioFileFilter
 import com.mpatric.mp3agic.Mp3File
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job

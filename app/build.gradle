@@ -10,8 +10,6 @@ apply plugin: "dagger.hilt.android.plugin"
 apply plugin: "kotlin-kapt"
 
 buildscript {
-    ext.hilt_ver = '2.44.2'
-
     repositories {
         google()
         mavenCentral()
