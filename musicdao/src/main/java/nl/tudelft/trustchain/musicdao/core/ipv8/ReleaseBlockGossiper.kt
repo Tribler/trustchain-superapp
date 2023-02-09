@@ -1,6 +1,6 @@
 package nl.tudelft.trustchain.musicdao.core.ipv8
 
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlock
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlock
 import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockValidator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay

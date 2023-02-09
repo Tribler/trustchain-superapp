@@ -5,6 +5,7 @@ import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.Constants
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlock
 import javax.inject.Inject
 
 class ReleasePublishBlockRepository @Inject constructor(
