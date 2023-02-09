@@ -7,6 +7,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlock
 import javax.inject.Inject
 
 class ReleasePublishBlockValidator @Inject constructor(val musicCommunity: MusicCommunity) :
@@ -47,6 +48,6 @@ class ReleasePublishBlockValidator @Inject constructor(val musicCommunity: Music
     }
 
     companion object {
-        val BLOCK_TYPE = ReleasePublishBlock.BLOCK_TYPE
+        const val BLOCK_TYPE = ReleasePublishBlock.BLOCK_TYPE
     }
 }
