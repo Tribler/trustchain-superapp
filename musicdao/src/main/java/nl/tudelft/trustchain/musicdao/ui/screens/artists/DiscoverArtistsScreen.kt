@@ -29,7 +29,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DiscoverArtistsScreen(navController: NavController) {
-
     val discoverArtistsViewModel: DiscoverArtistsViewModel = hiltViewModel()
     val artists by discoverArtistsViewModel.artists.collectAsState(listOf())
     val isRefreshing by discoverArtistsViewModel.isRefreshing.observeAsState(false)
@@ -38,7 +37,6 @@ fun DiscoverArtistsScreen(navController: NavController) {
 
     SwipeRefresh(state = refreshState, onRefresh = { discoverArtistsViewModel.refresh() }) {
         Column(modifier = Modifier.fillMaxSize()) {
-
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 artists.map {
                     ListItem(
@@ -53,7 +51,7 @@ fun DiscoverArtistsScreen(navController: NavController) {
             if (artists.isEmpty()) {
                 EmptyState(
                     firstLine = "No artists found",
-                    secondLine = "Make a profile yourself or wait for profiles to come in",
+                    secondLine = "Make a profile yourself or wait for profiles to come in"
                 )
             }
         }

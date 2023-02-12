@@ -404,16 +404,6 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
         context: Context,
         activityRequired: Activity
     ) {
-//        if (!validateTransferInput()) {
-//            activity?.runOnUiThread {
-//                alert_view.text =
-//                    "Failed: Bitcoin PK should be a string, minimal satoshi amount: ${SWUtil.MINIMAL_TRANSACTION_AMOUNT}"
-//            }
-//            return
-//        }
-//        val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
-//        val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
-
         val swJoinBlock: TrustChainBlock =
             getDaoCommunity().fetchLatestSharedWalletBlock(blockHash!!)
                 ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
@@ -484,7 +474,6 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
             refreshOneShot()
         } catch (t: Throwable) {
             Log.d("MVDAO", "Transferring funds failed. ${t.message ?: "No further information"}.")
-//            resetWalletInitializationValues()
             Log.d(
                 "MVDAO",
                 t.message ?: "Unexpected error occurred. Try again"
@@ -512,8 +501,6 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
             "MVDAO",
             "Collecting signatures: ${responses.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
         )
-
-//        SnackbarHandler.displaySnackbar("Collecting signatures: ${responses.size}/${blockData.SW_SIGNATURES_REQUIRED} received!")
 
         if (responses.size >= requiredSignatures) {
             return responses

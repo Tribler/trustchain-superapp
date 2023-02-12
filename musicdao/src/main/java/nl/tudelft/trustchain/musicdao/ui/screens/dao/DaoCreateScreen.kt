@@ -31,11 +31,6 @@ fun DaoCreateScreen(daoViewModel: DaoViewModel, navController: NavController) {
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
-//            OutlinedTextField(
-//                value = name,
-//                onValueChange = { name = it },
-//                label = { Text("Title") }
-//            )
             OutlinedTextField(
                 value = threshHold,
                 onValueChange = { threshHold = it },
