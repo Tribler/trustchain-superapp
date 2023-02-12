@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
@@ -32,9 +31,6 @@ fun HomeScreen(
     homeScreenViewModel: HomeScreenViewModel,
     screenViewModel: SearchScreenViewModel
 ) {
-//    val releasesState by homeScreenViewModel.releases.observeAsState(listOf())
-//    val peerAmount by homeScreenViewModel.peerAmount.observeAsState(0)
-//    val isRefreshing by homeScreenViewModel.isRefreshing.observeAsState(false)
     val isRefreshing by screenViewModel.isRefreshing.observeAsState(false)
     val releases by screenViewModel.searchResult.collectAsState(listOf())
     val searchQuery by screenViewModel.searchQuery.collectAsState()
@@ -75,27 +71,5 @@ fun HomeScreen(
                 )
             }
         }
-
-        val modifier = if (releases.isEmpty()) Modifier else Modifier.fillMaxSize()
-
-//        Column(modifier = Modifier.fillMaxSize()) {
-//            Divider()
-//            Column(modifier = Modifier.padding(16.dp)) {
-//                Text(text = "Discovered ${releasesState.size} releases")
-//                Text(text = "Discovered $peerAmount peers")
-//            }
-//
-//            ReleaseList(
-//                releasesState = releasesState,
-//                navController = navController,
-//                modifier = modifier
-//            )
-//            if (releasesState.isEmpty()) {
-//                EmptyState(
-//                    firstLine = "No releases found",
-//                    secondLine = "Make a release yourself or wait for releases to come in"
-//                )
-//            }
-//        }
     }
 }

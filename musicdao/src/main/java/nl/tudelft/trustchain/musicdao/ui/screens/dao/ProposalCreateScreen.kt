@@ -18,7 +18,7 @@ import nl.tudelft.trustchain.musicdao.ui.SnackbarHandler
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NewProposalScreen(daoId: String, daoViewModel: DaoViewModel, navController: NavController) {
+fun ProposalCreateScreen(daoId: String, daoViewModel: DaoViewModel, navController: NavController) {
     var satoshi by rememberSaveable { mutableStateOf("6000") }
     var address by rememberSaveable { mutableStateOf("mkKcu9VCNTAerxbZLXvLSGBTBiLwqGqcDL") }
     var chosenArtist by rememberSaveable { mutableStateOf("") }
@@ -31,7 +31,7 @@ fun NewProposalScreen(daoId: String, daoViewModel: DaoViewModel, navController: 
 
     fun newProposal() {
         if (dao != null) {
-            // validaation
+            // validation
             if (satoshi.toLong() <= 5000) {
                 SnackbarHandler.displaySnackbar("Amount should be larger than 5000.")
                 return

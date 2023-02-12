@@ -92,7 +92,7 @@ class DAOJoinHelper {
      *
      * NOTE:
      *  - the latest walletBlockData should be  given, otherwise the serialized transaction is invalid.
-     *  - It takes some time before the sharedwallet is accepted on the bitcoin blockchain.
+     *  - It takes some time before the shared wallet is accepted on the bitcoin blockchain.
      * @param sharedWalletData data of the shared wallet that you want to join.
      */
     private fun createBitcoinSharedWalletForJoining(sharedWalletData: SWJoinBlockTD): String {

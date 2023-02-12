@@ -57,7 +57,6 @@ fun AppNavigation(
     val bitcoinWalletViewModel: BitcoinWalletViewModel = hiltViewModel()
     val daoViewModel: DaoViewModel = hiltViewModel()
 
-    val context = LocalContext.current
     daoViewModel.initManager()
 
     AnimatedNavHost(
@@ -169,7 +168,7 @@ fun AppNavigation(
                     }
                 )
             ) { navBackStackEntry ->
-                NewProposalScreen(
+                ProposalCreateScreen(
                     navBackStackEntry.arguments?.getString(
                         "daoId"
                     )!!,
