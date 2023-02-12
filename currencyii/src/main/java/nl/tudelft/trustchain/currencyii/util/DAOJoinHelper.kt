@@ -34,7 +34,7 @@ class DAOJoinHelper {
      * 2.1 Send a proposal on the trust chain to join a shared wallet and to collect signatures.
      * The proposal is a serialized bitcoin join transaction.
      * **NOTE** the latest walletBlockData should be given, otherwise the serialized transaction is invalid.
-     * @param mostRecentWalletBlock - the latest (that you know of) shared wallet block.
+     * @param mostRecentWalletBlock - the latest (that you know of) sharedwallet block.
      */
     fun proposeJoinWallet(
         myPeer: Peer,
