@@ -27,7 +27,9 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+        allWarningsAsErrors = true
     }
+
 
     buildFeatures {
         viewBinding = true
@@ -75,6 +77,6 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-opt-in=kotlin.RequiresOptIn"
+        "-opt-in=kotlin.RequiresOptIn", "-Werror"
     ]
 }
