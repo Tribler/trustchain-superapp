@@ -118,6 +118,11 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
+            android:name="nl.tudelft.trustchain.detoks.DeToksActivity"
+            android:theme="@style/Fullscreen"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+
+        <activity
             android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
             android:exported="true"
             android:launchMode="singleTop"
