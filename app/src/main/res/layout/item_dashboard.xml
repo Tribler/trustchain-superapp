@@ -9,14 +9,15 @@
 
     <ImageView
         android:id="@+id/imgIcon"
-        android:layout_width="48dp"
-        android:layout_height="48dp" />
+        android:layout_width="72dp"
+        android:layout_height="72dp" />
 
     <TextView
         android:id="@+id/txtAppName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:textSize="16sp"
         android:fontFamily="sans-serif-medium"
         android:textAlignment="center" />
 </LinearLayout>

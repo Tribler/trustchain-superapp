@@ -25,6 +25,9 @@ An online indicator and the last message is shown for each contact. Users can ex
 
  <img src="https://user-images.githubusercontent.com/1122874/82873643-1a353880-9f35-11ea-8da3-24ce189c939d.png" width="180"> <img src="https://user-images.githubusercontent.com/1122874/82873661-1f928300-9f35-11ea-9955-6a7488936b02.png" width="180">
 
+### DeToks
+**Decentralised TikTok** skeleton app for the CS4160 Blockchain Engineering (2022/23) course.
+
 ### Digital Euro
 
 The Superapp is connected to the European IBAN Euro system.

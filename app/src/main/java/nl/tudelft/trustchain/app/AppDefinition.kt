@@ -20,6 +20,7 @@ import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.voting.VotingActivity
+import nl.tudelft.trustchain.detoks.DeToksActivity
 
 enum class AppDefinition(
     @DrawableRes val icon: Int,
@@ -28,6 +29,13 @@ enum class AppDefinition(
     val activity: Class<out Activity>,
     val disableImageTint: Boolean = false,
 ) {
+    DETOKS(
+        R.drawable.ic_detox_logo,
+        "DeToks",
+        R.color.black,
+        DeToksActivity::class.java,
+        true,
+    ),
     EIGHTEEN_PLUS(
         R.drawable.ic_18_plus,
         "18+",
