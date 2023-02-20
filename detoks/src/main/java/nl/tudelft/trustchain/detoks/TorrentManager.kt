@@ -14,6 +14,11 @@ import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import java.io.File
 
+/**
+ * This class manages the torrent files and the video pool.
+ * It is responsible for downloading the torrent files and caching the videos.
+ * It also provides the videos to the video adapter.
+ */
 class TorrentManager(
     private val cacheDir: File,
     private val torrentDir: File,
@@ -42,6 +47,11 @@ class TorrentManager(
         notifyChange((currentIndex - 1) % getNumberOfTorrents())
     }
 
+    /**
+     * This function provides the video at the given index.
+     * If the video is not downloaded yet, it will wait for it to be downloaded.
+     * If the video is not downloaded after the timeout, it will return the video anyway.
+     */
     suspend fun provideContent(index: Int = currentIndex, timeout: Long = 10000): TorrentMediaInfo {
         Log.i("DeToks", "Providing content ... $index, ${index % getNumberOfTorrents()}")
         val content = torrentFiles.gett(index % getNumberOfTorrents())
@@ -64,7 +74,9 @@ class TorrentManager(
         return torrentFiles.size
     }
 
-
+    /**
+     * This functions updates the current index of the cache.
+     */
     private fun notifyChange(
         newIndex: Int,
         loopedToFront: Boolean = false
@@ -103,6 +115,10 @@ class TorrentManager(
         }
     }
 
+    /**
+     * This function builds the torrent index. It adds all the torrent files in the torrent
+     * directory to Libtorrent and selects all .mp4 files for download.
+     */
     private fun buildTorrentIndex() {
         val files = torrentDir.listFiles()
         if (files != null) {

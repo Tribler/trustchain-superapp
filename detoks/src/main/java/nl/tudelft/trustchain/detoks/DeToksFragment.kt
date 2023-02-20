@@ -10,7 +10,6 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
 import java.io.FileOutputStream
 
-
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var torrentManager: TorrentManager
     private val logger = KotlinLogging.logger {}
@@ -62,6 +61,9 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         onPageChangeCallback()
     }
 
+    /**
+     * This functions allows for looping back to start of the video pool.
+     */
     private fun onPageChangeCallback() {
         viewPagerVideos.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageScrollStateChanged(state: Int) {

@@ -9,10 +9,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application>
-        <!--        <activity-->
-        <!--            android:name=".ExecutionActivity"-->
-        <!--            android:exported="false"-->
-        <!--            android:configChanges="keyboardHidden|orientation|screenSize" />-->
         <activity
             android:name="nl.tudelft.trustchain.detoks.DeToksActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
