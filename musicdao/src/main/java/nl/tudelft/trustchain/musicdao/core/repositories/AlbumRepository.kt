@@ -7,7 +7,7 @@ import androidx.lifecycle.map
 import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
 import nl.tudelft.trustchain.musicdao.core.cache.entities.AlbumEntity
 import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlock
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockRepository
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlockRepository
 import nl.tudelft.trustchain.musicdao.core.repositories.model.Album
 import nl.tudelft.trustchain.musicdao.core.torrent.TorrentEngine
 import javax.inject.Inject

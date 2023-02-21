@@ -51,7 +51,6 @@ fun ReleaseScreen(
     playerViewModel: PlayerViewModel,
     navController: NavController
 ) {
-
     var state by remember { mutableStateOf(0) }
     val titles = listOf("RELEASE", "TORRENT")
 
@@ -65,7 +64,7 @@ fun ReleaseScreen(
     )
 
     val torrentStatus by viewModel.torrentState.collectAsState()
-    val album by viewModel.saturatedReleaseState.observeAsState()
+    val albumState by viewModel.saturatedReleaseState.observeAsState()
 
     val playingTrack = playerViewModel.playingTrack.collectAsState()
 
@@ -81,15 +80,16 @@ fun ReleaseScreen(
             Song(
                 file = track.file,
                 artist = track.artist,
-                title = track.title,
+                title = track.title
             ),
-            context, cover
+            context,
+            cover
         )
     }
 
     val scrollState = rememberScrollState()
 
-    album?.let { album ->
+    albumState?.let { album ->
         LaunchedEffect(
             key1 = playerViewModel,
             block = {
@@ -144,7 +144,6 @@ fun ReleaseScreen(
                 if (album.songs != null && album.songs.isNotEmpty()) {
                     val files = album.songs
                     files.map {
-
                         val isPlayingModifier = playingTrack.value?.let { current ->
                             if (it.title == current.title) {
                                 MaterialTheme.colors.primary
@@ -263,7 +262,7 @@ fun Header(album: Album, navController: NavController) {
                 IconButton(onClick = { /*TODO*/ }) {
                     Icon(
                         imageVector = Icons.Outlined.Favorite,
-                        contentDescription = null,
+                        contentDescription = null
                     )
                 }
                 IconButton(
@@ -275,7 +274,7 @@ fun Header(album: Album, navController: NavController) {
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Person,
-                        contentDescription = null,
+                        contentDescription = null
                     )
                 }
                 IconButton(
@@ -287,7 +286,7 @@ fun Header(album: Album, navController: NavController) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = null,
+                        contentDescription = null
                     )
                 }
 
@@ -296,7 +295,7 @@ fun Header(album: Album, navController: NavController) {
                     IconButton(onClick = { expanded = true }) {
                         Icon(
                             imageVector = Icons.Outlined.MoreVert,
-                            contentDescription = null,
+                            contentDescription = null
                         )
                     }
                     DropdownMenu(
@@ -330,15 +329,9 @@ fun Header(album: Album, navController: NavController) {
             IconButton(onClick = { /*TODO*/ }) {
                 Icon(
                     imageVector = Icons.Outlined.PlayArrow,
-                    contentDescription = null,
-
+                    contentDescription = null
                 )
             }
-//            OutlinedButton(onClick = { navController.navigate(Screen.Donate.route) }) {
-//                Row {
-//                    Icon(imageVector = Icons.Default.Send, contentDescription = null)
-//                }
-//            }
         }
     }
 }

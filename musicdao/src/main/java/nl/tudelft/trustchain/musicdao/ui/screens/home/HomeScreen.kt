@@ -28,7 +28,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    homeScreenViewModel: HomeScreenViewModel,
     screenViewModel: SearchScreenViewModel
 ) {
     val isRefreshing by screenViewModel.isRefreshing.observeAsState(false)

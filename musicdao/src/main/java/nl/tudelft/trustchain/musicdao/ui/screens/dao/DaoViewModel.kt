@@ -23,7 +23,6 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.currencyii.CoinCommunity.Companion.SIGNATURE_AGREEMENT_BLOCK
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManager
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
@@ -72,23 +71,6 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
                 isRefreshing.value = false
             }
         }
-    }
-
-    /**
-     * Fetch all DAO blocks that contain a signature. These blocks are the response of a signature request.
-     * Signatures are fetched from [SIGNATURE_AGREEMENT_BLOCK] type blocks.
-     */
-    fun fetchProposalResponses(
-        walletId: String,
-        proposalId: String
-    ): List<SWResponseSignatureBlockTD> {
-        return getTrustChainCommunity().database.getBlocksWithType(SIGNATURE_AGREEMENT_BLOCK)
-            .filter {
-                val blockData = SWResponseSignatureTransactionData(it.transaction)
-                blockData.matchesProposal(walletId, proposalId)
-            }.map {
-                SWResponseSignatureTransactionData(it.transaction).getData()
-            }
     }
 
     /**
@@ -268,7 +250,7 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
                 // TODO: Commented this line out, it causes the app to crash
 //                withTimeout(SW_CRAWLING_TIMEOUT_MILLI) {
                 trustchain.crawlChain(peer)
-                val crawlResult = trustchain
+                trustchain
                     .getChainByUser(peer.publicKey.keyToBin())
             } catch (t: Throwable) {
                 val message = t.message ?: "No further information"
@@ -306,9 +288,9 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
                 var signatures: List<SWResponseSignatureBlockTD>? = null
                 while (signatures == null) {
                     Thread.sleep(1000)
-                    val oldSignatureCounbt = signatures?.size ?: 0
+                    val oldSignatureCount = signatures?.size ?: 0
                     signatures = collectJoinWalletResponses(proposeBlockData)
-                    if (signatures != null && signatures.size != oldSignatureCounbt) {
+                    if (signatures != null && signatures.size != oldSignatureCount) {
                         SnackbarHandler.displaySnackbar(
                             "Received a new signature: ${signatures.size}/${
                             requiredSignatures(

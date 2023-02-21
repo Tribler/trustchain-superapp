@@ -13,7 +13,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -25,7 +24,6 @@ import nl.tudelft.trustchain.musicdao.ui.screens.artists.DiscoverArtistsScreen
 import nl.tudelft.trustchain.musicdao.ui.screens.debug.Debug
 import nl.tudelft.trustchain.musicdao.ui.screens.donate.DonateScreen
 import nl.tudelft.trustchain.musicdao.ui.screens.home.HomeScreen
-import nl.tudelft.trustchain.musicdao.ui.screens.home.HomeScreenViewModel
 import nl.tudelft.trustchain.musicdao.ui.screens.release.create.CreateReleaseDialog
 import nl.tudelft.trustchain.musicdao.ui.screens.release.ReleaseScreen
 import nl.tudelft.trustchain.musicdao.ui.screens.search.SearchScreen
@@ -67,11 +65,9 @@ fun AppNavigation(
         startDestination = Screen.Home.route,
         builder = {
             composable(Screen.Home.route) {
-                val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
                 val searchScreenViewModel: SearchScreenViewModel = hiltViewModel()
                 HomeScreen(
                     navController = navController,
-                    homeScreenViewModel = homeScreenViewModel,
                     screenViewModel = searchScreenViewModel
                 )
             }

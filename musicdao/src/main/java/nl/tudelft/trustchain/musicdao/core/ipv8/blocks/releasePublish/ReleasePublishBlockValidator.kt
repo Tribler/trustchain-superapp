@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish
+package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish
 
 import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
 import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.Constants
@@ -7,7 +7,6 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlock
 import javax.inject.Inject
 
 class ReleasePublishBlockValidator @Inject constructor(val musicCommunity: MusicCommunity) :
@@ -33,8 +32,6 @@ class ReleasePublishBlockValidator @Inject constructor(val musicCommunity: Music
         val publisher = transaction["publisher"]
         val releaseDate = transaction["releaseDate"]
         val protocolVersion = transaction["protocolVersion"]
-
-//        Log.d("MusicDao", "Validating: $protocolVersion === ${Constants.PROTOCOL_VERSION} = ${protocolVersion == Constants.PROTOCOL_VERSION}")
 
         return (
             releaseId is String && releaseId.isNotEmpty() && transaction.containsKey("releaseId") &&

@@ -1,13 +1,13 @@
 package nl.tudelft.trustchain.musicdao.core.ipv8
 
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockSigner
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockValidator
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlockSigner
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlockValidator
 import javax.inject.Inject
 
 class SetupMusicCommunity @Inject constructor(
     private val musicCommunity: MusicCommunity,
     private val releasePublishBlockSigner: ReleasePublishBlockSigner,
-    private val releasePublishBlockValidator: ReleasePublishBlockValidator,
+    private val releasePublishBlockValidator: ReleasePublishBlockValidator
 ) {
 
     fun registerListeners() {

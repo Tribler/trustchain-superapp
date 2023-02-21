@@ -11,8 +11,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -41,11 +39,6 @@ fun MusicDAOApp() {
         val navController = rememberAnimatedNavController()
 
         val context = LocalContext.current
-
-        val openCreateReleaseDialog = remember { mutableStateOf(false) }
-        val closeDialog = {
-            openCreateReleaseDialog.value = false
-        }
 
         val playerViewModel: PlayerViewModel =
             viewModel(factory = PlayerViewModel.provideFactory(context = context))

@@ -11,7 +11,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,7 +21,6 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EditProfileScreen(navController: NavController) {
-
     val ownProfileViewScreenModel: MyProfileScreenViewModel = hiltViewModel()
     val profile = ownProfileViewScreenModel.profile.collectAsState()
 
@@ -30,8 +28,6 @@ fun EditProfileScreen(navController: NavController) {
     val bitcoinPublicKey = remember { mutableStateOf(profile.value?.bitcoinAddress) }
     val biography = remember { mutableStateOf(profile.value?.biography) }
     val socials = remember { mutableStateOf(profile.value?.socials) }
-
-    val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
 
     fun save() {

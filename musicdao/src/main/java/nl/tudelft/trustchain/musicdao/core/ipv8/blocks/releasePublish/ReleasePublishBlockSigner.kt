@@ -1,9 +1,8 @@
-package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish
+package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish
 
 import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlock
 import javax.inject.Inject
 
 class ReleasePublishBlockSigner @Inject constructor(val musicCommunity: MusicCommunity) :

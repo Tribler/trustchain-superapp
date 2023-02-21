@@ -1,16 +1,15 @@
-package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish
+package nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish
 
 import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
 import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.Constants
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlock
 import javax.inject.Inject
 
 class ReleasePublishBlockRepository @Inject constructor(
     private val musicCommunity: MusicCommunity,
-    private val releasePublishBlockValidator: ReleasePublishBlockValidator,
+    private val releasePublishBlockValidator: ReleasePublishBlockValidator
 ) {
 
     fun getValidBlocks(): List<ReleasePublishBlock> {
@@ -24,7 +23,7 @@ class ReleasePublishBlockRepository @Inject constructor(
         magnet: String,
         title: String,
         artist: String,
-        releaseDate: String,
+        releaseDate: String
     ): TrustChainBlock? {
         val myPeer = IPv8Android.getInstance().myPeer
         val transaction = mutableMapOf(

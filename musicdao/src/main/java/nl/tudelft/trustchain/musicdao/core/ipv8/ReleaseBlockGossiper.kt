@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.musicdao.core.ipv8
 
 import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlock
-import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockValidator
+import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.releasePublish.ReleasePublishBlockValidator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 class ReleaseBlockGossiper @Inject constructor(
     private val musicCommunity: MusicCommunity,
-    private val releasePublishBlockSigner: ReleasePublishBlockValidator,
+    private val releasePublishBlockSigner: ReleasePublishBlockValidator
 ) {
 
     fun startGossip(coroutineScope: CoroutineScope) {
