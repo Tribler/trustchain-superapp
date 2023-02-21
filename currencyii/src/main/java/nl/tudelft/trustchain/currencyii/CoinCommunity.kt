@@ -15,8 +15,8 @@ import nl.tudelft.trustchain.currencyii.util.DAOJoinHelper
 import nl.tudelft.trustchain.currencyii.util.DAOTransferFundsHelper
 
 @Suppress("UNCHECKED_CAST")
-class CoinCommunity : Community() {
-    override val serviceId = "02313685c1912a141279f8248fc8db5899c5df5b"
+class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8db5899c5df5b") : Community() {
+    override val serviceId = serviceId
 
     private fun getTrustChainCommunity(): TrustChainCommunity {
         return IPv8Android.getInstance().getOverlay()
@@ -73,16 +73,14 @@ class CoinCommunity : Community() {
         walletBlockData: TrustChainTransaction,
         blockData: SWSignatureAskBlockTD,
         responses: List<SWResponseSignatureBlockTD>,
-        context: Context,
-        activity: Activity
+        context: Context
     ) {
         daoJoinHelper.joinBitcoinWallet(
             myPeer,
             walletBlockData,
             blockData,
             responses,
-            context,
-            activity
+            context
         )
     }
 

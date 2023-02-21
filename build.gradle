@@ -11,6 +11,8 @@ buildscript {
     ext.lifecycle_version = "2.5.1"
     ext.jlibtorrent_version = '1.2.17.0'
     ext.dokka_version = "0.10.1"
+    ext.hilt_ver = '2.44.2'
+    ext.room_version = '2.4.0'
     repositories {
         google()
         jcenter()

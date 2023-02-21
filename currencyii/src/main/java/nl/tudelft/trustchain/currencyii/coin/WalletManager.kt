@@ -8,8 +8,6 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity.Companion.DEFAULT_BITCOIN_MAX_TIMEOUT
 import nl.tudelft.trustchain.currencyii.util.taproot.*
 import org.bitcoinj.core.*
-import org.bitcoinj.core.DumpedPrivateKey
-import org.bitcoinj.core.LegacyAddress
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.kits.WalletAppKit
@@ -68,6 +66,12 @@ class WalletManager(
     var progress: Int = 0
     val key = addressPrivateKeyPair
 
+    val onSetupCompletedListeners = mutableListOf<() -> Unit>()
+
+    fun addOnSetupCompletedListener(listener: () -> Unit) {
+        onSetupCompletedListeners.add(listener)
+    }
+
     /**
      * Initializes WalletManager.
      */
@@ -95,6 +99,10 @@ class WalletManager(
                 }
                 wallet().allowSpendingUnconfirmedTransactions()
                 Log.i("Coin", "Coin: WalletManager started successfully.")
+                onSetupCompletedListeners.forEach {
+                    Log.i("Coin", "Coin: calling listener $it")
+                    it()
+                }
             }
         }
 
@@ -246,7 +254,8 @@ class WalletManager(
         val transaction = Transaction(params)
 
         transaction.addOutput(
-            entranceFee, Address.fromString(params, addressMuSig)
+            entranceFee,
+            Address.fromString(params, addressMuSig)
         )
 
         // no fees since we are in a test network and this is a proof of concept still
@@ -259,7 +268,10 @@ class WalletManager(
         kit.wallet().completeTx(req)
 
         Log.i("Coin", "SafeCreationAndSendGensisWallet - txid: " + req.tx.txId.toString())
-        Log.i("Coin", "SafeCreationAndSendGensisWallet - serialized tx: " + req.tx.bitcoinSerialize().toHex())
+        Log.i(
+            "Coin",
+            "SafeCreationAndSendGensisWallet - serialized tx: " + req.tx.bitcoinSerialize().toHex()
+        )
 
         val serializedTransaction = req.tx.bitcoinSerialize()
 
@@ -326,7 +338,11 @@ class WalletManager(
         kit.wallet().signTransaction(req)
 
         Log.i("Coin", "Joining DAO - newtxid: " + newTransaction.txId.toString())
-        Log.i("Coin", "Joining DAO - serialized new tx without signatures: " + newTransaction.bitcoinSerialize().toHex())
+        Log.i(
+            "Coin",
+            "Joining DAO - serialized new tx without signatures: " + newTransaction.bitcoinSerialize()
+                .toHex()
+        )
 
         // TODO there is probably a bug if multiple vins are required by our own wallet (for example, multiple small txin's combined to 1 big vout)
         return req.tx.bitcoinSerialize().toHex()
@@ -376,7 +392,10 @@ class WalletManager(
             sighashMuSig
         )
 
-        Log.i("NONCE_KEY", "nonce_key priv: " + getNonceKey(walletId, context).first.privKey.toString())
+        Log.i(
+            "NONCE_KEY",
+            "nonce_key priv: " + getNonceKey(walletId, context).first.privKey.toString()
+        )
 
         return signature
     }
@@ -415,7 +434,10 @@ class WalletManager(
 
         newTransaction.wit = cTxWitness
 
-        Log.i("Coin", "Joining DAO - serialized new tx with signatures: " + newTransaction.serialize().toHex())
+        Log.i(
+            "Coin",
+            "Joining DAO - serialized new tx with signatures: " + newTransaction.serialize().toHex()
+        )
 
         return Pair(sendTaprootTransaction(newTransaction), newTransaction.serialize().toHex())
     }
@@ -456,7 +478,11 @@ class WalletManager(
             receiverAddress
         )
 
-        Log.i("Coin", "Transfer funds DAO - serialized new tx without signature: " + newTransaction.serialize().toHex())
+        Log.i(
+            "Coin",
+            "Transfer funds DAO - serialized new tx without signature: " + newTransaction.serialize()
+                .toHex()
+        )
 
         val privChallenge =
             detKey.privKey.multiply(BigInteger(1, cMap[key.decompress()])).mod(Schnorr.n)
@@ -517,7 +543,11 @@ class WalletManager(
 
         newTransaction.wit = cTxWitness
 
-        Log.i("Coin", "Transfer funds DAO - final serialized new tx with signature: " + newTransaction.serialize().toHex())
+        Log.i(
+            "Coin",
+            "Transfer funds DAO - final serialized new tx with signature: " + newTransaction.serialize()
+                .toHex()
+        )
 
         return Pair(sendTaprootTransaction(newTransaction), newTransaction.serialize().toHex())
     }

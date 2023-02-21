@@ -13,9 +13,14 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.preference.PreferenceManager
-import com.example.musicdao.ipv8.MusicCommunity
+import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
+import nl.tudelft.trustchain.musicdao.core.dao.DaoCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
+import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -71,7 +76,9 @@ import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
+@OptIn(DelicateCoroutinesApi::class)
 @ExperimentalUnsignedTypes
+@HiltAndroidApp
 class TrustChainApplication : Application() {
 
     var isFirstRun: Boolean = false
@@ -104,6 +111,7 @@ class TrustChainApplication : Application() {
                 createAtomicSwapCommunity(),
                 createMarketCommunity(),
                 createCoinCommunity(),
+                createDaoCommunity(),
                 createVotingCommunity(),
                 createMusicCommunity(),
                 createLiteratureCommunity(),
@@ -358,6 +366,16 @@ class TrustChainApplication : Application() {
         )
     }
 
+    private fun createDaoCommunity(): OverlayConfiguration<DaoCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
+
+        return OverlayConfiguration(
+            Overlay.Factory(DaoCommunity::class.java),
+            listOf(randomWalk, nsd)
+        )
+    }
+
     private fun createCoinCommunity(): OverlayConfiguration<CoinCommunity> {
         val randomWalk = RandomWalk.Factory()
         val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
@@ -381,7 +399,8 @@ class TrustChainApplication : Application() {
 
     private fun createMusicCommunity(): OverlayConfiguration<MusicCommunity> {
         val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "music.db")
+        // TODO: Re-concile this community with Reccomender Community
+        val driver = AndroidSqliteDriver(Database.Schema, this, "music-private.db")
         val store = TrustChainSQLiteStore(Database(driver))
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(

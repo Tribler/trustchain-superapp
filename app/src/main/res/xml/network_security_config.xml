@@ -7,5 +7,8 @@
         <domain includeSubdomains="true">131.180.27.224</domain>
         <!--        IP address of the host machine when ran from the Android emulator -->
 <!--        <domain includeSubdomains="true">10.0.2.2</domain>-->
+
+        <!--        This is for RegTest faucet, to claim some starter money -->
+        <domain includeSubdomains="true">95.179.182.243</domain>
     </domain-config>
 </network-security-config>

@@ -151,17 +151,12 @@
             android:windowSoftInputMode="stateAlwaysHidden" />
 
         <activity
-            android:name="com.example.musicdao.MusicService"
+            android:name="nl.tudelft.trustchain.musicdao.MusicActivity"
+            android:label="Music App"
             android:exported="true"
-            android:label="Music app"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MusicDaoTheme">
         </activity>
 
         <activity
@@ -183,7 +178,7 @@
             android:exported="false" />
 
         <service
-            android:name="com.example.musicdao.MusicGossipingService"
+            android:name="nl.tudelft.trustchain.musicdao.core.repositories.MusicGossipingService"
             android:enabled="true"
             android:exported="false" />
 

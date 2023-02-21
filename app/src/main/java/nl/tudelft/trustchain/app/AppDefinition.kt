@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.app
 import android.app.Activity
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import com.example.musicdao.MusicService
+import nl.tudelft.trustchain.musicdao.MusicActivity
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.atomicswap.AtomicSwapActivity
 import nl.tudelft.trustchain.common.R
@@ -101,7 +101,7 @@ enum class AppDefinition(
         android.R.drawable.ic_media_play,
         "MusicDAO",
         R.color.black,
-        MusicService::class.java
+        MusicActivity::class.java
     ),
     EUROTOKEN(
         R.drawable.ic_baseline_euro_symbol_24,

@@ -108,6 +108,7 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             SETTINGS_INTENT_CODE -> {

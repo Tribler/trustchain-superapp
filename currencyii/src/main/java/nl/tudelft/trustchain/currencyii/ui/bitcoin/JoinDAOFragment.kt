@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_join_network.*
-import kotlinx.android.synthetic.main.fragment_shared_wallet_transaction.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -205,7 +204,6 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
         }
 
         val context = requireContext()
-        val activityRequired = requireActivity()
         // Wait and collect signatures
         var signatures: List<SWResponseSignatureBlockTD>? = null
         while (signatures == null) {
@@ -220,11 +218,11 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 mostRecentSWBlock.transaction,
                 proposeBlockData,
                 signatures,
-                context,
-                activityRequired
+                context
             )
             // Add new nonceKey after joining a DAO
-            WalletManagerAndroid.getInstance().addNewNonceKey(proposeBlockData.SW_UNIQUE_ID, context)
+            WalletManagerAndroid.getInstance()
+                .addNewNonceKey(proposeBlockData.SW_UNIQUE_ID, context)
         } catch (t: Throwable) {
             Log.e("Coin", "Joining failed. ${t.message ?: "No further information"}.")
             setAlertText(t.message ?: "Unexpected error occurred. Try again")
