@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- We don't run ads in the app, so we can remove the permission -->
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -119,8 +124,8 @@
 
         <activity
             android:name="nl.tudelft.trustchain.detoks.DeToksActivity"
-            android:theme="@style/Fullscreen"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+            android:parentActivityName=".ui.dashboard.DashboardActivity"
+            android:theme="@style/Fullscreen" />
 
         <activity
             android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
@@ -152,12 +157,11 @@
 
         <activity
             android:name="nl.tudelft.trustchain.musicdao.MusicActivity"
-            android:label="Music App"
             android:exported="true"
+            android:label="Music App"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.MusicDaoTheme">
-        </activity>
+            android:theme="@style/Theme.MusicDaoTheme"></activity>
 
         <activity
             android:name="nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity"
