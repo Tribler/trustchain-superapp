@@ -31,34 +31,36 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:layout_width="396dp"
+        android:layout_width="match_parent"
         android:layout_height="224dp"
         android:layout_marginBottom="30dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+
+
             <Button
-                android:id="@+id/button"
+                android:id="@+id/like_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_weight="1"
                 android:text="Like"
                 android:translationZ="100px" />
-        </LinearLayout>
+        </RelativeLayout>
 
-        <androidx.constraintlayout.widget.Barrier
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:barrierDirection="left" />
+
 
         <TextView
             android:id="@+id/txtTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:paddingStart="5dp"
             android:paddingTop="5dp"
             android:paddingEnd="5dp"
@@ -71,6 +73,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:layout_weight="1"
             android:id="@+id/txtDesc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

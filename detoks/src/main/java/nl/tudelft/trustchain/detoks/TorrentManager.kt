@@ -123,9 +123,12 @@ class TorrentManager(
         val files = torrentDir.listFiles()
         if (files != null) {
             for (file in files) {
+//                Log.i("DeToks","OPENING ${file.name}")
+
                 if (file.extension == "torrent") {
                     val torrentInfo = TorrentInfo(file)
                     sessionManager.download(torrentInfo, cacheDir)
+                    Log.i("DeToks", "AA: ${torrentInfo.creator()}")
                     val handle = sessionManager.find(torrentInfo.infoHash())
                     handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
                     val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
@@ -140,7 +143,8 @@ class TorrentManager(
                                     handle,
                                     torrentInfo.name(),
                                     fileName,
-                                    it
+                                    it,
+                                    torrentInfo.creator()
                                 )
                             )
                         }
@@ -196,7 +200,8 @@ class TorrentManager(
         val handle: TorrentHandle,
         val torrentName: String,
         val fileName: String,
-        val fileIndex: Int
+        val fileIndex: Int,
+        val creator: String
     ) {
 
         var isDownloading: Boolean = false
@@ -250,7 +255,7 @@ class TorrentManager(
         }
 
         fun asMediaInfo(): TorrentMediaInfo {
-            return TorrentMediaInfo(torrentName, fileName, getPath())
+            return TorrentMediaInfo(torrentName, fileName, getPath(), creator)
         }
 
     }
@@ -265,4 +270,5 @@ class TorrentMediaInfo(
     val torrentName: String,
     val fileName: String,
     val fileURI: String,
+    val creator: String
 )

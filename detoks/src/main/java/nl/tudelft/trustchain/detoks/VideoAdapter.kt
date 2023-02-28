@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
@@ -46,18 +47,26 @@ class VideosAdapter(
         var txtTitle: TextView
         var txtDesc: TextView
         var mProgressBar: ProgressBar
+        var like: Button
 
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
             mProgressBar = itemView.findViewById(R.id.progressBar)
+            like = itemView.findViewById(R.id.like_button)
+            like.setVisibility(View.GONE);
+            like.setOnClickListener{
+                // DeToks usernames should be public keys and we will assume torrent creator is the public key :)
+                System.exit(0)
+            }
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
             CoroutineScope(Dispatchers.Main).launch {
                 val content = item.content(position, 10000)
-                txtTitle.text = content.fileName
+                like.setVisibility(View.VISIBLE);
+                txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
