@@ -13,6 +13,7 @@ To transceive the list of 50 public keys, the EVA protocol is utilized.
 
 EVA the best!
 
+
 ### Sending public keys
 - As mentioned, we use the EVA protocol to transmit a binary blob of encoded public keys to the other party.
 - `TransactionsPayload` serializes and deserializes _n_ public keys seperated by comma's into a correct payload.
