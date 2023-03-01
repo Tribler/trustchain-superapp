@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.android.IPv8Android
 
 
 class VideosAdapter(
@@ -56,16 +57,18 @@ class VideosAdapter(
             mProgressBar = itemView.findViewById(R.id.progressBar)
             like = itemView.findViewById(R.id.like_button)
             like.setVisibility(View.GONE);
-            like.setOnClickListener{
-                // DeToks usernames should be public keys and we will assume torrent creator is the public key :)
-                System.exit(0)
-            }
+
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
             CoroutineScope(Dispatchers.Main).launch {
+//
                 val content = item.content(position, 10000)
-                like.setVisibility(View.VISIBLE);
+                like.setVisibility(View.VISIBLE)
+                like.setOnClickListener{
+                    val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+                    community.broadcastLike(content.fileName)
+                }
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
                 mVideoView.setVideoPath(content.fileURI)
