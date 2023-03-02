@@ -10,9 +10,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Packet
-import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 
 import nl.tudelft.trustchain.detoks.Like
@@ -62,17 +60,31 @@ class DetoksCommunity (settings: TrustChainSettings,
 
     fun broadcastLike(vid: String) {
         Log.d("DeToks", "Liking: $vid")
-        // TODO: change broadcast to subset of peers?
-        // TODO: we need to use trustchain's features for accounting
-        for (peer in getPeers()) {
-            // TODO: use public key of the liker
-            val packet = serializePacket(MessageType.LIKE.ordinal, Like("my public key", vid))
-            send(peer.address, packet)
-        }
+        // TODO: get public key of video author
+        val author_public_key = "them".toByteArray()
+        // TODO: get own public key
+        val like = Like("me", "video")
+        val map = mapOf("like" to like)
+        createProposalBlock("like_block", map, author_public_key)
+//        // TODO: change broadcast to subset of peers?
+//        for (peer in getPeers()) {
+//            val packet = serializePacket(MessageType.LIKE.ordinal, Like("my public key", vid))
+//            send(peer.address, packet)
+//        }
     }
 
     init {
         messageHandlers[MessageType.LIKE.ordinal] = ::onMessage
+        registerBlockSigner("like_block", object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                createAgreementBlock(block, mapOf<Any?, Any?>())
+            }
+        })
+        addListener("like_block", object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
     }
 
     private fun onMessage(packet: Packet) {

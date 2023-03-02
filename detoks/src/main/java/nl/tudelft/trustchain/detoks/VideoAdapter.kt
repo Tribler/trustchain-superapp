@@ -62,7 +62,6 @@ class VideosAdapter(
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
             CoroutineScope(Dispatchers.Main).launch {
-//
                 val content = item.content(position, 10000)
                 like.setVisibility(View.VISIBLE)
                 like.setOnClickListener{
