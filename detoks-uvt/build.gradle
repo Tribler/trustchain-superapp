@@ -1,0 +1,92 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 33
+
+    defaultConfig {
+        minSdkVersion 22
+        targetSdkVersion 33
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+        allWarningsAsErrors = true
+    }
+
+
+    buildFeatures {
+        viewBinding = true
+    }
+    namespace 'nl.tudelft.trustchain.detoks'
+}
+
+dependencies {
+    implementation project(':common')
+
+    // AndroidX
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation "androidx.recyclerview:recyclerview:1.2.1"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+    implementation "androidx.fragment:fragment-ktx:$fragment_version"
+    implementation "androidx.preference:preference:1.2.0"
+    implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+
+    // Material
+    implementation 'com.google.android.material:material:1.8.0'
+
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+
+    // Logging
+    implementation 'io.github.microutils:kotlin-logging:1.7.7'
+    implementation 'com.github.tony19:logback-android:2.0.0'
+
+    implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
+
+    // Testing
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    // TODO fix direct import, this should rely on common.
+    // BitTorrent
+    implementation files('../common/libs/jlibtorrent-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm64-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-android-x86_64-' + jlibtorrent_version + '.jar')
+
+    implementation 'com.devbrackets.android:exomedia:4.3.0'
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions.freeCompilerArgs += [
+        "-opt-in=kotlin.RequiresOptIn", "-Werror"
+    ]
+}
