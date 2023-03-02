@@ -1,7 +1,7 @@
 name: apk
 
 on:
-  pull_request:
+  pull_request_target:
   push:
     branches: master
 
@@ -9,11 +9,13 @@ jobs:
   apk:
     name: Build APK
     runs-on: ubuntu-latest
+    environment:
+      name: apk_build
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          ref: refs/pull/${{github.event.pull_request.number}}/merge
 
       - name: Checkout submodules
         shell: bash
