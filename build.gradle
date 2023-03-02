@@ -21,7 +21,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:7.3.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20-Beta"
         classpath "org.jlleitschuh.gradle:ktlint-gradle:$ktlint_gradle_version"
         classpath "com.squareup.sqldelight:gradle-plugin:$sqldelight_version"
