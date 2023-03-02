@@ -13,14 +13,16 @@ import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 import java.util.*
 
+enum class MessageType {
+    LIKE
+}
 
 class DetoksCommunity (settings: TrustChainSettings,
                        database: TrustChainStore,
                        crawler: TrustChainCrawler = TrustChainCrawler()
 ) : TrustChainCommunity(settings, database, crawler)  {
-    // TODO: WHAT THIS?
+    // TODO: generate random service id for our community
     override val serviceId = "02313685c1912a141289f8248fc8db5899c5df5a"
-    private val LIKE_ID = 1
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
     val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
 
@@ -41,8 +43,6 @@ class DetoksCommunity (settings: TrustChainSettings,
         discoveredAddressesContacted[address] = Date()
     }
 
-    // Retrieve the DeToks community
-
     private fun getDetoksComm(): DetoksCommunity {
         return IPv8Android.getInstance().getOverlay<DetoksCommunity>()
             ?: throw IllegalStateException("DeToks community is not configured")
@@ -58,31 +58,35 @@ class DetoksCommunity (settings: TrustChainSettings,
 
     fun broadcastLike(vid: String) {
         Log.d("DeToks", "Liking: $vid")
+        // TODO: change broadcast to subset of peers?
         for (peer in getPeers()) {
-            val packet = serializePacket(LIKE_ID, Like(vid))
+            // TODO: change test to the liker's public key
+            val packet = serializePacket(MessageType.LIKE.ordinal, Like("test", vid))
             send(peer.address, packet)
-
         }
     }
 
     init {
-        messageHandlers[LIKE_ID] = ::onMessage
+        messageHandlers[MessageType.LIKE.ordinal] = ::onMessage
     }
 
     private fun onMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(Like.Deserializer)
-        Log.d("DeToks", peer.mid + " liked: " + payload.message)
+        // Because peers can relay the message, peer != liker in all cases
+        Log.d("DeToks", payload.liker + " liked: " + payload.video)
     }
 }
 
-class Like(val message: String) : Serializable {
+// also add torrent name and video creator
+class Like(val liker: String, val video: String) : Serializable {
     override fun serialize(): ByteArray {
-        return message.toByteArray()
+        return liker.toByteArray() + video.toByteArray()
     }
 
     companion object Deserializer : Deserializable<Like> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<Like, Int> {
-            return Pair(Like(buffer.toString(Charsets.UTF_8)), buffer.size)
+            val like = Like(buffer.toString(Charsets.UTF_8), )
+            return Pair(like, buffer.size)
         }
     }
 }
