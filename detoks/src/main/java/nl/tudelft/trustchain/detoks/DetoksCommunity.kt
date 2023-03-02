@@ -1,5 +1,8 @@
 package nl.tudelft.trustchain.detoks
+
+import java.util.*
 import android.util.Log
+
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
@@ -11,7 +14,8 @@ import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
-import java.util.*
+
+import nl.tudelft.trustchain.detoks.Like
 
 enum class MessageType {
     LIKE
@@ -59,9 +63,10 @@ class DetoksCommunity (settings: TrustChainSettings,
     fun broadcastLike(vid: String) {
         Log.d("DeToks", "Liking: $vid")
         // TODO: change broadcast to subset of peers?
+        // TODO: we need to use trustchain's features for accounting
         for (peer in getPeers()) {
-            // TODO: change test to the liker's public key
-            val packet = serializePacket(MessageType.LIKE.ordinal, Like("test", vid))
+            // TODO: use public key of the liker
+            val packet = serializePacket(MessageType.LIKE.ordinal, Like("my public key", vid))
             send(peer.address, packet)
         }
     }
@@ -74,19 +79,6 @@ class DetoksCommunity (settings: TrustChainSettings,
         val (peer, payload) = packet.getAuthPayload(Like.Deserializer)
         // Because peers can relay the message, peer != liker in all cases
         Log.d("DeToks", payload.liker + " liked: " + payload.video)
-    }
-}
-
-// also add torrent name and video creator
-class Like(val liker: String, val video: String) : Serializable {
-    override fun serialize(): ByteArray {
-        return liker.toByteArray() + video.toByteArray()
-    }
-
-    companion object Deserializer : Deserializable<Like> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<Like, Int> {
-            val like = Like(buffer.toString(Charsets.UTF_8), )
-            return Pair(like, buffer.size)
-        }
+        // TODO: propagate message
     }
 }
