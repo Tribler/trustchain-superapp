@@ -58,14 +58,14 @@ class DetoksCommunity (settings: TrustChainSettings,
         }
     }
 
-    fun broadcastLike(vid: String) {
+    fun broadcastLike(vid: String, torrent: String, creator: String) {
         Log.d("DeToks", "Liking: $vid")
-        // TODO: get public key of video author
-        val author_public_key = "them".toByteArray()
+
         // TODO: get own public key
-        val like = Like("me", "video")
+        val like = Like("me", vid, torrent, creator)
         val map = mapOf("like" to like)
-        createProposalBlock("like_block", map, author_public_key)
+        Log.d("DeToks", map.toString())
+//        createProposalBlock("like_block", map, creator.toByteArray())
 //        // TODO: change broadcast to subset of peers?
 //        for (peer in getPeers()) {
 //            val packet = serializePacket(MessageType.LIKE.ordinal, Like("my public key", vid))
@@ -90,7 +90,7 @@ class DetoksCommunity (settings: TrustChainSettings,
     private fun onMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(Like.Deserializer)
         // Because peers can relay the message, peer != liker in all cases
-        Log.d("DeToks", payload.liker + " liked: " + payload.video)
+        Log.d("DeToks", payload.liker + " liked: " + payload.video + " Peer " + peer.address.toString())
         // TODO: propagate message
     }
 }
