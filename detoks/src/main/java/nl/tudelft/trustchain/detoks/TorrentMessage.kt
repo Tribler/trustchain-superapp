@@ -2,16 +2,28 @@ package nl.tudelft.trustchain.detoks
 
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Serializable
+import org.json.JSONArray
 
-class TorrentMessage(val message: String) : Serializable {
+
+class TorrentMessage(val magnets: List<String>) : Serializable {
 
     override fun serialize(): ByteArray {
-        return message.toByteArray()
+        return JSONArray(magnets).toString().toByteArray()
     }
 
     companion object Deserializer : Deserializable<TorrentMessage> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<TorrentMessage, Int> {
-            return Pair(TorrentMessage(buffer.toString(Charsets.UTF_8)), buffer.size)
+            val tempStr = String(buffer, offset,buffer.size - offset)
+            val jsonEnd = tempStr.indexOf(']') + 1
+
+            val jsonArray = JSONArray(tempStr.substring(0, jsonEnd))
+            val magnets = mutableListOf<String>()
+
+            for (i in 0 until jsonArray.length()) {
+                magnets.add(jsonArray.getString(i))
+            }
+
+            return Pair(TorrentMessage(magnets), jsonEnd + offset)
         }
     }
 
