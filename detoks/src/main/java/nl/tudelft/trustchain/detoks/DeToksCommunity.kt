@@ -21,6 +21,7 @@ class DeToksCommunity() : Community() {
         super.walkTo(address)
 
         Log.d("DeToksCommunity", this.getPeers().toString())
+        Log.d("DeToksCommunity", this.myPeer.toString())
         broadcastTorrent() // FOR TESTING PURPOSES
     }
 
