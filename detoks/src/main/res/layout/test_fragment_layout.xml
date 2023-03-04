@@ -33,20 +33,24 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@id/peerListView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/privateKeyStatus" />
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/peerListView"
-        android:layout_width="409dp"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="20dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginRight="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="5dp"
+        app:layout_constraintBottom_toTopOf="@+id/proposalsListView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/privateKeyValue" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/proposalsListView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

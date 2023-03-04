@@ -5,11 +5,15 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.Button
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import kotlinx.android.synthetic.main.test_fragment_layout.*
 import nl.tudelft.ipv8.sqldelight.Database
 import com.squareup.sqldelight.db.SqlDriver
+import kotlinx.android.synthetic.main.discovered_peer_item.*
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.OverlayConfiguration
@@ -32,9 +36,10 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 private const val PREF_PRIVATE_KEY = "private_key"
 private const val PREF_PUBLIC_KEY = "public_key"
 
-class test_fragment : BaseFragment(R.layout.test_fragment_layout) {
+class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransactionOnClick, confirmProposalOnClick {
 
-    var peers: ArrayList<String> = arrayListOf("First pk")
+    var peers: ArrayList<PeerViewModel> = arrayListOf()
+    var proposals: ArrayList<ProposalViewModel> = arrayListOf()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -76,18 +81,18 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout) {
         registerValidator(trustchain)
 
         // Register the BlockSigner
-        registerSigner(trustchain)
+        //registerSigner(trustchain)
 
+        val peerRecyclerView = peerListView
+        peerRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        val adapter = PeerAdapter(peers, this)
 
+        peerRecyclerView.adapter = adapter
 
-
-        val adapter: ArrayAdapter<String?> = ArrayAdapter(
-            requireContext(),
-            R.layout.discovered_peer_item, R.id.pkTextview,
-            peers as List<String?>
-        )
-
-        peerListView.adapter = adapter
+        val proposalRecyclerView = proposalsListView
+        proposalRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        val proposalAdapter = ProposalAdapter(proposals, this)
+        proposalRecyclerView.adapter = proposalAdapter
 
 
         Thread(Runnable {
@@ -99,14 +104,15 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout) {
                     val peerlist :List<Peer> = trustChainCommunity.getPeers()
 
                     requireActivity().runOnUiThread(Runnable {
-                        peers.clear()
                         for (peer in peerlist) {
-                            peers.add(peer.publicKey.toString())
+                            if (!peers.contains(PeerViewModel(peer.publicKey.toString(), peer))) {
+                                peers.add(PeerViewModel(peer.publicKey.toString(), peer))
+                                adapter.notifyItemInserted(peers.size-1)
+                            }
                         }
-                        println("running on ui thread...")
-                        adapter.notifyDataSetChanged()
+
                     })
-                    Thread.sleep(50)
+                    Thread.sleep(100)
                 }
 
 
@@ -114,18 +120,25 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout) {
 
         }).start()
 
-    }
 
-
-    // Here we register a listener that notifies us of all incoming blocks.
-    private fun registerListener(trustchain : TrustChainCommunity) {
         trustchain.addListener("test_block", object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 println("we received a block from ${block.publicKey}, amazing")
-                //TODO make sure we can manually confirm the block.
+                // If we receive a proposal of the correct type...
+
+                if (block.isProposal) {
+                    proposals.add(ProposalViewModel(block.publicKey.toString(), block.type, block))
+                    proposalAdapter.notifyItemInserted(proposals.size - 1)
+                }
             }
         })
+
     }
+
+
+
+
+
 
     // We also register a TransactionValidator. This one is simple and checks whether "test_block"s are valid.
     private fun registerValidator(trustchain : TrustChainCommunity) {
@@ -134,7 +147,7 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout) {
                 block: TrustChainBlock,
                 database: TrustChainStore
             ): ValidationResult {
-                if (block.transaction["message"] == "luuk_test" || block.isAgreement) {
+                if (block.transaction["message"] == "luuk_test" || block.isAgreement || block.isProposal) {
                     return ValidationResult.Valid
                 } else {
                     if (block.transaction["message"] != "luuk_test") {
@@ -163,12 +176,12 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout) {
 
 
     // Create a proposal block, store it, and send it to all peers. It sends blocks of type "test_block"
-    private fun createProposal(recipient : String) {
+    private fun createProposal(recipient : Peer) {
         // get reference to the trustchain community
         val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
 
         val transaction = mapOf("message" to "test message!")
-        trustchain.createProposalBlock("test_block", transaction, recipient.toByteArray())
+        trustchain.createProposalBlock("test_block", transaction, recipient.publicKey.keyToBin())
     }
 
     private fun getPrivateKey(context: Context): nl.tudelft.ipv8.keyvault.PrivateKey {
@@ -204,4 +217,24 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout) {
         }
     }
 
+    override fun onClick(recipient: Peer) {
+        println("alert: onClick called from the adapter!")
+        createProposal(recipient)
+    }
+
+    override fun confirmProposalClick(block: TrustChainBlock) {
+        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+        println("alert: Agreement should have been sent!")
+    }
+
+
+}
+
+public interface singleTransactionOnClick {
+    fun onClick(recipient: Peer)
+}
+
+interface confirmProposalOnClick {
+    fun confirmProposalClick(block: TrustChainBlock)
 }
