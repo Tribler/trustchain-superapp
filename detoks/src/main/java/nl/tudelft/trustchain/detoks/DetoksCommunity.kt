@@ -12,7 +12,6 @@ import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
-
 import nl.tudelft.trustchain.detoks.Like
 
 enum class MessageType {
@@ -62,10 +61,11 @@ class DetoksCommunity (settings: TrustChainSettings,
         Log.d("DeToks", "Liking: $vid")
 
         // TODO: get own public key
-        val like = Like("me", vid, torrent, creator)
+        val my_public_key = myPeer.publicKey.toString()
+        val like = Like(my_public_key, vid, torrent, creator)
         val map = mapOf("like" to like)
         Log.d("DeToks", map.toString())
-//        createProposalBlock("like_block", map, creator.toByteArray())
+        createProposalBlock("like_block", map, creator.toByteArray())
 //        // TODO: change broadcast to subset of peers?
 //        for (peer in getPeers()) {
 //            val packet = serializePacket(MessageType.LIKE.ordinal, Like("my public key", vid))
@@ -90,7 +90,7 @@ class DetoksCommunity (settings: TrustChainSettings,
     private fun onMessage(packet: Packet) {
         val (_, payload) = packet.getAuthPayload(Like.Deserializer)
         // Because peers can relay the message, peer != liker in all cases
-        Log.d("DeToks", payload.liker + " liked: " + payload.video + " Peer " + peer.address.toString())
+        Log.d("DeToks", payload.liker + " liked: " + payload.video + " Peer "/* + peer.address.toString()*/)
         // TODO: propagate message
     }
 }
