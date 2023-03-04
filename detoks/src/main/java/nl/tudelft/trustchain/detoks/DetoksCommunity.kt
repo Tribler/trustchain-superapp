@@ -60,8 +60,6 @@ class DetoksCommunity (settings: TrustChainSettings,
     fun broadcastLike(vid: String, torrent: String, creator: String) {
         Log.d("DeToks", "Liking: $vid")
 
-        // TODO: get own public key
-
         var creator1 = creator
         for (peer in getPeers()) {
             creator1 = peer.toString();

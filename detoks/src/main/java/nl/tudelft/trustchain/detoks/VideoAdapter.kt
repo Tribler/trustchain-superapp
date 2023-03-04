@@ -32,7 +32,6 @@ class VideosAdapter(
         )
     }
 
-
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
         holder.setVideoData(mVideoItems[position], position, onPlaybackError)
@@ -47,6 +46,7 @@ class VideosAdapter(
         var mVideoView: VideoView
         var txtTitle: TextView
         var txtDesc: TextView
+        var peerCount: TextView
         var mProgressBar: ProgressBar
         var like: Button
 
@@ -54,6 +54,7 @@ class VideosAdapter(
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
+            peerCount = itemView.findViewById(R.id.peerCount)
             mProgressBar = itemView.findViewById(R.id.progressBar)
             like = itemView.findViewById(R.id.like_button)
             like.setVisibility(View.GONE);
@@ -68,8 +69,10 @@ class VideosAdapter(
                     val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
                     community.broadcastLike(content.fileName, content.torrentName, content.creator)
                 }
+                val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
+                peerCount.text = "Peers: " + community.getPeers().size.toString()
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
                 mVideoView.setOnPreparedListener { mp ->
