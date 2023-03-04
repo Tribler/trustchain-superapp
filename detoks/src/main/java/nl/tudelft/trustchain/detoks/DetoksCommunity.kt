@@ -88,7 +88,7 @@ class DetoksCommunity (settings: TrustChainSettings,
     }
 
     private fun onMessage(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(Like.Deserializer)
+        val (_, payload) = packet.getAuthPayload(Like.Deserializer)
         // Because peers can relay the message, peer != liker in all cases
         Log.d("DeToks", payload.liker + " liked: " + payload.video)
         // TODO: propagate message
