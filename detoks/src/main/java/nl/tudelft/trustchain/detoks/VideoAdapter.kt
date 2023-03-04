@@ -66,7 +66,7 @@ class VideosAdapter(
                 like.setVisibility(View.VISIBLE)
                 like.setOnClickListener{
                     val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
-                    community.broadcastLike(content.fileName)
+                    community.broadcastLike(content.fileName, content.torrentName, content.creator)
                 }
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
