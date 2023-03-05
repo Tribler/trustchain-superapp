@@ -23,7 +23,8 @@ class DetoksCommunity (settings: TrustChainSettings,
                        crawler: TrustChainCrawler = TrustChainCrawler()
 ) : TrustChainCommunity(settings, database, crawler)  {
     // TODO: generate random service id for our community
-    override val serviceId = "02313685c1912a141289f8248fc8db5899c5df5a"
+    //changed one character, unique atm
+    override val serviceId = "02333685c1912a141289f8248fc8db5899c5df5a"
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
     val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
 
