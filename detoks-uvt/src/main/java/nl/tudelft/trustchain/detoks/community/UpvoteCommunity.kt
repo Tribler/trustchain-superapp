@@ -32,18 +32,32 @@ class UpvoteCommunity() : Community(){
         logger.debug { "-> received heart token with id: ${payload.id}  and token: ${payload.token} from peer with member id: ${peer.mid}" }
     }
 
+    private fun pickRandomPeer(): Peer? {
+        val peers = getPeers()
+        if (peers.isEmpty()) return null
+        return peers.random()
+    }
+
     /**
      * Use this function in the DetoksFragment class to send a Heart Token
      */
-    fun sendHeartToken(id: String, token: String, peer: Peer) {
+    fun sendHeartToken(id: String, token: String): String {
         val payload = HeartTokenPayload(id, token)
 
         val packet = serializePacket(
             MessageID.HEART_TOKEN,
             payload
         )
-        logger.debug { "You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}" }
-        send(peer, packet)
+
+        val peer = pickRandomPeer()
+        if (peer != null) {
+            val message = "You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}"
+            logger.debug { message }
+            send(peer, packet)
+            return message
+        }
+
+        return "No peer found"
     }
 
     class Factory(
