@@ -3,11 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     android:label="DeToks"
-    app:startDestination="@id/detoksFragment">
+    app:startDestination="@id/exampleOverlayFragment">
 
     <fragment
         android:id="@+id/detoksFragment"
         android:name="nl.tudelft.trustchain.detoks.DeToksFragment"
         android:label="DeToks">
     </fragment>
+
+    <fragment
+        android:id="@+id/exampleOverlayFragment"
+        android:name="nl.tudelft.trustchain.detoks.ExampleOverlayFragment"
+        android:label="ExampleOverlay">
+    </fragment>
+
 </navigation>
