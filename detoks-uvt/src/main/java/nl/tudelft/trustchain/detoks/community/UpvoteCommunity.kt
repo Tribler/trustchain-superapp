@@ -32,6 +32,10 @@ class UpvoteCommunity() : Community(){
         logger.debug { "-> received heart token with id: ${payload.id}  and token: ${payload.token} from peer with member id: ${peer.mid}" }
     }
 
+    /**
+     * Selects a random Peer from the list of known Peers
+     * @returns A random Peer or null if there are no known Peers
+     */
     private fun pickRandomPeer(): Peer? {
         val peers = getPeers()
         if (peers.isEmpty()) return null
@@ -39,7 +43,7 @@ class UpvoteCommunity() : Community(){
     }
 
     /**
-     * Use this function in the DetoksFragment class to send a Heart Token
+     * Sends a HeartToken to a random Peer
      */
     fun sendHeartToken(id: String, token: String): String {
         val payload = HeartTokenPayload(id, token)
@@ -50,6 +54,7 @@ class UpvoteCommunity() : Community(){
         )
 
         val peer = pickRandomPeer()
+
         if (peer != null) {
             val message = "You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}"
             logger.debug { message }

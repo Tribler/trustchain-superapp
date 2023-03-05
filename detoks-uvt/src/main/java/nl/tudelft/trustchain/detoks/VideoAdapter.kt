@@ -12,10 +12,9 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
-
+import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
 
 class VideosAdapter(
     private val torrentManager: TorrentManager,
@@ -50,32 +49,13 @@ class VideosAdapter(
         var txtTitle: TextView
         var txtDesc: TextView
         var mProgressBar: ProgressBar
-        var lastClickTime: Long = 0
-        val DOUBLE_CLICK_TIME_DELTA: Long = 300 //milliseconds
 
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
             mProgressBar = itemView.findViewById(R.id.progressBar)
-
-            itemView.setOnClickListener {
-                val isDoubleClicked = checkForDoubleClick()
-                if (isDoubleClicked) {
-                    val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
-                    Toast.makeText(itemView.context,upvoteCommunity?.sendHeartToken("", "TEST"), Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        private fun checkForDoubleClick(): Boolean {
-            val clickTime = System.currentTimeMillis()
-            if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA) {
-                return true
-            }
-            lastClickTime = clickTime
-
-            return false
+            setLikeListener()
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
@@ -111,6 +91,36 @@ class VideosAdapter(
                     }
                 }
             }
+        }
+
+        /**
+         * Sends a HearthToken to a random user and displays the result in a toast message
+         */
+        private fun sendHeartToken() {
+
+            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
+            val toastMessage = upvoteCommunity?.sendHeartToken("", "TEST")
+            Toast.makeText(
+                itemView.context,
+                toastMessage,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        /**
+         * Sets a listener to like a video by double tapping the screen
+         */
+        private fun setLikeListener() {
+
+            val adapter = this
+
+            itemView.setOnClickListener(
+                object : DoubleClickListener() {
+                    override fun onDoubleClick(view: View?) {
+                        adapter.sendHeartToken()
+                    }
+                }
+            )
         }
     }
 }
