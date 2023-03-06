@@ -143,6 +143,7 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
 
 
         }).start()
+        // wow new comment
 
         // Register the signer that will deal with the incoming benchmark proposals.
         registerBenchmarkSigner(trustchain)
