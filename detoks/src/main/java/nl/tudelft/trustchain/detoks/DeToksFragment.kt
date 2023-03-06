@@ -3,6 +3,8 @@ package nl.tudelft.trustchain.detoks
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
+import android.widget.Toast
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
 import mu.KotlinLogging
@@ -58,6 +60,12 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
         viewPagerVideos.adapter = VideosAdapter(torrentManager)
         viewPagerVideos.currentItem = 0
+
+        val button = view.findViewById<Button>(R.id.button2)
+        button.setOnClickListener {
+            Toast.makeText(activity, "HOI", Toast.LENGTH_SHORT).show()
+        }
+
         onPageChangeCallback()
     }
 
