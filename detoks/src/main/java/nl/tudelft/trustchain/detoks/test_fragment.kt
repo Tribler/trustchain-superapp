@@ -1,21 +1,17 @@
 package nl.tudelft.trustchain.detoks
 
-import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Button
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import kotlinx.android.synthetic.main.test_fragment_layout.*
-import nl.tudelft.ipv8.sqldelight.Database
-import com.squareup.sqldelight.db.SqlDriver
-import kotlinx.android.synthetic.main.discovered_peer_item.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.IPv8Configuration
-import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.OverlayConfiguration
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -29,21 +25,23 @@ import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
+import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.common.util.TrustChainHelper
 
 private const val PREF_PRIVATE_KEY = "private_key"
 private const val PREF_PUBLIC_KEY = "public_key"
 
-class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransactionOnClick, confirmProposalOnClick {
+class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransactionOnClick, confirmProposalOnClick, benchmark1000 {
 
     var peers: ArrayList<PeerViewModel> = arrayListOf()
     var proposals: ArrayList<ProposalViewModel> = arrayListOf()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        getPrivateKey(requireContext())
+        val privateKey = getPrivateKey(requireContext())
 
 
 //        val luukCommunity = OverlayConfiguration(
@@ -75,10 +73,16 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
         val trustChainConfiguration = IPv8Configuration(overlays=listOf(luuksTrustChainCommunity))
         activity?.let { IPv8Android.Factory(it.application).setConfiguration(trustChainConfiguration).setPrivateKey(getPrivateKey(requireContext())).init() }
 
+        val benchmarkTextView = benchmarkStatusTextView
+        benchmarkTextView.text = "Currently not running a benchmark."
+
+        val benchmarkCounterTextView = benchmarkCounterTextView
+        benchmarkCounterTextView.text = ""
+
         val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
 
         // Call this method to register the validator.
-        registerValidator(trustchain)
+        //registerValidator(trustchain)
 
         // Register the BlockSigner
         //registerSigner(trustchain)
@@ -94,12 +98,15 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
         val proposalAdapter = ProposalAdapter(proposals, this)
         proposalRecyclerView.adapter = proposalAdapter
 
+//        val helper: TrustChainHelper = TrustChainHelper(trustchain)
+
 
         Thread(Runnable {
 
             val trustChainCommunity = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()
             if (trustChainCommunity != null) {
                 while (true) {
+
                     println("alert: getting peers, found ${Integer.toString(peers.size)}")
                     val peerlist :List<Peer> = trustChainCommunity.getPeers()
 
@@ -109,34 +116,66 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
                                 peers.add(PeerViewModel(peer.publicKey.toString(), peer))
                                 adapter.notifyItemInserted(peers.size-1)
                             }
+
                         }
 
+                        for (index in 0..peers.size - 1) {
+                            if (!peerlist.contains(peers[index].peer)) {
+                                peers.removeAt(index)
+                                adapter.notifyItemRemoved(index)
+                            }
+                        }
                     })
-                    Thread.sleep(100)
+
+
+//                    for (peer in peers) {
+//                        lifecycleScope.launch {
+//                            println("crawling!!")
+//                            trustchain.crawlChain(peer.peer)
+//                        }
+//                    }
+                    Thread.sleep(50)
                 }
+
 
 
             }
 
+
         }).start()
 
+        // Register the signer that will deal with the incoming benchmark proposals.
+        registerBenchmarkSigner(trustchain)
 
+
+        // In these listeners, the blocks already went through the validator.
         trustchain.addListener("test_block", object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                println("we received a block from ${block.publicKey}, amazing")
+                println("we received a block from ${block.publicKey.toHex()}, amazing")
                 // If we receive a proposal of the correct type...
 
-                if (block.isProposal) {
+                println("${AndroidCryptoProvider.keyFromPrivateBin(privateKey.keyToBin()).pub().keyToBin().toHex()} received a proposal from ${block.publicKey.toHex()}")
+                if (block.isProposal && block.publicKey.toHex() !=  AndroidCryptoProvider.keyFromPrivateBin(privateKey.keyToBin()).pub().keyToBin().toHex()) {
+                    println("it is a proposal.")
                     proposals.add(ProposalViewModel(block.publicKey.toString(), block.type, block))
                     proposalAdapter.notifyItemInserted(proposals.size - 1)
                 }
             }
         })
 
+        trustchain.addListener("benchmark_block", object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                println("received a benchmark block")
+
+            }
+        })
     }
 
-
-
+    private suspend fun crawler(peers: List<PeerViewModel>) {
+        for (peer in peers) {
+            trustchain.crawlChain(peer.peer)
+        }
+    }
 
 
 
@@ -147,14 +186,19 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
                 block: TrustChainBlock,
                 database: TrustChainStore
             ): ValidationResult {
-                if (block.transaction["message"] == "luuk_test" || block.isAgreement || block.isProposal) {
+                // Incoming proposal generated by pressing the create transaction button
+                if (block.transaction["message"] == "test message!" && block.isProposal) {
+                    println("received a valid proposal from ${block.publicKey.toHex()}")
                     return ValidationResult.Valid
-                } else {
-                    if (block.transaction["message"] != "luuk_test") {
-                        return ValidationResult.Invalid(listOf("The message weas not equal to luuk_test"))
-                    } else {
-                        return ValidationResult.Invalid(listOf("This block was not an agreement"))
-                    }
+                } else if (block.transaction["message"] == "benchmark" && block.isProposal) {
+                    return ValidationResult.Valid
+                } else if (block.transaction["message"] == "benchmark" && block.isAgreement) {
+                    return ValidationResult.Valid
+                } else if (block.isAgreement) {
+                    return ValidationResult.Valid
+                }
+                else {
+                    return ValidationResult.Invalid(listOf("This message was not expected and thus will be discarded."))
                 }
             }
         })
@@ -172,6 +216,18 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
         })
     }
 
+    private fun registerBenchmarkSigner(trustchain: TrustChainCommunity) {
+        val benchmarkTextView = benchmarkCounterTextView
+        var counter = 0
+        trustchain.registerBlockSigner("benchmark_block", object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                trustchain.createAgreementBlock(block, mapOf("message" to block.transaction["message"]))
+                counter++
+                benchmarkTextView.text = "Agreement $counter"
+            }
+        })
+    }
+
 
 
 
@@ -181,21 +237,26 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
         val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
 
         val transaction = mapOf("message" to "test message!")
+        println("creating proposal, sending to ${recipient.publicKey.keyToBin()}")
+        trustchain.createProposalBlock("test_block", transaction, recipient.publicKey.keyToBin())
+    }
+
+    private fun createProposal(recipient: Peer, trustchain: TrustChainCommunity, message: String) {
+        val transaction = mapOf("message" to message)
         trustchain.createProposalBlock("test_block", transaction, recipient.publicKey.keyToBin())
     }
 
     private fun getPrivateKey(context: Context): nl.tudelft.ipv8.keyvault.PrivateKey {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         val privateKey = prefs.getString(PREF_PRIVATE_KEY, null)
+        val pkTextView = publicKeyTextView
         if (privateKey == null) {
             val newKey = AndroidCryptoProvider.generateKey()
             prefs.edit().putString(PREF_PRIVATE_KEY, newKey.keyToBin().toHex()).apply();
-            privateKeyStatus.setText("There was no key stored yet. ")
-            privateKeyValue.setText(newKey.toString())
             return newKey
         } else {
-            privateKeyStatus.setText("A key was already stored.\n Public key: ${AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes()).pub()}")
-            privateKeyValue.setText(privateKey)
+            println("Public key: ${AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes()).pub().keyToBin().toHex()}")
+            pkTextView.setText(AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes()).pub().keyToBin().toHex())
             return AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
         }
     }
@@ -222,13 +283,32 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
         createProposal(recipient)
     }
 
-    override fun confirmProposalClick(block: TrustChainBlock) {
+    override fun confirmProposalClick(block: TrustChainBlock, adapter: ProposalAdapter) {
         val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
         trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+        for (proposal in proposals) {
+            if (proposal.block == block) {
+                proposals.remove(proposal)
+                adapter.notifyDataSetChanged()
+            }
+        }
+//        for (index in 0 .. proposals.size - 1) {
+//            if (proposals[index].block.equals(block)) {
+//                proposals.removeAt(index)
+//                adapter.notifyItemRemoved(index)
+//            }
+//        }
         println("alert: Agreement should have been sent!")
     }
 
 
+    // Run the benchmark, do 1000 transactions with a peer.
+    override fun runBenchmark(peer: Peer) {
+        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        for (i in 0..999) {
+            createProposal(peer, trustchain, "benchmark")
+        }
+    }
 }
 
 public interface singleTransactionOnClick {
@@ -236,5 +316,9 @@ public interface singleTransactionOnClick {
 }
 
 interface confirmProposalOnClick {
-    fun confirmProposalClick(block: TrustChainBlock)
+    fun confirmProposalClick(block: TrustChainBlock, adapter: ProposalAdapter)
+}
+
+interface benchmark1000 {
+    fun runBenchmark(peer: Peer)
 }
