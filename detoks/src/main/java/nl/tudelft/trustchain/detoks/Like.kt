@@ -5,10 +5,10 @@ import nl.tudelft.ipv8.messaging.*
 //private const val DELIMITER = "|"
 
 
-class Like(val liker: String, val video: String, val torrent: String, val creator_name: String) : Serializable {
+class Like(val liker: ByteArray, val video: String, val torrent: String, val creator_name: String) : Serializable {
 
     override fun serialize(): ByteArray {
-        return serializeVarLen(liker.toByteArray(Charsets.UTF_8)) +
+        return liker +
             serializeVarLen(video.toByteArray(Charsets.UTF_8)) +
             serializeVarLen(torrent.toByteArray(Charsets.UTF_8)) +
             serializeVarLen(creator_name.toByteArray(Charsets.UTF_8))
@@ -27,7 +27,7 @@ class Like(val liker: String, val video: String, val torrent: String, val creato
             localOffset += cretorSize
             return Pair(
                 Like(
-                    liker.toString(Charsets.UTF_8),
+                    liker,
                     video.toString(Charsets.UTF_8),
                     torrent.toString(Charsets.UTF_8),
                     creator_name.toString(Charsets.UTF_8)
