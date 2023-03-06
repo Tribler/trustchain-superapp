@@ -451,7 +451,7 @@ class TrustChainApplication : Application() {
 
     private fun createUpvoteCommunity(): OverlayConfiguration<UpvoteCommunity> {
         val randomWalk = RandomWalk.Factory()
-        return  OverlayConfiguration(
+        return OverlayConfiguration(
             UpvoteCommunity.Factory(),
             listOf(randomWalk)
         )
