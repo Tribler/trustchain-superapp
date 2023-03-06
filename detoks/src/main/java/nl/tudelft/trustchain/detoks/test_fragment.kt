@@ -57,6 +57,7 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
 //        System.out.println("Context is " + context.toString())
 
 //        activity?.let { IPv8Android.Factory(it.application).setConfiguration(configuration).setPrivateKey(getPrivateKey(requireContext())).init() }
+        // wow new comment
 
         //Do the trustchain things
         val settings = TrustChainSettings()
