@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import nl.tudelft.ipv8.attestation.trustchain.TransactionEncoding
 import nl.tudelft.ipv8.messaging.*
 
 //private const val DELIMITER = "|"

@@ -22,8 +22,6 @@ class DetoksCommunity (settings: TrustChainSettings,
                        database: TrustChainStore,
                        crawler: TrustChainCrawler = TrustChainCrawler()
 ) : TrustChainCommunity(settings, database, crawler)  {
-    // TODO: generate random service id for our community
-    //changed one character, unique atm
     override val serviceId = "02333685c1912a141289f8248fc8db5899c5df5a"
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
     val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
@@ -61,19 +59,15 @@ class DetoksCommunity (settings: TrustChainSettings,
     fun broadcastLike(vid: String, torrent: String, creator: String) {
         Log.d("DeToks", "Liking: $vid")
 
-        var creator1 = creator
-        for (peer in getPeers()) {
-            creator1 = peer.toString();
-        }
-        print(getPeers().size)
-        val my_public_key = myPeer.publicKey.keyToBin()
-        val like = Like(my_public_key, vid, torrent, creator1)
-        val map = mapOf("like" to like)
-        Log.d("DeToks", map.toString())
-        createProposalBlock("like_block", map, creator1.toByteArray())
-//        // TODO: change broadcast to subset of peers?
+        // TODO: This should be the creator of the video, now we just ask a random peer to validate
+        val peerKey = getPeers()[0].key.keyToBin()
+        val like = Like(myPeer.publicKey.keyToBin(), vid, torrent, creator)
+        val map = mapOf<Any?, Any?>()
+        createProposalBlock("like_block", map, peerKey)
+        Log.d("DeToks", "$like")
+        // TODO: change broadcast to subset of peers?
 //        for (peer in getPeers()) {
-//            val packet = serializePacket(MessageType.LIKE.ordinal, Like("my public key", vid))
+//            val packet = serializePacket(MessageType.LIKE.ordinal, like)
 //            send(peer.address, packet)
 //        }
     }
@@ -87,7 +81,7 @@ class DetoksCommunity (settings: TrustChainSettings,
         })
         addListener("like_block", object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                Log.d("Detoks", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
     }
