@@ -1,13 +1,11 @@
-package nl.tudelft.trustchain.detoks
+package nl.tudelft.trustchain.detoks.utils
+
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 import java.util.*
-
 
 class DetoksCommunity : Community() {
     // TODO: WHAT THIS?
