@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.util.toHex
 
 class PeerAdapter (private val mList: List<PeerViewModel>, val transactionOnClick: singleTransactionOnClick) : RecyclerView.Adapter<PeerAdapter.ViewHolder>() {
 
@@ -21,7 +22,7 @@ class PeerAdapter (private val mList: List<PeerViewModel>, val transactionOnClic
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         println("alert: onbindviewholder")
         val peerViewModel = mList[position]
-        holder.pkView.setText(peerViewModel.peerPK)
+        holder.pkView.setText(peerViewModel.peer.publicKey.keyToBin().toHex())
         holder.pkView.setOnClickListener {
             println("Alert: works for pk view")
         }
