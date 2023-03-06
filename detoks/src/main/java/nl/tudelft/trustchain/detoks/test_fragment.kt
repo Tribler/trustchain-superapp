@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import kotlinx.android.synthetic.main.test_fragment_layout.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.OverlayConfiguration
@@ -28,6 +29,7 @@ import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.common.util.TrustChainHelper
 
 private const val PREF_PRIVATE_KEY = "private_key"
 private const val PREF_PUBLIC_KEY = "public_key"
@@ -71,9 +73,6 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
         val trustChainConfiguration = IPv8Configuration(overlays=listOf(luuksTrustChainCommunity))
         activity?.let { IPv8Android.Factory(it.application).setConfiguration(trustChainConfiguration).setPrivateKey(getPrivateKey(requireContext())).init() }
 
-
-
-
         val benchmarkTextView = benchmarkStatusTextView
         benchmarkTextView.text = "Currently not running a benchmark."
 
@@ -83,7 +82,7 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
         val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
 
         // Call this method to register the validator.
-        registerValidator(trustchain)
+        //registerValidator(trustchain)
 
         // Register the BlockSigner
         //registerSigner(trustchain)
@@ -98,6 +97,8 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
         proposalRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         val proposalAdapter = ProposalAdapter(proposals, this)
         proposalRecyclerView.adapter = proposalAdapter
+
+//        val helper: TrustChainHelper = TrustChainHelper(trustchain)
 
 
         Thread(Runnable {
@@ -115,12 +116,24 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
                                 peers.add(PeerViewModel(peer.publicKey.toString(), peer))
                                 adapter.notifyItemInserted(peers.size-1)
                             }
+
                         }
 
+                        for (index in 0..peers.size - 1) {
+                            if (!peerlist.contains(peers[index].peer)) {
+                                peers.removeAt(index)
+                                adapter.notifyItemRemoved(index)
+                            }
+                        }
                     })
 
 
-
+//                    for (peer in peers) {
+//                        lifecycleScope.launch {
+//                            println("crawling!!")
+//                            trustchain.crawlChain(peer.peer)
+//                        }
+//                    }
                     Thread.sleep(50)
                 }
 
@@ -130,21 +143,6 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
 
 
         }).start()
-
-//        Thread(Runnable {
-//
-//            Thread.sleep(1000)
-//        }).start()
-
-        lifecycleScope.launchWhenStarted {
-                while (true) {
-                    println("crawling...")
-                    crawler(peers)
-                    withContext(Dispatchers.IO) {
-                        Thread.sleep(2000)
-                    }
-                }
-            }
 
         // Register the signer that will deal with the incoming benchmark proposals.
         registerBenchmarkSigner(trustchain)
@@ -287,13 +285,19 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
 
     override fun confirmProposalClick(block: TrustChainBlock, adapter: ProposalAdapter) {
         val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-        val agreementBlock: TrustChainBlock = trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
-        for (index in 0..proposals.size - 1) {
-            if (proposals[index].block.publicKey.contentEquals(block.publicKey) && block.sequenceNumber == agreementBlock.sequenceNumber) {
-                proposals.removeAt(index)
-                adapter.notifyItemRemoved(index)
+        trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+        for (proposal in proposals) {
+            if (proposal.block == block) {
+                proposals.remove(proposal)
+                adapter.notifyDataSetChanged()
             }
         }
+//        for (index in 0 .. proposals.size - 1) {
+//            if (proposals[index].block.equals(block)) {
+//                proposals.removeAt(index)
+//                adapter.notifyItemRemoved(index)
+//            }
+//        }
         println("alert: Agreement should have been sent!")
     }
 
