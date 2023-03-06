@@ -23,8 +23,9 @@
             android:layout_height="wrap_content" android:id="@+id/button2" android:onClick="doStuff"
         />
         <TextView
-            android:text="Bullshit"
+            android:text="No messages received yet"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/textView"/>
+            android:layout_height="wrap_content" android:id="@+id/textView" android:textSize="24sp"
+            android:textAlignment="center"/>
     </LinearLayout>
 </FrameLayout>
