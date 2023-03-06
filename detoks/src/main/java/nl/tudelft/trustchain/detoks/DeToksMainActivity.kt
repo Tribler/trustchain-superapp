@@ -40,13 +40,26 @@ class DeToksActivity : BaseActivity() {
         val actionBar = supportActionBar
         defaultCryptoProvider = AndroidCryptoProvider
         actionBar!!.hide()
+        // Maybe we can put this in app/trustChainApplication.kt like the other apps
+        createDetoksCommunity()
+
+        val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+        val peers = community.getPeers()
+        for (peer in peers) {
+            Log.d("DeToks", peer.mid)
+        }
+    }
+
+    fun createDetoksCommunity() {
         val settings = TrustChainSettings()
         val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
         val store = TrustChainSQLiteStore(Database(driver))
-        val randomWalk = RandomWalk.Factory()
         val deToksComm = OverlayConfiguration(
             DetoksCommunity.Factory(settings, store),
-            listOf(randomWalk)
+            listOf(
+                RandomWalk.Factory(),
+                NetworkServiceDiscovery.Factory(getSystemService()!!)
+            )
         )
 
         val config = IPv8Configuration(overlays = listOf(
@@ -57,13 +70,6 @@ class DeToksActivity : BaseActivity() {
             .setConfiguration(config)
             .setPrivateKey(getPrivateKey())
             .init()
-
-
-        val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
-        val peers = community.getPeers()
-        for (peer in peers) {
-            Log.d("DeToks", peer.mid)
-        }
     }
 
 //    private fun initIPv8() {
