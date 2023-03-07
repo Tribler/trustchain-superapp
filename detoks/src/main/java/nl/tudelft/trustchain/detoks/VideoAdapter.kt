@@ -4,7 +4,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
@@ -41,31 +41,91 @@ class VideosAdapter(
         return mVideoItems.size
     }
 
+    // Taken from https://www.geeksforgeeks.org/double-tap-on-a-button-in-android/
+    abstract class DoubleClickListener : View.OnClickListener {
+        var lastClickTime: Long = 0
+
+        override fun onClick(v: View?) {
+            val clickTime = System.currentTimeMillis()
+
+            if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA) {
+                onDoubleClick(v)
+            }
+
+            lastClickTime = clickTime
+        }
+
+        abstract fun onDoubleClick(v: View?)
+
+        companion object {
+            private const val DOUBLE_CLICK_TIME_DELTA: Long = 300 // milliseconds
+        }
+    }
+
     class VideoViewHolder(itemView: View, private val videoScaling: Boolean = false) :
         RecyclerView.ViewHolder(itemView) {
         var mVideoView: VideoView
         var txtTitle: TextView
         var txtDesc: TextView
         var mProgressBar: ProgressBar
-        var like: Button
+        var likeButton: ImageButton
+        var likeCount: TextView
+        var isLiked: Boolean = false
+
+        private fun likeVideo() {
+//            if (isLiked) {
+//                likeButton.setImageResource(R.drawable.baseline_favorite_24_white)
+//            } else {
+//                likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
+//            }
+//
+//            isLiked = !isLiked
+
+            if (isLiked) return
+
+            isLiked = true
+            likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
+
+            // TODO: Implement the actual functionality for liking a video.
+        }
 
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
             mProgressBar = itemView.findViewById(R.id.progressBar)
-            like = itemView.findViewById(R.id.like_button)
-            like.setVisibility(View.GONE);
-            like.setOnClickListener{
-                // DeToks usernames should be public keys and we will assume torrent creator is the public key :)
-                System.exit(0)
+            likeButton = itemView.findViewById(R.id.like_button)
+            likeCount = itemView.findViewById(R.id.like_count)
+
+            // Hide the like button and the like count until the video loads.
+            likeButton.visibility = View.GONE
+            likeCount.visibility = View.GONE
+
+            // Disable the click sound effects.
+            mVideoView.isSoundEffectsEnabled = false
+            likeButton.isSoundEffectsEnabled = false
+
+            // TODO: Check if user has already liked the current video. If so, set isLiked to true and change likeButton to baseline_favorite_24_red.
+
+            likeButton.setOnClickListener{
+                likeVideo()
             }
+
+            mVideoView.setOnClickListener(object: DoubleClickListener() {
+                override fun onDoubleClick(v: View?) {
+                    likeVideo()
+                }
+            })
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
             CoroutineScope(Dispatchers.Main).launch {
                 val content = item.content(position, 10000)
-                like.setVisibility(View.VISIBLE);
+
+                // Show the like button and the like count.
+                likeButton.visibility = View.VISIBLE
+                likeCount.visibility = View.VISIBLE
+
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
                 mVideoView.setVideoPath(content.fileURI)
