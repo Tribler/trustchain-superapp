@@ -73,9 +73,9 @@ class AppLoader(
         val PREFERRED_APPS = stringSetPreferencesKey("preferred_apps")
         val DEFAULT_APPS = setOf(
             AppDefinition.DETOKS.appName,
-            AppDefinition.VALUETRANSFER.appName,
-            AppDefinition.MUSIC_DAO.appName,
-            AppDefinition.EIGHTEEN_PLUS.appName
+//            AppDefinition.VALUETRANSFER.appName,
+//            AppDefinition.MUSIC_DAO.appName,
+//            AppDefinition.EIGHTEEN_PLUS.appName
         )
     }
 }
