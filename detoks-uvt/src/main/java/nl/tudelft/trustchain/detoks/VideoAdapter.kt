@@ -6,12 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import android.widget.VideoView
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
+import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
 
 class VideosAdapter(
     private val torrentManager: TorrentManager,
@@ -52,6 +55,7 @@ class VideosAdapter(
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
             mProgressBar = itemView.findViewById(R.id.progressBar)
+            setLikeListener()
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
@@ -87,6 +91,36 @@ class VideosAdapter(
                     }
                 }
             }
+        }
+
+        /**
+         * Sends a HearthToken to a random user and displays the result in a toast message
+         */
+        private fun sendHeartToken() {
+
+            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
+            val toastMessage = upvoteCommunity?.sendHeartToken("", "TEST")
+            Toast.makeText(
+                itemView.context,
+                toastMessage,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        /**
+         * Sets a listener to like a video by double tapping the screen
+         */
+        private fun setLikeListener() {
+
+            val adapter = this
+
+            itemView.setOnClickListener(
+                object : DoubleClickListener() {
+                    override fun onDoubleClick(view: View?) {
+                        adapter.sendHeartToken()
+                    }
+                }
+            )
         }
     }
 }
