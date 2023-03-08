@@ -106,6 +106,10 @@
             android:theme="@style/Theme.PeerChat" />
 
         <activity
+            android:name="com.example.offlinemoney.OfflineMoneyMainActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+
+        <activity
             android:name="nl.tudelft.trustchain.FOC.MainActivityFOC"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             tools:ignore="InnerclassSeparator" />

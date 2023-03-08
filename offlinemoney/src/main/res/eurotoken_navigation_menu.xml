@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/transferFragment"
+        android:icon="@drawable/ic_baseline_euro_symbol_24"
+        android:title="Balance" />
+    <item
+        android:id="@+id/transactionsFragment"
+        android:icon="@drawable/ic_baseline_trans_hist_alt_24"
+        android:title="Transaction History" />
+    <item
+        android:id="@+id/exchangeFragment"
+        android:icon="@drawable/ic_baseline_account_balance_24"
+        android:title="Exchange" />
+</menu>
