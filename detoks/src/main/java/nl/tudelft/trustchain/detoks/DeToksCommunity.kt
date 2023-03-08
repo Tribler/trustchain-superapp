@@ -20,11 +20,12 @@ class DeToksCommunity(private val context: Context) : Community() {
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
 
     fun gossipWith(peer: Peer) {
-        Log.d("DeToksCommunity", "Gossiping with ${peer.mid}")
+        Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
 
         val listOfTorrents = TorrentManager.getInstance(context).getListOfTorrents()
-        val magnets = listOfTorrents.map {it.makeMagnetUri()}
-        val packet = serializePacket(MESSAGE_TORRENT_ID, TorrentMessage(magnets))
+        if(listOfTorrents.isEmpty()) return
+        val magnet = listOfTorrents.random().makeMagnetUri()
+        val packet = serializePacket(MESSAGE_TORRENT_ID, TorrentMessage(magnet))
 
         send(peer.address, packet)
     }
@@ -32,9 +33,9 @@ class DeToksCommunity(private val context: Context) : Community() {
     private fun onGossip(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
+        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
 
-        payload.magnets.forEach {torrentManager.addTorrent(it)}
-        Log.d("DeToksCommunity", "received torrent from ${peer.mid}")
+        torrentManager.addTorrent(payload.magnet)
     }
 
     class Factory(

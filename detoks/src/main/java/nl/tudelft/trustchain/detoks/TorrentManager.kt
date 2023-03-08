@@ -211,8 +211,9 @@ class TorrentManager private constructor (
         val hash = torrentInfo.infoHash()
 
         if(sessionManager.find(hash) != null) return
+        Log.d("DeToksCommunity","Is a new torrent: ${torrentInfo.name()}")
 
-        sessionManager.download(magnet, cacheDir)
+        sessionManager.download(torrentInfo, cacheDir)
         val handle = sessionManager.find(hash)
         handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
         handle.prioritizeFiles(arrayOf(Priority.IGNORE))

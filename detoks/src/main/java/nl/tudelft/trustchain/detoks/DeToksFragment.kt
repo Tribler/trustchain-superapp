@@ -33,7 +33,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             val file = File("$torrentDir/$DEFAULT_TORRENT_FILE")
             if (!file.exists()) {
                 val outputStream = FileOutputStream(file)
-                val ins = requireActivity().resources.openRawResource(R.raw.detoks)
+                val ins = requireActivity().resources.openRawResource(R.raw.big_buck_bunny)
                 outputStream.write(ins.readBytes())
                 ins.close()
                 outputStream.close()
@@ -82,6 +82,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 2
-        const val DEFAULT_TORRENT_FILE = "detoks.torrent"
+        const val DEFAULT_TORRENT_FILE = "big_buck_bunny.torrent"
     }
 }
