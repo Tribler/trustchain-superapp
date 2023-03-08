@@ -187,6 +187,31 @@ class TorrentManager(
 
         Log.d("DeToks", "Making magnet")
         Log.d("DeToks", torrentInfo.makeMagnetUri())
+//        buildTorrentIndex()
+
+//        sessionManager.download(torrentInfo, cacheDir)
+//        Log.i("DeToks", "AA: ${torrentInfo.creator()}")
+//        val handle = sessionManager.find(torrentInfo.infoHash())
+//        handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+//        val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
+//        handle.prioritizeFiles(priorities)
+//        handle.pause()
+//        Log.d("DeToks", "THIS HAS ${torrentInfo.numFiles()} : ${torrentInfo.creator()}")
+//        for (it in 0..torrentInfo.numFiles()-1) {
+//            val fileName = torrentInfo.files().fileName(it)
+//            if (fileName.endsWith(".mp4")) {
+//                torrentFiles.add(
+//                    TorrentHandler(
+//                        cacheDir,
+//                        handle,
+//                        torrentInfo.name(),
+//                        fileName,
+//                        it,
+//                        torrentInfo.creator()
+//                    )
+//                )
+//            }
+//        }
         return Pair(torrentPath, torrentInfo)
     }
 
