@@ -21,20 +21,20 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
 
         community = IPv8Android.getInstance().getOverlay<OurCommunity>()!!
 
-       // Example of how to change the page
-        binding.button1.setOnClickListener {
-
-            binding.textView1.text = community.serviceId;
-
-            binding.textView1.setText("peers:\n")
-
-            val peers = community.getPeers()
-
-            for (peer in peers) {
-                binding.textView1.append("${peer.address}, ${peer.key}\n")
-            }
-
-        }
+//        // Example of how to change the page
+//        binding.button1.setOnClickListener {
+//
+//            binding.textView1.text = community.serviceId;
+//
+//            binding.textView1.setText("peers:\n")
+//
+//            val peers = community.getPeers()
+//
+//            for (peer in peers) {
+//                binding.textView1.append("${peer.address}, ${peer.key}\n")
+//            }
+//
+//        }
 
 
     }
