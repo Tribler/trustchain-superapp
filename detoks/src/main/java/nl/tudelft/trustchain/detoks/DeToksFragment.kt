@@ -1,8 +1,13 @@
 package nl.tudelft.trustchain.detoks
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
 import mu.KotlinLogging
@@ -12,7 +17,7 @@ import java.io.FileOutputStream
 
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var torrentManager: TorrentManager
-    private val logger = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {} // == ({})
     private var previousVideoAdapterIndex = 0
 
     private val torrentDir: String
@@ -59,6 +64,15 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         viewPagerVideos.adapter = VideosAdapter(torrentManager)
         viewPagerVideos.currentItem = 0
         onPageChangeCallback()
+        val buttonOffline = view.findViewById<Button>(R.id.button_offline)
+        buttonOffline.setOnClickListener {
+            OfflineTransferFragment.newInstance("param1", "param2")
+//            val activity = view.context as (AppCompatActivity)
+            val navController = view.findNavController()
+            navController.navigate(R.id.offlineTransferFragment)
+            Log.v("Offline fragment", "hello")
+            Log.v("Offline fragment", "activated")
+        }
     }
 
     /**
