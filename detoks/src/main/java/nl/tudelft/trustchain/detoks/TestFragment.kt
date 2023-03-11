@@ -71,9 +71,18 @@ class TestFragment : BaseFragment(R.layout.fragment_test) {
             }
         })
 
-        trustchainCommunity.registerBlockSigner(BLOCK_TYPE, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+        trustchainCommunity.registerTransactionValidator(BLOCK_TYPE, object : TransactionValidator {
+            override fun validate(
+                block: TrustChainBlock,
+                database: TrustChainStore
+            ): ValidationResult {
+
+                if (block.isProposal) {
+                    debugLog("received a proposal to validate from ${block.publicKey.toHex().take(10)}...")
+                    return ValidationResult.Valid
+                }
+
+                return ValidationResult.Invalid(listOf("Unexpected block"));
             }
         })
 
@@ -83,6 +92,7 @@ class TestFragment : BaseFragment(R.layout.fragment_test) {
                 trustchain.createAgreementBlock(block, block.transaction)
             }
         })
+
 
     }
 }
