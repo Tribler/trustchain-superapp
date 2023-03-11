@@ -1,20 +1,20 @@
 package nl.tudelft.trustchain.detoks
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.BlockListener
+import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.detoks.databinding.FragmentExampleoverlayBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentTestBinding
 
 class TestFragment : BaseFragment(R.layout.fragment_test) {
@@ -23,11 +23,26 @@ class TestFragment : BaseFragment(R.layout.fragment_test) {
 
     private lateinit var ipv8: IPv8
     private lateinit var community: OurCommunity
-    private lateinit var trustchainCommunity : TrustChainCommunity
+    private lateinit var trustchainCommunity: TrustChainCommunity
 
-    private fun createProposal(recipient : Peer) {
-        val transaction = mapOf("msg" to "test_message")
-        trustchainCommunity.createProposalBlock("test_dlock", transaction, recipient.publicKey.keyToBin())
+    private val BLOCK_TYPE = "our_test_block"
+
+    private var index = 0;
+
+    private fun debugLog(txt: String) {
+        val textView = binding.debugTextView;
+        textView.text = textView.text.toString() + "${txt}\n"
+    }
+
+    private fun createProposal(recipient: Peer) {
+        val transaction = mapOf("msg" to index)
+        debugLog("Proposing block: ${transaction["msg"]} to ${recipient.key.keyToBin().toHex().take(10)}...")
+        trustchainCommunity.createProposalBlock(
+            BLOCK_TYPE,
+            transaction,
+            recipient.publicKey.keyToBin()
+        )
+        index += 1
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -36,12 +51,38 @@ class TestFragment : BaseFragment(R.layout.fragment_test) {
         trustchainCommunity = IPv8Android.getInstance().getOverlay()!!
         ipv8 = IPv8Android.getInstance()
 
+        binding.debugClearButton.setOnClickListener {
+            binding.debugTextView.text = ""
+        }
+
         binding.button1.setOnClickListener {
             createProposal(ipv8.myPeer)
         }
 
-        binding.textView1.text = "asdf"
+        trustchainCommunity.addListener(BLOCK_TYPE, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
 
+                debugLog("Received block ${block.transaction["msg"]}")
+
+                // TODO validate integrity...
+
+                // if valid, create agreement block
+
+            }
+        })
+
+        trustchainCommunity.registerBlockSigner(BLOCK_TYPE, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+            }
+        })
+
+        trustchainCommunity.registerBlockSigner(BLOCK_TYPE, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                debugLog("create agreement block")
+                trustchain.createAgreementBlock(block, block.transaction)
+            }
+        })
 
     }
 }

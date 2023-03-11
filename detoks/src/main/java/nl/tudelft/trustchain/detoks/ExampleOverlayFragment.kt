@@ -38,9 +38,6 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
 
         binding.peer1IpTextview.text = "${ipv8.myPeer.address}"
 
-
-
-
 //        // busy wait for peers
 //        var peers = community.getPeers()
 //        while (peers.isEmpty()) {
