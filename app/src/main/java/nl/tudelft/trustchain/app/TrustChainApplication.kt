@@ -452,7 +452,7 @@ class TrustChainApplication : Application() {
     private fun createDeToksCommunity(): OverlayConfiguration<DeToksCommunity> {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
-            Overlay.Factory(DeToksCommunity::class.java),
+            DeToksCommunity.Factory(this),
             listOf(randomWalk)
         )
     }

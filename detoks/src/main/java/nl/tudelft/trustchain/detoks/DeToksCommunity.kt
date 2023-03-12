@@ -1,20 +1,25 @@
 package nl.tudelft.trustchain.detoks
 
+import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Community
-import nl.tudelft.ipv8.IPv4Address
+import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.messaging.Packet
 
 data class Wallet(var balance: Int = 10) {
 }
 
-class DeToksCommunity() : Community() {
+class DeToksCommunity(private val context: Context) : Community() {
     private val wallets = mutableMapOf<String, Wallet>()
+
     init {
-        messageHandlers[MESSAGE_TORRENT_ID] = ::onMessage
+        messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
+
     }
+
     companion object {
         const val MESSAGE_TORRENT_ID = 1
         const val MESSAGE_TRANSACTION_ID = 2
@@ -26,6 +31,7 @@ class DeToksCommunity() : Community() {
     private fun getOrCreateWallet(peerMid: String): Wallet {
         return wallets.getOrPut(peerMid) { Wallet() }
     }
+
     fun sendTokens(amount: Int, recipientMid: String) {
         val senderWallet = getOrCreateWallet(myPeer.mid)
 
@@ -45,18 +51,27 @@ class DeToksCommunity() : Community() {
             Log.d("DeToksCommunity", "Insufficient funds!")
         }
     }
+
+    fun gossipWith(peer: Peer) {
+        Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
+
+        val listOfTorrents = TorrentManager.getInstance(context).getListOfTorrents()
+        if(listOfTorrents.isEmpty()) return
+        val magnet = listOfTorrents.random().makeMagnetUri()
+        val packet = serializePacket(MESSAGE_TORRENT_ID, TorrentMessage(magnet))
+
+        send(peer.address, packet)
+    }
+
     override fun walkTo(address: IPv4Address) {
         super.walkTo(address)
-        myPeer
-        Log.d("DeToksCommunity", this.getPeers().toString())
-        println("Sending tokens to my peers")
-
         for  (peer in getPeers()) {
             sendTokens(1, peer.mid)
         }
         println("map:")
         println(wallets)
-        //broadcastTorrent() // FOR TESTING PURPOSES
+        Log.d("DeToksCommunity", this.getPeers().toString())
+        broadcastTorrent() // FOR TESTING PURPOSES
     }
 
     fun broadcastTorrent() {
@@ -67,10 +82,12 @@ class DeToksCommunity() : Community() {
             Log.d("DeToksCommunityWallet", "$wallets ${wallets.size}")
         }
     }
-
-    private fun onMessage(packet: Packet) {
+    private fun onGossip(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
-        Log.d("DeToksCommunity", peer.mid + ": " + payload.message)
+        val torrentManager = TorrentManager.getInstance(context)
+        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
+
+        torrentManager.addTorrent(payload.magnet)
     }
     private fun onTransactionMessage(packet: Packet) {
         val (_, payload) = packet.getAuthPayload(TransactionMessage.Deserializer)
@@ -88,4 +105,11 @@ class DeToksCommunity() : Community() {
         }
     }
 
+    class Factory(
+        private val context: Context
+    ) : Overlay.Factory<DeToksCommunity>(DeToksCommunity::class.java) {
+        override fun create(): DeToksCommunity {
+            return DeToksCommunity(context)
+        }
+    }
 }
