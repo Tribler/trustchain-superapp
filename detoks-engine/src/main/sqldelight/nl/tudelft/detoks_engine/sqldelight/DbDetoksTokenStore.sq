@@ -1,5 +1,5 @@
 createTokenTable:
-CREATE TABLE tokens (
+CREATE TABLE IF NOT EXISTS tokens (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   token TEXT NOT NULL
 );

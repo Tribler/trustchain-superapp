@@ -8,6 +8,10 @@ class TokenStore private constructor(context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "detokstokens.db")
     private val db = Database(driver)
 
+    init {
+        db.dbDetoksTokenStoreQueries.createTokenTable()
+    }
+
     fun storeToken(token: String): Unit {
         db.dbDetoksTokenStoreQueries.storeToken(null, token)
     }

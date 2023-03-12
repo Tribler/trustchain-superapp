@@ -12,7 +12,7 @@ import nl.tudelft.trustchain.detoks_engine.TransactionCommunity
 import nl.tudelft.trustchain.detoks_engine.db.TokenStore
 import java.util.UUID
 
-class TokenManageActivity: AppCompatActivity() {
+class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
     private lateinit var tokenStore: TokenStore
     private lateinit var transactionCommunity: TransactionCommunity
 
@@ -27,8 +27,6 @@ class TokenManageActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)
-        tokenStore = TokenStore.getInstance(this)
-        transactionCommunity = IPv8Android.getInstance().getOverlay()!!
     }
 
     override fun onStart() {
@@ -38,9 +36,11 @@ class TokenManageActivity: AppCompatActivity() {
         findViewById<Button>(R.id.generate_button).setOnClickListener { _ -> generate() }
 
 
-
+        tokenStore = TokenStore.getInstance(this)
+        transactionCommunity = IPv8Android.getInstance().getOverlay()!!
 
         tokenData = ArrayList(tokenStore.getAllToken())
+        tokenData.add("BLABLABLABLBALBALB")
         peerData = ArrayList(transactionCommunity.getPeers())
         val tokenListView = findViewById<RecyclerView>(R.id.token_list)
         val peerListView = findViewById<RecyclerView>(R.id.peer_list)
@@ -53,8 +53,8 @@ class TokenManageActivity: AppCompatActivity() {
         }
 
 
-        tokenAdapter = ListAdapter(ArrayList(tokenData), {t -> t}, ::onTokenClick)
-        peerAdapter = ListAdapter(ArrayList(peerData), { peer -> peer.mid }, ::onPeerClick)
+        tokenAdapter = ListAdapter(tokenData, {t -> t}, ::onTokenClick)
+        peerAdapter = ListAdapter(peerData, { peer -> peer.mid }, ::onPeerClick)
         tokenListView.adapter = tokenAdapter
         peerListView.adapter = peerAdapter
     }

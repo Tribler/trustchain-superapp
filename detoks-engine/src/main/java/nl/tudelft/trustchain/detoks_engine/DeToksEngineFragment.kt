@@ -79,10 +79,10 @@ class DeToksEngineFragment : BaseFragment(R.layout.fragment_detoks2) {
             startActivity(Intent(requireActivity(), TokenManageActivity::class.java))
         }
 
-//        val button2 = view.findViewById<Button>(R.id.opentk)
-//        button2.setOnClickListener {
-//            startActivity(Intent(requireActivity(), TokenManageActivity::class.java))
-//        }
+        val button2 = view.findViewById<Button>(R.id.opentk)
+        button2.setOnClickListener {
+            startActivity(Intent(requireActivity(), TokenManageActivity::class.java))
+        }
 
         val textView = view.findViewById<TextView>(R.id.textView)
         transactionCommunity.setHandler {
