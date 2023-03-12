@@ -9,22 +9,22 @@ import kotlin.random.Random
 // TODO: Compare the performance of coin toss against watch time
 
 class ProfileEntry(
-    var duration: Long,
-    var watchTime: Long,
-    val freshness: Long
+    var duration: Long = 0,
+    var watchTime: Long = 0,
+    val freshness: Long = 0
 )
 
 class Profile(
     val magnets: HashMap<String, ProfileEntry>
 ) {
     fun updateEntryWatchTime(torrent: TorrentManager.TorrentHandler, time: Long) {
-        magnets[torrent.torrentName]?.watchTime?.plus(time)
-        Log.i("DeToks", "Updated watchtime of ... ${torrent.torrentName} to ${magnets[torrent.torrentName]?.watchTime}")
+        magnets[torrent.torrentName]?.watchTime?.plus(time) // FIXME: I am silly and broken!
+        Log.i("DeToks", "Updated watchtime of ${torrent.torrentName} to ${magnets[torrent.torrentName]?.watchTime}")
     }
 
     fun updateEntryDuration(torrent: TorrentManager.TorrentHandler, time: Long) {
-        magnets[torrent.torrentName]?.duration = time
-        Log.i("DeToks", "Updated duration of ... ${torrent.torrentName} to ${magnets[torrent.torrentName]?.duration}")
+        magnets[torrent.torrentName]?.duration = time // FIXME: I am silly and broken!
+        Log.i("DeToks", "Updated duration of ${torrent.torrentName} to ${magnets[torrent.torrentName]?.duration}")
     }
 }
 

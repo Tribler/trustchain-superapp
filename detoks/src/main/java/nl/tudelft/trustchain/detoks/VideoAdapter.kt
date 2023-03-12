@@ -33,7 +33,7 @@ class VideosAdapter(
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
-        val duration: Long = holder.setVideoData(mVideoItems[position], position, onPlaybackError)
+        val duration = holder.setVideoData(mVideoItems[position], position, onPlaybackError)
         torrentManager.updateTorrentDuration(position, duration)
     }
 
@@ -64,8 +64,9 @@ class VideosAdapter(
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
                 mVideoView.setOnPreparedListener { mp ->
-                     duration = mp.duration
+                    duration = mp.duration
                     mProgressBar.visibility = View.GONE
+                    mp.start()
                     if (videoScaling) {
                         val videoRatio = mp.videoWidth / mp.videoHeight.toFloat()
                         val screenRatio = mVideoView.width / mVideoView.height.toFloat()
