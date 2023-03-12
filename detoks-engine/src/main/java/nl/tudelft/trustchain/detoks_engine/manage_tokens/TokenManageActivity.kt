@@ -76,6 +76,7 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
 
     fun generate() {
         val newToken: String = UUID.randomUUID().toString()
+        tokenStore.storeToken(newToken)
         tokenData.add(newToken)
         tokenAdapter.notifyItemInserted(tokenData.size - 1)
     }

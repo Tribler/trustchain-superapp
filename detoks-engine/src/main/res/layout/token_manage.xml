@@ -9,10 +9,14 @@
     app:layout_constraintEnd_toEndOf="parent">
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:layout_height="match_parent" android:layout_weight="2" android:id="@+id/token_list">
     </androidx.recyclerview.widget.RecyclerView>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:layout_height="match_parent" android:layout_weight="2" android:id="@+id/peer_list">
     </androidx.recyclerview.widget.RecyclerView>
     <LinearLayout

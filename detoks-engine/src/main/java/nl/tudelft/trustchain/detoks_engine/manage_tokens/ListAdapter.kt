@@ -16,7 +16,7 @@ class ListAdapter<T>(private val data: ArrayList<T>, private val mapper: (t: T) 
             val textView: TextView
 
             init {
-                textView = view.findViewById(R.id.list_item)
+                textView = view.findViewById(R.id.recycler_item)
             }
         }
 
