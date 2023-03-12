@@ -15,16 +15,20 @@ class ProfileEntry(
 )
 
 class Profile(
-    val magnets: HashMap<String, ProfileEntry>
+    val magnets: HashMap<String, ProfileEntry> = HashMap()
 ) {
     fun updateEntryWatchTime(torrent: TorrentManager.TorrentHandler, time: Long) {
-        magnets[torrent.torrentName]?.watchTime?.plus(time) // FIXME: I am silly and broken!
-        Log.i("DeToks", "Updated watchtime of ${torrent.torrentName} to ${magnets[torrent.torrentName]?.watchTime}")
+        if(!magnets.contains(torrent.torrentName)) magnets[torrent.torrentName] =
+            ProfileEntry(0, time, System.currentTimeMillis())
+        magnets[torrent.torrentName]!!.watchTime += time
+        Log.i("DeToks", "Updated watchtime of ${torrent.torrentName} to ${magnets[torrent.torrentName]!!.watchTime}")
     }
 
-    fun updateEntryDuration(torrent: TorrentManager.TorrentHandler, time: Long) {
-        magnets[torrent.torrentName]?.duration = time // FIXME: I am silly and broken!
-        Log.i("DeToks", "Updated duration of ${torrent.torrentName} to ${magnets[torrent.torrentName]?.duration}")
+    fun updateEntryDuration(torrent: TorrentManager.TorrentHandler, duration: Long) {
+        if(!magnets.contains(torrent.torrentName)) magnets[torrent.torrentName] =
+            ProfileEntry(duration, 0, System.currentTimeMillis())
+        else magnets[torrent.torrentName]!!.duration = duration
+        Log.i("DeToks", "Updated duration of ${torrent.torrentName} to ${magnets[torrent.torrentName]!!.duration}")
     }
 }
 
