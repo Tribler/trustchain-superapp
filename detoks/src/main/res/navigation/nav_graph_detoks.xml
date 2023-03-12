@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     android:label="DeToks"
-    app:startDestination="@id/TestFragment">
+    app:startDestination="@id/exampleOverlayFragment">
 
     <fragment
         android:id="@+id/detoksFragment"

@@ -86,7 +86,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="18sp"
-                        android:text="Owned tokens:" />
+                        android:text="Last Transaction proposed:" />
                     <!-- Text view to show Peer 1's tokens-->
                     <TextView
                         android:id="@+id/peer1_tokens_textview"
@@ -118,7 +118,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="18sp"
-                        android:text="Tokens to confirm:" />
+                        android:text="Last transaction agreed:" />
                     <!-- Text view to show tokens to confirm by Peer 1-->
                     <TextView
                         android:id="@+id/peer1_confirm_textview"
@@ -188,7 +188,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="18sp"
-                        android:text="Owned tokens:" />
+                        android:text="Last Transaction proposed:" />
                     <!-- Text view to show Peer 2's tokens-->
                     <TextView
                         android:id="@+id/peer2_tokens_textview"
@@ -222,7 +222,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="18sp"
-                        android:text="Tokens to confirm:" />
+                        android:text="Last transaction agreed:" />
                     <!-- Text view to show tokens to confirm by Peer 2-->
                     <TextView
                         android:id="@+id/peer2_confirm_textview"
