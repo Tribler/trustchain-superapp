@@ -28,6 +28,9 @@ class TorrentManager(
     private val logger = KotlinLogging.logger {}
     private val torrentFiles = mutableListOf<TorrentHandler>()
 
+    private val profile = Profile(HashMap())
+
+    private var lastTimeStamp: Long
     private var currentIndex = 0
 
     init {
@@ -35,6 +38,7 @@ class TorrentManager(
         initializeSessionManager()
         buildTorrentIndex()
         initializeVideoPool()
+        lastTimeStamp = System.currentTimeMillis()
     }
 
     fun notifyIncrease() {
@@ -74,6 +78,19 @@ class TorrentManager(
         return torrentFiles.size
     }
 
+    fun updateTorrentDuration(index: Int = currentIndex, duration: Long) {
+        profile.updateEntryDuration(torrentFiles.gett(index), duration)
+    }
+
+    /**
+     * Update the time and return the difference
+     */
+    private fun updateTime() : Long {
+        val oldTimeStamp = lastTimeStamp
+        lastTimeStamp = System.currentTimeMillis()
+        return lastTimeStamp - oldTimeStamp
+    }
+
     /**
      * This functions updates the current index of the cache.
      */
@@ -85,6 +102,7 @@ class TorrentManager(
             return
         }
         if (cachingAmount * 2 + 1 >= getNumberOfTorrents()) {
+            profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
             currentIndex = newIndex
             return
         }
@@ -97,6 +115,7 @@ class TorrentManager(
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
 
         }
+        profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
         currentIndex = newIndex
     }
 
@@ -143,6 +162,8 @@ class TorrentManager(
                                     it
                                 )
                             )
+                            val entry = ProfileEntry(0, 0, System.currentTimeMillis())
+                            profile.magnets[torrentInfo.name()] = entry
                         }
                     }
                 }

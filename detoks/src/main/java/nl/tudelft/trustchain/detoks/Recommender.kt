@@ -1,23 +1,32 @@
 package nl.tudelft.trustchain.detoks
 
+import android.util.Log
 import kotlin.random.Random
 
-// TODO: Implement some kind of handler for all of this that also stores the user's own profile
 // TODO: On downloading a new torrent, check all the other profiles to rank it
 // TODO: On sending a video/peer discovery, attach the profile to keep peers updated
-// TODO: After watching a video, update the (new) hashmap entry
 // TODO: Generate 100 dummy profiles with dummy entries to do testing with
 // TODO: Compare the performance of coin toss against watch time
 
 class ProfileEntry(
-    val duration: Int,      // TODO: Change to time
-    val watchTime: Int,     // TODO: Change to time
-    val freshness: Double,
+    var duration: Long,
+    var watchTime: Long,
+    val freshness: Long
 )
 
 class Profile(
-    val magnets: HashMap<String, ProfileEntry>,
-)
+    val magnets: HashMap<String, ProfileEntry>
+) {
+    fun updateEntryWatchTime(torrent: TorrentManager.TorrentHandler, time: Long) {
+        magnets[torrent.torrentName]?.watchTime?.plus(time)
+        Log.i("DeToks", "Updated watchtime of ... ${torrent.torrentName} to ${magnets[torrent.torrentName]?.watchTime}")
+    }
+
+    fun updateEntryDuration(torrent: TorrentManager.TorrentHandler, time: Long) {
+        magnets[torrent.torrentName]?.duration = time
+        Log.i("DeToks", "Updated duration of ... ${torrent.torrentName} to ${magnets[torrent.torrentName]?.duration}")
+    }
+}
 
 class Recommender {
     private fun coinTossRecommender(URIs: List<String>): String {

@@ -33,7 +33,8 @@ class VideosAdapter(
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
-        holder.setVideoData(mVideoItems[position], position, onPlaybackError)
+        val duration: Long = holder.setVideoData(mVideoItems[position], position, onPlaybackError)
+        torrentManager.updateTorrentDuration(position, duration)
     }
 
     override fun getItemCount(): Int {
@@ -54,7 +55,8 @@ class VideosAdapter(
             mProgressBar = itemView.findViewById(R.id.progressBar)
         }
 
-        fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
+        fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null): Long {
+            var duration = 0
             CoroutineScope(Dispatchers.Main).launch {
                 val content = item.content(position, 10000)
                 txtTitle.text = content.fileName
@@ -62,8 +64,8 @@ class VideosAdapter(
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
                 mVideoView.setOnPreparedListener { mp ->
+                     duration = mp.duration
                     mProgressBar.visibility = View.GONE
-                    mp.start()
                     if (videoScaling) {
                         val videoRatio = mp.videoWidth / mp.videoHeight.toFloat()
                         val screenRatio = mVideoView.width / mVideoView.height.toFloat()
@@ -87,6 +89,7 @@ class VideosAdapter(
                     }
                 }
             }
+            return duration.toLong()
         }
     }
 }
