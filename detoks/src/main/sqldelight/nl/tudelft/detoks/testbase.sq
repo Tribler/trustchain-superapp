@@ -1,0 +1,20 @@
+CREATE TABLE testing(
+    transactionid INTEGER NOT NULL,
+    sendFrom TEXT NOT NULL,
+    sendTo TEXT NOT NULL,
+    amount INTEGER NOT NULL,
+    PRIMARY KEY (transactionid)
+);
+
+addTest:
+REPLACE INTO testing(transactionid, sendFrom, sendTo, amount)
+VALUES(?,?,?,?);
+
+getTest:
+SELECT  * FROM testing WHERE transactionid = ? LIMIT 1;
+
+deleteTest:
+DELETE FROM testing WHERE transactionid = ?;
+
+deleteAll:
+DELETE FROM testing;

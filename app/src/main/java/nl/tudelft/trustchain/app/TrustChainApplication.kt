@@ -73,6 +73,8 @@ import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.voting.VotingCommunity
 import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
+import nl.tudelft.trustchain.detoks.db.TestBase
+import nl.tudelft.trustchain.detoks.community.TestCommunity
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -117,7 +119,8 @@ class TrustChainApplication : Application() {
                 createLiteratureCommunity(),
                 createRecommenderCommunity(),
                 createIdentityCommunity(),
-                createFOCCommunity()
+                createFOCCommunity(),
+                createTestDatabase()
             ),
             walkerInterval = 5.0
         )
@@ -321,6 +324,17 @@ class TrustChainApplication : Application() {
         val trustStore = TrustStore.getInstance(this)
         return OverlayConfiguration(
             EuroTokenCommunity.Factory(store, trustStore, this),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createTestDatabase(): OverlayConfiguration<TestCommunity>{
+        val settings = TrustChainSettings()
+        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "testbase.db")
+        val store = TestBas
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            TestCommunity.Factory(store, this),
             listOf(randomWalk)
         )
     }
