@@ -62,15 +62,17 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             DEFAULT_CACHING_AMOUNT
         )
 
-        var permission = ContextCompat.checkSelfPermission(this.requireContext(),
+        val permission = ContextCompat.checkSelfPermission(this.requireContext(),
             Manifest.permission.READ_EXTERNAL_STORAGE)
         if (permission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this.requireActivity(),
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                 111)
 
+        }else{
+            mainPart()
         }
-        mainPart()
+
 
 
     }

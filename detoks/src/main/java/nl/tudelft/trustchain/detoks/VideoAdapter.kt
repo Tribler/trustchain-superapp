@@ -73,8 +73,10 @@ class VideosAdapter(
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
                 peerCount.text = "Peers: " + community.getPeers().size.toString()
+                Log.d("DeToks", content.fileURI)
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
+
                 mVideoView.setOnPreparedListener { mp ->
                     mProgressBar.visibility = View.GONE
                     mp.start()
@@ -92,7 +94,8 @@ class VideosAdapter(
                 }
                 mVideoView.setOnCompletionListener { mp -> mp.start() }
                 mVideoView.setOnErrorListener { p1, what, extra ->
-                    Log.i("DeToks", "onError: $p1, $what, $extra")
+                    Log.i("DeToks", "onError: $p1, $what, $extra , ${p1.duration}")
+
                     if (onPlaybackError != null) {
                         onPlaybackError()
                         true
