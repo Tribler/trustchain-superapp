@@ -16,7 +16,6 @@ class DeToksEngineMainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         val actionBar = supportActionBar
         actionBar!!.hide()
-//        broadcast()
     }
 
     private fun broadcast() {

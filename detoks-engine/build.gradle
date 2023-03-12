@@ -2,6 +2,16 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'com.squareup.sqldelight'
+
+sqldelight {
+    Database {
+        packageName = "nl.tudelft.token_engine.sqldelight"
+        sourceFolders = ["sqldelight"]
+        schemaOutputDirectory = file("src/main/sqldelight/databases")
+    }
+}
+
 android {
     namespace 'nl.tudelft.trustchain.detoks_engine'
     compileSdkVersion 33
