@@ -20,5 +20,8 @@ class DeToksActivity : BaseActivity() {
         //actionBar!!.hide()
     }
 
+    fun showBootstraps() {
+        println("pls")
+    }
 
 }

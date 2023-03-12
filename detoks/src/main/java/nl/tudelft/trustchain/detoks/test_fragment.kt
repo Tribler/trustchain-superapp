@@ -2,15 +2,23 @@ package nl.tudelft.trustchain.detoks
 
 import android.content.Context
 import android.os.Bundle
+import android.service.autofill.OnClickAction
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowManager
+import android.widget.Button
+import android.widget.PopupWindow
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
+import kotlinx.android.synthetic.main.discovered_peer_item.*
 import kotlinx.android.synthetic.main.test_fragment_layout.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.OverlayConfiguration
 import nl.tudelft.ipv8.Peer
@@ -38,11 +46,31 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
 
     var peers: ArrayList<PeerViewModel> = arrayListOf()
     var proposals: ArrayList<ProposalViewModel> = arrayListOf()
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val privateKey = getPrivateKey(requireContext())
 
+
+        // button to show the bootstrap servers
+        val button = view.findViewById<Button>(R.id.bootstrapButton)
+
+        button.setOnClickListener {
+            // select the popup layout file
+            val popupView = LayoutInflater.from(requireContext()).inflate(R.layout.popup_servers, null)
+
+            // open the popup window in the middle of the screen
+            val popupWindow = PopupWindow(popupView, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
+            popupWindow.isFocusable = true
+            popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
+
+            // TODO: add the logic for the bootstrap button (show the server adresses)
+
+            // close popup window on closebutton click
+            val closeButton = popupView.findViewById<Button>(R.id.close_button)
+            closeButton.setOnClickListener {
+                popupWindow.dismiss()
+            }
+        }
 
 //        val luukCommunity = OverlayConfiguration(
 //            Overlay.Factory(LuukCommunity::class.java),
@@ -78,6 +106,7 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
 
         val benchmarkCounterTextView = benchmarkCounterTextView
         benchmarkCounterTextView.text = ""
+
 
         val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
 
@@ -178,7 +207,9 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
         }
     }
 
-
+    fun actionBootstrapServers() {
+        println(Community.DEFAULT_ADDRESSES.joinToString("\n"))
+    }
 
     // We also register a TransactionValidator. This one is simple and checks whether "test_block"s are valid.
     private fun registerValidator(trustchain : TrustChainCommunity) {

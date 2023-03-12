@@ -60,4 +60,21 @@
         android:layout_height="200dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <Button
+        android:id="@+id/bootstrapButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="bootstrap_servers"
+        android:textAllCaps="false"
+        tools:layout_editor_absoluteX="320dp"
+        tools:layout_editor_absoluteY="5dp"
+        android:onClick="showBootstraps"
+        />
+
+    <Button
+        android:id="@+id/close_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Close"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
