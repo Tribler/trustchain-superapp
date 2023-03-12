@@ -9,6 +9,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -64,6 +65,11 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
             popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
 
             // TODO: add the logic for the bootstrap button (show the server adresses)
+            // get the txt attribute of the popup window
+            println(Community.DEFAULT_ADDRESSES.joinToString("\n"))
+
+            val text = popupView.findViewById<TextView>(R.id.slay)
+            text.text = Community.DEFAULT_ADDRESSES.joinToString("\n")
 
             // close popup window on closebutton click
             val closeButton = popupView.findViewById<Button>(R.id.close_button)
