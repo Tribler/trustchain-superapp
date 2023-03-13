@@ -94,8 +94,13 @@ class UpvoteCommunity(
             val transaction = mapOf("videoID" to "TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
             "heartTokenGivenBy" to myPeer.publicKey.keyToBin().toHex(),
             "heartTokenGivenTo" to peer.publicKey.keyToBin().toHex())
-            this.createProposalBlock(UpvoteTrustchainConstants.GIVE_HEART_TOKEN, transaction, peer.publicKey.keyToBin());
-
+            val block = this.createProposalBlock(UpvoteTrustchainConstants.GIVE_HEART_TOKEN, transaction, peer.publicKey.keyToBin());
+            logger.debug { "proposal block created:" +
+                "peer with public key: ${block.publicKey.toHex()} has created a proposal block,\n" +
+                "contents of block:\n" +
+                "video ID: ${block.transaction["videoID"]}\n" +
+                "peer with public key: ${block.transaction["heartTokenGivenBy"]} gave a Heart token to \n" +
+                "proposal block needs an agreement block from peer with public key: ${block.transaction["heartTokenGivenTo"]}" }
             return message
         }
 
