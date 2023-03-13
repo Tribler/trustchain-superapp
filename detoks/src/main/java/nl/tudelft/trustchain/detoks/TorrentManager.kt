@@ -1,6 +1,13 @@
 package nl.tudelft.trustchain.detoks
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Resources
+import android.database.Cursor
+import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.frostwire.jlibtorrent.*
@@ -8,11 +15,17 @@ import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
+import com.frostwire.jlibtorrent.swig.*
+import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
+import org.apache.commons.io.FileUtils
 import java.io.File
+import java.nio.file.Path
+import java.nio.file.Paths
+
 
 /**
  * This class manages the torrent files and the video pool.
@@ -127,15 +140,18 @@ class TorrentManager(
 
                 if (file.extension == "torrent") {
                     val torrentInfo = TorrentInfo(file)
-                    sessionManager.download(torrentInfo, cacheDir)
+                    sessionManager.download(torrentInfo, cacheDir )
                     Log.i("DeToks", "AA: ${torrentInfo.creator()}")
                     val handle = sessionManager.find(torrentInfo.infoHash())
+
                     handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
                     val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
                     handle.prioritizeFiles(priorities)
                     handle.pause()
-                    for (it in 0..torrentInfo.numFiles()) {
+                    Log.d("DeToks", "THIS HAS ${torrentInfo.numFiles()} : ${torrentInfo.creator()}  from ${torrentInfo.name()}")
+                    for (it in 0..torrentInfo.numFiles()-1) {
                         val fileName = torrentInfo.files().fileName(it)
+                        Log.d("DeToks", "file ${fileName} in $it")
                         if (fileName.endsWith(".mp4")) {
                             torrentFiles.add(
                                 TorrentHandler(
@@ -152,6 +168,150 @@ class TorrentManager(
                 }
             }
         }
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createTorrentInfo(collection: Uri, context: Context): Pair<Path, TorrentInfo>? {
+        Log.d("DeToks", "AAAAAAAAAAAAAA")
+
+        val parentDir = Paths.get(cacheDir.getPath()+"/"+collection.hashCode().toString())
+        val out = copyToTempFolder(context, listOf(collection), parentDir)
+
+        Log.d("DeToks", collection.toString())
+        val out2 = getVideoFilePath(collection,context)
+        val folder = Paths.get(out2.first)
+
+
+        Log.d("DeToks", "VALID: ${out.second.is_valid}" )
+        val ec =  error_code()
+
+        var fs = file_storage()
+        libtorrent.add_files(fs,cacheDir.getPath()+"/"+collection.hashCode().toString())
+        val ct = create_torrent(fs)
+        ct.set_creator("Moi")
+        ct.set_priv(false)
+
+        ct.add_tracker("udp://tracker.openbittorrent.com:80/announce",1)
+        libtorrent.set_piece_hashes(ct,cacheDir.getPath(), ec)
+        Log.d("DeToks","ec ${ec.value()}")
+        val et = ct.generate()
+        Log.d("DeToks", folder.toString())
+
+
+        Log.d("DeToks", out2.first!!)
+        Log.d("DeToks", out.first.absolutePath)
+
+
+        val torrentInfo = TorrentInfo(Entry(et).bencode())
+//        torrentInfo.addTracker("udp://tracker.openbittorrent.com:80/announce")
+        val infoHash = torrentInfo.infoHash().toString()
+        val par = torrentDir.absolutePath
+        val torrentPath = Paths.get("$par/$infoHash.torrent")
+        val torrentFile = torrentPath.toFile()
+
+
+
+
+        torrentFile.writeBytes(Entry(et).bencode())
+
+        Log.d("DeToks", "Making magnet")
+        Log.d("DeToks", torrentInfo.makeMagnetUri())
+        sessionManager.download(torrentInfo, cacheDir )
+        val res = sessionManager.fetchMagnet(torrentInfo.makeMagnetUri(), 10)
+        if (res == null) Log.d("DeToks", "NO DATA :(")
+        val handle = sessionManager.find(torrentInfo.infoHash())
+
+        handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+        val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
+        handle.prioritizeFiles(priorities)
+        handle.pause()
+        Log.d("DeToks", "THIS HAS ${torrentInfo.numFiles()} : ${torrentInfo.creator()}  from ${torrentInfo.name()}")
+        for (it in 0..torrentInfo.numFiles()-1) {
+            val fileName = torrentInfo.files().fileName(it)
+            Log.d("DeToks", "file ${fileName} in $it")
+            if (fileName.endsWith(".mp4")) {
+                torrentFiles.add(
+                    TorrentHandler(
+                        cacheDir,
+                        handle,
+                        torrentInfo.name(),
+                        fileName,
+                        it,
+                        torrentInfo.creator()
+                    )
+                )
+            }
+        }
+        return Pair(torrentPath, torrentInfo)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun copyToTempFolder(context: Context, uris: List<Uri>, parentDir: Path): Pair<File, file_storage> {
+        Log.d(
+            "DeToks",
+            "copyToTempFolder: attempting to copy files ${uris.map { it.toString() }} into temp folder $parentDir"
+        )
+        val contentResolver = context.contentResolver
+
+        File(parentDir.toUri()).deleteRecursively()
+        var fs = file_storage()
+
+        val fileList = mutableListOf<File>()
+        val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+        for (uri in uris) {
+            var fileName = ""
+            contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    fileName = cursor.getString(0)
+                }
+            }
+
+            if (fileName == "") throw Error("Source file name for creating torrent not found")
+            val input =
+                contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
+            val fileLocation = "$parentDir/$fileName"
+
+
+            FileUtils.copyInputStreamToFile(input, File(fileLocation))
+            fileList.add(File(fileLocation))
+            libtorrent.add_files(fs, "$parentDir/$fileName")
+        }
+
+        return Pair(parentDir.toFile(), fs)
+    }
+
+    @SuppressLint("Range")
+    fun getVideoFilePath(uri: Uri, context: Context):  Pair<String?, Long> {
+
+
+        val cursor: Cursor = context.getContentResolver().query(uri, null, null, null, null)!!
+        cursor.moveToFirst()
+        var f_id = cursor.getString(0)
+
+        Log.d("DeToks", f_id)
+        f_id = f_id.split(":")[1]
+        cursor.close()
+
+        context.contentResolver.query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            arrayOf( MediaStore.Video.Media.DATA, OpenableColumns.SIZE),
+            "_id=?",
+            arrayOf(f_id),
+            null
+        )?.use { c2 ->
+            Log.d("AndroidRuntime", f_id)
+            Log.d("AndroidRuntime", uri.toString())
+            Log.d("AndroidRuntime",c2.count.toString())
+            Log.d("AndroidRuntime", "====")
+            c2.moveToFirst()
+            var path = c2.getString(0)
+            val size = c2.getString(1).toLong()
+
+            c2.close()
+            return Pair(path, size )
+        }
+
+        return Pair("",0)
+
     }
 
     private fun initializeSessionManager() {
@@ -211,6 +371,7 @@ class TorrentManager(
         }
 
         fun isPlayable(): Boolean {
+
             return handle.fileProgress()[fileIndex] / handle.torrentFile().files()
                 .fileSize(fileIndex) > 0.8
         }

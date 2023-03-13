@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.android.IPv8Android
 
 
 class VideosAdapter(
@@ -31,7 +32,6 @@ class VideosAdapter(
         )
     }
 
-
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
         holder.setVideoData(mVideoItems[position], position, onPlaybackError)
@@ -46,6 +46,7 @@ class VideosAdapter(
         var mVideoView: VideoView
         var txtTitle: TextView
         var txtDesc: TextView
+        var peerCount: TextView
         var mProgressBar: ProgressBar
         var like: Button
 
@@ -53,23 +54,29 @@ class VideosAdapter(
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
+            peerCount = itemView.findViewById(R.id.peerCount)
             mProgressBar = itemView.findViewById(R.id.progressBar)
             like = itemView.findViewById(R.id.like_button)
             like.setVisibility(View.GONE);
-            like.setOnClickListener{
-                // DeToks usernames should be public keys and we will assume torrent creator is the public key :)
-                System.exit(0)
-            }
+
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
             CoroutineScope(Dispatchers.Main).launch {
                 val content = item.content(position, 10000)
-                like.setVisibility(View.VISIBLE);
+                like.setVisibility(View.VISIBLE)
+                like.setOnClickListener{
+                    val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+                    community.broadcastLike(content.fileName, content.torrentName, content.creator)
+                }
+                val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
+                peerCount.text = "Peers: " + community.getPeers().size.toString()
+                Log.d("DeToks", content.fileURI)
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
+
                 mVideoView.setOnPreparedListener { mp ->
                     mProgressBar.visibility = View.GONE
                     mp.start()
@@ -87,7 +94,8 @@ class VideosAdapter(
                 }
                 mVideoView.setOnCompletionListener { mp -> mp.start() }
                 mVideoView.setOnErrorListener { p1, what, extra ->
-                    Log.i("DeToks", "onError: $p1, $what, $extra")
+                    Log.i("DeToks", "onError: $p1, $what, $extra , ${p1.duration}")
+
                     if (onPlaybackError != null) {
                         onPlaybackError()
                         true
