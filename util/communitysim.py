@@ -1,8 +1,11 @@
 import os
 import sys
+import random
 from asyncio import ensure_future, get_event_loop
+from torrentool.api import Torrent
 
 from pyipv8.ipv8.community import Community
+from pyipv8.ipv8.messaging.serialization import Serializable
 from pyipv8.ipv8.configuration import (
     ConfigBuilder,
     Strategy,
@@ -13,6 +16,8 @@ from pyipv8.ipv8.configuration import (
 )
 
 from pyipv8.ipv8_service import IPv8
+
+MESSAGE_TORRENT_ID = 1
 
 bootstrap_config = {
     "class": "DispersyBootstrapper",
@@ -62,10 +67,24 @@ bootstrapper = [
 ]
 
 
+class TorrentPayload(Serializable):
+    def __init__(self, message):
+        self.message = message
+
+    def to_pack_list(self):
+        return [("20s", self.message.encode())]
+
+    @classmethod
+    def from_unpack_list(cls, *args):
+        return cls(*args)
+
+
 class DetoksCommunity(Community):
     community_id = bytes.fromhex("c86a7db45eb3563ae047639817baec4db2bc7c25")
 
     def started(self):
+        self.torrent_list = os.listdir("torrents/")
+
         async def print_peers():
             print(
                 "I am:", self.my_peer, "\nI know:", [str(p) for p in self.get_peers()]
@@ -75,26 +94,36 @@ class DetoksCommunity(Community):
             """
             Function that runs the gossip message like the android app
             """
-            pass
 
-        # We register a asyncio task with this overlay.
-        # This makes sure that the task ends when this overlay is unloaded.
-        # We call the 'print_peers' function every 5.0 seconds, starting now.
+            for p in self.get_peers():
+                torrent_to_send = random.choice(self.torrent_list)
+                torrent = Torrent.from_file(f"torrents/{torrent_to_send}")
+
+                print(
+                    f"Sending torrent {torrent_to_send} with magnetlink: {torrent.magnet_link}"
+                )
+
+                packet = self.ezr_pack(
+                    MESSAGE_TORRENT_ID, TorrentPayload(torrent.magnet_link)
+                )
+                self.endpoint.send(p.address, packet)
+
         self.register_task("print_peers", print_peers, interval=5.0, delay=0)
         self.register_task("gossip", gossip, interval=5.0, delay=0)
 
         self.add_message_handler(1, self.on_message)
 
     def on_message(self, peer, payload):
-        pass
-        # print("Got a message from:", peer)
-        # print("The message includes the first payload:\n", payload)
-        # print("The message includes the second payload:\n", payload2)
+        print("Got a message from:", peer)
+        print("The message includes the first payload:\n", payload)
 
 
 async def start_nodes(num_nodes):
     if not os.path.exists("keys/"):
         os.mkdir("keys/")
+
+    if not os.path.exists("torrents/"):
+        os.mkdir("torrents/")
 
     for i in range(num_nodes):
         node_name = f"dummy_peer_{i}"
