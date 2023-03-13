@@ -1,28 +1,25 @@
 package nl.tudelft.trustchain.detoks
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
-import android.service.autofill.OnClickAction
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
-import androidx.lifecycle.lifecycleScope
+import androidx.core.text.buildSpannedString
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.common.io.Files.append
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import kotlinx.android.synthetic.main.discovered_peer_item.*
 import kotlinx.android.synthetic.main.test_fragment_layout.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import nl.tudelft.ipv8.Community
-import nl.tudelft.ipv8.IPv8Configuration
-import nl.tudelft.ipv8.OverlayConfiguration
-import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.*
@@ -38,7 +35,9 @@ import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import nl.tudelft.trustchain.common.util.TrustChainHelper
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 private const val PREF_PRIVATE_KEY = "private_key"
 private const val PREF_PUBLIC_KEY = "public_key"
@@ -50,33 +49,6 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val privateKey = getPrivateKey(requireContext())
-
-
-        // button to show the bootstrap servers
-        val button = view.findViewById<Button>(R.id.bootstrapButton)
-
-        button.setOnClickListener {
-            // select the popup layout file
-            val popupView = LayoutInflater.from(requireContext()).inflate(R.layout.popup_servers, null)
-
-            // open the popup window in the middle of the screen
-            val popupWindow = PopupWindow(popupView, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
-            popupWindow.isFocusable = true
-            popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
-
-            // TODO: add the logic for the bootstrap button (show the server adresses)
-            // get the txt attribute of the popup window
-            println(Community.DEFAULT_ADDRESSES.joinToString("\n"))
-
-            val text = popupView.findViewById<TextView>(R.id.slay)
-            text.text = Community.DEFAULT_ADDRESSES.joinToString("\n")
-
-            // close popup window on closebutton click
-            val closeButton = popupView.findViewById<Button>(R.id.close_button)
-            closeButton.setOnClickListener {
-                popupWindow.dismiss()
-            }
-        }
 
 //        val luukCommunity = OverlayConfiguration(
 //            Overlay.Factory(LuukCommunity::class.java),
@@ -106,6 +78,47 @@ class test_fragment : BaseFragment(R.layout.test_fragment_layout), singleTransac
         // We now initialize IPv8 with this new community
         val trustChainConfiguration = IPv8Configuration(overlays=listOf(luuksTrustChainCommunity))
         activity?.let { IPv8Android.Factory(it.application).setConfiguration(trustChainConfiguration).setPrivateKey(getPrivateKey(requireContext())).init() }
+
+
+        // DEFINE BEHAVIOR BOOTSTRAP SERVERS
+
+        // button to show the bootstrap servers
+        val button = view.findViewById<Button>(R.id.bootstrapButton)
+
+        button.setOnClickListener {
+            // select the popup layout file
+            val popupView = LayoutInflater.from(requireContext()).inflate(R.layout.popup_servers, null)
+
+            // open the popup window in the middle of the screen
+            val popupWindow = PopupWindow(popupView, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
+            popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
+
+
+            val text = popupView.findViewById<TextView>(R.id.text_popup)
+
+           val com = getTrustChainCommunity()
+
+            val walkable = com.getWalkableAddresses()
+
+            var res_str = "BOOTSTRAP SERVERS : \n"
+
+            Community.DEFAULT_ADDRESSES.forEach {address ->
+                res_str += address.toString()
+                res_str += if (address in walkable) " UP\n"; else " DOWN\n"
+
+            }
+            res_str += "\n WALKABLE ADDRESSES :\n" + walkable.joinToString("\n")
+            res_str += "\n\nWAN: " + com.myEstimatedWan.toString() + "\n"
+            res_str += "`\nLAN: " + com.myEstimatedLan.toString() + "\n"
+            text.text = res_str
+            // showing the servers on the popup and if they're active or not.
+
+            // close popup window on closebutton click
+            val closeButton = popupView.findViewById<Button>(R.id.close_button)
+            closeButton.setOnClickListener {
+                popupWindow.dismiss()
+            }
+        }
 
         val benchmarkTextView = benchmarkStatusTextView
         benchmarkTextView.text = "Currently not running a benchmark."
