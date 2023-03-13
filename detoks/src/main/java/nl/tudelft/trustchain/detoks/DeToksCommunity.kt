@@ -11,6 +11,7 @@ import nl.tudelft.ipv8.messaging.Packet
 class DeToksCommunity(private val context: Context) : Community() {
 
     private val walletManager = WalletManager(context)
+    private val visitedPeers  = mutableListOf<Peer>()
 
     init {
         messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
@@ -61,8 +62,15 @@ class DeToksCommunity(private val context: Context) : Community() {
         val listOfTorrents = TorrentManager.getInstance(context).getListOfTorrents()
         if(listOfTorrents.isEmpty()) return
         val magnet = listOfTorrents.random().makeMagnetUri()
+
         val packet = serializePacket(MESSAGE_TORRENT_ID, TorrentMessage(magnet))
-        sendTokens(1, peer.mid)
+
+        // Send a token only to a new peer
+        if (!visitedPeers.contains(peer)) {
+            visitedPeers.add(peer)
+            sendTokens(1, peer.mid)
+        }
+
         send(peer.address, packet)
     }
 
