@@ -6,8 +6,12 @@ CREATE TABLE testing(
     PRIMARY KEY (transactionid)
 );
 
+selectAll:
+SELECT *
+FROM testing;
+
 addTest:
-REPLACE INTO testing(transactionid, sendFrom, sendTo, amount)
+INSERT INTO testing(transactionid, sendFrom, sendTo, amount)
 VALUES(?,?,?,?);
 
 getTest:

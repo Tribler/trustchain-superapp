@@ -2,6 +2,16 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'com.squareup.sqldelight'
+
+sqldelight {
+    Database {
+        packageName = "nl.tudelft.detoks.sqldelight"
+        sourceFolders = ["sqldelight"]
+        schemaOutputDirectory = file("src/main/detoks/databases")
+    }
+}
+
 android {
     compileSdkVersion 33
 
