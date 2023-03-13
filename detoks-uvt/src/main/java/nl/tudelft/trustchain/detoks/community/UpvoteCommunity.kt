@@ -1,21 +1,46 @@
 package nl.tudelft.trustchain.detoks.community
 
+import android.content.Context
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import mu.KotlinLogging
+import nl.tudelft.ipv8.attestation.trustchain.*
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.util.toHex
 
 private val logger = KotlinLogging.logger {}
 
-class UpvoteCommunity() : Community(){
+object UpvoteTrustchainConstants {
+    const val GIVE_HEART_TOKEN = "give_heart_token_block"
+}
+class UpvoteCommunity(
+    context: Context,
+    settings: TrustChainSettings,
+    database: TrustChainStore,
+    crawler: TrustChainCrawler = TrustChainCrawler()
+) : TrustChainCommunity(settings, database, crawler){
     /**
      * serviceId is a randomly generated hex string with length 40
      */
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
-
+    val context = context
     init {
         messageHandlers[MessageID.HEART_TOKEN] = ::onHeartTokenPacket
+        this.registerBlockSigner(UpvoteTrustchainConstants.GIVE_HEART_TOKEN, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                logger.debug { "This peer with member ID: ${myPeer.mid} received \n" +
+                    "the link_public key from the proposal block is ${block.linkPublicKey.toHex()}\n" +
+                    "mypeer's public key is: ${myPeer.publicKey.keyToBin().toHex()}" +
+                    "a proposal block from  peer with public key: ${block.publicKey.toHex()}, contents of the transaction:\n" +
+                    "the video ID is: ${block.transaction["videoID"]},\n" +
+                    "the heartTokenGivenBy: ${block.transaction["heartTokenGivenBy"]},\n" +
+                    "the heartTokenGivenTo: ${block.transaction["heartTokenGivenTo"]},\n" +
+                    "Agreement Block created and sent\n"}
+                this@UpvoteCommunity.createAgreementBlock(block, block.transaction)
+            }
+        })
     }
 
     object MessageID {
@@ -44,6 +69,12 @@ class UpvoteCommunity() : Community(){
 
     /**
      * Sends a HeartToken to a random Peer
+     * When a message is sent, a proposal block is created
+     * //TODO: only make proposal block if the user did not like the video yet, if the user already like the video,
+     * //TODO: it shouldn't be possible to like again / create a proposal again
+     *
+     * //TODO: maybe it should be the poster of the video that creates proposal blocks and
+     * //todo: the user that likes it creates an agreement block
      */
     fun sendHeartToken(id: String, token: String): String {
         val payload = HeartTokenPayload(id, token)
@@ -59,6 +90,12 @@ class UpvoteCommunity() : Community(){
             val message = "You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}"
             logger.debug { message }
             send(peer, packet)
+
+            val transaction = mapOf("videoID" to "TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
+            "heartTokenGivenBy" to myPeer.publicKey.keyToBin().toHex(),
+            "heartTokenGivenTo" to peer.publicKey.keyToBin().toHex())
+            this.createProposalBlock(UpvoteTrustchainConstants.GIVE_HEART_TOKEN, transaction, peer.publicKey.keyToBin());
+
             return message
         }
 
@@ -66,10 +103,14 @@ class UpvoteCommunity() : Community(){
     }
 
     class Factory(
-        // add parameters needed by the constructor of UpvoteCommunity if needed
+        private val context: Context,
+        private val settings: TrustChainSettings,
+        private val database: TrustChainStore,
+        private val crawler: TrustChainCrawler = TrustChainCrawler()
     ) : Overlay.Factory<UpvoteCommunity>(UpvoteCommunity::class.java) {
         override fun create(): UpvoteCommunity {
-            return UpvoteCommunity()
+            return UpvoteCommunity(context, settings, database, crawler)
         }
     }
+
 }

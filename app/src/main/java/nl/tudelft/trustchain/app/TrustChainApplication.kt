@@ -450,9 +450,12 @@ class TrustChainApplication : Application() {
     }
 
     private fun createUpvoteCommunity(): OverlayConfiguration<UpvoteCommunity> {
+        val settings = TrustChainSettings()
+        val driver = AndroidSqliteDriver(Database.Schema, this, "upvote.db")
+        val store = TrustChainSQLiteStore(Database(driver))
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
-            UpvoteCommunity.Factory(),
+            UpvoteCommunity.Factory(this, settings, store),
             listOf(randomWalk)
         )
     }
