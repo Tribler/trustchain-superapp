@@ -7,7 +7,14 @@ import nl.tudelft.ipv8.messaging.*
 
 
 class Like(val liker: ByteArray, val video: String, val torrent: String, val creator_name: String) : Serializable {
-
+    fun toMap(): Map<String, String> {
+        return mapOf(
+            "liker" to liker.toString(),
+            "video" to video,
+            "torrent" to torrent,
+            "creator_name" to creator_name,
+        )
+    }
     override fun serialize(): ByteArray {
         return liker +
             serializeVarLen(video.toByteArray(Charsets.UTF_8)) +

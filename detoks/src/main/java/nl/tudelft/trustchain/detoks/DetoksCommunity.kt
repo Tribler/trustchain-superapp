@@ -14,9 +14,7 @@ import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 import nl.tudelft.trustchain.detoks.Like
 
-enum class MessageType {
-    LIKE
-}
+const val LIKE_BLOCK: String = "like_block"
 
 class DetoksCommunity (settings: TrustChainSettings,
                        database: TrustChainStore,
@@ -59,38 +57,34 @@ class DetoksCommunity (settings: TrustChainSettings,
     fun broadcastLike(vid: String, torrent: String, creator: String) {
         Log.d("DeToks", "Liking: $vid")
 
-        // TODO: This should be the creator of the video, now we just ask a random peer to validate
-        val peerKey = getPeers()[0].key.keyToBin()
+        // Ask a random peer to validate your like
+        val peer = (0 until getPeers().size).random()
+        val peerKey = getPeers()[peer].key.keyToBin()
         val like = Like(myPeer.publicKey.keyToBin(), vid, torrent, creator)
-        val map = mapOf<Any?, Any?>()
-        createProposalBlock("like_block", map, peerKey)
+        createProposalBlock(LIKE_BLOCK, like.toMap(), peerKey)
         Log.d("DeToks", "$like")
-        // TODO: change broadcast to subset of peers?
-//        for (peer in getPeers()) {
-//            val packet = serializePacket(MessageType.LIKE.ordinal, like)
-//            send(peer.address, packet)
-//        }
+    }
+
+    // Looks through the entire database, so probably very inefficient, but works for now
+    fun getLikes(vid: String, torrent: String): Int {
+        return database.getBlocksWithType(LIKE_BLOCK).filter {
+            it.transaction["video"] == vid && it.transaction["torrent"] == torrent
+        }.size
     }
 
     init {
-        messageHandlers[MessageType.LIKE.ordinal] = ::onMessage
-        registerBlockSigner("like_block", object : BlockSigner {
+        registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
                 createAgreementBlock(block, mapOf<Any?, Any?>())
             }
         })
-        addListener("like_block", object : BlockListener {
+        addListener(LIKE_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Detoks", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                val video = block.transaction.get("video")
+                val torrent = block.transaction.get("torrent")
+                Log.d("Detoks", "Received like for $video, $torrent")
             }
         })
-    }
-
-    private fun onMessage(packet: Packet) {
-        val (_, payload) = packet.getAuthPayload(Like.Deserializer)
-        // Because peers can relay the message, peer != liker in all cases
-        Log.d("DeToks", payload.liker.toString() + " liked: " + payload.video + " Peer "/* + peer.address.toString()*/)
-        // TODO: propagate message
-
     }
 }
