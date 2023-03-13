@@ -21,7 +21,6 @@ class DeToksCommunity(private val context: Context) : Community() {
 
     fun gossipWith(peer: Peer) {
         Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
-
         Log.d("DeToksCommunity", this.getPeers().toString())
         Log.d("DeToksCommunity", this.myPeer.toString())
         val listOfTorrents = TorrentManager.getInstance(context).getListOfTorrents()
