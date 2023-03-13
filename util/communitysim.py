@@ -75,12 +75,13 @@ class DetoksCommunity(Community):
             """
             Function that runs the gossip message like the android app
             """
+            pass
 
         # We register a asyncio task with this overlay.
         # This makes sure that the task ends when this overlay is unloaded.
         # We call the 'print_peers' function every 5.0 seconds, starting now.
         self.register_task("print_peers", print_peers, interval=5.0, delay=0)
-        self.register_task("gossip", print_peers, interval=5.0, delay=0)
+        self.register_task("gossip", gossip, interval=5.0, delay=0)
 
         self.add_message_handler(1, self.on_message)
 
@@ -97,12 +98,12 @@ async def start_nodes(num_nodes):
 
     for i in range(num_nodes):
         node_name = f"dummy_peer_{i}"
-        builder = ConfigBuilder().clear_keys().clear_overlays()
+        builder = ConfigBuilder()
         builder.add_key(node_name, "medium", f"keys/ec{i}.pem")
         builder.add_overlay(
             "DeToksCommunity",
             node_name,
-            [WalkerDefinition(Strategy.RandomWalk, 10, {"timeout": 0.5})],
+            [WalkerDefinition(Strategy.RandomWalk, 3, {"timeout": 20})],
             bootstrapper,
             {},
             [("started",)],
