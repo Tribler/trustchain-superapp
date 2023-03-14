@@ -53,7 +53,8 @@ class TorrentManager(
      * If the video is not downloaded after the timeout, it will return the video anyway.
      */
     suspend fun provideContent(index: Int = currentIndex, timeout: Long = 10000): TorrentMediaInfo {
-        Log.i("DeToks", "Providing content ... $index, ${index % getNumberOfTorrents()}")
+        val numTorrents = getNumberOfTorrents()
+        Log.i("DeToks", "Providing content ... $index, ${index % numTorrents}, $numTorrents")
         val content = torrentFiles.gett(index % getNumberOfTorrents())
 
         return try {

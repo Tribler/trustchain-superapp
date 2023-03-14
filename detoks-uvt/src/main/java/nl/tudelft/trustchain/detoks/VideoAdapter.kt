@@ -13,8 +13,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
+import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
+import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
+import nl.tudelft.trustchain.detoks.helpers.LongHoldListener
 
 class VideosAdapter(
     private val torrentManager: TorrentManager,
@@ -56,6 +61,7 @@ class VideosAdapter(
             txtDesc = itemView.findViewById(R.id.txtDesc)
             mProgressBar = itemView.findViewById(R.id.progressBar)
             setLikeListener()
+            setCreateProposalTokenListener()
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
@@ -118,6 +124,45 @@ class VideosAdapter(
                 object : DoubleClickListener() {
                     override fun onDoubleClick(view: View?) {
                         adapter.sendHeartToken()
+                    }
+                }
+            )
+        }
+
+        private fun createProposalToken() {
+            //TODO: create and sign proposal token with own private key
+            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
+            val myPeer = IPv8Android.getInstance().myPeer
+
+            val transaction = mapOf(
+                "videoID" to "TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
+                "heartTokenGivenBy" to ANY_COUNTERPARTY_PK.toHex(),
+                "heartTokenGivenTo" to myPeer.publicKey.keyToBin().toHex()
+            )
+            val proposalBlock = upvoteCommunity?.createProposalBlock(
+                UpvoteTrustchainConstants.GIVE_HEART_TOKEN,
+                transaction,
+                myPeer.publicKey.keyToBin()
+            )
+            proposalBlock?.sign(myPeer.key as PrivateKey)
+        }
+
+        /**
+        Sets a listener to create a proposal token after a long press has been detected.
+         */
+        private fun setCreateProposalTokenListener() {
+            itemView.setOnTouchListener(
+                object : LongHoldListener() {
+                    override fun onLongHold() {
+                        val message = "Long HOLD detected"
+                        Log.i("DeToks", message)
+                        Toast.makeText(
+                            itemView.context,
+                            message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        createProposalToken()
                     }
                 }
             )
