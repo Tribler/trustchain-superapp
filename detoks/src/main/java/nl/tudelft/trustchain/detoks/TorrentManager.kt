@@ -44,7 +44,7 @@ class TorrentManager(
     private var currentIndex = 0
 
     init {
-        clearMediaCache()
+//        clearMediaCache()
         initializeSessionManager()
         buildTorrentIndex()
         initializeVideoPool()
@@ -115,6 +115,7 @@ class TorrentManager(
 
     private fun initializeVideoPool() {
         if (torrentFiles.size < cachingAmount * 2) {
+            Log.d("DeToks", "Smaller than cache")
             logger.error("Not enough torrents to initialize video pool")
             return
         }
@@ -187,13 +188,17 @@ class TorrentManager(
         var fs = file_storage()
         libtorrent.add_files(fs,cacheDir.getPath()+"/"+collection.hashCode().toString())
         val ct = create_torrent(fs)
+        val tb = TorrentBuilder()
+        tb.creator("Moi")
+        tb.path(File(cacheDir.getPath()+"/"+collection.hashCode().toString()))
+
         ct.set_creator("Moi")
         ct.set_priv(false)
 
         ct.add_tracker("udp://tracker.openbittorrent.com:80/announce",1)
         libtorrent.set_piece_hashes(ct,cacheDir.getPath(), ec)
         Log.d("DeToks","ec ${ec.value()}")
-        val et = ct.generate()
+//        val et = ct.generate()
         Log.d("DeToks", folder.toString())
 
 
@@ -201,7 +206,7 @@ class TorrentManager(
         Log.d("DeToks", out.first.absolutePath)
 
 
-        val torrentInfo = TorrentInfo(Entry(et).bencode())
+        val torrentInfo = TorrentInfo(tb.generate().entry().bencode())
 //        torrentInfo.addTracker("udp://tracker.openbittorrent.com:80/announce")
         val infoHash = torrentInfo.infoHash().toString()
         val par = torrentDir.absolutePath
@@ -211,7 +216,7 @@ class TorrentManager(
 
 
 
-        torrentFile.writeBytes(Entry(et).bencode())
+        torrentFile.writeBytes(tb.generate().entry().bencode())
 
         Log.d("DeToks", "Making magnet")
         Log.d("DeToks", torrentInfo.makeMagnetUri())
@@ -382,12 +387,13 @@ class TorrentManager(
         }
 
         fun deleteFile() {
-            handle.filePriority(fileIndex, Priority.IGNORE)
-            val file = File("$cacheDir/$torrentName/$fileName")
-            if (file.exists()) {
-                file.delete()
-            }
-            isDownloading = false
+            return
+//            handle.filePriority(fileIndex, Priority.IGNORE)
+//            val file = File("$cacheDir/$torrentName/$fileName")
+//            if (file.exists()) {
+//                file.delete()
+//            }
+//            isDownloading = false
         }
 
         fun downloadWithMaxPriority() {
