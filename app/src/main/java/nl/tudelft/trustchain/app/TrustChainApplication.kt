@@ -63,6 +63,7 @@ import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.detoks.OurCommunity
+import nl.tudelft.trustchain.detoks.db.OurTransactionStore
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.gossipML.RecommenderCommunity
@@ -74,8 +75,6 @@ import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.voting.VotingCommunity
 import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
-import nl.tudelft.trustchain.detoks.db.TestBase
-import nl.tudelft.trustchain.detoks.community.TestCommunity
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -452,25 +451,13 @@ class TrustChainApplication : Application() {
     }
 
     private fun createOurCommunity(): OverlayConfiguration<OurCommunity> {
-//        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "testbase.db")
-//        val store = TestBase.getInstance(this)
+        val store = OurTransactionStore.getInstance(this)
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
-            Overlay.Factory(OurCommunity::class.java),
+            OurCommunity.Factory(store, this),
             listOf(randomWalk)
         )
     }
-
-    //    private fun createTestDatabase(): OverlayConfiguration<TestCommunity>{
-//        val settings = TrustChainSettings()
-//        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "testbase.db")
-//        val store = TestBas
-//        val randomWalk = RandomWalk.Factory()
-//        return OverlayConfiguration(
-//            TestCommunity.Factory(store, this),
-//            listOf(randomWalk)
-//        )
-//    }
 
     private fun getIdAlgorithmKey(idFormat: String): BonehPrivateKey {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)

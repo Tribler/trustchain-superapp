@@ -38,6 +38,7 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
             transaction,
             recipient.publicKey.keyToBin()
         )
+        community.addTransaction(transaction_index, ipv8.myPeer.publicKey.toString(), recipient.publicKey.toString(), "proposal")
         transaction_index += 1
     }
 
@@ -47,13 +48,19 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
             block,
             transaction,
         )
+        // TODO - I increment transaction index here to keep unique IDs in the DB
+        community.addTransaction(transaction_index, ipv8.myPeer.publicKey.toString(), block.transaction["peer_id"].toString(), "agreement")
+        transaction_index += 1
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         community = IPv8Android.getInstance().getOverlay()!!
         trustchainCommunity = IPv8Android.getInstance().getOverlay()!!
         ipv8 = IPv8Android.getInstance()
 
+        // Reset DB
+        community.resetDatabase()
 
         binding.peer1IpTextview.text = "${ipv8.myPeer.address.ip}"
         binding.peer2IpTextview.text = "${ipv8.myPeer.address.ip}"
@@ -65,6 +72,14 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
         binding.peer2SendTokenButton.setOnClickListener {
             binding.peer2TokensTextview.text="Transaction ${transaction_index}"
             createProposal(ipv8.myPeer, 2)
+        }
+
+        binding.peer1ConfirmTokenButton.setOnClickListener{
+            binding.peer1ConfirmTextview.text = community.getData().toString()
+        }
+
+        binding.peer2ConfirmTokenButton.setOnClickListener{
+            binding.peer2ConfirmTextview.text = community.getData().toString()
         }
 
         trustchainCommunity.addListener(BLOCK_TYPE, object : BlockListener {
