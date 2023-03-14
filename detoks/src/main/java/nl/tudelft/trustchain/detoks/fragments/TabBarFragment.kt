@@ -8,19 +8,17 @@ import android.view.ViewGroup
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import nl.tudelft.trustchain.detoks.R
-import nl.tudelft.trustchain.detoks.utils.TabPageAdapter
+import nl.tudelft.trustchain.detoks.adapters.TabBarAdapter
 
 class TabBarFragment : Fragment() {
-    private lateinit var adapter: TabPageAdapter
     private lateinit var viewPager: ViewPager2
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)
-        adapter = TabPageAdapter(this)
         viewPager = view.findViewById(R.id.viewPager)
-        viewPager.adapter = adapter
+        viewPager.adapter = TabBarAdapter(this, listOf(DeToksFragment(), ProfileFragment()))
 
         viewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {

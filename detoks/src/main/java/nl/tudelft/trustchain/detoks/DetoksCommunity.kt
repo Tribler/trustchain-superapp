@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.detoks.utils
+package nl.tudelft.trustchain.detoks
 
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Community
