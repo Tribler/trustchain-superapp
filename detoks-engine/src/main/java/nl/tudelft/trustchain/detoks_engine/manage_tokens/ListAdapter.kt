@@ -16,7 +16,7 @@ class ListAdapter<T>(private val data: ArrayList<T>, private val mapper: (t: T) 
             val textView: TextView
 
             init {
-                textView = view.findViewById(R.id.recycler_item)
+                textView = view.findViewById(R.id.token_text)
             }
         }
 
@@ -28,9 +28,16 @@ class ListAdapter<T>(private val data: ArrayList<T>, private val mapper: (t: T) 
     override fun getItemCount() = data.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        (holder.itemView as TextView).text = mapper(data[position])
+        holder.textView.text = mapper(data[position])
         holder.itemView.isSelected = position == selectedPos
         holder.itemView.setOnClickListener { _ -> onItemClick(position) }
     }
+
+    fun removeAt(position: Int) {
+        data.removeAt(position)
+        notifyItemRemoved(position)
+        notifyItemRangeChanged(position, data.size)
+    }
+
 }
 
