@@ -182,7 +182,7 @@ class TorrentManager private constructor (
                                 )
                             )
                             val entry = ProfileEntry(0, 0, System.currentTimeMillis())
-                            profile.magnets[torrentInfo.name()] = entry
+                            profile.magnets[torrentInfo.name() + "[" + fileName + "]"] = entry
                         }
                     }
                 }
