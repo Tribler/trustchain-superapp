@@ -14,7 +14,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
+import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
+import java.text.SimpleDateFormat
+import java.util.*
 
 class VideosAdapter(
     private val torrentManager: TorrentManager,
@@ -94,17 +97,56 @@ class VideosAdapter(
         }
 
         /**
-         * Sends a HearthToken to a random user and displays the result in a toast message
+         * Sends a HeartToken to a random user and displays the result in a toast message
          */
         private fun sendHeartToken() {
-
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val toastMessage = upvoteCommunity?.sendHeartToken("", "TEST")
-            Toast.makeText(
-                itemView.context,
-                toastMessage,
-                Toast.LENGTH_SHORT
-            ).show()
+            val lastUpvoteToken = SentTokenManager(itemView.context).getLastToken()
+
+            if (lastUpvoteToken.tokenID > -1 && lastUpvoteToken.tokenID < 10) {
+                //Since we have a string as date in our database (for now), we first need to
+                //parse it into a date, which then can give us the time in millis.
+                //We then can turn the time in millis into the GMT timezone and check if it's
+                //before or after the current time.
+                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                val upvoteTokenDate = formatter.parse(lastUpvoteToken.date)
+                val dateInMillis = upvoteTokenDate?.time
+                if (dateInMillis != null) {
+                    if (localToGMT(dateInMillis) <= Date().time) {
+                        Toast.makeText(
+                            itemView.context,
+                            toastMessage,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            } else {
+                Toast.makeText(
+                    itemView.context,
+                    "Minted tokenID is INVALID!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        private fun localToGMT(time: Long): Long {
+            try {
+                val dateFormat =
+                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                val date = Date(time)
+                dateFormat.timeZone = TimeZone.getTimeZone("GMT")
+                val strDate = dateFormat.format(date)
+                //            System.out.println("Local Millis * " + date.getTime() + "  ---UTC time  " + strDate);//correct
+                val dateFormatLocal =
+                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                val utcDate = dateFormatLocal.parse(strDate)
+                //            System.out.println("UTC Millis * " + utcDate.getTime() + " ------  " + dateFormatLocal.format(utcDate));
+                return utcDate.time
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            return time
         }
 
         /**

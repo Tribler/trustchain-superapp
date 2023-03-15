@@ -1,0 +1,21 @@
+createSentUpvoteTokensTable:
+CREATE TABLE IF NOT EXISTS sent_upvote_tokens (
+    token_id INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    public_key TEXT NOT NULL,
+    video_id INTEGER NOT NULL,
+    PRIMARY KEY (token_id)
+);
+
+getAll:
+SELECT * FROM sent_upvote_tokens;
+
+addToken:
+INSERT INTO sent_upvote_tokens (token_id, date, public_key, video_id)
+VALUES(?, ?, ?, ?);
+
+getLast:
+SELECT * FROM sent_upvote_tokens ORDER BY date DESC LIMIT 1;
+
+-- deleteTable:
+-- DROP TABLE IF EXISTS sent_upvote_tokens;
