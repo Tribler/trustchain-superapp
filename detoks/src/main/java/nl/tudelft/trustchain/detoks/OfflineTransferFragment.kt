@@ -2,7 +2,9 @@ package nl.tudelft.trustchain.detoks
 
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -62,11 +64,17 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val buttonScan = view.findViewById<Button>(R.id.button_send)
+        buttonScan.setOnClickListener {
+            qrCodeUtils.startQRScanner(this, null, true)
+        }
+
         val myPublicKey = getIpv8().myPeer.publicKey.pub().keyToBin().toString()
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         buttonRequest.setOnClickListener {
             showQR(view, myPublicKey)
         }
+
 
 //    companion object {
 //        /**
@@ -90,6 +98,12 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+        val content = qrCodeUtils.parseActivityResult(requestCode,resultCode,data)
+        Log.v("Transfer data ", content.toString())
+    }
+    
     private fun showQR(view: View, myPublicKey: String) {
         val jsonObject = JSONObject()
         jsonObject.put("public_key", myPublicKey)
