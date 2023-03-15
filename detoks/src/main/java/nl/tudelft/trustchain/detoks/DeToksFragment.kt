@@ -107,10 +107,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     private fun broadcast() {
         lifecycleScope.launch {
-            while (isActive) {
-                transactionCommunity.broadcastGreeting()
-                delay(1000)
-            }
+            transactionCommunity.broadcastGreeting()
         }
     }
 
