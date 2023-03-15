@@ -14,6 +14,8 @@ Run the following command from within the `util` folder
 
 ```bash
 git clone https://github.com/Tribler/py-ipv8.git pyipv8
+cd pyipv8
+pip install -r requirements.txt
 ```
 
 ### Folders
