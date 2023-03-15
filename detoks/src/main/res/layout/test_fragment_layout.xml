@@ -64,7 +64,7 @@
         android:id="@+id/bootstrapButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="bootstrap_servers"
+        android:text="info"
         android:textAllCaps="false"
         tools:layout_editor_absoluteX="320dp"
         tools:layout_editor_absoluteY="5dp"
