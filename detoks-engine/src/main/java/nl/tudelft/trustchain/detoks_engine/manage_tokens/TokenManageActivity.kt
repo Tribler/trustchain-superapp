@@ -3,9 +3,11 @@ package nl.tudelft.trustchain.detoks_engine.manage_tokens
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks_engine.R
@@ -21,6 +23,7 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
     private lateinit var peerData: ArrayList<Peer>
     private lateinit var tokenAdapter: ListAdapter<String>
     private lateinit var peerAdapter: ListAdapter<Peer>
+    private val logger = KotlinLogging.logger {}
 
     private var selectedTokenIndex: Int = RecyclerView.NO_POSITION
     private var selectedPeerIndex: Int = RecyclerView.NO_POSITION
@@ -35,7 +38,8 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
         findViewById<Button>(R.id.refresh_button).setOnClickListener { _ -> refresh() }
         findViewById<Button>(R.id.send_button).setOnClickListener { _ -> send() }
         findViewById<Button>(R.id.generate_button).setOnClickListener { _ -> generate() }
-        findViewById<Button>(R.id.delete_button).setOnClickListener{ _ -> delete()}
+        findViewById<Button>(R.id.delete_button).setOnClickListener{ _ -> delete() }
+        findViewById<Button>(R.id.delete_all_button).setOnClickListener{ _ -> deleteAll() }
 
 
         tokenStore = TokenStore.getInstance(this)
@@ -46,18 +50,22 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
         val tokenListView = findViewById<RecyclerView>(R.id.token_list)
         val peerListView = findViewById<RecyclerView>(R.id.peer_list)
 
-        transactionCommunity.setHandler {
-                msg: String ->
-            tokenStore.storeToken(msg)
-            tokenData.add(msg)
-            tokenAdapter.notifyItemInserted(tokenData.size - 1)
-        }
-
-
         tokenAdapter = ListAdapter(tokenData, {t -> t}, ::onTokenClick)
         peerAdapter = ListAdapter(peerData, { peer -> peer.mid }, ::onPeerClick)
         tokenListView.adapter = tokenAdapter
         peerListView.adapter = peerAdapter
+
+        transactionCommunity.setHandler {
+                msg: String ->
+            logger.debug("Detoks_engine handler in manage activity")
+            tokenStore.storeToken(msg)
+            tokenData.add(msg)
+            runOnUiThread{ tokenAdapter.notifyItemInserted(tokenData.size - 1) }
+        }
+
+        val myId = transactionCommunity.myPeer.mid.substring(0, 5)
+        findViewById<TextView>(R.id.my_peer).text = "Peers (my id: ${myId}..)"
+
     }
 
     fun onTokenClick(index: Int) {
@@ -94,6 +102,13 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
         tokenStore.removeToken(token)
         selectedTokenIndex = RecyclerView.NO_POSITION
         tokenAdapter.removeAt(tokenIndex)
+    }
+
+    fun deleteAll() {
+        for (token in tokenData) {
+            tokenStore.removeToken(token)
+        }
+        tokenAdapter.removeAll()
     }
 
     fun send() {

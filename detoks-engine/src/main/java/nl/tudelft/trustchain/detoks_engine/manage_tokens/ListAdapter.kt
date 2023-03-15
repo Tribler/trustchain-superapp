@@ -39,5 +39,11 @@ class ListAdapter<T>(private val data: ArrayList<T>, private val mapper: (t: T) 
         notifyItemRangeChanged(position, data.size)
     }
 
+    fun removeAll() {
+        val len = data.size
+        data.clear()
+        notifyItemRangeRemoved(0, len)
+    }
+
 }
 

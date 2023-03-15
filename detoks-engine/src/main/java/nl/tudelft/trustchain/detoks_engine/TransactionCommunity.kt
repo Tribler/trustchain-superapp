@@ -17,7 +17,7 @@ class TransactionCommunity: Community() {
         messageHandlers[MESSAGE_ID] = ::onMessage
     }
 
-    public fun setHandler(onMsg: (msg: String) -> Unit) {
+    fun setHandler(onMsg: (msg: String) -> Unit) {
         handler = onMsg
     }
 
