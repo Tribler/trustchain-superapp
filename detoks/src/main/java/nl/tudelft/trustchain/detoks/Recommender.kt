@@ -3,19 +3,14 @@ package nl.tudelft.trustchain.detoks
 import android.util.Log
 import kotlin.random.Random
 
-// TODO: On downloading a new torrent, check all the other profiles to rank it in a list
-// TODO: On sending a video/peer discovery, attach the profile to keep peers updated
-// TODO: Generate 100 dummy profiles with dummy entries to do testing with
-// TODO: Compare the performance of coin toss against watch time
-
 /**
  * Basic structure for a profile entry
- * Note: Both the duration and freshness are currently not used
+ * NOTE: Both the duration and freshness are currently not used
  */
 class ProfileEntry(
     var duration: Long = 0,
     var watchTime: Long = 0,
-    val freshness: Long = 0
+    val firstSeen: Long = 0
 )
 
 class Profile(
