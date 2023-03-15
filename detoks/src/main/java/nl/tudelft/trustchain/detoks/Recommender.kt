@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.detoks
 import android.util.Log
 import kotlin.random.Random
 
-// TODO: On downloading a new torrent, check all the other profiles to rank it
+// TODO: On downloading a new torrent, check all the other profiles to rank it in a list
 // TODO: On sending a video/peer discovery, attach the profile to keep peers updated
 // TODO: Generate 100 dummy profiles with dummy entries to do testing with
 // TODO: Compare the performance of coin toss against watch time

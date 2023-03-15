@@ -62,6 +62,7 @@ class VideosAdapter(
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
                 mVideoView.setOnPreparedListener { mp ->
+                    // NOTE: Log the duration here potentially
                     mProgressBar.visibility = View.GONE
                     mp.start()
                     if (videoScaling) {

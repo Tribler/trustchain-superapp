@@ -111,7 +111,7 @@ class TorrentManager private constructor (
     }
 
     /**
-     * This functions updates the current index of the cache.
+     * This function updates the current index of the cache.
      */
     private fun notifyChange(
         newIndex: Int,
