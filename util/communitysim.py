@@ -72,7 +72,7 @@ class TorrentPayload(Serializable):
         self.message = message
 
     def to_pack_list(self):
-        return [("20s", self.message.encode())]
+        return [("Q", MESSAGE_TORRENT_ID), ("raw", self.message.encode("UTF-8"))]
 
     @classmethod
     def from_unpack_list(cls, *args):
@@ -104,7 +104,7 @@ class DetoksCommunity(Community):
                 )
 
                 packet = self.ezr_pack(
-                    MESSAGE_TORRENT_ID, TorrentPayload(torrent.magnet_link)
+                    MESSAGE_TORRENT_ID, TorrentPayload(torrent.magnet_link), sig=False
                 )
                 self.endpoint.send(p.address, packet)
 

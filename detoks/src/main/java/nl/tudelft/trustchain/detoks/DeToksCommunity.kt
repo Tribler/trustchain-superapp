@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.detoks
 import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
@@ -32,10 +33,11 @@ class DeToksCommunity(private val context: Context) : Community() {
     }
 
     private fun onGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
+//        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
+        val payload = packet.getPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
-
+        //Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
+        Log.d("DeToksCommunity", "magnet: ${payload.magnet}")
         torrentManager.addTorrent(payload.magnet)
     }
 
