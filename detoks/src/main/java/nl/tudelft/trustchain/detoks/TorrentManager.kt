@@ -93,6 +93,10 @@ class TorrentManager private constructor (
         return torrentFiles.size
     }
 
+    /**
+     * Update the torrent duration by calling the recommender
+     * NOTE: This function is currently not used
+     */
     fun updateTorrentDuration(index: Int = currentIndex, duration: Long) {
         profile.updateEntryDuration(torrentFiles.gett(index), duration)
     }

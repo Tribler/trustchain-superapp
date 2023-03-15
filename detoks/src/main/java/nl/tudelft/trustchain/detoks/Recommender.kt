@@ -8,6 +8,10 @@ import kotlin.random.Random
 // TODO: Generate 100 dummy profiles with dummy entries to do testing with
 // TODO: Compare the performance of coin toss against watch time
 
+/**
+ * Basic structure for a profile entry
+ * Note: Both the duration and freshness are currently not used
+ */
 class ProfileEntry(
     var duration: Long = 0,
     var watchTime: Long = 0,
@@ -18,17 +22,23 @@ class Profile(
     val magnets: HashMap<String, ProfileEntry> = HashMap()
 ) {
     fun updateEntryWatchTime(torrent: TorrentManager.TorrentHandler, time: Long) {
-        if(!magnets.contains(torrent.torrentName)) magnets[torrent.torrentName] =
+        val name = torrent.torrentName + "[" + torrent.fileName + "]"
+        if(!magnets.contains(name)) magnets[name] =
             ProfileEntry(0, time, System.currentTimeMillis())
-        magnets[torrent.torrentName]!!.watchTime += time
-        Log.i("DeToks", "Updated watchtime of ${torrent.torrentName} to ${magnets[torrent.torrentName]!!.watchTime}")
+        magnets[name]!!.watchTime += time
+        Log.i("DeToks", "Updated watchtime of $name to ${magnets[name]!!.watchTime}")
     }
 
+    /**
+     * Update the entry duration in the profile
+     * NOTE: This function is currently not used
+     */
     fun updateEntryDuration(torrent: TorrentManager.TorrentHandler, duration: Long) {
-        if(!magnets.contains(torrent.torrentName)) magnets[torrent.torrentName] =
+        val name = torrent.torrentName + "[" + torrent.fileName + "]"
+        if(!magnets.contains(name)) magnets[name] =
             ProfileEntry(duration, 0, System.currentTimeMillis())
-        else magnets[torrent.torrentName]!!.duration = duration
-        Log.i("DeToks", "Updated duration of ${torrent.torrentName} to ${magnets[torrent.torrentName]!!.duration}")
+        else magnets[name]!!.duration = duration
+        Log.i("DeToks", "Updated duration of $name to ${magnets[name]!!.duration}")
     }
 }
 
@@ -38,22 +48,28 @@ class Recommender {
     }
 
     // TODO: Return a sorted list of videos not just the 'winner'
-    private fun watchTimeRecommender(URIs: List<String>, profiles: List<Profile>): String {
+    private fun watchTimeDurationRatioRecommender(
+        URIs: List<String>,
+        profiles: List<Profile>
+    ): String {
         var (candidate, averagePercentageWatched) = Pair("", 0.0f)
-        for(URI: String in URIs) {
+        for (URI: String in URIs) {
             var (hits, percentageWatchedTotal) = Pair(0.0f, 0.0f)
-            for(profile: Profile in profiles) {
-                if(profile.magnets.containsKey(URI)) {
+            for (profile: Profile in profiles) {
+                if (profile.magnets.containsKey(URI)) {
                     val entry = profile.magnets[URI]
                     percentageWatchedTotal += 100.0f * (entry!!.watchTime / entry.duration)
                     hits += 1.0f
                 }
             }
-            if(percentageWatchedTotal / hits > averagePercentageWatched) {
+            if (percentageWatchedTotal / hits > averagePercentageWatched) {
                 averagePercentageWatched = percentageWatchedTotal / hits
                 candidate = URI
             }
         }
         return candidate
     }
+
+    // TODO: Implement a function which returns a sorted list of videos with the highest watch time
+    // private fun watchTimeRecommender(URIs: List<String>, profiles: List<Profile>): String { }
 }
