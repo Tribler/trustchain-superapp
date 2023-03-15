@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 
-class PeerAdapter (private val mList: List<PeerViewModel>, val transactionOnClick: singleTransactionOnClick) : RecyclerView.Adapter<PeerAdapter.ViewHolder>() {
+class PeerAdapter (private val mList: List<PeerViewModel>, val transactionOnClick: singleTransactionOnClick, val benchmarkOnClick: benchmark1000) : RecyclerView.Adapter<PeerAdapter.ViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -31,6 +31,10 @@ class PeerAdapter (private val mList: List<PeerViewModel>, val transactionOnClic
             println("alert: in adapter")
             transactionOnClick.onClick(peerViewModel.peer)
         }
+
+        holder.benchmarkButton.setOnClickListener {
+            benchmarkOnClick.runBenchmark(peerViewModel.peer)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -40,7 +44,7 @@ class PeerAdapter (private val mList: List<PeerViewModel>, val transactionOnClic
     class ViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView) {
         var pkView : TextView = itemView.findViewById(R.id.pkTextview)
         var singleTransactionButton: Button = itemView.findViewById(R.id.initializeTransactionButton)
-
+        var benchmarkButton : Button = itemView.findViewById(R.id.button1000)
 
     }
 }

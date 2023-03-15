@@ -71,10 +71,6 @@
         android:onClick="showBootstraps"
         />
 
-    <Button
-        android:id="@+id/close_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Close"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
