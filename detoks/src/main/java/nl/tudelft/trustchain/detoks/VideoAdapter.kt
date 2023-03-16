@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.android.IPv8Android
 
 
 class VideosAdapter(
@@ -30,7 +31,6 @@ class VideosAdapter(
             videoScaling,
         )
     }
-
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
@@ -67,12 +67,13 @@ class VideosAdapter(
         var mVideoView: VideoView
         var txtTitle: TextView
         var txtDesc: TextView
+        var peerCount: TextView
         var mProgressBar: ProgressBar
         var likeButton: ImageButton
         var likeCount: TextView
         var isLiked: Boolean = false
 
-        private fun likeVideo() {
+        private fun likeVideo(content: TorrentMediaInfo) {
 //            if (isLiked) {
 //                likeButton.setImageResource(R.drawable.baseline_favorite_24_white)
 //            } else {
@@ -87,12 +88,15 @@ class VideosAdapter(
             likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
 
             // TODO: Implement the actual functionality for liking a video.
+            val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+            community.broadcastLike(content.fileName, content.torrentName, content.creator)
         }
 
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
+            peerCount = itemView.findViewById(R.id.peerCount)
             mProgressBar = itemView.findViewById(R.id.progressBar)
             likeButton = itemView.findViewById(R.id.like_button)
             likeCount = itemView.findViewById(R.id.like_count)
@@ -106,16 +110,6 @@ class VideosAdapter(
             likeButton.isSoundEffectsEnabled = false
 
             // TODO: Check if user has already liked the current video. If so, set isLiked to true and change likeButton to baseline_favorite_24_red.
-
-            likeButton.setOnClickListener{
-                likeVideo()
-            }
-
-            mVideoView.setOnClickListener(object: DoubleClickListener() {
-                override fun onDoubleClick(v: View?) {
-                    likeVideo()
-                }
-            })
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
@@ -126,10 +120,24 @@ class VideosAdapter(
                 likeButton.visibility = View.VISIBLE
                 likeCount.visibility = View.VISIBLE
 
+                likeButton.setOnClickListener{
+                    likeVideo(content)
+                }
+
+                mVideoView.setOnClickListener(object: DoubleClickListener() {
+                    override fun onDoubleClick(v: View?) {
+                        likeVideo(content)
+                    }
+                })
+
+                val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
+                peerCount.text = "Peers: " + community.getPeers().size.toString()
+                Log.d("DeToks", content.fileURI)
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
+
                 mVideoView.setOnPreparedListener { mp ->
                     mProgressBar.visibility = View.GONE
                     mp.start()
@@ -147,7 +155,8 @@ class VideosAdapter(
                 }
                 mVideoView.setOnCompletionListener { mp -> mp.start() }
                 mVideoView.setOnErrorListener { p1, what, extra ->
-                    Log.i("DeToks", "onError: $p1, $what, $extra")
+                    Log.i("DeToks", "onError: $p1, $what, $extra , ${p1.duration}")
+
                     if (onPlaybackError != null) {
                         onPlaybackError()
                         true

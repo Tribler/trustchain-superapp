@@ -82,6 +82,7 @@ dependencies {
     implementation files('../common/libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar')
     implementation files('../common/libs/jlibtorrent-android-x86_64-' + jlibtorrent_version + '.jar')
 
+    implementation 'com.turn:ttorrent-core:1.5'
     implementation 'com.devbrackets.android:exomedia:4.3.0'
 }
 
