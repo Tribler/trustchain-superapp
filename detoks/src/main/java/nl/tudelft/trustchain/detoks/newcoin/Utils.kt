@@ -22,6 +22,6 @@ fun String.verifySignature(publicKey: PublicKey, signature: ByteArray, algorithm
     return rsa.verify(signature)
 }
 
-fun Key.encodeToString() : String {
-    return Base64.getEncoder().encodeToString(this.encoded)
-}
+//fun Key.encodeToString() : String {
+//    return Base64.getEncoder().encodeToString(this.encoded)
+//}

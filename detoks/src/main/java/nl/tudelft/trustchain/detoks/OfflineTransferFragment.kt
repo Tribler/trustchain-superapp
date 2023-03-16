@@ -61,14 +61,12 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // get reference to the string array that we just created
         val friends = Arrays.asList("Vyshnavi", "Ali", "Dany", "Julio")
         val spinnerFriends: Spinner = view.findViewById(R.id.spinner)
-//        spinnerFriends.text
         // create an array adapter and pass the required parameter
-        // in our case pass the context, drop down layout , and array.
+        // in our case pass the context, drop down layout, and array.
         val arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friends)
-        // set adapter to the autocomplete tv to the arrayAdapter
+        // set adapter to the spinner
         spinnerFriends.setAdapter(arrayAdapter)
 
         val buttonScan = view.findViewById<Button>(R.id.button_send)
@@ -79,6 +77,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val myPublicKey = getIpv8().myPeer.publicKey.keyToBin()
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         buttonRequest.setOnClickListener {
+            //check whether friend and amount? is selected
             showQR(view, myPublicKey)
         }
 
