@@ -8,7 +8,7 @@ import android.os.Handler
 import android.view.ViewConfiguration
 
 /**
- * Custom class to add a listener for double clicking
+ * Custom class to add a listener for long presses
  */
 @Suppress("DEPRECATION")
 abstract class LongHoldListener : OnTouchListener {

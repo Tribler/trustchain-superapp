@@ -65,6 +65,48 @@
             android:textColor="@android:color/white"
             android:textSize="10sp" />
 
+        <TextView
+            android:id="@+id/proposalBlockHash"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="5dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="5dp"
+            android:shadowColor="@android:color/black"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="15"
+            android:textColor="@android:color/white"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/videoPostedOn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="5dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="5dp"
+            android:shadowColor="@android:color/black"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="15"
+            android:textColor="@android:color/white"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/videoID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="5dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="5dp"
+            android:shadowColor="@android:color/black"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="15"
+            android:textColor="@android:color/white"
+            android:textSize="10sp" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

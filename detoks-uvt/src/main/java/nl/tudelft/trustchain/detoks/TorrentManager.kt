@@ -37,6 +37,18 @@ class TorrentManager(
         initializeVideoPool()
     }
 
+    fun addNewVideo(proposalBlockHash: String, videoPostedOn: String, videoID: String) {
+        val lastTorrentHandler = torrentFiles.lastOrNull()!!
+        torrentFiles.add(TorrentHandlerPlusUserInfo(cacheDir,
+            lastTorrentHandler.handle,
+            lastTorrentHandler.torrentName,
+            lastTorrentHandler.fileName,
+            lastTorrentHandler.fileIndex,
+            proposalBlockHash,
+            videoPostedOn,
+            videoID))
+    }
+
     fun notifyIncrease() {
         Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
@@ -192,7 +204,22 @@ class TorrentManager(
         fileOrDirectory.delete()
     }
 
-    class TorrentHandler(
+    class TorrentHandlerPlusUserInfo(cacheDir: File,
+                                     handle: TorrentHandle,
+                                     torrentName: String,
+                                     fileName: String,
+                                     fileIndex: Int,
+                                     val proposalBlockHash: String,
+                                     val videoPostedOn: String,
+                                     val videoID: String):
+        TorrentHandler(cacheDir, handle, torrentName, fileName, fileIndex){
+        override fun asMediaInfo(): TorrentMediaInfo {
+            return TorrentMediaInfo(torrentName, fileName, getPath(), proposalBlockHash, videoPostedOn, videoID)
+        }
+    }
+
+
+    open class TorrentHandler(
         private val cacheDir: File,
         val handle: TorrentHandle,
         val torrentName: String,
@@ -250,8 +277,8 @@ class TorrentManager(
             handle.resume()
         }
 
-        fun asMediaInfo(): TorrentMediaInfo {
-            return TorrentMediaInfo(torrentName, fileName, getPath())
+        open fun asMediaInfo(): TorrentMediaInfo {
+            return TorrentMediaInfo(torrentName, fileName, getPath(), "", "" ,"")
         }
 
     }
@@ -266,4 +293,7 @@ class TorrentMediaInfo(
     val torrentName: String,
     val fileName: String,
     val fileURI: String,
+    val proposalBlockHash: String,
+    val videoPostedOn: String,
+    val videoID: String
 )

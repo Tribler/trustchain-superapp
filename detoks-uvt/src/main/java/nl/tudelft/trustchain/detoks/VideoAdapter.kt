@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
@@ -35,7 +36,7 @@ class VideosAdapter(
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_video, parent, false),
             videoScaling,
-        )
+            torrentManager)
     }
 
 
@@ -48,20 +49,27 @@ class VideosAdapter(
         return mVideoItems.size
     }
 
-    class VideoViewHolder(itemView: View, private val videoScaling: Boolean = false) :
+    class VideoViewHolder(itemView: View,
+                          private val videoScaling: Boolean = false,
+                          private val torrentManager: TorrentManager) :
         RecyclerView.ViewHolder(itemView) {
         var mVideoView: VideoView
         var txtTitle: TextView
         var txtDesc: TextView
         var mProgressBar: ProgressBar
-
+        var proposalBlockHash: TextView
+        var videoID: TextView
+        var videoPostedOn: TextView
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
             mProgressBar = itemView.findViewById(R.id.progressBar)
+            proposalBlockHash = itemView.findViewById(R.id.proposalBlockHash)
+            videoID = itemView.findViewById(R.id.videoID)
+            videoPostedOn = itemView.findViewById(R.id.videoPostedOn)
             setLikeListener()
-            setCreateProposalTokenListener()
+            setPostVideoListener()
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
@@ -70,6 +78,9 @@ class VideosAdapter(
                 txtTitle.text = content.fileName
                 txtDesc.text = content.torrentName
                 mVideoView.setVideoPath(content.fileURI)
+                proposalBlockHash.text = content.proposalBlockHash
+                videoPostedOn.text = content.videoPostedOn
+                videoID.text = content.videoID
                 Log.i("DeToks", "Received content: ${content.fileURI}")
                 mVideoView.setOnPreparedListener { mp ->
                     mProgressBar.visibility = View.GONE
@@ -101,6 +112,12 @@ class VideosAdapter(
 
         /**
          * Sends a HearthToken to a random user and displays the result in a toast message
+         * TODO: change this function so that:
+         * - it gets the hash or proposal block of the video that is currently displayed on the
+         * scree
+         * - checks if this peer/user already liked or already created a proposal block for the
+         * proposal block of this video -> if already liked once => show message to user / cannot like again
+         * - if not then create an agreement block for this video
          */
         private fun sendHeartToken() {
 
@@ -129,7 +146,15 @@ class VideosAdapter(
             )
         }
 
-        private fun createProposalToken() {
+        /**
+         * This function is to be used when a peer posts video with video ID X:
+         * the idea is that a proposal block is created everytime a peer posts a video
+         * This proposal block is signed by the peer/user that uploaded the video.
+         * This proposal block can be paired with an agreement block created and signed by
+         * anyone who gives the video X a like/upvote.
+         * (except the peer that initiated the proposal block)
+         */
+        private fun createProposalToken(): TrustChainBlock? {
             //TODO: create and sign proposal token with own private key
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val myPeer = IPv8Android.getInstance().myPeer
@@ -142,27 +167,40 @@ class VideosAdapter(
             val proposalBlock = upvoteCommunity?.createProposalBlock(
                 UpvoteTrustchainConstants.GIVE_HEART_TOKEN,
                 transaction,
-                myPeer.publicKey.keyToBin()
+                ANY_COUNTERPARTY_PK
             )
-            proposalBlock?.sign(myPeer.key as PrivateKey)
+           //TODO: attach the created proposal block OR the hash of this created proposal block
+           //       to the video item that is showed on the screen
+           //       when a peer/user double clicks on the screen, create an agreement block for this
+           //       proposal block
+            return proposalBlock
         }
 
         /**
-        Sets a listener to create a proposal token after a long press has been detected.
+         * Sets a listener to create a proposal token after a long press has been detected.
+         * We do not have a post video functionality yet
+         * A long press of 2 seconds represents/simulates a peer having posted a video
          */
-        private fun setCreateProposalTokenListener() {
+        private fun setPostVideoListener() {
             itemView.setOnTouchListener(
                 object : LongHoldListener() {
                     override fun onLongHold() {
-                        val message = "Long HOLD detected"
+                        val proposalBlock = createProposalToken()
+                        val hash = proposalBlock?.calculateHash()!!
+                        val mypeer = IPv8Android.getInstance().myPeer
+                        val message = "By long pressing for 2 seconds you with public key: " +
+                            "${mypeer.publicKey.keyToBin().toHex()} and member id:\n" +
+                            "$mypeer.mid has created a proposalblock on this timestamp: ${proposalBlock.timestamp} \n" +
+                            "The hash of this block is ${hash.toHex()}, corresponding hashCode is: ${hash.hashCode()} \n" +
+                            "the block Id of this proposal block is: ${proposalBlock.blockId} \n" +
+                            "the linked block id is: ${proposalBlock.linkedBlockId}\n"
+                        torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
                         Log.i("DeToks", message)
                         Toast.makeText(
                             itemView.context,
                             message,
                             Toast.LENGTH_SHORT
                         ).show()
-
-                        createProposalToken()
                     }
                 }
             )
