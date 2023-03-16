@@ -16,7 +16,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.util.*
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
@@ -120,15 +120,33 @@ class VideosAdapter(
          * - if not then create an agreement block for this video
          */
         private fun sendHeartToken() {
-
-            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
+            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
             val toastMessage = upvoteCommunity?.sendHeartToken("", "TEST")
             Toast.makeText(
                 itemView.context,
                 toastMessage,
                 Toast.LENGTH_SHORT
             ).show()
-        }
+            // getBlockHash Method below might fail to get the proposal block if it is not in this peer's truststore
+            val proposalBlock = upvoteCommunity.database.getBlockWithHash(proposalBlockHash.text.toString().hexToBytes())
+            if (proposalBlock != null) {
+                upvoteCommunity.createAgreementBlock(proposalBlock, proposalBlock.transaction)
+            } else {
+                Toast.makeText(
+                    itemView.context,
+                    "This video does not have a proposal block attached to it and is thus not posted by anyone",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            //TODO when a video is posted by peer A on phone Ap by long pressing,
+            // how does peer B get the video posted by peer A on its phone Bp?
+            // peer B first: needs to have peer A's posted video displayed on phone Bp
+            // only when the above condition is satisfied can peer B create an agreement block
+            // for peer A's proposal block that was created when peer posted a video (thus liking the video posted by peer A)
+
+            // TODO: Currently, it seems that a peer can only like a video created by itself
+            //       when we can distribute a video added by a peer to another peer B, peer B will be able to like that viedo
+            }
 
         /**
          * Sets a listener to like a video by double tapping the screen
@@ -155,10 +173,8 @@ class VideosAdapter(
          * (except the peer that initiated the proposal block)
          */
         private fun createProposalToken(): TrustChainBlock? {
-            //TODO: create and sign proposal token with own private key
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val myPeer = IPv8Android.getInstance().myPeer
-
             val transaction = mapOf(
                 "videoID" to "TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
                 "heartTokenGivenBy" to ANY_COUNTERPARTY_PK.toHex(),
@@ -169,10 +185,6 @@ class VideosAdapter(
                 transaction,
                 ANY_COUNTERPARTY_PK
             )
-           //TODO: attach the created proposal block OR the hash of this created proposal block
-           //       to the video item that is showed on the screen
-           //       when a peer/user double clicks on the screen, create an agreement block for this
-           //       proposal block
             return proposalBlock
         }
 
