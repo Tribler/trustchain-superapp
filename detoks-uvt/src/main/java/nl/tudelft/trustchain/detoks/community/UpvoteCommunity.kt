@@ -23,13 +23,13 @@ class UpvoteCommunity() : Community(){
     }
 
     private fun onHeartTokenPacket(packet: Packet){
-        val (peer, payload) = packet.getAuthPayload(HeartTokenPayload.Deserializer)
+        val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
         onHeartToken(peer, payload)
     }
 
-    private fun onHeartToken(peer: Peer, payload: HeartTokenPayload) {
+    private fun onHeartToken(peer: Peer, payload: UpvoteTokenPayload) {
         // do something with the payload
-        logger.debug { "-> received heart token with id: ${payload.id}  and token: ${payload.token} from peer with member id: ${peer.mid}" }
+        logger.debug { "-> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
     }
 
     /**
@@ -45,8 +45,8 @@ class UpvoteCommunity() : Community(){
     /**
      * Sends a HeartToken to a random Peer
      */
-    fun sendHeartToken(id: String, token: String): String {
-        val payload = HeartTokenPayload(id, token)
+    fun sendHeartToken(token_id: String, date: String, public_key_miner: String, video_id: String): String {
+        val payload = UpvoteTokenPayload(token_id, date, public_key_miner, video_id)
 
         val packet = serializePacket(
             MessageID.HEART_TOKEN,

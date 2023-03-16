@@ -16,6 +16,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
+import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -101,7 +102,9 @@ class VideosAdapter(
          */
         private fun sendHeartToken() {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
-            val toastMessage = upvoteCommunity?.sendHeartToken("", "TEST")
+            val upvoteToken = UpvoteToken(1, "1679006615", "12345678910", 1)
+            val toastMessage = upvoteCommunity?.sendHeartToken(upvoteToken.tokenID.toString(), localToGMT(upvoteToken.date.toLong()).toString(), upvoteToken.publicKeyMinter, upvoteToken.videoID.toString())
+
             val lastUpvoteToken = SentTokenManager(itemView.context).getLastToken()
 
             if (lastUpvoteToken.tokenID > -1 && lastUpvoteToken.tokenID < 10) {
@@ -142,7 +145,8 @@ class VideosAdapter(
                     SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                 val utcDate = dateFormatLocal.parse(strDate)
                 //            System.out.println("UTC Millis * " + utcDate.getTime() + " ------  " + dateFormatLocal.format(utcDate));
-                return utcDate.time
+
+                return utcDate?.time!!
             } catch (e: Exception) {
                 e.printStackTrace()
             }
