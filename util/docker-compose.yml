@@ -1,0 +1,16 @@
+version: "3"
+services:
+  communitysim:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: detoks_community_sim
+    container_name: detoks_community_sim
+    environment:
+      NUM_NODES: ${NUM_NODES:-1}
+      TIMEOUT: ${TIMEOUT:-20}
+      MAX_NUM_PEERS: ${MAX_NUM_PEERS:-3}
+      COMMUNITY_ID: ${COMMUNITY_ID:-c86a7db45eb3563ae047639817baec4db2bc7c25}
+    volumes:
+      - ./torrents/:/app
+      - ./communitysim.py:/communitysim.py

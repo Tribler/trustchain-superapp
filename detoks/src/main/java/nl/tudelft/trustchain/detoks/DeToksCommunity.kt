@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.detoks
 import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
@@ -57,6 +58,8 @@ class DeToksCommunity(private val context: Context) : Community() {
 
     fun gossipWith(peer: Peer) {
         Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
+        Log.d("DeToksCommunity", this.getPeers().toString())
+        Log.d("DeToksCommunity", this.myPeer.toString())
         Log.d("DetoksCommunity", "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
         Log.d("DetoksCommunity", "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
         val listOfTorrents = TorrentManager.getInstance(context).getListOfTorrents()
@@ -75,9 +78,11 @@ class DeToksCommunity(private val context: Context) : Community() {
     }
 
     private fun onGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
+//        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
+        val payload = packet.getPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
+        //Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
+        Log.d("DeToksCommunity", "magnet: ${payload.magnet}")
         torrentManager.addTorrent(payload.magnet)
     }
     private fun onTransactionMessage(packet: Packet) {
