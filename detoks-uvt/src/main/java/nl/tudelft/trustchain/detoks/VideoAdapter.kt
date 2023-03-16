@@ -55,6 +55,9 @@ class VideosAdapter(
         var videoID: TextView
         var videoPostedOn: TextView
         var proposalSendButton: Button
+        var tokensSent: TextView
+        var tokensReceived: TextView
+        var tokensBalance: TextView
 
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
@@ -65,9 +68,13 @@ class VideosAdapter(
             videoID = itemView.findViewById(R.id.videoID)
             videoPostedOn = itemView.findViewById(R.id.videoPostedOn)
             proposalSendButton = itemView.findViewById(R.id.proposalMockButton)
+            tokensSent = itemView.findViewById(R.id.tokensSentValue)
+            tokensReceived = itemView.findViewById(R.id.tokensReceivedValue)
+            tokensBalance = itemView.findViewById(R.id.tokensBalanceValue)
 
             setLikeListener()
             setPostVideoListener()
+            checkTokenBalance()
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
@@ -106,6 +113,28 @@ class VideosAdapter(
                     }
                 }
             }
+        }
+
+        private fun checkTokenBalance() {
+            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
+            val allBlocks = upvoteCommunity.database.getAllBlocks()
+            var sent = 0;
+            var received = 0;
+            for (block: TrustChainBlock in allBlocks) {
+                if (block.isProposal) {
+                    received++
+                }
+                else if (block.isAgreement) {
+                    sent++
+                }
+                else {
+                    Log.i("DeToks", "Other type of block found: ${block.blockId}")
+                }
+            }
+            Log.i("DeToks", "Tokens sent: $sent received: $received")
+            tokensSent.text = "$sent"
+            tokensReceived.text = "$received"
+            tokensBalance.text = "${received - sent}"
         }
 
         /**
