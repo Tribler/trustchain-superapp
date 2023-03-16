@@ -1,29 +1,26 @@
 package nl.tudelft.trustchain.detoks
 
 import android.content.Context
-import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
-import androidx.core.content.ContextCompat.getSystemService
+import android.widget.*
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nl.tudelft.trustchain.common.util.QRCodeUtils
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.common.util.QRCodeUtils
 import org.json.JSONObject
-import nl.tudelft.ipv8.IPv8
 import java.security.PublicKey
+import java.util.*
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -64,12 +61,22 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // get reference to the string array that we just created
+        val friends = Arrays.asList("Vyshnavi", "Ali", "Dany", "Julio")
+        val spinnerFriends: Spinner = view.findViewById(R.id.spinner)
+//        spinnerFriends.text
+        // create an array adapter and pass the required parameter
+        // in our case pass the context, drop down layout , and array.
+        val arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friends)
+        // set adapter to the autocomplete tv to the arrayAdapter
+        spinnerFriends.setAdapter(arrayAdapter)
+
         val buttonScan = view.findViewById<Button>(R.id.button_send)
         buttonScan.setOnClickListener {
             qrCodeUtils.startQRScanner(this, null, true)
         }
 
-        val myPublicKey = getIpv8().myPeer.publicKey.pub().keyToBin().toString()
+        val myPublicKey = getIpv8().myPeer.publicKey.keyToBin()
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         buttonRequest.setOnClickListener {
             showQR(view, myPublicKey)
@@ -102,9 +109,27 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 //        super.onActivityResult(requestCode, resultCode, data)
         val content = qrCodeUtils.parseActivityResult(requestCode,resultCode,data)
         Log.v("Transfer data ", content.toString())
+
+        // retrieve the collection of tokens
+        // deserialize it
+        // increase the amount in the wallet
+
     }
-    
-    private fun showQR(view: View, myPublicKey: String) {
+
+    private fun createNextOwner(token : Token, pubKeyRecipient: PublicKey) : Token {
+        val senderPrivateKey = getIpv8().myPeer.key
+
+        // create the new ownership of the token
+        token.signByPeer(pubKeyRecipient.encoded, senderPrivateKey as PrivateKey)
+        return token
+    }
+    // select a friend
+    // retrieve its public key
+
+
+    private fun showQR(view: View, myPublicKey: ByteArray) {
+
+
         val jsonObject = JSONObject()
         jsonObject.put("public_key", myPublicKey)
         val amountText = view.findViewById<EditText>(R.id.amount)

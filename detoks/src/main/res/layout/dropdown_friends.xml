@@ -1,0 +1,11 @@
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/textView"
+    android:layout_width="match_parent"
+    android:textColor="@color/black"
+    android:textSize="20sp"
+    android:textStyle="bold"
+    android:padding="14dp"
+    android:layout_height="wrap_content"
+    android:hint="@string/select_offline_friend"
+    android:text="@string/select_offline_friend" />

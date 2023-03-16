@@ -6,13 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".OfflineTransferFragment">
 
-
     <Button
         android:id="@+id/button_send"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:text="Send"
+        android:layout_gravity="end"
+        android:text="@string/scan"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,16 +19,18 @@
         app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintVertical_bias="0.144" />
 
+
+
     <EditText
         android:id="@+id/amount"
         android:layout_width="200dp"
-        android:layout_height="40dp"
+        android:layout_height="50dp"
         android:layout_marginLeft="70dp"
         android:layout_marginRight="70dp"
         android:inputType="numberDecimal"
         android:ellipsize="start"
         android:hint="EURO 00000"
-        android:textSize="15dp"
+        android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center_horizontal"
         android:layout_centerInParent="true"
@@ -38,13 +39,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button_send"
         app:layout_constraintHorizontal_bias="0.494"
-        app:layout_constraintVertical_bias="0.152" />
+        app:layout_constraintVertical_bias="0.152"
+        android:autofillHints="EUR0" />
 
     <Button
         android:id="@+id/button_request"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Request"
+        android:text="@string/request"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -61,15 +63,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_request" />
 
-    <TextView
-        android:id="@+id/textView2"
+    <Spinner
+        android:id="@+id/spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="323dp"
-        android:text="Hello to the offline sending/receiving of tokens"
-        app:layout_constraintBottom_toTopOf="@+id/button_send"
+        android:spinnerMode="dropdown"
+        app:layout_constraintBottom_toTopOf="@+id/amount"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/button_send" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
