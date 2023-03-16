@@ -2,43 +2,39 @@
 
 ## Setup
 
-Use pip to install the requirements for this script
+The community simulator uses docker to run the nodes. Make sure you have docker installed on your system, then run the following command to build the community sim container.
 
 ```bash
-pip install -r requirements.txt
+docker-compose up --build
 ```
 
-### pyipv8
-
-Run the following command from within the `util` folder
+After docker is done building it will automatically run the script for you. From now on you can simply run
 
 ```bash
-git clone https://github.com/Tribler/py-ipv8.git pyipv8
-cd pyipv8
-pip install -r requirements.txt
+docker-compose up
 ```
 
-### Folders
-
-A few folders are required, though the script will create them if not present.
+or if you do not need the output of the script, you can run it deamonized with
 
 ```bash
-mkdir keys
-mkdir torrents
+docker-compose up -d
 ```
 
-The `keys` folder will be used to store the keys used by each node. The `torrents` folder can be used to store torrents in. From here nodes will randomly pick torrents to gossip to each other.
+## Configuration
 
-## Running
+### Parameters
 
-Run the following command to start a session with 3 nodes.
+There are a few parameters that can be tweaked for the community sim. In order to do this, you need to create a file called `.env` in the current directory. This file should then contain the parameters you want to change. Below is an example of what a `.env` could look like:
 
 ```bash
-python communitysim.py 3
+NUM_NODES=4
+TIMEOUT=20
+MAX_NUM_PEERS=10
+COMMUNITY_ID=c86a7db45eb3563ae047639817baec4db2bc7c25
 ```
 
-More nodes can be added simply by changing the argument of the script
+This example spawns 4 nodes with a timeout for discovery of 20 seconds. Each will try and look for 10 peers in the community given by `COMMUNITY_ID`.
 
-```bash
-python communitysim.py <num_nodes>
-```
+### Torrents
+
+Torrents can simply be added to file `torrents` folder. The nodes will use this folder to randomly pick torrents that they will send to other nodes.

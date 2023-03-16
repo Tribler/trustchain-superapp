@@ -80,7 +80,7 @@ class TorrentPayload(Serializable):
 
 
 class DetoksCommunity(Community):
-    community_id = bytes.fromhex("c86a7db45eb3563ae047639817baec4db2bc7c25")
+    community_id = bytes.fromhex(os.getenv("COMMUNITY_ID"))
 
     def started(self):
         self.torrent_list = os.listdir("torrents/")
@@ -118,7 +118,11 @@ class DetoksCommunity(Community):
         print("The message includes the first payload:\n", payload)
 
 
-async def start_nodes(num_nodes):
+async def start_nodes(num_nodes: int, timeout: int, max_peers: int):
+    print(
+        f"Starting community with {num_nodes} nodes, {timeout}s timeout and {max_peers} max peers."
+    )
+
     if not os.path.exists("keys/"):
         os.mkdir("keys/")
 
@@ -132,7 +136,7 @@ async def start_nodes(num_nodes):
         builder.add_overlay(
             "DeToksCommunity",
             node_name,
-            [WalkerDefinition(Strategy.RandomWalk, 3, {"timeout": 20})],
+            [WalkerDefinition(Strategy.RandomWalk, max_peers, {"timeout": timeout})],
             bootstrapper,
             {},
             [("started",)],
@@ -144,11 +148,9 @@ async def start_nodes(num_nodes):
 
 
 if __name__ == "__main__":
-    try:
-        num_nodes = int(sys.argv[1])
-    except:
-        print("Please provide a number of nodes to spawn")
-        exit(1)
+    NUM_NODES = int(os.getenv("NUM_NODES"))
+    TIMEOUT = int(os.getenv("TIMEOUT"))
+    MAX_NUM_PEERS = int(os.getenv("MAX_NUM_PEERS"))
 
-    ensure_future(start_nodes(num_nodes))
+    ensure_future(start_nodes(NUM_NODES, TIMEOUT, MAX_NUM_PEERS))
     get_event_loop().run_forever()
