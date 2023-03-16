@@ -4,10 +4,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
-import android.widget.VideoView
+import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,12 +12,10 @@ import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.util.*
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
-import nl.tudelft.trustchain.detoks.helpers.LongHoldListener
 
 class VideosAdapter(
     private val torrentManager: TorrentManager,
@@ -38,7 +33,6 @@ class VideosAdapter(
             videoScaling,
             torrentManager)
     }
-
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
@@ -60,6 +54,8 @@ class VideosAdapter(
         var proposalBlockHash: TextView
         var videoID: TextView
         var videoPostedOn: TextView
+        var proposalSendButton: Button
+
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
@@ -68,6 +64,8 @@ class VideosAdapter(
             proposalBlockHash = itemView.findViewById(R.id.proposalBlockHash)
             videoID = itemView.findViewById(R.id.videoID)
             videoPostedOn = itemView.findViewById(R.id.videoPostedOn)
+            proposalSendButton = itemView.findViewById(R.id.proposalMockButton)
+
             setLikeListener()
             setPostVideoListener()
         }
@@ -121,7 +119,7 @@ class VideosAdapter(
          */
         private fun sendHeartToken() {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
-            val toastMessage = upvoteCommunity?.sendHeartToken("", "TEST")
+            val toastMessage = upvoteCommunity.sendHeartToken("", "TEST")
             Toast.makeText(
                 itemView.context,
                 toastMessage,
@@ -131,6 +129,7 @@ class VideosAdapter(
             val proposalBlock = upvoteCommunity.database.getBlockWithHash(proposalBlockHash.text.toString().hexToBytes())
             if (proposalBlock != null) {
                 upvoteCommunity.createAgreementBlock(proposalBlock, proposalBlock.transaction)
+                Log.i("DeToks", "Agreement block created!")
             } else {
                 Toast.makeText(
                     itemView.context,
@@ -175,6 +174,7 @@ class VideosAdapter(
         private fun createProposalToken(): TrustChainBlock? {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val myPeer = IPv8Android.getInstance().myPeer
+
             val transaction = mapOf(
                 "videoID" to "TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
                 "heartTokenGivenBy" to ANY_COUNTERPARTY_PK.toHex(),
@@ -194,28 +194,49 @@ class VideosAdapter(
          * A long press of 2 seconds represents/simulates a peer having posted a video
          */
         private fun setPostVideoListener() {
-            itemView.setOnTouchListener(
-                object : LongHoldListener() {
-                    override fun onLongHold() {
-                        val proposalBlock = createProposalToken()
-                        val hash = proposalBlock?.calculateHash()!!
-                        val mypeer = IPv8Android.getInstance().myPeer
-                        val message = "By long pressing for 2 seconds you with public key: " +
-                            "${mypeer.publicKey.keyToBin().toHex()} and member id:\n" +
-                            "$mypeer.mid has created a proposalblock on this timestamp: ${proposalBlock.timestamp} \n" +
-                            "The hash of this block is ${hash.toHex()}, corresponding hashCode is: ${hash.hashCode()} \n" +
-                            "the block Id of this proposal block is: ${proposalBlock.blockId} \n" +
-                            "the linked block id is: ${proposalBlock.linkedBlockId}\n"
-                        torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
-                        Log.i("DeToks", message)
-                        Toast.makeText(
-                            itemView.context,
-                            message,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            )
+//            itemView.setOnTouchListener(
+//                object : LongHoldListener() {
+//                    override fun onLongHold() {
+//                        val proposalBlock = createProposalToken()
+//                        val hash = proposalBlock?.calculateHash()!!
+//                        val mypeer = IPv8Android.getInstance().myPeer
+//                        val message = "By long pressing for 2 seconds you with public key: " +
+//                            "${mypeer.publicKey.keyToBin().toHex()} and member id:\n" +
+//                            "$mypeer.mid has created a proposalblock on this timestamp: ${proposalBlock.timestamp} \n" +
+//                            "The hash of this block is ${hash.toHex()}, corresponding hashCode is: ${hash.hashCode()} \n" +
+//                            "the block Id of this proposal block is: ${proposalBlock.blockId} \n" +
+//                            "the linked block id is: ${proposalBlock.linkedBlockId}\n"
+//                        torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
+//                        Log.i("DeToks", message)
+//                        Toast.makeText(
+//                            itemView.context,
+//                            message,
+//                            Toast.LENGTH_SHORT
+//                        ).show()
+//                    }
+//                }
+//            )
+
+            proposalSendButton.setOnClickListener{
+                val proposalBlock = createProposalToken()
+                val hash = proposalBlock?.calculateHash()!!
+                val myPeer = IPv8Android.getInstance().myPeer
+                val message = "Button Clicked! Your public key: " +
+                    "${myPeer.publicKey.keyToBin().toHex()} and member id:\n" +
+                    "$myPeer.mid has created a proposalblock on this timestamp: ${proposalBlock.timestamp} \n" +
+                    "The hash of this block is ${hash.toHex()}, corresponding hashCode is: ${hash.hashCode()} \n" +
+                    "the block Id of this proposal block is: ${proposalBlock.blockId} \n" +
+                    "the linked block id is: ${proposalBlock.linkedBlockId}\n"
+                torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
+
+                Log.i("DeToks", message)
+                Toast.makeText(
+                    itemView.context,
+                    message,
+                    Toast.LENGTH_SHORT
+                ).show()
+                createProposalToken()
+            }
         }
     }
 }

@@ -107,6 +107,12 @@
             android:textColor="@android:color/white"
             android:textSize="10sp" />
 
+        <Button
+            android:id="@+id/proposalMockButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/proposal_mock_button" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
