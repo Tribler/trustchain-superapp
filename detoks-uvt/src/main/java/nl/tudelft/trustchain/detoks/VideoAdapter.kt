@@ -1,13 +1,12 @@
 package nl.tudelft.trustchain.detoks
 
+import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
-import android.widget.VideoView
+import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +19,8 @@ import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
 import nl.tudelft.trustchain.detoks.helpers.LongHoldListener
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 class VideosAdapter(
     private val torrentManager: TorrentManager,
@@ -31,6 +32,18 @@ class VideosAdapter(
         List(100) { VideoItem(torrentManager::provideContent) }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
+//        val videoViewHolder: VideoViewHolder = VideoViewHolder(
+//            LayoutInflater.from(parent.context)
+//                .inflate(R.layout.item_video, parent, false),
+//            videoScaling,
+//        )
+//        val button = parent.findViewById(R.id.buttonTest) as Button
+//        button.setOnClickListener {
+//            Log.i("DeToks", "BUTTON TEST")
+//        }
+//        return videoViewHolder
+
+
         return VideoViewHolder(
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_video, parent, false),
@@ -54,12 +67,15 @@ class VideosAdapter(
         var txtTitle: TextView
         var txtDesc: TextView
         var mProgressBar: ProgressBar
+        var proposalSendButton: Button
 
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
             mProgressBar = itemView.findViewById(R.id.progressBar)
+            proposalSendButton = itemView.findViewById(R.id.proposalMockButton)
+
             setLikeListener()
             setCreateProposalTokenListener()
         }
@@ -129,11 +145,19 @@ class VideosAdapter(
             )
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         private fun createProposalToken() {
             //TODO: create and sign proposal token with own private key
+            val nowInUtc = OffsetDateTime.now(ZoneOffset.UTC)
+            Log.i("DeToks", "Current UTC Time: $nowInUtc")
+
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val myPeer = IPv8Android.getInstance().myPeer
 
+            //TODO: ADD THESE ATTRIBUTES:
+            // TIMESTAMP (UTC)
+            // (BALANCE)
+            // (HASH)
             val transaction = mapOf(
                 "videoID" to "TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
                 "heartTokenGivenBy" to ANY_COUNTERPARTY_PK.toHex(),
@@ -166,6 +190,17 @@ class VideosAdapter(
                     }
                 }
             )
+
+            proposalSendButton.setOnClickListener{
+                val message = "Proposal Button Clicked: creating proposal token"
+                Log.i("DeToks", message)
+                Toast.makeText(
+                    itemView.context,
+                    message,
+                    Toast.LENGTH_SHORT
+                ).show()
+                createProposalToken()
+            }
         }
     }
 }
