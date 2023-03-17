@@ -100,9 +100,9 @@ class DetoksCommunity (settings: TrustChainSettings,
             }
         })
     }
-    fun listOfLikedVideos(person: ByteArray): List<String> {
+    fun listOfLikedVideos(person: String): List<String> {
         var iterator = database.getBlocksWithType(LIKE_BLOCK).filter {
-            it.transaction["liker"] == person.toString()
+            it.transaction["liker"] == person
         }.listIterator()
         var likedVideos = ArrayList<String>()
         while(iterator.hasNext()) {
