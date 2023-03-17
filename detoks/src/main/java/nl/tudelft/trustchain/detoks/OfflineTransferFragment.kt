@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import Wallet
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -62,6 +63,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+
         val friends = Arrays.asList("Vyshnavi", "Ali", "Dany", "Julio")
         val spinnerFriends: Spinner = view.findViewById(R.id.spinner)
         // create an array adapter and pass the required parameter
@@ -75,11 +78,20 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             qrCodeUtils.startQRScanner(this, null, true)
         }
 
-        val myPublicKey = getIpv8().myPeer.publicKey.keyToBin()
+        val myPublicKey = getIpv8().myPeer.publicKey
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
+        val wallet = Wallet.create(myPublicKey, getIpv8().myPeer.key as PrivateKey)
+        val token = Token.create(1, myPublicKey.keyToBin())
+        wallet.addToken(token)
+
         buttonRequest.setOnClickListener {
-            //check whether friend and amount? is selected
-            showQR(view, myPublicKey)
+            //friend selected
+            val friendUsername = spinnerFriends.selectedItem
+
+            //get the friends public key from the db
+            val chosenToken = wallet.tokens.removeLast()
+
+            showQR(view, chosenToken, myPublicKey)
         }
 
 
@@ -110,31 +122,37 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val content = qrCodeUtils.parseActivityResult(requestCode,resultCode,data)
         Log.v("Transfer data ", content.toString())
 
+        if (content != null) {
+            // deserialize the content
+            val obtainedTokens = Token.deserialize(content.toByteArray())
+            //add tokens to wallet
+        } else {
+            Toast.makeText(this.context,"Scanning failed!",  Toast.LENGTH_LONG).show()
+        }
         // retrieve the collection of tokens
         // deserialize it
         // increase the amount in the wallet
 
     }
 
-    private fun createNextOwner(token : Token, pubKeyRecipient: PublicKey) : Token {
+    private fun createNextOwner(token : Token, pubKeyRecipient: nl.tudelft.ipv8.keyvault.PublicKey) : Token {
         val senderPrivateKey = getIpv8().myPeer.key
 
         // create the new ownership of the token
-        token.signByPeer(pubKeyRecipient.encoded, senderPrivateKey as PrivateKey)
+        token.signByPeer(pubKeyRecipient.keyToBin(), senderPrivateKey as PrivateKey)
         return token
     }
-    // select a friend
-    // retrieve its public key
 
 
-    private fun showQR(view: View, myPublicKey: ByteArray) {
-
+    private fun showQR(view: View, token: Token, friendPublicKey: nl.tudelft.ipv8.keyvault.PublicKey) {
+        val newToken = createNextOwner(token, friendPublicKey)
+        // encode newToken
 
         val jsonObject = JSONObject()
-        jsonObject.put("public_key", myPublicKey)
-        val amountText = view.findViewById<EditText>(R.id.amount)
-        val amount = amountText.text
-        jsonObject.put("amount_requested", amount)
+        jsonObject.put("token", newToken)
+//        val amountText = view.findViewById<EditText>(R.id.amount)
+//        val amount = amountText.text
+//        jsonObject.put("amount_requested", amount)
         val jsonString = jsonObject.toString()
         hideKeyboard()
         lifecycleScope.launch {
@@ -145,7 +163,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             qrCodeImage.setImageBitmap(bitmap)
         }
 //        amountText.text.clear()
-        amountText.clearFocus()
+//        amountText.clearFocus()
         button_send.visibility = View.INVISIBLE
     }
 

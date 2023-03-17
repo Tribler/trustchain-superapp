@@ -5,7 +5,7 @@ import java.security.PublicKey
 data class OfflineFriend(val username : String,
                          val publicKey: PublicKey) {
 
-    public fun getPublicKey(username: String): PublicKey{
-        return publicKey
+//    public fun getPublicKey(username: String): PublicKey{
+//        return publicKey
     }
-}
+//}

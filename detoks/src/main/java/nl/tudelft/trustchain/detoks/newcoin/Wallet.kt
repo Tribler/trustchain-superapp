@@ -5,21 +5,22 @@ import java.security.PrivateKey
 import java.security.PublicKey
 
 data class Wallet(
-    val publicKey: PublicKey,
-    val privateKey: PrivateKey,
+    val publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
+    val privateKey: nl.tudelft.ipv8.keyvault.PrivateKey,
     val tokens: ArrayList<Token>,
     val listOfFriends: ArrayList<OfflineFriend>
 ) {
 
     companion object {
-        fun create(): Wallet {
-            val generator = KeyPairGenerator.getInstance("RSA")
-            generator.initialize(2048)
-            val keyPair = generator.generateKeyPair()
+        fun create(publicKey : nl.tudelft.ipv8.keyvault.PublicKey,
+                   privateKey: nl.tudelft.ipv8.keyvault.PrivateKey ): Wallet {
+//            val generator = KeyPairGenerator.getInstance("RSA")
+//            generator.initialize(2048)
+//            val keyPair = generator.generateKeyPair()
 
             // is the generation of private public keys auto when you make an account?
 
-            return Wallet(keyPair.public, keyPair.private, arrayListOf<Token>(), arrayListOf<OfflineFriend>())
+            return Wallet(publicKey, privateKey, arrayListOf<Token>(), arrayListOf<OfflineFriend>())
         }
     }
 
