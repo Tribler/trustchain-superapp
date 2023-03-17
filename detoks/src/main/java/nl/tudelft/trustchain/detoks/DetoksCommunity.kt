@@ -9,6 +9,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
+import kotlin.collections.ArrayList
 
 const val LIKE_BLOCK: String = "like_block"
 
@@ -82,5 +83,16 @@ class DetoksCommunity (settings: TrustChainSettings,
                 Log.d("Detoks", "Received like for $video, $torrent")
             }
         })
+    }
+    fun listOfLikedVideos(person: ByteArray): List<String> {
+        var iterator = database.getBlocksWithType(LIKE_BLOCK).filter {
+            it.transaction["liker"] == person.toString()
+        }.listIterator()
+        var likedVideos = ArrayList<String>()
+        while(iterator.hasNext()) {
+            val block = iterator.next()
+            likedVideos.add(block.transaction.get("video") as String)
+        }
+        return likedVideos;
     }
 }
