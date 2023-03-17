@@ -39,7 +39,6 @@
         android:ellipsize="start"
         android:gravity="center_horizontal"
         android:hint="NAME"
-        android:inputType="numberDecimal"
         android:textSize="20sp"
         android:textStyle="bold"
         android:visibility="invisible"

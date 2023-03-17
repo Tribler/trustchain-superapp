@@ -67,7 +67,7 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
         val buttonShow = view.findViewById<Button>(R.id.button_show)
         buttonShow.setOnClickListener {
             buttonScan.visibility = View.INVISIBLE
-            val myPublicKey = getIpv8().myPeer.publicKey.pub().keyToBin().toString()
+            val myPublicKey = getIpv8().myPeer.publicKey.toString()
             lifecycleScope.launch {
                 var bitmap = withContext(Dispatchers.Default) {
                     // qrCodeUtils.createQR(payload.serialize().toHex())
