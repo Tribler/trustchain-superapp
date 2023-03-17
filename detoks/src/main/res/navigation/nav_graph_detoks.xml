@@ -18,6 +18,14 @@
         android:id="@+id/offlineTransferFragment"
         android:name="nl.tudelft.trustchain.detoks.OfflineTransferFragment"
         android:label="fragment_offline_transfer"
-        tools:layout="@layout/fragment_offline_transfer" />
-
+        tools:layout="@layout/fragment_offline_transfer" >
+        <action
+            android:id="@+id/action_offlineTransferFragment_to_addFriendFragment"
+            app:destination="@id/addFriendFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addFriendFragment"
+        android:name="nl.tudelft.trustchain.detoks.AddFriendFragment"
+        android:label="fragment_add_friend"
+        tools:layout="@layout/fragment_add_friend" />
 </navigation>

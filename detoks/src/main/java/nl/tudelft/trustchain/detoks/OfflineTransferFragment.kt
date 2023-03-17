@@ -12,6 +12,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.fragment_offline_transfer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,8 +64,6 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
         val friends = Arrays.asList("Vyshnavi", "Ali", "Dany", "Julio")
         val spinnerFriends: Spinner = view.findViewById(R.id.spinner)
         // create an array adapter and pass the required parameter
@@ -78,6 +77,12 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             qrCodeUtils.startQRScanner(this, null, true)
         }
 
+        val buttonAddFriend = view.findViewById<Button>(R.id.button_friend)
+        buttonAddFriend.setOnClickListener {
+            val navController = view.findNavController()
+            navController.navigate(R.id.addFriendFragment)
+        }
+
         val myPublicKey = getIpv8().myPeer.publicKey
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         val wallet = Wallet.create(myPublicKey, getIpv8().myPeer.key as PrivateKey)
@@ -86,7 +91,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
         buttonRequest.setOnClickListener {
             //friend selected
-            val friendUsername = spinnerFriends.selectedItem
+//            val friendUsername = spinnerFriends.selectedItem
 
             //get the friends public key from the db
             val chosenToken = wallet.tokens.removeLast()
@@ -124,7 +129,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
         if (content != null) {
             // deserialize the content
-            val obtainedTokens = Token.deserialize(content.toByteArray())
+//            val obtainedTokens = Token.deserialize(content.toByteArray())
             //add tokens to wallet
         } else {
             Toast.makeText(this.context,"Scanning failed!",  Toast.LENGTH_LONG).show()
