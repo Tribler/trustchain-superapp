@@ -94,14 +94,6 @@ class TorrentManager private constructor (
     }
 
     /**
-     * Update the torrent duration by calling the recommender
-     * NOTE: This function is currently not used
-     */
-    fun updateTorrentDuration(index: Int = currentIndex, duration: Long) {
-        profile.updateEntryDuration(torrentFiles.gett(index), duration)
-    }
-
-    /**
      * Update the time and return the difference
      */
     private fun updateTime() : Long {
@@ -121,6 +113,10 @@ class TorrentManager private constructor (
             return
         }
         if (cachingAmount * 2 + 1 >= getNumberOfTorrents()) {
+            // FIXME: This could potentially lead to issues, since what happens if the user locks
+            //        their screen or switches to another app for a while? Maybe this could be
+            //        changed to a place in the video adapter as well, if we can detect maybe when
+            //        a video is done playing and starts again, then update the duration if possible
             profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
             currentIndex = newIndex
             return
@@ -181,8 +177,7 @@ class TorrentManager private constructor (
                                     it
                                 )
                             )
-                            val entry = ProfileEntry(0, 0, System.currentTimeMillis())
-                            profile.magnets[torrentInfo.name() + "[" + fileName + "]"] = entry
+                            profile.magnets[torrentInfo.name() + "[" + fileName + "]"] = ProfileEntry()
                         }
                     }
                 }
