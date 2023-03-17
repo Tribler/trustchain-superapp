@@ -10,6 +10,7 @@ import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 import kotlin.collections.ArrayList
+import kotlin.math.sign
 
 const val LIKE_BLOCK: String = "like_block"
 
@@ -54,11 +55,12 @@ class DetoksCommunity (settings: TrustChainSettings,
     fun broadcastLike(vid: String, torrent: String, creator: String) {
         Log.d("DeToks", "Liking: $vid")
 
-        // Ask a random peer to validate your like, IS THIS CORRECT?
-        val peer = (0 until getPeers().size).random()
-        val peerKey = getPeers()[peer].key.keyToBin()
-        val like = Like(myPeer.publicKey.keyToBin(), vid, torrent, creator)
-        createProposalBlock(LIKE_BLOCK, like.toMap(), peerKey)
+        // TODO: fix this
+//        val peer = (0 until getPeers().size).random()
+//        val peerKey = getPeers()[peer].key.keyToBin()
+        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator)
+        createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
+        // createProposalBlock(LIKE_BLOCK, like.toMap(), peerKey)
         Log.d("DeToks", "$like")
     }
 
@@ -69,6 +71,10 @@ class DetoksCommunity (settings: TrustChainSettings,
     }
 
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
+//        Log.d("Detoks", author)
+//        for (block in database.getBlocksWithType(LIKE_BLOCK)) {
+//            Log.d("Detoks", block.transaction.toString())
+//        }
         return database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["author"] == author
         }
@@ -89,21 +95,6 @@ class DetoksCommunity (settings: TrustChainSettings,
         }
     }
 
-    init {
-        registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                createAgreementBlock(block, mapOf<Any?, Any?>())
-            }
-        })
-        addListener(LIKE_BLOCK, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("Detoks", "onBlockReceived: ${block.blockId} ${block.transaction}")
-                val video = block.transaction.get("video")
-                val torrent = block.transaction.get("torrent")
-                Log.d("Detoks", "Received like for $video, $torrent")
-            }
-        })
-    }
     fun listOfLikedVideosAndTorrents(person: String): List<Pair<String,String>> {
         var iterator = database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["liker"] == person
@@ -114,5 +105,22 @@ class DetoksCommunity (settings: TrustChainSettings,
             likedVideos.add(Pair(block.transaction.get("video") as String, block.transaction.get("torrent") as String))
         }
         return likedVideos;
+    }
+
+    init {
+        registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                // TODO: Something is wrong here, loads of empty transaction blocks on the client
+                createAgreementBlock(block, block.transaction)
+            }
+        })
+        addListener(LIKE_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("Detoks", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                val video = block.transaction.get("video")
+                val torrent = block.transaction.get("torrent")
+                Log.d("Detoks", "Received like for $video, $torrent")
+            }
+        })
     }
 }

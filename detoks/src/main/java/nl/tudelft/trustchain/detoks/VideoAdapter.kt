@@ -74,20 +74,11 @@ class VideosAdapter(
         var isLiked: Boolean = false
 
         private fun likeVideo(content: TorrentMediaInfo) {
-//            if (isLiked) {
-//                likeButton.setImageResource(R.drawable.baseline_favorite_24_white)
-//            } else {
-//                likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
-//            }
-//
-//            isLiked = !isLiked
-
             if (isLiked) return
 
             isLiked = true
             likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
 
-            // TODO: Implement the actual functionality for liking a video.
             val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
             community.broadcastLike(content.fileName, content.torrentName, content.creator)
         }
@@ -108,13 +99,23 @@ class VideosAdapter(
             // Disable the click sound effects.
             mVideoView.isSoundEffectsEnabled = false
             likeButton.isSoundEffectsEnabled = false
-
-            // TODO: Check if user has already liked the current video. If so, set isLiked to true and change likeButton to baseline_favorite_24_red.
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
             CoroutineScope(Dispatchers.Main).launch {
                 val content = item.content(position, 10000)
+
+                val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+                isLiked = community.userLikedVideo(
+                    content.fileName,
+                    content.torrentName,
+                    community.myPeer.publicKey.toString()
+                )
+                if (isLiked) {
+                    likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
+                } else {
+                    likeButton.setImageResource(R.drawable.baseline_favorite_24_white)
+                }
 
                 // Show the like button and the like count.
                 likeButton.visibility = View.VISIBLE
@@ -130,7 +131,6 @@ class VideosAdapter(
                     }
                 })
 
-                val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
                 peerCount.text = "Peers: " + community.getPeers().size.toString()
