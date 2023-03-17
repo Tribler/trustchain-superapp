@@ -92,9 +92,8 @@ class VideosAdapter(
             likeButton = itemView.findViewById(R.id.like_button)
             likeCount = itemView.findViewById(R.id.like_count)
 
-            // Hide the like button and the like count until the video loads.
+            // Hide the like button until the video loads.
             likeButton.visibility = View.GONE
-            likeCount.visibility = View.GONE
 
             // Disable the click sound effects.
             mVideoView.isSoundEffectsEnabled = false
@@ -104,22 +103,23 @@ class VideosAdapter(
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
             CoroutineScope(Dispatchers.Main).launch {
                 val content = item.content(position, 10000)
-
                 val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+
+                likeCount.text = community.getLikes(content.fileName, content.torrentName).size.toString()
+
                 isLiked = community.userLikedVideo(
                     content.fileName,
                     content.torrentName,
                     community.myPeer.publicKey.toString()
                 )
-                if (isLiked) {
-                    likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
-                } else {
-                    likeButton.setImageResource(R.drawable.baseline_favorite_24_white)
-                }
 
-                // Show the like button and the like count.
+                if (isLiked)
+                    likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
+                else
+                    likeButton.setImageResource(R.drawable.baseline_favorite_24_white)
+
+                // Show the like button.
                 likeButton.visibility = View.VISIBLE
-                likeCount.visibility = View.VISIBLE
 
                 likeButton.setOnClickListener{
                     likeVideo(content)
