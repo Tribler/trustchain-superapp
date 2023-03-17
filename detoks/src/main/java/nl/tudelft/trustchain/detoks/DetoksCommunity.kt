@@ -100,14 +100,14 @@ class DetoksCommunity (settings: TrustChainSettings,
             }
         })
     }
-    fun listOfLikedVideos(person: String): List<String> {
+    fun listOfLikedVideosAndTorrents(person: String): List<Pair<String,String>> {
         var iterator = database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["liker"] == person
         }.listIterator()
-        var likedVideos = ArrayList<String>()
+        var likedVideos = ArrayList<Pair<String,String>>()
         while(iterator.hasNext()) {
             val block = iterator.next()
-            likedVideos.add(block.transaction.get("video") as String)
+            likedVideos.add(Pair(block.transaction.get("video") as String, block.transaction.get("torrent") as String))
         }
         return likedVideos;
     }
