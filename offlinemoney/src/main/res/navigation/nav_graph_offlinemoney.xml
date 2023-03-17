@@ -8,5 +8,21 @@
         android:id="@+id/transferFragment"
         android:name="nl.tudelft.trustchain.offlinemoney.ui.TransferFragment"
         android:label="Transfer"
-        tools:layout="@layout/activity_main_offline_money" />
+        tools:layout="@layout/activity_main_offline_money">
+        <action
+            android:id="@+id/action_transferFragment_to_sendMoneyFragment"
+            app:destination="@id/sendMoneyFragment"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/sendMoneyFragment"
+        android:name="nl.tudelft.trustchain.offlinemoney.ui.SendMoneyFragment"
+        android:label="SendMoneyFragment"
+        tools:layout="@layout/send_money_fragment">
+        <action
+            android:id="@+id/action_sendMoneyFragment_to_tranferFragment"
+            app:destination="@id/transferFragment"
+            />
+    </fragment>
 </navigation>
