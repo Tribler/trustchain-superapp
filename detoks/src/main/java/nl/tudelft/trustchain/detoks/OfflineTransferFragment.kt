@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.lifecycleScope
+import kotlinx.android.synthetic.main.fragment_offline_transfer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -105,7 +106,9 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             val qrCodeImage = view.findViewById<ImageView>(R.id.QR)
             qrCodeImage.setImageBitmap(bitmap)
         }
-        amountText.text.clear()
+//        amountText.text.clear()
+        amountText.clearFocus()
+        button_send.visibility = View.INVISIBLE
     }
 
     private fun hideKeyboard() {
