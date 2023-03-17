@@ -1,11 +1,7 @@
 package nl.tudelft.trustchain.offlinemoney
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
+import nl.tudelft.trustchain.common.BaseActivity
 
-class MainActivityOfflineMoney : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main_offline_money)
-    }
+class MainActivityOfflineMoney() : BaseActivity() {
+    override val navigationGraph = R.navigation.nav_graph_offlinemoney
 }

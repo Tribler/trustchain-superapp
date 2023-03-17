@@ -7,108 +7,108 @@
     android:orientation="vertical"
     tools:context=".MainActivityOfflineMoney">
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:id="@+id/balanceLayout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="16dp"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:layout_editor_absoluteX="1dp">
-
-    <TextView
-        android:id="@+id/txtOwnPublicKey"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:lines="1"
-        android:typeface="monospace"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone"
-        tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
-
-    <TextView
-        android:id="@+id/txtOwnName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Your balance"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txtOwnPublicKey"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/txtBalance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="20.00"
-        android:textSize="60dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txtOwnName"  />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
-
-<View
-    android:layout_width="match_parent"
-    android:layout_height="1dp"
-    android:background="@android:color/darker_gray"/>
-
-<ScrollView
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1">
-
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/balanceLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="1dp">
 
         <TextView
-            android:id="@+id/txtIntro"
+            android:id="@+id/txtOwnPublicKey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Request or transfer token:"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:ellipsize="end"
+            android:lines="1"
+            android:typeface="monospace"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"
+            tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
 
-        <EditText
-            android:id="@+id/edtAmount"
+        <TextView
+            android:id="@+id/txtOwnName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="0.00"
-            android:inputType="numberDecimal"
-            android:textSize="32dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:text="Your balance"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/txtIntro" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/txtOwnPublicKey"
+            android:textStyle="bold" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRequest"
-            style="@style/Button"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/txtBalance"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="Request"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:text="20.00"
+            android:textSize="60dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/edtAmount" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSend"
-            style="@style/Button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="Send"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnRequest" />
+            app:layout_constraintTop_toBottomOf="@id/txtOwnName"  />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/txtIntro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Get or transfer token:"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/edtAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="0.00"
+                android:inputType="numberDecimal"
+                android:textSize="32dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtIntro" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGet"
+                style="@style/Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="Get"
+                app:icon="@drawable/ic_baseline_photo_camera_24"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/edtAmount" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSend"
+                style="@style/Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="Send"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnRequest" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
 </LinearLayout>
