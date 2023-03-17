@@ -68,6 +68,12 @@ class DetoksCommunity (settings: TrustChainSettings,
         }
     }
 
+    fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
+        return database.getBlocksWithType(LIKE_BLOCK).filter {
+            it.transaction["author"] == author
+        }
+    }
+
     fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
         return getLikes(vid, torrent).filter { it.transaction["liker"] == liker }.isNotEmpty()
     }
@@ -75,11 +81,9 @@ class DetoksCommunity (settings: TrustChainSettings,
     fun getPostedVideos(author: String): List<Pair<String, Int>> {
         // Create Key data class so we can group by two fields (torrent and video)
         data class Key(val video: String, val torrent: String)
-        fun TrustChainBlock.toKey() = Key(transaction["video"].toString(), transaction["torrent"].toString())
-        val likes = database.getBlocksWithType(LIKE_BLOCK).filter {
-            it.transaction["author"] == author          // get videos posted by author
-        }.groupBy { it.toKey() }
-        // Maybe sort them first
+        fun TrustChainBlock.toKey() = Key(transaction["video"] as String, transaction["torrent"] as String)
+        val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
+        // TODO: sort based on posted timestamp
         return likes.entries.map {
             Pair(it.key.video, it.value.size)
         }
