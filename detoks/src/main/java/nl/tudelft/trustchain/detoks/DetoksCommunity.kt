@@ -71,10 +71,6 @@ class DetoksCommunity (settings: TrustChainSettings,
     }
 
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
-//        Log.d("Detoks", author)
-//        for (block in database.getBlocksWithType(LIKE_BLOCK)) {
-//            Log.d("Detoks", block.transaction.toString())
-//        }
         return database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["author"] == author
         }

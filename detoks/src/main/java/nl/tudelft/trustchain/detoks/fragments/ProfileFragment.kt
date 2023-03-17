@@ -22,7 +22,7 @@ class ProfileFragment : Fragment() {
 
         val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
 
-        val author = "ia_make_torrent" // community.myPeer.publicKey.toString()
+        val author = community.myPeer.publicKey.toString()
         val videos = community.getPostedVideos(author)
 //        TODO: Set the correct values of the the following three text views
         val publicKeyLabel = view.findViewById<TextView>(R.id.publicKeyLabel)
