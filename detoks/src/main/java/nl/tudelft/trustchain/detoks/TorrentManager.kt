@@ -29,6 +29,9 @@ class TorrentManager private constructor (
     private val logger = KotlinLogging.logger {}
     private val torrentFiles = mutableListOf<TorrentHandler>()
 
+    private val profile = Profile(HashMap())
+
+    private var lastTimeStamp: Long
     private var currentIndex = 0
 
     init {
@@ -36,6 +39,7 @@ class TorrentManager private constructor (
         initializeSessionManager()
         buildTorrentIndex()
         initializeVideoPool()
+        lastTimeStamp = System.currentTimeMillis()
     }
 
     companion object {
@@ -90,7 +94,16 @@ class TorrentManager private constructor (
     }
 
     /**
-     * This functions updates the current index of the cache.
+     * Update the time and return the difference
+     */
+    private fun updateTime() : Long {
+        val oldTimeStamp = lastTimeStamp
+        lastTimeStamp = System.currentTimeMillis()
+        return lastTimeStamp - oldTimeStamp
+    }
+
+    /**
+     * This function updates the current index of the cache.
      */
     private fun notifyChange(
         newIndex: Int,
@@ -100,6 +113,11 @@ class TorrentManager private constructor (
             return
         }
         if (cachingAmount * 2 + 1 >= getNumberOfTorrents()) {
+            // FIXME: This could potentially lead to issues, since what happens if the user locks
+            //        their screen or switches to another app for a while? Maybe this could be
+            //        changed to a place in the video adapter as well, if we can detect maybe when
+            //        a video is done playing and starts again, then update the duration if possible
+            profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
             currentIndex = newIndex
             return
         }
@@ -112,6 +130,7 @@ class TorrentManager private constructor (
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
 
         }
+        profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
         currentIndex = newIndex
     }
 
@@ -158,6 +177,7 @@ class TorrentManager private constructor (
                                     it
                                 )
                             )
+                            profile.magnets[torrentInfo.name() + "[" + fileName + "]"] = ProfileEntry()
                         }
                     }
                 }
