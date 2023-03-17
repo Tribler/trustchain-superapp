@@ -36,7 +36,7 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         }
 
         binding.btnSend.setOnClickListener{
-            val amount = getAmount(binding.edtAmount.text.toString())
+            val amount = binding.edtAmount.text.toString().toDouble()
             println(amount)
 
             if (amount > 0) {

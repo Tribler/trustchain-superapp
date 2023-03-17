@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.offlinemoney.ui
 
 import android.os.Bundle
+import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.Dispatchers
@@ -16,8 +17,9 @@ class SendMoneyFragment  : OfflineMoneyBaseFragment(R.layout.send_money_fragment
     private val binding by viewBinding(SendMoneyFragmentBinding::bind)
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
 
         // val exchange_list = mutableListOf("public_key" , "private_key", 5);
 
