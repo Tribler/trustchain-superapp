@@ -53,7 +53,7 @@ class DetoksCommunity (settings: TrustChainSettings,
     fun broadcastLike(vid: String, torrent: String, creator: String) {
         Log.d("DeToks", "Liking: $vid")
 
-        // Ask a random peer to validate your like
+        // Ask a random peer to validate your like, IS THIS CORRECT?
         val peer = (0 until getPeers().size).random()
         val peerKey = getPeers()[peer].key.keyToBin()
         val like = Like(myPeer.publicKey.keyToBin(), vid, torrent, creator)
@@ -61,11 +61,27 @@ class DetoksCommunity (settings: TrustChainSettings,
         Log.d("DeToks", "$like")
     }
 
-    // Looks through the entire database, so probably very inefficient, but works for now
-    fun getLikes(vid: String, torrent: String): Int {
+    fun getLikes(vid: String, torrent: String): List<TrustChainBlock> {
         return database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["video"] == vid && it.transaction["torrent"] == torrent
-        }.size
+        }
+    }
+
+    fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
+        return getLikes(vid, torrent).filter { it.transaction["liker"] == liker }.isNotEmpty()
+    }
+
+    fun getPostedVideos(author: String): List<Pair<String, Int>> {
+        // Create Key data class so we can group by two fields (torrent and video)
+        data class Key(val video: String, val torrent: String)
+        fun TrustChainBlock.toKey() = Key(transaction["video"].toString(), transaction["torrent"].toString())
+        val likes = database.getBlocksWithType(LIKE_BLOCK).filter {
+            it.transaction["author"] == author          // get videos posted by author
+        }.groupBy { it.toKey() }
+        // Maybe sort them first
+        return likes.entries.map {
+            Pair(it.key.video, it.value.size)
+        }
     }
 
     init {
