@@ -12,27 +12,40 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.DetoksCommunity
 import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.adapters.TabBarAdapter
-import kotlin.random.Random
 
 class ProfileFragment : Fragment() {
+    private lateinit var numVideosLabel: TextView
+    private lateinit var numLikesLabel: TextView
     private lateinit var viewPager: ViewPager2
+
+    private fun updatePersonalInformation(videos: List<Pair<String, Int>>) {
+        numVideosLabel.text = videos.size.toString()
+        numLikesLabel.text = videos.sumOf { it.second }.toString()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+        val videos = community.getPostedVideos(community.myPeer.publicKey.toString())
+
+        updatePersonalInformation(videos)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
-
         val author = community.myPeer.publicKey.toString()
         val videos = community.getPostedVideos(author)
-//        TODO: Set the correct values of the the following three text views
+
         val publicKeyLabel = view.findViewById<TextView>(R.id.publicKeyLabel)
-        publicKeyLabel.text = author // The current user's public key
+        publicKeyLabel.text = author
 
-        val numVideosLabel = view.findViewById<TextView>(R.id.numVideosLabel)
-        numVideosLabel.text = videos.size.toString() // The current user's total number of uploaded videos
+        numVideosLabel = view.findViewById(R.id.numVideosLabel)
+        numLikesLabel = view.findViewById(R.id.numLikesLabel)
 
-        val numLikesLabel = view.findViewById<TextView>(R.id.numLikesLabel)
-        numLikesLabel.text = videos.sumOf { it.second }.toString() // The current user's total number of received likes
+        updatePersonalInformation(videos)
 
 //        TODO: (optionally, if possible) Sort the list by the date and time when the video was uploaded.
         val videosListFragment = VideosListFragment(videos)
