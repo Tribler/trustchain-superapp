@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     android:label="DeToks"
-    app:startDestination="@id/detoksFragment">
+    app:startDestination="@id/tabBarFragment">
 
     <fragment
-        android:id="@+id/detoksFragment"
-        android:name="nl.tudelft.trustchain.detoks.DeToksFragment"
+        android:id="@+id/tabBarFragment"
+        android:name="nl.tudelft.trustchain.detoks.fragments.TabBarFragment"
         android:label="DeToks">
     </fragment>
 </navigation>

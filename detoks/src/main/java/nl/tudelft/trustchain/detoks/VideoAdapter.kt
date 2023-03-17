@@ -4,7 +4,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
@@ -41,6 +41,27 @@ class VideosAdapter(
         return mVideoItems.size
     }
 
+    // Taken from https://www.geeksforgeeks.org/double-tap-on-a-button-in-android/
+    abstract class DoubleClickListener : View.OnClickListener {
+        var lastClickTime: Long = 0
+
+        override fun onClick(v: View?) {
+            val clickTime = System.currentTimeMillis()
+
+            if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA) {
+                onDoubleClick(v)
+            }
+
+            lastClickTime = clickTime
+        }
+
+        abstract fun onDoubleClick(v: View?)
+
+        companion object {
+            private const val DOUBLE_CLICK_TIME_DELTA: Long = 300 // milliseconds
+        }
+    }
+
     class VideoViewHolder(itemView: View, private val videoScaling: Boolean = false) :
         RecyclerView.ViewHolder(itemView) {
         var mVideoView: VideoView
@@ -48,7 +69,19 @@ class VideosAdapter(
         var txtDesc: TextView
         var peerCount: TextView
         var mProgressBar: ProgressBar
-        var like: Button
+        var likeButton: ImageButton
+        var likeCount: TextView
+        var isLiked: Boolean = false
+
+        private fun likeVideo(content: TorrentMediaInfo) {
+            if (isLiked) return
+
+            isLiked = true
+            likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
+
+            val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+            community.broadcastLike(content.fileName, content.torrentName, content.creator)
+        }
 
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
@@ -56,20 +89,48 @@ class VideosAdapter(
             txtDesc = itemView.findViewById(R.id.txtDesc)
             peerCount = itemView.findViewById(R.id.peerCount)
             mProgressBar = itemView.findViewById(R.id.progressBar)
-            like = itemView.findViewById(R.id.like_button)
-            like.setVisibility(View.GONE);
+            likeButton = itemView.findViewById(R.id.like_button)
+            likeCount = itemView.findViewById(R.id.like_count)
 
+            // Hide the like button and the like count until the video loads.
+            likeButton.visibility = View.GONE
+            likeCount.visibility = View.GONE
+
+            // Disable the click sound effects.
+            mVideoView.isSoundEffectsEnabled = false
+            likeButton.isSoundEffectsEnabled = false
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
             CoroutineScope(Dispatchers.Main).launch {
                 val content = item.content(position, 10000)
-                like.setVisibility(View.VISIBLE)
-                like.setOnClickListener{
-                    val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
-                    community.broadcastLike(content.fileName, content.torrentName, content.creator)
-                }
+
                 val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+                isLiked = community.userLikedVideo(
+                    content.fileName,
+                    content.torrentName,
+                    community.myPeer.publicKey.toString()
+                )
+                if (isLiked) {
+                    likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
+                } else {
+                    likeButton.setImageResource(R.drawable.baseline_favorite_24_white)
+                }
+
+                // Show the like button and the like count.
+                likeButton.visibility = View.VISIBLE
+                likeCount.visibility = View.VISIBLE
+
+                likeButton.setOnClickListener{
+                    likeVideo(content)
+                }
+
+                mVideoView.setOnClickListener(object: DoubleClickListener() {
+                    override fun onDoubleClick(v: View?) {
+                        likeVideo(content)
+                    }
+                })
+
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
                 peerCount.text = "Peers: " + community.getPeers().size.toString()

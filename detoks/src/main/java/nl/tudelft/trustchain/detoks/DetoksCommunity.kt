@@ -2,17 +2,15 @@ package nl.tudelft.trustchain.detoks
 
 import java.util.*
 import android.util.Log
-
 import nl.tudelft.ipv8.IPv4Address
-import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
-import nl.tudelft.trustchain.detoks.Like
+import kotlin.collections.ArrayList
+import kotlin.math.sign
 
 const val LIKE_BLOCK: String = "like_block"
 
@@ -57,25 +55,59 @@ class DetoksCommunity (settings: TrustChainSettings,
     fun broadcastLike(vid: String, torrent: String, creator: String) {
         Log.d("DeToks", "Liking: $vid")
 
-        // Ask a random peer to validate your like
-        val peer = (0 until getPeers().size).random()
-        val peerKey = getPeers()[peer].key.keyToBin()
-        val like = Like(myPeer.publicKey.keyToBin(), vid, torrent, creator)
-        createProposalBlock(LIKE_BLOCK, like.toMap(), peerKey)
+        // TODO: fix this
+//        val peer = (0 until getPeers().size).random()
+//        val peerKey = getPeers()[peer].key.keyToBin()
+        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator)
+        createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
+        // createProposalBlock(LIKE_BLOCK, like.toMap(), peerKey)
         Log.d("DeToks", "$like")
     }
 
-    // Looks through the entire database, so probably very inefficient, but works for now
-    fun getLikes(vid: String, torrent: String): Int {
+    fun getLikes(vid: String, torrent: String): List<TrustChainBlock> {
         return database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["video"] == vid && it.transaction["torrent"] == torrent
-        }.size
+        }
+    }
+
+    fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
+        return database.getBlocksWithType(LIKE_BLOCK).filter {
+            it.transaction["author"] == author
+        }
+    }
+
+    fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
+        return getLikes(vid, torrent).filter { it.transaction["liker"] == liker }.isNotEmpty()
+    }
+
+    fun getPostedVideos(author: String): List<Pair<String, Int>> {
+        // Create Key data class so we can group by two fields (torrent and video)
+        data class Key(val video: String, val torrent: String)
+        fun TrustChainBlock.toKey() = Key(transaction["video"] as String, transaction["torrent"] as String)
+        val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
+        // TODO: sort based on posted timestamp
+        return likes.entries.map {
+            Pair(it.key.video, it.value.size)
+        }
+    }
+
+    fun listOfLikedVideosAndTorrents(person: String): List<Pair<String,String>> {
+        var iterator = database.getBlocksWithType(LIKE_BLOCK).filter {
+            it.transaction["liker"] == person
+        }.listIterator()
+        var likedVideos = ArrayList<Pair<String,String>>()
+        while(iterator.hasNext()) {
+            val block = iterator.next()
+            likedVideos.add(Pair(block.transaction.get("video") as String, block.transaction.get("torrent") as String))
+        }
+        return likedVideos;
     }
 
     init {
         registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
-                createAgreementBlock(block, mapOf<Any?, Any?>())
+                // TODO: Something is wrong here, loads of empty transaction blocks on the client
+                createAgreementBlock(block, block.transaction)
             }
         })
         addListener(LIKE_BLOCK, object : BlockListener {
