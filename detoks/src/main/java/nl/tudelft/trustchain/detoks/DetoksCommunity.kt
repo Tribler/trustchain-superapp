@@ -72,7 +72,7 @@ class DetoksCommunity (settings: TrustChainSettings,
     }
 
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
-        return database.getBlocksWithType(LIKE_BLOCK).sortedWith(compareBy{(it.transaction["timestamp"] as String).toLong()}).filter {
+        return database.getBlocksWithType(LIKE_BLOCK).sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()}).filter {
             it.transaction["author"] == author
         }
     }
@@ -93,7 +93,7 @@ class DetoksCommunity (settings: TrustChainSettings,
     }
 
     fun listOfLikedVideosAndTorrents(person: String): List<Pair<String,String>> {
-        var iterator = database.getBlocksWithType(LIKE_BLOCK).sortedWith(compareBy{(it.transaction["timestamp"] as String).toLong()}).filter {
+        var iterator = database.getBlocksWithType(LIKE_BLOCK).sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()}).filter {
             it.transaction["liker"] == person
         }.listIterator()
         var likedVideos = ArrayList<Pair<String,String>>()
