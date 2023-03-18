@@ -3,10 +3,11 @@ package nl.tudelft.trustchain.detoks
 import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Community
-import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
+import nl.tudelft.ipv8.messaging.Serializable
+
 
 
 class DeToksCommunity(private val context: Context) : Community() {
@@ -17,7 +18,6 @@ class DeToksCommunity(private val context: Context) : Community() {
     init {
         messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
-
     }
 
     companion object {
@@ -56,17 +56,14 @@ class DeToksCommunity(private val context: Context) : Community() {
 
     }
 
-    fun gossipWith(peer: Peer) {
+    fun gossipWith(peer: Peer, message: Serializable) {
         Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
         Log.d("DeToksCommunity", this.getPeers().toString())
         Log.d("DeToksCommunity", this.myPeer.toString())
-        Log.d("DetoksCommunity", "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
-        Log.d("DetoksCommunity", "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
-        val listOfTorrents = TorrentManager.getInstance(context).getListOfTorrents()
-        if(listOfTorrents.isEmpty()) return
-        val magnet = listOfTorrents.random().makeMagnetUri()
+        Log.d("DeToksCommunity", "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
+        Log.d("DeToksCommunity", "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
 
-        val packet = serializePacket(MESSAGE_TORRENT_ID, TorrentMessage(magnet))
+        val packet = serializePacket(MESSAGE_TORRENT_ID, message)
 
         // Send a token only to a new peer
         if (!visitedPeers.contains(peer)) {
@@ -82,8 +79,8 @@ class DeToksCommunity(private val context: Context) : Community() {
         val payload = packet.getPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
         //Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
-        Log.d("DeToksCommunity", "magnet: ${payload.magnet}")
-        torrentManager.addTorrent(payload.magnet)
+        Log.d("DeToksCommunity", "magnet: ${payload.magnets}")
+        payload.magnets.map { torrentManager.addTorrent(it) }
     }
     private fun onTransactionMessage(packet: Packet) {
         val (_, payload) = packet.getAuthPayload(TransactionMessage.Deserializer)

@@ -13,6 +13,14 @@ class GossiperService : Service() {
     private val binder = LocalBinder()
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    /**
+     * Add all gossiper services in the list to have them started by this service.
+     */
+    private val gossiperList: List<Gossiper> = listOf(
+        TorrentGossiper(4000L, 4, this)
+    )
+
+
     inner class LocalBinder : Binder() {
         fun getService(): GossiperService = this@GossiperService
     }
@@ -27,9 +35,7 @@ class GossiperService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        scope.launch {
-            gossipTorrents()
-        }
+        gossiperList.forEach { it.startGossip(scope) }
     }
 
     override fun onDestroy() {
@@ -37,23 +43,5 @@ class GossiperService : Service() {
         super.onDestroy()
 
         exitProcess(0)
-    }
-
-    private suspend fun gossipTorrents() {
-        while (scope.isActive) {
-            val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-
-            val randomPeer = pickRandomPeer(deToksCommunity)
-            if(randomPeer != null)
-                deToksCommunity.gossipWith(randomPeer)
-
-            delay(4000)
-        }
-    }
-
-    private fun pickRandomPeer(deToksCommunity: DeToksCommunity): Peer? {
-        val peers = deToksCommunity.getPeers()
-        if (peers.isEmpty()) return null
-        return peers.random()
     }
 }
