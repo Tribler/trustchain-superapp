@@ -117,14 +117,14 @@ class VideosAdapter(
 
         private fun checkTokenBalance() {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
-            val allBlocks = upvoteCommunity.database.getAllBlocks()
+            val allBlocks = upvoteCommunity.database.getBlocksWithType(UpvoteTrustchainConstants.GIVE_HEART_TOKEN)
             var sent = 0;
             var received = 0;
             for (block: TrustChainBlock in allBlocks) {
-                if (block.isProposal) {
+                if (block.isAgreement && block.linkPublicKey.toHex().equals(IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex())) {
                     received++
                 }
-                else if (block.isAgreement) {
+                else if (block.isAgreement && block.publicKey.toHex().equals(IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex())) {
                     sent++
                 }
                 else {
