@@ -16,7 +16,6 @@ import org.json.JSONObject
 class SendMoneyFragment  : OfflineMoneyBaseFragment(R.layout.send_money_fragment)  {
     private val binding by viewBinding(SendMoneyFragmentBinding::bind)
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

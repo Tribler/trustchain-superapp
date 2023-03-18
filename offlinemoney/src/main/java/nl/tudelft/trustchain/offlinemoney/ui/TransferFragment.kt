@@ -1,15 +1,15 @@
 package nl.tudelft.trustchain.offlinemoney.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.findNavController
-import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.contacts.ContactStore
 import android.widget.Toast
-import androidx.navigation.fragment.findNavController
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.hexToBytes
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
@@ -31,6 +31,14 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        lifecycleScope.launch {
+            val bitmap = withContext(Dispatchers.Default) {
+                val json = JSONObject().put("public_key", PUBLIC_KEY)
+                qrCodeUtils.createQR(json.toString())
+            }
+            binding.qrPublicKey.setImageBitmap(bitmap)
+        }
+
         binding.btnGet.setOnClickListener {
             qrCodeUtils.startQRScanner(this)
         }
@@ -43,7 +51,7 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
                 val myPeer = "kjalsdjfoiawonsad"
 
                 val connectionData = JSONObject()
-                connectionData.put("public_key", myPeer)
+                connectionData.put("public_key", PUBLIC_KEY)
                 connectionData.put("amount", amount)
                 connectionData.put("name", myPeer)
 
@@ -70,6 +78,7 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         return regex.replace(amount, "").toLong()
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
@@ -84,6 +93,10 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
             }
         } ?: Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
         return
+    }
+
+    companion object {
+        const val PUBLIC_KEY = "kjalsdjfoiawonsad"
     }
 }
 
