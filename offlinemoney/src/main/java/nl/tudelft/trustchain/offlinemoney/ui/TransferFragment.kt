@@ -44,15 +44,15 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         }
 
         binding.btnSend.setOnClickListener{
-            val amount = binding.edtAmount.text.toString().toDouble()
-            println(amount)
+//            val amount = binding.edtAmount.text.toString().toDouble()
+//            println(amount)
 
-            if (amount > 0) {
+//            if (amount > 0) {
                 val myPeer = "kjalsdjfoiawonsad"
 
                 val connectionData = JSONObject()
                 connectionData.put("public_key", PUBLIC_KEY)
-                connectionData.put("amount", amount)
+//                connectionData.put("amount", amount)
                 connectionData.put("name", myPeer)
 
 
@@ -64,18 +64,10 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
                     R.id.action_transferFragment_to_sendMoneyFragment,
                     args
                 )
-            }
+//            }
 
         }
 
-    }
-
-    fun getAmount(amount: String): Long {
-        val regex = """[^\d]""".toRegex()
-        if (amount.isEmpty()) {
-            return 0L
-        }
-        return regex.replace(amount, "").toLong()
     }
 
     @SuppressLint("SetTextI18n")

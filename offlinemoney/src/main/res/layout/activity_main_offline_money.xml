@@ -74,17 +74,6 @@
                 android:text="Get or transfer token:"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <EditText
-                android:id="@+id/edtAmount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:hint="0.00"
-                android:inputType="numberDecimal"
-                android:textSize="32dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtIntro" />
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGet"
                 style="@style/Button"
@@ -104,6 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:text="Send"
+                app:icon="@drawable/ic_baseline_photo_camera_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnGet" />
