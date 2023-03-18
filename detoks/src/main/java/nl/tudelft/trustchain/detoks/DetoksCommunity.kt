@@ -58,7 +58,8 @@ class DetoksCommunity (settings: TrustChainSettings,
         // TODO: fix this
 //        val peer = (0 until getPeers().size).random()
 //        val peerKey = getPeers()[peer].key.keyToBin()
-        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator)
+        val timestamp = System.currentTimeMillis().toString()
+        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator,timestamp)
         createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
         // createProposalBlock(LIKE_BLOCK, like.toMap(), peerKey)
         Log.d("DeToks", "$like")
@@ -71,7 +72,7 @@ class DetoksCommunity (settings: TrustChainSettings,
     }
 
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
-        return database.getBlocksWithType(LIKE_BLOCK).filter {
+        return database.getBlocksWithType(LIKE_BLOCK).sortedWith(compareBy{(it.transaction["timestamp"] as String).toLong()}).filter {
             it.transaction["author"] == author
         }
     }
@@ -84,15 +85,15 @@ class DetoksCommunity (settings: TrustChainSettings,
         // Create Key data class so we can group by two fields (torrent and video)
         data class Key(val video: String, val torrent: String)
         fun TrustChainBlock.toKey() = Key(transaction["video"] as String, transaction["torrent"] as String)
-        val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
-        // TODO: sort based on posted timestamp
+        var likes = getBlocksByAuthor(author).groupBy { it.toKey() }
+        // no need to sort here as getblocksbyauthor already sorts
         return likes.entries.map {
             Pair(it.key.video, it.value.size)
         }
     }
 
     fun listOfLikedVideosAndTorrents(person: String): List<Pair<String,String>> {
-        var iterator = database.getBlocksWithType(LIKE_BLOCK).filter {
+        var iterator = database.getBlocksWithType(LIKE_BLOCK).sortedWith(compareBy{(it.transaction["timestamp"] as String).toLong()}).filter {
             it.transaction["liker"] == person
         }.listIterator()
         var likedVideos = ArrayList<Pair<String,String>>()
