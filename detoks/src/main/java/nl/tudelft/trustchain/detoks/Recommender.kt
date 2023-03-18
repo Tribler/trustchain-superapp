@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import android.util.Log
-import kotlin.random.Random
+import nl.tudelft.trustchain.detoks.TorrentManager.*
 
 /**
  * Basic structure for a profile entry
@@ -17,23 +17,21 @@ class ProfileEntry(
     }
 }
 
-class Profile(
-    val magnets: HashMap<String, ProfileEntry> = HashMap()
-) {
-    fun updateEntryWatchTime(torrent: TorrentManager.TorrentHandler, time: Long) {
+class Profile(val magnets: HashMap<TorrentHandler, ProfileEntry> = HashMap()) {
+    fun updateEntryWatchTime(torrent: TorrentHandler, time: Long) {
+        if(!magnets.contains(torrent)) magnets[torrent] = ProfileEntry()
+        magnets[torrent]!!.watchTime += time
         val name = torrent.torrentName + "[" + torrent.fileName + "]"
-        if(!magnets.contains(name)) magnets[name] = ProfileEntry()
-        magnets[name]!!.watchTime += time
-        Log.i("DeToks", "Updated watchtime of $name to ${magnets[name]!!.watchTime}")
+        Log.i("DeToks", "Updated watchtime of $name to ${magnets[torrent]!!.watchTime}")
     }
 }
 
 class Recommender {
-    private fun coinTossRecommender(magnets: HashMap<String, ProfileEntry>): Map<String, ProfileEntry> {
+    private fun coinTossRecommender(magnets: HashMap<TorrentHandler, ProfileEntry>) : Map<TorrentHandler, ProfileEntry> {
         return magnets.map { it.key to it.value }.shuffled().toMap()
     }
 
-    private fun watchTimeRecommender(magnets: HashMap<String, ProfileEntry>): Map<String, ProfileEntry> {
+    private fun watchTimeRecommender(magnets: HashMap<TorrentHandler, ProfileEntry>) : Map<TorrentHandler, ProfileEntry> {
         return magnets.toList().sortedBy { (_, entry) -> entry }.toMap()
     }
 }

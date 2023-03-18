@@ -168,16 +168,15 @@ class TorrentManager private constructor (
                     for (it in 0 until torrentInfo.numFiles()) {
                         val fileName = torrentInfo.files().fileName(it)
                         if (fileName.endsWith(".mp4")) {
-                            torrentFiles.add(
-                                TorrentHandler(
-                                    cacheDir,
-                                    handle,
-                                    torrentInfo.name(),
-                                    fileName,
-                                    it
-                                )
+                            val torrent = TorrentHandler(
+                                cacheDir,
+                                handle,
+                                torrentInfo.name(),
+                                fileName,
+                                it
                             )
-                            profile.magnets[torrentInfo.name() + "[" + fileName + "]"] = ProfileEntry()
+                            torrentFiles.add(torrent)
+                            profile.magnets[torrent] = ProfileEntry()
                         }
                     }
                 }
@@ -262,6 +261,14 @@ class TorrentManager private constructor (
 
     fun getListOfTorrents(): List<TorrentHandle> {
         return torrentFiles.map {it.handle}.distinct()
+    }
+
+    fun getWatchedTorrents(): List<TorrentHandler> {
+        return (profile.magnets.keys).toList()
+    }
+
+    fun getUnwatchedTorrents(): List<TorrentHandler> {
+        return (torrentFiles subtract profile.magnets.keys).toList()
     }
 
     class TorrentHandler(
