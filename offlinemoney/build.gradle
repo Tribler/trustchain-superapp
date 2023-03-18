@@ -39,7 +39,8 @@ android {
 }
 
 dependencies {
-    implementation project(path: ':common')
+    implementation project(':common')
+    implementation project(':app')
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'

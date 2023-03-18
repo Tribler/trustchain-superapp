@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".MainActivityOfflineMoney">
+    android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/balanceLayout"
@@ -16,26 +15,13 @@
         tools:layout_editor_absoluteX="1dp">
 
         <TextView
-            android:id="@+id/txtOwnPublicKey"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:lines="1"
-            android:typeface="monospace"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"
-            tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
-
-        <TextView
             android:id="@+id/txtOwnName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Your balance"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/txtOwnPublicKey"
+            app:layout_constraintTop_toTopOf="parent"
             android:textStyle="bold" />
 
         <TextView
@@ -68,55 +54,54 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/txtIntro"
+                android:id="@+id/txtTransfer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Get or transfer token:"
+                android:text="Transfer amount:"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnGet"
-                style="@style/Button"
-                android:layout_width="match_parent"
+            <EditText
+                android:id="@+id/edtAmount"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="Get"
-                app:icon="@drawable/ic_baseline_photo_camera_24"
+                android:hint="0.00"
+                android:inputType="numberDecimal"
+                android:textSize="32dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtIntro" />
+                app:layout_constraintTop_toBottomOf="@id/txtTransfer" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_margin="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/edtAmount"
+                >
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSend"
                 style="@style/Button"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:text="Send"
-                app:icon="@drawable/ic_baseline_photo_camera_24"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnGet" />
+                android:layout_gravity="center"/>
 
-            <TextView
-                android:id="@+id/txtPublicKey"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Your public key:"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnSend" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCancel"
+                    style="@style/Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="bottom"
+                    android:layout_margin="16dp"
+                    android:text="Cancel" />
 
-            <ImageView
-                android:id="@+id/qrPublicKey"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintDimensionRatio="H,1:1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtPublicKey" />
-
+            </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
 </LinearLayout>
+

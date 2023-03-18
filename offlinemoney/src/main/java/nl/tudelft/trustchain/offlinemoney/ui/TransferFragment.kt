@@ -14,6 +14,10 @@ import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.databinding.ActivityMainOfflineMoneyBinding
+import nl.tudelft.trustchain.offlinemoney.payloads.RequestPayload
+import nl.tudelft.trustchain.common.eurotoken.GatewayStore
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import nl.tudelft.trustchain.offlinemoney.payloads.Promise
 import org.json.JSONObject
 import org.json.JSONException
 
@@ -31,9 +35,13 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val pbk = TransactionRepository(getIpv8().getOverlay()!!,
+            GatewayStore.getInstance(requireContext())).trustChainCommunity.myPeer.publicKey
+
         lifecycleScope.launch {
+            val json = JSONObject().put("type", "request")
+            json.put("payload", RequestPayload(pbk).toJson())
             val bitmap = withContext(Dispatchers.Default) {
-                val json = JSONObject().put("public_key", PUBLIC_KEY)
                 qrCodeUtils.createQR(json.toString())
             }
             binding.qrPublicKey.setImageBitmap(bitmap)
@@ -44,28 +52,7 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         }
 
         binding.btnSend.setOnClickListener{
-//            val amount = binding.edtAmount.text.toString().toDouble()
-//            println(amount)
-
-//            if (amount > 0) {
-                val myPeer = "kjalsdjfoiawonsad"
-
-                val connectionData = JSONObject()
-                connectionData.put("public_key", PUBLIC_KEY)
-//                connectionData.put("amount", amount)
-                connectionData.put("name", myPeer)
-
-
-                val args = Bundle()
-
-                args.putString(SendMoneyFragment.ARG_DATA, connectionData.toString())
-
-                findNavController().navigate(
-                    R.id.action_transferFragment_to_sendMoneyFragment,
-                    args
-                )
-//            }
-
+            qrCodeUtils.startQRScanner(this)
         }
 
     }
@@ -74,21 +61,27 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
-                val amount = JSONObject(it).optDouble("amount", 0.0)
+                val type = JSONObject(it).optString("type")
+                if (type == "transfer") {
+                    val promise = Promise.fromJson(JSONObject(JSONObject(it).getString("payload")))!!
+                    // TO DO to store promise
+                    val amount = promise.amount
+                    val past = binding.txtBalance.text.toString().toDouble()
 
-                val past = binding.txtBalance.text.toString().toDouble()
-
-                binding.txtBalance.text = (past + amount).toString()
-
+                    binding.txtBalance.text = (past + amount).toString()
+                } else {
+                    val args = Bundle()
+                    args.putString(SendAmountFragment.ARG_RECEIVER, JSONObject(it).getString("payload"))
+                    findNavController().navigate(
+                        R.id.action_transferFragment_to_sendAmountFragment,
+                        args
+                    )
+                }
             } catch (e: JSONException) {
                 Toast.makeText(requireContext(), "Scan failed, try again", Toast.LENGTH_LONG).show()
             }
         } ?: Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
         return
-    }
-
-    companion object {
-        const val PUBLIC_KEY = "kjalsdjfoiawonsad"
     }
 }
 

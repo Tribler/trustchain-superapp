@@ -14,7 +14,7 @@ class RequestPayload(
     private val pbk: PublicKey,
 ) {
     fun toJson() :JSONObject {
-        var ret = JSONObject()
+        val ret = JSONObject()
 
         ret.put(field_pbk, pbk.keyToBin().toHex())
 
