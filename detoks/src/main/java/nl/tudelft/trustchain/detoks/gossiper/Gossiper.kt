@@ -1,7 +1,8 @@
-package nl.tudelft.trustchain.detoks
+package nl.tudelft.trustchain.detoks.gossiper
 
 import kotlinx.coroutines.CoroutineScope
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.trustchain.detoks.DeToksCommunity
 
 abstract class Gossiper() {
 

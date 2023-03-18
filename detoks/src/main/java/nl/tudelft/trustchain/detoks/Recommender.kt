@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import android.util.Log
+import nl.tudelft.ipv8.android.IPv8Android
 import kotlin.random.Random
 
 /**
@@ -20,11 +21,13 @@ class ProfileEntry(
 class Profile(
     val magnets: HashMap<String, ProfileEntry> = HashMap()
 ) {
-    fun updateEntryWatchTime(torrent: TorrentManager.TorrentHandler, time: Long) {
-        val name = torrent.torrentName + "[" + torrent.fileName + "]"
+    fun updateEntryWatchTime(name: String, time: Long, myUpdate: Boolean) {
         if(!magnets.contains(name)) magnets[name] = ProfileEntry()
         magnets[name]!!.watchTime += time
-        Log.i("DeToks", "Updated watchtime of $name to ${magnets[name]!!.watchTime}")
+        val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+
+        if(myUpdate) deToksCommunity.watchTimeQueue.add(Pair(name, time))
+        Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $name to ${magnets[name]!!.watchTime}")
     }
 }
 

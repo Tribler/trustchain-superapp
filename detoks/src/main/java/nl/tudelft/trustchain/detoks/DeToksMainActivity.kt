@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import nl.tudelft.trustchain.common.BaseActivity
+import nl.tudelft.trustchain.detoks.gossiper.GossiperService
 
 class DeToksActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_detoks

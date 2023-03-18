@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.detoks
+package nl.tudelft.trustchain.detoks.gossiper.messages
 
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Serializable
@@ -26,6 +26,4 @@ class TorrentMessage(val magnets: List<String>) : Serializable {
             return Pair(TorrentMessage(magnets), jsonEnd + offset)
         }
     }
-
-
 }

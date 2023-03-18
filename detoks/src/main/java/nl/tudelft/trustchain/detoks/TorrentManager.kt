@@ -29,7 +29,7 @@ class TorrentManager private constructor (
     private val logger = KotlinLogging.logger {}
     private val torrentFiles = mutableListOf<TorrentHandler>()
 
-    private val profile = Profile(HashMap())
+    val profile = Profile(HashMap())
 
     private var lastTimeStamp: Long
     private var currentIndex = 0
@@ -117,7 +117,11 @@ class TorrentManager private constructor (
             //        their screen or switches to another app for a while? Maybe this could be
             //        changed to a place in the video adapter as well, if we can detect maybe when
             //        a video is done playing and starts again, then update the duration if possible
-            profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
+            val torrent = torrentFiles.gett(currentIndex)
+            profile.updateEntryWatchTime(
+                torrent.torrentName + "[" + torrent.fileName + "]",
+                updateTime(),
+            true)
             currentIndex = newIndex
             return
         }
@@ -130,7 +134,11 @@ class TorrentManager private constructor (
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
 
         }
-        profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
+        val torrent = torrentFiles.gett(currentIndex)
+        profile.updateEntryWatchTime(
+            torrent.torrentName + "[" + torrent.fileName + "]",
+            updateTime(),
+        true)
         currentIndex = newIndex
     }
 

@@ -7,23 +7,28 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
-
+import nl.tudelft.trustchain.detoks.gossiper.messages.TorrentMessage
+import nl.tudelft.trustchain.detoks.gossiper.messages.WatchTimeMessage
 
 
 class DeToksCommunity(private val context: Context) : Community() {
 
     private val walletManager = WalletManager(context)
     private val visitedPeers  = mutableListOf<Peer>()
+    val watchTimeQueue = mutableListOf<Pair<String, Long>>()
+
 
     init {
-        messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
+        messageHandlers[MESSAGE_TORRENT_ID] = ::onTorrentGossip
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
+        messageHandlers[MESSAGE_WATCH_TIME_ID] = :: onWatchTimeGossip
     }
 
     companion object {
+        const val LOGGING_TAG = "DeToksCommunity"
         const val MESSAGE_TORRENT_ID = 1
         const val MESSAGE_TRANSACTION_ID = 2
-
+        const val MESSAGE_WATCH_TIME_ID = 3
     }
 
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
@@ -32,10 +37,10 @@ class DeToksCommunity(private val context: Context) : Community() {
     fun sendTokens(amount: Int, recipientMid: String) {
         val senderWallet = walletManager.getOrCreateWallet(myPeer.mid)
 
-        Log.d("DetoksCommunity", "my wallet ${senderWallet.balance}")
+        Log.d(LOGGING_TAG, "my wallet ${senderWallet.balance}")
 
         if (senderWallet.balance >= amount) {
-            Log.d("DetoksCommunity", "Sending $amount money to $recipientMid")
+            Log.d(LOGGING_TAG, "Sending $amount money to $recipientMid")
             senderWallet.balance -= amount
             walletManager.setWalletBalance(myPeer.mid, senderWallet.balance)
 
@@ -51,19 +56,19 @@ class DeToksCommunity(private val context: Context) : Community() {
                 send(peer.address, packet)
             }
         } else {
-            Log.d("DeToksCommunity", "Insufficient funds!")
+            Log.d(LOGGING_TAG, "Insufficient funds!")
         }
 
     }
 
-    fun gossipWith(peer: Peer, message: Serializable) {
-        Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
-        Log.d("DeToksCommunity", this.getPeers().toString())
-        Log.d("DeToksCommunity", this.myPeer.toString())
-        Log.d("DeToksCommunity", "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
-        Log.d("DeToksCommunity", "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
+    fun gossipWith(peer: Peer, message: Serializable, id: Int) {
+        Log.d(LOGGING_TAG, "Gossiping with ${peer.mid}, address: ${peer.address}, msg id: $id")
+        Log.d(LOGGING_TAG, this.getPeers().toString())
+        Log.d(LOGGING_TAG, this.myPeer.toString())
+        Log.d(LOGGING_TAG, "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
+        Log.d(LOGGING_TAG, "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
 
-        val packet = serializePacket(MESSAGE_TORRENT_ID, message)
+        val packet = serializePacket(id, message)
 
         // Send a token only to a new peer
         if (!visitedPeers.contains(peer)) {
@@ -74,14 +79,25 @@ class DeToksCommunity(private val context: Context) : Community() {
         send(peer.address, packet)
     }
 
-    private fun onGossip(packet: Packet) {
+    private fun onTorrentGossip(packet: Packet) {
 //        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val payload = packet.getPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
         //Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
-        Log.d("DeToksCommunity", "magnet: ${payload.magnets}")
-        payload.magnets.map { torrentManager.addTorrent(it) }
+        Log.d(LOGGING_TAG, "magnet: ${payload.magnets}")
+        payload.magnets.forEach { torrentManager.addTorrent(it) }
     }
+
+    private fun onWatchTimeGossip(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
+        val torrentManager = TorrentManager.getInstance(context)
+        Log.d(LOGGING_TAG, "Received watch time entry from ${peer.mid}, payload: ${payload.entries}")
+
+        payload.entries.forEach {
+            torrentManager.profile.updateEntryWatchTime(it.first, it.second, false)
+        }
+    }
+
     private fun onTransactionMessage(packet: Packet) {
         val (_, payload) = packet.getAuthPayload(TransactionMessage.Deserializer)
 
@@ -95,9 +111,9 @@ class DeToksCommunity(private val context: Context) : Community() {
             recipientWallet.balance += payload.amount
             walletManager.setWalletBalance(payload.recipientMID, recipientWallet.balance)
 
-            Log.d("DeToksCommunity", "Received ${payload.amount} tokens from ${payload.senderMID}")
+            Log.d(LOGGING_TAG, "Received ${payload.amount} tokens from ${payload.senderMID}")
         } else {
-            Log.d("DeToksCommunity", "Insufficient funds from ${payload.senderMID}!")
+            Log.d(LOGGING_TAG, "Insufficient funds from ${payload.senderMID}!")
         }
     }
 
