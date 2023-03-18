@@ -14,6 +14,7 @@ private val logger = KotlinLogging.logger {}
 
 object UpvoteTrustchainConstants {
     const val GIVE_HEART_TOKEN = "give_heart_token_block"
+    const val BALANCE_CHECKPOINT = "balance_checkpoint"
 }
 class UpvoteCommunity(
     context: Context,
