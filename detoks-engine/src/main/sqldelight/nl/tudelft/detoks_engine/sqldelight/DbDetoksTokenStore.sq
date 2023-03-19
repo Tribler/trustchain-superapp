@@ -1,0 +1,16 @@
+createTokenTable:
+CREATE TABLE IF NOT EXISTS tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token TEXT NOT NULL
+);
+
+storeToken:
+INSERT INTO tokens (id, token)
+VALUES (?, ?);
+
+getAllTokens:
+SELECT * FROM tokens;
+
+removeToken:
+DELETE FROM tokens
+WHERE token=?;

@@ -20,8 +20,12 @@
         <Button
             android:text="Button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/button2" android:onClick="doStuff"
+            android:layout_height="wrap_content" android:id="@+id/button2"
         />
+        <Button
+            android:text="Send tokens"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:id="@+id/opentk"/>
         <TextView
             android:text="No messages received yet"
             android:layout_width="match_parent"
