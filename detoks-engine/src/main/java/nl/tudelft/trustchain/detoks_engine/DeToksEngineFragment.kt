@@ -87,6 +87,7 @@ class DeToksEngineFragment : BaseFragment(R.layout.fragment_detoks2) {
         val textView = view.findViewById<TextView>(R.id.textView)
         transactionCommunity.setHandler {
                 msg: String ->
+            logger.debug("Detoks_engine", "handler in fragment")
             textView.text = msg
             tokenStore.storeToken(msg)
         }
