@@ -1,18 +1,13 @@
 package nl.tudelft.trustchain.detoks
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockListener
-import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
-import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -23,21 +18,28 @@ class TestFragment : BaseFragment(R.layout.fragment_test) {
     private val binding by viewBinding(FragmentTestBinding::bind)
 
     private lateinit var ipv8: IPv8
-    private lateinit var community: OurCommunity
+    private lateinit var community: DeToksCommunity
     private lateinit var trustchainCommunity: TrustChainCommunity
 
     private val BLOCK_TYPE = "our_test_block"
 
-    private var index = 0;
+    private var index = 0
+
+    // the peer to send to
+    private lateinit var targetPeer: Peer
 
     private fun debugLog(txt: String) {
-        val textView = binding.debugTextView;
+        val textView = binding.debugTextView
         textView.text = textView.text.toString() + "${txt}\n"
     }
 
     private fun createProposal(recipient: Peer) {
         val transaction = mapOf("proposal" to index)
-        debugLog("Proposing block: ${transaction["proposal"]} to ${recipient.key.keyToBin().toHex().take(10)}...")
+        debugLog(
+            "Proposing block: ${transaction["proposal"]} to ${
+                recipient.key.keyToBin().toHex().take(10)
+            }..."
+        )
         trustchainCommunity.createProposalBlock(
             BLOCK_TYPE,
             transaction,
@@ -48,75 +50,95 @@ class TestFragment : BaseFragment(R.layout.fragment_test) {
 
     private fun createAgreement(recipient: Peer, block: TrustChainBlock) {
         val transaction = mapOf("agreement" to block.transaction["proposal"])
-        debugLog("Agreeing block: ${transaction["agreement"]} to ${recipient.key.keyToBin().toHex().take(10)}...")
+        debugLog(
+            "Agreeing block: ${transaction["agreement"]} to ${
+                recipient.key.keyToBin().toHex().take(10)
+            }..."
+        )
         trustchainCommunity.createAgreementBlock(
             block,
             transaction,
         )
     }
+
+    private fun setTargetPeer(tpeer: Peer) {
+        this.targetPeer = tpeer
+        binding.targetPeerTextView.text = "target peer:" + tpeer.publicKey.toString()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
+        // get references to community etc
         community = IPv8Android.getInstance().getOverlay()!!
         trustchainCommunity = IPv8Android.getInstance().getOverlay()!!
         ipv8 = IPv8Android.getInstance()
 
+
+        // initial target peer is yourself
+        setTargetPeer(community.myPeer)
+
+        // display your PK
+        binding.yourPkTextView.text = "Your PK: ${community.myPeer.publicKey}"
+
+        // button for finding peers
+        binding.findPeersButton.setOnClickListener {
+            val peers = community.getPeers()
+            val peersList = peers.map { it.publicKey.toString() }.joinToString("\n")
+
+            if (peers.isEmpty()) {
+                binding.peersList.text = "no peers found"
+            } else {
+                binding.peersList.text = peersList
+                setTargetPeer(peers[0])
+            }
+
+        }
+
+        // button1 for creating a proposal
+        binding.button1.setOnClickListener {
+            setTargetPeer(targetPeer)
+            createProposal(targetPeer)
+        }
+
         binding.debugClearButton.setOnClickListener {
             binding.debugTextView.text = ""
+            binding.debugTextView.maxLines = Integer.MAX_VALUE
+            binding.debugTextView.maxWidth = Integer.MAX_VALUE
         }
-
-        binding.button1.setOnClickListener {
-            createProposal(ipv8.myPeer)
-        }
-
-        trustchainCommunity.registerBlockSigner(BLOCK_TYPE, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                debugLog("create agreement block")
-                trustchain.createAgreementBlock(block, mapOf("agreement" to block.transaction["proposal"]))
-            }
-        })
-
 
         trustchainCommunity.addListener(BLOCK_TYPE, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
 
-                if  (block.isProposal) {
-                    debugLog("Received proposal block for transaction ${block.transaction["proposal"]}")
-                    val builder = AlertDialog.Builder(requireContext())
-                    builder.setTitle("Proposal Block received!")
-                    builder.setMessage("Do you want to confirm it?")
-                    builder.setPositiveButton("Yes") { _, _ ->
-                        createAgreement(ipv8.myPeer, block)
-                    }
-                    val dialog= builder.create()
-                    dialog.show()
-                }else if (block.isAgreement) {
-                    debugLog("Received agreement block for transaction ${block.transaction["agreement"]}")
-                }
+                debugLog("BLOCK RECEIVED: ${block.publicKey}")
+
+
+//                if (!block.publicKey.contentEquals(ipv8.myPeer.publicKey.keyToBin())) {
+//                    debugLog("BLOCK RECEIVED")
+//                }
+
+//                if  (block.isProposal) {
+//                    debugLog("Received proposal block for transaction ${block.transaction["proposal"]}")
+//                    val builder = AlertDialog.Builder(requireContext())
+//                    builder.setTitle("Proposal Block received!")
+//                    builder.setMessage("Do you want to confirm it?")
+//                    builder.setPositiveButton("Yes") { _, _ ->
+//                        // TODO make sender
+//                        createAgreement(targetPeer, block)
+//                    }
+//                    val dialog= builder.create()
+//                    dialog.show()
+//                }else if (block.isAgreement) {
+//                    debugLog("Received agreement block for transaction ${block.transaction["agreement"]}")
+//                }
             }
         })
 
-//        trustchainCommunity.registerTransactionValidator(BLOCK_TYPE, object : TransactionValidator {
-//            override fun validate(
-//                block: TrustChainBlock,
-//                database: TrustChainStore
-//            ): ValidationResult {
-//
-//                if (block.isProposal) {
-//                    debugLog("received a proposal to validate from ${block.publicKey.toHex().take(10)}...")
-//                    return ValidationResult.Valid
-//                }
-//
-//                return ValidationResult.Invalid(listOf("Unexpected block"));
+//        trustchainCommunity.registerBlockSigner(BLOCK_TYPE, object : BlockSigner {
+//            override fun onSignatureRequest(block: TrustChainBlock) {
+//                debugLog("create agreement block")
+//                trustchain.createAgreementBlock(block, mapOf("agreement" to block.transaction["proposal"]))
 //            }
 //        })
-
-        trustchainCommunity.registerBlockSigner(BLOCK_TYPE, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                debugLog("create agreement block")
-                trustchain.createAgreementBlock(block, mapOf("agreement" to block.transaction["proposal"]))
-            }
-        })
-
 
 
     }
