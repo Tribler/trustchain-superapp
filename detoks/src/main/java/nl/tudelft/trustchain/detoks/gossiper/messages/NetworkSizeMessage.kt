@@ -15,8 +15,11 @@ class NetworkSizeMessage(val entries: List<Pair<String, Double>>) : Serializable
 
             val tempStr = String(buffer, offset,buffer.size - offset)
 
-            //TODO: fix if nothing is sent
-            val entries: List<Pair<String, Double>> = tempStr.split(",").map {
+            val tempList = tempStr.split(",")
+            if(tempList.size == 1 && tempList[0] == "")
+                return Pair(NetworkSizeMessage(listOf()), offset)
+
+            val entries: List<Pair<String, Double>> = tempList.map {
                 val strPair = it.split(":")
                 Pair(strPair[0], strPair[1].toDouble())
             }

@@ -15,11 +15,15 @@ class WatchTimeMessage(val entries: List<Pair<String, Long>>) : Serializable {
 
             val tempStr = String(buffer, offset,buffer.size - offset)
 
-            //TODO: fix if nothing is sent
-            val entries: List<Pair<String, Long>> = tempStr.split(",").map {
+            val tempList = tempStr.split(",")
+            if(tempList.size == 1 && tempList[0] == "")
+                return Pair(WatchTimeMessage(listOf()), offset)
+
+            val entries: List<Pair<String, Long>> = tempList.map {
                 val strPair = it.split(":")
                 Pair(strPair[0], strPair[1].toLong())
             }
+
 
             return Pair(WatchTimeMessage(entries), offset)
         }
