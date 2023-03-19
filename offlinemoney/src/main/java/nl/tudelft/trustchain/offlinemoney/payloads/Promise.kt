@@ -1,15 +1,14 @@
 package nl.tudelft.trustchain.offlinemoney.payloads
 
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.ipv8.util.sha256
+import nl.tudelft.ipv8.util.toASCII
 
 import android.util.Log
-
-import nl.tudelft.ipv8.keyvault.CryptoProvider
-import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 
 import java.util.Date
 import org.json.JSONObject
@@ -49,9 +48,7 @@ class Promise(
         const val field_timestamp = "TIMESTAMP"
         const val field_signature = "SIGNATURE"
 
-        var defaultCryptoProvider: CryptoProvider = JavaCryptoProvider
-
-//        creates a Promise
+//        create a Promise
         fun createPromise(
             s_pbk: PublicKey,
             req_payload: RequestPayload,
@@ -81,7 +78,7 @@ class Promise(
                 || !json.has(field_amount) || !json.has(field_nonce) || !json.has(field_timestamp)
                 || !json.has(field_signature)
             ) {
-                Log.d("WARN", "In 'Promise::fromJson', json has missing field")
+                Log.w("offline_money", "In 'Promise::fromJson', json has missing field")
                 return null
             }
 
@@ -106,7 +103,7 @@ class Promise(
                     signature
                 )
             } catch (e: Exception) {
-                Log.d("WARN", "Exception in 'Promise::fromJson': $e")
+                Log.w("offline_money", "Exception in 'Promise::fromJson': $e")
                 null
             }
         }
@@ -127,7 +124,7 @@ class Promise(
             transaction.put(field_nonce, nonce)
             transaction.put(field_timestamp, timestamp)
 
-            val transactionHash = sha256(transaction.toString().hexToBytes())
+            val transactionHash = sha256(toASCII(transaction.toString()))
 
             return transactionHash
         }

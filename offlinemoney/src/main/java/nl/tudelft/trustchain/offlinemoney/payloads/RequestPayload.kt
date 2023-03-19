@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.offlinemoney.payloads
 
-import nl.tudelft.ipv8.keyvault.CryptoProvider
-import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -25,12 +24,10 @@ class RequestPayload(
         // public key
         const val field_pbk: String = "PUB_K"
 
-        var defaultCryptoProvider: CryptoProvider = JavaCryptoProvider
-
         fun fromJson(json: JSONObject): RequestPayload? {
 //            first check if all fields are present
             if (!json.has(field_pbk)) {
-                Log.d("WARN", "In 'RequestPayload::fromJson', json has missing field")
+                Log.w("offline_money", "In 'RequestPayload::fromJson', json has missing field")
                 return null
             }
 
@@ -43,7 +40,7 @@ class RequestPayload(
                     pbk
                 )
             } catch (e: Exception) {
-                Log.d("WARN", "Exception in 'RequestPayload::fromJson': $e")
+                Log.w("offline_money", "Exception in 'RequestPayload::fromJson': $e")
                 null
             }
         }
