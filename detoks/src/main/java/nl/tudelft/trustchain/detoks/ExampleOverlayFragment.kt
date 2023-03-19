@@ -4,7 +4,9 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.Navigation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -115,5 +117,12 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
                 }
             }
         })
+        val switchToTestButton = view.findViewById<Button>(R.id.Test_button)
+        switchToTestButton.setOnClickListener { switchEnvirmonments(view) }
     }
+    fun switchEnvirmonments(view: View){
+        val navController = Navigation.findNavController(view)
+        navController.navigate(R.id.action_go_to_testEnvironment)
+    }
+
 }
