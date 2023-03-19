@@ -40,4 +40,11 @@
             app:destination="@id/sendMoneyFragment"
             />
     </fragment>
+
+    <fragment
+        android:id="@+id/transactionsFragment"
+        android:name="nl.tudelft.trustchain.offlinemoney.ui.TransactionsFragment"
+        android:label="Transactions"
+        tools:layout="@layout/transactions_fragment">
+    </fragment>
 </navigation>
