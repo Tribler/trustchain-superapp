@@ -38,7 +38,7 @@ class TorrentGossiper(
 
         if(randomMagnets.isNotEmpty())
             randomPeers.forEach {
-                deToksCommunity.gossipWith(it as Peer, TorrentMessage(randomMagnets), DeToksCommunity.MESSAGE_TORRENT_ID)
+                deToksCommunity.gossipWith(it, TorrentMessage(randomMagnets), DeToksCommunity.MESSAGE_TORRENT_ID)
             }
     }
 }

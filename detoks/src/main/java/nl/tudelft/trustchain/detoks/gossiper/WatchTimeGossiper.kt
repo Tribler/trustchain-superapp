@@ -37,7 +37,7 @@ class WatchTimeGossiper(
         )
 
         randomPeers.forEach {
-            deToksCommunity.gossipWith(it as Peer, WatchTimeMessage(randomProfileEntries), DeToksCommunity.MESSAGE_WATCH_TIME_ID)
+            deToksCommunity.gossipWith(it, WatchTimeMessage(randomProfileEntries), DeToksCommunity.MESSAGE_WATCH_TIME_ID)
         }
     }
 }

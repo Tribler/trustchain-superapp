@@ -46,7 +46,7 @@ class NetworkSizeGossiper(override val delay: Long,
 
         val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
         randomPeers.forEach {
-            awaitingResponse.add(it as Peer)
+            awaitingResponse.add(it)
             deToksCommunity.gossipWith(
                 it,
                 NetworkSizeMessage(leaderEstimates),
