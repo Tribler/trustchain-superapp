@@ -3,24 +3,15 @@ package nl.tudelft.trustchain.detoks
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import mu.KotlinLogging
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
 import java.io.FileOutputStream
 
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var torrentManager: TorrentManager
-    private lateinit var transactionCommunity: TransactionCommunity
     private val logger = KotlinLogging.logger {}
     private var previousVideoAdapterIndex = 0
 
@@ -54,13 +45,8 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        cacheDefaultTorrent()
-        torrentManager = TorrentManager(
-            File("${requireActivity().cacheDir.absolutePath}/media"),
-            File("${requireActivity().cacheDir.absolutePath}/torrent"),
-            DEFAULT_CACHING_AMOUNT
-        )
-        transactionCommunity = IPv8Android.getInstance().getOverlay<TransactionCommunity>()!!
+        cacheDefaultTorrent() //TODO: change to caching from peers
+        torrentManager = TorrentManager.getInstance(requireActivity())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,16 +54,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
         viewPagerVideos.adapter = VideosAdapter(torrentManager)
         viewPagerVideos.currentItem = 0
-
-        val button = view.findViewById<Button>(R.id.button2)
-        button.setOnClickListener {
-            Toast.makeText(activity, "Sending test message", Toast.LENGTH_SHORT).show()
-            broadcast()
-        }
-
-        val textView = view.findViewById<TextView>(R.id.textView)
-        transactionCommunity.setHandler { msg: String -> textView.text = msg }
-
         onPageChangeCallback()
     }
 
@@ -102,13 +78,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
                 }
             }
         })
-    }
-
-
-    private fun broadcast() {
-        lifecycleScope.launch {
-            transactionCommunity.broadcastGreeting()
-        }
     }
 
     companion object {
