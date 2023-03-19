@@ -12,11 +12,15 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.db.SentTokenManager
+import nl.tudelft.trustchain.detoks.helpers.DateFormatter
 import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
+import nl.tudelft.trustchain.detoks.exception.InvalidMintException
+import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -53,7 +57,7 @@ class VideosAdapter(
         var txtTitle: TextView
         var txtDesc: TextView
         var mProgressBar: ProgressBar
-
+        val videoID = 1
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
@@ -102,55 +106,35 @@ class VideosAdapter(
          */
         private fun sendHeartToken() {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
-            val upvoteToken = UpvoteToken(1, "1679006615", "12345678910", 1)
-            val toastMessage = upvoteCommunity?.sendHeartToken(upvoteToken.tokenID.toString(), localToGMT(upvoteToken.date.toLong()).toString(), upvoteToken.publicKeyMinter, upvoteToken.videoID.toString())
+            val myPubKey = upvoteCommunity?.myPeer?.publicKey.toString()
+            //val upvoteToken = UpvoteToken(1, "1679006615", "12345678910", 1)
+            //val toastMessage = upvoteCommunity?.sendHeartToken(upvoteToken.tokenID.toString(), localToGMT(upvoteToken.date.toLong()).toString(), upvoteToken.publicKeyMinter, upvoteToken.videoID.toString())
+            var toastMessage: String?
 
-            val lastUpvoteToken = SentTokenManager(itemView.context).getLastToken()
-
-            if (lastUpvoteToken.tokenID > -1 && lastUpvoteToken.tokenID < 10) {
-                //Since we have a string as date in our database (for now), we first need to
-                //parse it into a date, which then can give us the time in millis.
-                //We then can turn the time in millis into the GMT timezone and check if it's
-                //before or after the current time.
-                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                val upvoteTokenDate = formatter.parse(lastUpvoteToken.date)
-                val dateInMillis = upvoteTokenDate?.time
-                if (dateInMillis != null) {
-                    if (localToGMT(dateInMillis) <= Date().time) {
-                        Toast.makeText(
-                            itemView.context,
-                            toastMessage,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            } else {
-                Toast.makeText(
-                    itemView.context,
-                    "Minted tokenID is INVALID!",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-
-        private fun localToGMT(time: Long): Long {
             try {
-                val dateFormat =
-                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                val date = Date(time)
-                dateFormat.timeZone = TimeZone.getTimeZone("GMT")
-                val strDate = dateFormat.format(date)
-                //            System.out.println("Local Millis * " + date.getTime() + "  ---UTC time  " + strDate);//correct
-                val dateFormatLocal =
-                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                val utcDate = dateFormatLocal.parse(strDate)
-                //            System.out.println("UTC Millis * " + utcDate.getTime() + " ------  " + dateFormatLocal.format(utcDate));
+                val nextToken = UpvoteToken.tryMintToken(itemView.context, videoID, myPubKey)
+                val dbSuccess = SentTokenManager(itemView.context).addSentToken(nextToken)
+                val sendSuccess = upvoteCommunity?.sendHeartToken(nextToken)
 
-                return utcDate?.time!!
-            } catch (e: Exception) {
-                e.printStackTrace()
+                toastMessage = if (dbSuccess && sendSuccess == true) {
+                    "Successfully sent the token {id} to the creator of {videoId}"
+                } else {
+                    "Successfully sent the token {id} to the creator of {videoId}"
+                }
+
+            } catch (invalidMintException: InvalidMintException) {
+                toastMessage = invalidMintException.message
+            } catch (peerNotFoundException: PeerNotFoundException) {
+                // TODO Add DB Rollback and potential other network failures
+                toastMessage = peerNotFoundException.message
             }
-            return time
+
+            // Toast the result
+            Toast.makeText(
+                itemView.context,
+                toastMessage,
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
         /**

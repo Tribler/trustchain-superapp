@@ -5,6 +5,9 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import mu.KotlinLogging
+import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
+import nl.tudelft.trustchain.detoks.token.UpvoteToken
+import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
 
 private val logger = KotlinLogging.logger {}
 
@@ -29,7 +32,22 @@ class UpvoteCommunity() : Community(){
 
     private fun onHeartToken(peer: Peer, payload: UpvoteTokenPayload) {
         // do something with the payload
-        logger.debug { "-> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
+        logger.debug { "[UPVOTETOKEN] -> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
+        val upvoteToken = UpvoteToken(
+            payload.token_id.toInt(),
+            payload.date,
+            payload.public_key_minter,
+            payload.video_id.toInt()
+        )
+
+        val isValid = UpvoteTokenValidator.ValidateToken(upvoteToken)
+
+        if (isValid) {
+            logger.debug { "[UPVOTETOKEN] Hurray! Received valid token!" }
+        } else {
+            logger.debug { "[UPVOTETOKEN] Oh no! Received invalid token!" }
+        }
+
     }
 
     /**
@@ -45,8 +63,12 @@ class UpvoteCommunity() : Community(){
     /**
      * Sends a HeartToken to a random Peer
      */
-    fun sendHeartToken(token_id: String, date: String, public_key_miner: String, video_id: String): String {
-        val payload = UpvoteTokenPayload(token_id, date, public_key_miner, video_id)
+    fun sendHeartToken(upvoteToken: UpvoteToken): Boolean {
+        val payload = UpvoteTokenPayload(
+            upvoteToken.tokenID.toString(),
+            upvoteToken.date,
+            upvoteToken.publicKeyMinter,
+            upvoteToken.videoID.toString())
 
         val packet = serializePacket(
             MessageID.HEART_TOKEN,
@@ -56,13 +78,12 @@ class UpvoteCommunity() : Community(){
         val peer = pickRandomPeer()
 
         if (peer != null) {
-            val message = "You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}"
+            val message = "[UPVOTETOKEN] You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}"
             logger.debug { message }
             send(peer, packet)
-            return message
+            return true
         }
-
-        return "No peer found"
+        throw PeerNotFoundException("Could not find a peer")
     }
 
     class Factory(

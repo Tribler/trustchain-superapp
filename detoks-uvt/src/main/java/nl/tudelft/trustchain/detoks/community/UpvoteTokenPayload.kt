@@ -1,8 +1,15 @@
 package nl.tudelft.trustchain.detoks.community
 
+import mu.KotlinLogging
 import nl.tudelft.ipv8.messaging.*
+import nl.tudelft.trustchain.detoks.token.UpvoteToken
+import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
+
+private val logger = KotlinLogging.logger {}
 
 class UpvoteTokenPayload constructor(val token_id: String, val date: String, val public_key_minter: String, val video_id: String) : Serializable {
+
+
     override fun serialize(): ByteArray {
         return serializeVarLen(token_id.toByteArray()) + serializeVarLen(date.toByteArray()) + serializeVarLen(public_key_minter.toByteArray()) + serializeVarLen(video_id.toByteArray())
     }

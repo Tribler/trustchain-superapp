@@ -4,12 +4,6 @@ import com.squareup.sqldelight.android.AndroidSqliteDriver
 import nl.tudelft.trustchain.detoks.Database
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 
-/**
- * TrustStore stores the trust scores of other wallets.
- * When we receive EuroTokens, the sender also sends its latest
- * 50 public keys of transactions he/she made. For every public key,
- * a trust score is maintained in order to build the web of trust.
- */
 class SentTokenManager (context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "sent_upvote_tokens.db")
     private val database = Database(driver)
@@ -38,14 +32,24 @@ class SentTokenManager (context: Context) {
         return database.dbUpvoteTokenQueries.getAll<UpvoteToken>(sentTokenMapper).executeAsList()
     }
 
-    fun getLastToken() : UpvoteToken {
-        return database.dbUpvoteTokenQueries.getLast<UpvoteToken>(sentTokenMapper).executeAsList().first()
+    fun getLastToken() : UpvoteToken? {
+        return database.dbUpvoteTokenQueries.getLast<UpvoteToken>(sentTokenMapper).executeAsList().firstOrNull()
+    }
+
+    fun addSentToken(upvoteToken: UpvoteToken): Boolean {
+        database.dbUpvoteTokenQueries.addToken(
+            upvoteToken.tokenID.toLong(),
+            upvoteToken.date,
+            upvoteToken.publicKeyMinter,
+            upvoteToken.videoID.toLong()
+        )
+        return true
     }
 
     /**
      * Initialize the database.
      */
-    fun createContactStateTable() {
+    fun createSentUpvoteTokensTable() {
         database.dbUpvoteTokenQueries.createSentUpvoteTokensTable()
     }
 

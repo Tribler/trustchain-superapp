@@ -15,7 +15,7 @@ INSERT INTO sent_upvote_tokens (token_id, date, public_key, video_id)
 VALUES(?, ?, ?, ?);
 
 getLast:
-SELECT * FROM sent_upvote_tokens ORDER BY date DESC LIMIT 1;
+SELECT * FROM sent_upvote_tokens ORDER BY date DESC, token_id DESC LIMIT 1;
 
 -- deleteTable:
 -- DROP TABLE IF EXISTS sent_upvote_tokens;
