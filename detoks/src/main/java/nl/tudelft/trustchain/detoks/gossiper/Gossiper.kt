@@ -1,11 +1,9 @@
 package nl.tudelft.trustchain.detoks.gossiper
 
 import kotlinx.coroutines.CoroutineScope
-import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.random
-import nl.tudelft.trustchain.detoks.DeToksCommunity
 
-abstract class Gossiper() {
+abstract class Gossiper {
 
     /**
      * Interval between gossips.
@@ -34,11 +32,14 @@ abstract class Gossiper() {
     abstract suspend fun gossip()
 
     /**
-     * Returns a random peer from the peers in the community.
+     * Returns a list of n random elements from collection.
+     * If the collection is empty returns an empty list.
+     * If n is larger than the collection size, returns the collection.
      */
-    protected fun pickRandomPeers(deToksCommunity: DeToksCommunity, n : Int): Collection<Peer> {
-        val peers = deToksCommunity.getPeers()
-        val maxPeers = if(peers.size < n) peers.size else n
-        return peers.random(maxPeers)
+    protected fun<T> pickRandomN(collection: List<T>, n: Int): List<T> {
+        if (collection.isEmpty()) return listOf()
+        if (collection.size < n) return collection
+
+        return collection.random(n).toList()
     }
 }

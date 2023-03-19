@@ -17,8 +17,6 @@ class DeToksCommunity(private val context: Context) : Community() {
 
     private val walletManager = WalletManager(context)
     private val visitedPeers  = mutableListOf<Peer>()
-    val watchTimeQueue = mutableListOf<Pair<String, Long>>()
-
 
     init {
         messageHandlers[MESSAGE_TORRENT_ID] = ::onTorrentGossip

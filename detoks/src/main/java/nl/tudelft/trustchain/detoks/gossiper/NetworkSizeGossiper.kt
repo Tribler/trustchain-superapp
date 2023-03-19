@@ -18,8 +18,6 @@ class NetworkSizeGossiper(override val delay: Long,
 
     private var firstCycle = true
 
-    private var networkSizeEstimate = 1
-
     override fun startGossip(coroutineScope: CoroutineScope) {
         coroutineScope.launch {
             while (coroutineScope.isActive) {
@@ -46,9 +44,9 @@ class NetworkSizeGossiper(override val delay: Long,
             listOf(Pair(deToksCommunity.myPeer.mid, 1.0))
         else listOf()
 
-        val randomPeers = pickRandomPeers(deToksCommunity, peers)
+        val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
         randomPeers.forEach {
-            awaitingResponse.add(it)
+            awaitingResponse.add(it as Peer)
             deToksCommunity.gossipWith(
                 it,
                 NetworkSizeMessage(leaderEstimates),
@@ -58,6 +56,8 @@ class NetworkSizeGossiper(override val delay: Long,
     }
 
     companion object {
+        var networkSizeEstimate = 1
+
         private var leaderEstimates = listOf<Pair<String, Double>>()
 
         private val awaitingResponse = mutableListOf<Peer>()

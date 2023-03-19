@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.util.random
 import nl.tudelft.trustchain.detoks.DeToksCommunity
@@ -29,7 +30,7 @@ class TorrentGossiper(
 
     override suspend fun gossip() {
         val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-        val randomPeers = pickRandomPeers(deToksCommunity, peers)
+        val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
 
         val handlers = TorrentManager.getInstance(context).getListOfTorrents()
         val max = if (handlers.size < blocks) handlers.size else blocks
@@ -37,7 +38,7 @@ class TorrentGossiper(
 
         if(randomMagnets.isNotEmpty())
             randomPeers.forEach {
-                deToksCommunity.gossipWith(it, TorrentMessage(randomMagnets), DeToksCommunity.MESSAGE_TORRENT_ID)
+                deToksCommunity.gossipWith(it as Peer, TorrentMessage(randomMagnets), DeToksCommunity.MESSAGE_TORRENT_ID)
             }
     }
 }
