@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.offlinemoney.ui
 
 import android.os.Bundle
+import androidx.lifecycle.lifecycleScope
 import mu.KotlinLogging
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
@@ -26,6 +27,8 @@ open class OfflineMoneyBaseFragment(contentLayoutId: Int = 0) : BaseFragment(con
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
+        lifecycleScope.launchWhenResumed {
+        }
     }
 
     override fun onResume() {

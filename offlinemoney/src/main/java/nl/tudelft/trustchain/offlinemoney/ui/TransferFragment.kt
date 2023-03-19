@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
@@ -35,10 +36,11 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val pbk = TransactionRepository(getIpv8().getOverlay()!!,
-            GatewayStore.getInstance(requireContext())).trustChainCommunity.myPeer.publicKey
+        val pbk = transactionRepository.trustChainCommunity.myPeer.publicKey
 
         lifecycleScope.launch {
+            binding.txtPublicKey.text = pbk.keyToBin().toHex()
+
             val json = JSONObject().put("type", "request")
             json.put("payload", RequestPayload(pbk).toJson())
             val bitmap = withContext(Dispatchers.Default) {

@@ -21,6 +21,7 @@ import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.voting.VotingActivity
 import nl.tudelft.trustchain.detoks.DeToksActivity
+import nl.tudelft.trustchain.offlinemoney.MainActivityOfflineMoney
 
 enum class AppDefinition(
     @DrawableRes val icon: Int,
@@ -34,6 +35,13 @@ enum class AppDefinition(
         "DeToks",
         R.color.black,
         DeToksActivity::class.java,
+        true,
+    ),
+    OFFLINE_MONEY(
+        R.drawable.ic_detox_logo,
+        "offline money",
+        R.color.black,
+        MainActivityOfflineMoney::class.java,
         true,
     ),
     EIGHTEEN_PLUS(

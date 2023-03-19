@@ -2,8 +2,13 @@ package nl.tudelft.trustchain.offlinemoney.ui
 
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -19,6 +24,12 @@ class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragmen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        lifecycleScope.launch {
+            val reqPayload = JSONObject(requireArguments().getString(ARG_RECEIVER)!!)
+
+            binding.txtReceiverInfo.text = "request: $reqPayload"
+        }
+
         binding.btnCancel.setOnClickListener {
             findNavController().navigate(R.id.action_sendAmountFragment_to_transferFragment)
         }
@@ -26,11 +37,9 @@ class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragmen
         binding.btnSend.setOnClickListener{
             val amount = binding.edtAmount.text.toString().toDouble().toLong()
 
-            val pbk = TransactionRepository(getIpv8().getOverlay()!!,
-                GatewayStore.getInstance(requireContext())).trustChainCommunity.myPeer.publicKey
+            val pbk = transactionRepository.trustChainCommunity.myPeer.publicKey
 
-            val pvk = TransactionRepository(getIpv8().getOverlay()!!,
-                GatewayStore.getInstance(requireContext())).trustChainCommunity.myPeer.key as PrivateKey
+            val pvk = transactionRepository.trustChainCommunity.myPeer.key as PrivateKey
 
             val reqPayload = RequestPayload.fromJson(JSONObject(requireArguments().getString(ARG_RECEIVER)!!))!!
             if (amount > 0) {
