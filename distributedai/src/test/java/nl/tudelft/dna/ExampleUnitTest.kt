@@ -1,4 +1,4 @@
-package com.example.dna
+package nl.tudelft.dna
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
