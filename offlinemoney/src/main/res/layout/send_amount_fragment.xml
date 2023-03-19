@@ -18,7 +18,7 @@
             android:id="@+id/txtOwnName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Your balance"
+            android:text="@string/your_balance"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="20.00"
-            android:textSize="60dp"
+            android:textSize="60sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/txtOwnName"  />
@@ -57,7 +57,7 @@
                 android:id="@+id/txtTransfer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Transfer amount:"
+                android:text="@string/transfer_amount"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
@@ -66,7 +66,8 @@
                 android:layout_height="wrap_content"
                 android:hint="0.00"
                 android:inputType="numberDecimal"
-                android:textSize="32dp"
+                android:textSize="32sp"
+                android:importantForAutofill="no"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/txtTransfer" />
@@ -88,7 +89,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:text="Send"
+                android:text="@string/send"
                 android:layout_gravity="center"/>
 
             <com.google.android.material.button.MaterialButton
@@ -98,7 +99,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="bottom"
                 android:layout_margin="16dp"
-                android:text="Cancel" />
+                android:text="@string/cancel" />
 
             </LinearLayout>
 

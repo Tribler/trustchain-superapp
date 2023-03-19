@@ -32,7 +32,7 @@
             android:id="@+id/txtOwnName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Your balance"
+            android:text="@string/your_balance"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/txtOwnPublicKey"
@@ -43,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="20.00"
-            android:textSize="60dp"
+            android:textSize="60sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/txtOwnName"  />
@@ -71,7 +71,7 @@
                 android:id="@+id/txtIntro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Get or transfer token:"
+                android:text="@string/get_or_transfer_token"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.button.MaterialButton
@@ -80,7 +80,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:text="Get"
+                android:text="@string/get"
                 app:icon="@drawable/ic_baseline_photo_camera_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -92,7 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:text="Send"
+                android:text="@string/send"
                 app:icon="@drawable/ic_baseline_photo_camera_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -102,7 +102,7 @@
                 android:id="@+id/txtPublicKey"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Your public key:"
+                android:text="@string/your_public_key"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnSend" />
