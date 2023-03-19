@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import nl.tudelft.ipv8.IPv8
@@ -109,36 +110,31 @@ class TestFragment : BaseFragment(R.layout.fragment_test) {
         trustchainCommunity.addListener(BLOCK_TYPE, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
 
-                debugLog("BLOCK RECEIVED: ${block.publicKey}")
+                if (!block.publicKey.contentEquals(ipv8.myPeer.publicKey.keyToBin())) {
 
-
-//                if (!block.publicKey.contentEquals(ipv8.myPeer.publicKey.keyToBin())) {
-//                    debugLog("BLOCK RECEIVED")
-//                }
-
-//                if  (block.isProposal) {
-//                    debugLog("Received proposal block for transaction ${block.transaction["proposal"]}")
-//                    val builder = AlertDialog.Builder(requireContext())
-//                    builder.setTitle("Proposal Block received!")
-//                    builder.setMessage("Do you want to confirm it?")
-//                    builder.setPositiveButton("Yes") { _, _ ->
-//                        // TODO make sender
-//                        createAgreement(targetPeer, block)
-//                    }
-//                    val dialog= builder.create()
-//                    dialog.show()
-//                }else if (block.isAgreement) {
-//                    debugLog("Received agreement block for transaction ${block.transaction["agreement"]}")
-//                }
+                    if (block.isProposal) {
+                        val builder = AlertDialog.Builder(requireContext())
+                        builder.setTitle("Proposal Block received!")
+                        builder.setMessage("Sender ${block.publicKey.toHex().take(10)}. Do you agree?")
+                        builder.setPositiveButton("Yes") { _, _ ->
+                            // TODO make sender
+                            createAgreement(targetPeer, block)
+                        }
+                        val dialog = builder.create()
+                        dialog.show()
+                    } else if (block.isAgreement) {
+                        val builder = AlertDialog.Builder(requireContext())
+                        builder.setTitle("Agreement Block received!")
+                        builder.setMessage("Sender ${block.publicKey.toHex().take(10)}")
+                        builder.setNeutralButton("Nice") { _, _ ->
+                        }
+                        val dialog = builder.create()
+                        dialog.show()
+                    }
+                }
             }
         })
 
-//        trustchainCommunity.registerBlockSigner(BLOCK_TYPE, object : BlockSigner {
-//            override fun onSignatureRequest(block: TrustChainBlock) {
-//                debugLog("create agreement block")
-//                trustchain.createAgreementBlock(block, mapOf("agreement" to block.transaction["proposal"]))
-//            }
-//        })
 
 
     }
