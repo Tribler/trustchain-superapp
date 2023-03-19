@@ -7,6 +7,8 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
+import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
+import nl.tudelft.trustchain.detoks.gossiper.messages.NetworkSizeMessage
 import nl.tudelft.trustchain.detoks.gossiper.messages.TorrentMessage
 import nl.tudelft.trustchain.detoks.gossiper.messages.WatchTimeMessage
 
@@ -22,6 +24,7 @@ class DeToksCommunity(private val context: Context) : Community() {
         messageHandlers[MESSAGE_TORRENT_ID] = ::onTorrentGossip
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
         messageHandlers[MESSAGE_WATCH_TIME_ID] = :: onWatchTimeGossip
+        messageHandlers[MESSAGE_NETWORK_SIZE_ID] = :: onNetworkSizeGossip
     }
 
     companion object {
@@ -29,6 +32,7 @@ class DeToksCommunity(private val context: Context) : Community() {
         const val MESSAGE_TORRENT_ID = 1
         const val MESSAGE_TRANSACTION_ID = 2
         const val MESSAGE_WATCH_TIME_ID = 3
+        const val MESSAGE_NETWORK_SIZE_ID = 4
     }
 
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
@@ -117,6 +121,13 @@ class DeToksCommunity(private val context: Context) : Community() {
         }
     }
 
+    private fun onNetworkSizeGossip(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(NetworkSizeMessage.Deserializer)
+        Log.d(LOGGING_TAG, "Received network size gossip from ${peer.mid}, payload: ${payload.entries}")
+
+        NetworkSizeGossiper.receivedData(payload, peer)
+    }
+
     class Factory(
         private val context: Context
     ) : Overlay.Factory<DeToksCommunity>(DeToksCommunity::class.java) {
@@ -125,3 +136,4 @@ class DeToksCommunity(private val context: Context) : Community() {
         }
     }
 }
+

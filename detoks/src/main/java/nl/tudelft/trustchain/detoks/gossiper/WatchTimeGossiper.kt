@@ -10,8 +10,9 @@ import nl.tudelft.trustchain.detoks.gossiper.messages.WatchTimeMessage
 
 class WatchTimeGossiper(
     override val delay: Long,
-    override val blocks: Int
-    ) : Gossiper() {
+    override val blocks: Int,
+    override val peers: Int
+) : Gossiper() {
 
     override fun startGossip(coroutineScope: CoroutineScope) {
         coroutineScope.launch {

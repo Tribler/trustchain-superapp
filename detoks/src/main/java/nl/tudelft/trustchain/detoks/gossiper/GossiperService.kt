@@ -15,8 +15,9 @@ class GossiperService : Service() {
      * Add all gossiper services in the list to have them started by this service.
      */
     private val gossiperList: List<Gossiper> = listOf(
-        TorrentGossiper(4000L, 4, this),
-        WatchTimeGossiper(4000L, 4)
+        TorrentGossiper(4000L, 4, 4, this),
+        WatchTimeGossiper(4000L, 4, 4),
+        NetworkSizeGossiper(30000L, 4, 4, 4)
     )
 
 

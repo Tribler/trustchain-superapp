@@ -14,8 +14,9 @@ import nl.tudelft.trustchain.detoks.gossiper.messages.TorrentMessage
 class TorrentGossiper(
     override val delay: Long,
     override val blocks: Int,
+    override val peers: Int,
     val context: Context
-    ) : Gossiper() {
+) : Gossiper() {
 
     override fun startGossip(coroutineScope: CoroutineScope) {
         coroutineScope.launch {
@@ -28,13 +29,15 @@ class TorrentGossiper(
 
     override suspend fun gossip() {
         val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-        val randomPeer = pickRandomPeer(deToksCommunity) ?: return
+        val randomPeers = pickRandomPeers(deToksCommunity, peers)
 
         val handlers = TorrentManager.getInstance(context).getListOfTorrents()
         val max = if (handlers.size < blocks) handlers.size else blocks
         val randomMagnets = handlers.random(max).map { it.makeMagnetUri() }
 
         if(randomMagnets.isNotEmpty())
-            deToksCommunity.gossipWith(randomPeer, TorrentMessage(randomMagnets), DeToksCommunity.MESSAGE_TORRENT_ID)
+            randomPeers.forEach {
+                deToksCommunity.gossipWith(it, TorrentMessage(randomMagnets), DeToksCommunity.MESSAGE_TORRENT_ID)
+            }
     }
 }
