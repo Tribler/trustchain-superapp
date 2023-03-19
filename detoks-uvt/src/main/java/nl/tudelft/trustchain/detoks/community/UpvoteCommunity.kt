@@ -18,19 +18,19 @@ class UpvoteCommunity() : Community(){
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
 
     init {
-        messageHandlers[MessageID.HEART_TOKEN] = ::onHeartTokenPacket
+        messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
     }
 
     object MessageID {
-        const val HEART_TOKEN = 1
+        const val UPVOTE_TOKEN = 1
     }
 
-    private fun onHeartTokenPacket(packet: Packet){
+    private fun onUpvoteTokenPacket(packet: Packet){
         val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
-        onHeartToken(peer, payload)
+        onUpvoteToken(peer, payload)
     }
 
-    private fun onHeartToken(peer: Peer, payload: UpvoteTokenPayload) {
+    private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {
         // do something with the payload
         logger.debug { "[UPVOTETOKEN] -> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
         val upvoteToken = UpvoteToken(
@@ -40,7 +40,7 @@ class UpvoteCommunity() : Community(){
             payload.video_id.toInt()
         )
 
-        val isValid = UpvoteTokenValidator.ValidateToken(upvoteToken)
+        val isValid = UpvoteTokenValidator.validateToken(upvoteToken)
 
         if (isValid) {
             logger.debug { "[UPVOTETOKEN] Hurray! Received valid token!" }
@@ -61,9 +61,9 @@ class UpvoteCommunity() : Community(){
     }
 
     /**
-     * Sends a HeartToken to a random Peer
+     * Sends a UpvoteToken to a random Peer
      */
-    fun sendHeartToken(upvoteToken: UpvoteToken): Boolean {
+    fun sendUpvoteToken(upvoteToken: UpvoteToken): Boolean {
         val payload = UpvoteTokenPayload(
             upvoteToken.tokenID.toString(),
             upvoteToken.date,
@@ -71,14 +71,14 @@ class UpvoteCommunity() : Community(){
             upvoteToken.videoID.toString())
 
         val packet = serializePacket(
-            MessageID.HEART_TOKEN,
+            MessageID.UPVOTE_TOKEN,
             payload
         )
 
         val peer = pickRandomPeer()
 
         if (peer != null) {
-            val message = "[UPVOTETOKEN] You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}"
+            val message = "[UPVOTETOKEN] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
             logger.debug { message }
             send(peer, packet)
             return true

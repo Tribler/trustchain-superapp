@@ -12,17 +12,13 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.db.SentTokenManager
-import nl.tudelft.trustchain.detoks.helpers.DateFormatter
 import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.exception.InvalidMintException
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
-import java.text.SimpleDateFormat
-import java.util.*
 
 class VideosAdapter(
     private val torrentManager: TorrentManager,
@@ -102,19 +98,19 @@ class VideosAdapter(
         }
 
         /**
-         * Sends a HeartToken to a random user and displays the result in a toast message
+         * Sends a UpvoteToken to a random user and displays the result in a toast message
          */
-        private fun sendHeartToken() {
+        private fun sendUpvoteToken() {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val myPubKey = upvoteCommunity?.myPeer?.publicKey.toString()
             //val upvoteToken = UpvoteToken(1, "1679006615", "12345678910", 1)
-            //val toastMessage = upvoteCommunity?.sendHeartToken(upvoteToken.tokenID.toString(), localToGMT(upvoteToken.date.toLong()).toString(), upvoteToken.publicKeyMinter, upvoteToken.videoID.toString())
+            //val toastMessage = upvoteCommunity?.sendUpvoteToken(upvoteToken.tokenID.toString(), localToGMT(upvoteToken.date.toLong()).toString(), upvoteToken.publicKeyMinter, upvoteToken.videoID.toString())
             var toastMessage: String?
 
             try {
                 val nextToken = UpvoteToken.tryMintToken(itemView.context, videoID, myPubKey)
                 val dbSuccess = SentTokenManager(itemView.context).addSentToken(nextToken)
-                val sendSuccess = upvoteCommunity?.sendHeartToken(nextToken)
+                val sendSuccess = upvoteCommunity?.sendUpvoteToken(nextToken)
 
                 toastMessage = if (dbSuccess && sendSuccess == true) {
                     "Successfully sent the token {id} to the creator of {videoId}"
@@ -147,7 +143,7 @@ class VideosAdapter(
             itemView.setOnClickListener(
                 object : DoubleClickListener() {
                     override fun onDoubleClick(view: View?) {
-                        adapter.sendHeartToken()
+                        adapter.sendUpvoteToken()
                     }
                 }
             )

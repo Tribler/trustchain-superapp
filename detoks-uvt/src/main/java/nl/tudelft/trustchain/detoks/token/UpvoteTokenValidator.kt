@@ -6,7 +6,7 @@ import java.util.*
 class UpvoteTokenValidator{
 
     companion object {
-        fun ValidateToken(upvoteToken: UpvoteToken) : Boolean {
+        fun validateToken(upvoteToken: UpvoteToken) : Boolean {
             val tokenDate = DateFormatter.stringToDate(upvoteToken.date)
             val currentDate = Date()
 

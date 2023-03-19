@@ -2,8 +2,6 @@ package nl.tudelft.trustchain.detoks.community
 
 import mu.KotlinLogging
 import nl.tudelft.ipv8.messaging.*
-import nl.tudelft.trustchain.detoks.token.UpvoteToken
-import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
 
 private val logger = KotlinLogging.logger {}
 
