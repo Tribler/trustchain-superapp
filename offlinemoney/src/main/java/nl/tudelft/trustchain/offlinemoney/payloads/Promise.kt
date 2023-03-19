@@ -108,7 +108,7 @@ class Promise(
             }
         }
 
-//        the hash is done only on the transaction info in JSON format for now
+        //        the hash is done only on the transaction info in JSON format for now
         fun getTransactionHash(
             s_pbk: PublicKey,
             req_payload: RequestPayload,
@@ -124,9 +124,7 @@ class Promise(
             transaction.put(field_nonce, nonce)
             transaction.put(field_timestamp, timestamp)
 
-            val transactionHash = sha256(toASCII(transaction.toString()))
-
-            return transactionHash
+            return sha256(toASCII(transaction.toString()))
         }
     }
 }

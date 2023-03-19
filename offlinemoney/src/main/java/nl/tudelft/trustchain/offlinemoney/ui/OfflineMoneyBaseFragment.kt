@@ -39,9 +39,4 @@ open class OfflineMoneyBaseFragment(contentLayoutId: Int = 0) : BaseFragment(con
         super.onPause()
     }
 
-//    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-//        inflater.inflate(R.menu.eurotoken_options, menu)
-//        menu.findItem(R.id.toggleDemoMode).setTitle(getDemoModeMenuItemText())
-//    }
-
 }

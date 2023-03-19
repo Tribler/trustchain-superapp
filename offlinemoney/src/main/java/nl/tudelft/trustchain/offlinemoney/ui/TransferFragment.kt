@@ -16,8 +16,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.databinding.ActivityMainOfflineMoneyBinding
 import nl.tudelft.trustchain.offlinemoney.payloads.RequestPayload
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.offlinemoney.payloads.Promise
 import org.json.JSONObject
 import org.json.JSONException
@@ -27,10 +25,6 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
 
     private val qrCodeUtils by lazy {
         QRCodeUtils(requireContext())
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -59,6 +53,7 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
 
     }
 
+    @Deprecated("Deprecated in Java")
     @SuppressLint("SetTextI18n")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
