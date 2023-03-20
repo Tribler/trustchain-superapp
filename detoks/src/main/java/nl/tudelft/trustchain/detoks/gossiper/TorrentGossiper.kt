@@ -5,12 +5,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.util.random
 import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.TorrentManager
-import nl.tudelft.trustchain.detoks.gossiper.messages.TorrentMessage
 
 class TorrentGossiper(
     override val delay: Long,
@@ -38,7 +36,11 @@ class TorrentGossiper(
 
         if(randomMagnets.isNotEmpty())
             randomPeers.forEach {
-                deToksCommunity.gossipWith(it, TorrentMessage(randomMagnets), DeToksCommunity.MESSAGE_TORRENT_ID)
+                deToksCommunity.gossipWith(
+                    it,
+                    GossipMessage(DeToksCommunity.MESSAGE_TORRENT_ID, randomMagnets),
+                    DeToksCommunity.MESSAGE_TORRENT_ID
+                )
             }
     }
 }

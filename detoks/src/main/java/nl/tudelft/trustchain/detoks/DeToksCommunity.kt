@@ -8,9 +8,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
-import nl.tudelft.trustchain.detoks.gossiper.messages.NetworkSizeMessage
-import nl.tudelft.trustchain.detoks.gossiper.messages.TorrentMessage
-import nl.tudelft.trustchain.detoks.gossiper.messages.WatchTimeMessage
+import nl.tudelft.trustchain.detoks.gossiper.GossipMessage
 
 
 class DeToksCommunity(private val context: Context) : Community() {
@@ -31,6 +29,8 @@ class DeToksCommunity(private val context: Context) : Community() {
         const val MESSAGE_TRANSACTION_ID = 2
         const val MESSAGE_WATCH_TIME_ID = 3
         const val MESSAGE_NETWORK_SIZE_ID = 4
+        const val MESSAGE_BOOT_REQUEST = 5
+        const val MESSAGE_BOOT_RESPONSE = 6
     }
 
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
@@ -83,20 +83,23 @@ class DeToksCommunity(private val context: Context) : Community() {
 
     private fun onTorrentGossip(packet: Packet) {
 //        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
-        val payload = packet.getPayload(TorrentMessage.Deserializer)
+        val payload = packet.getPayload(GossipMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
         //Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
-        Log.d(LOGGING_TAG, "magnet: ${payload.magnets}")
-        payload.magnets.forEach { torrentManager.addTorrent(it) }
+        Log.d(LOGGING_TAG, "magnet: ${payload.data}")
+        payload.data.forEach { torrentManager.addTorrent(it as String) }
     }
 
     private fun onWatchTimeGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
+        val (peer, payload) = packet.getAuthPayload(GossipMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-        Log.d(LOGGING_TAG, "Received watch time entry from ${peer.mid}, payload: ${payload.entries}")
+        Log.d(LOGGING_TAG, "Received watch time entry from ${peer.mid}, payload: ${payload.data}")
 
-        payload.entries.forEach {
-            torrentManager.profile.updateEntryWatchTime(it.first, it.second, false)
+        payload.data.forEach {
+            torrentManager.profile.updateEntryWatchTime(
+                (it as Pair<*, *>).first as String, it.second as Long,
+                false
+            )
         }
     }
 
@@ -120,8 +123,8 @@ class DeToksCommunity(private val context: Context) : Community() {
     }
 
     private fun onNetworkSizeGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(NetworkSizeMessage.Deserializer)
-        Log.d(LOGGING_TAG, "Received network size gossip from ${peer.mid}, payload: ${payload.entries}")
+        val (peer, payload) = packet.getAuthPayload(GossipMessage.Deserializer)
+        Log.d(LOGGING_TAG, "Received network size gossip from ${peer.mid}, payload: ${payload.data}")
 
         NetworkSizeGossiper.receivedData(payload, peer)
     }

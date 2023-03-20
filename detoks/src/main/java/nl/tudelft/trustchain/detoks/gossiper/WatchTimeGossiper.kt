@@ -5,11 +5,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.TorrentManager
-import nl.tudelft.trustchain.detoks.gossiper.messages.WatchTimeMessage
 
 class WatchTimeGossiper(
     override val delay: Long,
@@ -37,7 +35,11 @@ class WatchTimeGossiper(
         )
 
         randomPeers.forEach {
-            deToksCommunity.gossipWith(it, WatchTimeMessage(randomProfileEntries), DeToksCommunity.MESSAGE_WATCH_TIME_ID)
+            deToksCommunity.gossipWith(
+                it,
+                GossipMessage(DeToksCommunity.MESSAGE_WATCH_TIME_ID, randomProfileEntries),
+                DeToksCommunity.MESSAGE_WATCH_TIME_ID
+            )
         }
     }
 }

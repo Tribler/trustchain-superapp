@@ -7,7 +7,6 @@ import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.DeToksCommunity
-import nl.tudelft.trustchain.detoks.gossiper.messages.NetworkSizeMessage
 import kotlin.random.Random.Default.nextDouble
 
 class NetworkSizeGossiper(override val delay: Long,
@@ -49,7 +48,7 @@ class NetworkSizeGossiper(override val delay: Long,
             awaitingResponse.add(it)
             deToksCommunity.gossipWith(
                 it,
-                NetworkSizeMessage(leaderEstimates),
+                GossipMessage(DeToksCommunity.MESSAGE_NETWORK_SIZE_ID, leaderEstimates),
                 DeToksCommunity.MESSAGE_NETWORK_SIZE_ID
             )
         }
@@ -65,24 +64,30 @@ class NetworkSizeGossiper(override val delay: Long,
         /**
          * Applies counting algorithm to determine network size.
          */
-        fun receivedData(msg: NetworkSizeMessage, peer: Peer) {
+        fun receivedData(msg: GossipMessage, peer: Peer) {
             if (!awaitingResponse.contains(peer)) {
                 val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
                 deToksCommunity.gossipWith(
                     peer,
-                    NetworkSizeMessage(leaderEstimates),
+                    GossipMessage(DeToksCommunity.MESSAGE_NETWORK_SIZE_ID, leaderEstimates),
                     DeToksCommunity.MESSAGE_NETWORK_SIZE_ID
+                )
+            }
+            val entries = msg.data.map {
+                Pair(
+                    (it as Pair<*,*>).first as String,
+                    (it.second as String).toDouble()
                 )
             }
 
             val myKeys = leaderEstimates.map { it.first }
-            val otherKeys = msg.entries.map { it.first }
+            val otherKeys = entries.map { it.first }
 
             val myUnique = leaderEstimates
                 .filter { !otherKeys.contains(it.first) }
                 .map { Pair(it.first, it.second / 2) }
 
-            val otherUnique = msg.entries
+            val otherUnique = entries
                 .filter { !myKeys.contains(it.first) }
                 .map { Pair(it.first, it.second / 2) }
 
@@ -91,7 +96,7 @@ class NetworkSizeGossiper(override val delay: Long,
                 .map {
                     Pair(
                         it.first, it.second + (
-                            msg.entries.find { it1 -> it1.first == it.first }?.second ?: 0.0
+                            entries.find { it1 -> it1.first == it.first }?.second ?: 0.0
                             )
                     )
                 }
