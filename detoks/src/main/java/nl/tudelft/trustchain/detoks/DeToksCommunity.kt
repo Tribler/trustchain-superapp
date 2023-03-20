@@ -68,11 +68,7 @@ class DeToksCommunity(private val context: Context) : Community() {
     }
 
     fun gossipWith(peer: Peer, message: Serializable, id: Int) {
-        Log.d(LOGGING_TAG, "Gossiping with ${peer.mid}, address: ${peer.address}, msg id: $id")
-        Log.d(LOGGING_TAG, this.getPeers().toString())
-        Log.d(LOGGING_TAG, this.myPeer.toString())
-        Log.d(LOGGING_TAG, "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
-        Log.d(LOGGING_TAG, "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
+        Log.d(LOGGING_TAG, "Gossiping with ${peer.mid}, msg id: $id")
 
         val packet = serializePacket(id, message)
 
@@ -105,11 +101,8 @@ class DeToksCommunity(private val context: Context) : Community() {
     }
 
     private fun onTorrentGossip(packet: Packet) {
-//        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val payload = packet.getPayload(GossipMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-        //Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
-        Log.d(LOGGING_TAG, "magnet: ${payload.data}")
         payload.data.forEach { torrentManager.addTorrent(it as String) }
     }
 

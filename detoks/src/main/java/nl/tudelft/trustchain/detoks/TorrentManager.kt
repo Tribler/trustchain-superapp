@@ -239,7 +239,7 @@ class TorrentManager private constructor (
         val hash = torrentInfo.infoHash()
 
         if(sessionManager.find(hash) != null) return
-        Log.d("DeToksCommunity","Is a new torrent: ${torrentInfo.name()}")
+        Log.d(DeToksCommunity.LOGGING_TAG,"Adding new torrent: ${torrentInfo.name()}")
 
         sessionManager.download(torrentInfo, cacheDir)
         val handle = sessionManager.find(hash)
