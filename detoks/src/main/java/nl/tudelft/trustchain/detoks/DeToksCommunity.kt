@@ -7,6 +7,7 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
+import nl.tudelft.trustchain.detoks.gossiper.BootGossiper
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 import nl.tudelft.trustchain.detoks.gossiper.GossipMessage
 
@@ -21,6 +22,9 @@ class DeToksCommunity(private val context: Context) : Community() {
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
         messageHandlers[MESSAGE_WATCH_TIME_ID] = :: onWatchTimeGossip
         messageHandlers[MESSAGE_NETWORK_SIZE_ID] = :: onNetworkSizeGossip
+        messageHandlers[MESSAGE_BOOT_REQUEST] = :: onBootRequestGossip
+        messageHandlers[MESSAGE_BOOT_RESPONSE] = :: onBootResponseGossip
+
     }
 
     companion object {
@@ -81,6 +85,25 @@ class DeToksCommunity(private val context: Context) : Community() {
         send(peer.address, packet)
     }
 
+    private fun onTransactionMessage(packet: Packet) {
+        val (_, payload) = packet.getAuthPayload(TransactionMessage.Deserializer)
+
+        val senderWallet = walletManager.getOrCreateWallet(payload.senderMID)
+
+        if (senderWallet.balance >= payload.amount) {
+            senderWallet.balance -= payload.amount
+            walletManager.setWalletBalance(payload.senderMID, senderWallet.balance)
+
+            val recipientWallet = walletManager.getOrCreateWallet(payload.recipientMID)
+            recipientWallet.balance += payload.amount
+            walletManager.setWalletBalance(payload.recipientMID, recipientWallet.balance)
+
+            Log.d(LOGGING_TAG, "Received ${payload.amount} tokens from ${payload.senderMID}")
+        } else {
+            Log.d(LOGGING_TAG, "Insufficient funds from ${payload.senderMID}!")
+        }
+    }
+
     private fun onTorrentGossip(packet: Packet) {
 //        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val payload = packet.getPayload(GossipMessage.Deserializer)
@@ -103,30 +126,19 @@ class DeToksCommunity(private val context: Context) : Community() {
         }
     }
 
-    private fun onTransactionMessage(packet: Packet) {
-        val (_, payload) = packet.getAuthPayload(TransactionMessage.Deserializer)
-
-        val senderWallet = walletManager.getOrCreateWallet(payload.senderMID)
-
-        if (senderWallet.balance >= payload.amount) {
-            senderWallet.balance -= payload.amount
-            walletManager.setWalletBalance(payload.senderMID, senderWallet.balance)
-
-            val recipientWallet = walletManager.getOrCreateWallet(payload.recipientMID)
-            recipientWallet.balance += payload.amount
-            walletManager.setWalletBalance(payload.recipientMID, recipientWallet.balance)
-
-            Log.d(LOGGING_TAG, "Received ${payload.amount} tokens from ${payload.senderMID}")
-        } else {
-            Log.d(LOGGING_TAG, "Insufficient funds from ${payload.senderMID}!")
-        }
-    }
-
     private fun onNetworkSizeGossip(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(GossipMessage.Deserializer)
-        Log.d(LOGGING_TAG, "Received network size gossip from ${peer.mid}, payload: ${payload.data}")
+        NetworkSizeGossiper.receivedResponse(payload, peer)
+    }
 
-        NetworkSizeGossiper.receivedData(payload, peer)
+    private fun onBootRequestGossip(packet: Packet) {
+        val (peer, _) = packet.getAuthPayload(GossipMessage.Deserializer)
+        BootGossiper.sendResponse(peer)
+    }
+
+    private fun onBootResponseGossip(packet: Packet) {
+        val (_, payload) = packet.getAuthPayload(GossipMessage.Deserializer)
+        BootGossiper.receivedResponse(payload.data)
     }
 
     class Factory(

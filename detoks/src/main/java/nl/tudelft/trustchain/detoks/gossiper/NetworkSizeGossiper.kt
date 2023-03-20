@@ -10,7 +10,6 @@ import nl.tudelft.trustchain.detoks.DeToksCommunity
 import kotlin.random.Random.Default.nextDouble
 
 class NetworkSizeGossiper(override val delay: Long,
-                          override val blocks: Int,
                           override val peers: Int,
                           private val leaders: Int
 ) : Gossiper() {
@@ -64,7 +63,7 @@ class NetworkSizeGossiper(override val delay: Long,
         /**
          * Applies counting algorithm to determine network size.
          */
-        fun receivedData(msg: GossipMessage, peer: Peer) {
+        fun receivedResponse(msg: GossipMessage, peer: Peer) {
             if (!awaitingResponse.contains(peer)) {
                 val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
                 deToksCommunity.gossipWith(

@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import kotlinx.coroutines.*
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.detoks.DeToksCommunity
 import kotlin.system.exitProcess
 
 class GossiperService : Service() {
@@ -15,7 +17,8 @@ class GossiperService : Service() {
      * Add all gossiper services in the list to have them started by this service.
      */
     private val gossiperList: List<Gossiper> = listOf(
-        NetworkSizeGossiper(30000L, 4, 4, 4),
+        BootGossiper(1000L, 4),
+        NetworkSizeGossiper(30000L, 4, 4),
         TorrentGossiper(4000L, 4, 4, this),
         WatchTimeGossiper(4000L, 4, 4, this)
     )

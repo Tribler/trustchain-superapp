@@ -11,10 +11,11 @@ import nl.tudelft.trustchain.detoks.TorrentManager
 
 class WatchTimeGossiper(
     override val delay: Long,
-    override val blocks: Int,
     override val peers: Int,
+    val blocks: Int,
     private val context: Context
-) : Gossiper() {
+
+    ) : Gossiper() {
 
     override fun startGossip(coroutineScope: CoroutineScope) {
         coroutineScope.launch {

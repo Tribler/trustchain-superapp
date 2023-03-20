@@ -12,8 +12,8 @@ import nl.tudelft.trustchain.detoks.TorrentManager
 
 class TorrentGossiper(
     override val delay: Long,
-    override val blocks: Int,
     override val peers: Int,
+    val blocks: Int,
     val context: Context
 ) : Gossiper() {
 

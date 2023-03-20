@@ -11,11 +11,6 @@ abstract class Gossiper {
     abstract val delay: Long
 
     /**
-     * Amount of items to gossip.
-     */
-    abstract val blocks: Int
-
-    /**
      * Number of peers to gossip with.
      */
     abstract val peers: Int
