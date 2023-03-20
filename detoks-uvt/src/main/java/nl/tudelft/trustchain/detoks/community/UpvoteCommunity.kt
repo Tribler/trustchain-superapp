@@ -1,35 +1,68 @@
 package nl.tudelft.trustchain.detoks.community
 
-import nl.tudelft.ipv8.Community
+import android.content.Context
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import mu.KotlinLogging
+import nl.tudelft.ipv8.attestation.trustchain.*
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
+import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
+import nl.tudelft.trustchain.detoks.token.UpvoteToken
+import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
 
 private val logger = KotlinLogging.logger {}
 
-class UpvoteCommunity() : Community(){
+object UpvoteTrustchainConstants {
+    const val GIVE_UPVOTE_TOKEN = "give_upvote_token_block"
+    const val BALANCE_CHECKPOINT = "balance_checkpoint"
+}
+class UpvoteCommunity(
+    val context: Context,
+    settings: TrustChainSettings,
+    database: TrustChainStore,
+    crawler: TrustChainCrawler = TrustChainCrawler()
+) : TrustChainCommunity(settings, database, crawler){
     /**
      * serviceId is a randomly generated hex string with length 40
      */
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
 
     init {
-        messageHandlers[MessageID.HEART_TOKEN] = ::onHeartTokenPacket
+        messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
     }
 
     object MessageID {
-        const val HEART_TOKEN = 1
+        const val UPVOTE_TOKEN = 1
     }
 
-    private fun onHeartTokenPacket(packet: Packet){
-        val (peer, payload) = packet.getAuthPayload(HeartTokenPayload.Deserializer)
-        onHeartToken(peer, payload)
+    private fun onUpvoteTokenPacket(packet: Packet){
+        val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
+        onUpvoteToken(peer, payload)
     }
 
-    private fun onHeartToken(peer: Peer, payload: HeartTokenPayload) {
+    private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {
         // do something with the payload
-        logger.debug { "-> received heart token with id: ${payload.id}  and token: ${payload.token} from peer with member id: ${peer.mid}" }
+        logger.debug { "[UPVOTETOKEN] -> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
+        val upvoteToken = UpvoteToken(
+            payload.token_id.toInt(),
+            payload.date,
+            payload.public_key_minter,
+            payload.video_id
+        )
+
+        val isValid = UpvoteTokenValidator.validateToken(upvoteToken)
+
+        if (isValid) {
+            // TODO Move table creation to correct place
+            OwnedTokenManager(context).createOwnedUpvoteTokensTable()
+            OwnedTokenManager(context).addReceivedToken(upvoteToken)
+            logger.debug { "[UPVOTETOKEN] Hurray! Received valid token!" }
+        } else {
+            logger.debug { "[UPVOTETOKEN] Oh no! Received invalid token!" }
+        }
+
     }
 
     /**
@@ -44,32 +77,42 @@ class UpvoteCommunity() : Community(){
 
     /**
      * Sends a HeartToken to a random Peer
+     * When a message is sent, a proposal block is created
+     * //TODO: only make an agreement block if the user did not like the video yet, if the user already like the video,
+     * Sends a UpvoteToken to a random Peer
      */
-    fun sendHeartToken(id: String, token: String): String {
-        val payload = HeartTokenPayload(id, token)
+    fun sendUpvoteToken(upvoteToken: UpvoteToken): Boolean {
+        val payload = UpvoteTokenPayload(
+            upvoteToken.tokenID.toString(),
+            upvoteToken.date,
+            upvoteToken.publicKeyMinter,
+            upvoteToken.videoID)
 
         val packet = serializePacket(
-            MessageID.HEART_TOKEN,
+            MessageID.UPVOTE_TOKEN,
             payload
         )
 
         val peer = pickRandomPeer()
 
         if (peer != null) {
-            val message = "You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}"
+            val message = "[UPVOTETOKEN] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
             logger.debug { message }
             send(peer, packet)
-            return message
+            return true
         }
-
-        return "No peer found"
+        throw PeerNotFoundException("Could not find a peer")
     }
 
     class Factory(
-        // add parameters needed by the constructor of UpvoteCommunity if needed
+        private val context: Context,
+        private val settings: TrustChainSettings,
+        private val database: TrustChainStore,
+        private val crawler: TrustChainCrawler = TrustChainCrawler()
     ) : Overlay.Factory<UpvoteCommunity>(UpvoteCommunity::class.java) {
         override fun create(): UpvoteCommunity {
-            return UpvoteCommunity()
+            return UpvoteCommunity(context, settings, database, crawler)
         }
     }
+
 }
