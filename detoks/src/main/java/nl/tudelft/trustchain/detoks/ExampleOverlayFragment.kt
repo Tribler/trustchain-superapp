@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.ListView
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -19,6 +21,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentExampleoverlayBinding
+import nl.tudelft.trustchain.detoks.db.OurTransactionStore
 
 class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
 
@@ -31,6 +34,10 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
 
     private var transaction_index = 0;
 
+    private val store by lazy {
+        OurTransactionStore.getInstance(requireContext())
+    }
+
     private fun createProposal(recipient: Peer, peer_id: Int) {
         val transaction = mapOf("proposal" to transaction_index, "peer_id" to peer_id)
         trustchainCommunity.createProposalBlock(
@@ -38,7 +45,7 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
             transaction,
             recipient.publicKey.keyToBin()
         )
-        community.addTransaction(transaction_index, ipv8.myPeer.publicKey.toString(), recipient.publicKey.toString(), "proposal")
+        store.addTransaction(transaction_index, ipv8.myPeer.publicKey.toString(), recipient.publicKey.toString(), "proposal")
         transaction_index += 1
     }
 
@@ -49,9 +56,13 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
             transaction,
         )
         // TODO - I increment transaction index here to keep unique IDs in the DB
-        community.addTransaction(transaction_index, ipv8.myPeer.publicKey.toString(), block.transaction["peer_id"].toString(), "agreement")
+        store.addTransaction(transaction_index, ipv8.myPeer.publicKey.toString(), block.transaction["peer_id"].toString(), "agreement")
         transaction_index += 1
     }
+
+    /**
+     * Updates a list of blocks for debug purposes
+     */
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
@@ -60,7 +71,7 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
         ipv8 = IPv8Android.getInstance()
 
         // Reset DB
-        community.resetDatabase()
+        store.deleteAll()
 
         binding.peer1IpTextview.text = "${ipv8.myPeer.address.ip}"
         binding.peer2IpTextview.text = "${ipv8.myPeer.address.ip}"
@@ -75,11 +86,11 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
         }
 
         binding.peer1ConfirmTokenButton.setOnClickListener{
-            binding.peer1ConfirmTextview.text = community.getData().toString()
+            binding.blockList1.text = store.getAllTransactions().toString()
         }
 
         binding.peer2ConfirmTokenButton.setOnClickListener{
-            binding.peer2ConfirmTextview.text = community.getData().toString()
+            binding.blockList2.text = trustchainCommunity.database.getAllBlocks().toString()
         }
 
         trustchainCommunity.addListener(BLOCK_TYPE, object : BlockListener {
@@ -90,9 +101,9 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
                     builder.setMessage("Transaction ${block.transaction["proposal"]}. Do you want to confirm it?")
                     builder.setPositiveButton("Yes") { _, _ ->
                         if(block.transaction["peer_id"] == 1){
-                            binding.peer1ConfirmTextview.text="Transaction ${block.transaction["proposal"]}"
+                            binding.peer1TokensTextview.text="Transaction ${block.transaction["proposal"]}"
                         } else if (block.transaction["peer_id"] == 2) {
-                            binding.peer2ConfirmTextview.text="Transaction ${block.transaction["proposal"]}"
+                            binding.peer2TokensTextview.text="Transaction ${block.transaction["proposal"]}"
                         }
                         createAgreement(block)
                     }
