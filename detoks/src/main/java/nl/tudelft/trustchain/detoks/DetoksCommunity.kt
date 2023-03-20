@@ -58,6 +58,8 @@ class DetoksCommunity (settings: TrustChainSettings,
         // TODO: fix this
 //        val peer = (0 until getPeers().size).random()
 //        val peerKey = getPeers()[peer].key.keyToBin()
+        if(userLikedVideo(vid,torrent,myPeer.publicKey.toString())) return
+
         val timestamp = System.currentTimeMillis().toString()
         val like = Like(myPeer.publicKey.toString(), vid, torrent, creator,timestamp)
         createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
@@ -108,6 +110,7 @@ class DetoksCommunity (settings: TrustChainSettings,
         registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
                 // TODO: Something is wrong here, loads of empty transaction blocks on the client
+                if(userLikedVideo(block.transaction["video"] as String,block.transaction["torrent"] as String, block.transaction["liker"] as String)) return
                 createAgreementBlock(block, block.transaction)
             }
         })
