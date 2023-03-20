@@ -18,6 +18,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
+import nl.tudelft.trustchain.detoks.db.DbHelper
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -95,9 +98,19 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
            if(nameFriend?.text == null){
                Toast.makeText(this.context,"Enter friend's name!", Toast.LENGTH_LONG).show()
            } else {
+               val dbHelper = DbHelper(this.requireContext())
+               val newRowId = dbHelper.addFriend(username.toString(), content.toString())
+               if(newRowId != -1L){
+                   Toast.makeText(this.context,"Added Friend!", Toast.LENGTH_LONG).show()
+               } else {
+                   Toast.makeText(this.context,"Duplicate Entry!", Toast.LENGTH_LONG).show()
+               }
                //save call to db
+               Log.v("newRowID", newRowId.toString())
                Log.v("Save pub key", content.toString())
                Log.v("Name ", username.toString())
+               val navController = this.findNavController()
+               navController.navigate(R.id.offlineTransferFragment)
            }
         }
 

@@ -20,6 +20,7 @@ import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
+import nl.tudelft.trustchain.detoks.db.DbHelper
 import org.json.JSONObject
 import java.security.PublicKey
 import java.util.*
@@ -63,14 +64,22 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val dbHelper = DbHelper(view.context)
+        val friendList = dbHelper.getAllFriends()
+        val friends = friendList.toMutableList()
+        if (friendList.isEmpty()) {
+            friends.add("Add Friend")
+        }
 
-        val friends = Arrays.asList("Vyshnavi", "Ali", "Dany", "Julio")
+//        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, friendList)
+//        dropdownMenu.adapter = adapter
+//        val friends = Arrays.asList("Vyshnavi", "Ali", "Dany", "Julio")
         val spinnerFriends: Spinner = view.findViewById(R.id.spinner)
         // create an array adapter and pass the required parameter
         // in our case pass the context, drop down layout, and array.
         val arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friends)
         // set adapter to the spinner
-        spinnerFriends.setAdapter(arrayAdapter)
+        spinnerFriends.adapter = arrayAdapter
 
         val buttonScan = view.findViewById<Button>(R.id.button_send)
         buttonScan.setOnClickListener {
