@@ -16,7 +16,11 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.*
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
+import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
+import nl.tudelft.trustchain.detoks.token.UpvoteToken
+import nl.tudelft.trustchain.detoks.exception.InvalidMintException
+import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
 
 class VideosAdapter(
     private val torrentManager: TorrentManager,
@@ -59,7 +63,7 @@ class VideosAdapter(
         var tokensSent: TextView
         var tokensReceived: TextView
         var tokensBalance: TextView
-
+//        val videoID = 1
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
@@ -189,18 +193,40 @@ class VideosAdapter(
          * proposal block of this video -> if already liked once => show message to user / cannot like again
          * - if not then create an agreement block for this video
          */
-        private fun sendHeartToken() {
-            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
-            val toastMessage = upvoteCommunity.sendHeartToken("", "TEST")
+        private fun sendUpvoteToken() {
+            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
+            val myPubKey = upvoteCommunity?.myPeer?.publicKey.toString()
+            //val upvoteToken = UpvoteToken(1, "1679006615", "12345678910", 1)
+            //val toastMessage = upvoteCommunity?.sendUpvoteToken(upvoteToken.tokenID.toString(), localToGMT(upvoteToken.date.toLong()).toString(), upvoteToken.publicKeyMinter, upvoteToken.videoID.toString())
+            var toastMessage: String?
+
+            try {
+                val nextToken = UpvoteToken.tryMintToken(itemView.context, videoID.text.toString(), myPubKey)
+                val dbSuccess = SentTokenManager(itemView.context).addSentToken(nextToken)
+                val sendSuccess = upvoteCommunity?.sendUpvoteToken(nextToken)
+
+                toastMessage = if (dbSuccess && sendSuccess == true) {
+                    "Successfully sent the token {id} to the creator of {videoId}"
+                } else {
+                    "Successfully sent the token {id} to the creator of {videoId}"
+                }
+
+            } catch (invalidMintException: InvalidMintException) {
+                toastMessage = invalidMintException.message
+            } catch (peerNotFoundException: PeerNotFoundException) {
+                // TODO Add DB Rollback and potential other network failures
+                toastMessage = peerNotFoundException.message
+            }
+            // Toast the result
             Toast.makeText(
                 itemView.context,
                 toastMessage,
                 Toast.LENGTH_SHORT
             ).show()
             // getBlockHash Method below might fail to get the proposal block if it is not in this peer's truststore
-            val proposalBlock = upvoteCommunity.database.getBlockWithHash(proposalBlockHash.text.toString().hexToBytes())
+            val proposalBlock = upvoteCommunity?.database?.getBlockWithHash(proposalBlockHash.text.toString().hexToBytes())
             if (proposalBlock != null) {
-                upvoteCommunity.createAgreementBlock(proposalBlock, proposalBlock.transaction)
+                upvoteCommunity?.createAgreementBlock(proposalBlock, proposalBlock.transaction)
                 Log.i("DeToks", "Agreement block created!")
             } else {
                 Toast.makeText(
@@ -229,7 +255,7 @@ class VideosAdapter(
             itemView.setOnClickListener(
                 object : DoubleClickListener() {
                     override fun onDoubleClick(view: View?) {
-                        adapter.sendHeartToken()
+                        adapter.sendUpvoteToken()
                     }
                 }
             )
@@ -266,28 +292,6 @@ class VideosAdapter(
          * A long press of 2 seconds represents/simulates a peer having posted a video
          */
         private fun setPostVideoListener() {
-//            itemView.setOnTouchListener(
-//                object : LongHoldListener() {
-//                    override fun onLongHold() {
-//                        val proposalBlock = createProposalToken()
-//                        val hash = proposalBlock?.calculateHash()!!
-//                        val mypeer = IPv8Android.getInstance().myPeer
-//                        val message = "By long pressing for 2 seconds you with public key: " +
-//                            "${mypeer.publicKey.keyToBin().toHex()} and member id:\n" +
-//                            "$mypeer.mid has created a proposalblock on this timestamp: ${proposalBlock.timestamp} \n" +
-//                            "The hash of this block is ${hash.toHex()}, corresponding hashCode is: ${hash.hashCode()} \n" +
-//                            "the block Id of this proposal block is: ${proposalBlock.blockId} \n" +
-//                            "the linked block id is: ${proposalBlock.linkedBlockId}\n"
-//                        torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
-//                        Log.i("DeToks", message)
-//                        Toast.makeText(
-//                            itemView.context,
-//                            message,
-//                            Toast.LENGTH_SHORT
-//                        ).show()
-//                    }
-//                }
-//            )
 
             proposalSendButton.setOnClickListener{
                 val proposalBlock = createProposalToken()

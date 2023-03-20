@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.detoks.community
 
 import android.content.Context
-import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
@@ -9,6 +8,9 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
+import nl.tudelft.trustchain.detoks.token.UpvoteToken
+import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
 
 private val logger = KotlinLogging.logger {}
 
@@ -28,34 +30,36 @@ class UpvoteCommunity(
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
     val context = context
     init {
-        messageHandlers[MessageID.HEART_TOKEN] = ::onHeartTokenPacket
-        this.registerBlockSigner(UpvoteTrustchainConstants.GIVE_HEART_TOKEN, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                logger.debug { "This peer with member ID: ${myPeer.mid} received \n" +
-                    "the link_public key from the proposal block is ${block.linkPublicKey.toHex()}\n" +
-                    "mypeer's public key is: ${myPeer.publicKey.keyToBin().toHex()}" +
-                    "a proposal block from  peer with public key: ${block.publicKey.toHex()}, contents of the transaction:\n" +
-                    "the video ID is: ${block.transaction["videoID"]},\n" +
-                    "the heartTokenGivenBy: ${block.transaction["heartTokenGivenBy"]},\n" +
-                    "the heartTokenGivenTo: ${block.transaction["heartTokenGivenTo"]},\n" +
-                    "Agreement Block created and sent\n"}
-                this@UpvoteCommunity.createAgreementBlock(block, block.transaction)
-            }
-        })
+        messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
     }
 
     object MessageID {
-        const val HEART_TOKEN = 1
+        const val UPVOTE_TOKEN = 1
     }
 
-    private fun onHeartTokenPacket(packet: Packet){
-        val (peer, payload) = packet.getAuthPayload(HeartTokenPayload.Deserializer)
-        onHeartToken(peer, payload)
+    private fun onUpvoteTokenPacket(packet: Packet){
+        val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
+        onUpvoteToken(peer, payload)
     }
 
-    private fun onHeartToken(peer: Peer, payload: HeartTokenPayload) {
+    private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {
         // do something with the payload
-        logger.debug { "-> received heart token with id: ${payload.id}  and token: ${payload.token} from peer with member id: ${peer.mid}" }
+        logger.debug { "[UPVOTETOKEN] -> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
+        val upvoteToken = UpvoteToken(
+            payload.token_id.toInt(),
+            payload.date,
+            payload.public_key_minter,
+            payload.video_id
+        )
+
+        val isValid = UpvoteTokenValidator.validateToken(upvoteToken)
+
+        if (isValid) {
+            logger.debug { "[UPVOTETOKEN] Hurray! Received valid token!" }
+        } else {
+            logger.debug { "[UPVOTETOKEN] Oh no! Received invalid token!" }
+        }
+
     }
 
     /**
@@ -71,41 +75,30 @@ class UpvoteCommunity(
     /**
      * Sends a HeartToken to a random Peer
      * When a message is sent, a proposal block is created
-     * //TODO: only make proposal block if the user did not like the video yet, if the user already like the video,
-     * //TODO: it shouldn't be possible to like again / create a proposal again
-     *
-     * //TODO: maybe it should be the poster of the video that creates proposal blocks and
-     * //todo: the user that likes it creates an agreement block
+     * //TODO: only make an agreement block if the user did not like the video yet, if the user already like the video,
+     * Sends a UpvoteToken to a random Peer
      */
-    fun sendHeartToken(id: String, token: String): String {
-        val payload = HeartTokenPayload(id, token)
+    fun sendUpvoteToken(upvoteToken: UpvoteToken): Boolean {
+        val payload = UpvoteTokenPayload(
+            upvoteToken.tokenID.toString(),
+            upvoteToken.date,
+            upvoteToken.publicKeyMinter,
+            upvoteToken.videoID.toString())
 
         val packet = serializePacket(
-            MessageID.HEART_TOKEN,
+            MessageID.UPVOTE_TOKEN,
             payload
         )
 
         val peer = pickRandomPeer()
 
         if (peer != null) {
-            val message = "You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}"
+            val message = "[UPVOTETOKEN] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
             logger.debug { message }
             send(peer, packet)
-
-//            val transaction = mapOf("videoID" to "TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
-//            "heartTokenGivenBy" to myPeer.publicKey.keyToBin().toHex(),
-//            "heartTokenGivenTo" to peer.publicKey.keyToBin().toHex())
-//            val block = this.createProposalBlock(UpvoteTrustchainConstants.GIVE_HEART_TOKEN, transaction, peer.publicKey.keyToBin());
-//            logger.debug { "proposal block created:" +
-//                "peer with public key: ${block.publicKey.toHex()} has created a proposal block,\n" +
-//                "contents of block:\n" +
-//                "video ID: ${block.transaction["videoID"]}\n" +
-//                "peer with public key: ${block.transaction["heartTokenGivenBy"]} gave a Heart token to \n" +
-//                "proposal block needs an agreement block from peer with public key: ${block.transaction["heartTokenGivenTo"]}" }
-            return message
+            return true
         }
-
-        return "No peer found"
+        throw PeerNotFoundException("Could not find a peer")
     }
 
     class Factory(
