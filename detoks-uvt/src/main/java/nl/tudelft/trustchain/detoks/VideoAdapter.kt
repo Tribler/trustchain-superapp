@@ -132,7 +132,7 @@ class VideosAdapter(
                 var sent = latestBalanceCheckpoint.transaction.get("sent")!!.toString().toInt();
                 var received = latestBalanceCheckpoint.transaction.get("received")!!.toString().toInt();
                 for (block: TrustChainBlock in blocksToProcess){
-                    if (block.type.equals(UpvoteTrustchainConstants.GIVE_HEART_TOKEN)) {
+                    if (block.type.equals(UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN)) {
                         if (block.isAgreement && block.linkPublicKey.toHex().equals(myPublicKey.toHex())) {
                             received++
                         }
@@ -163,7 +163,7 @@ class VideosAdapter(
 
         private fun checkTokenBalance():Triple<Int, Int, Int> {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
-            val allBlocks = upvoteCommunity.database.getBlocksWithType(UpvoteTrustchainConstants.GIVE_HEART_TOKEN)
+            val allBlocks = upvoteCommunity.database.getBlocksWithType(UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN)
             var sent = 0;
             var received = 0;
             for (block: TrustChainBlock in allBlocks) {
@@ -206,9 +206,9 @@ class VideosAdapter(
                 val sendSuccess = upvoteCommunity?.sendUpvoteToken(nextToken)
 
                 toastMessage = if (dbSuccess && sendSuccess == true) {
-                    "Successfully sent the token {id} to the creator of {videoId}"
+                    "Successfully sent the token ${nextToken.tokenID} to the creator of ${nextToken.videoID}"
                 } else {
-                    "Successfully sent the token {id} to the creator of {videoId}"
+                    "Failed to sent the token ${nextToken.tokenID} to the creator of ${nextToken.videoID}"
                 }
 
             } catch (invalidMintException: InvalidMintException) {
@@ -226,7 +226,7 @@ class VideosAdapter(
             // getBlockHash Method below might fail to get the proposal block if it is not in this peer's truststore
             val proposalBlock = upvoteCommunity?.database?.getBlockWithHash(proposalBlockHash.text.toString().hexToBytes())
             if (proposalBlock != null) {
-                upvoteCommunity?.createAgreementBlock(proposalBlock, proposalBlock.transaction)
+                upvoteCommunity.createAgreementBlock(proposalBlock, proposalBlock.transaction)
                 Log.i("DeToks", "Agreement block created!")
             } else {
                 Toast.makeText(
@@ -242,7 +242,7 @@ class VideosAdapter(
             // for peer A's proposal block that was created when peer posted a video (thus liking the video posted by peer A)
 
             // TODO: Currently, it seems that a peer can only like a video created by itself
-            //       when we can distribute a video added by a peer to another peer B, peer B will be able to like that viedo
+            //       when we can distribute a video added by a peer to another peer B, peer B will be able to like that video
             }
 
         /**
@@ -279,7 +279,7 @@ class VideosAdapter(
                 "heartTokenGivenTo" to myPeer.publicKey.keyToBin().toHex()
             )
             val proposalBlock = upvoteCommunity?.createProposalBlock(
-                UpvoteTrustchainConstants.GIVE_HEART_TOKEN,
+                UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN,
                 transaction,
                 ANY_COUNTERPARTY_PK
             )

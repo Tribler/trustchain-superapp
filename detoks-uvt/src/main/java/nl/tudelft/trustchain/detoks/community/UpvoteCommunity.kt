@@ -7,7 +7,7 @@ import nl.tudelft.ipv8.messaging.Packet
 import mu.KotlinLogging
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
@@ -15,11 +15,11 @@ import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
 private val logger = KotlinLogging.logger {}
 
 object UpvoteTrustchainConstants {
-    const val GIVE_HEART_TOKEN = "give_heart_token_block"
+    const val GIVE_UPVOTE_TOKEN = "give_upvote_token_block"
     const val BALANCE_CHECKPOINT = "balance_checkpoint"
 }
 class UpvoteCommunity(
-    context: Context,
+    val context: Context,
     settings: TrustChainSettings,
     database: TrustChainStore,
     crawler: TrustChainCrawler = TrustChainCrawler()
@@ -28,7 +28,7 @@ class UpvoteCommunity(
      * serviceId is a randomly generated hex string with length 40
      */
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
-    val context = context
+
     init {
         messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
     }
@@ -55,6 +55,9 @@ class UpvoteCommunity(
         val isValid = UpvoteTokenValidator.validateToken(upvoteToken)
 
         if (isValid) {
+            // TODO Move table creation to correct place
+            OwnedTokenManager(context).createOwnedUpvoteTokensTable()
+            OwnedTokenManager(context).addReceivedToken(upvoteToken)
             logger.debug { "[UPVOTETOKEN] Hurray! Received valid token!" }
         } else {
             logger.debug { "[UPVOTETOKEN] Oh no! Received invalid token!" }
@@ -83,7 +86,7 @@ class UpvoteCommunity(
             upvoteToken.tokenID.toString(),
             upvoteToken.date,
             upvoteToken.publicKeyMinter,
-            upvoteToken.videoID.toString())
+            upvoteToken.videoID)
 
         val packet = serializePacket(
             MessageID.UPVOTE_TOKEN,

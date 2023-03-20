@@ -7,16 +7,15 @@ import nl.tudelft.trustchain.detoks.helpers.DateFormatter
 import nl.tudelft.trustchain.detoks.exception.InvalidMintException
 import java.util.*
 
-class UpvoteToken constructor(tokenID: Int, date: String, publicKeyMinter: String, videoID: String) {
-
-    val tokenID = tokenID
-    val date = date
-    val publicKeyMinter = publicKeyMinter
-    val videoID = videoID
-
+class UpvoteToken constructor(
+    val tokenID: Int,
+    val date: String,
+    val publicKeyMinter: String,
+    val videoID: String
+) {
 
     companion object {
-        public fun tryMintToken(context: Context, videoID: String, publicKey: String): UpvoteToken {
+        fun tryMintToken(context: Context, videoID: String, publicKey: String): UpvoteToken {
             SentTokenManager(context).createSentUpvoteTokensTable()
             val lastUpvoteToken = SentTokenManager(context).getLastToken()
             // Check if we have sent a token already today
