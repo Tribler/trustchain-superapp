@@ -58,6 +58,8 @@ class DetoksCommunity (settings: TrustChainSettings,
         // TODO: fix this
 //        val peer = (0 until getPeers().size).random()
 //        val peerKey = getPeers()[peer].key.keyToBin()
+        if(userLikedVideo(vid,torrent,myPeer.publicKey.toString())) return
+
         val timestamp = System.currentTimeMillis().toString()
         val like = Like(myPeer.publicKey.toString(), vid, torrent, creator,timestamp)
         createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
