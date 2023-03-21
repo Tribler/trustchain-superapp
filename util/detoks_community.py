@@ -2,13 +2,21 @@ import os
 import random
 from pyipv8.ipv8.community import Community
 from gossiper.torrent_gossiper import TorrentGossiper
+from gossiper.network_size_gossiper import NetworkSizeGossiper
+from gossiper.boot_gossiper import BootGossiper
+from gossiper.watchtime_gossiper import WatchtimeGossiper
 
 
 class DetoksCommunity(Community):
     community_id = bytes.fromhex(os.getenv("COMMUNITY_ID"))
 
     def started(self):
-        gossipers = [TorrentGossiper(delay=5.0, peers=5, community=self)]
+        gossipers = [
+            TorrentGossiper(delay=5.0, peers=5, community=self),
+            NetworkSizeGossiper(),
+            BootGossiper(),
+            WatchtimeGossiper(),
+        ]
 
         for i, val in enumerate(gossipers):
             self.register_task(f"gossip_{i}", val.gossip, interval=val.delay, delay=0)
