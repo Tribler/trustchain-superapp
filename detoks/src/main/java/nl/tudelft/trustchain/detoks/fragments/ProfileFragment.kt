@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks.fragments
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -59,18 +60,16 @@ class ProfileFragment : Fragment() {
         numVideosLabel = view.findViewById(R.id.numVideosLabel)
         numLikesLabel = view.findViewById(R.id.numLikesLabel)
         upload = view.findViewById(R.id.upload)
-        upload.setOnClickListener{
 
-        }
-        val permission = ContextCompat.checkSelfPermission(this.requireContext(),
-            Manifest.permission.READ_EXTERNAL_STORAGE)
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this.requireActivity(),
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                111)
-
-        }
-        mainPart()
+//        val permission = ContextCompat.checkSelfPermission(this.requireContext(),
+//            Manifest.permission.READ_EXTERNAL_STORAGE)
+//        if (permission != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this.requireActivity(),
+//                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+//                111)
+//
+//        }
+//        mainPart()
         updatePersonalInformation(videos)
 
 //        TODO: (optionally, if possible) Sort the list by the date and time when the video was uploaded.

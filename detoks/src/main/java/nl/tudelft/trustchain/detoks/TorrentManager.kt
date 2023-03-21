@@ -129,6 +129,7 @@ class TorrentManager(
             }
         }
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     fun addMagnet(magnet: String){
         val res = sessionManager.fetchMagnet(magnet, 10)
         if (res == null){
