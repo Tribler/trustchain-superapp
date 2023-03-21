@@ -23,6 +23,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
+
     private lateinit var torrentManager: TorrentManager
     private val logger = KotlinLogging.logger {}
     private var previousVideoAdapterIndex = 0
@@ -64,45 +65,11 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             File("${requireActivity().cacheDir.absolutePath}/torrent"),
             DEFAULT_CACHING_AMOUNT
         )
-
-        val permission = ContextCompat.checkSelfPermission(this.requireContext(),
-            Manifest.permission.READ_EXTERNAL_STORAGE)
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this.requireActivity(),
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                111)
-
-        }else{
-            mainPart()
-        }
-
-
+        SingleTM.torrentManager = torrentManager
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun mainPart(){
-        val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
 
-            torrentManager.createTorrentInfo(uri!!, this.requireContext())
-        }
-        getContent.launch("video/*")
-    }
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            111 -> {
-
-                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Log.d("AndroidRuntime", "REJECTED :(")
-
-                } else {
-                    mainPart()
-                }
-            }
-        }
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -135,8 +102,9 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         })
     }
 
-    companion object {
+    companion object SingleTM{
         const val DEFAULT_CACHING_AMOUNT = 2
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"
+        public lateinit var torrentManager: TorrentManager
     }
 }

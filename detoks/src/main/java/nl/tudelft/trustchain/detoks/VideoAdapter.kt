@@ -80,7 +80,7 @@ class VideosAdapter(
             likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
 
             val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
-            community.broadcastLike(content.fileName, content.torrentName, content.creator)
+            community.broadcastLike(content.fileName, content.torrentMagnet, content.creator)
         }
 
         init {
@@ -105,11 +105,11 @@ class VideosAdapter(
                 val content = item.content(position, 10000)
                 val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
 
-                likeCount.text = community.getLikes(content.fileName, content.torrentName).size.toString()
+                likeCount.text = community.getLikes(content.fileName, content.torrentMagnet).size.toString()
 
                 isLiked = community.userLikedVideo(
                     content.fileName,
-                    content.torrentName,
+                    content.torrentMagnet,
                     community.myPeer.publicKey.toString()
                 )
 
