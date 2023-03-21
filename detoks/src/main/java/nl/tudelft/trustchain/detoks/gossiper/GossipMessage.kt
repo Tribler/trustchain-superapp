@@ -24,12 +24,11 @@ class GossipMessage(
             val tempStr = String(buffer, offset,buffer.size - offset)
             val tempList = tempStr.split(",")
 
-            if (!tempStr.contains("~")) {
-                return Pair(GossipMessage(0, tempList), offset)
-            }
-
             if(tempList.size == 1 && tempList[0] == "")
                 return Pair(GossipMessage(0, listOf()), offset)
+
+            if (!tempStr.contains("~"))
+                return Pair(GossipMessage(0, tempList), offset)
 
             val entries: List<Pair<String, Any>> = tempList.map {
                 val strPair = it.split("~")
