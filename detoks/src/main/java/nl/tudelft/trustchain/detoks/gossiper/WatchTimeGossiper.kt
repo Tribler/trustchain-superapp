@@ -35,6 +35,7 @@ class WatchTimeGossiper(
             TorrentManager.getInstance(context).profile.magnets.entries.map { Pair(it.key, it.value.watchTime) },
             blocks
         )
+        if (randomPeers.isEmpty() || randomProfileEntries.isEmpty()) return
 
         randomPeers.forEach {
             deToksCommunity.gossipWith(

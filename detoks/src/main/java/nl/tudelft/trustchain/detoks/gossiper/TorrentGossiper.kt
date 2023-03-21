@@ -29,8 +29,9 @@ class TorrentGossiper(
     override suspend fun gossip() {
         val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
-
         val handlers = TorrentManager.getInstance(context).getListOfTorrents()
+        if (randomPeers.isEmpty() || handlers.isEmpty()) return
+
         val max = if (handlers.size < blocks) handlers.size else blocks
         val randomMagnets = handlers.random(max).map { it.makeMagnetUri() }
 
