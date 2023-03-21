@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import android.util.Log
-import kotlin.random.Random
+import nl.tudelft.trustchain.detoks.TorrentManager.*
 
 /**
  * Basic structure for a profile entry
@@ -17,14 +17,11 @@ class ProfileEntry(
     }
 }
 
-class Profile(
-    val magnets: HashMap<String, ProfileEntry> = HashMap()
-) {
-    fun updateEntryWatchTime(torrent: TorrentManager.TorrentHandler, time: Long) {
-        val name = torrent.torrentName + "[" + torrent.fileName + "]"
-        if(!magnets.contains(name)) magnets[name] = ProfileEntry()
-        magnets[name]!!.watchTime += time
-        Log.i("DeToks", "Updated watchtime of $name to ${magnets[name]!!.watchTime}")
+class Profile(val magnets: HashMap<String, ProfileEntry> = HashMap()) {
+    fun updateEntryWatchTime(torrent: String, time: Long) {
+        if(!magnets.contains(torrent)) magnets[torrent] = ProfileEntry()
+        magnets[torrent]!!.watchTime += time
+        Log.i("DeToks", "Updated watchtime of $torrent to ${magnets[torrent]!!.watchTime}")
     }
 }
 

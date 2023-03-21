@@ -117,7 +117,8 @@ class TorrentManager private constructor (
             //        their screen or switches to another app for a while? Maybe this could be
             //        changed to a place in the video adapter as well, if we can detect maybe when
             //        a video is done playing and starts again, then update the duration if possible
-            profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
+            val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
+            profile.updateEntryWatchTime(uri, updateTime())
             currentIndex = newIndex
             return
         }
@@ -130,7 +131,8 @@ class TorrentManager private constructor (
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
 
         }
-        profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
+        val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
+        profile.updateEntryWatchTime(uri, updateTime())
         currentIndex = newIndex
     }
 
@@ -168,16 +170,15 @@ class TorrentManager private constructor (
                     for (it in 0 until torrentInfo.numFiles()) {
                         val fileName = torrentInfo.files().fileName(it)
                         if (fileName.endsWith(".mp4")) {
-                            torrentFiles.add(
-                                TorrentHandler(
-                                    cacheDir,
-                                    handle,
-                                    torrentInfo.name(),
-                                    fileName,
-                                    it
-                                )
+                            val torrent = TorrentHandler(
+                                cacheDir,
+                                handle,
+                                torrentInfo.name(),
+                                fileName,
+                                it
                             )
-                            profile.magnets[torrentInfo.name() + "[" + fileName + "]"] = ProfileEntry()
+                            torrentFiles.add(torrent)
+                            profile.magnets[torrent.handle.makeMagnetUri()] = ProfileEntry()
                         }
                     }
                 }
@@ -262,6 +263,14 @@ class TorrentManager private constructor (
 
     fun getListOfTorrents(): List<TorrentHandle> {
         return torrentFiles.map {it.handle}.distinct()
+    }
+
+    fun getWatchedTorrents(): List<String> {
+        return (profile.magnets.keys).toList()
+    }
+
+    fun getUnwatchedTorrents(): List<String> {
+        return (torrentFiles.map { it.handle.makeMagnetUri() } subtract profile.magnets.keys).toList()
     }
 
     class TorrentHandler(
