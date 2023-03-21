@@ -10,6 +10,10 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
+import nl.tudelft.ipv8.messaging.Serializable
+import nl.tudelft.trustchain.detoks.gossiper.BootGossiper
+import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
+import nl.tudelft.trustchain.detoks.gossiper.GossipMessage
 
 
 class DeToksCommunity(private val context: Context,
@@ -22,15 +26,23 @@ class DeToksCommunity(private val context: Context,
     private val visitedPeers  = mutableListOf<Peer>()
 
     init {
-        messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
+        messageHandlers[MESSAGE_TORRENT_ID] = ::onTorrentGossip
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
+        messageHandlers[MESSAGE_WATCH_TIME_ID] = :: onWatchTimeGossip
+        messageHandlers[MESSAGE_NETWORK_SIZE_ID] = :: onNetworkSizeGossip
+        messageHandlers[MESSAGE_BOOT_REQUEST] = :: onBootRequestGossip
+        messageHandlers[MESSAGE_BOOT_RESPONSE] = :: onBootResponseGossip
 
     }
 
     companion object {
+        const val LOGGING_TAG = "DeToksCommunity"
         const val MESSAGE_TORRENT_ID = 1
         const val MESSAGE_TRANSACTION_ID = 2
-
+        const val MESSAGE_WATCH_TIME_ID = 3
+        const val MESSAGE_NETWORK_SIZE_ID = 4
+        const val MESSAGE_BOOT_REQUEST = 5
+        const val MESSAGE_BOOT_RESPONSE = 6
     }
 
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
@@ -39,10 +51,10 @@ class DeToksCommunity(private val context: Context,
     fun sendTokens(amount: Int, recipientMid: String) {
         val senderWallet = walletManager.getOrCreateWallet(myPeer.mid)
 
-        Log.d("DetoksCommunity", "my wallet ${senderWallet.balance}")
+        Log.d(LOGGING_TAG, "my wallet ${senderWallet.balance}")
 
         if (senderWallet.balance >= amount) {
-            Log.d("DetoksCommunity", "Sending $amount money to $recipientMid")
+            Log.d(LOGGING_TAG, "Sending $amount money to $recipientMid")
             senderWallet.balance -= amount
             walletManager.setWalletBalance(myPeer.mid, senderWallet.balance)
 
@@ -58,20 +70,15 @@ class DeToksCommunity(private val context: Context,
                 send(peer.address, packet)
             }
         } else {
-            Log.d("DeToksCommunity", "Insufficient funds!")
+            Log.d(LOGGING_TAG, "Insufficient funds!")
         }
 
     }
 
-    fun gossipWith(peer: Peer) {
-        Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
-        Log.d("DetoksCommunity", "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
-        Log.d("DetoksCommunity", "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
-        val listOfTorrents = TorrentManager.getInstance(context).getListOfTorrents()
-        if(listOfTorrents.isEmpty()) return
-        val magnet = listOfTorrents.random().makeMagnetUri()
+    fun gossipWith(peer: Peer, message: Serializable, id: Int) {
+        Log.d(LOGGING_TAG, "Gossiping with ${peer.mid}, msg id: $id")
 
-        val packet = serializePacket(MESSAGE_TORRENT_ID, TorrentMessage(magnet))
+        val packet = serializePacket(id, message)
 
         // Send a token only to a new peer
         if (!visitedPeers.contains(peer)) {
@@ -82,12 +89,6 @@ class DeToksCommunity(private val context: Context,
         send(peer.address, packet)
     }
 
-    private fun onGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
-        val torrentManager = TorrentManager.getInstance(context)
-        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
-        torrentManager.addTorrent(payload.magnet)
-    }
     private fun onTransactionMessage(packet: Packet) {
         val (_, payload) = packet.getAuthPayload(TransactionMessage.Deserializer)
 
@@ -101,10 +102,44 @@ class DeToksCommunity(private val context: Context,
             recipientWallet.balance += payload.amount
             walletManager.setWalletBalance(payload.recipientMID, recipientWallet.balance)
 
-            Log.d("DeToksCommunity", "Received ${payload.amount} tokens from ${payload.senderMID}")
+            Log.d(LOGGING_TAG, "Received ${payload.amount} tokens from ${payload.senderMID}")
         } else {
-            Log.d("DeToksCommunity", "Insufficient funds from ${payload.senderMID}!")
+            Log.d(LOGGING_TAG, "Insufficient funds from ${payload.senderMID}!")
         }
+    }
+
+    private fun onTorrentGossip(packet: Packet) {
+        val payload = packet.getPayload(GossipMessage.Deserializer)
+        val torrentManager = TorrentManager.getInstance(context)
+        payload.data.forEach { torrentManager.addTorrent(it as String) }
+    }
+
+    private fun onWatchTimeGossip(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(GossipMessage.Deserializer)
+        val torrentManager = TorrentManager.getInstance(context)
+        Log.d(LOGGING_TAG, "Received watch time entry from ${peer.mid}, payload: ${payload.data}")
+
+        payload.data.forEach {
+            torrentManager.profile.updateEntryWatchTime(
+                (it as Pair<*, *>).first as String, it.second.toString().toLong(),
+                false
+            )
+        }
+    }
+
+    private fun onNetworkSizeGossip(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(GossipMessage.Deserializer)
+        NetworkSizeGossiper.receivedResponse(payload, peer)
+    }
+
+    private fun onBootRequestGossip(packet: Packet) {
+        val (peer, _) = packet.getAuthPayload(GossipMessage.Deserializer)
+        BootGossiper.receivedRequest(peer)
+    }
+
+    private fun onBootResponseGossip(packet: Packet) {
+        val (_, payload) = packet.getAuthPayload(GossipMessage.Deserializer)
+        BootGossiper.receivedResponse(payload.data)
     }
 
     class Factory(
@@ -118,3 +153,4 @@ class DeToksCommunity(private val context: Context,
         }
     }
 }
+
