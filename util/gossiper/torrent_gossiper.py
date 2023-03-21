@@ -1,8 +1,6 @@
 import os
 import random
 from torrentool.api import Torrent
-
-from torrentool.api import Torrent
 from .gossiper import Gossiper
 from messages import TorrentPayload, MESSAGE_TORRENT_ID
 
