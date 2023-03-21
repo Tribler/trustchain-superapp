@@ -26,11 +26,11 @@ class Profile(val magnets: HashMap<String, ProfileEntry> = HashMap()) {
 }
 
 class Recommender {
-    private fun coinTossRecommender(magnets: HashMap<String, ProfileEntry>) : Map<String, ProfileEntry> {
+    private fun coinTossRecommender(magnets: HashMap<String, ProfileEntry>): Map<String, ProfileEntry> {
         return magnets.map { it.key to it.value }.shuffled().toMap()
     }
 
-    private fun watchTimeRecommender(magnets: HashMap<String, ProfileEntry>) : Map<String, ProfileEntry> {
+    private fun watchTimeRecommender(magnets: HashMap<String, ProfileEntry>): Map<String, ProfileEntry> {
         return magnets.toList().sortedBy { (_, entry) -> entry }.toMap()
     }
 }
