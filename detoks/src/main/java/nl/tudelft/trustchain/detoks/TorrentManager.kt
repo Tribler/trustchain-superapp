@@ -117,7 +117,8 @@ class TorrentManager private constructor (
             //        their screen or switches to another app for a while? Maybe this could be
             //        changed to a place in the video adapter as well, if we can detect maybe when
             //        a video is done playing and starts again, then update the duration if possible
-            profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
+            val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
+            profile.updateEntryWatchTime(uri, updateTime())
             currentIndex = newIndex
             return
         }
@@ -130,7 +131,8 @@ class TorrentManager private constructor (
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
 
         }
-        profile.updateEntryWatchTime(torrentFiles.gett(currentIndex), updateTime())
+        val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
+        profile.updateEntryWatchTime(uri, updateTime())
         currentIndex = newIndex
     }
 
@@ -176,7 +178,7 @@ class TorrentManager private constructor (
                                 it
                             )
                             torrentFiles.add(torrent)
-                            profile.magnets[torrent] = ProfileEntry()
+                            profile.magnets[torrent.handle.makeMagnetUri()] = ProfileEntry()
                         }
                     }
                 }
@@ -263,12 +265,12 @@ class TorrentManager private constructor (
         return torrentFiles.map {it.handle}.distinct()
     }
 
-    fun getWatchedTorrents(): List<TorrentHandler> {
+    fun getWatchedTorrents(): List<String> {
         return (profile.magnets.keys).toList()
     }
 
-    fun getUnwatchedTorrents(): List<TorrentHandler> {
-        return (torrentFiles subtract profile.magnets.keys).toList()
+    fun getUnwatchedTorrents(): List<String> {
+        return (torrentFiles.map { it.handle.makeMagnetUri() } subtract profile.magnets.keys).toList()
     }
 
     class TorrentHandler(
