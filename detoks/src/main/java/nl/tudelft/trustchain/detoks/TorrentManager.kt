@@ -6,6 +6,7 @@ import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
+import android.os.FileUtils
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
@@ -22,8 +23,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
-import org.apache.commons.io.FileUtils
+
 import java.io.File
+import java.io.FileDescriptor
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -317,9 +319,12 @@ class TorrentManager(
             val input =
                 contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
             val fileLocation = "$parentDir/$fileName"
+            val output = contentResolver.openOutputStream(Uri.fromFile(File(fileLocation)))!!
 
-
-            FileUtils.copyInputStreamToFile(input, File(fileLocation))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                FileUtils.copy(input, output)
+            }
+            output.close()
             fileList.add(File(fileLocation))
             libtorrent.add_files(fs, "$parentDir/$fileName")
         }
