@@ -1,13 +1,13 @@
 package nl.tudelft.trustchain.detoks
 
 import android.util.Log
-import nl.tudelft.trustchain.detoks.TorrentManager.*
+import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 
 /**
  * Basic structure for a profile entry
  */
 class ProfileEntry(
-    var watchTime: Long = 0,
+    var watchTime: Long = 0, // Average watch time
     val firstSeen: Long = System.currentTimeMillis()
 ) : Comparable<ProfileEntry> {
     override fun compareTo(other: ProfileEntry): Int = when {
@@ -17,11 +17,19 @@ class ProfileEntry(
     }
 }
 
-class Profile(val magnets: HashMap<String, ProfileEntry> = HashMap()) {
-    fun updateEntryWatchTime(torrent: String, time: Long) {
-        if(!magnets.contains(torrent)) magnets[torrent] = ProfileEntry()
-        magnets[torrent]!!.watchTime += time
-        Log.i("DeToks", "Updated watchtime of $torrent to ${magnets[torrent]!!.watchTime}")
+class Profile(
+    val magnets: HashMap<String, ProfileEntry> = HashMap()
+) {
+    fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
+        if(!magnets.contains(key)) magnets[key] = ProfileEntry()
+
+        if (myUpdate) {
+            magnets[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
+        } else {
+            magnets[key]!!.watchTime += time
+            magnets[key]!!.watchTime /= 2
+        }
+        Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${magnets[key]!!.watchTime}")
     }
 }
 

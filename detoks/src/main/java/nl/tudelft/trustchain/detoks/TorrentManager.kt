@@ -29,7 +29,7 @@ class TorrentManager private constructor (
     private val logger = KotlinLogging.logger {}
     private val torrentFiles = mutableListOf<TorrentHandler>()
 
-    private val profile = Profile(HashMap())
+    val profile = Profile(HashMap())
 
     private var lastTimeStamp: Long
     private var currentIndex = 0
@@ -118,7 +118,10 @@ class TorrentManager private constructor (
             //        changed to a place in the video adapter as well, if we can detect maybe when
             //        a video is done playing and starts again, then update the duration if possible
             val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
-            profile.updateEntryWatchTime(uri, updateTime())
+            profile.updateEntryWatchTime(
+                uri,
+                updateTime(),
+                true)
             currentIndex = newIndex
             return
         }
@@ -132,7 +135,10 @@ class TorrentManager private constructor (
 
         }
         val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
-        profile.updateEntryWatchTime(uri, updateTime())
+        profile.updateEntryWatchTime(
+            uri,
+            updateTime(),
+        true)
         currentIndex = newIndex
     }
 
@@ -232,7 +238,7 @@ class TorrentManager private constructor (
         val hash = torrentInfo.infoHash()
 
         if(sessionManager.find(hash) != null) return
-        Log.d("DeToksCommunity","Is a new torrent: ${torrentInfo.name()}")
+        Log.d(DeToksCommunity.LOGGING_TAG,"Adding new torrent: ${torrentInfo.name()}")
 
         sessionManager.download(torrentInfo, cacheDir)
         val handle = sessionManager.find(hash)
