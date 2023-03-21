@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks.gossiper
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -9,9 +10,10 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.DeToksCommunity
 import kotlin.random.Random.Default.nextDouble
 
-class NetworkSizeGossiper(override val delay: Long,
-                          override val peers: Int,
-                          private val leaders: Int
+class NetworkSizeGossiper(
+    override val delay: Long,
+    override val peers: Int,
+    private val leaders: Int
 ) : Gossiper() {
 
     private var firstCycle = true
@@ -37,14 +39,15 @@ class NetworkSizeGossiper(override val delay: Long,
 
         awaitingResponse.clear()
 
-        val chanceLeader = leaders / networkSizeEstimate
+        val chanceLeader = leaders / (networkSizeEstimate.toDouble())
+        Log.d(DeToksCommunity.LOGGING_TAG, "Chance to become leader: $chanceLeader, leaders: $leaders, networksize estimate: $networkSizeEstimate")
         leaderEstimates = if (nextDouble() < chanceLeader)
             listOf(Pair(deToksCommunity.myPeer.mid, 1.0))
         else listOf()
 
         val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
         randomPeers.forEach {
-            awaitingResponse.add(it)
+            awaitingResponse.add(it.mid)
             deToksCommunity.gossipWith(
                 it,
                 GossipMessage(DeToksCommunity.MESSAGE_NETWORK_SIZE_ID, leaderEstimates),
@@ -58,13 +61,13 @@ class NetworkSizeGossiper(override val delay: Long,
 
         private var leaderEstimates = listOf<Pair<String, Double>>()
 
-        private val awaitingResponse = mutableListOf<Peer>()
+        private val awaitingResponse = mutableListOf<String>()
 
         /**
          * Applies counting algorithm to determine network size.
          */
         fun receivedResponse(msg: GossipMessage, peer: Peer) {
-            if (!awaitingResponse.contains(peer)) {
+            if (!awaitingResponse.contains(peer.mid)) {
                 val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
                 deToksCommunity.gossipWith(
                     peer,

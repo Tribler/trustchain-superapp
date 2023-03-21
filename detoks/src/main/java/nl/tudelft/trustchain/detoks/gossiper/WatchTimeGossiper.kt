@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks.gossiper
 
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -12,7 +13,7 @@ import nl.tudelft.trustchain.detoks.TorrentManager
 class WatchTimeGossiper(
     override val delay: Long,
     override val peers: Int,
-    val blocks: Int,
+    private val blocks: Int,
     private val context: Context
 
     ) : Gossiper() {

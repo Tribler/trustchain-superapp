@@ -1,30 +1,28 @@
 package nl.tudelft.trustchain.detoks.gossiper
 
-import android.net.Network
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.DeToksCommunity
-import kotlin.system.exitProcess
 
 class BootGossiper(
     override val delay: Long,
     override val peers: Int
 ) : Gossiper() {
 
-    var maxLoops = (30/delay).toInt()
+    var maxLoops = (30000/delay).toInt()
 
     override fun startGossip(coroutineScope: CoroutineScope) {
         coroutineScope.launch {
-            while (coroutineScope.isActive) {
-                if (maxLoops < 0)
-                    exitProcess(0)
+            while (coroutineScope.isActive && running) {
+                if (maxLoops <= 1)
+                    running = false
                 gossip()
+                maxLoops -= 1
                 delay(delay)
             }
         }
@@ -44,7 +42,9 @@ class BootGossiper(
     }
 
     companion object {
-        fun sendResponse(peer: Peer) {
+        var running = true
+
+        fun receivedRequest(peer: Peer) {
             val data = listOf<Pair<String, Any>>(
                 Pair("NetworkSize", NetworkSizeGossiper.networkSizeEstimate)
             )
@@ -65,7 +65,8 @@ class BootGossiper(
                         Log.d(DeToksCommunity.LOGGING_TAG, "Received data in boot message that wasn't recognized")
                 }
             }
-
+            running = false
+            Log.d(DeToksCommunity.LOGGING_TAG, "Received boot response, shutting down gossiper")
         }
     }
 }

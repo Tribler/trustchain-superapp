@@ -113,7 +113,7 @@ class DeToksCommunity(private val context: Context) : Community() {
 
         payload.data.forEach {
             torrentManager.profile.updateEntryWatchTime(
-                (it as Pair<*, *>).first as String, it.second as Long,
+                (it as Pair<*, *>).first as String, it.second.toString().toLong(),
                 false
             )
         }
@@ -126,7 +126,7 @@ class DeToksCommunity(private val context: Context) : Community() {
 
     private fun onBootRequestGossip(packet: Packet) {
         val (peer, _) = packet.getAuthPayload(GossipMessage.Deserializer)
-        BootGossiper.sendResponse(peer)
+        BootGossiper.receivedRequest(peer)
     }
 
     private fun onBootResponseGossip(packet: Packet) {

@@ -18,7 +18,7 @@ class GossiperService : Service() {
      */
     private val gossiperList: List<Gossiper> = listOf(
         BootGossiper(1000L, 4),
-        NetworkSizeGossiper(30000L, 4, 4),
+        NetworkSizeGossiper(30000L, 4, 1),
         TorrentGossiper(4000L, 4, 4, this),
         WatchTimeGossiper(4000L, 4, 4, this)
     )
