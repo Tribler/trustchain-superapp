@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import android.util.Log
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
-import kotlin.random.Random
 
 /**
  * Basic structure for a profile entry
@@ -22,16 +20,16 @@ class ProfileEntry(
 class Profile(
     val magnets: HashMap<String, ProfileEntry> = HashMap()
 ) {
-    fun updateEntryWatchTime(name: String, time: Long, myUpdate: Boolean) {
-        if(!magnets.contains(name)) magnets[name] = ProfileEntry()
+    fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
+        if(!magnets.contains(key)) magnets[key] = ProfileEntry()
 
         if (myUpdate) {
-            magnets[name]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
+            magnets[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
         } else {
-            magnets[name]!!.watchTime += time
-            magnets[name]!!.watchTime /= 2
+            magnets[key]!!.watchTime += time
+            magnets[key]!!.watchTime /= 2
         }
-        Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $name to ${magnets[name]!!.watchTime}")
+        Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${magnets[key]!!.watchTime}")
     }
 }
 
