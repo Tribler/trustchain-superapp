@@ -1,3 +1,5 @@
 pyipv8
 keys
 *.pem
+__pycache__
+.env
