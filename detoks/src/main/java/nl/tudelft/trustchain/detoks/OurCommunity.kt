@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.detoks
 
 import android.content.Context
 import android.util.Log
-import nl.tudelft.detoks.Transactions
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.messaging.Packet
@@ -24,27 +23,10 @@ class OurCommunity(
 
     private val MESSAGE_ID = 1
     init {
-//        messageHandlers[EuroTokenCommunity.MessageId.ROLLBACK_REQUEST] = ::onRollbackRequestPacket
-//        messageHandlers[EuroTokenCommunity.MessageId.ATTACHMENT] = ::onLastAddressPacket
-//        if (store.getPreferred().isEmpty()) {
-//            DefaultGateway.addGateway(store)
-//        }
         messageHandlers[MESSAGE_ID] = ::onMessage
 
         myTokenStore = store
         myContext = context
-    }
-
-    fun getData(): List<Transactions> {
-        return myTokenStore.getAllTransactions()
-    }
-
-    fun resetDatabase() {
-        myTokenStore.deleteAll()
-    }
-
-    fun addTransaction(transactionID: Int, sendFrom: String, sendTo: String, type: String) {
-        myTokenStore.addTransaction(transactionID, sendFrom, sendTo, type)
     }
 
     private fun onMessage(packet: Packet) {

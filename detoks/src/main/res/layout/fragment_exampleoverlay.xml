@@ -130,7 +130,7 @@
                         android:text="Transaction list:" />
                     <!-- Text view to show tokens to confirm by Peer 1-->
                     <TextView
-                        android:id="@+id/peer1_confirm_textview"
+                        android:id="@+id/block_list_1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="13sp"
@@ -234,7 +234,7 @@
                         android:text="Transaction list:" />
                     <!-- Text view to show tokens to confirm by Peer 2-->
                     <TextView
-                        android:id="@+id/peer2_confirm_textview"
+                        android:id="@+id/block_list_2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="13sp"
