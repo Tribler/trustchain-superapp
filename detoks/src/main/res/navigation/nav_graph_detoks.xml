@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     android:label="DeToks"
-    app:startDestination="@id/exampleOverlayFragment">
+    app:startDestination="@id/singlePeerFragment">
 
     <fragment
         android:id="@+id/detoksFragment"
@@ -21,6 +21,12 @@
         android:id="@+id/exampleOverlayFragment"
         android:name="nl.tudelft.trustchain.detoks.ExampleOverlayFragment"
         android:label="ExampleOverlay">
+    </fragment>
+
+    <fragment
+        android:id="@+id/singlePeerFragment"
+        android:name="nl.tudelft.trustchain.detoks.SinglePeerFragment"
+        android:label="SinglePeer">
     </fragment>
 
 </navigation>
