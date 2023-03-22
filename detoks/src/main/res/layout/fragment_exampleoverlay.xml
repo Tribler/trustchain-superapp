@@ -42,7 +42,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:weightSum="3"
+                android:weightSum="5"
                 android:background="@drawable/border_right"
                 android:orientation="vertical"
 
@@ -51,7 +51,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:orientation="vertical"
                     android:gravity="center|top">
                     <TextView
@@ -77,7 +77,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:orientation="vertical"
                     android:gravity="center|top"
                     >
@@ -85,14 +85,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
+                        android:textSize="15sp"
                         android:text="Last Transaction proposed:" />
                     <!-- Text view to show Peer 1's tokens-->
                     <TextView
                         android:id="@+id/peer1_tokens_textview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:textSize="13sp"
                         android:text="" />
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -117,14 +117,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:text="Last transaction agreed:" />
+                        android:textSize="15sp"
+                        android:text="Transaction list:" />
                     <!-- Text view to show tokens to confirm by Peer 1-->
                     <TextView
-                        android:id="@+id/peer1_confirm_textview"
+                        android:id="@+id/block_list_1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:textSize="13sp"
                         android:text="" />
 
                     <LinearLayout
@@ -136,7 +136,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
-                            android:text="Confirm next token" />
+                            android:text="Update transactions" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -146,14 +146,14 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:weightSum="3"
+                android:weightSum="5"
                 android:orientation="vertical"
                 >
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:orientation="vertical"
                     android:gravity="center|top">
                     <TextView
@@ -179,7 +179,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:orientation="vertical"
                     android:gravity="center|top"
                     >
@@ -187,14 +187,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
+                        android:textSize="15sp"
                         android:text="Last Transaction proposed:" />
                     <!-- Text view to show Peer 2's tokens-->
                     <TextView
                         android:id="@+id/peer2_tokens_textview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
+                        android:textSize="13sp"
                         android:text="" />
 
 
@@ -221,14 +221,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:text="Last transaction agreed:" />
+                        android:textSize="15sp"
+                        android:text="Transaction list:" />
                     <!-- Text view to show tokens to confirm by Peer 2-->
                     <TextView
-                        android:id="@+id/peer2_confirm_textview"
+                        android:id="@+id/block_list_2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:textSize="13sp"
                         android:text="" />
 
                     <LinearLayout
@@ -240,7 +240,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
-                            android:text="Confirm next token" />
+                            android:text="Update transactions:" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

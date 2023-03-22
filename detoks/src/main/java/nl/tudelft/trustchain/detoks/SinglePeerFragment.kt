@@ -21,15 +21,18 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentExampleoverlayBinding
+import nl.tudelft.trustchain.detoks.databinding.FragmentSinglePeerBinding
 import nl.tudelft.trustchain.detoks.db.OurTransactionStore
 
-class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
+class SinglePeerFragment : BaseFragment(R.layout.fragment_single_peer) {
 
-    private val binding by viewBinding(FragmentExampleoverlayBinding::bind)
+    private val binding by viewBinding(FragmentSinglePeerBinding::bind)
 
     private lateinit var ipv8: IPv8
     private lateinit var community: OurCommunity
     private lateinit var trustchainCommunity : TrustChainCommunity
+
+    private lateinit var adapter : BlockAdapter
     private val BLOCK_TYPE = "our_test_block"
 
     private var transaction_index = 0;
@@ -73,25 +76,33 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
         // Reset DB
         store.deleteAll()
 
-        binding.peer1IpTextview.text = "${ipv8.myPeer.address.ip}"
-        binding.peer2IpTextview.text = "${ipv8.myPeer.address.ip}"
+        binding.peerIp.text = "${ipv8.myPeer.address.ip}"
+        binding.otherPeers.text = "Not implemented yet"
 
-        binding.peer1SendTokenButton.setOnClickListener {
-            binding.peer1TokensTextview.text="Transaction ${transaction_index}"
+        adapter = BlockAdapter(requireActivity(),
+            trustchainCommunity.database.getAllBlocks() as ArrayList<TrustChainBlock>
+        )
+        binding.listview.isClickable = true
+        binding.listview.adapter = adapter
+        binding.listview.setOnItemClickListener() { _, _, position, _ ->
+            val block = adapter.getItem(position)
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("Block ${block.blockId}")
+            builder.setMessage("Signature: ${block.signature.toHex()}")
+            val dialog= builder.create()
+            dialog.show()
+        }
+
+        binding.sendToken.setOnClickListener {
             createProposal(ipv8.myPeer, 1)
         }
-        binding.peer2SendTokenButton.setOnClickListener {
-            binding.peer2TokensTextview.text="Transaction ${transaction_index}"
-            createProposal(ipv8.myPeer, 2)
+
+        binding.updateListButton.setOnClickListener {
+            adapter = BlockAdapter(requireActivity(),
+                trustchainCommunity.database.getAllBlocks() as ArrayList<TrustChainBlock>
+            )
         }
 
-        binding.peer1ConfirmTokenButton.setOnClickListener{
-            binding.blockList1.text = store.getAllTransactions().toString()
-        }
-
-        binding.peer2ConfirmTokenButton.setOnClickListener{
-            binding.blockList2.text = trustchainCommunity.database.getAllBlocks().toString()
-        }
 
         trustchainCommunity.addListener(BLOCK_TYPE, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
@@ -101,9 +112,9 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
                     builder.setMessage("Transaction ${block.transaction["proposal"]}. Do you want to confirm it?")
                     builder.setPositiveButton("Yes") { _, _ ->
                         if(block.transaction["peer_id"] == 1){
-                            binding.peer1TokensTextview.text="Transaction ${block.transaction["proposal"]}"
+                            binding.lastSent.text="Transaction ${block.transaction["proposal"]}"
                         } else if (block.transaction["peer_id"] == 2) {
-                            binding.peer2TokensTextview.text="Transaction ${block.transaction["proposal"]}"
+                            binding.lastSent.text="Transaction ${block.transaction["proposal"]}"
                         }
                         createAgreement(block)
                     }

@@ -57,6 +57,7 @@ import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.detoks.db.OurTransactionStore
 import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.OurCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
@@ -449,9 +450,10 @@ class TrustChainApplication : Application() {
     }
 
     private fun createOurCommunity(): OverlayConfiguration<OurCommunity> {
+        val store = OurTransactionStore.getInstance(this)
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
-            Overlay.Factory(OurCommunity::class.java),
+            OurCommunity.Factory(store, this),
             listOf(randomWalk)
         )
     }
