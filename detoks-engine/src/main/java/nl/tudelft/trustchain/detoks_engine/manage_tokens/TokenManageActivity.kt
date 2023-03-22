@@ -66,6 +66,7 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
         val myId = transactionCommunity.myPeer.mid.substring(0, 5)
         findViewById<TextView>(R.id.my_peer).text = "Peers (my id: ${myId}..)"
 
+        transactionCommunity.startAsyncSender()
     }
 
     fun onTokenClick(index: Int) {
@@ -127,7 +128,8 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
 
         val token = tokenData[tokenIndex]
         tokenStore.removeToken(token)
-        transactionCommunity.send(peerData[selectedPeerIndex], token)
+        // transactionCommunity.send(peerData[selectedPeerIndex], token)
+        transactionCommunity.sendAsync(peerData[selectedPeerIndex], token)
         selectedTokenIndex = RecyclerView.NO_POSITION
         tokenAdapter.removeAt(tokenIndex)
     }
