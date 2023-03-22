@@ -13,6 +13,9 @@ import nl.tudelft.trustchain.offlinemoney.db.UserData
 
 class MainActivityOfflineMoney() : BaseActivity() {
     private lateinit var userDao: UserDao
+    override val navigationGraph = R.navigation.nav_graph_offlinemoney
+    override val bottomNavigationMenu = R.menu.offlinemoney_menu
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val db = Room.databaseBuilder(
@@ -25,7 +28,6 @@ class MainActivityOfflineMoney() : BaseActivity() {
         testDB()
 
     }
-    override val navigationGraph = R.navigation.nav_graph_offlinemoney
 
     private fun testDB() {
         lifecycleScope.launch(Dispatchers.IO) {
