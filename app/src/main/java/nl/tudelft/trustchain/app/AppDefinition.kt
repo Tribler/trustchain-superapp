@@ -38,7 +38,7 @@ enum class AppDefinition(
         true,
     ),
     OFFLINE_MONEY(
-        R.drawable.ic_detox_logo,
+        R.drawable.ic_offline_money,
         "offline money",
         R.color.black,
         MainActivityOfflineMoney::class.java,
