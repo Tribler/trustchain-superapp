@@ -18,7 +18,7 @@ class TabBarFragment : Fragment() {
 
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)
         viewPager = view.findViewById(R.id.viewPager)
-        viewPager.adapter = TabBarAdapter(this, listOf(DeToksFragment(), ProfileFragment()))
+        viewPager.adapter = TabBarAdapter(this, listOf(DeToksFragment(), UploadFragment(), ProfileFragment()))
 
         viewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {

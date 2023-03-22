@@ -14,8 +14,6 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import nl.tudelft.ipv8.android.IPv8Android
@@ -47,9 +45,6 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
-
         val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
         val author = community.myPeer.publicKey.toString()
         val videos = community.getPostedVideos(author)
@@ -59,17 +54,7 @@ class ProfileFragment : Fragment() {
 
         numVideosLabel = view.findViewById(R.id.numVideosLabel)
         numLikesLabel = view.findViewById(R.id.numLikesLabel)
-        upload = view.findViewById(R.id.upload)
 
-//        val permission = ContextCompat.checkSelfPermission(this.requireContext(),
-//            Manifest.permission.READ_EXTERNAL_STORAGE)
-//        if (permission != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(this.requireActivity(),
-//                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-//                111)
-//
-//        }
-//        mainPart()
         updatePersonalInformation(videos)
 
 //        TODO: (optionally, if possible) Sort the list by the date and time when the video was uploaded.
@@ -107,29 +92,29 @@ class ProfileFragment : Fragment() {
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
     }
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun mainPart(){
-        val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-
-            DeToksFragment.SingleTM.torrentManager.createTorrentInfo(uri!!, this.requireContext())
-        }
-        getContent.launch("video/*")
-    }
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            111 -> {
-
-                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Log.d("AndroidRuntime", "REJECTED :(")
-
-                } else {
-                    mainPart()
-                }
-            }
-        }
-    }
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    fun mainPart(){
+//        val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+//
+//            DeToksFragment.SingleTM.torrentManager.createTorrentInfo(uri!!, this.requireContext())
+//        }
+//        getContent.launch("video/*")
+//    }
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    override fun onRequestPermissionsResult(requestCode: Int,
+//                                            permissions: Array<String>, grantResults: IntArray) {
+//        when (requestCode) {
+//            111 -> {
+//
+//                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+//                    Log.d("AndroidRuntime", "REJECTED :(")
+//
+//                } else {
+//                    mainPart()
+//                }
+//            }
+//        }
+//    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
