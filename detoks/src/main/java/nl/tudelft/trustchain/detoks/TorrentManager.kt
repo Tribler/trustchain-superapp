@@ -25,6 +25,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 
 import java.io.File
 import java.io.FileDescriptor
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -318,6 +319,12 @@ class TorrentManager(
             val input =
                 contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
             val fileLocation = "$parentDir/$fileName"
+
+            Files.createDirectories(parentDir)
+            if(Files.notExists(File(fileLocation).toPath())) {
+                Files.createFile(File(fileLocation).toPath()).toFile()
+            }
+
             val output = contentResolver.openOutputStream(Uri.fromFile(File(fileLocation)))!!
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
