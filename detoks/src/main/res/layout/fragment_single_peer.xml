@@ -27,7 +27,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="5"
+            android:layout_weight="3"
             android:orientation="vertical"
             >
             <TextView
@@ -40,6 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Connected IP:"
+                android:id="@+id/peer_ip"
                 />
             <!-- Text view to show Peer 1's IP-->
             <TextView
@@ -61,6 +62,40 @@
                 android:layout_height="wrap_content"
                 android:text=""
                 />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                >
+                <Button
+                    android:id="@+id/send_token"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Send Token"
+                    android:onClick="createProposal"
+                    />
+                <Button
+                    android:id="@+id/peer1_button2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select Receiver"
+                    android:onClick="selectPeer"
+                    />
+            </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Last sent block:"></TextView>
+            <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+                android:id="@+id/last_sent"></TextView>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Update list"
+                android:id="@+id/update_list_button"></Button>
         </LinearLayout>
 
         <!-- ListView -->
@@ -82,7 +117,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/listview"
-                tools:listitem="@layout/list_item"/>
+                tools:listitem="@layout/list_item"
+                android:divider="#000000"
+                android:dividerHeight="1dp"/>
         </LinearLayout>
 
     </LinearLayout>

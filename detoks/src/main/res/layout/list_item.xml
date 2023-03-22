@@ -18,7 +18,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
 
-                android:id="@+id/recordNumber"
+                android:id="@+id/record_number"
                 android:textColor="@color/black"
                 android:textSize="15sp"
                 android:textStyle="bold"
@@ -51,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
 
-                android:id="@+id/blockNumber"
+                android:id="@+id/block_number"
                 android:textColor="@color/black"
                 android:textSize="15sp"
                 android:textStyle="bold"
