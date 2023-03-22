@@ -128,11 +128,6 @@
             android:theme="@style/Fullscreen" />
 
         <activity
-            android:name="nl.tudelft.trustchain.offlinemoney.MainActivityOfflineMoney"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:theme="@style/Theme.PeerChat" />
-
-        <activity
             android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
             android:exported="true"
             android:launchMode="singleTop"

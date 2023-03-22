@@ -32,7 +32,7 @@
             android:id="@+id/txtOwnName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/your_balance"
+            android:text="Your balance"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/txtOwnPublicKey"
@@ -43,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="20.00"
-            android:textSize="60sp"
+            android:textSize="60dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/txtOwnName"  />
@@ -68,23 +68,22 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/txt1Euro"
+                android:id="@+id/txtIntro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="30sp"
-                android:text="1€"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:text="Get or transfer token:"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/edt1Euro"
+            <EditText
+                android:id="@+id/edtAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="30sp"
-                android:text=""
+                android:hint="0.00"
+                android:inputType="numberDecimal"
+                android:textSize="32dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txt1Euro" />
+                app:layout_constraintTop_toBottomOf="@id/txtIntro" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGet"
@@ -92,11 +91,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:text="@string/get"
+                android:text="Get"
                 app:icon="@drawable/ic_baseline_photo_camera_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/edt1Euro"/>
+                app:layout_constraintTop_toBottomOf="@id/edtAmount" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSend"
@@ -104,10 +103,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:text="@string/send"
+                android:text="Send"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnGet" />
+
+            <TextView
+                android:id="@+id/txtPublicKey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Your public key:"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnSend" />
+
+            <ImageView
+                android:id="@+id/qrPublicKey"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="H,1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtPublicKey" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

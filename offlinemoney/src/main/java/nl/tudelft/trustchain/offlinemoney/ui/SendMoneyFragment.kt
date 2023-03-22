@@ -13,28 +13,30 @@ import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.databinding.SendMoneyFragmentBinding
 import org.json.JSONObject
 
-class SendMoneyFragment : OfflineMoneyBaseFragment(R.layout.send_money_fragment)  {
+class SendMoneyFragment  : OfflineMoneyBaseFragment(R.layout.send_money_fragment)  {
     private val binding by viewBinding(SendMoneyFragmentBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val promiseString = requireArguments().getString(ARG_DATA)!!
-        // TO DO to store promise
-        binding.txtSendData.text = promiseString
 
-        val json = JSONObject().put("type", "transfer")
-        json.put("payload", JSONObject(promiseString))
+        // val exchange_list = mutableListOf("public_key" , "private_key", 5);
+
+        val exchange_json_object = requireArguments().getString(ARG_DATA)!!
+        println(exchange_json_object)
+        binding.txtSendData.text = exchange_json_object
+
+        // binding.requestJsonData.text = exchange_json_object
 
         lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.Default) {
-                qrCodeUtils.createQR(json.toString())
+                qrCodeUtils.createQR(exchange_json_object)
             }
             binding.qrImageView.setImageBitmap(bitmap)
         }
 
         binding.btnContinue.setOnClickListener {
-            findNavController().navigate(R.id.action_sendMoneyFragment_to_transferFragment)
+            findNavController().navigate(R.id.action_sendMoneyFragment_to_tranferFragment)
         }
     }
 

@@ -10,13 +10,10 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.databinding.ActivityMainOfflineMoneyBinding
-import nl.tudelft.trustchain.offlinemoney.payloads.RequestPayload
-import nl.tudelft.trustchain.offlinemoney.payloads.Promise
 import org.json.JSONObject
 import org.json.JSONException
 
@@ -27,59 +24,79 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         QRCodeUtils(requireContext())
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.edt1Euro.text = 5.toString()
-//        val pbk = transactionRepository.
-//
-//        lifecycleScope.launch {
-//            binding.txtPublicKey.text = pbk.toHex()
-//
-//            val json = JSONObject().put("type", "request")
-//            json.put("payload", pbk.toString())
-//            val bitmap = withContext(Dispatchers.Default) {
-//                qrCodeUtils.createQR(json.toString())
-//            }
-//            binding.qrPublicKey.setImageBitmap(bitmap)
-//        }
+        lifecycleScope.launch {
+            val bitmap = withContext(Dispatchers.Default) {
+                val json = JSONObject().put("public_key", PUBLIC_KEY)
+                qrCodeUtils.createQR(json.toString())
+            }
+            binding.qrPublicKey.setImageBitmap(bitmap)
+        }
 
         binding.btnGet.setOnClickListener {
             qrCodeUtils.startQRScanner(this)
         }
 
         binding.btnSend.setOnClickListener{
-            findNavController().navigate(R.id.action_transferFragment_to_sendAmountFragment)
+            val amount = binding.edtAmount.text.toString().toDouble()
+            println(amount)
+
+            if (amount > 0) {
+                val myPeer = "kjalsdjfoiawonsad"
+
+                val connectionData = JSONObject()
+                connectionData.put("public_key", PUBLIC_KEY)
+                connectionData.put("amount", amount)
+                connectionData.put("name", myPeer)
+
+
+                val args = Bundle()
+
+                args.putString(SendMoneyFragment.ARG_DATA, connectionData.toString())
+
+                findNavController().navigate(
+                    R.id.action_transferFragment_to_sendMoneyFragment,
+                    args
+                )
+            }
+
         }
 
     }
 
-    @Deprecated("Deprecated in Java")
+    fun getAmount(amount: String): Long {
+        val regex = """[^\d]""".toRegex()
+        if (amount.isEmpty()) {
+            return 0L
+        }
+        return regex.replace(amount, "").toLong()
+    }
+
     @SuppressLint("SetTextI18n")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
-                val type = JSONObject(it).optString("type")
-//                if (type == "transfer") {
-                    val promise = Promise.fromJson(JSONObject(JSONObject(it).getString("payload")))!!
-                    // TO DO to store promise
-                    val amount = promise.amount
-                    val past = binding.txtBalance.text.toString().toDouble()
+                val amount = JSONObject(it).optDouble("amount", 0.0)
 
-                    binding.txtBalance.text = (past + amount).toString()
-//                } else {
-//                    val args = Bundle()
-//                    args.putString(SendAmountFragment.ARG_RECEIVER, JSONObject(it).getString("payload"))
-//                    findNavController().navigate(
-//                        R.id.action_transferFragment_to_sendAmountFragment,
-//                        args
-//                    )
-//                }
+                val past = binding.txtBalance.text.toString().toDouble()
+
+                binding.txtBalance.text = (past + amount).toString()
+
             } catch (e: JSONException) {
                 Toast.makeText(requireContext(), "Scan failed, try again", Toast.LENGTH_LONG).show()
             }
         } ?: Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
         return
+    }
+
+    companion object {
+        const val PUBLIC_KEY = "kjalsdjfoiawonsad"
     }
 }
 
