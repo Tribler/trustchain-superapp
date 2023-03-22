@@ -1,11 +1,14 @@
 package nl.tudelft.trustchain.offlinemoney.ui
 
 import android.os.Bundle
+import androidx.room.Room
 import mu.KotlinLogging
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.offlinemoney.db.OfflineMoneyRoomDatabase
+import nl.tudelft.trustchain.offlinemoney.db.UserDao
 
 open class OfflineMoneyBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
     protected val logger = KotlinLogging.logger {}
@@ -26,6 +29,7 @@ open class OfflineMoneyBaseFragment(contentLayoutId: Int = 0) : BaseFragment(con
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
+
     }
 
     override fun onResume() {
