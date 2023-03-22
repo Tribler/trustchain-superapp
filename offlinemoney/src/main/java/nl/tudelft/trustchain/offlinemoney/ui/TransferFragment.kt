@@ -30,25 +30,26 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val pbk = transactionRepository.trustChainCommunity.myPeer.publicKey
-
-        lifecycleScope.launch {
-            binding.txtPublicKey.text = pbk.keyToBin().toHex()
-
-            val json = JSONObject().put("type", "request")
-            json.put("payload", RequestPayload(pbk).toJson())
-            val bitmap = withContext(Dispatchers.Default) {
-                qrCodeUtils.createQR(json.toString())
-            }
-            binding.qrPublicKey.setImageBitmap(bitmap)
-        }
+        binding.edt1Euro.text = 5.toString()
+//        val pbk = transactionRepository.
+//
+//        lifecycleScope.launch {
+//            binding.txtPublicKey.text = pbk.toHex()
+//
+//            val json = JSONObject().put("type", "request")
+//            json.put("payload", pbk.toString())
+//            val bitmap = withContext(Dispatchers.Default) {
+//                qrCodeUtils.createQR(json.toString())
+//            }
+//            binding.qrPublicKey.setImageBitmap(bitmap)
+//        }
 
         binding.btnGet.setOnClickListener {
             qrCodeUtils.startQRScanner(this)
         }
 
         binding.btnSend.setOnClickListener{
-            qrCodeUtils.startQRScanner(this)
+            findNavController().navigate(R.id.action_transferFragment_to_sendAmountFragment)
         }
 
     }
@@ -59,21 +60,21 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
                 val type = JSONObject(it).optString("type")
-                if (type == "transfer") {
+//                if (type == "transfer") {
                     val promise = Promise.fromJson(JSONObject(JSONObject(it).getString("payload")))!!
                     // TO DO to store promise
                     val amount = promise.amount
                     val past = binding.txtBalance.text.toString().toDouble()
 
                     binding.txtBalance.text = (past + amount).toString()
-                } else {
-                    val args = Bundle()
-                    args.putString(SendAmountFragment.ARG_RECEIVER, JSONObject(it).getString("payload"))
-                    findNavController().navigate(
-                        R.id.action_transferFragment_to_sendAmountFragment,
-                        args
-                    )
-                }
+//                } else {
+//                    val args = Bundle()
+//                    args.putString(SendAmountFragment.ARG_RECEIVER, JSONObject(it).getString("payload"))
+//                    findNavController().navigate(
+//                        R.id.action_transferFragment_to_sendAmountFragment,
+//                        args
+//                    )
+//                }
             } catch (e: JSONException) {
                 Toast.makeText(requireContext(), "Scan failed, try again", Toast.LENGTH_LONG).show()
             }

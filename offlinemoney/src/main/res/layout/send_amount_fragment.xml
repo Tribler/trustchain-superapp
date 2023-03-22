@@ -60,17 +60,65 @@
                 android:text="@string/transfer_amount"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <EditText
-                android:id="@+id/edtAmount"
+            <TextView
+                android:id="@+id/txtAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="0.00"
-                android:inputType="numberDecimal"
-                android:textSize="32sp"
-                android:importantForAutofill="no"
+                android:text="0.00"
+                android:textSize="30sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/txtTransfer" />
+
+            <TextView
+                android:id="@+id/txt1Euro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1€"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtAmount" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraint_inner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:id="@+id/imgMinus"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:padding="5dp"
+                    android:src="@drawable/ic_minus"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <TextView
+                    android:id="@+id/txtNumbers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="24dp"
+                    android:layout_marginStart="24dp"
+                    android:textColor="@android:color/black"
+                    app:layout_constraintTop_toTopOf="@+id/imgMinus"
+                    app:layout_constraintBottom_toBottomOf="@id/imgMinus"
+                    app:layout_constraintStart_toEndOf="@+id/imgMinus"/>
+
+                <ImageView
+                    android:id="@+id/imgPlus"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="24dp"
+                    android:src="@drawable/ic_plus"
+                    android:padding="5dp"
+                    app:layout_constraintStart_toEndOf="@+id/txtNumbers"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
                 android:id="@+id/buttonLayout"
@@ -80,7 +128,7 @@
                 android:layout_margin="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/edtAmount"
+                app:layout_constraintTop_toBottomOf="@id/constraint_inner"
                 >
 
             <com.google.android.material.button.MaterialButton
