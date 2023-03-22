@@ -68,11 +68,23 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/txtIntro"
+                android:id="@+id/txt1Euro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/get_or_transfer_token"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:textSize="30sp"
+                android:text="1€"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/edt1Euro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:text=""
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txt1Euro" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGet"
@@ -84,7 +96,7 @@
                 app:icon="@drawable/ic_baseline_photo_camera_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtIntro" />
+                app:layout_constraintTop_toBottomOf="@id/edt1Euro"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSend"
@@ -93,28 +105,9 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:text="@string/send"
-                app:icon="@drawable/ic_baseline_photo_camera_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnGet" />
-
-            <TextView
-                android:id="@+id/txtPublicKey"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/your_public_key"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnSend" />
-
-            <ImageView
-                android:id="@+id/qrPublicKey"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintDimensionRatio="H,1:1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtPublicKey" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
