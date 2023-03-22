@@ -77,8 +77,10 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
     }
 
     fun refresh() {
-        tokenData = ArrayList(tokenStore.getAllToken())
-        peerData = ArrayList(transactionCommunity.getPeers())
+        tokenData.clear()
+        tokenData.addAll(tokenStore.getAllToken())
+        peerData.clear()
+        peerData.addAll(transactionCommunity.getPeers())
         tokenAdapter.notifyDataSetChanged()
         peerAdapter.notifyDataSetChanged()
     }
