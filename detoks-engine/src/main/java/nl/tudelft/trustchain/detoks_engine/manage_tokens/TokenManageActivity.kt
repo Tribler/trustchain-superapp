@@ -11,19 +11,23 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks_engine.R
-import nl.tudelft.trustchain.detoks_engine.TransactionCommunity
 import nl.tudelft.trustchain.detoks_engine.db.TokenStore
+import nl.tudelft.trustchain.detoks_engine.trustchain.CommunityAdapter
+import nl.tudelft.trustchain.detoks_engine.trustchain.TrustChainTransactionCommunity
 import java.util.UUID
 
 class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
     private lateinit var tokenStore: TokenStore
-    private lateinit var transactionCommunity: TransactionCommunity
+    private lateinit var trustChainCommunity: TrustChainTransactionCommunity
+    private lateinit var communityAdapter: CommunityAdapter
 
     private lateinit var tokenData: ArrayList<String>
     private lateinit var peerData: ArrayList<Peer>
     private lateinit var tokenAdapter: ListAdapter<String>
     private lateinit var peerAdapter: ListAdapter<Peer>
     private val logger = KotlinLogging.logger {}
+
+    private val transactionsInTransit: MutableMap<String, Transaction> = mutableMapOf()
 
     private var selectedTokenIndex: Int = RecyclerView.NO_POSITION
     private var selectedPeerIndex: Int = RecyclerView.NO_POSITION
@@ -43,10 +47,11 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
 
 
         tokenStore = TokenStore.getInstance(this)
-        transactionCommunity = IPv8Android.getInstance().getOverlay()!!
+        trustChainCommunity = IPv8Android.getInstance().getOverlay<TrustChainTransactionCommunity>()!!
+        communityAdapter = CommunityAdapter(trustChainCommunity)
 
         tokenData = ArrayList(tokenStore.getAllToken())
-        peerData = ArrayList(transactionCommunity.getPeers())
+        peerData = ArrayList(communityAdapter.getPeers())
         val tokenListView = findViewById<RecyclerView>(R.id.token_list)
         val peerListView = findViewById<RecyclerView>(R.id.peer_list)
 
@@ -55,15 +60,34 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
         tokenListView.adapter = tokenAdapter
         peerListView.adapter = peerAdapter
 
-        transactionCommunity.setHandler {
-                msg: String ->
-            logger.debug("Detoks_engine handler in manage activity")
-            tokenStore.storeToken(msg)
-            tokenData.add(msg)
-            runOnUiThread{ tokenAdapter.notifyItemInserted(tokenData.size - 1) }
+
+        communityAdapter.setReceiveAckHandler {
+            transactionId ->
+            val succeededTransaction = transactionsInTransit[transactionId]
+            transactionsInTransit.remove(transactionId)
+            succeededTransaction?.tokens?.forEach { t ->
+                tokenStore.removeToken(t)
+                runOnUiThread{tokenAdapter.removeAt(tokenData.indexOf("... $t"))}
+            }
         }
 
-        val myId = transactionCommunity.myPeer.mid.substring(0, 5)
+        communityAdapter.setReceiveTransactionHandler {
+            transaction ->
+            transaction.tokens.forEach{ t ->
+                tokenStore.storeToken(t)
+                tokenData.add(t)
+                runOnUiThread{ tokenAdapter.notifyItemInserted(tokenData.size - 1) }
+            }
+        }
+
+//        transactionCommunity.setHandler {
+//                msg: String ->
+//            tokenStore.storeToken(msg)
+//            tokenData.add(msg)
+//            runOnUiThread{ tokenAdapter.notifyItemInserted(tokenData.size - 1) }
+//        }
+
+        val myId = trustChainCommunity.myPeer.mid.substring(0, 5)
         findViewById<TextView>(R.id.my_peer).text = "Peers (my id: ${myId}..)"
 
     }
@@ -80,13 +104,13 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
         tokenData.clear()
         tokenData.addAll(tokenStore.getAllToken())
         peerData.clear()
-        peerData.addAll(transactionCommunity.getPeers())
+        peerData.addAll(communityAdapter.getPeers())
         tokenAdapter.notifyDataSetChanged()
         peerAdapter.notifyDataSetChanged()
     }
 
     fun generate() {
-        val newToken: String = UUID.randomUUID().toString()
+        val newToken: String = UUID.randomUUID().toString().substring(0, 4)
         tokenStore.storeToken(newToken)
         tokenData.add(newToken)
         tokenAdapter.notifyItemInserted(tokenData.size - 1)
@@ -128,10 +152,12 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
         }
 
         val token = tokenData[tokenIndex]
-        tokenStore.removeToken(token)
-        transactionCommunity.send(peerData[selectedPeerIndex], token)
+        tokenData[tokenIndex] = "... $token"
+        tokenAdapter.notifyItemChanged(tokenIndex)
+        val transaction = Transaction(listOf(token))
+        transactionsInTransit[transaction.transactionId] = transaction
+        communityAdapter.proposeTransaction(transaction, peerData[selectedPeerIndex])
         selectedTokenIndex = RecyclerView.NO_POSITION
-        tokenAdapter.removeAt(tokenIndex)
     }
 
 }
