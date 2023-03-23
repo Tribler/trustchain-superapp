@@ -62,7 +62,7 @@ class ProfileFragment : Fragment() {
 
 //        TODO: (optionally, if possible) Sort the list by the date and time when the video was liked.
         val likedListFragment = LikedListFragment(
-            community.listOfLikedVideosAndTorrents(author).map { it.first + ", " + it.second }
+            community.listOfLikedVideosAndTorrents(author).map { it.second }
         )
 
 //        TODO: (optionally, if possible) Sort the list by the date and time when the notification was received.
