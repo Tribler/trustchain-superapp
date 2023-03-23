@@ -21,7 +21,7 @@
                 android:id="@+id/txtIntro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Have the Requesting party scan this code, then press done"
+                android:text="@string/have_the_requesting_party_scan_this_code_then_press_done"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:gravity="center_horizontal"
-                android:text="Sending"
+                android:text="@string/sending"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/txtIntro" />
@@ -62,6 +62,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Continue"
+        android:text="@string/continueString"
         app:layout_constraintBottom_toBottomOf="parent" />
 </LinearLayout>

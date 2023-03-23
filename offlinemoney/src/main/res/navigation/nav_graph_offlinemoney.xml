@@ -7,22 +7,44 @@
     <fragment
         android:id="@+id/transferFragment"
         android:name="nl.tudelft.trustchain.offlinemoney.ui.TransferFragment"
-        android:label="Transfer"
+        android:label="Offline Money"
         tools:layout="@layout/activity_main_offline_money">
         <action
-            android:id="@+id/action_transferFragment_to_sendMoneyFragment"
-            app:destination="@id/sendMoneyFragment"
+            android:id="@+id/action_transferFragment_to_sendAmountFragment"
+            app:destination="@id/sendAmountFragment"
             />
     </fragment>
 
     <fragment
         android:id="@+id/sendMoneyFragment"
         android:name="nl.tudelft.trustchain.offlinemoney.ui.SendMoneyFragment"
-        android:label="SendMoneyFragment"
+        android:label="Transfer"
         tools:layout="@layout/send_money_fragment">
         <action
-            android:id="@+id/action_sendMoneyFragment_to_tranferFragment"
+            android:id="@+id/action_sendMoneyFragment_to_transferFragment"
             app:destination="@id/transferFragment"
             />
+    </fragment>
+
+    <fragment
+        android:id="@+id/sendAmountFragment"
+        android:name="nl.tudelft.trustchain.offlinemoney.ui.SendAmountFragment"
+        android:label="Transfer"
+        tools:layout="@layout/send_amount_fragment">
+        <action
+            android:id="@+id/action_sendAmountFragment_to_transferFragment"
+            app:destination="@id/transferFragment"
+            />
+        <action
+            android:id="@+id/action_sendAmountFragment_to_sendMoneyFragment"
+            app:destination="@id/sendMoneyFragment"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/transactionsFragment"
+        android:name="nl.tudelft.trustchain.offlinemoney.ui.TransactionsFragment"
+        android:label="Transactions"
+        tools:layout="@layout/transactions_fragment">
     </fragment>
 </navigation>
