@@ -19,6 +19,8 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         get() = "${requireActivity().cacheDir.absolutePath}/torrent"
     private val mediaCacheDir: String
         get() = "${requireActivity().cacheDir.absolutePath}/media"
+    private val postVideosDir: String
+        get() = "${requireActivity().cacheDir.absolutePath}/postVideos"
 
     private fun cacheDefaultTorrent() {
         try {
@@ -38,6 +40,33 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
                 ins.close()
                 outputStream.close()
             }
+
+            val catfile = File("$torrentDir/$DEFAULT_POST_VIDEO")
+            if (!catfile.exists()) {
+                val outputStream = FileOutputStream(catfile)
+                val ins = requireActivity().resources.openRawResource(R.raw.cat)
+                outputStream.write(ins.readBytes())
+                ins.close()
+                outputStream.close()
+            }
+//
+//            val arcanefile = File("$torrentDir/arcane.torrent")
+//            if (arcanefile.exists()) {
+//                arcanefile.delete()
+//            }
+//
+            val dir3 = File(postVideosDir)
+            if (!dir3.exists()) {
+                dir3.mkdirs()
+            }
+            val file2 = File("$postVideosDir/$DEFAULT_POST_VIDEO")
+            if (!file2.exists()) {
+                val outputStream = FileOutputStream(file2)
+                val ins = requireActivity().resources.openRawResource(R.raw.cat)
+                outputStream.write(ins.readBytes())
+                ins.close()
+                outputStream.close()
+            }
         } catch (e: Exception) {
             Log.e("DeToks", "Failed to cache default torrent: $e")
         }
@@ -49,6 +78,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         torrentManager = TorrentManager(
             File("${requireActivity().cacheDir.absolutePath}/media"),
             File("${requireActivity().cacheDir.absolutePath}/torrent"),
+            File("${requireActivity().cacheDir.absolutePath}/postVideos"),
             DEFAULT_CACHING_AMOUNT
         )
     }
@@ -85,7 +115,10 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     }
 
     companion object {
-        const val DEFAULT_CACHING_AMOUNT = 2
+        const val DEFAULT_CACHING_AMOUNT = 1
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"
+        const val DEFAULT_POST_VIDEO = "cat.torrent"
+//        const val DEFAULT_POST_VIDEO2 = "pexels10.torrent"
+//        const val DEFAULT_POST_VIDEO3 = "blueparrot.torrent"
     }
 }
