@@ -7,6 +7,7 @@ import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
 import mu.KotlinLogging
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.detoks.recommendation.Recommender
 import java.io.File
 import java.io.FileOutputStream
 

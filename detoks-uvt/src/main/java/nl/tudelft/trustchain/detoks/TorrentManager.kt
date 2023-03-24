@@ -12,6 +12,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
+import nl.tudelft.trustchain.detoks.recommendation.Recommender
 import java.io.File
 
 /**
@@ -37,6 +38,10 @@ class TorrentManager(
         initializeVideoPool()
     }
 
+    fun getCurrentIndex(): Int {
+        return currentIndex
+    }
+
     fun addNewVideo(proposalBlockHash: String, videoPostedOn: String, videoID: String) {
         val lastTorrentHandler = torrentFiles.lastOrNull()!!
         torrentFiles.add(TorrentHandlerPlusUserInfo(cacheDir,
@@ -52,6 +57,8 @@ class TorrentManager(
     fun notifyIncrease() {
         Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
+        val recommendation = Recommender.getNextRecommendation()
+        Log.i("DeToks", "Recommended video: $recommendation")
     }
 
     fun notifyDecrease() {
