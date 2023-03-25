@@ -33,20 +33,20 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
 
     private var transaction_index = 0;
 
-    private fun generateTokensFor1Sec(): Int {
-        val startTime = System.currentTimeMillis()
-        val endTime = startTime + 1000 // 1 second time limit
-        var numTokens = 0
-
-        while (System.currentTimeMillis() < endTime) {
-            val unique_id = "token-$numTokens"
-            val token = Token(unique_id)
-            token.serialize()
-            numTokens++
-        }
-
-        return numTokens
-    }
+//    private fun generateTokensFor1Sec(): Int {
+//        val startTime = System.currentTimeMillis()
+//        val endTime = startTime + 1000 // 1 second time limit
+//        var numTokens = 0
+//
+//        while (System.currentTimeMillis() < endTime) {
+//            val unique_id = "token-$numTokens"
+//            val token = Token(unique_id)
+//            token.serialize()
+//            numTokens++
+//        }
+//
+//        return numTokens
+//    }
 
     private fun blockpacking() {
         for(i in 0..9) {
@@ -65,7 +65,7 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
             val block = halfblocks.reduce {acc, byteArray -> acc + byteArray }
 
             val propose_transaction = mapOf("proposal" to i, "block" to block)
-            trustchainCommunity.createProposalBlock(BLOCK_TYPE2)
+            trustchainCommunity.createProposalBlock(BLOCK_TYPE2, propose_transaction, ipv8.myPeer.publicKey.keyToBin())
 
         }
         //agreement(halfblocks)
@@ -83,7 +83,7 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
 
         binding.startTransactionsButton.setOnClickListener {
             binding.transactionsPerSecondField.text =
-                "${generateTokensFor1Sec()} transactions per second"
+                "${blockpacking()} transactions per second"
         }
     }
     fun switchEnvirmonments(view: View){
