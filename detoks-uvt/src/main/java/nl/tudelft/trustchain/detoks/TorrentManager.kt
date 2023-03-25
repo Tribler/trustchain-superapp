@@ -67,12 +67,12 @@ class TorrentManager(
         Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
 
-//        val recommendedVideo: String? = Recommender.getNextRecommendation()
-//        if (recommendedVideo != null) {
-//            Log.i("DeToks", "Recommended video ID: $recommendedVideo")
-//        } else {
-//            Log.i("DeToks", "Could not get recommended video")
-//        }
+        val recommendedVideo: String? = Recommender.getNextRecommendation()
+        if (recommendedVideo != null) {
+            Log.i("DeToks", "Recommended video ID: $recommendedVideo")
+        } else {
+            Log.i("DeToks", "Could not get recommended video")
+        }
     }
 
     fun notifyDecrease() {

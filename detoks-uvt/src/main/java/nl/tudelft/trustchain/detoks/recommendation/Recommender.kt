@@ -22,6 +22,7 @@ class Recommender {
         fun initialize(torrentManager: TorrentManager) {
             if (isInitialized)
                 return
+            Log.i("DeToks", "Initializing Recommender...")
             val allTorrents: List<TorrentManager.TorrentHandler> = torrentManager.getAllTorrents()
             recommendations.addAll(allTorrents.map{ it.asMediaInfo().videoID }.toMutableList())
             isInitialized = true
@@ -55,32 +56,43 @@ class Recommender {
          * Update the list of recommendations.
          */
         private fun createNewRecommendations() {
-            Log.i("DeToksRecommend", "Creating new recommendations...")
+            Log.i("DeToks", "Creating new recommendations...")
 
             // Recommend the most liked videos
             if (Random.nextFloat() <= mostLikedProb) {
-                Log.i("DeToksRecommend", "Recommending MOST LIKED videos...")
+                Log.i("DeToks", "Recommending MOST LIKED videos...")
                 recommendations.addAll(getMostLikedVideoIDs())
             }
             // Recommend random videos to allow users to see new stuff they might like
             else {
-                Log.i("DeToksRecommend", "Recommending RANDOM videos...")
+                Log.i("DeToks", "Recommending RANDOM videos...")
                 recommendations.addAll(getRandomVideoIDs())
             }
+            Log.i("DeToks", "Recommendations: $recommendations")
         }
 
         private fun getMostLikedVideoIDs(): List<String> {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
-            val mostLikedIDs = mutableListOf<String>()
             val allUpvoteTokens = upvoteCommunity?.database?.getBlocksWithType(
-                UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN) ?: return mostLikedIDs
+                UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN) ?: return listOf()
+            Log.i("DeToks", "RECEIVED ${allUpvoteTokens.size} UPVOTE TOKENS!")
+
+            var videoHashMap: HashMap<String, Int> = hashMapOf()
             for (block: TrustChainBlock in allUpvoteTokens) {
                 if (block.isAgreement) {
                     val videoID: String = block.transaction["videoID"] as String
-                    Log.i("DeToksRecommend", "Like for video: $videoID")
+                    Log.i("DeToks", "Like for video: $videoID")
+
+                    if (videoHashMap.containsKey(videoID)) {
+                        val currentLikes = videoHashMap[videoID]
+                        videoHashMap[videoID] = currentLikes!! + 1
+                    } else {
+                        videoHashMap[videoID] = 1
+                    }
                 }
             }
-            return mostLikedIDs
+            videoHashMap.toSortedMap(Comparator.reverseOrder())
+            return videoHashMap.keys.toList()
         }
 
         private fun getRandomVideoIDs(): List<String> {

@@ -11,6 +11,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
+import java.time.LocalDateTime
 
 class ProposalToken {
 
@@ -26,8 +27,10 @@ class ProposalToken {
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
         val myPeer = IPv8Android.getInstance().myPeer
 
+        val videoIDTimestamp = LocalDateTime.now()
+        val ownPublicKeyString = myPeer.publicKey.toString()
         val transaction = mapOf(
-            "videoID" to "TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
+            "videoID" to "$ownPublicKeyString $videoIDTimestamp TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
             "heartTokenGivenBy" to ANY_COUNTERPARTY_PK.toHex(),
             "heartTokenGivenTo" to myPeer.publicKey.keyToBin().toHex()
         )
