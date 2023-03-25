@@ -25,8 +25,8 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         get() = "${requireActivity().cacheDir.absolutePath}/torrent"
     private val mediaCacheDir: String
         get() = "${requireActivity().cacheDir.absolutePath}/media"
-    private val postVideosDir: String
-        get() = "${requireActivity().cacheDir.absolutePath}/postVideos"
+    private val seedableTorrentsDir: String
+        get() = "${requireActivity().cacheDir.absolutePath}/seedableTorrents"
 
     private fun cacheDefaultTorrent() {
         try {
@@ -46,45 +46,47 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
                 ins.close()
                 outputStream.close()
             }
-
-            val catfile = File("$torrentDir/$DEFAULT_POST_VIDEO")
-            if (!catfile.exists()) {
-                val outputStream = FileOutputStream(catfile)
-                val ins = requireActivity().resources.openRawResource(R.raw.cat)
-                outputStream.write(ins.readBytes())
-                ins.close()
-                outputStream.close()
-            }
-//
-//            val arcanefile = File("$torrentDir/arcane.torrent")
-//            if (arcanefile.exists()) {
-//                arcanefile.delete()
-//            }
-//
-            val dir3 = File(postVideosDir)
-            if (!dir3.exists()) {
-                dir3.mkdirs()
-            }
-            val file2 = File("$postVideosDir/$DEFAULT_POST_VIDEO")
-            if (!file2.exists()) {
-                val outputStream = FileOutputStream(file2)
-                val ins = requireActivity().resources.openRawResource(R.raw.cat)
-                outputStream.write(ins.readBytes())
-                ins.close()
-                outputStream.close()
-            }
         } catch (e: Exception) {
             Log.e("DeToks", "Failed to cache default torrent: $e")
         }
     }
 
+    private fun makeSeedableTorrentDirAndPopulate(){
+        try{
+            val dir3 = File(seedableTorrentsDir)
+            if (!dir3.exists()) {
+                dir3.mkdirs()
+            }
+            // currently I only know how to add seedable torrents manually and one by one T_T
+            // TODO: figure out how to add all seedable torrents all in one swoop and not one by one
+            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.cat)
+            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.pexels10)
+            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO3, R.raw.blueparrot)
+        } catch (e: Exception) {
+            Log.e("Detoks", "Failed to make a cache for seedable torrents")
+        }
+    }
+
+    private fun addFile(dir: String, nameOfFileToAdd: String, fileRawInt: Int) {
+        val file = File("$dir/$nameOfFileToAdd")
+        if (!file.exists()) {
+            val outputStream = FileOutputStream(file)
+            val ins = requireActivity().resources.openRawResource(fileRawInt)
+            outputStream.write(ins.readBytes())
+            ins.close()
+            outputStream.close()
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         cacheDefaultTorrent()
+        makeSeedableTorrentDirAndPopulate()
         torrentManager = TorrentManager(
             File("${requireActivity().cacheDir.absolutePath}/media"),
             File("${requireActivity().cacheDir.absolutePath}/torrent"),
-            File("${requireActivity().cacheDir.absolutePath}/postVideos"),
+            File("${requireActivity().cacheDir.absolutePath}/seedableTorrents"),
             DEFAULT_CACHING_AMOUNT
         )
 
@@ -128,7 +130,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         const val DEFAULT_CACHING_AMOUNT = 1
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"
         const val DEFAULT_POST_VIDEO = "cat.torrent"
-//        const val DEFAULT_POST_VIDEO2 = "pexels10.torrent"
-//        const val DEFAULT_POST_VIDEO3 = "blueparrot.torrent"
+        const val DEFAULT_POST_VIDEO2 = "pexels10.torrent"
+        const val DEFAULT_POST_VIDEO3 = "blueparrot.torrent"
     }
 }
