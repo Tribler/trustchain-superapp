@@ -47,8 +47,8 @@ class TorrentManager(
         initializeVideoPool()
     }
 
-    fun getCurrentIndex(): Int {
-        return currentIndex
+    fun getAllTorrents(): List<TorrentHandler> {
+        return torrentFiles
     }
 
     fun addNewVideo(proposalBlockHash: String, videoPostedOn: String, videoID: String) {
@@ -66,8 +66,13 @@ class TorrentManager(
     fun notifyIncrease() {
         Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
-        val recommendation = Recommender.getNextRecommendation()
-        Log.i("DeToks", "Recommended video: $recommendation")
+
+//        val recommendedVideo: String? = Recommender.getNextRecommendation()
+//        if (recommendedVideo != null) {
+//            Log.i("DeToks", "Recommended video ID: $recommendedVideo")
+//        } else {
+//            Log.i("DeToks", "Could not get recommended video")
+//        }
     }
 
     fun notifyDecrease() {
@@ -312,36 +317,36 @@ class TorrentManager(
      * directory to Libtorrent and selects all .mp4 files for download.
      */
     private fun buildTorrentIndex() {
-        val files = torrentDir.listFiles()
-        if (files != null) {
-            for (file in files) {
-                if (file.extension == "torrent") {
-                    val torrentInfo = TorrentInfo(file)
-                    sessionManager.download(torrentInfo, cacheDir)
-                    val handle = sessionManager.find(torrentInfo.infoHash())
-                    handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
-                    val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
-                    handle.prioritizeFiles(priorities)
-                    handle.pause()
-                    Log.i("Detoks", "name of the torrent file is: ${torrentInfo.name()}")
-                    Log.i("Detoks", "The magnet URI created by .makeMagnetUri() function is ${handle.makeMagnetUri()}")
-                    Log.i("Detoks", "The magnet URI create by constructMagnetLink() is ${MagnetUtils.constructMagnetLink(torrentInfo.infoHash(), torrentInfo.name())}")
+        val files = torrentDir.listFiles() ?: return
+
+        for (file in files) {
+            if (file.extension != "torrent")
+                continue
+
+            val torrentInfo = TorrentInfo(file)
+            sessionManager.download(torrentInfo, cacheDir)
+            val handle = sessionManager.find(torrentInfo.infoHash())
+            handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+            val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
+            handle.prioritizeFiles(priorities)
+            handle.pause()
+            Log.i("Detoks", "name of the torrent file is: ${torrentInfo.name()}")
+            Log.i("Detoks", "The magnet URI created by .makeMagnetUri() function is ${handle.makeMagnetUri()}")
+            Log.i("Detoks", "The magnet URI create by constructMagnetLink() is ${MagnetUtils.constructMagnetLink(torrentInfo.infoHash(), torrentInfo.name())}")
 //                    logger.info {"The magnet URI created by .makeMagnetUri() function is ${handle.makeMagnetUri()}"}
 //                    logger.info {"The magnet URI create by constructMagnetLink() is ${MagnetUtils.constructMagnetLink(torrentInfo.infoHash(), torrentInfo.name())}" }
-                    for (it in 0..torrentInfo.numFiles()) {
-                        val fileName = torrentInfo.files().fileName(it)
-                        if (fileName.endsWith(".mp4")) {
-                            torrentFiles.add(
-                                TorrentHandler(
-                                    cacheDir,
-                                    handle,
-                                    torrentInfo.name(),
-                                    fileName,
-                                    it
-                                )
-                            )
-                        }
-                    }
+            for (it in 0..torrentInfo.numFiles()) {
+                val fileName = torrentInfo.files().fileName(it)
+                if (fileName.endsWith(".mp4")) {
+                    torrentFiles.add(
+                        TorrentHandler(
+                            cacheDir,
+                            handle,
+                            torrentInfo.name(),
+                            fileName,
+                            it
+                        )
+                    )
                 }
             }
         }

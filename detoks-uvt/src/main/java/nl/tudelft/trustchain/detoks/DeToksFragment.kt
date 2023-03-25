@@ -88,6 +88,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             File("${requireActivity().cacheDir.absolutePath}/postVideos"),
             DEFAULT_CACHING_AMOUNT
         )
+        Recommender.initialize(torrentManager)
 
         upvoteToken = UpvoteToken(-100, "", "", "") //TODO: make constructor with no parameters for initialisation
         proposalToken = ProposalToken()
