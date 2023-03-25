@@ -15,12 +15,29 @@
         android:id="@+id/TestFragment"
         android:name="nl.tudelft.trustchain.detoks.TestFragment"
         android:label="TestFragment">
+        <action
+            android:id="@+id/action_go_to_testFreq"
+            app:destination="@id/TransactionFrequencyTestFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/exampleOverlayFragment"
         android:name="nl.tudelft.trustchain.detoks.ExampleOverlayFragment"
         android:label="ExampleOverlay">
+
+	  <action
+            android:id="@+id/action_go_to_testEnvironment"
+            app:destination="@id/TransactionFrequencyTestFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/TransactionFrequencyTestFragment"
+        android:name="nl.tudelft.trustchain.detoks.TransactionFrequencyTestFragment"
+        android:label="TransactionFrequencyTest">
+
+        <action
+            android:id="@+id/action_switch_environment"
+            app:destination="@id/exampleOverlayFragment" />
     </fragment>
 
     <fragment
@@ -28,5 +45,7 @@
         android:name="nl.tudelft.trustchain.detoks.SinglePeerFragment"
         android:label="SinglePeer">
     </fragment>
+
+
 
 </navigation>

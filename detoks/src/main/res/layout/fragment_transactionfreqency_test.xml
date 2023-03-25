@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Start Transactions Button -->
+    <Button
+        android:id="@+id/start_transactions_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:onClick="startTransactions"
+        android:text="Start Transactions" />
+
+    <!-- Transactions Per Second Field -->
+    <TextView
+        android:id="@+id/transactions_per_second_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/start_transactions_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="0 ms" />
+
+    <!-- Switch Environment Button -->
+    <Button
+        android:id="@+id/switch_environment_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dp"
+        android:text="Switch Environment" />
+	  android:onClick="switchEnvirmonments" />
+
+</RelativeLayout>
