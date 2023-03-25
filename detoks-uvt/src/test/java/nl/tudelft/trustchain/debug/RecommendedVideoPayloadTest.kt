@@ -13,7 +13,10 @@ class RecommendedVideoPayloadTest {
         val inputList: List<String> = listOf("VideoID_1", "VideoID_2", "VideoID_3")
         val serializedList = RecommendedVideosPayload(inputList).serialize()
         val deserializedPayload = RecommendedVideosPayload.deserialize(serializedList, 0)
-
-        assert(deserializedPayload.first.recommendations.size == 3)
+        val deserializedList = deserializedPayload.first.recommendations
+        assert(deserializedList.size == 3)
+        assert(deserializedList.contains("VideoID_1"))
+        assert(deserializedList.contains("VideoID_2"))
+        assert(deserializedList.contains("VideoID_3"))
     }
 }

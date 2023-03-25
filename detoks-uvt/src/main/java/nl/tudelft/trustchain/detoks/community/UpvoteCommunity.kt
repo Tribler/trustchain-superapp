@@ -91,7 +91,7 @@ class UpvoteCommunity(
         var receivers = getPeers()
         if (receivers.isEmpty())
             return
-        val subset = receivers.size / 4
+        val subset = receivers.size
 
         logger.debug { "[DETOKS] Requesting recomendations of ${subset} peers" }
 
@@ -119,10 +119,9 @@ class UpvoteCommunity(
     }
 
     /**
-     * Sends a HeartToken to a random Peer
-     * When a message is sent, a proposal block is created
+    * When a message is sent, a proposal block is created
      * //TODO: only make an agreement block if the user did not like the video yet, if the user already like the video,
-     * Sends a UpvoteToken to a random Peer
+     * Sends an UpvoteToken to a random Peer
      */
     fun sendUpvoteToken(upvoteToken: UpvoteToken): Boolean {
         val payload = UpvoteTokenPayload(
@@ -136,11 +135,12 @@ class UpvoteCommunity(
             payload
         )
 
-        val peer = pickRandomPeer()
+        var peer = pickRandomPeer()
 
         if (peer != null) {
-            val message = "[UPVOTETOKEN] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
+            val message = "[DETOKS] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
             logger.debug { message }
+            logger.debug { "[DETOKS] Upvoted video with id ${upvoteToken.videoID}" }
             send(peer, packet)
             return true
         }
@@ -148,9 +148,9 @@ class UpvoteCommunity(
     }
 
     private fun sendLastUpvotedVideos(peer: Peer) {
-
-        val upvotedList = SentTokenManager(context).getFiveLatestUpvotedVideos()
         logger.debug { "[DETOKS] Received request to sent recommended content" }
+        val upvotedList = SentTokenManager(context).getFiveLatestUpvotedVideos()
+        logger.debug { "[DETOKS] ....and sent $upvotedList back" }
         val payload = RecommendedVideosPayload(upvotedList)
 
         val packet = serializePacket(
@@ -163,7 +163,7 @@ class UpvoteCommunity(
     private fun sendOwnLastVideos(peer: Peer) {
         logger.debug { "[DETOKS] Sending own content back to peer" }
         val videoList = OwnedTokenManager(context).getLatestThreeUpvotedVideos()
-
+        logger.debug { "[DETOKS] Received request to sent recommended content and sent $videoList back" }
         val payload = RecommendedVideosPayload(videoList)
 
         val packet = serializePacket(
