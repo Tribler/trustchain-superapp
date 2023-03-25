@@ -47,6 +47,7 @@ class ProposalToken {
     fun setPostVideoListener(proposalSendButton: Button, itemView: View, torrentManager: TorrentManager) {
         proposalSendButton.setOnClickListener{
             val proposalBlock = createProposalToken()
+            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val hash = proposalBlock?.calculateHash()!!
             val myPeer = IPv8Android.getInstance().myPeer
             val message = "Button Clicked! Your public key: " +
@@ -55,7 +56,19 @@ class ProposalToken {
                 "The hash of this block is ${hash.toHex()}, corresponding hashCode is: ${hash.hashCode()} \n" +
                 "the block Id of this proposal block is: ${proposalBlock.blockId} \n" +
                 "the linked block id is: ${proposalBlock.linkedBlockId}\n"
-            torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
+//            torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
+            val torrentInfo = torrentManager.getSeedableTorrents().get(0)
+            val magnetURI = torrentManager.seedTorrent(torrentInfo)
+
+            if (magnetURI == null) {
+                Log.i("DeToks", "Seeding failed!")
+            } else {
+                Log.i("DeToks", "Seeding succeeded!")
+            }
+
+            if (magnetURI != null) {
+                upvoteCommunity?.sendVideoData(magnetURI, hash.toHex())
+            }
 
             Log.i("DeToks", message)
             Toast.makeText(

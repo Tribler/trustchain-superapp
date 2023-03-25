@@ -7,6 +7,7 @@ import nl.tudelft.ipv8.messaging.Packet
 import mu.KotlinLogging
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
@@ -28,18 +29,32 @@ class UpvoteCommunity(
      * serviceId is a randomly generated hex string with length 40
      */
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
+    var torrentManager: TorrentManager? = null
 
     init {
         messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
+        messageHandlers[MessageID.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
     }
 
     object MessageID {
         const val UPVOTE_TOKEN = 1
+        const val MAGNET_URI_AND_HASH = 2
     }
 
-    private fun onUpvoteTokenPacket(packet: Packet){
+
+    private fun onUpvoteTokenPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
         onUpvoteToken(peer, payload)
+    }
+
+    private fun onMagnetURIPacket(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(MagnetURIPayload.Deserializer)
+        onMagnetURI(peer, payload)
+    }
+
+    private fun onMagnetURI(peer: Peer, payload: MagnetURIPayload) {
+        logger.debug { "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}" }
+        torrentManager?.addTorrent(payload.magnet_uri)
     }
 
     private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {
@@ -69,10 +84,32 @@ class UpvoteCommunity(
      * Selects a random Peer from the list of known Peers
      * @returns A random Peer or null if there are no known Peers
      */
-    private fun pickRandomPeer(): Peer? {
+    fun pickRandomPeer(): Peer? {
         val peers = getPeers()
         if (peers.isEmpty()) return null
         return peers.random()
+    }
+
+    fun sendVideoData(magnetURI: String, proposalTokenHash: String): Boolean {
+        val payload = MagnetURIPayload(
+            magnetURI,
+            proposalTokenHash
+        )
+
+        val packet = serializePacket(
+            MessageID.MAGNET_URI_AND_HASH,
+            payload
+        )
+
+        val peer = pickRandomPeer()
+
+        if (peer != null) {
+            val message = "[MAGNETURIPAYLOAD] You/Peer with member id: ${myPeer.mid} is sending magnet uri to peer with peer id: ${peer.mid}"
+            logger.debug { message }
+            send(peer, packet)
+            return true
+        }
+        throw PeerNotFoundException("Could not find a peer")
     }
 
     /**
