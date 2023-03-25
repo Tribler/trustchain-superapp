@@ -7,11 +7,17 @@ import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
 import mu.KotlinLogging
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.detoks.token.ProposalToken
+import nl.tudelft.trustchain.detoks.token.UpvoteToken
+import nl.tudelft.trustchain.detoks.trustchain.Balance
 import java.io.File
 import java.io.FileOutputStream
 
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var torrentManager: TorrentManager
+    private lateinit var balance: Balance
+    private lateinit var upvoteToken: UpvoteToken
+    private lateinit var proposalToken: ProposalToken
     private val logger = KotlinLogging.logger {}
     private var previousVideoAdapterIndex = 0
 
@@ -81,12 +87,16 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             File("${requireActivity().cacheDir.absolutePath}/postVideos"),
             DEFAULT_CACHING_AMOUNT
         )
+
+        upvoteToken = UpvoteToken(-100, "", "", "") //TODO: make constructor with no parameters for initialisation
+        proposalToken = ProposalToken()
+        balance = Balance()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewPagerVideos.adapter = VideosAdapter(torrentManager)
+        viewPagerVideos.adapter = VideosAdapter(torrentManager, upvoteToken, proposalToken, balance)
         viewPagerVideos.currentItem = 0
         onPageChangeCallback()
     }
