@@ -8,7 +8,9 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
+import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
+import nl.tudelft.trustchain.detoks.recommendation.Recommender
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
 
@@ -31,10 +33,15 @@ class UpvoteCommunity(
 
     init {
         messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
+        messageHandlers[MessageID.RECOMMENDATION_REQUEST] = ::onRecommendationRequestPacket
+        messageHandlers[MessageID.RECOMMENDATION_RECEIVED] = ::onRecommendationReceivedPacket
+
     }
 
     object MessageID {
         const val UPVOTE_TOKEN = 1
+        const val RECOMMENDATION_REQUEST = 2
+        const val RECOMMENDATION_RECEIVED = 3
     }
 
     private fun onUpvoteTokenPacket(packet: Packet){
@@ -42,9 +49,21 @@ class UpvoteCommunity(
         onUpvoteToken(peer, payload)
     }
 
+    private fun onRecommendationRequestPacket(packet: Packet) {
+        val (peer, _) = packet.getAuthPayload(RecommendedVideosPayload.Deserializer)
+        sendLastUpvotedVideos(peer)
+    }
+
+    private fun onRecommendationReceivedPacket(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(RecommendedVideosPayload.Deserializer)
+        logger.debug { "[DETOKS] -> Received recommendations of ${peer.mid}"}
+        val recommendations = payload.recommendations
+        Recommender.addRecommendations(recommendations)
+    }
+
     private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {
         // do something with the payload
-        logger.debug { "[UPVOTETOKEN] -> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
+        logger.debug { "[DETOKS] -> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
         val upvoteToken = UpvoteToken(
             payload.token_id.toInt(),
             payload.date,
@@ -59,10 +78,34 @@ class UpvoteCommunity(
             OwnedTokenManager(context).createOwnedUpvoteTokensTable()
             OwnedTokenManager(context).addReceivedToken(upvoteToken)
             logger.debug { "[UPVOTETOKEN] Hurray! Received valid token!" }
+
         } else {
             logger.debug { "[UPVOTETOKEN] Oh no! Received invalid token!" }
         }
 
+        sendOwnLastVideos(peer)
+
+    }
+
+    fun requestRecommendations() {
+        var receivers = getPeers()
+        if (receivers.isEmpty())
+            return
+        val subset = receivers.size / 4
+
+        logger.debug { "[DETOKS] Requesting recomendations of ${subset} peers" }
+
+        receivers = receivers.asSequence().shuffled().take(subset).toList()
+
+        val payload = RecommendedVideosPayload(emptyList())
+
+        val packet = serializePacket(
+            MessageID.RECOMMENDATION_REQUEST,
+            payload
+        )
+
+        for (receiver in receivers)
+            send(receiver, packet)
     }
 
     /**
@@ -104,6 +147,32 @@ class UpvoteCommunity(
         throw PeerNotFoundException("Could not find a peer")
     }
 
+    private fun sendLastUpvotedVideos(peer: Peer) {
+
+        val upvotedList = SentTokenManager(context).getFiveLatestUpvotedVideos()
+        logger.debug { "[DETOKS] Received request to sent recommended content" }
+        val payload = RecommendedVideosPayload(upvotedList)
+
+        val packet = serializePacket(
+            MessageID.RECOMMENDATION_RECEIVED,
+            payload
+        )
+
+        send(peer, packet)
+    }
+    private fun sendOwnLastVideos(peer: Peer) {
+        logger.debug { "[DETOKS] Sending own content back to peer" }
+        val videoList = OwnedTokenManager(context).getLatestThreeUpvotedVideos()
+
+        val payload = RecommendedVideosPayload(videoList)
+
+        val packet = serializePacket(
+            MessageID.RECOMMENDATION_RECEIVED,
+            payload
+        )
+
+        send(peer, packet)
+    }
     class Factory(
         private val context: Context,
         private val settings: TrustChainSettings,

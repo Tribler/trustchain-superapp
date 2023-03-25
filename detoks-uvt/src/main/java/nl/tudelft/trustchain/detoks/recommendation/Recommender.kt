@@ -31,9 +31,17 @@ class Recommender {
          * Add a new recommendations to the list of recommendations.
          */
         fun addRecommendation(videoID: String) {
-            recommendations.add(videoID)
+            if (!recommendations.contains(videoID))
+                recommendations.add(videoID)
         }
 
+        /**
+         * Add new recommendations to the list of recommendations.
+         */
+        fun addRecommendations(videos: List<String>) {
+            for (recommendation: String in videos)
+                addRecommendation(recommendation)
+        }
         /**
          * Get the next recommendation when there are recommendations left or update the list of
          * recommendations when there are no more recommendations.
@@ -81,7 +89,7 @@ class Recommender {
                 UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN) ?: return listOf()
             Log.i("DeToks", "RECEIVED ${allUpvoteTokens.size} UPVOTE TOKENS!")
 
-            var videoHashMap: HashMap<String, Int> = hashMapOf()
+            val videoHashMap: HashMap<String, Int> = hashMapOf()
             for (block: TrustChainBlock in allUpvoteTokens) {
                 if (block.isAgreement) {
                     val videoID: String = block.transaction["videoID"] as String
@@ -116,6 +124,15 @@ class Recommender {
             return proposalTokens.map { it.transaction["videoID"].toString() }.toList()
         }
 
+        /**
+         * Start a crawl on the network to find new upvoted content. The Recommender will be
+         * filled with received recommendations when the peers send a message back.
+         */
+        private fun requestUpvotedContent() {
+            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
+            upvoteCommunity?.requestRecommendations()
+        }
+
         //TODO: remove these, for debugging only
         fun recommendMostLiked() {
             getMostLikedVideoIDs()
@@ -123,6 +140,10 @@ class Recommender {
 
         fun recommendRandom() {
             getRandomVideoIDs()
+        }
+
+        fun requestRecommendations() {
+            requestUpvotedContent()
         }
     }
 }

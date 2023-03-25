@@ -115,6 +115,12 @@
             android:text="@string/recommend_most_liked_button" />
 
         <Button
+            android:id="@+id/requestUpvotedContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Request upvoted content" />
+
+        <Button
             android:id="@+id/recommendRandom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

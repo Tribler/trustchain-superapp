@@ -87,6 +87,7 @@ class VideosAdapter(
             // TODO: remove this, for testing of Recommender only
             recommendMostLikedButton.setOnClickListener { Recommender.recommendMostLiked() }
             recommendRandomButton.setOnClickListener { Recommender.recommendRandom() }
+            recommendMostLikedButton.setOnClickListener { Recommender.requestRecommendations()}
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
