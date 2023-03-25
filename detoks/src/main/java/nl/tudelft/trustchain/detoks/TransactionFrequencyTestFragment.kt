@@ -29,6 +29,7 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
     private lateinit var community: OurCommunity
     private lateinit var trustchainCommunity: TrustChainCommunity
     private val BLOCK_TYPE = "our_test_block"
+    private val BLOCK_TYPE2 = "group_test_block"
 
     private var transaction_index = 0;
 
@@ -47,12 +48,35 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
         return numTokens
     }
 
+    private fun blockpacking() {
+        for(i in 0..9) {
+            val halfblocks = mutableListOf<ByteArray>()
+            for (j in 0..9) {
+                val transaction = mapOf("halfblock" to j, "peer_id" to i)
+                val token = Token("transaction_${i}_$j", ipv8.myPeer.publicKey.keyToBin())
+                val serialized_token = token.serialize()
+                halfblocks.add(serialized_token + transaction.toString().toByteArray())
+            }
+            // Map the 10 half blocks to form a list of full blocks
+//            val blocks = halfblocks
+//                .take(10)
+//                .zip(halfblocks.takeLast(10))
+//                .map { (firstHalf, secondHalf) -> firstHalf + secondHalf }
+            val block = halfblocks.reduce {acc, byteArray -> acc + byteArray }
+
+            val propose_transaction = mapOf("proposal" to i, "block" to block)
+            trustchainCommunity.createProposalBlock(BLOCK_TYPE2)
+
+        }
+        //agreement(halfblocks)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         community = IPv8Android.getInstance().getOverlay()!!
         trustchainCommunity = IPv8Android.getInstance().getOverlay()!!
         ipv8 = IPv8Android.getInstance()
-        
+
 
         val environmentSwitchButton = view.findViewById<Button>(R.id.switch_environment_button)
         environmentSwitchButton.setOnClickListener { switchEnvirmonments(view) }
