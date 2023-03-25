@@ -13,9 +13,9 @@ class DetoksCommunity(Community):
     def started(self):
         gossipers = [
             TorrentGossiper(delay=5.0, peers=5, community=self),
-            NetworkSizeGossiper(),
-            BootGossiper(),
-            WatchtimeGossiper(),
+            NetworkSizeGossiper(delay=5.0, peers=5, community=self),
+            BootGossiper(delay=5.0, peers=5, community=self),
+            WatchtimeGossiper(delay=5.0, peers=5, community=self),
         ]
 
         for i, val in enumerate(gossipers):
