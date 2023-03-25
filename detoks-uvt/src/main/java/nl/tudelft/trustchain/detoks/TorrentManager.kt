@@ -191,7 +191,7 @@ class TorrentManager(
             // This is a fix/hack that forces SEED_MODE to be available, for
             // an unsolved issue: seeding local torrents often result in an endless "CHECKING_FILES"
             // state
-            Log.i("Detoks", "Now seeding torrent with magnetLink: ${torrentHandle.makeMagnetUri()}")
+            Log.i("Detoks", "Now seeding the video you double clicked, torrent with magnetLink: ${torrentHandle.makeMagnetUri()}")
             torrentHandleBeingSeeded.add(torrentHandle)
             torrentHandle.makeMagnetUri()
         } else {

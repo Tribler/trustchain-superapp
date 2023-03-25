@@ -10,10 +10,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.ProposalToken
 import nl.tudelft.trustchain.detoks.trustchain.Balance
+import kotlin.math.log
 
 class VideosAdapter(
     private val torrentManager: TorrentManager,
@@ -81,7 +83,10 @@ class VideosAdapter(
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             if (upvoteCommunity != null) {
                 upvoteCommunity.torrentManager = torrentManager
+                Log.i("Detoks", "My peer id is: ${upvoteCommunity.myPeer.mid}")
+                Log.i("Detoks", "My peer public key is: ${upvoteCommunity.myPeer.publicKey.keyToBin().toHex()}")
             }
+
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
