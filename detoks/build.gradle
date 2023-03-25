@@ -39,6 +39,11 @@ android {
 
 dependencies {
     implementation project(':common')
+    api(project(':ipv8-jvm')) {
+        exclude group: 'net.java.dev.jna'
+        exclude group: 'org.slf4j'
+        exclude group: 'com.goterl'
+    }
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -83,6 +88,7 @@ dependencies {
     implementation files('../common/libs/jlibtorrent-android-x86_64-' + jlibtorrent_version + '.jar')
 
     implementation 'com.devbrackets.android:exomedia:4.3.0'
+    implementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
