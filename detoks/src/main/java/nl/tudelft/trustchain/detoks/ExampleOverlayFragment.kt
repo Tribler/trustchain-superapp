@@ -32,6 +32,7 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
     private lateinit var trustchainCommunity : TrustChainCommunity
     private val BLOCK_TYPE = "our_test_block"
 
+
     private var transaction_index = 0;
 
     private val store by lazy {
