@@ -38,27 +38,6 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
     private val store by lazy {
         OurTransactionStore.getInstance(requireContext())
     }
-    private fun blockpacking() {
-        for(i in 0..9) {
-            val halfblocks = mutableListOf<ByteArray>()
-            for (j in 0..9) {
-                val transaction = mapOf("halfblock" to j, "peer_id" to i)
-                val token = Token("transaction_${i}_$j", ipv8.myPeer.publicKey.keyToBin())
-                val serialized_token = token.serialize()
-                halfblocks.add(serialized_token + transaction.toString().toByteArray())
-            }
-            // Map the 10 half blocks to form a list of full blocks
-//            val blocks = halfblocks
-//                .take(10)
-//                .zip(halfblocks.takeLast(10))
-//                .map { (firstHalf, secondHalf) -> firstHalf + secondHalf }
-            val blocks = halfblocks.reduce {acc, byteArray -> acc + byteArray }
-
-            val propose_transaction = mapOf("proposal" to )
-
-        }
-        //agreement(halfblocks)
-    }
 
     private fun createProposal(recipient: Peer, peer_id: Int) {
         val transaction = mapOf("proposal" to transaction_index, "peer_id" to peer_id)
