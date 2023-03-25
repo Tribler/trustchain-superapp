@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.detoks.recommendation
 import android.util.Log
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
@@ -24,7 +23,7 @@ class Recommender {
                 return
             Log.i("DeToks", "Initializing Recommender...")
             val allTorrents: List<TorrentManager.TorrentHandler> = torrentManager.getAllTorrents()
-            recommendations.addAll(allTorrents.map{ it.asMediaInfo().videoID }.toMutableList())
+            recommendations.addAll(allTorrents.map { it.asMediaInfo().videoID }.toMutableList())
             isInitialized = true
         }
 
@@ -71,6 +70,11 @@ class Recommender {
             Log.i("DeToks", "Recommendations: $recommendations")
         }
 
+        /**
+         * Return a List in sorted order with the most liked videos in general at the start.
+         * Check if a block is an agreement block to make sure it is an upvote and not the creation
+         * block coupled to the uploading of a video.
+         */
         private fun getMostLikedVideoIDs(): List<String> {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val allUpvoteTokens = upvoteCommunity?.database?.getBlocksWithType(
@@ -95,10 +99,30 @@ class Recommender {
             return videoHashMap.keys.toList()
         }
 
+        /**
+         * Return a list of random video IDs by getting all video IDs. Check if the blocks are
+         * proposal blocks to avoid having the same video ID being present multiple times.
+         */
         private fun getRandomVideoIDs(): List<String> {
-            //TODO: implement his
-            val randomIDs = mutableListOf<String>()
-            return randomIDs
+            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
+            val allUpvoteTokens = upvoteCommunity?.database?.getBlocksWithType(
+                UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN) ?: return listOf()
+            var proposalTokens = allUpvoteTokens.filter { it.isProposal }
+            proposalTokens = proposalTokens.shuffled()
+            Log.i("DeToks", "Random video IDs: ${proposalTokens.size}")
+            for (token in proposalTokens) {
+                Log.i("DeToks", "\tVideo ID: ${token.transaction["videoID"]}")
+            }
+            return proposalTokens.map { it.transaction["videoID"].toString() }.toList()
+        }
+
+        //TODO: remove these, for debugging only
+        fun recommendMostLiked() {
+            getMostLikedVideoIDs()
+        }
+
+        fun recommendRandom() {
+            getRandomVideoIDs()
         }
     }
 }
