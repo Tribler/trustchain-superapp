@@ -47,50 +47,12 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
         return numTokens
     }
 
-    private fun createProposal(recipient: Peer, peer_id: Int) {
-        val transaction = mapOf("proposal" to transaction_index, "peer_id" to peer_id)
-        trustchainCommunity.createProposalBlock(
-            BLOCK_TYPE,
-            transaction,
-            recipient.publicKey.keyToBin()
-        )
-        community.addTransaction(
-            transaction_index,
-            ipv8.myPeer.publicKey.toString(),
-            recipient.publicKey.toString(),
-            "proposal"
-        )
-        transaction_index += 1
-    }
-
-
-    private fun createAgreement(block: TrustChainBlock) {
-        val transaction = mapOf(
-            "agreement" to block.transaction["proposal"],
-            "peer_id" to block.transaction["peer_id"]
-        )
-        trustchainCommunity.createAgreementBlock(
-            block,
-            transaction,
-        )
-        // TODO - I increment transaction index here to keep unique IDs in the DB
-        community.addTransaction(
-            transaction_index,
-            ipv8.myPeer.publicKey.toString(),
-            block.transaction["peer_id"].toString(),
-            "agreement"
-        )
-        transaction_index += 1
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         community = IPv8Android.getInstance().getOverlay()!!
         trustchainCommunity = IPv8Android.getInstance().getOverlay()!!
         ipv8 = IPv8Android.getInstance()
-
-        // Reset DB
-        community.resetDatabase()
+        
 
         val environmentSwitchButton = view.findViewById<Button>(R.id.switch_environment_button)
         environmentSwitchButton.setOnClickListener { switchEnvirmonments(view) }
