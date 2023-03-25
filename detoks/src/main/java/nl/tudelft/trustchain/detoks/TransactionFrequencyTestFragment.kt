@@ -53,20 +53,50 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
      fun grouppacking(): Long {
         val executionTime = measureTimeMillis {
             for (i in 0..9) {
-                val halfblocks = mutableListOf<ByteArray>()
-                for (j in 0..9) {
+//                val halfblocks = mutableListOf<ByteArray>()
+//                for (j in 0..9) {
+//                    val transaction = mapOf("halfblock" to j, "peer_id" to i)
+//                    val token = Token("transaction_${i}_$j", ipv8.myPeer.publicKey.keyToBin())
+//                    val serialized_token = token.serialize()
+//                    halfblocks.add(serialized_token + transaction.toString().toByteArray())
+//                }
+
+//                val builder = AlertDialog.Builder(requireContext())
+//                builder.setTitle("Test")
+//                builder.setMessage("Halfblock: ${halfblocks}")
+//                builder.setNeutralButton("OK") { _, _ -> }
+//                val dialog = builder.create()
+//                dialog.show()
+//                val block = halfblocks.reduce { acc, next -> acc + next }
+//                val propose_transaction = mapOf("proposal" to i, "block" to block)
+//                trustchainCommunity.createProposalBlock(
+//                    BLOCK_TYPE2,
+//                    propose_transaction,
+//                    ipv8.myPeer.publicKey.keyToBin()
+//                )
+                val transactionList: MutableList<Map<String, Any>> = mutableListOf()
+                for(j in 0..9){
                     val transaction = mapOf("halfblock" to j, "peer_id" to i)
-                    val token = Token("transaction_${i}_$j", ipv8.myPeer.publicKey.keyToBin())
-                    val serialized_token = token.serialize()
-                    halfblocks.add(serialized_token + transaction.toString().toByteArray())
+                    transactionList.add(transaction)
                 }
-                val block = halfblocks.reduce { acc, next -> acc + next }
-                val propose_transaction = mapOf("proposal" to i, "block" to block)
+
+                val transaction = mapOf("proposal" to transaction_index, "peer_id" to 1, "transactionList" to transactionList)
+
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle("Test")
+                builder.setMessage("Halfblock: ${transaction}")
+                builder.setNeutralButton("OK") { _, _ -> }
+                val dialog = builder.create()
+                dialog.show()
+
                 trustchainCommunity.createProposalBlock(
                     BLOCK_TYPE2,
-                    propose_transaction,
+                    transaction,
                     ipv8.myPeer.publicKey.keyToBin()
                 )
+
+                transaction_index += 1
+
 
             }
         }
@@ -87,11 +117,17 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
         trustchainCommunity.addListener(BLOCK_TYPE2, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 if (block.isProposal){
-                    trustchainCommunity.createAgreementBlock(block, mapOf("agreement" to block.transaction["proposal"], "block_id" to block.transaction["block"]))
+                    trustchainCommunity.createAgreementBlock(
+                        block,
+                        mapOf("agreement" to block.transaction["proposal"],
+                            "block_id" to block.transaction["block"],
+                            "transactionList" to block.transaction["transactionList"]
+                        ))
                 }
                 if(block.isAgreement){
                     print("Agreement reached")
                 }
+                transaction_index
             } })
     }
     fun switchEnvirmonments(view: View){
