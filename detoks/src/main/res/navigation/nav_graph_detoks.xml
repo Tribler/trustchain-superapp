@@ -15,6 +15,9 @@
         android:id="@+id/TestFragment"
         android:name="nl.tudelft.trustchain.detoks.TestFragment"
         android:label="TestFragment">
+        <action
+            android:id="@+id/action_go_to_testFreq"
+            app:destination="@id/TransactionFrequencyTestFragment" />
     </fragment>
 
     <fragment

@@ -34,12 +34,6 @@ class OurCommunity(
         Log.d("OurCommunity", peer.mid + ": " + payload.unique_id)
     }
 
-    fun broadcastGreeting() {
-        for (peer in getPeers()) {
-            val packet = serializePacket(MESSAGE_ID, Token("Hello"))
-            send(peer.address, packet)
-        }
-    }
 
     class Factory(
         private val store: OurTransactionStore,
