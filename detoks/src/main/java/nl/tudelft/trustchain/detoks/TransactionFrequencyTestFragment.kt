@@ -20,6 +20,8 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentExampleoverlayBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentTransactionfreqencyTestBinding
+import kotlin.system.measureTimeMillis
+
 
 class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transactionfreqency_test) {
 
@@ -32,6 +34,7 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
     private val BLOCK_TYPE2 = "group_test_block"
 
     private var transaction_index = 0;
+    private val count = 0
 
 //    private fun generateTokensFor1Sec(): Int {
 //        val startTime = System.currentTimeMillis()
@@ -48,29 +51,34 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
 //        return numTokens
 //    }
 
-    private fun blockpacking() {
-        for(i in 0..9) {
-            val halfblocks = mutableListOf<ByteArray>()
-            for (j in 0..9) {
-                val transaction = mapOf("halfblock" to j, "peer_id" to i)
-                val token = Token("transaction_${i}_$j", ipv8.myPeer.publicKey.keyToBin())
-                val serialized_token = token.serialize()
-                halfblocks.add(serialized_token + transaction.toString().toByteArray())
+    private fun grouppacking(): Long {
+        val executionTime = measureTimeMillis {
+            for (i in 0..9) {
+                val halfblocks = mutableListOf<ByteArray>()
+                for (j in 0..9) {
+                    val transaction = mapOf("halfblock" to j, "peer_id" to i)
+                    val token = Token("transaction_${i}_$j", ipv8.myPeer.publicKey.keyToBin())
+                    val serialized_token = token.serialize()
+                    halfblocks.add(serialized_token + transaction.toString().toByteArray())
+                }
+                // Map the 10 half blocks to form a list of full blocks
+                //            val blocks = halfblocks
+                //                .take(10)
+                //                .zip(halfblocks.takeLast(10))
+                //                .map { (firstHalf, secondHalf) -> firstHalf + secondHalf }
+                val block = halfblocks.reduce { acc, byteArray -> acc + byteArray }
+
+                val propose_transaction = mapOf("proposal" to i, "block" to block)
+                trustchainCommunity.createProposalBlock(
+                    BLOCK_TYPE2,
+                    propose_transaction,
+                    ipv8.myPeer.publicKey.keyToBin()
+                )
+
             }
-            // Map the 10 half blocks to form a list of full blocks
-//            val blocks = halfblocks
-//                .take(10)
-//                .zip(halfblocks.takeLast(10))
-//                .map { (firstHalf, secondHalf) -> firstHalf + secondHalf }
-            val block = halfblocks.reduce {acc, byteArray -> acc + byteArray }
-
-            val propose_transaction = mapOf("proposal" to i, "block" to block)
-            trustchainCommunity.createProposalBlock(BLOCK_TYPE2, propose_transaction, ipv8.myPeer.publicKey.keyToBin())
-
         }
-        //agreement(halfblocks)
+        return executionTime
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         community = IPv8Android.getInstance().getOverlay()!!
@@ -82,9 +90,17 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
         environmentSwitchButton.setOnClickListener { switchEnvirmonments(view) }
 
         binding.startTransactionsButton.setOnClickListener {
-            binding.transactionsPerSecondField.text =
-                "${blockpacking()} transactions per second"
+            binding.transactionsPerSecondField.text = "${grouppacking()} ms"
         }
+        trustchainCommunity.addListener(BLOCK_TYPE2, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                if (block.isProposal){
+                    trustchainCommunity.createAgreementBlock(block, mapOf("agreement" to block.transaction["proposal"], "block_id" to block.transaction["block"]))
+                }
+                if(block.isAgreement){
+                    print("Agreement reached")
+                }
+            } })
     }
     fun switchEnvirmonments(view: View){
         val navController = Navigation.findNavController(view)
