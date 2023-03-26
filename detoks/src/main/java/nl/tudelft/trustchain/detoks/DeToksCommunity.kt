@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.detoks
 
 import android.content.Context
 import android.util.Log
-import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -43,6 +42,7 @@ class DeToksCommunity(private val context: Context,
         const val MESSAGE_NETWORK_SIZE_ID = 4
         const val MESSAGE_BOOT_REQUEST = 5
         const val MESSAGE_BOOT_RESPONSE = 6
+        const val BLOCK_TYPE = "detoks_transaction"
     }
 
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
@@ -84,6 +84,9 @@ class DeToksCommunity(private val context: Context,
         if (!visitedPeers.contains(peer)) {
             visitedPeers.add(peer)
             sendTokens(1, peer.mid)
+            val transaction = mapOf("amount" to 1)
+            createProposalBlock(BLOCK_TYPE, transaction, peer.publicKey.keyToBin())
+            Log.d(LOGGING_TAG, "Created proposal block")
         }
 
         send(peer.address, packet)
