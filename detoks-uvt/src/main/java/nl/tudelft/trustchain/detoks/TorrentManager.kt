@@ -12,9 +12,12 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.trustchain.detoks.util.MagnetUtils
 import java.io.File
+import java.util.*
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -34,6 +37,8 @@ class TorrentManager(
     private var currentIndex = 0
     private val torrentHandleBeingSeeded = mutableListOf<TorrentHandle>()
     private val seedableTorrentInfo = mutableListOf<TorrentInfo>()
+    var sessionActive = false
+    internal var signal = CountDownLatch(0)
     init {
         clearMediaCache()
         initializeSessionManager()
@@ -174,6 +179,111 @@ class TorrentManager(
             return null
         }
         return TorrentInfo.bdecode(bytes)
+    }
+
+    /**
+     * A method for downloading given a magnet link from AppGossiper.kt from FOC nl.tudelft.trustchain.FOC
+     * If the AddTorrent Method does not work then try this one
+     */
+    fun getMagnetLink(magnetLink: String) {
+        // Handling of the case where the user is already downloading the
+        // same or another torrent
+
+        if (sessionActive)
+            return
+
+//        downloadHasStarted(torrentName)
+//
+//        activity.runOnUiThread {
+//            printToast("Found new torrent $torrentName attempting to download!")
+//        }
+//        val startIndexName = magnetLink.indexOf(displayNameAppender)
+//        val stopIndexName =
+//            if (magnetLink.contains(addressTrackerAppender)) magnetLink.indexOf(addressTracker) else magnetLink.length
+//
+//        val magnetNameRaw = magnetLink.substring(startIndexName + 4, stopIndexName)
+//        logger.info { magnetNameRaw }
+//        val magnetName = magnetNameRaw.replace('+', ' ', false)
+//        val magnetInfoHash = magnetLink.substring(preHashString.length, startIndexName)
+//        logger.info { magnetName }
+
+        val sp = SettingsPack()
+        sp.seedingOutgoingConnections(true)
+        val params =
+            SessionParams(sp)
+        sessionManager.start(params)
+
+        val timer = Timer()
+        timer.schedule(
+            object : TimerTask() {
+                override fun run() {
+                    val nodes = sessionManager.stats().dhtNodes()
+                    // wait for at least 10 nodes in the DHT.
+                    if (nodes >= 10) {
+                        logger.info { "DHT contains $nodes nodes" }
+                        // signal.countDown();
+                        timer.cancel()
+                    }
+                }
+            },
+            0, 1000
+        )
+
+        logger.info { "Detoks, Fetching the magnet uri, please wait..." }
+        val data: ByteArray
+        try {
+            data = sessionManager.fetchMagnet(magnetLink, 30)
+        } catch (e: Exception) {
+            logger.info { "Detoks, Failed to retrieve the magnet" }
+            return
+        }
+
+        if (data != null) {
+
+            val torrentInfo = TorrentInfo.bdecode(data)
+            sessionActive = true
+            signal = CountDownLatch(1)
+
+            sessionManager.download(torrentInfo, cacheDir)
+            val handle = sessionManager.find(torrentInfo.infoHash())
+            handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+            handle.prioritizeFiles(arrayOf(Priority.IGNORE))
+            handle.pause()
+
+            for (it in 0 until torrentInfo.numFiles()) {
+                val fileName = torrentInfo.files().fileName(it)
+                if (fileName.endsWith(".mp4")) {
+                    torrentFiles.add(
+                        TorrentHandler(
+                            cacheDir,
+                            handle,
+                            torrentInfo.name(),
+                            fileName,
+                            it
+                        )
+                    )
+                }
+            }
+//            activity.runOnUiThread { printToast("Managed to fetch torrent info for $torrentName, trying to download it via torrent!") }
+
+            signal.await(1, TimeUnit.MINUTES)
+
+            if (signal.count.toInt() == 1) {
+//                activity.runOnUiThread { printToast("Attempt to download timed out for $torrentName!") }
+                signal = CountDownLatch(0)
+                sessionManager.find(torrentInfo.infoHash())?.let { torrentHandle ->
+                    sessionManager.remove(torrentHandle)
+                }
+//                onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
+            } else {
+//                onDownloadSuccess(magnetName)
+            }
+            sessionActive = false
+        } else {
+            logger.info { "Failed to retrieve the magnet" }
+//            activity.runOnUiThread { printToast("Failed to retrieve magnet for $torrentName!") }
+//            onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
+        }
     }
 
     /**

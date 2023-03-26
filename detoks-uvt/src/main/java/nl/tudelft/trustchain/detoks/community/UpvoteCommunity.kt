@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks.community
 
 import android.content.Context
+import android.util.Log
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
@@ -54,7 +55,8 @@ class UpvoteCommunity(
 
     private fun onMagnetURI(peer: Peer, payload: MagnetURIPayload) {
         logger.debug { "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}" }
-        torrentManager?.addTorrent(payload.magnet_uri)
+//        torrentManager?.addTorrent(payload.magnet_uri)
+        torrentManager?.getMagnetLink(payload.magnet_uri)
     }
 
     private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {
@@ -86,6 +88,9 @@ class UpvoteCommunity(
      */
     fun pickRandomPeer(): Peer? {
         val peers = getPeers()
+        for (peer in peers) {
+            Log.i("Detoks", "This peer with peer mid is online: ${peer.mid}")
+        }
         if (peers.isEmpty()) return null
         return peers.random()
     }
