@@ -20,6 +20,13 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         const val TABLE_TOKEN ="tokens"
         const val COLUMN_TOKEN_ID = "token_id"
         const val COLUMN_VALUE = "token_value"
+        const val COLUMN_VERIFIER = "verifier"
+        const val COLUMN_GEN_HASH = "genesis block"
+        const val COLUMN_RECIPIENTS = "recipients"
+
+        const val TABLE_RECIPIENTS = "recipients"
+        const val COLUMN_RECIPIENT = "rec_publicKey"
+        const val COLUMN_PROOF = "proof"
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -33,9 +40,28 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db?.execSQL(
             "CREATE TABLE IF NOT EXISTS $TABLE_TOKEN (" +
 //                "$COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "$COLUMN_TOKEN_ID INTEGER PRIMARY KEY NOT NULL UNIQUE, " +
-                "$COLUMN_VALUE INTEGER NOT NULL)"
+                "$COLUMN_TOKEN_ID BLOB PRIMARY KEY NOT NULL UNIQUE, " +
+                "$COLUMN_VALUE BLOB NOT NULL, " +
+                "$COLUMN_VERIFIER BLOB NOT NULL, " +
+                "$COLUMN_GEN_HASH BLOB NOT NULL) "
+
         )
+
+        db?.execSQL(
+            "CREATE TABLE IF NOT EXISTS $TABLE_RECIPIENTS (" +
+                "$COLUMN_ID INTEGER NOT NULL, " +
+                "$COLUMN_TOKEN_ID BLOB NOT NULL, " +
+                "$COLUMN_RECIPIENT BLOB NOT NULL, " +
+                "$COLUMN_PROOF BLOB NOT NULL," +
+                "PRIMARY KEY(COLUMN_ID) " +
+                "FOREIGN KEY(token_id) REFERENCES tokens(token_id) ON DELETE CASCADE," +
+                " ON UPDATE CASCADE)"
+
+        )
+    }
+
+    override fun onConfigure(db: SQLiteDatabase) {
+        db.setForeignKeyConstraintsEnabled(true)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -61,19 +87,21 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return newRowId
     }
 
-    fun getAllFriends(): List<String> {
+    fun getAllFriends(): List<OfflineFriend> {
         val friendList = mutableListOf<String>()
-        val selectQuery = "SELECT $COLUMN_NAME FROM $TABLE_NAME"
-
+        val selectQuery = "SELECT $COLUMN_NAME, $COLUMN_ADDRESS FROM $TABLE_NAME"
+        
         val db = this.readableDatabase
         val cursor = db.rawQuery(selectQuery, null)
 
         if (cursor.moveToFirst()) {
             val nameColumnIndex = cursor.getColumnIndex(COLUMN_NAME)
-            if (nameColumnIndex >= 0) {
+            val addressColumnIndex = cursor.getColumnIndex(COLUMN_ADDRESS)
+            if (nameColumnIndex >= 0 && addressColumnIndex >= 0) {
                 do {
                     val name = cursor.getString(nameColumnIndex)
-                    friendList.add(name)
+                    val address = cursor.getString(addressColumnIndex)
+                    friendList.add(OfflineFriend(name, address))
                 } while (cursor.moveToNext())
             }
         }
@@ -95,7 +123,6 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db.insert(TABLE_TOKEN, null, new_row) // null?
         db.close()
     }
-
 
     fun removeToken(token: Token) {
         val db = this.writableDatabase

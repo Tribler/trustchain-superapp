@@ -98,8 +98,9 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
            if(nameFriend?.text == null){
                Toast.makeText(this.context,"Enter friend's name!", Toast.LENGTH_LONG).show()
            } else {
-               val dbHelper = DbHelper(this.requireContext())
-               val newRowId = dbHelper.addFriend(username.toString(), content.toString())
+                val myPublicKey = getIpv8().myPeer.publicKey
+                val wallet = Wallet.getInstance(myPublicKey, getIpv8().myPeer.key as PrivateKey)
+                wallet.addFriend(username.toString(), content.toString())
                if(newRowId != -1L){
                    Toast.makeText(this.context,"Added Friend!", Toast.LENGTH_LONG).show()
                } else {

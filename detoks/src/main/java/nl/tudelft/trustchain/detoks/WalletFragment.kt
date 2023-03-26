@@ -22,7 +22,6 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
-    // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
     val myPublicKey = getIpv8().myPeer.publicKey

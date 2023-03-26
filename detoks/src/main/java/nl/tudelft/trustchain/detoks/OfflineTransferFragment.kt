@@ -64,9 +64,10 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val dbHelper = DbHelper(view.context)
-        val friendList = dbHelper.getAllFriends()
-        val friends = friendList.toMutableList()
+        val wallet = Wallet.getInstance(myPublicKey, getIpv8().myPeer.key as PrivateKey)
+        
+        val friendList = wallet.listOfFriends
+        val friends = friendList.toMutableList() // Mutable?
         if (friendList.isEmpty()) {
             friends.add("Add Friend")
         }
@@ -94,18 +95,13 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
         val myPublicKey = getIpv8().myPeer.publicKey
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
-        val wallet = Wallet.getInstance(myPublicKey, getIpv8().myPeer.key as PrivateKey)
-        val token = Token.create(1, myPublicKey.keyToBin())
-        wallet.addToken(token)
-
+        val amountText = view.findViewById<EditText>(R.id.amount)
+        
         buttonRequest.setOnClickListener {
-            //friend selected
-//            val friendUsername = spinnerFriends.selectedItem
-
-            //get the friends public key from the db
-            val chosenToken = wallet.tokens.removeLast()
-
-            showQR(view, chosenToken, myPublicKey)
+            
+            // After tranfering the requested amount, remove it from the owner wallet.
+            val tokens = wallet.getPayment(amountText)  // removes the tokens from the db 
+            showQR(view, tokens, myPublicKey)
         }
 
 
