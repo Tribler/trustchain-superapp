@@ -54,6 +54,7 @@ class UpvoteCommunity(
     }
 
     private fun onMagnetURI(peer: Peer, payload: MagnetURIPayload) {
+        Log.i("Detoks", "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}")
         logger.debug { "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}" }
 //        torrentManager?.addTorrent(payload.magnet_uri)
         torrentManager?.getMagnetLink(payload.magnet_uri)
@@ -110,6 +111,7 @@ class UpvoteCommunity(
 
         if (peer != null) {
             val message = "[MAGNETURIPAYLOAD] You/Peer with member id: ${myPeer.mid} is sending magnet uri to peer with peer id: ${peer.mid}"
+            Log.i("Detoks", message)
             logger.debug { message }
             send(peer, packet)
             return true
