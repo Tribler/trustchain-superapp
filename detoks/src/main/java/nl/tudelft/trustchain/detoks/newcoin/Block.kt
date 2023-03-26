@@ -1,4 +1,4 @@
-//import java.time.Instant
+package nl.tudelft.trustchain.detoks.newcoin//import java.time.Instant
 //
 ///**
 // * Every block holds a list of transactions

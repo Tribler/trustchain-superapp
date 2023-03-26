@@ -1,4 +1,4 @@
-//import java.security.PrivateKey
+package nl.tudelft.trustchain.detoks.newcoin//import java.security.PrivateKey
 //import java.security.PublicKey
 //
 //

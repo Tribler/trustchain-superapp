@@ -11,30 +11,40 @@ data class Wallet(
     val listOfFriends: ArrayList<OfflineFriend>
 ) {
 
+
     companion object {
-        fun create(publicKey : nl.tudelft.ipv8.keyvault.PublicKey,
+        private var wallet :Wallet? = null;
+        private fun create(publicKey : nl.tudelft.ipv8.keyvault.PublicKey,
                    privateKey: nl.tudelft.ipv8.keyvault.PrivateKey ): Wallet {
 //            val generator = KeyPairGenerator.getInstance("RSA")
 //            generator.initialize(2048)
 //            val keyPair = generator.generateKeyPair()
 
-            // is the generation of private public keys auto when you make an account?
-
             return Wallet(publicKey, privateKey, arrayListOf<Token>(), arrayListOf<OfflineFriend>())
         }
+        fun getInstance(publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
+                        privateKey: nl.tudelft.ipv8.keyvault.PrivateKey): Wallet {
+            return this.wallet ?: create(publicKey, privateKey)
+        }
+
     }
+
 
     val balance: Int get() {
         return tokens.size
     }
 
-    public fun addFriend(friend: OfflineFriend){
+    fun addFriend(friend: OfflineFriend){
         listOfFriends.add(friend)
     }
 
-    public fun addToken(token : Token) {
+    fun addToken(token : Token) {
         tokens.add(token)
     }
+
+//    fun removeToken(): Token {
+//
+//    }
 
 
 //    fun sendFundsTo(recipient: PublicKey, amountToSend: Int) : Transaction {
