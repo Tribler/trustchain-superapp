@@ -25,7 +25,9 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
     private var param1: String? = null
     private var param2: String? = null
     val myPublicKey = getIpv8().myPeer.publicKey
-    val wallet = Wallet.getInstance(myPublicKey, getIpv8().myPeer.key as PrivateKey)
+    var wallet = Wallet.getInstance(this.requireContext(), myPublicKey, getIpv8().myPeer.key as PrivateKey)
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

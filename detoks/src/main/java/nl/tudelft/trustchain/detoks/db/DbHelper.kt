@@ -4,7 +4,10 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.google.common.primitives.Ints.toByteArray
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.detoks.Token
+import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
 
 class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -87,8 +90,8 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return newRowId
     }
 
-    fun getAllFriends(): List<OfflineFriend> {
-        val friendList = mutableListOf<String>()
+    fun getAllFriends(): ArrayList<OfflineFriend> {
+        val friendList = arrayListOf<OfflineFriend>()
         val selectQuery = "SELECT $COLUMN_NAME, $COLUMN_ADDRESS FROM $TABLE_NAME"
 
         val db = this.readableDatabase
@@ -101,7 +104,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 do {
                     val name = cursor.getString(nameColumnIndex)
                     val address = cursor.getString(addressColumnIndex)
-                    friendList.add(OfflineFriend(name, address))
+                    friendList.add(OfflineFriend(name, address as PublicKey))
                 } while (cursor.moveToNext())
             }
         }
@@ -134,26 +137,27 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db.close()
     }
 
-    // returns the id and the value of the token
-    fun getAllTokens(): List<Pair<Int, Int>> {
-        val tokenList = mutableListOf<Pair<Int, Int>>()
-        val selectQueryId = "SELECT $COLUMN_TOKEN_ID FROM $TABLE_TOKEN"
-        val selectQueryValue = "SELECT $COLUMN_TOKEN_ID FROM $TABLE_TOKEN"
+    //returns the id and the value of the token
+    fun getAllTokens(): ArrayList<Token>{
+        val tokenList = arrayListOf<Token>()
+        val selectQueryId = "SELECT $COLUMN_TOKEN_ID, $COLUMN_VERIFIER FROM $TABLE_TOKEN"
+//        val selectQueryValue = "SELECT $COLUMN_TOKEN_ID FROM $TABLE_TOKEN"
 
         val db = this.readableDatabase
 
         val cursorId = db.rawQuery(selectQueryId, null)
-        val cursorValue = db.rawQuery(selectQueryValue, null)
+//        val cursorValue = db.rawQuery(selectQueryValue, null)
 
-        if (cursorId.moveToFirst() && cursorValue.moveToFirst()) {
+        if (cursorId.moveToFirst()) {
             val columnIdIndex = cursorId.getColumnIndex(COLUMN_TOKEN_ID)
-            val columnValueIndex = cursorValue.getColumnIndex(COLUMN_VALUE)
+            val columnValueIndex = cursorId.getColumnIndex(COLUMN_VERIFIER)
             if (columnIdIndex >= 0 && columnValueIndex >= 0) {
                 do {
                     val token_id = cursorId.getInt(columnIdIndex)
-                    val token_value = cursorValue.getInt(columnValueIndex)
-                    tokenList.add(Pair(token_id, token_value))
-                } while (cursorId.moveToNext() && cursorValue.moveToNext())
+                    val token_verifier = cursorId.getInt(columnValueIndex)
+
+                    tokenList.add(Token.create(token_id.toByte(), toByteArray(token_verifier)))
+                } while (cursorId.moveToNext())
             }
         }
         db.close()
