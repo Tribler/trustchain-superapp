@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.navigation.findNavController
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
@@ -58,6 +59,12 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
             createCoinButton.visibility = View.INVISIBLE
             val textBalance = view.findViewById<TextView>(R.id.balance)
             textBalance.text = "Your balance is: " + wallet.balance
+        }
+
+        val buttonAdminPage = view.findViewById<Button>(R.id.button_admin_page)
+        buttonAdminPage.setOnClickListener {
+            val navController = view.findNavController()
+            navController.navigate(R.id.adminFragment)
         }
     }
 
