@@ -11,7 +11,7 @@ class SwarmHealth(
     val infoHash: String, // String representation of torrent info hash
     val numPeers: UInt,
     val numSeeds: UInt,
-    val timestamp: ULong = Date().time.toULong() // Timestamp is saved as Date.getTime format
+    val timestamp: ULong = Date().time.toULong(), // Timestamp is saved as Date.getTime format
 ) :
     Comparable<SwarmHealth>, Serializable {
     override fun compareTo(other: SwarmHealth): Int {
@@ -64,9 +64,9 @@ class SwarmHealth(
                     infoHash.toString(Charsets.US_ASCII),
                     numPeers,
                     numSeeds,
-                    timestamp
+                    timestamp,
                 ),
-                localOffset
+                localOffset,
             )
         }
 

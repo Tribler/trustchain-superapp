@@ -28,13 +28,15 @@ import kotlin.math.log10
  */
 open class RecommenderStore(
     private val musicStore: TrustChainSQLiteStore,
-    private val database: Database
+    private val database: Database,
 ) {
     lateinit var key: ByteArray
+
     @SuppressLint("SdCardPath")
     private val musicDir = File("/data/user/0/nl.tudelft.trustchain/cache/")
     lateinit var essentiaJob: Job
     private var highVarianceFeatureLabels = arrayOf(3, 62, 162, 223, 130, 140)
+
     // 2 block features + cherry-picked essentia features
     private val totalAmountFeatures = highVarianceFeatureLabels.size + 2
 
@@ -48,19 +50,19 @@ open class RecommenderStore(
             database.dbModelQueries.addModel(
                 name = model.name,
                 type = model.name,
-                parameters = (model as MatrixFactorization).serialize(private = true)
+                parameters = (model as MatrixFactorization).serialize(private = true),
             )
         } else if (model.name == "Pegasos") {
             database.dbModelQueries.addModel(
                 name = model.name,
                 type = model.name,
-                parameters = (model as Pegasos).serialize()
+                parameters = (model as Pegasos).serialize(),
             )
         } else {
             database.dbModelQueries.addModel(
                 name = model.name,
                 type = model.name,
-                parameters = (model as Adaline).serialize()
+                parameters = (model as Adaline).serialize(),
             )
         }
     }
@@ -131,7 +133,7 @@ open class RecommenderStore(
         for ((i, block) in songBlocks.withIndex()) {
             if (block.transaction["title"] != null && block.transaction["artist"] != null) {
                 playcounts[i] = database.dbFeaturesQueries.getFeature(
-                    "local-${block.transaction["title"]}-${block.transaction["artist"]}"
+                    "local-${block.transaction["title"]}-${block.transaction["artist"]}",
                 )
                     .executeAsOneOrNull()?.count?.toDouble() ?: 0.0
             }
@@ -162,12 +164,13 @@ open class RecommenderStore(
      */
     fun updateLocalFeatures(file: File) {
         val mp3File = Mp3File(file)
-        val k = if (mp3File.id3v2Tag != null)
+        val k = if (mp3File.id3v2Tag != null) {
             "local-${mp3File.id3v2Tag.title}-${mp3File.id3v2Tag.artist}"
-        else if (mp3File.id3v1Tag != null)
+        } else if (mp3File.id3v1Tag != null) {
             "local-${mp3File.id3v1Tag.title}-${mp3File.id3v1Tag.artist}"
-        else
+        } else {
             return
+        }
         val existingFeature = database.dbFeaturesQueries.getFeature(key = k).executeAsOneOrNull()
         var count = 1
         if (existingFeature != null) {
@@ -178,7 +181,7 @@ open class RecommenderStore(
         database.dbFeaturesQueries.addFeature(
             key = k,
             songFeatures = mp3Features.contentToString(),
-            count = count.toLong()
+            count = count.toLong(),
         )
     }
 
@@ -214,7 +217,7 @@ open class RecommenderStore(
                     (
                         block.transaction["date"] as
                             String
-                        ).split("/").toTypedArray()[-1]
+                        ).split("/").toTypedArray()[-1],
                 ).toDouble()
             } catch (e: Exception) {
             }
@@ -272,7 +275,7 @@ open class RecommenderStore(
                                 database.dbFeaturesQueries.addFeature(
                                     key = k,
                                     songFeatures = mp3Features.contentToString(),
-                                    count = count.toLong()
+                                    count = count.toLong(),
                                 )
                             } catch (e: Exception) {
                                 Log.e("Recommend", "Extracting audio features failed!")
@@ -300,7 +303,7 @@ open class RecommenderStore(
         if (seen == null && unseen == null) {
             database.dbUnseenFeaturesQueries.addFeature(
                 key = songIdentifier,
-                songFeatures = features
+                songFeatures = features,
             )
         }
     }
@@ -311,14 +314,15 @@ open class RecommenderStore(
      * @return training data (pair of features and labels) from local songs
      */
     fun getLocalSongData(): Pair<Array<Array<Double>>, IntArray> {
-        if (!essentiaJob.isActive)
+        if (!essentiaJob.isActive) {
             essentiaJob = GlobalScope.launch { addAllLocalFeatures() } // analyze local music files
+        }
         val batch = database.dbFeaturesQueries.getAllFeatures().executeAsList()
         if (batch.isEmpty()) {
             Log.w(
                 "Recommend",
                 "Local feature database is empty! " +
-                    "Analyzing files in background thread now, current recommendation will be empty."
+                    "Analyzing files in background thread now, current recommendation will be empty.",
             )
             return Pair(emptyArray(), emptyArray<Int>().toIntArray())
         }
@@ -355,12 +359,13 @@ open class RecommenderStore(
         try {
             val filename = mp3File.filename
 
-            val k = if (mp3File.id3v2Tag != null)
+            val k = if (mp3File.id3v2Tag != null) {
                 "local-${mp3File.id3v2Tag.title}-${mp3File.id3v2Tag.artist}"
-            else if (mp3File.id3v1Tag != null)
+            } else if (mp3File.id3v1Tag != null) {
                 "local-${mp3File.id3v1Tag.title}-${mp3File.id3v1Tag.artist}"
-            else
+            } else {
                 ""
+            }
 
             if (haveFeature(k)) {
                 val featureText = database.dbFeaturesQueries.getFeature(k).executeAsOneOrNull()
@@ -386,7 +391,7 @@ open class RecommenderStore(
                 "melbands_spread", "pitch_salience", "spectral_centroid", "spectral_complexity", "spectral_decrease",
                 "spectral_energy", "spectral_energyband_high", "spectral_energyband_low", "spectral_energyband_middle_high",
                 "spectral_energyband_middle_low", "spectral_entropy", "spectral_flux", "spectral_kurtosis", "spectral_rms",
-                "spectral_rolloff", "spectral_skewness", "spectral_spread", "spectral_strongpeak", "zerocrossingrate"
+                "spectral_rolloff", "spectral_skewness", "spectral_spread", "spectral_strongpeak", "zerocrossingrate",
             )
 
             var dynamic_complexity = 0.0
@@ -431,15 +436,15 @@ open class RecommenderStore(
                     key = scale2label(tonal.getString("chords_key"), tonal.getString("chords_scale"))
                     key_edma = scale2label(
                         tonal.getJSONObject("key_edma").getString("key"),
-                        tonal.getJSONObject("key_edma").getString("scale")
+                        tonal.getJSONObject("key_edma").getString("scale"),
                     )
                     key_krumhansl = scale2label(
                         tonal.getJSONObject("key_krumhansl").getString("key"),
-                        tonal.getJSONObject("key_krumhansl").getString("scale")
+                        tonal.getJSONObject("key_krumhansl").getString("scale"),
                     )
                     key_temperley = scale2label(
                         tonal.getJSONObject("key_temperley").getString("key"),
-                        tonal.getJSONObject("key_temperley").getString("scale")
+                        tonal.getJSONObject("key_temperley").getString("scale"),
                     )
                     chords_strength = stats(tonal.getJSONObject("chords_strength"))
                     hpcp_crest = stats(tonal.getJSONObject("hpcp_crest"))
@@ -483,10 +488,10 @@ open class RecommenderStore(
                 arrayOf(
                     year, genre, length, replay_gain, dynamic_complexity, average_loudness,
                     integrated_loudness, loudness_range, bpm, danceability, tuning_nontempered_energy_ratio,
-                    tuning_diatonic_strength
+                    tuning_diatonic_strength,
                 ),
                 momentary, short_term, lowlevelStats.flatten().toTypedArray(), key, key_edma, key_krumhansl, key_temperley,
-                chords_strength, hpcp_crest, hpcp_entropy, beats_loudness
+                chords_strength, hpcp_crest, hpcp_entropy, beats_loudness,
             ).flatten().toTypedArray()
         } catch (e: Exception) {
             Log.e("Recommend", "Essentia extraction failed:")
@@ -525,20 +530,26 @@ open class RecommenderStore(
     private fun haveFeature(key: String, zerosFine: Boolean = true): Boolean {
         for (feat in getMyFeatures())
             if (feat.key == key) {
-                return if (zerosFine) true else {
+                return if (zerosFine) {
+                    true
+                } else {
                     for ((i, d) in Json.decodeFromString<DoubleArray>(feat.songFeatures!!).toTypedArray().withIndex()) {
-                        if (i >= 2 && d != 0.0)
+                        if (i >= 2 && d != 0.0) {
                             return true
+                        }
                     }
                     return false
                 }
             }
         for (feat in getRemoteFeatures())
             if (feat.key == key) {
-                return if (zerosFine) true else {
+                return if (zerosFine) {
+                    true
+                } else {
                     for ((i, d) in Json.decodeFromString<DoubleArray>(feat.songFeatures!!).toTypedArray().withIndex()) {
-                        if (i >= 2 && d != 0.0)
+                        if (i >= 2 && d != 0.0) {
                             return true
+                        }
                     }
                     return false
                 }
@@ -561,11 +572,11 @@ open class RecommenderStore(
 // positions of scales on the circle of fifths
 val majorKeys = mapOf(
     "C" to 0.0, "G" to 1.0, "D" to 2.0, "A" to 3.0, "E" to 4.0, "B" to 5.0, "Gb" to 6.0,
-    "F#" to 6.0, "Db" to 7.0, "Ab" to 8.0, "Eb" to 9.0, "Bb" to 10.0, "F" to 11.0
+    "F#" to 6.0, "Db" to 7.0, "Ab" to 8.0, "Eb" to 9.0, "Bb" to 10.0, "F" to 11.0,
 )
 val minorKeys = mapOf(
     "A" to 0.0, "E" to 1.0, "B" to 2.0, "F#" to 3.0, "C#" to 4.0, "G#" to 5.0, "D#" to 6.0,
-    "Eb" to 6.0, "Bb" to 7.0, "F" to 8.0, "C" to 9.0, "G" to 10.0, "D" to 11.0
+    "Eb" to 6.0, "Bb" to 7.0, "F" to 8.0, "C" to 9.0, "G" to 10.0, "D" to 11.0,
 )
 fun scale2label(key: String, mode: String): Array<Double> {
     val keyCode = (if (mode == "major") majorKeys[key] else minorKeys[key]) ?: -1.0

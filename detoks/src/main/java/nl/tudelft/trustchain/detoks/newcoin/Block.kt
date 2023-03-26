@@ -1,9 +1,9 @@
-package nl.tudelft.trustchain.detoks.newcoin//import java.time.Instant
+package nl.tudelft.trustchain.detoks.newcoin // import java.time.Instant
 //
-///**
+// /**
 // * Every block holds a list of transactions
 // */
-//data class Block(val previousHash: String,
+// data class Block(val previousHash: String,
 //                 val blockTransactions: MutableList<Transaction> = mutableListOf(),
 //                 val timestamp: Long = Instant.now().toEpochMilli(),
 //                 val nonce: Long = 0,
@@ -23,4 +23,4 @@ package nl.tudelft.trustchain.detoks.newcoin//import java.time.Instant
 //            blockTransactions.add(newTransaction)
 //        return this
 //    }
-//}
+// }

@@ -17,7 +17,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         const val COLUMN_NAME = "name"
         const val COLUMN_ADDRESS = "address"
 
-        const val TABLE_TOKEN ="tokens"
+        const val TABLE_TOKEN = "tokens"
         const val COLUMN_TOKEN_ID = "token_id"
         const val COLUMN_VALUE = "token_value"
         const val COLUMN_VERIFIER = "verifier"
@@ -34,7 +34,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             "CREATE TABLE IF NOT EXISTS $TABLE_NAME (" +
                 "$COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_NAME TEXT NOT NULL, " +
-                "$COLUMN_ADDRESS TEXT NOT NULL)"
+                "$COLUMN_ADDRESS TEXT NOT NULL)",
         )
 
         db?.execSQL(
@@ -43,7 +43,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 "$COLUMN_TOKEN_ID BLOB PRIMARY KEY NOT NULL UNIQUE, " +
                 "$COLUMN_VALUE BLOB NOT NULL, " +
                 "$COLUMN_VERIFIER BLOB NOT NULL, " +
-                "$COLUMN_GEN_HASH BLOB NOT NULL) "
+                "$COLUMN_GEN_HASH BLOB NOT NULL) ",
 
         )
 
@@ -55,7 +55,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 "$COLUMN_PROOF BLOB NOT NULL," +
                 "PRIMARY KEY(COLUMN_ID) " +
                 "FOREIGN KEY(token_id) REFERENCES tokens(token_id) ON DELETE CASCADE," +
-                " ON UPDATE CASCADE)"
+                " ON UPDATE CASCADE)",
 
         )
     }
@@ -90,7 +90,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     fun getAllFriends(): List<OfflineFriend> {
         val friendList = mutableListOf<String>()
         val selectQuery = "SELECT $COLUMN_NAME, $COLUMN_ADDRESS FROM $TABLE_NAME"
-        
+
         val db = this.readableDatabase
         val cursor = db.rawQuery(selectQuery, null)
 
@@ -112,7 +112,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return friendList
     }
 
-    fun addToken(token: Token){
+    fun addToken(token: Token) {
         val new_row = ContentValues()
         new_row.put(COLUMN_TOKEN_ID, token.id)
         new_row.put(COLUMN_VALUE, token.value)
@@ -129,13 +129,13 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db.delete(
             TABLE_TOKEN,
             COLUMN_TOKEN_ID + " = ?",
-            arrayOf<String>(java.lang.String.valueOf(token.id))
+            arrayOf<String>(java.lang.String.valueOf(token.id)),
         )
         db.close()
     }
 
-    //returns the id and the value of the token
-    fun getAllTokens(): List<Pair<Int, Int>>{
+    // returns the id and the value of the token
+    fun getAllTokens(): List<Pair<Int, Int>> {
         val tokenList = mutableListOf<Pair<Int, Int>>()
         val selectQueryId = "SELECT $COLUMN_TOKEN_ID FROM $TABLE_TOKEN"
         val selectQueryValue = "SELECT $COLUMN_TOKEN_ID FROM $TABLE_TOKEN"
@@ -158,8 +158,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         }
         db.close()
         return tokenList
-
     }
 
-    //update token if we keep the token when the owner changes?
+    // update token if we keep the token when the owner changes?
 }

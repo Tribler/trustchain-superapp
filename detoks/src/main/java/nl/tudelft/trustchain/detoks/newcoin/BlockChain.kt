@@ -1,5 +1,5 @@
 package nl.tudelft.trustchain.detoks.newcoin
-//class BlockChain {
+// class BlockChain {
 //
 //    private val blocksList: MutableList<Block> = mutableListOf()
 //    private val difficulty = 2
@@ -56,4 +56,4 @@ package nl.tudelft.trustchain.detoks.newcoin
 //        block.transactions.flatMap { it.inputs }.map { it.hash }.forEach { UTXO.remove(it) }
 //        UTXO.putAll(block.transactions.flatMap { it.outputs }.associateBy { it.hash })
 //    }
-//}
+// }

@@ -10,7 +10,7 @@ class Token(
     internal val value: Byte,
     internal var verifier: ByteArray,
     internal var genesisHash: ByteArray,
-    internal val recipients: MutableList<RecipientPair>
+    internal val recipients: MutableList<RecipientPair>,
 ) {
     internal val numRecipients: Int
         get() = recipients.size
@@ -50,7 +50,8 @@ class Token(
 
         if (!JavaCryptoProvider.keyFromPublicBin(verifier).verify(
                 recipients.first().proof,
-                id + value + genesisHash + recipients.first().publicKey)
+                id + value + genesisHash + recipients.first().publicKey,
+            )
         ) {
             // This can also occur if the id or value has been tampered with.
             logger.info { "The token's first recipient was not signed by a verifier!" }
@@ -60,10 +61,10 @@ class Token(
         var lastRecipientPair = recipients.first()
 
         for (newPair in recipients.subList(1, recipients.size)) {
-
             if (!JavaCryptoProvider.keyFromPublicBin(lastRecipientPair.publicKey).verify(
                     newPair.proof,
-                    lastRecipientPair.proof + newPair.publicKey)
+                    lastRecipientPair.proof + newPair.publicKey,
+                )
             ) {
                 logger.info { "One of the token's recipients was not signed by the previous recipient!" }
                 return false
@@ -79,8 +80,8 @@ class Token(
         recipients.add(
             RecipientPair(
                 newRecipient,
-                privateKey.sign(recipients.last().proof + newRecipient)
-            )
+                privateKey.sign(recipients.last().proof + newRecipient),
+            ),
         )
     }
 
@@ -102,18 +103,20 @@ class Token(
             secureRandom.nextBytes(idBytes)
             secureRandom.nextBytes(signatureBytes)
 
-            return Token(idBytes,
+            return Token(
+                idBytes,
                 value,
                 verifier,
                 signatureBytes,
-                mutableListOf())
+                mutableListOf(),
+            )
         }
 
         internal fun serialize(tokens: Collection<Token>): ByteArray {
             // The total size of the byte array is for every token TOKEN_CREATION_SIZE bytes,
             // plus 2 before every token that indicates how many extra signatures the token has,
             // plus SIGNATURE_SIZE bytes for every extra recipient in the token.
-            val totalSize = tokens.fold(0) {a, b -> a + 2 + TOKEN_CREATION_SIZE + b.numRecipients * RECIPIENT_PAIR_SIZE}
+            val totalSize = tokens.fold(0) { a, b -> a + 2 + TOKEN_CREATION_SIZE + b.numRecipients * RECIPIENT_PAIR_SIZE }
             val data = ByteArray(totalSize)
 
             var i = 0
@@ -122,8 +125,10 @@ class Token(
                 // in the token. For this we use the size of the token, but we must also add
                 // 2 because the index itself takes up 2 bytes.
                 if (token.numRecipients > Short.MAX_VALUE) {
-                    logger.info { "Number of token signatures was more than ${Short.MAX_VALUE - 2}," +
-                        "serialization is not possible." }
+                    logger.info {
+                        "Number of token signatures was more than ${Short.MAX_VALUE - 2}," +
+                            "serialization is not possible."
+                    }
                     return byteArrayOf()
                 }
 
@@ -143,7 +148,6 @@ class Token(
                 i += SIGNATURE_SIZE
 
                 for (recipientPair in token.recipients) {
-
                     System.arraycopy(recipientPair.publicKey, 0, data, i, PUBLIC_KEY_SIZE)
                     i += PUBLIC_KEY_SIZE
 
@@ -174,7 +178,6 @@ class Token(
 
             var i = 0
             while (i < dataSize) {
-
                 if (i + 2 > dataSize) {
                     logger.info { "Received a wrongly formatted list of tokens!" }
                     return mutableSetOf()
@@ -206,7 +209,6 @@ class Token(
 
                 val recipients: MutableList<RecipientPair> = mutableListOf()
                 repeat(numRecipients.toInt()) {
-
                     val publicKey = ByteArray(PUBLIC_KEY_SIZE)
                     System.arraycopy(data, i, publicKey, 0, PUBLIC_KEY_SIZE)
                     i += PUBLIC_KEY_SIZE
@@ -231,8 +233,10 @@ class Token(
         }
 
         private fun copyByteArrayIntoShort(byteArray: ByteArray, index: Int): Short {
-            return ((byteArray[index].toInt() and 0xff shl 8) or
-                (byteArray[index + 1].toInt() and 0xff)).toShort()
+            return (
+                (byteArray[index].toInt() and 0xff shl 8) or
+                    (byteArray[index + 1].toInt() and 0xff)
+                ).toShort()
         }
     }
 }
