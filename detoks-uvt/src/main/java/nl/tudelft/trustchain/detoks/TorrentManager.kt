@@ -240,7 +240,6 @@ class TorrentManager(
         }
 
         if (data != null) {
-
             val torrentInfo = TorrentInfo.bdecode(data)
             sessionActive = true
             signal = CountDownLatch(1)

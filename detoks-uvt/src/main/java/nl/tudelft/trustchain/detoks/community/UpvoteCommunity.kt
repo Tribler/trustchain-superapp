@@ -106,19 +106,18 @@ class UpvoteCommunity(
             payload
         )
 
-        val peer = pickRandomPeer()
-
-        if (peer != null) {
+        val peers = getPeers()
+        for (peer in peers) {
             val message = "[MAGNETURIPAYLOAD] You/Peer with member id: ${myPeer.mid} is sending magnet uri to peer with peer id: ${peer.mid}"
             logger.debug { message }
             send(peer, packet)
-            return true
         }
-        throw PeerNotFoundException("Could not find a peer")
+        return true
+//        throw PeerNotFoundException("Could not find a peer")
     }
 
     /**
-     * Sends a HeartToken to a random Peer
+     * Sends a UpvoteToken to a random Peer
      * When a message is sent, a proposal block is created
      * //TODO: only make an agreement block if the user did not like the video yet, if the user already like the video,
      * Sends a UpvoteToken to a random Peer
