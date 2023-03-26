@@ -95,7 +95,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val myPublicKey = getIpv8().myPeer.publicKey
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         val wallet = Wallet.getInstance(myPublicKey, getIpv8().myPeer.key as PrivateKey)
-//        val token = Token.create(1, myPublicKey.keyToBin())
+        val token = Token.create(1, myPublicKey.keyToBin())
         wallet.addToken(token)
 
         buttonRequest.setOnClickListener {
