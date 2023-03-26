@@ -7,5 +7,8 @@ class NetworkSizeGossiper(Gossiper):
         self.peers = peers
         self.community = community
         
-    def gossip(self):
+    def gossip(self) -> None:
         pass
+
+    def received_response(self, peer, payload) -> None:
+        print(f"NETWORKSIZE RESPONSE {payload}")

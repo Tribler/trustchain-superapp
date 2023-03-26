@@ -18,10 +18,6 @@ class TorrentGossiper(Gossiper):
             torrent_to_send = random.choice(self.torrent_list)
             torrent = Torrent.from_file(f"torrents/{torrent_to_send}")
 
-            print(
-                f"Sending torrent {torrent_to_send} with magnetlink: {torrent.magnet_link}"
-            )
-
             packet = self.community.ezr_pack(
                 MESSAGE_TORRENT_ID, TorrentPayload(torrent.magnet_link), sig=False
             )
