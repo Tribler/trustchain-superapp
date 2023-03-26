@@ -38,6 +38,9 @@
         <action
             android:id="@+id/action_switch_environment"
             app:destination="@id/exampleOverlayFragment" />
+        <action
+            android:id="@+id/action_to_test"
+            app:destination="@id/TestFragment" />
     </fragment>
 
     <fragment

@@ -107,8 +107,15 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
         val environmentSwitchButton = view.findViewById<Button>(R.id.switch_environment_button)
         environmentSwitchButton.setOnClickListener { switchEnvirmonments(view) }
 
+        val toTestButton = view.findViewById<Button>(R.id.toTest_button)
+        toTestButton.setOnClickListener { toTest(view) }
+
+
         binding.startTransactionsButton.setOnClickListener {
-            binding.transactionsPerSecondField.text = "${normalSending()} ms"
+            binding.transactionsPerSecondField.text = "${grouppacking()} ms"
+        }
+        binding.singleTransactionsButton.setOnClickListener {
+            binding.singleTextField.text= "${normalSending()} ms"
         }
         trustchainCommunity.addListener(BLOCK_TYPE2, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
@@ -157,6 +164,10 @@ class TransactionFrequencyTestFragment : BaseFragment(R.layout.fragment_transact
     fun switchEnvirmonments(view: View){
         val navController = Navigation.findNavController(view)
         navController.navigate(R.id.action_switch_environment)
+    }
+    fun toTest(view: View){
+        val navController = Navigation.findNavController(view)
+        navController.navigate(R.id.action_to_test)
     }
 
 
