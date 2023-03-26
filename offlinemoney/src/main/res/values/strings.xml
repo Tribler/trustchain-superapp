@@ -12,4 +12,7 @@
     <string name="have_the_requesting_party_scan_this_code_then_press_done">Have the Requesting party scan this code, then press done</string>
     <string name="sending">Sending</string>
     <string name="continueString">Continue</string>
+    <string name="print_money">Print Money</string>
+    <string name="verify_money">Verify Money</string>
+    <string name="print">Print</string>
 </resources>

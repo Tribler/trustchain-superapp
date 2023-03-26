@@ -79,4 +79,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    implementation 'com.github.travijuu:numberpicker:1.0.7'
 }

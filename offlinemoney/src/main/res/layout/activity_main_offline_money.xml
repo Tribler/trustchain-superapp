@@ -67,24 +67,84 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/txt1Euro"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="30sp"
-                android:text="1€"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <TextView
-                android:id="@+id/edt1Euro"
+            <LinearLayout
+                android:id="@+id/firstEuro"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="30sp"
-                android:text=""
+                android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txt1Euro" />
+                app:layout_constraintTop_toTopOf="parent" >
+
+                <TextView
+                    android:id="@+id/txt5Euro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="30sp"
+                    android:text="5€:"
+                    android:layout_gravity="center"/>
+
+                <TextView
+                    android:id="@+id/edt5Euro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="30sp"
+                    android:text="16"
+                    android:layout_gravity="bottom" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/secondEuro"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/firstEuro">
+
+                <TextView
+                    android:id="@+id/txt2Euro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="30sp"
+                    android:text="2€:"
+                    android:layout_gravity="center"/>
+
+                <TextView
+                    android:id="@+id/edt2Euro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="30sp"
+                    android:text="22"
+                    android:layout_gravity="bottom" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/thirdEuro"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/secondEuro">
+
+                <TextView
+                    android:id="@+id/txt1Euro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="30sp"
+                    android:text="1€:"
+                    android:layout_gravity="center"/>
+
+                <TextView
+                    android:id="@+id/edt1Euro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="30sp"
+                    android:text="20"
+                    android:layout_gravity="bottom" />
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGet"
@@ -96,7 +156,7 @@
                 app:icon="@drawable/ic_baseline_photo_camera_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/edt1Euro"/>
+                app:layout_constraintTop_toBottomOf="@id/thirdEuro" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSend"
