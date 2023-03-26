@@ -236,6 +236,7 @@ class TorrentManager(
             data = sessionManager.fetchMagnet(magnetLink, 30)
         } catch (e: Exception) {
             logger.info { "Detoks, Failed to retrieve the magnet" }
+            Log.e("Detoks", "This peer failed get content using the provided magnet link: $magnetLink logged on line 239 of TorrentManager")
             return
         }
 
@@ -275,6 +276,9 @@ class TorrentManager(
                 sessionManager.find(torrentInfo.infoHash())?.let { torrentHandle ->
                     sessionManager.remove(torrentHandle)
                 }
+
+                Log.e("Detoks", "This peer failed get content using the provided magnet link: $magnetLink because of:")
+                Log.e("Detoks", "Attempt to download timed out for $magnetLink, logged by line 281 of torrentManager")
 //                onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
             } else {
 //                onDownloadSuccess(magnetName)
@@ -282,6 +286,7 @@ class TorrentManager(
             sessionActive = false
         } else {
             logger.info { "Failed to retrieve the magnet" }
+            Log.e("Detoks", "This peer failed get content using the provided magnet link: $magnetLink logged on line 289 of TorrentManager")
 //            activity.runOnUiThread { printToast("Failed to retrieve magnet for $torrentName!") }
 //            onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
         }
