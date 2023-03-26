@@ -28,10 +28,6 @@ data class Wallet(
         return tokens.size
     }
 
-//    private fun getMyTransactions() : Collection<TransactionOutput> {
-//        return blockChain.UTXO.filterValues { it.isMine(publicKey) }.values
-//    }
-
     public fun addFriend(friend: OfflineFriend){
         listOfFriends.add(friend)
     }

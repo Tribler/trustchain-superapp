@@ -73,6 +73,13 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             Log.v("Offline fragment", "hello")
             Log.v("Offline fragment", "activated")
         }
+        val walletButton = view.findViewById<Button>(R.id.wallet_button)
+        walletButton.setOnClickListener {
+            val navController = view.findNavController()
+            navController.navigate(R.id.walletFragment)
+            Log.v("Wallet fragment", "hello")
+            Log.v("Wallet fragment", "activated")
+        }
     }
 
     /**

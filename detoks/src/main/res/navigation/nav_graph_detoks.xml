@@ -13,7 +13,18 @@
         <action
             android:id="@+id/action_detoksFragment_to_offlineTransferFragment"
             app:destination="@id/offlineTransferFragment" />
+        <action
+            android:id="@+id/action_detoksFragment_to_walletFragment"
+            app:destination="@id/walletFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/walletFragment"
+        android:name="nl.tudelft.trustchain.detoks.WalletFragment"
+        android:label="Wallet"
+        tools:layout="@layout/wallet_fragment"
+        />
+
     <fragment
         android:id="@+id/offlineTransferFragment"
         android:name="nl.tudelft.trustchain.detoks.OfflineTransferFragment"
@@ -23,6 +34,7 @@
             android:id="@+id/action_offlineTransferFragment_to_addFriendFragment"
             app:destination="@id/addFriendFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/addFriendFragment"
         android:name="nl.tudelft.trustchain.detoks.AddFriendFragment"
