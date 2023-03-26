@@ -91,6 +91,7 @@ class TorrentManager(
             content.asMediaInfo()
         } catch (e: TimeoutCancellationException) {
             Log.i("DeToks", "Timeout for content ... $index")
+            Log.i("DeToks", "Timeout for content ... ${content.asMediaInfo().fileName}")
             content.asMediaInfo()
         }
     }
