@@ -144,8 +144,10 @@ class Recommender {
                     }
                 }
             }
-            videoHashMap.toSortedMap(Comparator.reverseOrder())
-            return videoHashMap.keys.toList()
+
+            val keys = videoHashMap.toSortedMap(compareByDescending { videoHashMap[it] }).keys
+
+            return keys.toList()
         }
 
         /**
