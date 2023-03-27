@@ -57,8 +57,8 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 "$COLUMN_TOKEN_ID BLOB NOT NULL, " +
                 "$COLUMN_RECIPIENT BLOB NOT NULL, " +
                 "$COLUMN_PROOF BLOB NOT NULL," +
-                "PRIMARY KEY(COLUMN_ID) " +
-                "FOREIGN KEY(token_id) REFERENCES tokens(token_id) ON DELETE CASCADE," +
+                "PRIMARY KEY(id) " +
+                "FOREIGN KEY(token_id) REFERENCES tokens(token_id) ON DELETE CASCADE " +
                 " ON UPDATE CASCADE)",
 
         )
