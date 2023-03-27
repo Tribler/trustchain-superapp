@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
+import nl.tudelft.trustchain.detoks.DeToksFragment
 import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.adapters.TabBarAdapter
 

@@ -16,11 +16,11 @@ import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
-import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
+import nl.tudelft.ipv8.android.IPv8Android
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.nio.file.Path
@@ -32,7 +32,7 @@ import java.nio.file.Paths
  * It is responsible for downloading the torrent files and caching the videos.
  * It also provides the videos to the video adapter.
  */
-class TorrentManager private constructor (
+class TorrentManager constructor (
     private val cacheDir: File,
     private val torrentDir: File,
     private val cachingAmount: Int = 1,
@@ -386,6 +386,7 @@ class TorrentManager private constructor (
         handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
         handle.prioritizeFiles(arrayOf(Priority.IGNORE))
         handle.pause()
+        val community = IPv8Android.getInstance().getOverlay<LikeCommunity>()!!
 
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
@@ -396,7 +397,8 @@ class TorrentManager private constructor (
                         handle,
                         torrentInfo.name(),
                         fileName,
-                        it
+                        it,
+                        community.myPeer.publicKey.toString()
                     )
                 )
             }

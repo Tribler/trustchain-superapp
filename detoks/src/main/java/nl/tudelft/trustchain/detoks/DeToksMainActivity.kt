@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
-import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
@@ -17,6 +16,7 @@ import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import android.os.IBinder
+import android.util.Log
 import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
@@ -39,6 +39,14 @@ class DeToksActivity : BaseActivity() {
             startService(intent)
             bindService(intent, gossipConnection, Context.BIND_AUTO_CREATE)
         }
+        // TODO: we can put this in app/trustChainApplication.kt like the other apps
+        createLikeCommunity()
+
+        val community = IPv8Android.getInstance().getOverlay<LikeCommunity>()!!
+        val peers = community.getPeers()
+        for (peer in peers) {
+            Log.d("DeToks", peer.mid)
+        }
     }
 
     private val gossipConnection = object : ServiceConnection {
@@ -50,22 +58,14 @@ class DeToksActivity : BaseActivity() {
         override fun onServiceDisconnected(p0: ComponentName?) {
             gossipService = null
         }
-        // Maybe we can put this in app/trustChainApplication.kt like the other apps
-        createDetoksCommunity()
-
-        val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
-        val peers = community.getPeers()
-        for (peer in peers) {
-            Log.d("DeToks", peer.mid)
-        }
     }
 
-    fun createDetoksCommunity() {
+    fun createLikeCommunity() {
         val settings = TrustChainSettings()
         val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
         val store = TrustChainSQLiteStore(Database(driver))
         val deToksComm = OverlayConfiguration(
-            DetoksCommunity.Factory(settings, store),
+            LikeCommunity.Factory(settings, store),
             listOf(
                 RandomWalk.Factory(),
                 NetworkServiceDiscovery.Factory(getSystemService()!!)
@@ -82,89 +82,6 @@ class DeToksActivity : BaseActivity() {
             .init()
     }
 
-//    private fun initIPv8() {
-//        val config = IPv8Configuration(overlays = listOf(
-//            createDiscoveryCommunity(),
-//            createTrustChainCommunity(),
-//            createDemoCommunity()
-//        ), walkerInterval = 5.0)
-//
-//        IPv8Android.Factory(this.application!!)
-//            .setConfiguration(config)
-//            .setPrivateKey(getPrivateKey())
-//            .setServiceClass(TrustChainService::class.java)
-//            .init()
-//
-//        initTrustChain()
-//    }
-//
-//    private fun initTrustChain() {
-//        val ipv8 = IPv8Android.getInstance()
-//        val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
-//
-//        trustchain.registerTransactionValidator(BLOCK_TYPE, object : TransactionValidator {
-//            override fun validate(
-//                block: TrustChainBlock,
-//                database: TrustChainStore
-//            ): ValidationResult {
-//                if (block.transaction["message"] != null || block.isAgreement) {
-//                    return ValidationResult.Valid
-//                } else {
-//                    return ValidationResult.Invalid(listOf(""))
-//                }
-//            }
-//        })
-//
-//        trustchain.registerBlockSigner(BLOCK_TYPE, object : BlockSigner {
-//            override fun onSignatureRequest(block: TrustChainBlock) {
-//                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
-//            }
-//        })
-//
-//        trustchain.addListener(BLOCK_TYPE, object : BlockListener {
-//            override fun onBlockReceived(block: TrustChainBlock) {
-//                Log.d("DeToks", "onBlockReceived: ${block.blockId} ${block.transaction}")
-//            }
-//        })
-//    }
-//
-//    private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
-//        val randomWalk = RandomWalk.Factory()
-//        val randomChurn = RandomChurn.Factory()
-//        val periodicSimilarity = PeriodicSimilarity.Factory()
-//
-//        val nsd = getSystemService<NsdManager>()?.let { NetworkServiceDiscovery.Factory(it) }
-//
-//        val strategies = listOf(
-//            randomWalk, randomChurn, periodicSimilarity, nsd
-//        )
-//
-//        return OverlayConfiguration(
-//            DiscoveryCommunity.Factory(),
-//
-//            strategies.map { it as DiscoveryStrategy.Factory<*> }
-//        )
-//    }
-//
-//    private fun createTrustChainCommunity(): OverlayConfiguration<TrustChainCommunity> {
-//        val settings = TrustChainSettings()
-//        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
-//        val store = TrustChainSQLiteStore(Database(driver))
-//        val randomWalk = RandomWalk.Factory()
-//        return OverlayConfiguration(
-//            TrustChainCommunity.Factory(settings, store),
-//            listOf(randomWalk)
-//        )
-//    }
-//
-//    private fun createDemoCommunity(): OverlayConfiguration<DetoksCommunity> {
-//        val randomWalk = RandomWalk.Factory()
-//        return OverlayConfiguration(
-//            Overlay.Factory(DetoksCommunity::class.java),
-//            listOf(randomWalk)
-//        )
-//    }
-//
     private fun getPrivateKey(): PrivateKey {
         // Load a key from the shared preferences
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
