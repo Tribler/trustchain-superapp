@@ -8,11 +8,21 @@ import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 import kotlin.random.Random
 
+enum class RecommendationType {
+    PEERS, MOST_LIKED, RANDOM
+}
+
 class Recommender {
     companion object {
-        private const val mostLikedProb: Float = 0.9F
-        private var recommendations = mutableListOf<String>()
+        private const val MAX_NUM_RECOMMENDATIONS = 20
+        private const val peersWeight: Float = 0.7F
+        private const val mostLikedWeight: Float = 0.25F
+        private const val randomWeight: Float = 1F - mostLikedWeight - peersWeight
         private var isInitialized: Boolean = false
+        private var recommendations = mutableListOf<String>()
+        private var mostLikedRecommendations = mutableListOf<String>()
+        private var peerRecommendations = mutableListOf<String>()
+        private var randomRecommendations = mutableListOf<String>()
 
         /**
          * Initialize the list of recommendations with all the torrents in the TorrentManager
@@ -22,6 +32,8 @@ class Recommender {
             if (isInitialized)
                 return
             Log.i("DeToks", "Initializing Recommender...")
+            Log.i("DeToks", "Recommendation Weights: \n\tPEERS: $peersWeight " +
+                "\n\tMOST LIKED: $mostLikedWeight \n\tRANDOM: $randomWeight")
             val allTorrents: List<TorrentManager.TorrentHandler> = torrentManager.getAllTorrents()
             recommendations.addAll(allTorrents.map { it.asMediaInfo().videoID }.toMutableList())
             isInitialized = true
@@ -30,17 +42,30 @@ class Recommender {
         /**
          * Add a new recommendations to the list of recommendations.
          */
-        fun addRecommendation(videoID: String) {
-            if (!recommendations.contains(videoID))
-                recommendations.add(videoID)
+        private fun addRecommendation(videoID: String, recommendationType: RecommendationType) {
+            when (recommendationType) {
+                RecommendationType.PEERS -> {
+                    if (!peerRecommendations.contains(videoID))
+                        peerRecommendations.add(videoID)
+                }
+                RecommendationType.MOST_LIKED -> {
+                    if (!mostLikedRecommendations.contains(videoID))
+                        mostLikedRecommendations.add(videoID)
+                }
+                RecommendationType.RANDOM -> {
+                    if (!randomRecommendations.contains(videoID))
+                        randomRecommendations.add(videoID)
+                }
+            }
+
         }
 
         /**
          * Add new recommendations to the list of recommendations.
          */
-        fun addRecommendations(videos: List<String>) {
+        fun addRecommendations(videos: List<String>, recommendationType: RecommendationType) {
             for (recommendation: String in videos)
-                addRecommendation(recommendation)
+                addRecommendation(recommendation, recommendationType)
         }
         /**
          * Get the next recommendation when there are recommendations left or update the list of
@@ -63,17 +88,33 @@ class Recommender {
          * Update the list of recommendations.
          */
         private fun createNewRecommendations() {
-            Log.i("DeToks", "Creating new recommendations...")
+            Log.i("DeToks", "Creating PEERS recommendations...")
+            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
+            upvoteCommunity?.requestRecommendations()
+            Log.i("DeToks", "Creating MOST LIKED recommendations...")
+            addRecommendations(getMostLikedVideoIDs(), RecommendationType.MOST_LIKED)
+            Log.i("DeToks", "Creating RANDOM recommendations...")
+            addRecommendations(getRandomVideoIDs(), RecommendationType.RANDOM)
 
-            // Recommend the most liked videos
-            if (Random.nextFloat() <= mostLikedProb) {
-                Log.i("DeToks", "Recommending MOST LIKED videos...")
-                recommendations.addAll(getMostLikedVideoIDs())
-            }
-            // Recommend random videos to allow users to see new stuff they might like
-            else {
-                Log.i("DeToks", "Recommending RANDOM videos...")
-                recommendations.addAll(getRandomVideoIDs())
+            for (i in 0 until MAX_NUM_RECOMMENDATIONS) {
+                val prob = Random.nextFloat()
+                var newVideoID: String? = null
+                if (prob <= peersWeight) {
+                    if (peerRecommendations.size > 0)
+                        newVideoID = peerRecommendations.removeFirst()
+                } else if (prob <= peersWeight + mostLikedWeight) {
+                    if (mostLikedRecommendations.size > 0)
+                        newVideoID = mostLikedRecommendations.removeFirst()
+                } else {
+                    if (randomRecommendations.size > 0)
+                        newVideoID = randomRecommendations.removeFirst()
+                }
+                if (newVideoID != null) {
+                    recommendations.add(newVideoID)
+                    peerRecommendations.remove(newVideoID)
+                    mostLikedRecommendations.remove(newVideoID)
+                    randomRecommendations.remove(newVideoID)
+                }
             }
             Log.i("DeToks", "Recommendations: $recommendations")
         }

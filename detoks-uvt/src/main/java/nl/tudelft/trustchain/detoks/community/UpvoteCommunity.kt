@@ -10,6 +10,7 @@ import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
 import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
+import nl.tudelft.trustchain.detoks.recommendation.RecommendationType
 import nl.tudelft.trustchain.detoks.recommendation.Recommender
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
@@ -56,9 +57,9 @@ class UpvoteCommunity(
 
     private fun onRecommendationReceivedPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(RecommendedVideosPayload.Deserializer)
-        logger.debug { "[DETOKS] -> Received recommendations of ${peer.mid}"}
+        logger.debug { "[DETOKS] -> Received recommendations of ${peer.mid}" }
         val recommendations = payload.recommendations
-        Recommender.addRecommendations(recommendations)
+        Recommender.addRecommendations(recommendations, RecommendationType.PEERS)
     }
 
     private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {
