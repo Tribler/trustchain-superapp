@@ -1,6 +1,7 @@
 from .gossiper import Gossiper
 from messages import MESSAGE_BOOT_REQUEST, MESSAGE_BOOT_RESPONSE
 from pyipv8.ipv8.messaging.serialization import Serializable
+from pyipv8.ipv8.lazy_community import lazy_wrapper_unsigned
 
 
 class BootRequesPayload(Serializable):
@@ -33,8 +34,11 @@ class BootGossiper(Gossiper):
         self.peers = peers
         self.community = community
         self.network_gossiper = network_gossiper
+        self.running = True
 
     def gossip(self) -> None:
+        if not self.running:
+            return 
         if self.max_loops > 0:
             self.max_loops -= 1
 
@@ -46,8 +50,8 @@ class BootGossiper(Gossiper):
 
                 self.community.endpoint.send(peer.address, packet)
 
-    def received_request(self, peer, payload) -> None:
-        message_map = {"NetworkSize": self.network_size_gossiper.estimated_size}
+    def received_request(self, peer, _payload) -> None:
+        message_map = {"NetworkSize": self.network_gossiper.estimated_size}
         message_to_send = self.serialize_message(message_map)
 
         packet = self.community.ezr_pack(
@@ -57,5 +61,17 @@ class BootGossiper(Gossiper):
 
         self.community.endpoint.send(peer, packet)
 
-    def received_response(self, peer, payload) -> None:
-        print(f"BOOTRESPONSE {payload}")
+    def received_response(self, _peer, payload: bytearray, data_offset=31) -> None:
+        result = payload[data_offset:].decode()
+        result_map = {}
+
+        for i in result.split(","):
+            split = i.split("~")
+            result_map[split[0]] = int(split[1])
+
+        self.network_gossiper.estimated_size = result_map["NetworkSize"]
+        print(f"BOOTRESPONSE {result}, size set to {self.network_gossiper.estimated_size}")
+
+        self.running = False
+
+        
