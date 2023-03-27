@@ -1,24 +1,12 @@
-package nl.tudelft.trustchain.detoks.fragments
+package nl.tudelft.trustchain.detoks
 
-import android.Manifest
-import android.app.Activity
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
 import mu.KotlinLogging
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import nl.tudelft.trustchain.detoks.R
-import nl.tudelft.trustchain.detoks.TorrentManager
-import nl.tudelft.trustchain.detoks.VideosAdapter
 import java.io.File
 import java.io.FileOutputStream
 
@@ -71,13 +59,9 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             ActivityCompat.requestPermissions(this.requireActivity(),
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                 111)
-
         }else{
             mainPart()
         }
-
-
-
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -93,7 +77,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
                                             permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             111 -> {
-
                 if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     Log.d("AndroidRuntime", "REJECTED :(")
 
