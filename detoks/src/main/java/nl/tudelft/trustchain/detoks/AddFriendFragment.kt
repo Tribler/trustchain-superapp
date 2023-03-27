@@ -73,7 +73,7 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
         val buttonShow = view.findViewById<Button>(R.id.button_show)
         buttonShow.setOnClickListener {
             buttonScan.visibility = View.INVISIBLE
-            val myPublicKey = getIpv8().myPeer.publicKey.toString()
+            val myPublicKey = getIpv8().myPeer.publicKey.keyToBin().toString()
             lifecycleScope.launch {
                 var bitmap = withContext(Dispatchers.Default) {
                     // qrCodeUtils.createQR(payload.serialize().toHex())
@@ -103,7 +103,7 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
            } else {
                 val myPublicKey = getIpv8().myPeer.publicKey
                 val wallet = Wallet.getInstance(this.requireContext(), myPublicKey, getIpv8().myPeer.key as PrivateKey)
-                wallet.addFriend(OfflineFriend(username.toString(), content as PublicKey))
+                wallet.addFriend(OfflineFriend(username.toString(), content.toString().toByteArray()))
 //               if(newRowId != -1L){
 //                   Toast.makeText(this.context,"Added Friend!", Toast.LENGTH_LONG).show()
 //               } else {

@@ -64,7 +64,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val wallet = Wallet.getInstance(view.context,getIpv8().myPeer.publicKey, getIpv8().myPeer.key as PrivateKey)
-
+        val dbHelper = DbHelper(view.context)
         val friendList = wallet.listOfFriends
         val friends = friendList.toMutableList() // Mutable?
         if (friendList.isEmpty()) {
@@ -92,17 +92,17 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             navController.navigate(R.id.addFriendFragment)
         }
 
-        val myPublicKey = getIpv8().myPeer.publicKey
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         val amountText = view.findViewById<EditText>(R.id.amount)
         val amount = amountText.text
 
 
         buttonRequest.setOnClickListener {
-
+            val friendUsername = spinnerFriends.selectedItem
+            val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername.toString())
             // After tranfering the requested amount, remove it from the owner wallet.
             val tokens = wallet.getPayment(amount.toString().toInt())  // removes the tokens from the db
-            showQR(view, tokens, myPublicKey)
+            showQR(view, tokens, friendPublicKey)
         }
 
 //    companion object {
@@ -143,20 +143,22 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         // increase the amount in the wallet
     }
 
-    private fun createNextOwner(tokens : ArrayList<Token>,
-                                pubKeyRecipient: nl.tudelft.ipv8.keyvault.PublicKey) : ArrayList<Token> {
+    private fun createNextOwner(
+        tokens: ArrayList<Token>,
+        pubKeyRecipient: ByteArray
+    ) : ArrayList<Token> {
         val senderPrivateKey = getIpv8().myPeer.key
 
         // create the new ownership of the token
         for(token in tokens) {
-            token.signByPeer(pubKeyRecipient.keyToBin(), senderPrivateKey as PrivateKey)
+            token.signByPeer(pubKeyRecipient, senderPrivateKey as PrivateKey)
         }
 
         return tokens
     }
 
 
-    private fun showQR(view: View, token: ArrayList<Token>, friendPublicKey: nl.tudelft.ipv8.keyvault.PublicKey) {
+    private fun showQR(view: View, token: ArrayList<Token>, friendPublicKey: ByteArray) {
         val newToken = createNextOwner(token, friendPublicKey)
         // encode newToken
 

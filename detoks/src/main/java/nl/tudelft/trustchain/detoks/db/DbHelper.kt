@@ -37,7 +37,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             "CREATE TABLE IF NOT EXISTS $TABLE_NAME (" +
                 "$COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_NAME TEXT NOT NULL, " +
-                "$COLUMN_ADDRESS TEXT NOT NULL)",
+                "$COLUMN_ADDRESS BLOB NOT NULL)",
         )
 
         db?.execSQL(
@@ -103,8 +103,8 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             if (nameColumnIndex >= 0 && addressColumnIndex >= 0) {
                 do {
                     val name = cursor.getString(nameColumnIndex)
-                    val address = cursor.getString(addressColumnIndex)
-                    friendList.add(OfflineFriend(name, address as PublicKey))
+                    val address = cursor.getBlob(addressColumnIndex)
+                    friendList.add(OfflineFriend(name, address))
                 } while (cursor.moveToNext())
             }
         }
@@ -113,6 +113,29 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db.close()
 
         return friendList
+    }
+
+    fun getFriendsPublicKey(friendName: String): ByteArray {
+        val db = readableDatabase
+        val cursor = db.query(
+            TABLE_NAME,
+            arrayOf("address"),
+            "name = ?",
+            arrayOf(friendName),
+            null,
+            null,
+            null
+        )
+
+        var address: ByteArray = byteArrayOf(0x48, 0x65, 0x6c, 0x6c, 0x6f)
+        if (cursor.moveToFirst()) {
+            val nameColumnIndex = cursor.getColumnIndex(COLUMN_ADDRESS)
+            if (nameColumnIndex >= 0) {
+                address = cursor.getBlob(nameColumnIndex)
+            }
+        }
+        cursor.close()
+        return address
     }
 
     fun addToken(token: Token) {
