@@ -20,7 +20,7 @@ class DetoksCommunity(Community):
         network_size_gossiper = NetworkSizeGossiper(delay=5.0, peers=5, community=self)
         self.register_task(f"networksize_gossip", network_size_gossiper.gossip, interval=network_size_gossiper.delay, delay=0)
 
-        boot_gossiper = BootGossiper(delay=5.0, peers=5, community=self)
+        boot_gossiper = BootGossiper(delay=5.0, peers=5, community=self, network_size_gossiper=network_size_gossiper)
         self.register_task(f"boot_gossip", boot_gossiper.gossip, interval=boot_gossiper.delay, delay=0)
 
         watch_time_gossiper = WatchtimeGossiper(delay=5.0, peers=5, community=self)

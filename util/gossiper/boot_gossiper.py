@@ -27,11 +27,12 @@ class BootResponsePayload(Serializable):
 
 class BootGossiper(Gossiper):
 
-    def __init__(self, delay, peers, community):
+    def __init__(self, delay, peers, community, network_gossiper):
         self.max_loops = int(30 / delay)
         self.delay = delay
         self.peers = peers
         self.community = community
+        self.network_gossiper = network_gossiper
 
     def gossip(self) -> None:
         if self.max_loops > 0:
@@ -46,7 +47,7 @@ class BootGossiper(Gossiper):
                 self.community.endpoint.send(peer.address, packet)
 
     def received_request(self, peer, payload) -> None:
-        message_map = {"NetworkSize": 1}
+        message_map = {"NetworkSize": self.network_size_gossiper.estimated_size}
         message_to_send = self.serialize_message(message_map)
 
         packet = self.community.ezr_pack(

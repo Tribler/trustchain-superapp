@@ -6,6 +6,7 @@ class NetworkSizeGossiper(Gossiper):
         self.delay = delay
         self.peers = peers
         self.community = community
+        self.estimated_size = 0
         
     def gossip(self) -> None:
         pass
