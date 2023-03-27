@@ -22,3 +22,7 @@ class TorrentGossiper(Gossiper):
                 MESSAGE_TORRENT_ID, TorrentPayload(torrent.magnet_link), sig=False
             )
             self.community.endpoint.send(p.address, packet)
+
+    def received_response(self, _peer, payload:bytearray, data_offset=31) -> None:
+        result = payload[data_offset:].decode()
+        print(f"TORRENT MESSAGE {result}")

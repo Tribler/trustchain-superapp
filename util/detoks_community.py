@@ -33,11 +33,7 @@ class DetoksCommunity(Community):
 
         self.register_task("print_peers", print_peers, interval=5.0, delay=0)
 
-        self.add_message_handler(messages.MESSAGE_TORRENT_ID, self.on_message)
+        self.add_message_handler(messages.MESSAGE_TORRENT_ID, torrent_gossiper.received_response)
         self.add_message_handler(messages.MESSAGE_BOOT_REQUEST, boot_gossiper.received_request)
         self.add_message_handler(messages.MESSAGE_BOOT_RESPONSE, boot_gossiper.received_response)
         self.add_message_handler(messages.MESSAGE_NETWORK_SIZE_ID, network_size_gossiper.received_response)
-
-
-    def on_message(self, peer, payload):
-        print(f"TORRENT MESSAGE {payload}")

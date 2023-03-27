@@ -62,6 +62,7 @@ class BootGossiper(Gossiper):
         self.community.endpoint.send(peer, packet)
 
     def received_response(self, _peer, payload: bytearray, data_offset=31) -> None:
+        #TODO: cleanup
         result = payload[data_offset:].decode()
         result_map = {}
 
