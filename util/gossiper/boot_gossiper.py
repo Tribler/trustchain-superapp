@@ -1,8 +1,6 @@
 from .gossiper import Gossiper
 from messages import MESSAGE_BOOT_REQUEST, MESSAGE_BOOT_RESPONSE
 from pyipv8.ipv8.messaging.serialization import Serializable
-from pyipv8.ipv8.lazy_community import lazy_wrapper_unsigned
-
 
 class BootRequesPayload(Serializable):
     def __init__(self, message):

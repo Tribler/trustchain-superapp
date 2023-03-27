@@ -17,7 +17,7 @@ class DetoksCommunity(Community):
         torrent_gossiper = TorrentGossiper(delay=5.0, peers=5, community=self)
         self.register_task(f"torrent_gossip", torrent_gossiper.gossip, interval=torrent_gossiper.delay, delay=0)
 
-        network_size_gossiper = NetworkSizeGossiper(delay=5.0, peers=5, community=self)
+        network_size_gossiper = NetworkSizeGossiper(delay=5.0, peers=5, community=self, num_leaders=1)
         self.register_task(f"networksize_gossip", network_size_gossiper.gossip, interval=network_size_gossiper.delay, delay=0)
 
         boot_gossiper = BootGossiper(delay=5.0, peers=5, community=self, network_gossiper=network_size_gossiper)
