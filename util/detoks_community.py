@@ -37,3 +37,4 @@ class DetoksCommunity(Community):
         self.add_message_handler(messages.MESSAGE_BOOT_REQUEST, boot_gossiper.received_request)
         self.add_message_handler(messages.MESSAGE_BOOT_RESPONSE, boot_gossiper.received_response)
         self.add_message_handler(messages.MESSAGE_NETWORK_SIZE_ID, network_size_gossiper.received_response)
+        self.add_message_handler(messages.MESSAGE_WATCH_TIME_ID, watch_time_gossiper.received_response)

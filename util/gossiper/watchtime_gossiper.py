@@ -46,3 +46,7 @@ class WatchtimeGossiper(Gossiper):
                 )
 
                 self.community.endpoint.send(peer.address, packet)
+
+    def received_response(self, _peer, payload: bytearray, data_offset=31) -> None: 
+        result = payload[data_offset:].decode()
+        print(f"WATCHTIME MESSAGE {result}")
