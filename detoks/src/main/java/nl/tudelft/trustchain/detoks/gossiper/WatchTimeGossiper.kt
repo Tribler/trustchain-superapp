@@ -7,8 +7,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.TorrentManager
+import nl.tudelft.trustchain.detoks.gossiper.GossipMessage.Deserializer.deserializeMessage
 
 class WatchTimeGossiper(
     override val delay: Long,
@@ -40,9 +42,20 @@ class WatchTimeGossiper(
         randomPeers.forEach {
             deToksCommunity.gossipWith(
                 it,
-                GossipMessage(DeToksCommunity.MESSAGE_WATCH_TIME_ID, randomProfileEntries),
+                WatchTimeMessage(randomProfileEntries),
                 DeToksCommunity.MESSAGE_WATCH_TIME_ID
             )
+        }
+    }
+}
+
+class WatchTimeMessage(data: List<Pair<String, Long>>) : GossipMessage<Long>(data) {
+    companion object Deserializer : Deserializable<WatchTimeMessage> {
+        override fun deserialize(buffer: ByteArray, offset: Int): Pair<WatchTimeMessage, Int> {
+            val msg = deserializeMessage(buffer, offset){
+                return@deserializeMessage Pair(it.getString(0), it.getLong(1))
+            }
+            return Pair(WatchTimeMessage(msg.first), msg.second)
         }
     }
 }

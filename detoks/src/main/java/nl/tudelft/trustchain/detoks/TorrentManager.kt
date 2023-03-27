@@ -233,11 +233,11 @@ class TorrentManager private constructor (
         fileOrDirectory.delete()
     }
 
-    fun addTorrent(magnet: String) {
-        val torrentInfo = getInfoFromMagnet(magnet)?:return
-        val hash = torrentInfo.infoHash()
+    fun addTorrent(hash: Sha1Hash, magnet: String) {
+        if (sessionManager.find(hash) != null) return
 
-        if(sessionManager.find(hash) != null) return
+        val torrentInfo = getInfoFromMagnet(magnet)?:return
+
         Log.d(DeToksCommunity.LOGGING_TAG,"Adding new torrent: ${torrentInfo.name()}")
 
         sessionManager.download(torrentInfo, cacheDir)
@@ -354,3 +354,13 @@ class TorrentMediaInfo(
     val fileName: String,
     val fileURI: String,
 )
+
+class MagnetLink {
+    companion object {
+        fun hashFromMagnet(magnet: String) : String {
+            return magnet
+                .substringAfter("xt=urn:btih:")
+                .substringBefore("&")
+        }
+    }
+}
