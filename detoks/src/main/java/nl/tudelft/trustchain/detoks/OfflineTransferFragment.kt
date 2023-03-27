@@ -66,9 +66,13 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val wallet = Wallet.getInstance(view.context,getIpv8().myPeer.publicKey, getIpv8().myPeer.key as PrivateKey)
         val dbHelper = DbHelper(view.context)
         val friendList = wallet.listOfFriends
-        val friends = friendList.toMutableList() // Mutable?
-        if (friendList.isEmpty()) {
-//            friends.add("Add Friend")
+        val friendUsernames = arrayListOf<String>()
+        for (f in friendList){
+            friendUsernames.add(f.username)
+        }
+        val friends = friendUsernames.toMutableList() // Mutable?
+        if (friendUsernames.isEmpty()) {
+            friends.add("Add Friend")
         }
 
 //        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, friendList)

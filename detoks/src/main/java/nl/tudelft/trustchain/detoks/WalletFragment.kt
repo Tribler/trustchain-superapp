@@ -25,7 +25,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
     private var param1: String? = null
     private var param2: String? = null
     val myPublicKey = getIpv8().myPeer.publicKey
-    var wallet = Wallet.getInstance(this.requireContext(), myPublicKey, getIpv8().myPeer.key as PrivateKey)
+//    var wallet = Wallet.getInstance(this, myPublicKey, getIpv8().myPeer.key as PrivateKey)
 
 
 
@@ -42,13 +42,14 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.wallet_fragment, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        var wallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
         val createCoinButton = view.findViewById<Button>(R.id.button_create_coin)
         createCoinButton.setOnClickListener {
             // Create a new coin and add it to the wallet!
