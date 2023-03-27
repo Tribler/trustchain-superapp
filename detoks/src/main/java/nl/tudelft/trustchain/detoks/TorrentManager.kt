@@ -386,7 +386,7 @@ class TorrentManager constructor (
         handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
         handle.prioritizeFiles(arrayOf(Priority.IGNORE))
         handle.pause()
-        val community = IPv8Android.getInstance().getOverlay<LikeCommunity>()!!
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
 
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)

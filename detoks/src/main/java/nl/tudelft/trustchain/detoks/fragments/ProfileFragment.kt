@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.detoks.LikeCommunity
+import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.adapters.TabBarAdapter
 
@@ -26,7 +26,7 @@ class ProfileFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        val community = IPv8Android.getInstance().getOverlay<LikeCommunity>()!!
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val videos = community.getPostedVideos(community.myPeer.publicKey.toString())
 
         updatePersonalInformation(videos)
@@ -35,7 +35,7 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val community = IPv8Android.getInstance().getOverlay<LikeCommunity>()!!
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val author = community.myPeer.publicKey.toString()
         val videos = community.getPostedVideos(author)
 

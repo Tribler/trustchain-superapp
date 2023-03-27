@@ -39,10 +39,8 @@ class DeToksActivity : BaseActivity() {
             startService(intent)
             bindService(intent, gossipConnection, Context.BIND_AUTO_CREATE)
         }
-        // TODO: we can put this in app/trustChainApplication.kt like the other apps
-        createLikeCommunity()
 
-        val community = IPv8Android.getInstance().getOverlay<LikeCommunity>()!!
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val peers = community.getPeers()
         for (peer in peers) {
             Log.d("DeToks", peer.mid)
@@ -60,27 +58,27 @@ class DeToksActivity : BaseActivity() {
         }
     }
 
-    fun createLikeCommunity() {
-        val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
-        val store = TrustChainSQLiteStore(Database(driver))
-        val deToksComm = OverlayConfiguration(
-            LikeCommunity.Factory(settings, store),
-            listOf(
-                RandomWalk.Factory(),
-                NetworkServiceDiscovery.Factory(getSystemService()!!)
-            )
-        )
-
-        val config = IPv8Configuration(overlays = listOf(
-            deToksComm
-        ))
-
-        IPv8Android.Factory(this.application!!)
-            .setConfiguration(config)
-            .setPrivateKey(getPrivateKey())
-            .init()
-    }
+//    fun createLikeCommunity() {
+//        val settings = TrustChainSettings()
+//        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
+//        val store = TrustChainSQLiteStore(Database(driver))
+//        val deToksComm = OverlayConfiguration(
+//            LikeCommunity.Factory(settings, store),
+//            listOf(
+//                RandomWalk.Factory(),
+//                NetworkServiceDiscovery.Factory(getSystemService()!!)
+//            )
+//        )
+//
+//        val config = IPv8Configuration(overlays = listOf(
+//            deToksComm
+//        ))
+//
+//        IPv8Android.Factory(this.application!!)
+//            .setConfiguration(config)
+//            .setPrivateKey(getPrivateKey())
+//            .init()
+//    }
 
     private fun getPrivateKey(): PrivateKey {
         // Load a key from the shared preferences

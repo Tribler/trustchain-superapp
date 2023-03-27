@@ -3,12 +3,23 @@ package nl.tudelft.trustchain.detoks
 import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.*
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
+import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
+import java.util.*
 
+const val LIKE_BLOCK: String = "like_block"
 
-class DeToksCommunity(private val context: Context) : Community() {
+class DeToksCommunity(
+    private val context: Context, settings: TrustChainSettings,
+    database: TrustChainStore,
+    crawler: TrustChainCrawler = TrustChainCrawler()
+) : TrustChainCommunity(settings, database, crawler) {
 
     private val walletManager = WalletManager(context)
     private val visitedPeers  = mutableListOf<Peer>()
@@ -16,7 +27,19 @@ class DeToksCommunity(private val context: Context) : Community() {
     init {
         messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
-
+        registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                createAgreementBlock(block, block.transaction)
+            }
+        })
+        addListener(LIKE_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("Detoks", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                val video = block.transaction.get("video")
+                val torrent = block.transaction.get("torrent")
+                Log.d("Detoks", "Received like for $video, $torrent")
+            }
+        })
     }
 
     companion object {
@@ -26,7 +49,8 @@ class DeToksCommunity(private val context: Context) : Community() {
     }
 
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
-
+    val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
+    val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
 
     fun sendTokens(amount: Int, recipientMid: String) {
         val senderWallet = walletManager.getOrCreateWallet(myPeer.mid)
@@ -99,11 +123,79 @@ class DeToksCommunity(private val context: Context) : Community() {
         }
     }
 
+    override fun walkTo(address: IPv4Address) {
+        super.walkTo(address)
+
+        discoveredAddressesContacted[address] = Date()
+    }
+
+    override fun onIntroductionResponse(peer: Peer, payload: IntroductionResponsePayload) {
+        super.onIntroductionResponse(peer, payload)
+
+        if (peer.address in DEFAULT_ADDRESSES) {
+            lastTrackerResponses[peer.address] = Date()
+        }
+    }
+
+    fun broadcastLike(vid: String, torrent: String, creator: String) {
+        Log.d("DeToks", "Liking: $vid")
+
+        // TODO: fix this
+//        val peer = (0 until getPeers().size).random()
+//        val peerKey = getPeers()[peer].key.keyToBin()
+        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator)
+        createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
+        // createProposalBlock(LIKE_BLOCK, like.toMap(), peerKey)
+        Log.d("DeToks", "$like")
+    }
+
+    fun getLikes(vid: String, torrent: String): List<TrustChainBlock> {
+        return database.getBlocksWithType(LIKE_BLOCK).filter {
+            it.transaction["video"] == vid && it.transaction["torrent"] == torrent
+        }
+    }
+
+    fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
+        return database.getBlocksWithType(LIKE_BLOCK).filter {
+            it.transaction["author"] == author
+        }
+    }
+
+    fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
+        return getLikes(vid, torrent).filter { it.transaction["liker"] == liker }.isNotEmpty()
+    }
+
+    fun getPostedVideos(author: String): List<Pair<String, Int>> {
+        // Create Key data class so we can group by two fields (torrent and video)
+        data class Key(val video: String, val torrent: String)
+        fun TrustChainBlock.toKey() = Key(transaction["video"] as String, transaction["torrent"] as String)
+        val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
+        // TODO: sort based on posted timestamp
+        return likes.entries.map {
+            Pair(it.key.video, it.value.size)
+        }
+    }
+
+    fun listOfLikedVideosAndTorrents(person: String): List<Pair<String,String>> {
+        var iterator = database.getBlocksWithType(LIKE_BLOCK).filter {
+            it.transaction["liker"] == person
+        }.listIterator()
+        var likedVideos = ArrayList<Pair<String,String>>()
+        while(iterator.hasNext()) {
+            val block = iterator.next()
+            likedVideos.add(Pair(block.transaction.get("video") as String, block.transaction.get("torrent") as String))
+        }
+        return likedVideos;
+    }
+
     class Factory(
-        private val context: Context
+        private val context: Context,
+        private val settings: TrustChainSettings,
+        private val database: TrustChainStore,
+        private val crawler: TrustChainCrawler = TrustChainCrawler()
     ) : Overlay.Factory<DeToksCommunity>(DeToksCommunity::class.java) {
         override fun create(): DeToksCommunity {
-            return DeToksCommunity(context)
+            return DeToksCommunity(context, settings, database, crawler)
         }
     }
 }
