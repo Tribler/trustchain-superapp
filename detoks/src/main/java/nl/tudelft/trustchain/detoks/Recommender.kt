@@ -18,18 +18,18 @@ class ProfileEntry(
 }
 
 class Profile(
-    val magnets: HashMap<String, ProfileEntry> = HashMap()
+    val torrents: HashMap<String, ProfileEntry> = HashMap()
 ) {
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
-        if(!magnets.contains(key)) magnets[key] = ProfileEntry()
+        if(!torrents.contains(key)) torrents[key] = ProfileEntry()
 
         if (myUpdate) {
-            magnets[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
+            torrents[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
         } else {
-            magnets[key]!!.watchTime += time
-            magnets[key]!!.watchTime /= 2
+            torrents[key]!!.watchTime += time
+            torrents[key]!!.watchTime /= 2
         }
-        Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${magnets[key]!!.watchTime}")
+        Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${torrents[key]!!.watchTime}")
     }
 }
 

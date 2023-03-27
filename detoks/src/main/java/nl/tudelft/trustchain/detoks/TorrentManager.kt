@@ -119,7 +119,7 @@ class TorrentManager private constructor (
             //        a video is done playing and starts again, then update the duration if possible
             val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
             profile.updateEntryWatchTime(
-                uri,
+                MagnetLink.hashFromMagnet(uri),
                 updateTime(),
                 true)
             currentIndex = newIndex
@@ -136,7 +136,7 @@ class TorrentManager private constructor (
         }
         val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
         profile.updateEntryWatchTime(
-            uri,
+            MagnetLink.hashFromMagnet(uri),
             updateTime(),
         true)
         currentIndex = newIndex
@@ -184,7 +184,7 @@ class TorrentManager private constructor (
                                 it
                             )
                             torrentFiles.add(torrent)
-                            profile.magnets[torrent.handle.makeMagnetUri()] = ProfileEntry()
+                            profile.torrents[torrent.handle.makeMagnetUri()] = ProfileEntry()
                         }
                     }
                 }
@@ -272,11 +272,11 @@ class TorrentManager private constructor (
     }
 
     fun getWatchedTorrents(): List<String> {
-        return (profile.magnets.keys).toList()
+        return (profile.torrents.keys).toList()
     }
 
     fun getUnwatchedTorrents(): List<String> {
-        return (torrentFiles.map { it.handle.makeMagnetUri() } subtract profile.magnets.keys).toList()
+        return (torrentFiles.map { it.handle.makeMagnetUri() } subtract profile.torrents.keys).toList()
     }
 
     class TorrentHandler(

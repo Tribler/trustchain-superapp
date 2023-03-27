@@ -114,7 +114,8 @@ class DeToksCommunity(private val context: Context) : Community() {
 
         payload.data.forEach {
             torrentManager.profile.updateEntryWatchTime(
-                it.first, it.second,
+                it.first,
+                it.second,
                 false
             )
         }

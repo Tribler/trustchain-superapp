@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.detoks.gossiper
 
 import android.content.Context
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -10,7 +9,6 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.TorrentManager
-import nl.tudelft.trustchain.detoks.gossiper.GossipMessage.Deserializer.deserializeMessage
 
 class WatchTimeGossiper(
     override val delay: Long,
@@ -34,7 +32,7 @@ class WatchTimeGossiper(
 
         val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
         val randomProfileEntries = pickRandomN(
-            TorrentManager.getInstance(context).profile.magnets.entries.map { Pair(it.key, it.value.watchTime) },
+            TorrentManager.getInstance(context).profile.torrents.entries.map { Pair(it.key, it.value.watchTime) },
             blocks
         )
         if (randomPeers.isEmpty() || randomProfileEntries.isEmpty()) return
