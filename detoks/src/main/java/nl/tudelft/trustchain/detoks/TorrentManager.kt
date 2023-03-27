@@ -166,7 +166,7 @@ class TorrentManager constructor (
 
                     for (it in 0 until torrentInfo.numFiles()) {
                         val fileName = torrentInfo.files().fileName(it)
-                        Log.d("DeToks", "file ${fileName} in $it")
+                        Log.d("DeToks", "file $fileName in $it")
                         if (fileName.endsWith(".mp4")) {
                             torrentFiles.add(
                                 TorrentHandler(
@@ -185,10 +185,8 @@ class TorrentManager constructor (
         }
     }
     @RequiresApi(Build.VERSION_CODES.O)
-    fun createTorrentInfo(collection: Uri, context: Context): Pair<Path, TorrentInfo>? {
-        Log.d("DeToks", "AAAAAAAAAAAAAA")
-
-        val parentDir = Paths.get(cacheDir.getPath()+"/"+collection.hashCode().toString())
+    fun createTorrentInfo(collection: Uri, context: Context): Pair<Path, TorrentInfo> {
+        val parentDir = Paths.get(cacheDir.path +"/"+collection.hashCode().toString())
         val out = copyToTempFolder(context, listOf(collection), parentDir)
 
         Log.d("DeToks", collection.toString())
@@ -199,18 +197,18 @@ class TorrentManager constructor (
         Log.d("DeToks", "VALID: ${out.second.is_valid}" )
         val ec =  error_code()
 
-        var fs = file_storage()
-        libtorrent.add_files(fs,cacheDir.getPath()+"/"+collection.hashCode().toString())
+        val fs = file_storage()
+        libtorrent.add_files(fs,cacheDir.path +"/"+collection.hashCode().toString())
         val ct = create_torrent(fs)
         val tb = TorrentBuilder()
         tb.creator("Moi")
-        tb.path(File(cacheDir.getPath()+"/"+collection.hashCode().toString()))
+        tb.path(File(cacheDir.path +"/"+collection.hashCode().toString()))
 
         ct.set_creator("Moi")
         ct.set_priv(false)
 
         ct.add_tracker("udp://tracker.openbittorrent.com:80/announce",1)
-        libtorrent.set_piece_hashes(ct,cacheDir.getPath(), ec)
+        libtorrent.set_piece_hashes(ct,cacheDir.path, ec)
         Log.d("DeToks","ec ${ec.value()}")
 //        val et = ct.generate()
         Log.d("DeToks", folder.toString())
@@ -244,9 +242,9 @@ class TorrentManager constructor (
         handle.prioritizeFiles(priorities)
         handle.pause()
         Log.d("DeToks", "THIS HAS ${torrentInfo.numFiles()} : ${torrentInfo.creator()}  from ${torrentInfo.name()}")
-        for (it in 0..torrentInfo.numFiles()-1) {
+        for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
-            Log.d("DeToks", "file ${fileName} in $it")
+            Log.d("DeToks", "file $fileName in $it")
             if (fileName.endsWith(".mp4")) {
                 torrentFiles.add(
                     TorrentHandler(
@@ -272,7 +270,7 @@ class TorrentManager constructor (
         val contentResolver = context.contentResolver
 
         File(parentDir.toUri()).deleteRecursively()
-        var fs = file_storage()
+        val fs = file_storage()
 
         val fileList = mutableListOf<File>()
         val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
@@ -302,7 +300,7 @@ class TorrentManager constructor (
     fun getVideoFilePath(uri: Uri, context: Context):  Pair<String?, Long> {
 
 
-        val cursor: Cursor = context.getContentResolver().query(uri, null, null, null, null)!!
+        val cursor: Cursor = context.contentResolver.query(uri, null, null, null, null)!!
         cursor.moveToFirst()
         var f_id = cursor.getString(0)
 
@@ -322,7 +320,7 @@ class TorrentManager constructor (
             Log.d("AndroidRuntime",c2.count.toString())
             Log.d("AndroidRuntime", "====")
             c2.moveToFirst()
-            var path = c2.getString(0)
+            val path = c2.getString(0)
             val size = c2.getString(1).toLong()
 
             c2.close()
