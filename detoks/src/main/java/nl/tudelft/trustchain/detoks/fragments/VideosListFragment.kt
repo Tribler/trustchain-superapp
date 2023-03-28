@@ -15,11 +15,6 @@ class VideosListFragment(private val likesPerVideo: List<Pair<String, Int>>) : F
 
         val listView = view.findViewById<ListView>(R.id.listView)
         listView.adapter = VideosListAdapter(requireActivity(), likesPerVideo)
-
-//        TODO: Add an event listener which plays the video on click
-//        listView.setOnItemClickListener{ adapterView, view, position, id ->
-//
-//        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

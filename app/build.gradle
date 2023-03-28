@@ -42,7 +42,7 @@ android {
         applicationId "nl.tudelft.trustchain"
         minSdkVersion 22
         targetSdkVersion 33
-        versionCode 1
+        versionCode generateVersionCode()
         versionName "0.3.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

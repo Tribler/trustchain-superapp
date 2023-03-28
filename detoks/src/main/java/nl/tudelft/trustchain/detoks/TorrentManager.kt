@@ -44,7 +44,7 @@ class TorrentManager constructor (
     private var currentIndex = 0
 
     init {
-//        clearMediaCache()
+        clearMediaCache()
         initializeSessionManager()
         buildTorrentIndex()
         initializeVideoPool()
@@ -151,8 +151,6 @@ class TorrentManager constructor (
         val files = torrentDir.listFiles()
         if (files != null) {
             for (file in files) {
-//                Log.i("DeToks","OPENING ${file.name}")
-
                 if (file.extension == "torrent") {
                     val torrentInfo = TorrentInfo(file)
                     sessionManager.download(torrentInfo, cacheDir )
@@ -186,8 +184,6 @@ class TorrentManager constructor (
     }
     @RequiresApi(Build.VERSION_CODES.O)
     fun createTorrentInfo(collection: Uri, context: Context): Pair<Path, TorrentInfo>? {
-        Log.d("DeToks", "AAAAAAAAAAAAAA")
-
         val parentDir = Paths.get(cacheDir.getPath()+"/"+collection.hashCode().toString())
         val out = copyToTempFolder(context, listOf(collection), parentDir)
 
@@ -300,8 +296,6 @@ class TorrentManager constructor (
 
     @SuppressLint("Range")
     fun getVideoFilePath(uri: Uri, context: Context):  Pair<String?, Long> {
-
-
         val cursor: Cursor = context.getContentResolver().query(uri, null, null, null, null)!!
         cursor.moveToFirst()
         var f_id = cursor.getString(0)
@@ -440,19 +434,18 @@ class TorrentManager constructor (
                 .fileSize(fileIndex)
         }
 
-        fun deleteFile() {
-            return
-//            handle.filePriority(fileIndex, Priority.IGNORE)
-//            val file = File("$cacheDir/$torrentName/$fileName")
-//            if (file.exists()) {
-//                file.delete()
-//            }
-//            isDownloading = false
-        }
-
         fun downloadWithMaxPriority() {
             downloadFile()
             setMaximumPriority()
+        }
+
+        fun deleteFile() {
+            return handle.filePriority(fileIndex, Priority.IGNORE)
+            val file = File("$cacheDir/$torrentName/$fileName")
+            if (file.exists()) {
+                file.delete()
+            }
+            isDownloading = false
         }
 
         fun downloadFile() {

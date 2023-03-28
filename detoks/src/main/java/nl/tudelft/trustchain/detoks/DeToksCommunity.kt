@@ -2,11 +2,9 @@ package nl.tudelft.trustchain.detoks
 
 import android.content.Context
 import android.util.Log
-import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
@@ -139,13 +137,8 @@ class DeToksCommunity(
 
     fun broadcastLike(vid: String, torrent: String, creator: String) {
         Log.d("DeToks", "Liking: $vid")
-
-        // TODO: fix this
-//        val peer = (0 until getPeers().size).random()
-//        val peerKey = getPeers()[peer].key.keyToBin()
         val like = Like(myPeer.publicKey.toString(), vid, torrent, creator)
         createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
-        // createProposalBlock(LIKE_BLOCK, like.toMap(), peerKey)
         Log.d("DeToks", "$like")
     }
 
@@ -162,7 +155,7 @@ class DeToksCommunity(
     }
 
     fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
-        return getLikes(vid, torrent).filter { it.transaction["liker"] == liker }.isNotEmpty()
+        return getLikes(vid, torrent).any { it.transaction["liker"] == liker }
     }
 
     fun getPostedVideos(author: String): List<Pair<String, Int>> {

@@ -47,15 +47,10 @@ class ProfileFragment : Fragment() {
 
         updatePersonalInformation(videos)
 
-//        TODO: (optionally, if possible) Sort the list by the date and time when the video was uploaded.
         val videosListFragment = VideosListFragment(videos)
-
-//        TODO: (optionally, if possible) Sort the list by the date and time when the video was liked.
         val likedListFragment = LikedListFragment(
             community.listOfLikedVideosAndTorrents(author).map { it.first + ", " + it.second }
         )
-
-//        TODO: (optionally, if possible) Sort the list by the date and time when the notification was received.
         val notificationsListFragment = NotificationsListFragment(
             community.getBlocksByAuthor(author).map {
                 "Received like for video: " + it.transaction["video"]
