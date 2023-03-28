@@ -440,7 +440,7 @@ class TorrentManager constructor (
         }
 
         fun deleteFile() {
-            return handle.filePriority(fileIndex, Priority.IGNORE)
+            handle.filePriority(fileIndex, Priority.IGNORE)
             val file = File("$cacheDir/$torrentName/$fileName")
             if (file.exists()) {
                 file.delete()

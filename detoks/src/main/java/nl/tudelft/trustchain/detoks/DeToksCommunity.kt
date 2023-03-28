@@ -121,12 +121,6 @@ class DeToksCommunity(
         }
     }
 
-    override fun walkTo(address: IPv4Address) {
-        super.walkTo(address)
-
-        discoveredAddressesContacted[address] = Date()
-    }
-
     override fun onIntroductionResponse(peer: Peer, payload: IntroductionResponsePayload) {
         super.onIntroductionResponse(peer, payload)
 
