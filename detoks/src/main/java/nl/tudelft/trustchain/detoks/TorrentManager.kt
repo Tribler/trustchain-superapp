@@ -1,10 +1,10 @@
 package nl.tudelft.trustchain.detoks
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
+import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -16,11 +16,11 @@ import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
-import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
+import nl.tudelft.ipv8.android.IPv8Android
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.nio.file.Path
@@ -32,7 +32,7 @@ import java.nio.file.Paths
  * It is responsible for downloading the torrent files and caching the videos.
  * It also provides the videos to the video adapter.
  */
-class TorrentManager(
+class TorrentManager constructor (
     private val cacheDir: File,
     private val torrentDir: File,
     private val cachingAmount: Int = 1,
@@ -44,10 +44,24 @@ class TorrentManager(
     private var currentIndex = 0
 
     init {
-//        clearMediaCache()
+        clearMediaCache()
         initializeSessionManager()
         buildTorrentIndex()
         initializeVideoPool()
+    }
+
+    companion object {
+        private lateinit var instance: TorrentManager
+        fun getInstance(context: Context): TorrentManager {
+            if (!::instance.isInitialized) {
+                instance = TorrentManager(
+                    File("${context.cacheDir.absolutePath}/media"),
+                    File("${context.cacheDir.absolutePath}/torrent"),
+                    DeToksFragment.DEFAULT_CACHING_AMOUNT
+                )
+            }
+            return instance
+        }
     }
 
     fun notifyIncrease() {
@@ -137,8 +151,6 @@ class TorrentManager(
         val files = torrentDir.listFiles()
         if (files != null) {
             for (file in files) {
-//                Log.i("DeToks","OPENING ${file.name}")
-
                 if (file.extension == "torrent") {
                     val torrentInfo = TorrentInfo(file)
                     sessionManager.download(torrentInfo, cacheDir )
@@ -149,8 +161,8 @@ class TorrentManager(
                     val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
                     handle.prioritizeFiles(priorities)
                     handle.pause()
-                    Log.d("DeToks", "THIS HAS ${torrentInfo.numFiles()} : ${torrentInfo.creator()}  from ${torrentInfo.name()}")
-                    for (it in 0..torrentInfo.numFiles()-1) {
+
+                    for (it in 0 until torrentInfo.numFiles()) {
                         val fileName = torrentInfo.files().fileName(it)
                         Log.d("DeToks", "file ${fileName} in $it")
                         if (fileName.endsWith(".mp4")) {
@@ -172,8 +184,6 @@ class TorrentManager(
     }
     @RequiresApi(Build.VERSION_CODES.O)
     fun createTorrentInfo(collection: Uri, context: Context): Pair<Path, TorrentInfo>? {
-        Log.d("DeToks", "AAAAAAAAAAAAAA")
-
         val parentDir = Paths.get(cacheDir.getPath()+"/"+collection.hashCode().toString())
         val out = copyToTempFolder(context, listOf(collection), parentDir)
 
@@ -286,8 +296,6 @@ class TorrentManager(
 
     @SuppressLint("Range")
     fun getVideoFilePath(uri: Uri, context: Context):  Pair<String?, Long> {
-
-
         val cursor: Cursor = context.getContentResolver().query(uri, null, null, null, null)!!
         cursor.moveToFirst()
         var f_id = cursor.getString(0)
@@ -360,6 +368,46 @@ class TorrentManager(
         fileOrDirectory.delete()
     }
 
+    fun addTorrent(magnet: String) {
+        val torrentInfo = getInfoFromMagnet(magnet)?:return
+        val hash = torrentInfo.infoHash()
+
+        if(sessionManager.find(hash) != null) return
+        Log.d("DeToksCommunity","Is a new torrent: ${torrentInfo.name()}")
+
+        sessionManager.download(torrentInfo, cacheDir)
+        val handle = sessionManager.find(hash)
+        handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+        handle.prioritizeFiles(arrayOf(Priority.IGNORE))
+        handle.pause()
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+
+        for (it in 0 until torrentInfo.numFiles()) {
+            val fileName = torrentInfo.files().fileName(it)
+            if (fileName.endsWith(".mp4")) {
+                torrentFiles.add(
+                    TorrentHandler(
+                        cacheDir,
+                        handle,
+                        torrentInfo.name(),
+                        fileName,
+                        it,
+                        community.myPeer.publicKey.toString()
+                    )
+                )
+            }
+        }
+    }
+
+    private fun getInfoFromMagnet(magnet: String): TorrentInfo? {
+        val bytes = sessionManager.fetchMagnet(magnet, 10)?:return null
+        return TorrentInfo.bdecode(bytes)
+    }
+
+    fun getListOfTorrents(): List<TorrentHandle> {
+        return torrentFiles.map {it.handle}.distinct()
+    }
+
     class TorrentHandler(
         private val cacheDir: File,
         val handle: TorrentHandle,
@@ -386,19 +434,18 @@ class TorrentManager(
                 .fileSize(fileIndex)
         }
 
-        fun deleteFile() {
-            return
-//            handle.filePriority(fileIndex, Priority.IGNORE)
-//            val file = File("$cacheDir/$torrentName/$fileName")
-//            if (file.exists()) {
-//                file.delete()
-//            }
-//            isDownloading = false
-        }
-
         fun downloadWithMaxPriority() {
             downloadFile()
             setMaximumPriority()
+        }
+
+        fun deleteFile() {
+            handle.filePriority(fileIndex, Priority.IGNORE)
+            val file = File("$cacheDir/$torrentName/$fileName")
+            if (file.exists()) {
+                file.delete()
+            }
+            isDownloading = false
         }
 
         fun downloadFile() {
