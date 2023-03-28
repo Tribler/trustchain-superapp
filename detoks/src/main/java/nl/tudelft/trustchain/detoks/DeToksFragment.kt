@@ -54,7 +54,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         torrentManager = TorrentManager(
             File("${requireActivity().cacheDir.absolutePath}/media"),
             File("${requireActivity().cacheDir.absolutePath}/torrent"),
-            DEFAULT_CACHING_AMOUNT
+            DEFAULT_CACHING_AMOUNT,
         )
     }
 

@@ -1,8 +1,8 @@
-package nl.tudelft.trustchain.detoks.newcoin//import java.security.PrivateKey
-//import java.security.PublicKey
+package nl.tudelft.trustchain.detoks.newcoin // import java.security.PrivateKey
+// import java.security.PublicKey
 //
 //
-//data class Transaction(val sender: PublicKey,
+// data class Transaction(val sender: PublicKey,
 //                       val recipient: PublicKey,
 //                       val amount: Int,
 //                       var hash: String = "",
@@ -35,9 +35,9 @@ package nl.tudelft.trustchain.detoks.newcoin//import java.security.PrivateKey
 //    fun isSignatureValid() : Boolean {
 //        return "${sender.encodeToString()}${recipient.encodeToString()}$amount".verifySignature(sender, signature)
 //    }
-//}
+// }
 //
-//data class TransactionOutput(val recipient: PublicKey,
+// data class TransactionOutput(val recipient: PublicKey,
 //                             val amount: Int,
 //                             val transactionHash: String,
 //                             var hash: String = "") {
@@ -51,5 +51,5 @@ package nl.tudelft.trustchain.detoks.newcoin//import java.security.PrivateKey
 //    fun isMine(ownerPublickey: PublicKey) : Boolean {
 //        return recipient == ownerPublickey
 //    }
-//}
+// }
 //

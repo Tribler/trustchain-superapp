@@ -31,11 +31,14 @@
 
     <TextView
         android:id="@+id/balance"
-        android:layout_width="83dp"
-        android:layout_height="34dp"
-        android:text="wallet_balance"
-        tools:layout_editor_absoluteX="162dp"
-        tools:layout_editor_absoluteY="322dp" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="wallet balance:"
+        app:layout_constraintBottom_toTopOf="@+id/button_create_coin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:text="Admin"
