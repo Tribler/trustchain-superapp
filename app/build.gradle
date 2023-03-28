@@ -30,9 +30,9 @@ ktlint {
 }
 
 // Generate a version code from git commit count
-//static def generateVersionCode() {
-//    return "git rev-list HEAD --count".execute().text.trim().toInteger()
-//}
+static def generateVersionCode() {
+    return "git rev-list HEAD --count".execute().text.trim().toInteger()
+}
 
 
 android {
