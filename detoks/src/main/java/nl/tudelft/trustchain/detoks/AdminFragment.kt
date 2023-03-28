@@ -4,16 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.TextView
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.detoks.db.DbHelper
 
 class AdminFragment : BaseFragment(R.layout.admin_fragment) {
 
-    val myPublicKey = getIpv8().myPeer.publicKey
+    private val myPublicKey = getIpv8().myPeer.publicKey
     val wallet = Wallet.getInstance(myPublicKey, getIpv8().myPeer.key as PrivateKey)
-//    val adminWallet =
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +31,12 @@ class AdminFragment : BaseFragment(R.layout.admin_fragment) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val dbHelper = DbHelper(view.context)
+        val tokenList = dbHelper.getAllTokens()
+        val tokens = tokenList.toMutableList()
+
+        val arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_tokens, tokens)
 
         val createTokenButton = view.findViewById<Button>(R.id.button_token_create)
         createTokenButton.setOnClickListener {
