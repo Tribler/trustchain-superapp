@@ -45,7 +45,8 @@ class TorrentManager private constructor (
 
     init {
         strategyChangeHandlers[STRATEGY_RANDOM] = strategies::randomStrategy
-        strategyChangeHandlers[STRATEGY_WATCHTIME] = strategies::watchTimeStrategy
+        strategyChangeHandlers[STRATEGY_HIGHEST_WATCHTIME] = strategies::highestWatchTimeStrategy
+        strategyChangeHandlers[STRATEGY_LOWEST_WATCHTIME] = strategies::lowestWatchTimeStrategy
 
         clearMediaCache()
         initializeSessionManager()
@@ -56,7 +57,8 @@ class TorrentManager private constructor (
 
     companion object {
         const val STRATEGY_RANDOM = 1
-        const val STRATEGY_WATCHTIME = 2
+        const val STRATEGY_HIGHEST_WATCHTIME = 2
+        const val STRATEGY_LOWEST_WATCHTIME = 3
 
         private lateinit var instance: TorrentManager
         fun getInstance(context: Context): TorrentManager {

@@ -17,12 +17,24 @@ class Strategy {
     /**
      * Returns the torrent handlers based on decreasing watch time.
      */
-    fun watchTimeStrategy(
+    fun highestWatchTimeStrategy(
         handlers: MutableList<TorrentHandler>,
         profiles: HashMap<String, ProfileEntry>
     ) : MutableList<TorrentHandler> {
         return applyStrategy(handlers, profiles) { p0, p1 ->
             return@applyStrategy (p0.second!!.watchTime compareTo p1.second!!.watchTime)
+        }
+    }
+
+    /**
+     * Returns the torrent handlers based on increasing watch time.
+     */
+    fun lowestWatchTimeStrategy(
+        handlers: MutableList<TorrentHandler>,
+        profiles: HashMap<String, ProfileEntry>
+    ) : MutableList<TorrentHandler> {
+        return applyStrategy(handlers, profiles) { p0, p1 ->
+            return@applyStrategy (p1.second!!.watchTime compareTo p0.second!!.watchTime)
         }
     }
 
@@ -45,6 +57,5 @@ class Strategy {
 
         val sortedHandlerProfile = handlerProfile.sortedWith(func)
         return sortedHandlerProfile.map { it.first }.toMutableList()
-
     }
 }
