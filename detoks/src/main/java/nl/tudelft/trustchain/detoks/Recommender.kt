@@ -18,27 +18,27 @@ class ProfileEntry(
 }
 
 class Profile(
-    val magnets: HashMap<String, ProfileEntry> = HashMap()
+    val torrents: HashMap<String, ProfileEntry> = HashMap()
 ) {
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
-        if(!magnets.contains(key)) magnets[key] = ProfileEntry()
+        if(!torrents.contains(key)) torrents[key] = ProfileEntry()
 
         if (myUpdate) {
-            magnets[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
+            torrents[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
         } else {
-            magnets[key]!!.watchTime += time
-            magnets[key]!!.watchTime /= 2
+            torrents[key]!!.watchTime += time
+            torrents[key]!!.watchTime /= 2
         }
-        Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${magnets[key]!!.watchTime}")
+        Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${torrents[key]!!.watchTime}")
     }
 }
 
 class Recommender {
-    private fun coinTossRecommender(magnets: HashMap<String, ProfileEntry>): Map<String, ProfileEntry> {
-        return magnets.map { it.key to it.value }.shuffled().toMap()
+    private fun coinTossRecommender(torrents: HashMap<String, ProfileEntry>): Map<String, ProfileEntry> {
+        return torrents.map { it.key to it.value }.shuffled().toMap()
     }
 
-    private fun watchTimeRecommender(magnets: HashMap<String, ProfileEntry>): Map<String, ProfileEntry> {
-        return magnets.toList().sortedBy { (_, entry) -> entry }.toMap()
+    private fun watchTimeRecommender(torrents: HashMap<String, ProfileEntry>): Map<String, ProfileEntry> {
+        return torrents.toList().sortedBy { (_, entry) -> entry }.toMap()
     }
 }
