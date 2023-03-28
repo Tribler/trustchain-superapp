@@ -30,11 +30,23 @@ class TorrentManager private constructor (
     private val torrentFiles = mutableListOf<TorrentHandler>()
 
     val profile = Profile(HashMap())
+    private val strategies = Strategy()
+
+    private val strategyChangeHandlers = mutableMapOf<Int, (
+        MutableList<TorrentHandler>,
+        HashMap<String, ProfileEntry>
+    ) -> MutableList<TorrentHandler>>()
+
+    val recommenderStrategy = STRATEGY_RANDOM
+    val seedingStrategy = STRATEGY_RANDOM
 
     private var lastTimeStamp: Long
     private var currentIndex = 0
 
     init {
+        strategyChangeHandlers[STRATEGY_RANDOM] = strategies::randomStrategy
+        strategyChangeHandlers[STRATEGY_WATCHTIME] = strategies::watchTimeStrategy
+
         clearMediaCache()
         initializeSessionManager()
         buildTorrentIndex()
@@ -43,6 +55,9 @@ class TorrentManager private constructor (
     }
 
     companion object {
+        const val STRATEGY_RANDOM = 1
+        const val STRATEGY_WATCHTIME = 2
+
         private lateinit var instance: TorrentManager
         fun getInstance(context: Context): TorrentManager {
             if (!::instance.isInitialized) {
@@ -184,7 +199,7 @@ class TorrentManager private constructor (
                                 it
                             )
                             torrentFiles.add(torrent)
-                            profile.torrents[torrent.handle.makeMagnetUri()] = ProfileEntry()
+                            profile.profiles[torrent.handle.makeMagnetUri()] = ProfileEntry()
                         }
                     }
                 }
@@ -272,11 +287,11 @@ class TorrentManager private constructor (
     }
 
     fun getWatchedTorrents(): List<String> {
-        return (profile.torrents.keys).toList()
+        return (profile.profiles.keys).toList()
     }
 
     fun getUnwatchedTorrents(): List<String> {
-        return (torrentFiles.map { it.handle.makeMagnetUri() } subtract profile.torrents.keys).toList()
+        return (torrentFiles.map { it.handle.makeMagnetUri() } subtract profile.profiles.keys).toList()
     }
 
     class TorrentHandler(
