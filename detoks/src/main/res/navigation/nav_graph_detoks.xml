@@ -47,5 +47,13 @@
     <fragment
         android:id="@+id/adminFragment"
         android:name="nl.tudelft.trustchain.detoks.AdminFragment"
-        android:label="AdminFragment" />
+        android:label="AdminFragment" >
+        <action
+            android:id="@+id/action_adminFragment_to_baseFragment"
+            app:destination="@id/tokenListAdmin" />
+    </fragment>
+    <fragment
+        android:id="@+id/tokenListAdmin"
+        android:name="nl.tudelft.trustchain.detoks.TokenListAdminFragment"
+        android:label="tokenListAdmin" />
 </navigation>
