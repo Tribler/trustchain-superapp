@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import AdminWallet
 import Wallet
 import android.os.Build
 import android.os.Bundle
@@ -20,9 +21,8 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
 
     private val adapter = ItemAdapter()
     private val myPublicKey = getIpv8().myPeer.publicKey
-    private val adminKey = getIpv8().myPeer.publicKey // todo: create new key for admin
 
-    private var adminWallet: Wallet? = null;
+    private var adminWallet: AdminWallet? = null;
     private var userWallet: Wallet? = null;
 
     private val items: LiveData<List<Item>> by lazy {
@@ -45,10 +45,11 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
         return inflater.inflate(R.layout.fragment_token_list_admin, container, false)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adminWallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
+        adminWallet = AdminWallet.getInstance(view.context)
         userWallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
 
     }
