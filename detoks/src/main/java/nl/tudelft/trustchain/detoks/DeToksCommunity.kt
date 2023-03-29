@@ -12,7 +12,7 @@ import nl.tudelft.trustchain.detoks.gossiper.*
 
 class DeToksCommunity(
     private val context: Context
-    ) : TransactionEngine("c86a7db45eb3563ae047639817baec4db2bc7c25") {
+    ) : TransactionEngine(DetoksConfig.DETOKS_SERVICE_ID) {
 
     private val walletManager = WalletManager(context)
     private val visitedPeers  = mutableListOf<Peer>()
