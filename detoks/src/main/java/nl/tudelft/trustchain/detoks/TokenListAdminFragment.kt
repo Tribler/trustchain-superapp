@@ -17,7 +17,7 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin), TokenButtonListener  {
 
     private val adapter = ItemAdapter()
-    val myPublicKey = getIpv8().myPeer.publicKey
+    private val myPublicKey = getIpv8().myPeer.publicKey
 
     private val items: LiveData<List<Item>> by lazy {
         liveData { emit(listOf<Item>()) }
@@ -55,7 +55,18 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
     }
 
     override fun onVerifyClick(token: Token) {
-        TODO("Not yet implemented")
+        val verified = verify(token)
+        if (verified) {
+            reissueToken(token)
+        }
+    }
+
+    fun verify(token: Token): Boolean {
+        return true
+    }
+
+    fun reissueToken(token: Token) {
+
     }
 
     companion object {
