@@ -16,12 +16,12 @@ class TransferQR {
             val ret: JSONObject = JSONObject();
 
             ret.put(field_pvk, pvk.keyToBin().toHex());
-            ret.put(field_tokens, JSONArray(Token.serialize(tokens)));
+            ret.put(field_tokens, Token.serialize(tokens).toHex());
 
             return ret;
         }
-//
-//        fun fromJson(json: JSONObject):  {
+
+//        fun fromJson(json: JSONObject): (PrivateKey, Vector<Token>) {
 //
 //        }
     }
