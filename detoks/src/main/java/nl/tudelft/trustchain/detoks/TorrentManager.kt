@@ -176,8 +176,7 @@ class TorrentManager constructor (
                                     torrentInfo.name(),
                                     fileName,
                                     it,
-                                    torrentInfo.creator(),
-                                    System.currentTimeMillis()
+                                    torrentInfo.creator()
                                 )
                             )
                         }
@@ -255,8 +254,7 @@ class TorrentManager constructor (
                         torrentInfo.name(),
                         fileName,
                         it,
-                        torrentInfo.creator(),
-                        System.currentTimeMillis()
+                        torrentInfo.creator()
                     )
                 )
             }
@@ -397,8 +395,7 @@ class TorrentManager constructor (
                         torrentInfo.name(),
                         fileName,
                         it,
-                        community.myPeer.publicKey.toString(),
-                        System.currentTimeMillis()
+                        community.myPeer.publicKey.toString()
                     )
                 )
             }
@@ -420,8 +417,7 @@ class TorrentManager constructor (
         val torrentName: String,
         val fileName: String,
         val fileIndex: Int,
-        val creator: String,
-        val dateandtime: Long
+        val creator: String
     ) {
 
         var isDownloading: Boolean = false
@@ -476,7 +472,7 @@ class TorrentManager constructor (
         }
 
         fun asMediaInfo(): TorrentMediaInfo {
-            return TorrentMediaInfo(torrentName, fileName, getPath(), creator, dateandtime)
+            return TorrentMediaInfo(torrentName, fileName, getPath(), creator)
         }
 
     }
@@ -491,6 +487,5 @@ class TorrentMediaInfo(
     val torrentName: String,
     val fileName: String,
     val fileURI: String,
-    val creator: String,
-    val dateandtime: Long
+    val creator: String
 )

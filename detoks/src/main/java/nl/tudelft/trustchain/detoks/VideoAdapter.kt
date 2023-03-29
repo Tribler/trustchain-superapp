@@ -34,7 +34,7 @@ class VideosAdapter(
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
-        mVideoItems.sortedWith(compareByDescending { (it.content as TorrentMediaInfo).dateandtime })
+        //mVideoItems.sortedWith(compareByDescending { (it.content as TorrentMediaInfo).dateandtime })
         holder.setVideoData(mVideoItems[position], position, onPlaybackError)
     }
 
