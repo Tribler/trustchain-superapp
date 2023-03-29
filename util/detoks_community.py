@@ -19,7 +19,7 @@ class DetoksCommunity(Community):
     def started(self):
         print(hexlify(self.my_peer.mid).decode())
         if (
-            "8f3948f78d815a2c779de3dbf13ae7d76d0b3d0b"
+            "a447203835cb0c8ea52e78d935e313cd178f18fb"
             == hexlify(self.my_peer.mid).decode()
         ):
             self.should_print = True
@@ -79,7 +79,8 @@ class DetoksCommunity(Community):
                 "I am:", self.my_peer, "\nI know:", [str(p) for p in self.get_peers()]
             )
 
-        # self.register_task("print_peers", print_peers, interval=5.0, delay=0)
+        if self.should_print:
+            self.register_task("print_peers", print_peers, interval=5.0, delay=0)
 
         self.add_message_handler(
             messages.MESSAGE_TORRENT_ID, self.torrent_gossiper.received_response

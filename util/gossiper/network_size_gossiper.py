@@ -39,7 +39,6 @@ class NetworkSizeGossiper(Gossiper):
         self.gossip_count = 0
 
     def gossip(self) -> None:
-        print(f"Gossip {self.gossip_count}")
         self.gossip_count += 1
         if self.first_cycle:
             self.first_cycle = False
@@ -53,13 +52,14 @@ class NetworkSizeGossiper(Gossiper):
 
             if self.community.should_print:
                 print(f"Estimated Size: {self.estimated_size}")
+        else:
+            self.estimated_size /= 2
 
         self.awaiting_responses = []
 
         chance_leader = self.num_leaders / self.estimated_size
 
         if random.random() < chance_leader:
-            print("Leader")
             self.leader_estimates = {hexlify(self.community.my_peer.mid).decode(): 1.0}
         else:
             self.leader_estimates = {}
@@ -67,18 +67,23 @@ class NetworkSizeGossiper(Gossiper):
         message = self.serialize_message(self.leader_estimates)
 
         for peer in self.community.get_peers():
-            self.awaiting_responses.append(hexlify(peer.mid).decode())
-            packet = self.community.ezr_pack(
-                MESSAGE_NETWORK_SIZE_ID, NetworkSizePayload(message), sig=self.signed
-            )
+            other_mid = hexlify(peer.mid).decode()
+            if not other_mid in self.awaiting_responses:
+                self.awaiting_responses.append(hexlify(peer.mid).decode())
+                packet = self.community.ezr_pack(
+                    MESSAGE_NETWORK_SIZE_ID,
+                    NetworkSizePayload(message),
+                    sig=self.signed,
+                )
 
-            self.community.endpoint.send(peer.address, packet)
+                self.community.endpoint.send(peer.address, packet)
 
     # @lazy_wrapper(NetworkSizePayload)
     def received_response(self, peer, payload: NetworkSizePayload) -> None:
         other_mid = hexlify(peer.mid).decode()
 
         if not other_mid in self.awaiting_responses:
+            self.awaiting_responses.append(hexlify(peer.mid).decode())
             message = self.serialize_message(self.leader_estimates)
             packet = self.community.ezr_pack(
                 MESSAGE_NETWORK_SIZE_ID, NetworkSizePayload(message), sig=self.signed
