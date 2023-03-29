@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.offlinemoney.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.navigation.fragment.findNavController
 import android.widget.Toast
@@ -16,6 +17,10 @@ import nl.tudelft.trustchain.offlinemoney.databinding.ActivityMainOfflineMoneyBi
 import nl.tudelft.trustchain.offlinemoney.payloads.Promise
 import org.json.JSONObject
 import org.json.JSONException
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toASCII
+import nl.tudelft.trustchain.offlinemoney.payloads.TransferQR
 
 class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline_money) {
     private val binding by viewBinding(ActivityMainOfflineMoneyBinding::bind)
@@ -58,22 +63,9 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
-                val type = JSONObject(it).optString("type")
-//                if (type == "transfer") {
-                    val promise = Promise.fromJson(JSONObject(JSONObject(it).getString("payload")))!!
-                    // TO DO to store promise
-                    val amount = promise.amount
-                    val past = binding.txtBalance.text.toString().toDouble()
-
-                    binding.txtBalance.text = (past + amount).toString()
-//                } else {
-//                    val args = Bundle()
-//                    args.putString(SendAmountFragment.ARG_RECEIVER, JSONObject(it).getString("payload"))
-//                    findNavController().navigate(
-//                        R.id.action_transferFragment_to_sendAmountFragment,
-//                        args
-//                    )
-//                }
+                val qr = TransferQR.fromJson(JSONObject(it))!!;
+                Log.d("DEBUG:", "pvk = " + qr.pvk.toString());
+                Log.d("DEBUG:", "tokens = " + qr.tokens.toString())
             } catch (e: JSONException) {
                 Toast.makeText(requireContext(), "Scan failed, try again", Toast.LENGTH_LONG).show()
             }
@@ -81,4 +73,5 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         return
     }
 }
+
 
