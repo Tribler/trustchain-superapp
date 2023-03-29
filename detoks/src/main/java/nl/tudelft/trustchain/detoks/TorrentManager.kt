@@ -25,6 +25,8 @@ import org.apache.commons.io.FileUtils
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.sql.Timestamp
+import java.util.Date
 
 
 /**
@@ -67,6 +69,7 @@ class TorrentManager constructor (
     fun notifyIncrease() {
         Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
+
     }
 
     fun notifyDecrease() {
@@ -173,7 +176,8 @@ class TorrentManager constructor (
                                     torrentInfo.name(),
                                     fileName,
                                     it,
-                                    torrentInfo.creator()
+                                    torrentInfo.creator(),
+                                    System.currentTimeMillis()
                                 )
                             )
                         }
@@ -251,7 +255,8 @@ class TorrentManager constructor (
                         torrentInfo.name(),
                         fileName,
                         it,
-                        torrentInfo.creator()
+                        torrentInfo.creator(),
+                        System.currentTimeMillis()
                     )
                 )
             }
@@ -392,7 +397,8 @@ class TorrentManager constructor (
                         torrentInfo.name(),
                         fileName,
                         it,
-                        community.myPeer.publicKey.toString()
+                        community.myPeer.publicKey.toString(),
+                        System.currentTimeMillis()
                     )
                 )
             }
@@ -414,7 +420,8 @@ class TorrentManager constructor (
         val torrentName: String,
         val fileName: String,
         val fileIndex: Int,
-        val creator: String
+        val creator: String,
+        val dateandtime: Long
     ) {
 
         var isDownloading: Boolean = false
@@ -469,7 +476,7 @@ class TorrentManager constructor (
         }
 
         fun asMediaInfo(): TorrentMediaInfo {
-            return TorrentMediaInfo(torrentName, fileName, getPath(), creator)
+            return TorrentMediaInfo(torrentName, fileName, getPath(), creator, dateandtime)
         }
 
     }
@@ -484,5 +491,6 @@ class TorrentMediaInfo(
     val torrentName: String,
     val fileName: String,
     val fileURI: String,
-    val creator: String
+    val creator: String,
+    val dateandtime: Long
 )

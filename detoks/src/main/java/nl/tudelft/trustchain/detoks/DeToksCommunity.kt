@@ -27,6 +27,7 @@ class DeToksCommunity(
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
         registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
+                if(userLikedVideo(block.transaction["video"] as String,block.transaction["torrent"] as String, block.transaction["liker"] as String)) return
                 createAgreementBlock(block, block.transaction)
             }
         })
@@ -130,6 +131,7 @@ class DeToksCommunity(
     }
 
     fun broadcastLike(vid: String, torrent: String, creator: String) {
+        if(userLikedVideo(vid,torrent,myPeer.publicKey.toString())) return
         Log.d("DeToks", "Liking: $vid")
         val timestamp = System.currentTimeMillis().toString()
         val like = Like(myPeer.publicKey.toString(), vid, torrent, creator,timestamp)
