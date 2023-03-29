@@ -39,10 +39,10 @@ class MainActivityOfflineMoney() : BaseActivity() {
 //            Log.i("MyTAG","*****     Inserted 1 User       **********")
 
             // Query
-            var users = userDao.getUserData()
-            Log.i("MyTAG","*****   ${users.size} users there *****")
-            var user = users[0]
-            Log.i("MyTAG","id: ${user.id} name: ${user.username} public_key: ${user.public_key} private_key ${user.private_key} balance: ${user.money_balance.toString()}")
+//            var users = userDao.getUserData()
+//            Log.i("MyTAG","*****   ${users.size} users there *****")
+//            var user = users[0]
+//            Log.i("MyTAG","id: ${user.id} name: ${user.username} public_key: ${user.public_key} private_key ${user.private_key} balance: ${user.money_balance.toString()}")
 
 //            //Update
 //            user.money_balance = 50.0

@@ -33,6 +33,8 @@ class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragmen
         binding.numberPicker2.value = 0
         binding.numberPicker5.value = 0
 
+        binding.txtBalance.text = 42.toString()
+
         class ValueListener : ValueChangedListener {
             override fun valueChanged(value: Int, action: ActionEnum) {
                 updateTextViewAmount()

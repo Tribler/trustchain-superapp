@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.offlinemoney.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.navigation.fragment.findNavController
 import android.widget.Toast
@@ -19,6 +20,9 @@ import nl.tudelft.trustchain.offlinemoney.payloads.RequestPayload
 import nl.tudelft.trustchain.offlinemoney.payloads.Promise
 import org.json.JSONObject
 import org.json.JSONException
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toASCII
 
 class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline_money) {
     private val binding by viewBinding(ActivityMainOfflineMoneyBinding::bind)
@@ -27,10 +31,22 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         QRCodeUtils(requireContext())
     }
 
+    private fun updateTextViewAmount() {
+        var sum = 0;
+
+        sum += binding.edt1Euro.text.toString().toInt() * 1 + binding.edt2Euro.text.toString().toInt() * 2 + binding.edt5Euro.text.toString().toInt() * 5;
+
+        binding.txtBalance.text = sum.toString()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.edt1Euro.text = 5.toString()
+        binding.edt1Euro.text = 8.toString()
+        binding.edt2Euro.text = 2.toString()
+        binding.edt5Euro.text = 6.toString()
+
+        updateTextViewAmount()
 //        val pbk = transactionRepository.
 //
 //        lifecycleScope.launch {
@@ -60,21 +76,10 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
                 val type = JSONObject(it).optString("type")
-//                if (type == "transfer") {
-                    val promise = Promise.fromJson(JSONObject(JSONObject(it).getString("payload")))!!
-                    // TO DO to store promise
-                    val amount = promise.amount
-                    val past = binding.txtBalance.text.toString().toDouble()
-
-                    binding.txtBalance.text = (past + amount).toString()
-//                } else {
-//                    val args = Bundle()
-//                    args.putString(SendAmountFragment.ARG_RECEIVER, JSONObject(it).getString("payload"))
-//                    findNavController().navigate(
-//                        R.id.action_transferFragment_to_sendAmountFragment,
-//                        args
-//                    )
-//                }
+                    val privateKey = defaultCryptoProvider.keyFromPrivateBin(
+                        JSONObject(it).getString("pvk").hexToBytes()
+                    )
+                Log.d("DEBUG:", privateKey.toString());
             } catch (e: JSONException) {
                 Toast.makeText(requireContext(), "Scan failed, try again", Toast.LENGTH_LONG).show()
             }
@@ -82,4 +87,5 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         return
     }
 }
+
 
