@@ -39,13 +39,18 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
                 dir2.mkdirs()
             }
             val file = File("$torrentDir/$DEFAULT_TORRENT_FILE")
-            if (!file.exists()) {
-                val outputStream = FileOutputStream(file)
-                val ins = requireActivity().resources.openRawResource(R.raw.detoks)
-                outputStream.write(ins.readBytes())
-                ins.close()
-                outputStream.close()
+            if (file.exists())  {
+                file.delete()
             }
+            addFile(torrentDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
+            addFile(torrentDir, LAUNDROMAT, R.raw.cosmos_laundromat)
+//            if (!file.exists()) {
+//                val outputStream = FileOutputStream(file)
+//                val ins = requireActivity().resources.openRawResource(R.raw.detoks)
+//                outputStream.write(ins.readBytes())
+//                ins.close()
+//                outputStream.close()
+//            }
         } catch (e: Exception) {
             Log.e("DeToks", "Failed to cache default torrent: $e")
         }
@@ -59,12 +64,14 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             }
             // currently I only know how to add seedable torrents manually and one by one T_T
             // TODO: figure out how to add all seedable torrents all in one swoop and not one by one
+            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.sintel)
+            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.tears_of_steel)
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.chicken_20230326_archive)
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.file_20230326_archive)
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO3, R.raw.parrot_202303_archive)
-            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.cat)
-            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.blueparrot)
-            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO3,R.raw.arcane)
+//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.cat)
+//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.blueparrot)
+//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO3,R.raw.arcane)
             deleteFile(seedableTorrentsDir, "chicken_20230326_archive.torrent")
             deleteFile(seedableTorrentsDir, "file_20230326_archive.torrent")
             deleteFile(seedableTorrentsDir, "parrot_202303_archive.torrent")
@@ -144,9 +151,11 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 1
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"
-        const val DEFAULT_POST_VIDEO = "cat.torrent"
-        const val DEFAULT_POST_VIDEO2 = "blueparrot.torrent"
-        const val DEFAULT_POST_VIDEO3 = "arcane.torrent"
+        const val LAUNDROMAT = "cosmos_laundromat.torrent"
+        const val BIGBUCKBUNNY = "big_buck_bunny.torrent"
+        const val DEFAULT_POST_VIDEO = "sintel.torrent"
+        const val DEFAULT_POST_VIDEO2 = "tears_of_steel.torrent"
+//        const val DEFAULT_POST_VIDEO3 = "arcane.torrent"
 //        const val DEFAULT_POST_VIDEO = "chicken_20230326_archive.torrent"
 //        const val DEFAULT_POST_VIDEO2 = "file_20230326_archive.torrent"
 //        const val DEFAULT_POST_VIDEO3 = "parrot_202303_archive.torrent"

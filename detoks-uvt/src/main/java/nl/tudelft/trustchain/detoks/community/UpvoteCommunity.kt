@@ -56,8 +56,7 @@ class UpvoteCommunity(
     private fun onMagnetURI(peer: Peer, payload: MagnetURIPayload) {
         Log.i("Detoks", "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}")
         logger.debug { "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}" }
-//        torrentManager?.addTorrent(payload.magnet_uri)
-        torrentManager?.getMagnetLink(payload.magnet_uri)
+        torrentManager?.addTorrent(payload.magnet_uri)
     }
 
     private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {
@@ -107,16 +106,30 @@ class UpvoteCommunity(
             payload
         )
 
-        val peer = pickRandomPeer()
-
-        if (peer != null) {
+        val peers = getPeers()
+        if (peers.isEmpty()) {
+            Log.i("Detoks", "No peers are online at this momemt, you/peer with mid :${myPeer.mid} cannot sent (hash,magnetUri) = (${proposalTokenHash},${magnetURI}) to anyone")
+            throw PeerNotFoundException("Could not find a peer")
+        }
+        for (peer in peers) {
+            Log.i("Detoks", "This peer with peer mid is online: ${peer.mid}")
             val message = "[MAGNETURIPAYLOAD] You/Peer with member id: ${myPeer.mid} is sending magnet uri to peer with peer id: ${peer.mid}"
             Log.i("Detoks", message)
             logger.debug { message }
             send(peer, packet)
-            return true
         }
-        throw PeerNotFoundException("Could not find a peer")
+        return true
+
+//        val peer = pickRandomPeer()
+//
+//        if (peer != null) {
+//            val message = "[MAGNETURIPAYLOAD] You/Peer with member id: ${myPeer.mid} is sending magnet uri to peer with peer id: ${peer.mid}"
+//            Log.i("Detoks", message)
+//            logger.debug { message }
+//            send(peer, packet)
+//            return true
+//        }
+//        throw PeerNotFoundException("Could not find a peer")
     }
 
     /**
