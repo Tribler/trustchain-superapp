@@ -2,91 +2,75 @@ package nl.tudelft.trustchain.offlinemoney.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.keyvault.PublicKey
+import com.travijuu.numberpicker.library.Enums.ActionEnum
+import com.travijuu.numberpicker.library.Interface.ValueChangedListener
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.databinding.SendAmountFragmentBinding
 
+
 class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragment) {
     private val binding by viewBinding(SendAmountFragmentBinding::bind)
 
-    private val avail1Euro = 5
-    private var count1Euro = 0
-
-    @SuppressLint("SetTextI18n")
-    private fun updateTextViewBill(txtView: TextView, count: Int, avail: Int) {
-        txtView.text = "$count/$avail"
-        updateTextViewAmount()
-    }
-
     private fun updateTextViewAmount() {
-        var sum: Int = 0;
+        var sum = 0;
 
-        sum += count1Euro * 1;
+        sum += binding.numberPicker1.value * 1 + binding.numberPicker2.value * 2 + binding.numberPicker5.value * 5;
 
         binding.txtAmount.text = sum.toString()
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        updateTextViewBill(binding.txtNumbers, count1Euro, avail1Euro)
+        binding.numberPicker1.max = 11
+        binding.numberPicker2.max = 12
+        binding.numberPicker5.max = 15
 
-//        lifecycleScope.launch {
-//            val reqPayload = JSONObject(requireArguments().getString(ARG_RECEIVER)!!)
-//
-//            binding.txtReceiverInfo.text = "request: $reqPayload"
-//        }
+        binding.numberPicker1.value = 0
+        binding.numberPicker2.value = 0
+        binding.numberPicker5.value = 0
 
-        binding.imgPlus.setOnClickListener {
-            if(count1Euro < avail1Euro) {
-                count1Euro += 1
-                updateTextViewBill(binding.txtNumbers, count1Euro, avail1Euro)
+        binding.txtBalance.text = 42.toString()
+
+        class ValueListener : ValueChangedListener {
+            override fun valueChanged(value: Int, action: ActionEnum) {
+                updateTextViewAmount()
             }
         }
 
-        binding.imgMinus.setOnClickListener {
-            if(count1Euro > 0) {
-                count1Euro -= 1
-                updateTextViewBill(binding.txtNumbers, count1Euro, avail1Euro)
-            }
-        }
+        binding.numberPicker1.valueChangedListener = ValueListener()
+        binding.numberPicker2.valueChangedListener = ValueListener()
+        binding.numberPicker5.valueChangedListener = ValueListener()
 
         binding.btnCancel.setOnClickListener {
             findNavController().navigate(R.id.action_sendAmountFragment_to_transferFragment)
         }
 
         binding.btnSend.setOnClickListener{
-//            val amount = binding.edtAmount.text.toString().toDouble().toLong()
-//
-//            val pbk = transactionRepository.myPublicKey
-//
-//            val pvk = transactionRepository.myPrivateKey
-//
-//            val reqPayload = RequestPayload.fromJson(JSONObject(requireArguments().getString(ARG_RECEIVER)!!))!!
-//            if (amount > 0) {
-//                val promise = Promise.createPromise(pbk as PublicKey, reqPayload, amount, s_pvk = pvk)
-//
-//                val connectionData = promise.toJson()
-//
-//                val args = Bundle()
-//
-//                args.putString(SendMoneyFragment.ARG_DATA, connectionData.toString())
-//
+    //            val amount = binding.edtAmount.text.toString().toDouble().toLong()
+    //
+    //            val pbk = transactionRepository.myPublicKey
+    //
+    //            val pvk = transactionRepository.myPrivateKey
+    //
+    //            val reqPayload = RequestPayload.fromJson(JSONObject(requireArguments().getString(ARG_RECEIVER)!!))!!
+    //            if (amount > 0) {
+    //                val promise = Promise.createPromise(pbk as PublicKey, reqPayload, amount, s_pvk = pvk)
+    //
+    //                val connectionData = promise.toJson()
+    //
+    //                val args = Bundle()
+    //
+    //                args.putString(SendMoneyFragment.ARG_DATA, connectionData.toString())
+    //
                 findNavController().navigate(
                     R.id.action_sendAmountFragment_to_sendMoneyFragment,
                     //args
                 )
-//            }
+    //            }
 
         }
     }

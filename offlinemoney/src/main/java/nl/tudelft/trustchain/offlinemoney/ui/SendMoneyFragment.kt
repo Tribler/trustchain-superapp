@@ -40,6 +40,12 @@ class SendMoneyFragment : OfflineMoneyBaseFragment(R.layout.send_money_fragment)
         val token = Token(id, 5, verifier, genesisHash, mutableListOf())
 
         Log.d("TOKEN:", token.toString())
+        //val promiseString = requireArguments().getString(ARG_DATA)!!
+        // TO DO to store promise
+        //binding.txtSendData.text = promiseString
+
+        val json = JSONObject().put("type", "transfer")
+        json.put("payload", 20)
 
         lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.Default) {

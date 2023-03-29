@@ -13,6 +13,10 @@
             android:id="@+id/action_transferFragment_to_sendAmountFragment"
             app:destination="@id/sendAmountFragment"
             />
+        <action
+            android:id="@+id/action_transferFragment_to_printMoneyFragment"
+            app:destination="@id/printMoneyFragment"
+            />
     </fragment>
 
     <fragment
@@ -46,5 +50,16 @@
         android:name="nl.tudelft.trustchain.offlinemoney.ui.TransactionsFragment"
         android:label="Transactions"
         tools:layout="@layout/transactions_fragment">
+    </fragment>
+
+    <fragment
+        android:id="@+id/printMoneyFragment"
+        android:name="nl.tudelft.trustchain.offlinemoney.ui.PrintMoneyFragment"
+        android:label="Print Money"
+        tools:layout="@layout/print_money_fragment">
+        <action
+            android:id="@+id/action_printMoneyFragment_to_transferFragment"
+            app:destination="@id/transferFragment"
+            />
     </fragment>
 </navigation>
