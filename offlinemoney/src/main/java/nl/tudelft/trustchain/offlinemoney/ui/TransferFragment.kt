@@ -23,6 +23,7 @@ import org.json.JSONException
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toASCII
+import nl.tudelft.trustchain.offlinemoney.payloads.TransferQR
 
 class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline_money) {
     private val binding by viewBinding(ActivityMainOfflineMoneyBinding::bind)
@@ -75,11 +76,9 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
-                val type = JSONObject(it).optString("type")
-                    val privateKey = defaultCryptoProvider.keyFromPrivateBin(
-                        JSONObject(it).getString("pvk").hexToBytes()
-                    )
-                Log.d("DEBUG:", privateKey.toString());
+                val qr = TransferQR.fromJson(JSONObject(it))!!;
+                Log.d("DEBUG:", "pvk = " + qr.pvk.toString());
+                Log.d("DEBUG:", "tokens = " + qr.tokens.toString())
             } catch (e: JSONException) {
                 Toast.makeText(requireContext(), "Scan failed, try again", Toast.LENGTH_LONG).show()
             }
