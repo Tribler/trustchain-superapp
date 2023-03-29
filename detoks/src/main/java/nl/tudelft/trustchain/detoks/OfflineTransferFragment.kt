@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.detoks
 import Wallet
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
@@ -61,6 +63,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         return inflater.inflate(R.layout.fragment_offline_transfer, container, false)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val wallet = Wallet.getInstance(view.context,getIpv8().myPeer.publicKey, getIpv8().myPeer.key as PrivateKey)

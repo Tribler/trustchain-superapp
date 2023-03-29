@@ -8,7 +8,7 @@ data class AdminWallet(val tokens: ArrayList<Token>) {
 
     companion object {
         private var wallet :AdminWallet? = null
-        private val dbHelper: DbHelper? = null;
+        private val dbHelper: DbHelper? = null
         @RequiresApi(Build.VERSION_CODES.O)
         private fun create(context: Context): AdminWallet {
 //            val generator = KeyPairGenerator.getInstance("RSA")
