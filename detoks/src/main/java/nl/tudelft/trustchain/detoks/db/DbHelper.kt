@@ -18,11 +18,11 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
         db?.execSQL(
             "CREATE TABLE IF NOT EXISTS $TABLE_NAME (" +
-                "$COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "$COLUMN_NAME TEXT, " +
-                "$COLUMN_ADDRESS TEXT)"
+                "$COLUMN_NAME TEXT PRIMARY KEY, " +
+                "$COLUMN_ADDRESS TEXT NOT NULL UNIQUE)"
         )
     }
 
@@ -36,12 +36,6 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         values.put(COLUMN_ADDRESS, address)
 
         val db = this.writableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE $COLUMN_NAME=? OR $COLUMN_ADDRESS=?", arrayOf(name, address))
-        if (cursor.count > 0) {
-            cursor.close()
-            db.close()
-            return -1 // Return -1 to indicate that the friend already exists in the table
-        }
         val newRowId = db.insert(TABLE_NAME, null, values)
 
         db.close()
