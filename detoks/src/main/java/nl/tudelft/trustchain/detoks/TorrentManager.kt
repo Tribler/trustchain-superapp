@@ -150,27 +150,6 @@ class TorrentManager(
         val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
         handle.prioritizeFiles(priorities)
         handle.pause()
-        val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
-        val magnUri = torrentInfo.makeMagnetUri()
-        Log.d("DeToks", "THIS HAS ${torrentInfo.numFiles()} : ${torrentInfo.creator()}  from ${torrentInfo.name()}")
-        for (it in 0..torrentInfo.numFiles()-1) {
-            val fileName = torrentInfo.files().fileName(it)
-            Log.d("DeToks", "file ${fileName} in $it")
-            if (fileName.endsWith(".mp4")) {
-                community.broadcastLike(fileName,magnUri, torrentInfo.creator())
-                torrentFiles.add(
-                    TorrentHandler(
-                        cacheDir,
-                        handle,
-                        torrentInfo.name(),
-                        fileName,
-                        it,
-                        torrentInfo.creator(),
-                        magnUri
-                    )
-                )
-            }
-        }
     }
     /**
      * This function builds the torrent index. It adds all the torrent files in the torrent
