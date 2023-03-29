@@ -8,7 +8,8 @@ import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
  */
 class ProfileEntry(
     var watchTime: Long = 0, // Average watch time
-    val firstSeen: Long = System.currentTimeMillis()
+    val firstSeen: Long = System.currentTimeMillis(),
+    var duration: Long = 0
 ) : Comparable<ProfileEntry> {
     override fun compareTo(other: ProfileEntry): Int = when {
         this.watchTime != other.watchTime -> this.watchTime compareTo other.watchTime
@@ -30,6 +31,12 @@ class Profile(
             torrents[key]!!.watchTime /= 2
         }
         Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${torrents[key]!!.watchTime}")
+    }
+
+    fun updateEntryDuration(key: String, duration: Long) {
+        if(!torrents.contains(key)) torrents[key] = ProfileEntry()
+        torrents[key]!!.duration = duration
+        Log.i(DeToksCommunity.LOGGING_TAG, "Updated duration of $key to ${torrents[key]!!.duration}")
     }
 }
 

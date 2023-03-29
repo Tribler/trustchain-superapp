@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +34,13 @@ class VideosAdapter(
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
+        holder.mVideoView.duration
         holder.setVideoData(mVideoItems[position], position, onPlaybackError)
+        // TODO: retrieve some metrics from here by setting a listener
+        // holder.itemView.setOnClickListener {
+        //   holder.mVideoView.isVisible
+        //   holder.mVideoView.isPlaying
+        // }
     }
 
     override fun getItemCount(): Int {
@@ -62,7 +69,6 @@ class VideosAdapter(
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
                 mVideoView.setOnPreparedListener { mp ->
-                    // TODO: Log the duration here potentially
                     mProgressBar.visibility = View.GONE
                     mp.start()
                     if (videoScaling) {

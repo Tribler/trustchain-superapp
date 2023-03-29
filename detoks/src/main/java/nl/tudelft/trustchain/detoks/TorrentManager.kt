@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -14,6 +15,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import java.io.File
+
 
 /**
  * This class manages the torrent files and the video pool.
@@ -122,6 +124,9 @@ class TorrentManager private constructor (
                 MagnetLink.hashFromMagnet(uri),
                 updateTime(),
                 true)
+            profile.updateEntryDuration(
+                MagnetLink.hashFromMagnet(uri),
+                torrentFiles.gett(currentIndex).getVideoDuration())
             currentIndex = newIndex
             return
         }
@@ -139,6 +144,9 @@ class TorrentManager private constructor (
             MagnetLink.hashFromMagnet(uri),
             updateTime(),
         true)
+        profile.updateEntryDuration(
+            MagnetLink.hashFromMagnet(uri),
+            torrentFiles.gett(currentIndex).getVideoDuration())
         currentIndex = newIndex
     }
 
@@ -293,6 +301,13 @@ class TorrentManager private constructor (
             return "$cacheDir/$torrentName/$fileName"
         }
 
+        fun getVideoDuration() : Long {
+            if(!isDownloaded()) return 0
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(getPath())
+            return retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
+        }
+
         fun isPlayable(): Boolean {
             return handle.fileProgress()[fileIndex] / handle.torrentFile().files()
                 .fileSize(fileIndex) > 0.8
@@ -340,7 +355,6 @@ class TorrentManager private constructor (
         fun asMediaInfo(): TorrentMediaInfo {
             return TorrentMediaInfo(torrentName, fileName, getPath())
         }
-
     }
 
     // Extension functions to loop around the index of a lists.
