@@ -57,6 +57,6 @@
     </fragment>
     <fragment
         android:id="@+id/tokenListAdmin"
-        android:name="nl.tudelft.trustchain.detoks.TokenListAdminFragment"
+        android:name="nl.tudelft.trustchain.detoks.TokenListFragment"
         android:label="tokenListAdmin" />
 </navigation>

@@ -2,22 +2,27 @@ package nl.tudelft.trustchain.detoks
 
 import AdminWallet
 import Wallet
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.liveData
-import androidx.navigation.findNavController
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.trustchain.common.contacts.ContactStore
+import nl.tudelft.trustchain.common.eurotoken.Transaction
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
-class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin), TokenButtonListener  {
+class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButtonListener  {
 
     private val adapter = ItemAdapter()
     private val myPublicKey = getIpv8().myPeer.publicKey
@@ -38,11 +43,29 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val user = "admin"
+        val access = "user"
 
-        adapter.registerRenderer(TokenAdminItemRenderer(user, this))
+        adapter.registerRenderer(TokenAdminItemRenderer(access, this))
 
-        return inflater.inflate(R.layout.fragment_token_list_admin, container, false)
+        lifecycleScope.launchWhenResumed {
+            while (isActive) {
+                if (userWallet != null && adminWallet != null) {
+                    println("BP1")
+                    // Refresh transactions periodically
+                    val items = userWallet!!.tokens.map {
+                        token: Token -> TokenItem(token)
+                    }
+
+                    println(userWallet!!.tokens.size)
+
+                    adapter.updateItems(items)
+                    adapter.notifyDataSetChanged()
+                }
+                delay(1000L)
+            }
+        }
+
+        return inflater.inflate(R.layout.fragment_token_list, container, false)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -54,28 +77,28 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
 
     }
 
-    override fun onHistoryClick(token: Token, user: String) {
+    override fun onHistoryClick(token: Token, access: String) {
         TODO("Not yet implemented")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onVerifyClick(token: Token, user: String) {
-        val verified = verify(token, user)
+    override fun onVerifyClick(token: Token, access: String) {
+        val verified = verify(token, access)
         if (verified) {
-            reissueToken(token, user)
+            reissueToken(token, access)
         }
     }
 
-    fun verify(@Suppress("UNUSED_PARAMETER") token: Token, user: String): Boolean {
-        if (user != "admin") {
+    fun verify(@Suppress("UNUSED_PARAMETER") token: Token, access: String): Boolean {
+        if (access != "admin") {
             return false
         }
         return true
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun reissueToken(@Suppress("UNUSED_PARAMETER") token: Token, user: String) {
-        if (user != "admin") {
+    fun reissueToken(@Suppress("UNUSED_PARAMETER") token: Token, access: String) {
+        if (access != "admin") {
             return
         }
 
