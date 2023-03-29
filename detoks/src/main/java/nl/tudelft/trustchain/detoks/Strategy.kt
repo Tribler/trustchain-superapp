@@ -1,42 +1,44 @@
 package nl.tudelft.trustchain.detoks
 
+import android.util.Log
 import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
 
 class Strategy {
 
-    /**
-     * Returns randomly shuffled torrent handlers.
-     */
-    fun randomStrategy(
-        handlers: MutableList<TorrentHandler>,
-        profiles: HashMap<String, ProfileEntry>
-    ) : MutableList<TorrentHandler> {
-        return handlers.shuffled().toMutableList()
+    val strategyComparators = mutableMapOf<Int, (
+        Pair<TorrentHandler, ProfileEntry?>,
+        Pair<TorrentHandler, ProfileEntry?>
+    ) -> Int>()
+
+    val leachingStrategy = STRATEGY_RANDOM
+    val seedingStrategy = STRATEGY_RANDOM
+
+    companion object {
+        const val STRATEGY_RANDOM = 0
+        const val STRATEGY_HIGHEST_WATCH_TIME = 1
+        const val STRATEGY_LOWEST_WATCH_TIME = 2
+    }
+
+    init {
+        strategyComparators[STRATEGY_HIGHEST_WATCH_TIME] = :: highestWatchTimeStrategy
+        strategyComparators[STRATEGY_LOWEST_WATCH_TIME] = :: lowestWatchTimeStrategy
     }
 
     /**
      * Returns the torrent handlers based on decreasing watch time.
      */
-    fun highestWatchTimeStrategy(
-        handlers: MutableList<TorrentHandler>,
-        profiles: HashMap<String, ProfileEntry>
-    ) : MutableList<TorrentHandler> {
-        return applyStrategy(handlers, profiles) { p0, p1 ->
-            return@applyStrategy (p0.second!!.watchTime compareTo p1.second!!.watchTime)
-        }
-    }
+    private fun highestWatchTimeStrategy(
+        p0: Pair<TorrentHandler, ProfileEntry?>,
+        p1: Pair<TorrentHandler, ProfileEntry?>
+    ) : Int = p0.second!!.watchTime compareTo p1.second!!.watchTime
 
     /**
      * Returns the torrent handlers based on increasing watch time.
      */
-    fun lowestWatchTimeStrategy(
-        handlers: MutableList<TorrentHandler>,
-        profiles: HashMap<String, ProfileEntry>
-    ) : MutableList<TorrentHandler> {
-        return applyStrategy(handlers, profiles) { p0, p1 ->
-            return@applyStrategy (p1.second!!.watchTime compareTo p0.second!!.watchTime)
-        }
-    }
+    private fun lowestWatchTimeStrategy(
+        p0: Pair<TorrentHandler, ProfileEntry?>,
+        p1: Pair<TorrentHandler, ProfileEntry?>
+    ) : Int = p1.second!!.watchTime compareTo p0.second!!.watchTime
 
     /**
      * Applies the sorting function sent as parameter, to the handlers, based on the profiles.
@@ -57,5 +59,9 @@ class Strategy {
 
         val sortedHandlerProfile = handlerProfile.sortedWith(func)
         return sortedHandlerProfile.map { it.first }.toMutableList()
+    }
+
+    fun changeStrategy(item: Int) {
+        Log.i(DeToksCommunity.LOGGING_TAG, item.toString())
     }
 }

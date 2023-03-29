@@ -3,12 +3,15 @@ package nl.tudelft.trustchain.detoks
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
+import androidx.navigation.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
 import mu.KotlinLogging
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
 import java.io.FileOutputStream
+
 
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var torrentManager: TorrentManager
@@ -55,6 +58,9 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         viewPagerVideos.adapter = VideosAdapter(torrentManager)
         viewPagerVideos.currentItem = 0
         onPageChangeCallback()
+
+        val settingsButton = view.findViewById<Button>(R.id.strategyButton)
+        settingsButton.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toStrategyFragment) }
     }
 
     /**

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_activity_main_detoks">DeToks</string>
+    <string name="seeding_strategy">Seeding Strategy</string>
+    <string name="leaching_strategy">Leaching Strategy</string>
 </resources>

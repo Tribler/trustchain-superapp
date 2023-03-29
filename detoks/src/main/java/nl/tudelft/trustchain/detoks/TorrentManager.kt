@@ -30,23 +30,13 @@ class TorrentManager private constructor (
     private val torrentFiles = mutableListOf<TorrentHandler>()
 
     val profile = Profile(HashMap())
-    private val strategies = Strategy()
-
-    private val strategyChangeHandlers = mutableMapOf<Int, (
-        MutableList<TorrentHandler>,
-        HashMap<String, ProfileEntry>
-    ) -> MutableList<TorrentHandler>>()
-
-    val recommenderStrategy = STRATEGY_RANDOM
-    val seedingStrategy = STRATEGY_RANDOM
+    val strategies = Strategy()
 
     private var lastTimeStamp: Long
     private var currentIndex = 0
 
     init {
-        strategyChangeHandlers[STRATEGY_RANDOM] = strategies::randomStrategy
-        strategyChangeHandlers[STRATEGY_HIGHEST_WATCHTIME] = strategies::highestWatchTimeStrategy
-        strategyChangeHandlers[STRATEGY_LOWEST_WATCHTIME] = strategies::lowestWatchTimeStrategy
+
 
         clearMediaCache()
         initializeSessionManager()
@@ -56,10 +46,6 @@ class TorrentManager private constructor (
     }
 
     companion object {
-        const val STRATEGY_RANDOM = 1
-        const val STRATEGY_HIGHEST_WATCHTIME = 2
-        const val STRATEGY_LOWEST_WATCHTIME = 3
-
         private lateinit var instance: TorrentManager
         fun getInstance(context: Context): TorrentManager {
             if (!::instance.isInitialized) {
@@ -250,6 +236,11 @@ class TorrentManager private constructor (
         fileOrDirectory.delete()
     }
 
+    private fun download(hash: Sha1Hash) {
+        if (sessionManager.find(hash) != null) return
+        sessionManager
+    }
+
     fun addTorrent(hash: Sha1Hash, magnet: String) {
         if (sessionManager.find(hash) != null) return
 
@@ -275,6 +266,19 @@ class TorrentManager private constructor (
                         it
                     )
                 )
+            }
+        }
+    }
+
+    //TODO: temporary seeding function while waiting for pr
+    private fun downloadAndSeed(torrentInfo: TorrentInfo) {
+        if (torrentInfo.isValid) {
+            sessionManager.download(torrentInfo, torrentDir)
+            sessionManager.find(torrentInfo.infoHash())?.let { torrentHandle ->
+                torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
+                torrentHandle.pause()
+                torrentHandle.resume()
+                addTorrent(torrentHandle.infoHash(), torrentHandle.makeMagnetUri())
             }
         }
     }
@@ -357,7 +361,6 @@ class TorrentManager private constructor (
         fun asMediaInfo(): TorrentMediaInfo {
             return TorrentMediaInfo(torrentName, fileName, getPath())
         }
-
     }
 
     // Extension functions to loop around the index of a lists.
