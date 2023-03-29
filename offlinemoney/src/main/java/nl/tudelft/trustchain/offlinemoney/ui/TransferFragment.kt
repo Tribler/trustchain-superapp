@@ -65,7 +65,7 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
             try {
                 val type = JSONObject(it).optString("type")
                     val privateKey = defaultCryptoProvider.keyFromPrivateBin(
-                        JSONObject(it).getString("payload").hexToBytes()
+                        JSONObject(it).getString("pvk").hexToBytes()
                     )
                 Log.d("DEBUG:", privateKey.toString());
             } catch (e: JSONException) {
