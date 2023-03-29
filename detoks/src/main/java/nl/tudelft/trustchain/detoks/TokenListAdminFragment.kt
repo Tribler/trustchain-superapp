@@ -60,14 +60,14 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
         }
     }
 
-    fun verify(token: Token, user: String): Boolean {
+    fun verify(@Suppress("UNUSED_PARAMETER") token: Token, user: String): Boolean {
         if (user != "admin") {
             return false
         }
         return true
     }
 
-    fun reissueToken(token: Token, user: String) {
+    fun reissueToken(@Suppress("UNUSED_PARAMETER") token: Token, user: String) {
         if (user != "admin") {
             return
         }
