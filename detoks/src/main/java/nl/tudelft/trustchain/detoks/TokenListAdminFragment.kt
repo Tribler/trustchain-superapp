@@ -33,9 +33,8 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
     ): View? {
         // Inflate the layout for this fragment
         val user = "admin"
-        val wallet = view?.let { Wallet.getInstance(it.context, myPublicKey, getIpv8().myPeer.key as PrivateKey) }
 
-        adapter.registerRenderer(TokenAdminItemRenderer(wallet, user, this))
+        adapter.registerRenderer(TokenAdminItemRenderer(user, this))
 
         return inflater.inflate(R.layout.fragment_token_list_admin, container, false)
     }
@@ -50,23 +49,28 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
         }
     }
 
-    override fun onHistoryClick(token: Token) {
+    override fun onHistoryClick(token: Token, user: String) {
         TODO("Not yet implemented")
     }
 
-    override fun onVerifyClick(token: Token) {
-        val verified = verify(token)
+    override fun onVerifyClick(token: Token, user: String) {
+        val verified = verify(token, user)
         if (verified) {
-            reissueToken(token)
+            reissueToken(token, user)
         }
     }
 
-    fun verify(token: Token): Boolean {
+    fun verify(token: Token, user: String): Boolean {
+        if (user != "admin") {
+            return false
+        }
         return true
     }
 
-    fun reissueToken(token: Token) {
-
+    fun reissueToken(token: Token, user: String) {
+        if (user != "admin") {
+            return
+        }
     }
 
     companion object {
