@@ -4,7 +4,9 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.google.common.primitives.Ints.toByteArray
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.detoks.Token
@@ -20,6 +22,8 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         const val COLUMN_ID = "id"
         const val COLUMN_NAME = "name"
         const val COLUMN_ADDRESS = "address"
+
+        const val TABLE_ADMIN_TOKEN = "admin_tokens"
 
         const val TABLE_TOKEN = "tokens"
         const val COLUMN_TOKEN_ID = "token_id"
@@ -50,6 +54,17 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 "$COLUMN_GEN_HASH BLOB NOT NULL) ",
 
         )
+
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_ADMIN_TOKEN")
+        db?.execSQL(
+            "CREATE TABLE IF NOT EXISTS $TABLE_ADMIN_TOKEN (" +
+//                "$COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_TOKEN_ID BLOB PRIMARY KEY NOT NULL UNIQUE, " +
+                "$COLUMN_VALUE BLOB NOT NULL, " +
+                "$COLUMN_VERIFIER BLOB NOT NULL, " +
+                "$COLUMN_GEN_HASH BLOB NOT NULL) ",
+
+            )
 
         db?.execSQL(
             "CREATE TABLE IF NOT EXISTS $TABLE_RECIPIENTS (" +
@@ -162,10 +177,40 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     }
 
     //returns the id and the value of the token
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getAllTokens(): ArrayList<Token>{
         val tokenList = arrayListOf<Token>()
 //        val selectQueryId = "SELECT $COLUMN_TOKEN_ID, $COLUMN_VERIFIER FROM $TABLE_TOKEN"
         val selectQueryId = "SELECT $COLUMN_TOKEN_ID FROM $TABLE_TOKEN"
+
+//        val selectQueryValue = "SELECT * FROM $TABLE_TOKEN"
+
+        val db = this.readableDatabase
+//        Log.v()
+        val cursorId = db.rawQuery(selectQueryId, null)
+//        val cursorValue = db.rawQuery(selectQueryValue, null)
+
+        if (cursorId.moveToFirst()) {
+            val columnIdIndex = cursorId.getColumnIndex(COLUMN_TOKEN_ID)
+//            val columnValueIndex = cursorId.getColumnIndex(COLUMN_VERIFIER)
+            if (columnIdIndex >= 0) {// && columnValueIndex >= 0) {
+                do {
+                    val token_id = cursorId.getInt(columnIdIndex)
+//                    val token_verifier = cursorId.getInt(columnValueIndex)
+
+                    tokenList.add(Token.create(token_id.toByte(), toByteArray(18)))
+                } while (cursorId.moveToNext())
+            }
+        }
+        db.close()
+        return tokenList
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getAllAdminTokens(): ArrayList<Token>{
+        val tokenList = arrayListOf<Token>()
+//        val selectQueryId = "SELECT $COLUMN_TOKEN_ID, $COLUMN_VERIFIER FROM $TABLE_TOKEN"
+        val selectQueryId = "SELECT $COLUMN_TOKEN_ID FROM $TABLE_ADMIN_TOKEN"
 
 //        val selectQueryValue = "SELECT * FROM $TABLE_TOKEN"
 

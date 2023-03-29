@@ -1,4 +1,6 @@
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.detoks.Token
 import nl.tudelft.trustchain.detoks.db.DbHelper
 import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
@@ -16,6 +18,7 @@ data class Wallet(
     companion object {
         private var wallet :Wallet? = null
         private val dbHelper: DbHelper? = null;
+        @RequiresApi(Build.VERSION_CODES.O)
         private fun create(context: Context, publicKey : nl.tudelft.ipv8.keyvault.PublicKey,
                            privateKey: nl.tudelft.ipv8.keyvault.PrivateKey ): Wallet {
 //            val generator = KeyPairGenerator.getInstance("RSA")
@@ -28,6 +31,7 @@ data class Wallet(
 
             return Wallet(publicKey, privateKey, tokens, listOfFriends)
         }
+        @RequiresApi(Build.VERSION_CODES.O)
         fun getInstance(context: Context, publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
                         privateKey: nl.tudelft.ipv8.keyvault.PrivateKey): Wallet {
             return this.wallet ?: create(context, publicKey, privateKey)

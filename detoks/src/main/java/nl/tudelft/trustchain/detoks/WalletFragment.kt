@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import Wallet
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -8,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.navigation.findNavController
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -48,6 +50,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
         return inflater.inflate(R.layout.wallet_fragment, container, false)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         var wallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
@@ -74,6 +77,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
     /**
      * Create a new token and add it to the wallet!
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun creatNewCoin(wallet: Wallet) {
         val token = Token.create(1, myPublicKey.keyToBin())
         wallet.addToken(token)

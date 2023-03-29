@@ -1,12 +1,16 @@
 package nl.tudelft.trustchain.detoks
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import mu.KotlinLogging
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import java.security.SecureRandom
+import java.time.LocalDateTime
 
 class Token(
     internal val id: ByteArray,
+    internal val timestamp: LocalDateTime,
     internal val value: Byte,
     internal var verifier: ByteArray,
     internal var genesisHash: ByteArray,
@@ -85,6 +89,20 @@ class Token(
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    internal fun reissue(): Token {
+        val current = LocalDateTime.now()
+
+        return Token(
+            this.id,
+            current,
+            this.value,
+            this.verifier,
+            this.genesisHash,
+            mutableListOf(),
+        )
+    }
+
     companion object {
         private val logger = KotlinLogging.logger {}
         private val secureRandom = SecureRandom()
@@ -96,6 +114,7 @@ class Token(
         private const val RECIPIENT_PAIR_SIZE = PUBLIC_KEY_SIZE + SIGNATURE_SIZE
         private const val TOKEN_CREATION_SIZE = ID_SIZE + VALUE_SIZE + PUBLIC_KEY_SIZE + SIGNATURE_SIZE
 
+        @RequiresApi(Build.VERSION_CODES.O)
         internal fun create(value: Byte, verifier: ByteArray): Token {
             val idBytes = ByteArray(ID_SIZE)
             val signatureBytes = ByteArray(SIGNATURE_SIZE)
@@ -103,8 +122,11 @@ class Token(
             secureRandom.nextBytes(idBytes)
             secureRandom.nextBytes(signatureBytes)
 
+            val current = LocalDateTime.now()
+
             return Token(
                 idBytes,
+                current,
                 value,
                 verifier,
                 signatureBytes,
@@ -166,6 +188,7 @@ class Token(
          * additional 2 bytes are reserved for a short to denote the
          * number of recipients.
          */
+        @RequiresApi(Build.VERSION_CODES.O)
         internal fun deserialize(data: ByteArray): MutableSet<Token> {
             if (data.isEmpty()) {
                 logger.info { "Received an empty token set!" }
@@ -220,7 +243,9 @@ class Token(
                     recipients.add(RecipientPair(publicKey, proof))
                 }
 
-                tokens.add(Token(id, value, verifier, genesisHash, recipients))
+                val current = LocalDateTime.now()
+
+                tokens.add(Token(id, current, value, verifier, genesisHash, recipients))
             }
 
             return tokens

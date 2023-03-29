@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.detoks
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -12,6 +13,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import kotlinx.coroutines.Dispatchers
@@ -86,6 +88,7 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val content = qrCodeUtils.parseActivityResult(requestCode,resultCode,data)
         Log.v("PublicKey content", content.toString())
