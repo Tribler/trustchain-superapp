@@ -60,17 +60,26 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
             creatNewCoin(wallet)
         }
 
-        val buttonShow = view.findViewById<Button>(R.id.button_show)
-        buttonShow.setOnClickListener {
-            createCoinButton.visibility = View.INVISIBLE
-            val textBalance = view.findViewById<TextView>(R.id.balance)
-            textBalance.text = "Your balance is: " + wallet.balance
-        }
+//        val buttonShow = view.findViewById<Button>(R.id.button_show)
+//        buttonShow.setOnClickListener {
+//            createCoinButton.visibility = View.INVISIBLE
+//            val textBalance = view.findViewById<TextView>(R.id.balance)
+//            textBalance.text = "Your balance is: " + wallet.balance
+//        }
 
         val buttonAdminPage = view.findViewById<Button>(R.id.button_admin_page)
         buttonAdminPage.setOnClickListener {
             val navController = view.findNavController()
             navController.navigate(R.id.adminFragment)
+        }
+
+        val buttonTokenList = view.findViewById<Button>(R.id.button_show)
+        buttonTokenList.setOnClickListener {
+            val navController = view.findNavController()
+            val bundle = Bundle().apply {
+                putString("access", "user")
+            }
+            navController.navigate(R.id.tokenListAdmin, bundle)
         }
     }
 

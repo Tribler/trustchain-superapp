@@ -43,22 +43,25 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val access = "user"
+        val access = requireArguments().getString("access")
 
-        adapter.registerRenderer(TokenAdminItemRenderer(access, this))
+        adapter.registerRenderer(TokenAdminItemRenderer(access!!, this))
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
                 if (userWallet != null && adminWallet != null) {
-                    println("BP1")
-                    // Refresh transactions periodically
-                    val items = userWallet!!.tokens.map {
-                        token: Token -> TokenItem(token)
+//                    println("BP1")
+
+                    if (access == "admin") {
+                        val items = adminWallet!!.tokens.map { token: Token -> TokenItem(token) }
+                        adapter.updateItems(items)
+                    } else if (access == "user") {
+                        val items = userWallet!!.tokens.map { token: Token -> TokenItem(token) }
+                        adapter.updateItems(items)
                     }
 
-                    println(userWallet!!.tokens.size)
+//                    println(userWallet!!.tokens.size)
 
-                    adapter.updateItems(items)
                     adapter.notifyDataSetChanged()
                 }
                 delay(1000L)

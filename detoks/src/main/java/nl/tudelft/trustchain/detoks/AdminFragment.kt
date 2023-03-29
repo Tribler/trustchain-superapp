@@ -4,11 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Button
 import androidx.navigation.findNavController
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import nl.tudelft.trustchain.detoks.db.DbHelper
 
 class AdminFragment : BaseFragment(R.layout.fragment_admin) {
 
@@ -33,10 +31,13 @@ class AdminFragment : BaseFragment(R.layout.fragment_admin) {
 //            creatNewCoin(wallet)
         }
 
-        val buttonAdminPage = view.findViewById<Button>(R.id.buttonTokenView)
-        buttonAdminPage.setOnClickListener {
+        val buttonTokenList = view.findViewById<Button>(R.id.buttonTokenView)
+        buttonTokenList.setOnClickListener {
             val navController = view.findNavController()
-            navController.navigate(R.id.tokenListAdmin)
+            val bundle = Bundle().apply {
+                putString("access", "admin")
+            }
+            navController.navigate(R.id.tokenListAdmin, bundle)
         }
 
     }
