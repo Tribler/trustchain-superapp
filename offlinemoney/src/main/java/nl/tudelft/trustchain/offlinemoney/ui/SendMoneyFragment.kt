@@ -19,12 +19,12 @@ class SendMoneyFragment : OfflineMoneyBaseFragment(R.layout.send_money_fragment)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val promiseString = requireArguments().getString(ARG_DATA)!!
+        //val promiseString = requireArguments().getString(ARG_DATA)!!
         // TO DO to store promise
-        binding.txtSendData.text = promiseString
+        //binding.txtSendData.text = promiseString
 
         val json = JSONObject().put("type", "transfer")
-        json.put("payload", JSONObject(promiseString))
+        json.put("payload", 20)
 
         lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.Default) {

@@ -27,10 +27,22 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
         QRCodeUtils(requireContext())
     }
 
+    private fun updateTextViewAmount() {
+        var sum = 0;
+
+        sum += binding.edt1Euro.text.toString().toInt() * 1 + binding.edt2Euro.text.toString().toInt() * 2 + binding.edt5Euro.text.toString().toInt() * 5;
+
+        binding.txtBalance.text = sum.toString()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.edt1Euro.text = 5.toString()
+        binding.edt1Euro.text = 8.toString()
+        binding.edt2Euro.text = 2.toString()
+        binding.edt5Euro.text = 6.toString()
+
+        updateTextViewAmount()
 //        val pbk = transactionRepository.
 //
 //        lifecycleScope.launch {
