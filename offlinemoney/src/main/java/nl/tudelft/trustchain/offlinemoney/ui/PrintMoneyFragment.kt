@@ -24,6 +24,7 @@ class PrintMoneyFragment : OfflineMoneyBaseFragment(R.layout.print_money_fragmen
             val chararray: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             return (1..length).map {chararray.random()}.joinToString("").toByteArray()
         }
+
         fun createTokens(token1_count:Int, token2_count:Int, token5_count:Int): Array<Token> {
             var tokenpackage:Array<Token> = arrayOf<Token>()
             for(i in 0..token1_count){
@@ -35,7 +36,7 @@ class PrintMoneyFragment : OfflineMoneyBaseFragment(R.layout.print_money_fragmen
                     recipients= mutableListOf<RecipientPair>())
             }
             for(i in 0..token2_count) {
-                for (i in 0..token1_count) {
+
                     tokenpackage += Token(
                         id = generateRandomString(32),
                         value = 2,
@@ -43,17 +44,17 @@ class PrintMoneyFragment : OfflineMoneyBaseFragment(R.layout.print_money_fragmen
                         genesisHash = generateRandomString(20),
                         recipients = mutableListOf<RecipientPair>()
                     )
-                }
+
             }
             for(i in 0..token5_count){
-                for(i in 0..token1_count){
+
                     tokenpackage+=Token(
                         id=generateRandomString(32),
                         value=5,
                         verifier = generateRandomString(20),
                         genesisHash = generateRandomString(20),
                         recipients= mutableListOf<RecipientPair>())
-                }
+                
             }
             return tokenpackage
         }
@@ -64,7 +65,7 @@ class PrintMoneyFragment : OfflineMoneyBaseFragment(R.layout.print_money_fragmen
         binding.btnPrint.setOnClickListener {
             //This create an array with tokens of values 1,2,5
             val token_package: Array<Token> = createTokens(
-                token1_count= binding.printNumberPicker1.value,
+                token1_count = binding.printNumberPicker1.value,
                 token2_count = binding.printNumberPicker2.value,
                 token5_count = binding.printNumberPicker5.value
             )
