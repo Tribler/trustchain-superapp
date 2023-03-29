@@ -1,11 +1,13 @@
 package nl.tudelft.trustchain.detoks
 
 import Wallet
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import androidx.navigation.findNavController
@@ -18,6 +20,10 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
 
     private val adapter = ItemAdapter()
     private val myPublicKey = getIpv8().myPeer.publicKey
+    private val adminKey = getIpv8().myPeer.publicKey // todo: create new key for admin
+
+    private var adminWallet: Wallet? = null;
+    private var userWallet: Wallet? = null;
 
     private val items: LiveData<List<Item>> by lazy {
         liveData { emit(listOf<Item>()) }
@@ -42,17 +48,16 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val buttonAdminPage = view.findViewById<Button>(R.id.buttonTokenView)
-        buttonAdminPage.setOnClickListener {
-            val navController = view.findNavController()
-            navController.navigate(R.id.tokenListAdmin)
-        }
+        adminWallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
+        userWallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
+
     }
 
     override fun onHistoryClick(token: Token, user: String) {
         TODO("Not yet implemented")
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onVerifyClick(token: Token, user: String) {
         val verified = verify(token, user)
         if (verified) {
@@ -67,10 +72,18 @@ class TokenListAdminFragment : BaseFragment(R.layout.fragment_token_list_admin),
         return true
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun reissueToken(token: Token, user: String) {
         if (user != "admin") {
             return
         }
+
+        val reissuedToken = token.reissue()
+
+        adminWallet?.addToken(reissuedToken)
+
+        userWallet?.removeToken(token)
+        userWallet?.addToken(reissuedToken)
     }
 
     companion object {
