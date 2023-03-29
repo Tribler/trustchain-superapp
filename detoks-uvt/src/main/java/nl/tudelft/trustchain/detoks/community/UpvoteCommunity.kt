@@ -133,7 +133,7 @@ class UpvoteCommunity(
     }
 
     /**
-     * Sends a HeartToken to a random Peer
+     * Sends a UpvoteToken to a random Peer
      * When a message is sent, a proposal block is created
      * //TODO: only make an agreement block if the user did not like the video yet, if the user already like the video,
      * Sends a UpvoteToken to a random Peer
