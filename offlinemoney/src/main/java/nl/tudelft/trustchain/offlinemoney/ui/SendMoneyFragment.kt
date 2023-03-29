@@ -44,9 +44,6 @@ class SendMoneyFragment : OfflineMoneyBaseFragment(R.layout.send_money_fragment)
         // TO DO to store promise
         //binding.txtSendData.text = promiseString
 
-        val json = JSONObject().put("type", "transfer")
-        json.put("payload", 20)
-
         lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.Default) {
                 qrCodeUtils.createQR(json.toString())
