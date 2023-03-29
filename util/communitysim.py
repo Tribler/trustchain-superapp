@@ -76,6 +76,7 @@ async def start_nodes(num_nodes: int, timeout: int, max_peers: int):
     for i in range(num_nodes):
         node_name = f"dummy_peer_{i}"
         builder = ConfigBuilder()
+        builder.set_log_level("ERROR")
         builder.add_key(node_name, "medium", f"keys/ec{i}.pem")
         builder.add_overlay(
             "DeToksCommunity",
