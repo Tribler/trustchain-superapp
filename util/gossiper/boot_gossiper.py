@@ -28,13 +28,14 @@ class BootResponsePayload(Serializable):
 
 class BootGossiper(Gossiper):
 
-    def __init__(self, delay, peers, community, network_gossiper):
+    def __init__(self, delay, peers, community, network_gossiper, signed=True):
         self.max_loops = int(30 / delay)
         self.delay = delay
         self.peers = peers
         self.community = community
         self.network_gossiper = network_gossiper
         self.running = True
+        self.signed = signed
 
     def gossip(self) -> None:
         if not self.running:
@@ -45,18 +46,18 @@ class BootGossiper(Gossiper):
             for peer in self.community.get_peers():
                 packet = self.community.ezr_pack(
                     MESSAGE_BOOT_REQUEST, BootRequesPayload(""),
-                    sig=False
+                    sig=self.signed
                 )
 
                 self.community.endpoint.send(peer.address, packet)
 
     def received_request(self, peer, _payload) -> None:
-        message_map = {"NetworkSize": self.network_gossiper.estimated_size}
+        message_map = {"NetworkSize": float(self.network_gossiper.estimated_size)}
         message_to_send = self.serialize_message(message_map)
 
         packet = self.community.ezr_pack(
             MESSAGE_BOOT_RESPONSE, BootResponsePayload(message_to_send),
-            sig=False
+            sig=self.signed
         )
 
         self.community.endpoint.send(peer, packet)
@@ -68,11 +69,11 @@ class BootGossiper(Gossiper):
 
         for i in result.split(","):
             split = i.split("~")
-            result_map[split[0]] = int(split[1])
+            result_map[split[0]] = float(split[1])
 
         self.network_gossiper.estimated_size = result_map["NetworkSize"]
         print(f"BOOTRESPONSE {result}, size set to {self.network_gossiper.estimated_size}")
 
-        self.running = False
+        # self.running = False
 
         

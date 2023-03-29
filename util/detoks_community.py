@@ -2,9 +2,11 @@ import os
 import random
 from pyipv8.ipv8.community import Community
 from gossiper.torrent_gossiper import TorrentGossiper
-from gossiper.network_size_gossiper import NetworkSizeGossiper
+from gossiper.network_size_gossiper import NetworkSizeGossiper, NetworkSizePayload
 from gossiper.boot_gossiper import BootGossiper
 from gossiper.watchtime_gossiper import WatchtimeGossiper
+
+from pyipv8.ipv8.lazy_community import lazy_wrapper
 
 import messages
 
@@ -14,17 +16,18 @@ class DetoksCommunity(Community):
 
     def started(self):
 
-        torrent_gossiper = TorrentGossiper(delay=5.0, peers=5, community=self)
-        self.register_task(f"torrent_gossip", torrent_gossiper.gossip, interval=torrent_gossiper.delay, delay=0)
+        self.torrent_gossiper = TorrentGossiper(delay=5.0, peers=5, community=self, signed=False)
+        self.register_task(f"torrent_gossip", self.torrent_gossiper.gossip, interval=self.torrent_gossiper.delay, delay=0)
 
-        network_size_gossiper = NetworkSizeGossiper(delay=5.0, peers=5, community=self, num_leaders=1)
-        self.register_task(f"networksize_gossip", network_size_gossiper.gossip, interval=network_size_gossiper.delay, delay=0)
+        self.network_size_gossiper = NetworkSizeGossiper(delay=5.0, peers=5, community=self, num_leaders=1, signed=True)
 
-        boot_gossiper = BootGossiper(delay=5.0, peers=5, community=self, network_gossiper=network_size_gossiper)
-        self.register_task(f"boot_gossip", boot_gossiper.gossip, interval=boot_gossiper.delay, delay=0)
+        self.register_task(f"networksize_gossip", self.network_size_gossiper.gossip, interval=self.network_size_gossiper.delay, delay=0)
 
-        watch_time_gossiper = WatchtimeGossiper(delay=5.0, peers=5, community=self)
-        self.register_task(f"wathtime_gossip", watch_time_gossiper.gossip, interval=watch_time_gossiper.delay, delay=0)
+        self.boot_gossiper = BootGossiper(delay=5.0, peers=5, community=self, network_gossiper=self.network_size_gossiper, signed=False)
+        self.register_task(f"boot_gossip", self.boot_gossiper.gossip, interval=self.boot_gossiper.delay, delay=0)
+
+        self.watch_time_gossiper = WatchtimeGossiper(delay=5.0, peers=5, community=self, signed=False)
+        self.register_task(f"wathtime_gossip", self.watch_time_gossiper.gossip, interval=self.watch_time_gossiper.delay, delay=0)
 
         async def print_peers():
             print(
@@ -33,8 +36,13 @@ class DetoksCommunity(Community):
 
         self.register_task("print_peers", print_peers, interval=5.0, delay=0)
 
-        self.add_message_handler(messages.MESSAGE_TORRENT_ID, torrent_gossiper.received_response)
-        self.add_message_handler(messages.MESSAGE_BOOT_REQUEST, boot_gossiper.received_request)
-        self.add_message_handler(messages.MESSAGE_BOOT_RESPONSE, boot_gossiper.received_response)
-        self.add_message_handler(messages.MESSAGE_NETWORK_SIZE_ID, network_size_gossiper.received_response)
-        self.add_message_handler(messages.MESSAGE_WATCH_TIME_ID, watch_time_gossiper.received_response)
+        self.add_message_handler(messages.MESSAGE_TORRENT_ID, self.torrent_gossiper.received_response)
+        self.add_message_handler(messages.MESSAGE_BOOT_REQUEST, self.boot_gossiper.received_request)
+        self.add_message_handler(messages.MESSAGE_BOOT_RESPONSE, self.boot_gossiper.received_response)
+        self.add_message_handler(messages.MESSAGE_NETWORK_SIZE_ID, self.on_message)
+        self.add_message_handler(messages.MESSAGE_WATCH_TIME_ID, self.watch_time_gossiper.received_response)
+
+
+    @lazy_wrapper(NetworkSizePayload)
+    def on_message(self, peer, payload):
+        self.network_size_gossiper.received_response(peer, payload)

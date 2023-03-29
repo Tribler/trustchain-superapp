@@ -21,13 +21,14 @@ class WatchtimePayload(Serializable):
 
 class WatchtimeGossiper(Gossiper):
 
-    def __init__(self, delay, peers, community):
+    def __init__(self, delay, peers, community, signed=True):
         self.delay = delay
         self.peers = peers
         self.community = community
 
         self.torrent_list = os.listdir("torrents/")
         self.watch_time_map = {}
+        self.signed = signed
 
         for t in self.torrent_list:
             torrent = Torrent.from_file(f"torrents/{t}")
@@ -42,11 +43,11 @@ class WatchtimeGossiper(Gossiper):
         for peer in self.community.get_peers():
                 packet = self.community.ezr_pack(
                     MESSAGE_WATCH_TIME_ID, WatchtimePayload(message),
-                    sig=False
+                    sig=self.signed
                 )
 
                 self.community.endpoint.send(peer.address, packet)
 
     def received_response(self, _peer, payload: bytearray, data_offset=31) -> None: 
         result = payload[data_offset:].decode()
-        print(f"WATCHTIME MESSAGE {result}")
+        # print(f"WATCHTIME MESSAGE {result}")

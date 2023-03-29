@@ -6,11 +6,12 @@ from messages import TorrentPayload, MESSAGE_TORRENT_ID
 
 
 class TorrentGossiper(Gossiper):
-    def __init__(self, delay, peers, community):
+    def __init__(self, delay, peers, community, signed=True):
         self.delay = delay
         self.peers = peers
         self.community = community
         self.torrent_list = os.listdir("torrents/")
+        self.signed = signed
 
     # sends random torrents to a set of peers
     def gossip(self):
@@ -19,10 +20,10 @@ class TorrentGossiper(Gossiper):
             torrent = Torrent.from_file(f"torrents/{torrent_to_send}")
 
             packet = self.community.ezr_pack(
-                MESSAGE_TORRENT_ID, TorrentPayload(torrent.magnet_link), sig=False
+                MESSAGE_TORRENT_ID, TorrentPayload(torrent.magnet_link), sig=self.signed
             )
             self.community.endpoint.send(p.address, packet)
 
     def received_response(self, _peer, payload:bytearray, data_offset=31) -> None:
         result = payload[data_offset:].decode()
-        print(f"TORRENT MESSAGE {result}")
+        # print(f"TORRENT MESSAGE {result}")
