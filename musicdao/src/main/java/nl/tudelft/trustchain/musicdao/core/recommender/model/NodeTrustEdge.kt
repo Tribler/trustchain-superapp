@@ -1,0 +1,28 @@
+package nl.tudelft.trustchain.musicdao.core.recommender.model
+
+import kotlinx.serialization.Serializable
+import org.jgrapht.graph.DefaultWeightedEdge
+import java.sql.Timestamp
+
+@Serializable
+class NodeTrustEdge (
+    val trust: Double = 0.0,
+    val timestamp: Timestamp = Timestamp(System.currentTimeMillis())
+): DefaultWeightedEdge() {
+    companion object {
+        val TRUST = NodeTrustEdge::trust.name
+        val TIMESTAMP = NodeTrustEdge::timestamp.name
+    }
+
+    override fun hashCode(): Int {
+        return toString().hashCode()
+    }
+
+    override fun toString(): String {
+        return "($source : $target $trust v$timestamp)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is NodeTrustEdge && toString() == other.toString()
+    }
+}
