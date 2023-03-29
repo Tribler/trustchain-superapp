@@ -103,7 +103,11 @@ class DeToksCommunity(private val context: Context) : Community() {
         val payload = packet.getPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
         payload.data.forEach {
-            torrentManager.addTorrent(Sha1Hash(it.first), it.second)
+            torrentManager.addTorrent(Sha1Hash(MagnetLink.hashFromMagnet(it.first)), it.first)
+            torrentManager.profile.updateEntryHopCount(
+                MagnetLink.hashFromMagnet(it.first),
+                it.second
+            )
         }
     }
 

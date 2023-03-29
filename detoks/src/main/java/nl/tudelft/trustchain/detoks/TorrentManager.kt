@@ -83,6 +83,9 @@ class TorrentManager private constructor (
                 while (!content.isDownloaded()) {
                     delay(100)
                 }
+                profile.updateEntryDuration(
+                    MagnetLink.hashFromMagnet(content.handle.makeMagnetUri()),
+                    content.getVideoDuration())
             }
             content.asMediaInfo()
         } catch (e: TimeoutCancellationException) {
@@ -124,9 +127,6 @@ class TorrentManager private constructor (
                 MagnetLink.hashFromMagnet(uri),
                 updateTime(),
                 true)
-            profile.updateEntryDuration(
-                MagnetLink.hashFromMagnet(uri),
-                torrentFiles.gett(currentIndex).getVideoDuration())
             currentIndex = newIndex
             return
         }
@@ -144,9 +144,6 @@ class TorrentManager private constructor (
             MagnetLink.hashFromMagnet(uri),
             updateTime(),
         true)
-        profile.updateEntryDuration(
-            MagnetLink.hashFromMagnet(uri),
-            torrentFiles.gett(currentIndex).getVideoDuration())
         currentIndex = newIndex
     }
 
@@ -242,6 +239,7 @@ class TorrentManager private constructor (
     }
 
     fun addTorrent(hash: Sha1Hash, magnet: String) {
+        profile.incrementTimesSeen(MagnetLink.hashFromMagnet(magnet))
         if (sessionManager.find(hash) != null) return
 
         val torrentInfo = getInfoFromMagnet(magnet)?:return
@@ -257,15 +255,15 @@ class TorrentManager private constructor (
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
-                torrentFiles.add(
-                    TorrentHandler(
-                        cacheDir,
-                        handle,
-                        torrentInfo.name(),
-                        fileName,
-                        it
-                    )
+                val torrent = TorrentHandler(
+                    cacheDir,
+                    handle,
+                    torrentInfo.name(),
+                    fileName,
+                    it
                 )
+                torrentFiles.add(torrent)
+                profile.torrents[torrent.handle.makeMagnetUri()] = ProfileEntry()
             }
         }
     }
@@ -305,6 +303,7 @@ class TorrentManager private constructor (
             if(!isDownloaded()) return 0
             val retriever = MediaMetadataRetriever()
             retriever.setDataSource(getPath())
+            Log.i(DeToksCommunity.LOGGING_TAG, "Requested duration of ${getPath()} which is ${retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0}")
             return retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
         }
 

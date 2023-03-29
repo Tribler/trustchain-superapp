@@ -7,9 +7,11 @@ import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
  * Basic structure for a profile entry
  */
 class ProfileEntry(
-    var watchTime: Long = 0, // Average watch time
     val firstSeen: Long = System.currentTimeMillis(),
-    var duration: Long = 0
+    var watchTime: Long = 0, // Average watch time
+    var duration:  Long = 0, // Video duration
+    var hopCount:  Int  = 0, // Amount of other nodes visited
+    var timesSeen: Int  = 1  // Count of times we received it
 ) : Comparable<ProfileEntry> {
     override fun compareTo(other: ProfileEntry): Int = when {
         this.watchTime != other.watchTime -> this.watchTime compareTo other.watchTime
@@ -36,7 +38,16 @@ class Profile(
     fun updateEntryDuration(key: String, duration: Long) {
         if(!torrents.contains(key)) torrents[key] = ProfileEntry()
         torrents[key]!!.duration = duration
-        Log.i(DeToksCommunity.LOGGING_TAG, "Updated duration of $key to ${torrents[key]!!.duration}")
+    }
+
+    fun updateEntryHopCount(key: String, hopCount: Int) {
+        if(!torrents.contains(key)) torrents[key] = ProfileEntry()
+        torrents[key]!!.hopCount = hopCount
+    }
+
+    fun incrementTimesSeen(key: String) {
+        if(!torrents.contains(key)) torrents[key] = ProfileEntry(timesSeen = 0)
+        torrents[key]!!.timesSeen += 1
     }
 }
 
