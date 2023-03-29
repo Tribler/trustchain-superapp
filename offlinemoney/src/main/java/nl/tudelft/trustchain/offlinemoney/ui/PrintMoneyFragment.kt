@@ -31,8 +31,8 @@ class PrintMoneyFragment : OfflineMoneyBaseFragment(R.layout.print_money_fragmen
                 tokenpackage+=Token(
                     id=generateRandomString(32),
                     value=1,
-                    verifier = generateRandomString(20),
-                    genesisHash = generateRandomString(20),
+                    verifier = generateRandomString(74),
+                    genesisHash = generateRandomString(64),
                     recipients= mutableListOf<RecipientPair>())
             }
             for(i in 0..token2_count) {
@@ -40,8 +40,8 @@ class PrintMoneyFragment : OfflineMoneyBaseFragment(R.layout.print_money_fragmen
                     tokenpackage += Token(
                         id = generateRandomString(32),
                         value = 2,
-                        verifier = generateRandomString(20),
-                        genesisHash = generateRandomString(20),
+                        verifier = generateRandomString(74),
+                        genesisHash = generateRandomString(64),
                         recipients = mutableListOf<RecipientPair>()
                     )
 
@@ -51,10 +51,10 @@ class PrintMoneyFragment : OfflineMoneyBaseFragment(R.layout.print_money_fragmen
                     tokenpackage+=Token(
                         id=generateRandomString(32),
                         value=5,
-                        verifier = generateRandomString(20),
-                        genesisHash = generateRandomString(20),
+                        verifier = generateRandomString(74),
+                        genesisHash = generateRandomString(64),
                         recipients= mutableListOf<RecipientPair>())
-                
+
             }
             return tokenpackage
         }
