@@ -29,6 +29,8 @@ class SendMoneyFragment : OfflineMoneyBaseFragment(R.layout.send_money_fragment)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val jsonData = requireArguments().getString(ARG_DATA)!!
+
         // Generate random byte arrays for id, verifier, and genesisHash
         val id = ByteArray(16) { UUID.randomUUID().toString().toByte() }
         val verifier = ByteArray(20) { "0".toByte() }
