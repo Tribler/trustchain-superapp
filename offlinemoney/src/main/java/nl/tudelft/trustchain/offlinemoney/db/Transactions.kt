@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 @Entity(tableName = "transactions_table")
 class Transactions(
     @PrimaryKey(autoGenerate = true) var id: Int = 0,
-    @ColumnInfo(name = "transaction_time") var transaction_datetime: String,
+    @ColumnInfo(name = "transaction_datetime") var transaction_datetime: String,
     @ColumnInfo(name = "pubk_sender") var pubk_sender: String,
     @ColumnInfo(name = "pubk_receiver") var pubk_receiver: String,
     @ColumnInfo(name = "amount") var amount: Double,

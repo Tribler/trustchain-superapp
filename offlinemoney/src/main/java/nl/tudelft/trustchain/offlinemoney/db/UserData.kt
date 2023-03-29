@@ -10,7 +10,6 @@ data class UserData(
     @ColumnInfo(name = "username") val username: String,
     @ColumnInfo(name = "public_key") val public_key: String,
     @ColumnInfo(name = "private_key") val private_key: String,
-    @ColumnInfo(name = "money_balance") var money_balance: Double,
 )
 
 

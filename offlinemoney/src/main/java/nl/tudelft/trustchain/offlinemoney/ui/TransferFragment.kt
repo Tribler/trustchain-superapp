@@ -9,13 +9,10 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.databinding.ActivityMainOfflineMoneyBinding
-import nl.tudelft.trustchain.offlinemoney.payloads.RequestPayload
 import nl.tudelft.trustchain.offlinemoney.payloads.Promise
 import org.json.JSONObject
 import org.json.JSONException
@@ -38,23 +35,13 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.edt1Euro.text = 8.toString()
-        binding.edt2Euro.text = 2.toString()
-        binding.edt5Euro.text = 6.toString()
+        lifecycleScope.launch(Dispatchers.IO) {
+            binding.edt1Euro.text = db.tokensDao().getCountTokensOfValue(1.0).toString()
+            binding.edt2Euro.text = db.tokensDao().getCountTokensOfValue(2.0).toString()
+            binding.edt5Euro.text = db.tokensDao().getCountTokensOfValue(5.0).toString()
 
-        updateTextViewAmount()
-//        val pbk = transactionRepository.
-//
-//        lifecycleScope.launch {
-//            binding.txtPublicKey.text = pbk.toHex()
-//
-//            val json = JSONObject().put("type", "request")
-//            json.put("payload", pbk.toString())
-//            val bitmap = withContext(Dispatchers.Default) {
-//                qrCodeUtils.createQR(json.toString())
-//            }
-//            binding.qrPublicKey.setImageBitmap(bitmap)
-//        }
+            updateTextViewAmount()
+        }
 
         binding.btnGet.setOnClickListener {
             qrCodeUtils.startQRScanner(this)
