@@ -42,6 +42,10 @@ class UpvoteCommunity(
         const val MAGNET_URI_AND_HASH = 2
     }
 
+    object ContentSeeding {
+        const val MAX_SEEDED_CONTENT = 5
+    }
+
 
     private fun onUpvoteTokenPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
@@ -79,7 +83,21 @@ class UpvoteCommunity(
         } else {
             logger.debug { "[UPVOTETOKEN] Oh no! Received invalid token!" }
         }
+    }
 
+    private fun requestContent() {
+        logger.debug { "[CONTENTREQUEST] -> Requesting content..." }
+        val peers = getPeers()
+        for (peer in peers) {
+            Log.i("Detoks", "This peer with peer mid is online: ${peer.mid}")
+        }
+
+
+        //Cap 5 videos seeding when online
+
+        //Stop seeding when offline
+
+        //When coming online TorrentManager auto clear media cache directory
     }
 
     /**
