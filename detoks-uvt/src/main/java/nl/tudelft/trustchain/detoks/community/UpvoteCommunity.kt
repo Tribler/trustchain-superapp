@@ -35,8 +35,6 @@ class UpvoteCommunity(
      */
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
     var torrentManager: TorrentManager? = null
-    val mainHandler = Handler(Looper.getMainLooper())
-    var delay = 10000
     var seedVideoIDs = mutableListOf<String>()
     var failedSeeds = mutableListOf<String>()
 
@@ -120,28 +118,6 @@ class UpvoteCommunity(
         }
     }
 
-    fun requestContent() {
-        mainHandler.post(object : Runnable {
-            override fun run() {
-                logger.debug { "[CONTENTREQUEST] -> Requesting content..." }
-                val peers = getPeers()
-                for (peer in peers) {
-                    Log.i("Detoks", "This peer with peer mid is online: ${peer.mid}")
-                }
-
-                val seedableTorrents = torrentManager?.getSeedableTorrents()
-                if (seedableTorrents != null) {
-                    for (torrent in seedableTorrents) {
-                        val magnetURI = torrentManager?.seedTorrent(torrent)
-                        logger.debug { "[CONTENTREQUEST] -> Seeding content with magnetURI: $magnetURI" }
-                    }
-                }
-
-                mainHandler.postDelayed(this, delay.toLong())
-            }
-        })
-    }
-
     /**
      * Selects a random Peer from the list of known Peers
      * @returns A random Peer or null if there are no known Peers
@@ -179,17 +155,6 @@ class UpvoteCommunity(
             send(peer, packet)
         }
         return true
-
-//        val peer = pickRandomPeer()
-//
-//        if (peer != null) {
-//            val message = "[MAGNETURIPAYLOAD] You/Peer with member id: ${myPeer.mid} is sending magnet uri to peer with peer id: ${peer.mid}"
-//            Log.i("Detoks", message)
-//            logger.debug { message }
-//            send(peer, packet)
-//            return true
-//        }
-//        throw PeerNotFoundException("Could not find a peer")
     }
 
     /**
