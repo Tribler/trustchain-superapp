@@ -20,7 +20,9 @@ import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.detoks.db.DbHelper
+import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -98,8 +100,10 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
            if(nameFriend?.text == null){
                Toast.makeText(this.context,"Enter friend's name!", Toast.LENGTH_LONG).show()
            } else {
-               val dbHelper = DbHelper(this.requireContext())
-               val newRowId = dbHelper.addFriend(username.toString(), content.toString())
+               val myPublicKey = getIpv8().myPeer.publicKey
+               val wallet = Wallet.getInstance(this.requireContext(), myPublicKey, getIpv8().myPeer.key as PrivateKey)
+               val newRowId = wallet.addFriend(
+                   OfflineFriend(username.toString(), content.toString().toByteArray()))
                if(newRowId != -1L){
                    Toast.makeText(this.context,"Added Friend!", Toast.LENGTH_LONG).show()
                } else {

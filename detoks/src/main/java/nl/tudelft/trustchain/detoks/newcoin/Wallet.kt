@@ -1,4 +1,6 @@
+import android.content.Context
 import nl.tudelft.trustchain.detoks.Token
+import nl.tudelft.trustchain.detoks.db.DbHelper
 import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
@@ -7,20 +9,26 @@ import java.security.PublicKey
 data class Wallet(
     val publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
     val privateKey: nl.tudelft.ipv8.keyvault.PrivateKey,
-    val tokens: ArrayList<Token>,
-    val listOfFriends: ArrayList<OfflineFriend>
+    val tokens: MutableList<Token>,
+    val listOfFriends: MutableList<String>
 ) {
 
     companion object {
-        fun create(publicKey : nl.tudelft.ipv8.keyvault.PublicKey,
-                   privateKey: nl.tudelft.ipv8.keyvault.PrivateKey ): Wallet {
-//            val generator = KeyPairGenerator.getInstance("RSA")
-//            generator.initialize(2048)
-//            val keyPair = generator.generateKeyPair()
+        private var wallet :Wallet? = null
+        private var dbHelper: DbHelper? = null;
+        private fun create(context: Context, publicKey : nl.tudelft.ipv8.keyvault.PublicKey,
+                           privateKey: nl.tudelft.ipv8.keyvault.PrivateKey ): Wallet {
 
-            // is the generation of private public keys auto when you make an account?
+            dbHelper = DbHelper(context)
+//            val tokens = dbHelper.getAllTokens()
+            var listOfFriends = dbHelper?.getAllFriends()
+            wallet = Wallet(publicKey, privateKey, mutableListOf<Token>(), listOfFriends!!)
 
-            return Wallet(publicKey, privateKey, arrayListOf<Token>(), arrayListOf<OfflineFriend>())
+            return wallet as Wallet
+        }
+        fun getInstance(context: Context, publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
+                        privateKey: nl.tudelft.ipv8.keyvault.PrivateKey): Wallet {
+            return this.wallet ?: create(context, publicKey, privateKey)
         }
     }
 
@@ -32,8 +40,12 @@ data class Wallet(
 //        return blockChain.UTXO.filterValues { it.isMine(publicKey) }.values
 //    }
 
-    public fun addFriend(friend: OfflineFriend){
-        listOfFriends.add(friend)
+    public fun addFriend(friend: OfflineFriend): Long{
+        val result = dbHelper!!.addFriend(friend.username, friend.publicKey)
+        if(result != -1L) {
+            listOfFriends.add(friend.username)
+        }
+        return result
     }
 
     public fun addToken(token : Token) {

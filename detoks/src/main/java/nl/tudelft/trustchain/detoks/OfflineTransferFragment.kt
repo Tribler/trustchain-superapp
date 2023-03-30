@@ -40,6 +40,9 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    var arrayAdapter: ArrayAdapter<String>? = null
+    var wallet : Wallet? = null
+    var spinnerFriends: Spinner? = null
 
     private val qrCodeUtils by lazy {
         QRCodeUtils(requireContext())
@@ -58,28 +61,31 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        val view = inflater.inflate(R.layout.fragment_offline_transfer, container, false)
+        wallet = Wallet.getInstance(view.context, getIpv8().myPeer.publicKey, getIpv8().myPeer.key as PrivateKey)
+
+        val friends = wallet!!.listOfFriends
+//        val friendUsernames = mutableListOf<String>()
+//        for (f in friends){
+//            friendUsernames.add(f.username)
+//        }
+
+        spinnerFriends = view.findViewById(R.id.spinner)
+        // create an array adapter and pass the required parameter
+        // in our case pass the context, drop down layout, and array.
+        arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friends)
+//        arrayAdapter.notifyDataSetChanged()
+        // set adapter to the spinner
+        spinnerFriends?.adapter = arrayAdapter
+        arrayAdapter?.notifyDataSetChanged();
+//        view.invalidateDrawab;
+        spinnerFriends?.refreshDrawableState();
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_offline_transfer, container, false)
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val dbHelper = DbHelper(view.context)
-        val friendList = dbHelper.getAllFriends()
-        val friends = friendList.toMutableList()
-        if (friendList.isEmpty()) {
-            friends.add("Add Friend")
-        }
-
-//        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, friendList)
-//        dropdownMenu.adapter = adapter
-//        val friends = Arrays.asList("Vyshnavi", "Ali", "Dany", "Julio")
-        val spinnerFriends: Spinner = view.findViewById(R.id.spinner)
-        // create an array adapter and pass the required parameter
-        // in our case pass the context, drop down layout, and array.
-        val arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friends)
-        // set adapter to the spinner
-        spinnerFriends.adapter = arrayAdapter
 
         val buttonScan = view.findViewById<Button>(R.id.button_send)
         buttonScan.setOnClickListener {
@@ -94,18 +100,22 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
         val myPublicKey = getIpv8().myPeer.publicKey
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
-        val wallet = Wallet.create(myPublicKey, getIpv8().myPeer.key as PrivateKey)
+//        val wallet = Wallet.create(myPublicKey, getIpv8().myPeer.key as PrivateKey)
         val token = Token.create(1, myPublicKey.keyToBin())
-        wallet.addToken(token)
+        wallet?.addToken(token)
 
         buttonRequest.setOnClickListener {
             //friend selected
 //            val friendUsername = spinnerFriends.selectedItem
 
             //get the friends public key from the db
-            val chosenToken = wallet.tokens.removeLast()
+            try {
+                val chosenToken = wallet?.tokens?.removeLast()
+                showQR(view, chosenToken!!, myPublicKey)
+            } catch (e : NoSuchElementException){
+                Toast.makeText(this.context,"No money", Toast.LENGTH_LONG).show()
+            }
 
-            showQR(view, chosenToken, myPublicKey)
         }
 
 

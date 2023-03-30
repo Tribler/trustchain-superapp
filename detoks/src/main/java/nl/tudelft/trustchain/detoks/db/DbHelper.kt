@@ -22,7 +22,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db?.execSQL(
             "CREATE TABLE IF NOT EXISTS $TABLE_NAME (" +
                 "$COLUMN_NAME TEXT PRIMARY KEY, " +
-                "$COLUMN_ADDRESS TEXT NOT NULL UNIQUE)"
+                "$COLUMN_ADDRESS BLOB NOT NULL UNIQUE)"
         )
     }
 
@@ -30,7 +30,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         // Handle database schema upgrades here if needed
     }
 
-    fun addFriend(name: String, address: String): Long {
+    fun addFriend(name: String, address: ByteArray): Long {
         val values = ContentValues()
         values.put(COLUMN_NAME, name)
         values.put(COLUMN_ADDRESS, address)
@@ -43,7 +43,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return newRowId
     }
 
-    fun getAllFriends(): List<String> {
+    fun getAllFriends(): MutableList<String> {
         val friendList = mutableListOf<String>()
         val selectQuery = "SELECT $COLUMN_NAME FROM $TABLE_NAME"
 
