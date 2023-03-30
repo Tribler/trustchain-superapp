@@ -10,7 +10,7 @@ data class Wallet(
     val publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
     val privateKey: nl.tudelft.ipv8.keyvault.PrivateKey,
     val tokens: MutableList<Token>,
-    val listOfFriends: MutableList<String>
+    val listOfFriends: MutableList<OfflineFriend>
 ) {
 
     companion object {
@@ -43,7 +43,7 @@ data class Wallet(
     public fun addFriend(friend: OfflineFriend): Long{
         val result = dbHelper!!.addFriend(friend.username, friend.publicKey)
         if(result != -1L) {
-            listOfFriends.add(friend.username)
+            listOfFriends.add(friend)
         }
         return result
     }

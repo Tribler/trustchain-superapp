@@ -65,15 +65,15 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         wallet = Wallet.getInstance(view.context, getIpv8().myPeer.publicKey, getIpv8().myPeer.key as PrivateKey)
 
         val friends = wallet!!.listOfFriends
-//        val friendUsernames = mutableListOf<String>()
-//        for (f in friends){
-//            friendUsernames.add(f.username)
-//        }
+        val friendUsernames = mutableListOf<String>()
+        for (f in friends){
+            friendUsernames.add(f.username)
+        }
 
         spinnerFriends = view.findViewById(R.id.spinner)
         // create an array adapter and pass the required parameter
         // in our case pass the context, drop down layout, and array.
-        arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friends)
+        arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friendUsernames)
 //        arrayAdapter.notifyDataSetChanged()
         // set adapter to the spinner
         spinnerFriends?.adapter = arrayAdapter

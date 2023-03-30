@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
 
 class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -43,19 +44,21 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return newRowId
     }
 
-    fun getAllFriends(): MutableList<String> {
-        val friendList = mutableListOf<String>()
-        val selectQuery = "SELECT $COLUMN_NAME FROM $TABLE_NAME"
+    fun getAllFriends(): MutableList<OfflineFriend> {
+        val friendList = mutableListOf<OfflineFriend>()
+        val selectQuery = "SELECT $COLUMN_NAME,$COLUMN_ADDRESS FROM $TABLE_NAME"
 
         val db = this.readableDatabase
         val cursor = db.rawQuery(selectQuery, null)
 
         if (cursor.moveToFirst()) {
             val nameColumnIndex = cursor.getColumnIndex(COLUMN_NAME)
-            if (nameColumnIndex >= 0) {
+            val addressColumnIndex = cursor.getColumnIndex(COLUMN_ADDRESS)
+            if (nameColumnIndex >= 0 && addressColumnIndex >= 0) {
                 do {
                     val name = cursor.getString(nameColumnIndex)
-                    friendList.add(name)
+                    val address = cursor.getBlob(addressColumnIndex)
+                    friendList.add(OfflineFriend(name, address))
                 } while (cursor.moveToNext())
             }
         }
