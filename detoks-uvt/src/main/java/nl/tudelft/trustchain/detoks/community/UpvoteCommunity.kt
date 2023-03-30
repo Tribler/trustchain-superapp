@@ -16,6 +16,7 @@ import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
+import kotlin.math.min
 
 private val logger = KotlinLogging.logger {}
 
@@ -36,19 +37,49 @@ class UpvoteCommunity(
     var torrentManager: TorrentManager? = null
     val mainHandler = Handler(Looper.getMainLooper())
     var delay = 10000
+    var seedVideoIDs = mutableListOf<String>()
+    var failedSeeds = mutableListOf<String>()
 
     init {
         messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
         messageHandlers[MessageID.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
+        this.registerBlockSigner(UpvoteTrustchainConstants.BALANCE_CHECKPOINT, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                this@UpvoteCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
+            }
+        })
     }
 
     object MessageID {
         const val UPVOTE_TOKEN = 1
-        const val MAGNET_URI_AND_HASH = 2
+        const val MAGNET_URI_AND_HASH = 4
     }
 
     object ContentSeeding {
         const val MAX_SEEDED_CONTENT = 5
+    }
+
+    fun getContentToSeed() {
+        // randomly select peers
+        // if a random set is not good, we can change that
+        val listOfPostsAndUpvotes = database.getBlocksWithType(UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN)
+        val otherPeersProposalBlocks = listOfPostsAndUpvotes.filter { it.isProposal
+            && it.publicKey.toHex() != myPeer.publicKey.keyToBin().toHex()
+            && !seedVideoIDs.contains(it.blockId)
+            && !failedSeeds.contains(it.blockId)}
+        val additionalSeeds = min(otherPeersProposalBlocks.size, ContentSeeding.MAX_SEEDED_CONTENT-seedVideoIDs.size)
+        val randomlyChosenProposalBlocks = otherPeersProposalBlocks.shuffled().take(additionalSeeds)
+        for (block in randomlyChosenProposalBlocks) {
+            val magnetLink = block.transaction["magnetURI"].toString()
+            val seeded = torrentManager?.seedTorrentFromMagnetLink(magnetLink)
+            if (seeded !=null && seeded){
+                seedVideoIDs.add(block.blockId)
+                // Greedily send to all other peers who are online
+                sendVideoData(magnetLink, block.calculateHash().toHex())
+            } else {
+                failedSeeds.add(block.blockId)
+            }
+        }
     }
 
     private fun onUpvoteTokenPacket(packet: Packet) {

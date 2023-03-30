@@ -324,6 +324,32 @@ class TorrentManager(
             ?.makeMagnetUri()
     }
 
+    fun seedTorrentFromMagnetLink(magnetLink: String): Boolean {
+        val torrentInfo = getInfoFromMagnet(magnetLink)?:return false
+        val hash = torrentInfo.infoHash()
+        if(sessionManager.find(hash) != null) return true // return true if already seeding this torrent
+        Log.i("Detoks", "Downloading and seeding new torrent: ${torrentInfo.name()}")
+        if (torrentInfo.isValid) {
+            sessionManager.download(torrentInfo, cacheDir)
+        } else {
+            return false
+        }
+        val torrentHandle = sessionManager.find(torrentInfo.infoHash())
+        return if (torrentHandle.isValid) {
+            torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
+            torrentHandle.pause()
+            torrentHandle.resume()
+            // This is a fix/hack that forces SEED_MODE to be available, for
+            // an unsolved issue: seeding local torrents often result in an endless "CHECKING_FILES"
+            // state
+            Log.i("Detoks", "Now seeding torrent with magnetLink: ${torrentHandle.makeMagnetUri()}")
+            torrentHandleBeingSeeded.add(torrentHandle)
+            true
+        } else {
+            false
+        }
+    }
+
     /**
      * Downloads and seeds the torrent which has a name that matches @param torrentInfoName
      * This method is adapted from AppGossiper.kt which is in package nl.tudelft.trustchain.FOC
@@ -350,6 +376,8 @@ class TorrentManager(
             Log.e("Detoks" , "there is no torrent with name ${torrentInfoName}, as a result it won't be seeded")
         }
     }
+
+
 
     /**
      * Retrieves the names of the mp4 videos in the res folder the user can post
