@@ -67,6 +67,6 @@ class DeToksActivity : BaseActivity() {
 
     companion object {
         private const val PREF_PRIVATE_KEY = "private_key"
-        private const val BLOCK_TYPE = "demo_block"
+        private const val BLOCK_TYPE = "LIKE_BLOCK"
     }
 }

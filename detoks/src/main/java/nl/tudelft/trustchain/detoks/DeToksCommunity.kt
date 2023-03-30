@@ -150,6 +150,9 @@ class DeToksCommunity(
             it.transaction["author"] == author
         }
     }
+    fun getEarliestDate(vid: String, torrent: String):Long {
+        return (getLikes(vid,torrent).sortedBy{(it.transaction["timestamp"] as String).toLong()}.get(0).transaction["timestamp"] as String).toLong()
+    }
 
     fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
         return getLikes(vid, torrent).any { it.transaction["liker"] == liker }

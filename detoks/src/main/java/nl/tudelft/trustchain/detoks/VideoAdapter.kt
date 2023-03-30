@@ -9,6 +9,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SortedList
+import androidx.recyclerview.widget.SortedListAdapterCallback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,7 +20,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 class VideosAdapter(
     private val torrentManager: TorrentManager,
     private val onPlaybackError: (() -> Unit)? = null,
-    private val videoScaling: Boolean = false,
+    private val videoScaling: Boolean = false
 ) :
     RecyclerView.Adapter<VideosAdapter.VideoViewHolder?>() {
     private val mVideoItems: List<VideoItem> =
@@ -34,7 +36,6 @@ class VideosAdapter(
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
-        //mVideoItems.sortedWith(compareByDescending { (it.content as TorrentMediaInfo).dateandtime })
         holder.setVideoData(mVideoItems[position], position, onPlaybackError)
     }
 
