@@ -1,6 +1,8 @@
 package nl.tudelft.trustchain.detoks.community
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
@@ -8,6 +10,7 @@ import nl.tudelft.ipv8.messaging.Packet
 import mu.KotlinLogging
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
@@ -31,6 +34,8 @@ class UpvoteCommunity(
      */
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
     var torrentManager: TorrentManager? = null
+    val mainHandler = Handler(Looper.getMainLooper())
+    var delay = 10000
 
     init {
         messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
@@ -45,7 +50,6 @@ class UpvoteCommunity(
     object ContentSeeding {
         const val MAX_SEEDED_CONTENT = 5
     }
-
 
     private fun onUpvoteTokenPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
@@ -85,19 +89,26 @@ class UpvoteCommunity(
         }
     }
 
-    private fun requestContent() {
-        logger.debug { "[CONTENTREQUEST] -> Requesting content..." }
-        val peers = getPeers()
-        for (peer in peers) {
-            Log.i("Detoks", "This peer with peer mid is online: ${peer.mid}")
-        }
+    fun requestContent() {
+        mainHandler.post(object : Runnable {
+            override fun run() {
+                logger.debug { "[CONTENTREQUEST] -> Requesting content..." }
+                val peers = getPeers()
+                for (peer in peers) {
+                    Log.i("Detoks", "This peer with peer mid is online: ${peer.mid}")
+                }
 
+                val seedableTorrents = torrentManager?.getSeedableTorrents()
+                if (seedableTorrents != null) {
+                    for (torrent in seedableTorrents) {
+                        val magnetURI = torrentManager?.seedTorrent(torrent)
+                        logger.debug { "[CONTENTREQUEST] -> Seeding content with magnetURI: $magnetURI" }
+                    }
+                }
 
-        //Cap 5 videos seeding when online
-
-        //Stop seeding when offline
-
-        //When coming online TorrentManager auto clear media cache directory
+                mainHandler.postDelayed(this, delay.toLong())
+            }
+        })
     }
 
     /**
