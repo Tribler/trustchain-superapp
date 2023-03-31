@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks.fragments
 
 import android.Manifest
+import android.os.Build
 import android.os.Build.VERSION_CODES.TIRAMISU
 import android.os.Bundle
 import android.util.Log
@@ -49,8 +50,11 @@ class TabBarFragment : Fragment() {
                 if (tab.position == 1) {
                     val previousTabIndex = viewPager.currentItem
 
-                    requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_VIDEO)
-
+                    if(Build.VERSION.SDK_INT > 32) {
+                        requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_VIDEO)
+                    }else{
+                        requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    }
                     tabLayout.selectTab(tabLayout.getTabAt(previousTabIndex))
                     return
                 }
