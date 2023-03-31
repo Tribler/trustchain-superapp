@@ -199,7 +199,6 @@ class TorrentManager constructor (
                         Log.d("DeToks", "NO DATA :(")
                         continue
                     }
-                    Log.i("DeToks", "AA: ${torrentInfo.creator()}")
                     val handle = sessionManager.find(torrentInfo.infoHash())
 
                     handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
