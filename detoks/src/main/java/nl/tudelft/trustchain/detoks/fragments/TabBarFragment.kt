@@ -39,6 +39,7 @@ class TabBarFragment : Fragment() {
             if (isGranted) {
                 getContent.launch("video/*")
             } else {
+                Toast.makeText(this.requireContext(), "Permission has been denied!", Toast.LENGTH_LONG).show()
                 Log.i("AndroidRuntime", "Rejected :(")
             }
         }
