@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application>
@@ -15,9 +15,6 @@
             android:label="@string/title_activity_main_detoks"
             android:theme="@style/Fullscreen"
             android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name="nl.tudelft.trustchain.detoks.fragments.UploadFragment">
-        </activity>
     </application>
 
 </manifest>
