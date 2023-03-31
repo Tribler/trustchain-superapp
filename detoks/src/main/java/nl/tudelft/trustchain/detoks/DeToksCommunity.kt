@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
@@ -29,20 +27,15 @@ class DeToksCommunity(
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
         registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
-                if(userLikedVideo(block.transaction["video"] as String,block.transaction["torrent"] as String, block.transaction["liker"] as String)) return
                 createAgreementBlock(block, block.transaction)
             }
         })
         addListener(LIKE_BLOCK, object : BlockListener {
-            @RequiresApi(Build.VERSION_CODES.O)
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Detoks", "onBlockReceived: ${block.blockId} ${block.transaction}")
-                val video = block.transaction.get("video") as String
-                val torrent = block.transaction.get("torrent") as String
-                val magnet = block.transaction.get("torrentMagnet") as String
+                val video = block.transaction.get("video")
+                val torrent = block.transaction.get("torrent")
                 Log.d("Detoks", "Received like for $video, $torrent")
-                if (firstInstance(video, torrent)) TorrentManager.getInstance(context).addMagnet(magnet)
-
             }
         })
     }
@@ -136,11 +129,9 @@ class DeToksCommunity(
         }
     }
 
-    fun broadcastLike(vid: String, torrent: String, creator: String, magnet: String) {
-        if(userLikedVideo(vid,torrent,myPeer.publicKey.toString())) return
+    fun broadcastLike(vid: String, torrent: String, creator: String) {
         Log.d("DeToks", "Liking: $vid")
-        val timestamp = System.currentTimeMillis().toString()
-        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator,timestamp, magnet)
+        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator)
         createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
         Log.d("DeToks", "$like")
     }
@@ -152,43 +143,30 @@ class DeToksCommunity(
     }
 
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
-        val authorsBlocks =  database.getBlocksWithType(LIKE_BLOCK).filter {
+        return database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["author"] == author
         }
-        if(authorsBlocks.isEmpty()) return authorsBlocks
-        return authorsBlocks.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()})
-    }
-    fun getEarliestDate(vid: String, torrent: String):Long {
-        if(firstInstance(vid,torrent)) return Long.MAX_VALUE
-        return (getLikes(vid,torrent).sortedBy{(it.transaction["timestamp"] as String).toLong()}.get(0).transaction["timestamp"] as String).toLong()
     }
 
     fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
         return getLikes(vid, torrent).any { it.transaction["liker"] == liker }
-    }
-    fun firstInstance(vid: String, torrent: String): Boolean {
-        val exists = database.getBlocksWithType(LIKE_BLOCK).filter { it.transaction["video"] == vid && it.transaction["torrent"] == torrent }.size
-        if(exists == 0) return true
-        return false
     }
 
     fun getPostedVideos(author: String): List<Pair<String, Int>> {
         // Create Key data class so we can group by two fields (torrent and video)
         data class Key(val video: String, val torrent: String)
         fun TrustChainBlock.toKey() = Key(transaction["video"] as String, transaction["torrent"] as String)
-            val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
-        // no need to sort here as getblocksbyauthor already sorts
+        val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
+        // TODO: sort based on posted timestamp
         return likes.entries.map {
             Pair(it.key.video, it.value.size)
         }
     }
 
     fun listOfLikedVideosAndTorrents(person: String): List<Pair<String,String>> {
-        var iterato = database.getBlocksWithType(LIKE_BLOCK).filter {
+        var iterator = database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["liker"] == person
-        }
-        if(iterato.isEmpty()) return emptyList()
-        var iterator= iterato.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()}).listIterator()
+        }.listIterator()
         var likedVideos = ArrayList<Pair<String,String>>()
         while(iterator.hasNext()) {
             val block = iterator.next()

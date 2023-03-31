@@ -15,9 +15,6 @@
             android:label="@string/title_activity_main_detoks"
             android:theme="@style/Fullscreen"
             android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name="nl.tudelft.trustchain.detoks.fragments.UploadFragment">
-        </activity>
     </application>
 
 </manifest>
