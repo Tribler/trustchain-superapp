@@ -1,11 +1,13 @@
 package nl.tudelft.trustchain.detoks.fragments
 
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import nl.tudelft.ipv8.android.IPv8Android
@@ -32,6 +34,7 @@ class ProfileFragment : Fragment() {
         updatePersonalInformation(videos)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -48,14 +51,8 @@ class ProfileFragment : Fragment() {
         updatePersonalInformation(videos)
 
         val videosListFragment = VideosListFragment(videos)
-        val likedListFragment = LikedListFragment(
-            community.listOfLikedVideosAndTorrents(author).map { it.first + ", " + it.second }
-        )
-        val notificationsListFragment = NotificationsListFragment(
-            community.getBlocksByAuthor(author).map {
-                "Received like for video: " + it.transaction["video"]
-            }
-        )
+        val likedListFragment = LikedListFragment(community.listOfLikedVideosAndTorrents(author).map { it.second })
+        val notificationsListFragment = NotificationsListFragment(community.getBlocksByAuthor(author).map {"Received a like: " + it.transaction["video"]})
 
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)
         viewPager = view.findViewById(R.id.viewPager)

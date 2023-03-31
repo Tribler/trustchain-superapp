@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
-import android.util.Log
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Serializable
-import org.json.JSONArray
 
 
 class TorrentMessage(val magnet: String) : Serializable {

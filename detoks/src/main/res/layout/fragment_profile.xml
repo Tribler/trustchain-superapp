@@ -37,7 +37,6 @@
             android:id="@+id/publicKeyLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="The user's public key..."
             android:textSize="15sp" />
     </LinearLayout>
 
@@ -69,7 +68,6 @@
                 android:id="@+id/numVideosLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Total Number of Videos..."
                 android:textSize="15sp"
                 android:textAlignment="center" />
         </LinearLayout>
@@ -96,7 +94,9 @@
                 android:text="Total Number of Likes..."
                 android:textSize="15sp"
                 android:textAlignment="center" />
+
         </LinearLayout>
+
     </LinearLayout>
 
     <com.google.android.material.tabs.TabLayout
