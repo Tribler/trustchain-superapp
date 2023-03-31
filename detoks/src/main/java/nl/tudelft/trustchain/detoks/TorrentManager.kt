@@ -169,6 +169,24 @@ class TorrentManager constructor (
         val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
         handle.prioritizeFiles(priorities)
         handle.pause()
+
+        for (it in 0 until torrentInfo.numFiles()) {
+            val fileName = torrentInfo.files().fileName(it)
+            Log.d("DeToks", "file ${fileName} in $it")
+            if (fileName.endsWith(".mp4")) {
+                torrentFiles.add(
+                    TorrentHandler(
+                        cacheDir,
+                        handle,
+                        torrentInfo.name(),
+                        fileName,
+                        it,
+                        torrentInfo.creator(),
+                        torrentInfo.makeMagnetUri()
+                    )
+                )
+            }
+        }
     }
     /**
      * This function builds the torrent index. It adds all the torrent files in the torrent
