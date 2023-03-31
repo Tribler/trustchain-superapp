@@ -11,7 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.detoks.DetoksCommunity
+import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.adapters.TabBarAdapter
 
@@ -28,7 +28,7 @@ class ProfileFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val videos = community.getPostedVideos(community.myPeer.publicKey.toString())
 
         updatePersonalInformation(videos)
@@ -38,7 +38,7 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val author = community.myPeer.publicKey.toString()
         val videos = community.getPostedVideos(author)
 
@@ -50,20 +50,9 @@ class ProfileFragment : Fragment() {
 
         updatePersonalInformation(videos)
 
-//        TODO: (optionally, if possible) Sort the list by the date and time when the video was uploaded.
         val videosListFragment = VideosListFragment(videos)
-
-//        TODO: (optionally, if possible) Sort the list by the date and time when the video was liked.
-        val likedListFragment = LikedListFragment(
-            community.listOfLikedVideosAndTorrents(author).map { it.second }
-        )
-
-//        TODO: (optionally, if possible) Sort the list by the date and time when the notification was received.
-        val notificationsListFragment = NotificationsListFragment(
-            community.getBlocksByAuthor(author).map {
-                "Received a like: " + it.transaction["video"]
-            }
-        )
+        val likedListFragment = LikedListFragment(community.listOfLikedVideosAndTorrents(author).map { it.second })
+        val notificationsListFragment = NotificationsListFragment(community.getBlocksByAuthor(author).map {"Received a like: " + it.transaction["video"]})
 
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)
         viewPager = view.findViewById(R.id.viewPager)

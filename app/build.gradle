@@ -30,9 +30,9 @@ ktlint {
 }
 
 // Generate a version code from git commit count
-//static def generateVersionCode() {
-//    return "git rev-list HEAD --count".execute().text.trim().toInteger()
-//}
+static def generateVersionCode() {
+    return "git rev-list HEAD --count".execute().text.trim().toInteger()
+}
 
 
 android {
@@ -42,7 +42,7 @@ android {
         applicationId "nl.tudelft.trustchain"
         minSdkVersion 22
         targetSdkVersion 33
-        versionCode 1
+        versionCode generateVersionCode()
         versionName "0.3.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

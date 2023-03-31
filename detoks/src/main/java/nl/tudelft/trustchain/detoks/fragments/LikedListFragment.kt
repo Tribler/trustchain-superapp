@@ -12,7 +12,7 @@ import android.widget.ListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.detoks.DetoksCommunity
+import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.adapters.LikedListAdapter
 
@@ -20,7 +20,7 @@ class LikedListFragment(private val likedVideos: List<String>) : Fragment() {
     private lateinit var adapter: ArrayAdapter<String>
 
     fun updateLikedList() {
-        val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val author = community.myPeer.publicKey.toString()
         val likedVideos = community.listOfLikedVideosAndTorrents(author).map { it.second }
 

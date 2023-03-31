@@ -12,7 +12,7 @@ import android.widget.ListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.detoks.DetoksCommunity
+import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.adapters.VideosListAdapter
 
@@ -20,7 +20,7 @@ class VideosListFragment(private val likesPerVideo: List<Pair<String, Int>>) : F
     private lateinit var adapter: ArrayAdapter<Pair<String, Int>>
 
     fun updateVideos() {
-        val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val author = community.myPeer.publicKey.toString()
         val videos = community.getPostedVideos(author)
 
@@ -40,6 +40,7 @@ class VideosListFragment(private val likesPerVideo: List<Pair<String, Int>>) : F
         adapter = VideosListAdapter(requireActivity(), likesPerVideo)
         val listView = view.findViewById<ListView>(R.id.listView)
         listView.adapter = adapter
+
 
 //        TODO: Add an event listener which plays the video on click
 //        listView.setOnItemClickListener{ adapterView, view, position, id ->

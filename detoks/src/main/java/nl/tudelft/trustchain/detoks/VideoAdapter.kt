@@ -18,7 +18,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 class VideosAdapter(
     private val torrentManager: TorrentManager,
     private val onPlaybackError: (() -> Unit)? = null,
-    private val videoScaling: Boolean = false,
+    private val videoScaling: Boolean = false
 ) :
     RecyclerView.Adapter<VideosAdapter.VideoViewHolder?>() {
     private val mVideoItems: List<VideoItem> =
@@ -85,8 +85,8 @@ class VideosAdapter(
                 Log.d("DeToks", "Could not update the like counter.")
             }
 
-            val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
-            community.broadcastLike(content.fileName, content.torrentMagnet, content.creator)
+            val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+            community.broadcastLike(content.fileName, content.torrentName, content.creator,content.torrentMagnet)
         }
 
         init {
@@ -109,7 +109,7 @@ class VideosAdapter(
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
             CoroutineScope(Dispatchers.Main).launch {
                 val content = item.content(position, 10000)
-                val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+                val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
 
                 likeCount.text = community.getLikes(content.fileName, content.torrentMagnet).size.toString()
 

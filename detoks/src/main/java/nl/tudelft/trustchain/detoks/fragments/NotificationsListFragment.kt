@@ -12,7 +12,7 @@ import android.widget.ListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.detoks.DetoksCommunity
+import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.adapters.NotificationsListAdapter
 
@@ -20,7 +20,7 @@ class NotificationsListFragment(private val notifications: List<String>) : Fragm
     private lateinit var adapter: ArrayAdapter<String>
 
     fun updateNotifications() {
-        val community = IPv8Android.getInstance().getOverlay<DetoksCommunity>()!!
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val author = community.myPeer.publicKey.toString()
         val notifications = community.getBlocksByAuthor(author).map { "Received a like: " + it.transaction["video"] }
 
