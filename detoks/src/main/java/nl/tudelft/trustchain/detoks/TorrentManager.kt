@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.content.Context
 import android.os.Build
+import android.os.FileUtils
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
@@ -21,10 +22,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
-import org.apache.commons.io.FileUtils
 import java.io.File
+import java.io.FileDescriptor
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.sql.Timestamp
+import java.util.Date
 
 
 /**
@@ -67,6 +71,7 @@ class TorrentManager constructor (
     fun notifyIncrease() {
         Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
+
     }
 
     fun notifyDecrease() {
@@ -81,6 +86,7 @@ class TorrentManager constructor (
      */
     suspend fun provideContent(index: Int = currentIndex, timeout: Long = 10000): TorrentMediaInfo {
         Log.i("DeToks", "Providing content ... $index, ${index % getNumberOfTorrents()}")
+        torrentFiles.sort()
         val content = torrentFiles.gett(index % getNumberOfTorrents())
 
         return try {
@@ -118,9 +124,11 @@ class TorrentManager constructor (
 
         if (newIndex > currentIndex || loopedToFront) {
             torrentFiles.gett(currentIndex - cachingAmount).deleteFile()
+            torrentFiles.sort()
             torrentFiles.gett(newIndex + cachingAmount).downloadFile()
         } else {
             torrentFiles.gett(currentIndex + cachingAmount).deleteFile()
+            torrentFiles.sort()
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
 
         }
@@ -134,6 +142,7 @@ class TorrentManager constructor (
             return
         }
         for (i in (currentIndex - cachingAmount)..(currentIndex + cachingAmount)) {
+            torrentFiles.sort()
             val torrent = torrentFiles.gett(i)
             if (i == currentIndex) {
                 torrent.downloadWithMaxPriority()
@@ -142,7 +151,41 @@ class TorrentManager constructor (
             }
         }
     }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun addMagnet(magnet: String){
+        val res = sessionManager.fetchMagnet(magnet, 10) ?: return
+        val torrentInfo = TorrentInfo(res)
+        val par = torrentDir.absolutePath
+        val torrentPath = Paths.get("$par/${torrentInfo.infoHash()}.torrent")
+        val torrentFile = torrentPath.toFile()
 
+        torrentFile.writeBytes(res)
+        sessionManager.download(torrentInfo, cacheDir)
+        val handle = sessionManager.find(torrentInfo.infoHash())
+
+        handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+        val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
+        handle.prioritizeFiles(priorities)
+        handle.pause()
+
+        for (it in 0 until torrentInfo.numFiles()) {
+            val fileName = torrentInfo.files().fileName(it)
+            Log.d("DeToks", "file ${fileName} in $it")
+            if (fileName.endsWith(".mp4")) {
+                torrentFiles.add(
+                    TorrentHandler(
+                        cacheDir,
+                        handle,
+                        torrentInfo.name(),
+                        fileName,
+                        it,
+                        torrentInfo.creator(),
+                        torrentInfo.makeMagnetUri()
+                    )
+                )
+            }
+        }
+    }
     /**
      * This function builds the torrent index. It adds all the torrent files in the torrent
      * directory to Libtorrent and selects all .mp4 files for download.
@@ -154,6 +197,11 @@ class TorrentManager constructor (
                 if (file.extension == "torrent") {
                     val torrentInfo = TorrentInfo(file)
                     sessionManager.download(torrentInfo, cacheDir )
+                    val res = sessionManager.fetchMagnet(torrentInfo.makeMagnetUri(), 10)
+                    if (res == null) {
+                        Log.d("DeToks", "NO DATA :(")
+                        continue
+                    }
                     Log.i("DeToks", "AA: ${torrentInfo.creator()}")
                     val handle = sessionManager.find(torrentInfo.infoHash())
 
@@ -173,7 +221,8 @@ class TorrentManager constructor (
                                     torrentInfo.name(),
                                     fileName,
                                     it,
-                                    torrentInfo.creator()
+                                    torrentInfo.creator(),
+                                    torrentInfo.makeMagnetUri()
                                 )
                             )
                         }
@@ -193,22 +242,14 @@ class TorrentManager constructor (
 
 
         Log.d("DeToks", "VALID: ${out.second.is_valid}" )
-        val ec =  error_code()
 
-        var fs = file_storage()
-        libtorrent.add_files(fs,cacheDir.getPath()+"/"+collection.hashCode().toString())
-        val ct = create_torrent(fs)
         val tb = TorrentBuilder()
-        tb.creator("Moi")
+        tb.creator(IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!.myPeer.publicKey.toString())
         tb.path(File(cacheDir.getPath()+"/"+collection.hashCode().toString()))
+        tb.addTracker("http://opensharing.org:2710/announce")
+        tb.addTracker("http://open.acgnxtracker.com:80/announce")
+        tb.setPrivate(false)
 
-        ct.set_creator("Moi")
-        ct.set_priv(false)
-
-        ct.add_tracker("udp://tracker.openbittorrent.com:80/announce",1)
-        libtorrent.set_piece_hashes(ct,cacheDir.getPath(), ec)
-        Log.d("DeToks","ec ${ec.value()}")
-//        val et = ct.generate()
         Log.d("DeToks", folder.toString())
 
 
@@ -217,7 +258,7 @@ class TorrentManager constructor (
 
 
         val torrentInfo = TorrentInfo(tb.generate().entry().bencode())
-//        torrentInfo.addTracker("udp://tracker.openbittorrent.com:80/announce")
+//        torrentInfo.makeMagnetUri()
         val infoHash = torrentInfo.infoHash().toString()
         val par = torrentDir.absolutePath
         val torrentPath = Paths.get("$par/$infoHash.torrent")
@@ -239,11 +280,14 @@ class TorrentManager constructor (
         val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
         handle.prioritizeFiles(priorities)
         handle.pause()
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+        val magnUri = torrentInfo.makeMagnetUri()
         Log.d("DeToks", "THIS HAS ${torrentInfo.numFiles()} : ${torrentInfo.creator()}  from ${torrentInfo.name()}")
         for (it in 0..torrentInfo.numFiles()-1) {
             val fileName = torrentInfo.files().fileName(it)
             Log.d("DeToks", "file ${fileName} in $it")
             if (fileName.endsWith(".mp4")) {
+                community.broadcastLike(fileName,torrentInfo.name(), torrentInfo.creator(),magnUri)
                 torrentFiles.add(
                     TorrentHandler(
                         cacheDir,
@@ -251,7 +295,8 @@ class TorrentManager constructor (
                         torrentInfo.name(),
                         fileName,
                         it,
-                        torrentInfo.creator()
+                        torrentInfo.creator(),
+                        magnUri
                     )
                 )
             }
@@ -285,8 +330,17 @@ class TorrentManager constructor (
                 contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
             val fileLocation = "$parentDir/$fileName"
 
+            Files.createDirectories(parentDir)
+            if(Files.notExists(File(fileLocation).toPath())) {
+                Files.createFile(File(fileLocation).toPath()).toFile()
+            }
 
-            FileUtils.copyInputStreamToFile(input, File(fileLocation))
+            val output = contentResolver.openOutputStream(Uri.fromFile(File(fileLocation)))!!
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                FileUtils.copy(input, output)
+            }
+            output.close()
             fileList.add(File(fileLocation))
             libtorrent.add_files(fs, "$parentDir/$fileName")
         }
@@ -300,7 +354,7 @@ class TorrentManager constructor (
         cursor.moveToFirst()
         var f_id = cursor.getString(0)
 
-        Log.d("DeToks", f_id)
+//        Log.d("DeToks", f_id)
         f_id = f_id.split(":")[1]
         cursor.close()
 
@@ -392,7 +446,8 @@ class TorrentManager constructor (
                         torrentInfo.name(),
                         fileName,
                         it,
-                        community.myPeer.publicKey.toString()
+                        community.myPeer.publicKey.toString(),
+                        ""
                     )
                 )
             }
@@ -414,7 +469,8 @@ class TorrentManager constructor (
         val torrentName: String,
         val fileName: String,
         val fileIndex: Int,
-        val creator: String
+        val creator: String,
+        val torrentMagnet: String
     ) {
 
         var isDownloading: Boolean = false
@@ -469,20 +525,30 @@ class TorrentManager constructor (
         }
 
         fun asMediaInfo(): TorrentMediaInfo {
-            return TorrentMediaInfo(torrentName, fileName, getPath(), creator)
+            return TorrentMediaInfo(torrentName, fileName, getPath(), creator, torrentMagnet)
         }
 
     }
+    private fun List<TorrentHandler>.sort(){
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+        val comparator = compareByDescending <TorrentHandler>
+        { community.getLikes(it.fileName,it.torrentName).size }.
+        thenByDescending{ community.getEarliestDate(it.fileName,it.torrentName)}
 
+        this.sortedWith(comparator)
+    }
     // Extension functions to loop around the index of a lists.
-    private fun <E> List<E>.gett(index: Int): E = this[index.mod(size)]
+    private fun <E> List<E>.gett(index: Int): E  {
 
-    private fun <E> List<E>.gettIndex(index: Int): Int = index.mod(size)
+        return this[index.mod(size)]
+    }
+        private fun <E> List<E>.gettIndex(index: Int): Int = index.mod(size)
 }
 
 class TorrentMediaInfo(
     val torrentName: String,
     val fileName: String,
     val fileURI: String,
-    val creator: String
+    val creator: String,
+    val torrentMagnet: String
 )

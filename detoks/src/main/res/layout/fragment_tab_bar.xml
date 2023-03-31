@@ -35,6 +35,12 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:icon="@drawable/baseline_add_circle_24"
+            android:text="New Video"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:icon="@drawable/baseline_person_24"
             android:text="Profile"/>
     </com.google.android.material.tabs.TabLayout>

@@ -9,6 +9,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SortedList
+import androidx.recyclerview.widget.SortedListAdapterCallback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,7 +20,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 class VideosAdapter(
     private val torrentManager: TorrentManager,
     private val onPlaybackError: (() -> Unit)? = null,
-    private val videoScaling: Boolean = false,
+    private val videoScaling: Boolean = false
 ) :
     RecyclerView.Adapter<VideosAdapter.VideoViewHolder?>() {
     private val mVideoItems: List<VideoItem> =
@@ -78,9 +80,8 @@ class VideosAdapter(
 
             isLiked = true
             likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
-
             val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-            community.broadcastLike(content.fileName, content.torrentName, content.creator)
+            community.broadcastLike(content.fileName, content.torrentName, content.creator,content.torrentMagnet)
         }
 
         init {
@@ -105,11 +106,11 @@ class VideosAdapter(
                 val content = item.content(position, 10000)
                 val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
 
-                likeCount.text = community.getLikes(content.fileName, content.torrentName).size.toString()
+                likeCount.text = community.getLikes(content.fileName, content.torrentMagnet).size.toString()
 
                 isLiked = community.userLikedVideo(
                     content.fileName,
-                    content.torrentName,
+                    content.torrentMagnet,
                     community.myPeer.publicKey.toString()
                 )
 
