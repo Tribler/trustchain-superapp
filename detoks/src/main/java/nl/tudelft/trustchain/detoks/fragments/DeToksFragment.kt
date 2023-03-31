@@ -1,19 +1,17 @@
-package nl.tudelft.trustchain.detoks
+package nl.tudelft.trustchain.detoks.fragments
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
 import mu.KotlinLogging
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.detoks.R
+import nl.tudelft.trustchain.detoks.TorrentManager
+import nl.tudelft.trustchain.detoks.VideosAdapter
 import java.io.File
 import java.io.FileOutputStream
 
@@ -59,39 +57,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             File("${requireActivity().cacheDir.absolutePath}/torrent"),
             DEFAULT_CACHING_AMOUNT
         )
-
-        val permission = ContextCompat.checkSelfPermission(this.requireContext(),
-            Manifest.permission.READ_EXTERNAL_STORAGE)
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this.requireActivity(),
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                111)
-        }else{
-            mainPart()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun mainPart(){
-        val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-
-            torrentManager.createTorrentInfo(uri!!, this.requireContext())
-        }
-        getContent.launch("video/*")
-    }
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            111 -> {
-                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Log.d("AndroidRuntime", "REJECTED :(")
-
-                } else {
-                    mainPart()
-                }
-            }
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -128,5 +93,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 2
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"
+        lateinit var torrentManager: TorrentManager
     }
 }
