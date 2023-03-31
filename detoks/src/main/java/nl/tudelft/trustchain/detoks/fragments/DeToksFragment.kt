@@ -128,6 +128,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 2
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"
-        lateinit var torrentManager: TorrentManager
+        //lateinit var torrentManager: TorrentManager
     }
 }

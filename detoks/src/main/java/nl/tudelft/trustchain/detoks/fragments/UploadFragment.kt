@@ -22,6 +22,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.DeToksFragment
 import nl.tudelft.trustchain.detoks.R
+import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.adapters.TabBarAdapter
 
 class UploadFragment : Fragment() {
@@ -54,7 +55,7 @@ class UploadFragment : Fragment() {
     fun mainPart(){
         val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if(uri!=null){
-                DeToksFragment.torrentManager.createTorrentInfo(uri, this.requireContext())
+                TorrentManager.getInstance(this.requireContext()).createTorrentInfo(uri, this.requireContext())
                 Toast.makeText(this.requireContext(), "Successfully uploaded", Toast.LENGTH_LONG).show()
             }
 

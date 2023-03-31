@@ -1,7 +1,9 @@
 package nl.tudelft.trustchain.detoks
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
@@ -32,6 +34,7 @@ class DeToksCommunity(
             }
         })
         addListener(LIKE_BLOCK, object : BlockListener {
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Detoks", "onBlockReceived: ${block.blockId} ${block.transaction}")
                 val video = block.transaction.get("video") as String
@@ -149,11 +152,14 @@ class DeToksCommunity(
     }
 
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
-        return database.getBlocksWithType(LIKE_BLOCK).sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()}).filter {
+        val authorsBlocks =  database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["author"] == author
         }
+        if(authorsBlocks.isEmpty()) return authorsBlocks
+        return authorsBlocks.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()})
     }
     fun getEarliestDate(vid: String, torrent: String):Long {
+        if(firstInstance(vid,torrent)) return Long.MAX_VALUE
         return (getLikes(vid,torrent).sortedBy{(it.transaction["timestamp"] as String).toLong()}.get(0).transaction["timestamp"] as String).toLong()
     }
 
@@ -170,7 +176,7 @@ class DeToksCommunity(
         // Create Key data class so we can group by two fields (torrent and video)
         data class Key(val video: String, val torrent: String)
         fun TrustChainBlock.toKey() = Key(transaction["video"] as String, transaction["torrent"] as String)
-        val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
+            val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
         // no need to sort here as getblocksbyauthor already sorts
         return likes.entries.map {
             Pair(it.key.video, it.value.size)
@@ -178,9 +184,11 @@ class DeToksCommunity(
     }
 
     fun listOfLikedVideosAndTorrents(person: String): List<Pair<String,String>> {
-        var iterator = database.getBlocksWithType(LIKE_BLOCK).sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()}).filter {
+        var iterato = database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["liker"] == person
-        }.listIterator()
+        }
+        if(iterato.isEmpty()) return emptyList()
+        var iterator= iterato.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()}).listIterator()
         var likedVideos = ArrayList<Pair<String,String>>()
         while(iterator.hasNext()) {
             val block = iterator.next()
