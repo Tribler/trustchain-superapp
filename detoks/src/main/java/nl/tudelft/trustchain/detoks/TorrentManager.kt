@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.detoks.fragments.DeToksFragment
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -236,7 +237,6 @@ class TorrentManager constructor (
         val out2 = getVideoFilePath(collection,context)
         val folder = Paths.get(out2.first)
 
-
         Log.d("DeToks", "VALID: ${out.second.is_valid}" )
 
         val tb = TorrentBuilder()
@@ -247,21 +247,14 @@ class TorrentManager constructor (
         tb.setPrivate(false)
 
         Log.d("DeToks", folder.toString())
-
-
         Log.d("DeToks", out2.first!!)
         Log.d("DeToks", out.first.absolutePath)
 
-
         val torrentInfo = TorrentInfo(tb.generate().entry().bencode())
-//        torrentInfo.makeMagnetUri()
         val infoHash = torrentInfo.infoHash().toString()
         val par = torrentDir.absolutePath
         val torrentPath = Paths.get("$par/$infoHash.torrent")
         val torrentFile = torrentPath.toFile()
-
-
-
 
         torrentFile.writeBytes(tb.generate().entry().bencode())
 
@@ -350,7 +343,6 @@ class TorrentManager constructor (
         cursor.moveToFirst()
         var f_id = cursor.getString(0)
 
-//        Log.d("DeToks", f_id)
         f_id = f_id.split(":")[1]
         cursor.close()
 
@@ -374,7 +366,6 @@ class TorrentManager constructor (
         }
 
         return Pair("",0)
-
     }
 
     private fun initializeSessionManager() {
@@ -535,10 +526,9 @@ class TorrentManager constructor (
     }
     // Extension functions to loop around the index of a lists.
     private fun <E> List<E>.gett(index: Int): E  {
-
         return this[index.mod(size)]
     }
-        private fun <E> List<E>.gettIndex(index: Int): Int = index.mod(size)
+    private fun <E> List<E>.gettIndex(index: Int): Int = index.mod(size)
 }
 
 class TorrentMediaInfo(

@@ -41,11 +41,6 @@ class LikedListFragment(private val likedVideos: List<String>) : Fragment() {
         val listView = view.findViewById<ListView>(R.id.listView)
         listView.adapter = adapter
 
-//        TODO: Add an event listener which plays the video on click
-//        listView.setOnItemClickListener{ adapterView, view, position, id ->
-//
-//        }
-
         listView.setOnItemLongClickListener { _, _, i,_ ->
             val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val data = adapter.getItem(i)
