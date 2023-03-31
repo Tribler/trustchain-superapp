@@ -5,7 +5,10 @@ DeToks is a decentralized TikTok skeleton application where several different gr
 We will also show screenshots of the actions which are possible in our implementation:
 - TODO: When implementation is finalized
 
+## Table of Contents
+
 - [DeToks: Upvote Token](#detoks--upvote-token)
+  * [Table of Contents](#table-of-contents)
   * [Project Structure](#project-structure)
   * [Design Choices](#design-choices)
     + [TrustChain](#trustchain)
