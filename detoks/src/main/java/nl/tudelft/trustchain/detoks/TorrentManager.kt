@@ -350,7 +350,7 @@ class TorrentManager constructor (
         cursor.moveToFirst()
         var f_id = cursor.getString(0)
 
-        Log.d("DeToks", f_id)
+//        Log.d("DeToks", f_id)
         f_id = f_id.split(":")[1]
         cursor.close()
 

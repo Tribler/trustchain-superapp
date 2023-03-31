@@ -51,11 +51,12 @@ class TabBarFragment : Fragment() {
                 if (tab.position == 1) {
                     val previousTabIndex = viewPager.currentItem
 
-                    if(Build.VERSION.SDK_INT > 32) {
+                    if (Build.VERSION.SDK_INT > 32) {
                         requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_VIDEO)
-                    }else{
+                    } else {
                         requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
                     }
+
                     tabLayout.selectTab(tabLayout.getTabAt(previousTabIndex))
                     return
                 }
