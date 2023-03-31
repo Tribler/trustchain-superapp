@@ -29,6 +29,8 @@ class TorrentManager private constructor (
     private val logger = KotlinLogging.logger {}
     private val torrentFiles = mutableListOf<TorrentHandler>()
 
+    private var unwatchedVideos = mutableListOf<TorrentHandler>()
+
     val profile = Profile(HashMap())
     val strategies = Strategy()
 
@@ -36,13 +38,13 @@ class TorrentManager private constructor (
     private var currentIndex = 0
 
     init {
-
-
         clearMediaCache()
         initializeSessionManager()
         buildTorrentIndex()
         initializeVideoPool()
         lastTimeStamp = System.currentTimeMillis()
+
+        unwatchedVideos = torrentFiles
     }
 
     companion object {
@@ -120,7 +122,7 @@ class TorrentManager private constructor (
             //        their screen or switches to another app for a while? Maybe this could be
             //        changed to a place in the video adapter as well, if we can detect maybe when
             //        a video is done playing and starts again, then update the duration if possible
-            val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
+            val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()    //todo: make torrentFiles into unwatched videos
             profile.updateEntryWatchTime(
                 MagnetLink.hashFromMagnet(uri),
                 updateTime(),
@@ -236,11 +238,6 @@ class TorrentManager private constructor (
         fileOrDirectory.delete()
     }
 
-    private fun download(hash: Sha1Hash) {
-        if (sessionManager.find(hash) != null) return
-        sessionManager
-    }
-
     fun addTorrent(hash: Sha1Hash, magnet: String) {
         if (sessionManager.find(hash) != null) return
 
@@ -268,6 +265,34 @@ class TorrentManager private constructor (
                 )
             }
         }
+    }
+
+    fun updateLeachingStrategy(strategyId: Int) {
+        if (strategies.leachingStrategy == strategyId) return
+        strategies.leachingStrategy = strategyId
+
+        currentIndex = 0
+        unwatchedVideos = strategies.applyStrategy(strategyId, unwatchedVideos, profile.profiles)
+    }
+
+    fun updateSeedingStrategy(strategyId: Int) {
+        if (strategies.seedingStrategy == strategyId) return
+        strategies.seedingStrategy = strategyId
+
+        //TODO: seeding strategy
+        Log.i("Detoks", strategyId.toString())
+        sessionManager.stats().uploadRate()
+        sessionManager.maxActiveSeeds()
+        sessionManager.downloadRate()
+        sessionManager.downloadRateLimit()
+        sessionManager.uploadRateLimit()
+        sessionManager.postTorrentUpdates()
+        torrentFiles.gett(0).handle.uploadLimit
+        torrentFiles.gett(0).handle.forceReannounce()
+        torrentFiles.gett(0).handle.status().isSeeding
+        torrentFiles.gett(0).handle.status().totalDownload()
+        torrentFiles.gett(0).handle.status().allTimeDownload()
+
     }
 
     //TODO: temporary seeding function while waiting for pr
