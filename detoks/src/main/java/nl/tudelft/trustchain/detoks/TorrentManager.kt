@@ -123,12 +123,10 @@ class TorrentManager constructor (
         }
 
         if (newIndex > currentIndex || loopedToFront) {
-            torrentFiles.sort()
             torrentFiles.gett(currentIndex - cachingAmount).deleteFile()
             torrentFiles.sort()
             torrentFiles.gett(newIndex + cachingAmount).downloadFile()
         } else {
-            torrentFiles.sort()
             torrentFiles.gett(currentIndex + cachingAmount).deleteFile()
             torrentFiles.sort()
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
