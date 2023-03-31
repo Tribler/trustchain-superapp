@@ -192,7 +192,7 @@ class DeToksCommunity(
         var likedVideos = ArrayList<Pair<String,String>>()
         while(iterator.hasNext()) {
             val block = iterator.next()
-            likedVideos.add(Pair(block.transaction.get("video") as String, block.transaction.get("torrent") as String))
+            likedVideos.add(Pair(block.transaction.get("video") as String, block.transaction.get("torrentMagnet") as String))
         }
         return likedVideos;
     }
