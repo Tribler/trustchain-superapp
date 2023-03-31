@@ -271,7 +271,7 @@ class TorrentManager constructor (
             val fileName = torrentInfo.files().fileName(it)
             Log.d("DeToks", "file ${fileName} in $it")
             if (fileName.endsWith(".mp4")) {
-                community.broadcastLike(fileName,magnUri, torrentInfo.creator())
+                community.broadcastLike(fileName,torrentInfo.name(), torrentInfo.creator(),magnUri)
                 torrentFiles.add(
                     TorrentHandler(
                         cacheDir,

@@ -34,9 +34,12 @@ class DeToksCommunity(
         addListener(LIKE_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Detoks", "onBlockReceived: ${block.blockId} ${block.transaction}")
-                val video = block.transaction.get("video")
-                val torrent = block.transaction.get("torrent")
+                val video = block.transaction.get("video") as String
+                val torrent = block.transaction.get("torrent") as String
+                val magnet = block.transaction.get("torrentMagnet") as String
                 Log.d("Detoks", "Received like for $video, $torrent")
+                if (firstInstance(video, torrent)) TorrentManager.getInstance(context).addMagnet(magnet)
+
             }
         })
     }
@@ -130,11 +133,11 @@ class DeToksCommunity(
         }
     }
 
-    fun broadcastLike(vid: String, torrent: String, creator: String) {
+    fun broadcastLike(vid: String, torrent: String, creator: String, magnet: String) {
         if(userLikedVideo(vid,torrent,myPeer.publicKey.toString())) return
         Log.d("DeToks", "Liking: $vid")
         val timestamp = System.currentTimeMillis().toString()
-        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator,timestamp)
+        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator,timestamp, magnet)
         createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
         Log.d("DeToks", "$like")
     }
@@ -156,6 +159,11 @@ class DeToksCommunity(
 
     fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
         return getLikes(vid, torrent).any { it.transaction["liker"] == liker }
+    }
+    fun firstInstance(vid: String, torrent: String): Boolean {
+        val exists = database.getBlocksWithType(LIKE_BLOCK).filter { it.transaction["video"] == vid && it.transaction["torrent"] == torrent }.size
+        if(exists == 0) return true
+        return false
     }
 
     fun getPostedVideos(author: String): List<Pair<String, Int>> {
