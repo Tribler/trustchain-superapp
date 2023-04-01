@@ -68,4 +68,27 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
         return friendList
     }
+
+    fun getFriendsPublicKey(friendName: String): ByteArray {
+        val db = readableDatabase
+        val cursor = db.query(
+            TABLE_NAME,
+            arrayOf("address"),
+            "name = ?",
+            arrayOf(friendName),
+            null,
+            null,
+            null
+        )
+
+        var address: ByteArray = byteArrayOf(0x48, 0x65, 0x6c, 0x6c, 0x6f)
+        if (cursor.moveToFirst()) {
+            val nameColumnIndex = cursor.getColumnIndex(COLUMN_ADDRESS)
+            if (nameColumnIndex >= 0) {
+                address = cursor.getBlob(nameColumnIndex)
+            }
+        }
+        cursor.close()
+        return address
+    }
 }
