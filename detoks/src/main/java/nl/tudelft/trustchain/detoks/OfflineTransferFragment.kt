@@ -105,10 +105,6 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
 
         val token = Token.create(1, myPublicKey.keyToBin())
-        wallet?.addToken(token)
-        wallet?.addToken(token)
-        Log.v("Number of tokens", wallet!!.balance.toString())
-
 
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         val dbHelper = DbHelper(view.context)
@@ -118,14 +114,9 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
             //get the friends public key from the db
             val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername.toString())
-            Log.v("Friends PK", friendPublicKey.toString())
-            Toast.makeText(this.context, friendPublicKey.toString(), Toast.LENGTH_LONG).show()
 
             try {
                 wallet!!.addToken(token)
-                Log.v("Number of tokens 2", wallet!!.balance.toString())
-//                Log.v("List is empty? ", wallet!!.tokens.get(0))
-//                val chosenToken = wallet?.tokens?.removeLast()
                 val chosenToken = wallet!!.getTokens().get(0)
                 val proof = myPrivateKey.sign(chosenToken.id + chosenToken.value + chosenToken.genesisHash + myPublicKey.keyToBin())
                 chosenToken.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
@@ -134,7 +125,6 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             } catch (e : NoSuchElementException){
                 Toast.makeText(this.context,"No money", Toast.LENGTH_LONG).show()
             }
-
 
         }
 
