@@ -4,6 +4,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import nl.tudelft.trustchain.detoks.Token
+import nl.tudelft.trustchain.detoks.Token.Companion.serialize
 import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
 
 class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -13,22 +15,72 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         const val DATABASE_VERSION = 1
 
         const val TABLE_NAME = "friends"
-        const val COLUMN_ID = "id"
         const val COLUMN_NAME = "name"
         const val COLUMN_ADDRESS = "address"
+
+        const val TABLE_TOKEN = "tokens"
+        const val COLUMN_TOKEN_ID = "token_id"
+        const val COLUMN_VALUE = "token_value"
+        const val COLUMN_VERIFIER = "verifier"
+        const val COLUMN_GEN_HASH = "genesis_block"
+        const val COLUMN_SER_TOKEN = "serialized_token"
+
+        const val TABLE_RECIPIENTS = "recipients"
+        const val COLUMN_RECIPIENT = "rec_publicKey"
+        const val COLUMN_PROOF = "proof"
+
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
-        db?.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
+
         db?.execSQL(
             "CREATE TABLE IF NOT EXISTS $TABLE_NAME (" +
                 "$COLUMN_NAME TEXT PRIMARY KEY, " +
                 "$COLUMN_ADDRESS BLOB NOT NULL UNIQUE)"
         )
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_TOKEN")
+        db?.execSQL(
+            "CREATE TABLE IF NOT EXISTS $TABLE_TOKEN (" +
+                "$COLUMN_TOKEN_ID BLOB PRIMARY KEY, " +
+                "$COLUMN_VALUE BLOB NOT NULL, " +
+                "$COLUMN_VERIFIER BLOB NOT NULL, " +
+                "$COLUMN_GEN_HASH BLOB NOT NULL, " +
+                "$COLUMN_SER_TOKEN BLOB NOT NULL UNIQUE); ",
+            )
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         // Handle database schema upgrades here if needed
+    }
+
+    fun addToken(token: Token) : Long {
+        val new_row = ContentValues()
+        new_row.put(COLUMN_TOKEN_ID, token.id)
+        new_row.put(COLUMN_VALUE, token.value)
+        new_row.put(COLUMN_VERIFIER, token.verifier)
+        new_row.put(COLUMN_GEN_HASH, token.genesisHash)
+        val collection = mutableListOf<Token>(token)
+        new_row.put(COLUMN_SER_TOKEN, serialize(collection))
+
+        val db = this.writableDatabase
+//        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME_TOKEN WHERE $COLUMN_TOKEN_ID=? OR $COLUMN_VALUE=?",
+//            arrayOf(token_id, value.toString()))
+        val newRowId = db.insert(TABLE_TOKEN, null, new_row) // null?
+        db.close()
+        return newRowId
+    }
+
+    /**
+     * Removes the specified token from the DB
+     */
+    fun removeToken(token: Token) {
+        val db = this.writableDatabase
+        db.delete(
+            TABLE_TOKEN,
+            COLUMN_TOKEN_ID + " = ?",
+            arrayOf<String>(java.lang.String.valueOf(token.id)),
+        )
+        db.close()
     }
 
     fun addFriend(name: String, address: ByteArray): Long {
@@ -89,6 +141,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             }
         }
         cursor.close()
+        db.close()
         return address
     }
 }

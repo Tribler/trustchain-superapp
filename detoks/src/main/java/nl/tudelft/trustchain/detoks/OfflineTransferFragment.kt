@@ -13,6 +13,7 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import com.google.common.primitives.UnsignedBytes.toInt
 import kotlinx.android.synthetic.main.fragment_offline_transfer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -74,11 +75,10 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         // create an array adapter and pass the required parameter
         // in our case pass the context, drop down layout, and array.
         arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friendUsernames)
-//        arrayAdapter.notifyDataSetChanged()
         // set adapter to the spinner
         spinnerFriends?.adapter = arrayAdapter
-        arrayAdapter?.notifyDataSetChanged();
-        spinnerFriends?.refreshDrawableState();
+        arrayAdapter?.notifyDataSetChanged()
+        spinnerFriends?.refreshDrawableState()
 
         // Inflate the layout for this fragment
         return view
@@ -89,8 +89,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
         val myPublicKey = getIpv8().myPeer.publicKey
         val myPrivateKey = getIpv8().myPeer.key as PrivateKey
-//        val amountText = view.findViewById<EditText>(R.id.amount)
-//        val amount = amountText.text
+        val amountText = view.findViewById<EditText>(R.id.amount)
+
 
         val buttonScan = view.findViewById<Button>(R.id.button_send)
         buttonScan.setOnClickListener {
@@ -105,25 +105,44 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
 
         val token = Token.create(1, myPublicKey.keyToBin())
+        val proof = myPrivateKey.sign(token.id + token.value + token.genesisHash + myPublicKey.keyToBin())
+        token.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
+
+        val result = wallet!!.addToken(token)
+        if (result != -1L) {
+            Toast.makeText(this.context, "Added token!", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this.context, "Duplicate token!", Toast.LENGTH_LONG)
+                .show()
+        }
 
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         val dbHelper = DbHelper(view.context)
         buttonRequest.setOnClickListener {
             //friend selected
-             val friendUsername = spinnerFriends?.selectedItem
+            val friendUsername = spinnerFriends?.selectedItem
+            val amount = amountText.text
 
             //get the friends public key from the db
             val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername.toString())
-
             try {
-                wallet!!.addToken(token)
-                val chosenToken = wallet!!.getTokens().get(0)
-                val proof = myPrivateKey.sign(chosenToken.id + chosenToken.value + chosenToken.genesisHash + myPublicKey.keyToBin())
-                chosenToken.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
-                showQR(view, chosenToken, myPublicKey)
-                Toast.makeText(this.context,"Successful", Toast.LENGTH_LONG).show()
-            } catch (e : NoSuchElementException){
-                Toast.makeText(this.context,"No money", Toast.LENGTH_LONG).show()
+                //if(amount.toString().toInt() >= 0) {
+                        if (wallet!!.balance > 0) {
+                            val chosenTokens = wallet!!.getPayment(amount.toString().toInt())
+                            if(chosenTokens == null){
+                                Toast.makeText(this.context, "Not Successful (not enough money or could get amount)", Toast.LENGTH_LONG).show()
+                            } else {
+                                showQR(view, chosenTokens, friendPublicKey)
+                                Toast.makeText(this.context, "Successful", Toast.LENGTH_LONG).show()
+                            }
+                        } else {
+                            Toast.makeText(this.context, "No money", Toast.LENGTH_LONG).show()
+                        }
+                //TODO: disappear text field, button, spinner
+                // write some message you are sending blaabla
+                // check amount more than 0
+            } catch (e : NumberFormatException){
+                Toast.makeText(this.context, "Please specify positive amount!", Toast.LENGTH_LONG).show()
             }
 
         }
@@ -169,24 +188,23 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
     }
 
-    private fun createNextOwner(token : Token, pubKeyRecipient: nl.tudelft.ipv8.keyvault.PublicKey) : Token {
+    private fun createNextOwner(tokens : ArrayList<Token>, pubKeyRecipient: ByteArray) : ArrayList<Token> {
         val senderPrivateKey = getIpv8().myPeer.key
 
         // create the new ownership of the token
-        token.signByPeer(pubKeyRecipient.keyToBin(), senderPrivateKey as PrivateKey)
-        return token
+        for(token in tokens) {
+            token.signByPeer(pubKeyRecipient, senderPrivateKey as PrivateKey)
+        }
+        return tokens
     }
 
 
-    private fun showQR(view: View, token: Token, friendPublicKey: nl.tudelft.ipv8.keyvault.PublicKey) {
+    private fun showQR(view: View, token: ArrayList<Token>, friendPublicKey: ByteArray) {
         val newToken = createNextOwner(token, friendPublicKey)
         // encode newToken
 
         val jsonObject = JSONObject()
         jsonObject.put("token", newToken)
-//        val amountText = view.findViewById<EditText>(R.id.amount)
-//        val amount = amountText.text
-//        jsonObject.put("amount_requested", amount)
         val jsonString = jsonObject.toString()
         hideKeyboard()
         lifecycleScope.launch {

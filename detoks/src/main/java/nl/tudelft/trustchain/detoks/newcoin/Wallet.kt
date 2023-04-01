@@ -65,10 +65,50 @@ class Wallet(
         return result!!
     }
 
-    public fun addToken(token : Token) {
-        tokens!!.add(token)
+    public fun addToken(token : Token) : Long {
+        val result = dbHelper!!.addToken(token)
+        if(result != -1L) {
+            tokens!!.add(token)
+        }
+        return result
     }
 
+    /**
+     * Returns true if the token was successfully removed
+     * false - if the token was not present
+     */
+    fun removeToken(token: Token): Boolean {
+        if(tokens!!.remove(token)) { // returns false if the element was not present in the collection
+            dbHelper?.removeToken(token)
+            return true
+        }
+        return false
+    }
+
+    // Return the number of tokens needed to pay the value
+    // For example: we need to pay 2 euros, but we have tokes of 0.50 cents, 1 euro token
+    // This means we need to return either two 1 euro tokens or 4x0.50 cents tokens
+//    TODO: This method will not manage to get the right tokens always
+    fun getPayment(value: Int): ArrayList<Token>? {
+        val tokensToPay = arrayListOf<Token>()
+        var tempValue = 0
+
+        for(t in tokens!!) {
+            if(tempValue + t.value <= value){
+                tempValue = tempValue + t.value
+                if(removeToken(t)) {
+                    tokensToPay.add(t)
+                }
+            }
+            if(tempValue == value) {
+                return tokensToPay
+            }
+        }
+        if(tempValue == value) {
+            return tokensToPay
+        }
+        return null
+    }
 
 //    fun sendFundsTo(recipient: PublicKey, amountToSend: Int) : Transaction {
 //
