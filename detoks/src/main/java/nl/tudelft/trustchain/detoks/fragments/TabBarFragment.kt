@@ -1,8 +1,8 @@
 package nl.tudelft.trustchain.detoks.fragments
 
 import android.Manifest
+import android.graphics.Color
 import android.os.Build
-import android.os.Build.VERSION_CODES.TIRAMISU
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,13 +18,17 @@ import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.adapters.TabBarAdapter
 
 class TabBarFragment : Fragment() {
+    private val UPLOAD_VIDEO_INDEX = 1
+
     private lateinit var viewPager: ViewPager2
 
-    @RequiresApi(TIRAMISU)
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)
+        tabLayout.getTabAt(UPLOAD_VIDEO_INDEX)?.icon?.setTint(Color.RED)
+
         viewPager = view.findViewById(R.id.viewPager)
         viewPager.isUserInputEnabled = false
         viewPager.adapter = TabBarAdapter(this, listOf(DeToksFragment(), Fragment(), ProfileFragment()))
@@ -47,7 +51,9 @@ class TabBarFragment : Fragment() {
 
         tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
-                if (tab.position == 1) {
+                tabLayout.getTabAt(UPLOAD_VIDEO_INDEX)?.icon?.setTint(Color.RED)
+
+                if (tab.position == UPLOAD_VIDEO_INDEX) {
                     val previousTabIndex = viewPager.currentItem
 
                     if (Build.VERSION.SDK_INT > 32) {
@@ -63,9 +69,13 @@ class TabBarFragment : Fragment() {
                 viewPager.currentItem = tab.position
             }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                tabLayout.getTabAt(UPLOAD_VIDEO_INDEX)?.icon?.setTint(Color.RED)
+            }
 
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                tabLayout.getTabAt(UPLOAD_VIDEO_INDEX)?.icon?.setTint(Color.RED)
+            }
         })
     }
 
