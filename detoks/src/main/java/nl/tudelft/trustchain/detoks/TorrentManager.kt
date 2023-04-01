@@ -9,9 +9,7 @@ import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import java.io.File
 
@@ -30,6 +28,8 @@ class TorrentManager private constructor (
     private val torrentFiles = mutableListOf<TorrentHandler>()
 
     private var unwatchedVideos = mutableListOf<TorrentHandler>()
+    var seedingTorrents = mutableListOf<TorrentHandler>()
+        private set
 
     val profile = Profile(HashMap())
     val strategies = Strategy()
@@ -269,43 +269,96 @@ class TorrentManager private constructor (
 
     fun updateLeachingStrategy(strategyId: Int) {
         if (strategies.leachingStrategy == strategyId) return
+
         strategies.leachingStrategy = strategyId
 
         currentIndex = 0
         unwatchedVideos = strategies.applyStrategy(strategyId, unwatchedVideos, profile.profiles)
     }
 
-    fun updateSeedingStrategy(strategyId: Int) {
-        if (strategies.seedingStrategy == strategyId) return
+    fun updateSeedingStrategy(
+        strategyId: Int = strategies.seedingStrategy,
+        storageLimit: Int = strategies.storageLimit,
+        isSeeding: Boolean = strategies.isSeeding
+    ) {
+        if (!isSeeding) return
+
         strategies.seedingStrategy = strategyId
+        strategies.storageLimit = storageLimit
 
-        //TODO: seeding strategy
-        Log.i("Detoks", strategyId.toString())
-        sessionManager.stats().uploadRate()
-        sessionManager.maxActiveSeeds()
-        sessionManager.downloadRate()
-        sessionManager.downloadRateLimit()
-        sessionManager.uploadRateLimit()
-        sessionManager.postTorrentUpdates()
-        torrentFiles.gett(0).handle.uploadLimit
-        torrentFiles.gett(0).handle.forceReannounce()
-        torrentFiles.gett(0).handle.status().isSeeding
-        torrentFiles.gett(0).handle.status().totalDownload()
-        torrentFiles.gett(0).handle.status().allTimeDownload()
+        val seedingTorrentsSorted = strategies.applyStrategy(strategyId, torrentFiles, profile.profiles)
+        val newSeedingTorrents = mutableListOf<TorrentHandler>()
+        var storage: Long = 0
 
+        val jobs = mutableListOf<Job>()
+
+        for (i in 0 until seedingTorrentsSorted.size) {
+            val size = seedingTorrentsSorted[i].handle.status().total() / 1000000 //TODO: store as byte to avoid all conversions
+
+            if (storage + size > strategies.storageLimit) continue
+
+            if (seedingTorrents.contains(seedingTorrentsSorted[i])) {
+                seedingTorrents.remove(seedingTorrentsSorted[i])
+                newSeedingTorrents.add(seedingTorrentsSorted[i])
+                storage += size
+                continue
+            }
+
+            jobs.add(CoroutineScope(Job() + Dispatchers.Default).launch {
+                if (downloadAndSeed(seedingTorrentsSorted[i])) {
+                    newSeedingTorrents.add(seedingTorrentsSorted[i])
+                    storage += size
+                }
+            })
+        }
+
+        CoroutineScope(Job() + Dispatchers.Default).launch {
+            jobs.forEach { it.join() }
+            seedingTorrents.forEach { stopSeedingTorrent(it) }
+            seedingTorrents.clear()
+            seedingTorrents.addAll(newSeedingTorrents)
+        }
     }
 
-    //TODO: temporary seeding function while waiting for pr
-    private fun downloadAndSeed(torrentInfo: TorrentInfo) {
-        if (torrentInfo.isValid) {
-            sessionManager.download(torrentInfo, torrentDir)
-            sessionManager.find(torrentInfo.infoHash())?.let { torrentHandle ->
-                torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
-                torrentHandle.pause()
-                torrentHandle.resume()
-                addTorrent(torrentHandle.infoHash(), torrentHandle.makeMagnetUri())
+    private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 100000) : Boolean {
+        if (!handler.handle.isValid) return false
+        handler.downloadFile()
+
+        try {
+            withTimeout(timeout) {
+                Log.d(DeToksCommunity.LOGGING_TAG, "Waiting to download ${handler.torrentName}")
+                while (!handler.isDownloaded()) {
+                    delay(100)
+                }
             }
+        } catch (e: TimeoutCancellationException) {
+            Log.d(DeToksCommunity.LOGGING_TAG, "Timeout for download ... ${handler.torrentName}")
+            return false
         }
+
+        handler.handle.setFlags(handler.handle.flags().and_(TorrentFlags.SEED_MODE))
+        handler.handle.pause()
+        handler.handle.resume()
+        return true
+    }
+
+    fun stopSeeding() {
+        Log.d(DeToksCommunity.LOGGING_TAG, "Stopping all seeding")
+        seedingTorrents.forEach {
+            stopSeedingTorrent(it)
+        }
+    }
+
+    private fun stopSeedingTorrent(handler: TorrentHandler) {
+        Log.d(DeToksCommunity.LOGGING_TAG, "Stopping seeding for torrent ${handler.torrentName}")
+        handler.handle.unsetFlags(TorrentFlags.SEED_MODE)
+        handler.handle.pause()
+        handler.deleteFile()
+    }
+
+    fun setUploadRateLimit(bandwidth: Int) {
+        Log.d(DeToksCommunity.LOGGING_TAG, "Updated the upload limit")
+        sessionManager.uploadRateLimit(bandwidth)
     }
 
     private fun getInfoFromMagnet(magnet: String): TorrentInfo? {
