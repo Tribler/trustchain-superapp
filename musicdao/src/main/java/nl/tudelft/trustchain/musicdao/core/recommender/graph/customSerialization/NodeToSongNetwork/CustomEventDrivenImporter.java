@@ -15,11 +15,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-2.1-or-later
  */
-package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToNodeNetwork;
+package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToSongNetwork;
 
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.Quadruple;
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.Triple;
-import org.jgrapht.nio.*;
+import org.jgrapht.alg.util.Pair;
+import org.jgrapht.nio.BaseEventDrivenImporter;
+import org.jgrapht.nio.EventDrivenImporter;
+import org.jgrapht.nio.ImportEvent;
+import org.jgrapht.nio.ImportException;
 import org.jgrapht.nio.dimacs.DIMACSFormat;
 
 import java.io.BufferedReader;
@@ -154,24 +158,42 @@ public class CustomEventDrivenImporter
                     nodeId = Integer.parseInt(cols[1]);
                 } catch (NumberFormatException e) {
                     throw new ImportException(
-                        "Failed to parse edge source node:" + e.getMessage(), e);
+                        "Failed to parse nodeId:" + e.getMessage(), e);
                 }
                 String node;
                 try {
                     node = cols[2];
                 } catch (NumberFormatException e) {
                     throw new ImportException(
-                        "Failed to parse edge target node:" + e.getMessage(), e);
+                        "Failed to parse node:" + e.getMessage(), e);
                 }
                 float pr;
                 try {
                     pr = Float.parseFloat(cols[3]);
                 } catch (NumberFormatException e) {
                     throw new ImportException(
-                        "Failed to parse pr:" + e.getMessage(), e);
+                            "Failed to parse pr:" + e.getMessage(), e);
                 }
-
                 notifyVertex(Triple.of(nodeId, node, pr));
+            } else if (cols[0].equals("s")) {
+                if (cols.length < 2) {
+                    throw new ImportException("Failed to parse song:" + Arrays.toString(cols));
+                }
+                int songId;
+                try {
+                    songId = Integer.parseInt(cols[1]);
+                } catch (NumberFormatException e) {
+                    throw new ImportException(
+                        "Failed to parse songId:" + e.getMessage(), e);
+                }
+                String song;
+                try {
+                    song = cols[2];
+                } catch (NumberFormatException e) {
+                    throw new ImportException(
+                        "Failed to parse song:" + e.getMessage(), e);
+                }
+                notifyVertex(Triple.of(songId, song, null));
             }
             cols = skipComments(in);
         }

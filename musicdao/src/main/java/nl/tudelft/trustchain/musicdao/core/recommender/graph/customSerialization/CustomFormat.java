@@ -15,7 +15,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-2.1-or-later
  */
-package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToNodeNetwork;
+package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization;
 
 /**
  * Custom DIMACS format.
@@ -29,17 +29,28 @@ package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerializatio
  */
 public enum CustomFormat
 {
-    NODETONODE("nodeToNode", "e", "n");
+    NODETONODE("nodeToNode", "e", "n"),
+    NODETOSONG("nodeToSong", "e", "n", "s");
 
     private final String problem;
     private final String edge;
     private final String vertex;
+    private final String vertex2;
 
     private CustomFormat(String problem, String edge, String vertex)
     {
         this.problem = problem;
         this.edge = edge;
         this.vertex = vertex;
+        this.vertex2 = null;
+    }
+
+    private CustomFormat(String problem, String edge, String vertex, String vertex2)
+    {
+        this.problem = problem;
+        this.edge = edge;
+        this.vertex = vertex;
+        this.vertex2 = vertex2;
     }
 
     /**
@@ -64,6 +75,11 @@ public enum CustomFormat
     public String getVertexDescriptor()
     {
         return vertex;
+    }
+
+    public String getVertex2Descriptor()
+    {
+        return vertex2;
     }
 
 }

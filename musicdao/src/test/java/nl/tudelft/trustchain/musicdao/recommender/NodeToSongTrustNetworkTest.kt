@@ -13,13 +13,11 @@ class NodeToSongTrustNetworkTest {
     private val someNode = Node("someNode")
     private val randomNodeWithRandomPageRank = Node("randomNode", 0.3)
     private val anotherNode = Node("anotherNode")
-    private val yetAnotherNode = Node("yetAnotherNode")
     private val someSongRecommendation = SongRecommendation("someTorrentHash")
     private val anotherSongRecommendation = SongRecommendation("anotherTorrentHash")
-    private val yetAnotherSongRecommendation = SongRecommendation("yetAnotherTorrentHash")
-    private val randomSongRecommendation = SongRecommendation("randomTorrentHash")
     private val dummyValue = 0.5
     private val anotherDummyValue = 0.3
+    private val yetAnotherDummyValue = 0.4
     private val someNodeSongEdge = NodeSongEdge(
         dummyValue,
         Timestamp.valueOf("2020-03-29 05:07:08")
@@ -29,6 +27,23 @@ class NodeToSongTrustNetworkTest {
         anotherDummyValue,
         Timestamp(0)
     )
+
+    private val yetAnotherNodeSongEdge = NodeSongEdge(
+        yetAnotherDummyValue,
+        Timestamp(1)
+    )
+    private val compactNodeToNodeGraph = """c
+c SOURCE: Generated using a Custom Graph Exporter
+c
+p nodeToSong 4 3
+n 1 someNode 0.0
+n 2 randomNode 0.3
+s 3 someTorrentHash
+s 4 anotherTorrentHash
+e 1 3 0.5 1585451228000
+e 2 3 0.3 0
+e 1 4 0.4 1
+"""
 
     @Test
     fun canConstructAnEmptyNodeToSongNetwork() {
@@ -83,5 +98,32 @@ class NodeToSongTrustNetworkTest {
         val edgeBetweenSongsAdded = network.addEdge(someSongRecommendation, anotherSongRecommendation, anotherNodeSongEdge)
         Assert.assertFalse(edgeBetweenSongsAdded)
     }
+
+    @Test
+    fun canSerializeAndDeserializeGraphWithCompactRepr() {
+        network = NodeToSongNetwork()
+        network.addNodeOrSong(someNode)
+        network.addNodeOrSong(randomNodeWithRandomPageRank)
+        network.addNodeOrSong(someSongRecommendation)
+        network.addNodeOrSong(anotherSongRecommendation)
+
+        network.addEdge(someNode, someSongRecommendation, someNodeSongEdge)
+        network.addEdge(randomNodeWithRandomPageRank, someSongRecommendation, anotherNodeSongEdge)
+        network.addEdge(someNode, anotherSongRecommendation, yetAnotherNodeSongEdge)
+
+        val serializedOutput = network.serializeCompact()
+        Assert.assertEquals(compactNodeToNodeGraph, serializedOutput)
+        val newNodeToSongNetwork = NodeToSongNetwork(serializedOutput)
+        Assert.assertEquals(
+            network.graph,
+            newNodeToSongNetwork.graph
+        )
+        Assert.assertEquals(
+            newNodeToSongNetwork.getAllNodes().filter { it.getNodeString() == randomNodeWithRandomPageRank.getNodeString() }.first().personalisedPageRank,
+            randomNodeWithRandomPageRank.personalisedPageRank,
+            0.001
+        )
+    }
+
 
 }

@@ -15,11 +15,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-2.1-or-later
  */
-package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToNodeNetwork;
+package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToSongNetwork;
 
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.CustomFormat;
-import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node;
+import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeOrSong;
+import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeSongEdge;
+import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge;
 import org.jgrapht.Graph;
 import org.jgrapht.nio.BaseExporter;
 import org.jgrapht.nio.GraphExporter;
@@ -43,14 +45,14 @@ import java.util.function.Function;
  */
 public class CustomExporter
     extends
-    BaseExporter<Node, NodeTrustEdge>
+    BaseExporter<NodeOrSong, NodeSongEdge>
     implements
-    GraphExporter<Node, NodeTrustEdge>
+    GraphExporter<NodeOrSong, NodeSongEdge>
 {
     /**
      * The default format used by the exporter.
      */
-    public static final CustomFormat CUSTOM_FORMAT = CustomFormat.NODETONODE;
+    public static final CustomFormat CUSTOM_FORMAT = CustomFormat.NODETOSONG;
 
     private static final String HEADER = "Generated using a Custom Graph Exporter";
 
@@ -70,7 +72,7 @@ public class CustomExporter
      *
      * @param vertexIdProvider for generating vertex IDs. Must not be null.
      */
-    public CustomExporter(Function<Node, String> vertexIdProvider)
+    public CustomExporter(Function<NodeOrSong, String> vertexIdProvider)
     {
         this(vertexIdProvider, CUSTOM_FORMAT);
     }
@@ -81,14 +83,14 @@ public class CustomExporter
      * @param vertexIdProvider for generating vertex IDs. Must not be null.
      * @param format the format to use
      */
-    public CustomExporter(Function<Node, String> vertexIdProvider, CustomFormat format)
+    public CustomExporter(Function<NodeOrSong, String> vertexIdProvider, CustomFormat format)
     {
         super(vertexIdProvider);
         this.format = Objects.requireNonNull(format, "Format cannot be null");
     }
 
     @Override
-    public void exportGraph(Graph<Node, NodeTrustEdge> g, Writer writer)
+    public void exportGraph(Graph<NodeOrSong, NodeSongEdge> g, Writer writer)
     {
         PrintWriter out = new PrintWriter(writer);
 
@@ -101,19 +103,25 @@ public class CustomExporter
 
 
 
-        for (Node vertex : g.vertexSet()) {
-            out.print(format.getVertexDescriptor());
+        for (NodeOrSong vertex : g.vertexSet()) {
+            if(vertex instanceof Node) {
+                out.print(format.getVertexDescriptor());
+            } else {
+                out.print(format.getVertex2Descriptor());
+            }
             out.print(" ");
             out.print(getVertexId(vertex));
             out.print(" ");
-            out.print(vertex.getNodeString());
-            out.print(" ");
-            out.print(vertex.getPersonalisedPageRank());
+            out.print(vertex.getIdentifier());
+            if(vertex instanceof Node) {
+                out.print(" ");
+                out.print(((Node) vertex).getPersonalisedPageRank());
+            }
             out.println();
         }
 
 
-        for (NodeTrustEdge edge : g.edgeSet()) {
+        for (NodeSongEdge edge : g.edgeSet()) {
             out.print(format.getEdgeDescriptor());
             out.print(" ");
             out.print(getVertexId(g.getEdgeSource(edge)));

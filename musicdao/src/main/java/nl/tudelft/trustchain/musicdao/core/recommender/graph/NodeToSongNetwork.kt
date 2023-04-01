@@ -1,14 +1,20 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.graph
 
 import mu.KotlinLogging
+import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToSongNetwork.CustomImporter
+import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToSongNetwork.CustomExporter
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
+import org.jgrapht.graph.SimpleDirectedWeightedGraph
+import java.io.StringReader
+import java.io.StringWriter
 
 class NodeToSongNetwork {
-    var graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>
+    lateinit var graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>
     private val logger = KotlinLogging.logger {}
     val initialized = false
     lateinit var sourceNode: Node
+    private val customExporter = CustomExporter()
 
     companion object {
     }
@@ -19,6 +25,15 @@ class NodeToSongNetwork {
     constructor() {
         graph = DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>(NodeSongEdge::class.java)
     }
+
+    constructor(serializedString: String) {
+        val network = DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>(NodeSongEdge::class.java)
+        val importer =
+            CustomImporter()
+        importer.importGraph(network, StringReader(serializedString))
+        this.graph = network
+    }
+
     fun addNodeOrSong(nodeOrSong: NodeOrSong): Boolean {
         return graph.addVertex(nodeOrSong).also {
             if (!it) logger.error { "Couldn't add ${nodeOrSong.identifier} to node to song network" }
@@ -26,17 +41,15 @@ class NodeToSongNetwork {
     }
 
     fun addEdge(source: NodeOrSong, target: NodeOrSong, nodeSongEdge: NodeSongEdge): Boolean {
-        if(source is Node && target is Node || source is SongRecommendation && target is SongRecommendation)
+        if (source is Node && target is Node || source is SongRecommendation && target is SongRecommendation)
             return false
-        if(!graph.containsVertex(source))
-        {
-            if(!addNodeOrSong(source)) {
+        if (!graph.containsVertex(source)) {
+            if (!addNodeOrSong(source)) {
                 return false
             }
         }
-        if(!graph.containsVertex(target))
-        {
-            if(!addNodeOrSong(target)) {
+        if (!graph.containsVertex(target)) {
+            if (!addNodeOrSong(target)) {
                 return false
             }
         }
@@ -45,7 +58,7 @@ class NodeToSongNetwork {
             graph.removeEdge(source, target)
         }
         return graph.addEdge(source, target, nodeSongEdge).also {
-            if(!it) {
+            if (!it) {
                 logger.error { "Couldn't add edge $nodeSongEdge to network" }
             } else {
                 graph.setEdgeWeight(nodeSongEdge, nodeSongEdge.affinity)
@@ -63,5 +76,11 @@ class NodeToSongNetwork {
 
     fun getAllEdges(): Set<NodeSongEdge> {
         return graph.edgeSet()
+    }
+
+    fun serializeCompact(): String {
+        val stringWriter = StringWriter()
+        customExporter.exportGraph(graph, stringWriter)
+        return stringWriter.toString()
     }
 }

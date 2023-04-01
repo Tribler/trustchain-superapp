@@ -39,7 +39,7 @@ class TrustNetwork {
         nodeToSongNetwork = DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>(NodeSongEdge::class.java)
     }
 
-    constructor(serializedGraphs: Pair<String, String>, representation: NetworkRepresentation) {
+    constructor(serializedGraphs: Pair<String, String>) {
         nodeToNodeNetwork = NodeToNodeNetwork()
         nodeToSongNetwork = DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>(NodeSongEdge::class.java)
     }

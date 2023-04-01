@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.musicdao.recommender
 
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
-import nl.tudelft.trustchain.musicdao.core.recommender.model.NetworkRepresentation
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge
 import org.junit.Assert
@@ -18,23 +17,18 @@ class NodeToNodeNetworkTest {
     private val randomNodeWithRandomPageRank = Node(randomNode, 0.3)
     private val anotherNodeWithoutData = Node(anotherNode)
     private val yetAnotherNodeWithoutData = Node(yetAnotherNode)
-    private val serializedGraphWithTwoNodesString = """{"creator":"JGraphT JSON Exporter","version":"1","nodes":[{"id":"1","ipv8":"randomNode","pr":0.3},{"id":"2","ipv8":"anotherNode","pr":0.0}],"edges":[]}"""
     private val compactNodeToNodeGraph = """c
 c SOURCE: Generated using a Custom Graph Exporter
 c
 p nodeToNode 3 4
-n 1 yetAnotherNode
-n 2 randomNode
-n 3 anotherNode
+n 1 yetAnotherNode 0.0
+n 2 randomNode 0.3
+n 3 anotherNode 0.0
 e 2 3 0.5 1585451228000
 e 1 3 0.3 0
 e 3 2 0.2 1
 e 2 1 0.2 2
 """
-    private val serializedNodeToNodeGraphWithSingleEdgeTwoNodes =
-        """{"creator":"JGraphT JSON Exporter","version":"1","nodes":[{"id":"1","ipv8":"randomNode","pr":0.3},{"id":"2","ipv8":"anotherNode","pr":0.0}],"edges":[{"source":"1","target":"2","trust":0.5,"timestamp":1585451228000}]}"""
-    private val serializedNodeToNodeGraphWithSingleNode =
-        """{"creator":"JGraphT JSON Exporter","version":"1","nodes":[{"id":"1","ipv8":"someNode","pr":0.0}],"edges":[]}"""
     private val dummyValue = 0.5
     private val anotherDummyValue = 0.3
     private val someNodeEdge = NodeTrustEdge(
@@ -100,17 +94,7 @@ e 2 1 0.2 2
     }
 
     @Test
-    fun canSerializeAndDeserializeGraphWithSingleNode() {
-        nodeToNodeNetwork = NodeToNodeNetwork()
-        nodeToNodeNetwork.addNode(someNodeWithoutData)
-        val serializedGraph = nodeToNodeNetwork.serialize()
-        val deserializedGraph = NodeToNodeNetwork(serializedGraph, NetworkRepresentation.JSON).graph
-        Assert.assertEquals(serializedNodeToNodeGraphWithSingleNode, serializedGraph)
-        Assert.assertEquals(nodeToNodeNetwork.graph, deserializedGraph)
-    }
-
-    @Test
-    fun canSerializeAndDeserializeCompactTrustGraph() {
+    fun canSerializeCompactTrustGraph() {
         nodeToNodeNetwork = NodeToNodeNetwork()
         nodeToNodeNetwork.addNode(yetAnotherNodeWithoutData)
         nodeToNodeNetwork.addNode(randomNodeWithRandomPageRank)
@@ -135,54 +119,10 @@ e 2 1 0.2 2
             yetAnotherNodeWithoutData,
             NodeTrustEdge(0.2, Timestamp(2))
         )
-        val serializedGraph = nodeToNodeNetwork.serializeCompact()
+        val serializedGraph = nodeToNodeNetwork.serialize()
         Assert.assertEquals(compactNodeToNodeGraph, serializedGraph)
     }
 
-    @Test
-    fun canSerializeAndDeserializeGraphWithTwoNodesAsJSON() {
-        nodeToNodeNetwork = NodeToNodeNetwork()
-        nodeToNodeNetwork.addNode(randomNodeWithRandomPageRank)
-        nodeToNodeNetwork.addNode(anotherNodeWithoutData)
-        val serializedGraph = nodeToNodeNetwork.serialize()
-        val deserializedGraph = NodeToNodeNetwork(serializedGraph, NetworkRepresentation.JSON).graph
-        Assert.assertEquals(serializedGraphWithTwoNodesString, serializedGraph)
-        Assert.assertEquals(nodeToNodeNetwork.graph, deserializedGraph)
-    }
-
-    @Test
-    fun canSerializeAndDeserializeGraphWithDataAndEdgesAsJSON() {
-        nodeToNodeNetwork = NodeToNodeNetwork()
-        nodeToNodeNetwork.addNode(randomNodeWithRandomPageRank)
-        nodeToNodeNetwork.addNode(anotherNodeWithoutData)
-        nodeToNodeNetwork.addEdge(
-            randomNodeWithRandomPageRank,
-            anotherNodeWithoutData,
-            someNodeEdge
-        )
-        val serializedGraph = nodeToNodeNetwork.serialize()
-        val deserializedGraph = NodeToNodeNetwork(serializedGraph, NetworkRepresentation.JSON).graph
-        Assert.assertEquals(serializedNodeToNodeGraphWithSingleEdgeTwoNodes, serializedGraph)
-        Assert.assertEquals(nodeToNodeNetwork.graph, deserializedGraph)
-    }
-
-    @Test
-    fun canCreateANetworkFromSerializedJSONString() {
-        nodeToNodeNetwork = NodeToNodeNetwork()
-        nodeToNodeNetwork.addNode(randomNodeWithRandomPageRank)
-        nodeToNodeNetwork.addNode(anotherNodeWithoutData)
-        val newNodeToNodeNetworkGraph = NodeToNodeNetwork(serializedGraphWithTwoNodesString, NetworkRepresentation.JSON).graph
-        Assert.assertEquals(
-            nodeToNodeNetwork.graph,
-            newNodeToNodeNetworkGraph
-        )
-        Assert.assertEquals(
-            randomNodeWithRandomPageRank.personalisedPageRank,
-            newNodeToNodeNetworkGraph.vertexSet().first().personalisedPageRank,
-            0.001
-        )
-
-    }
 
     @Test
     fun canCreateANetworkFromSerializedCompactString() {
@@ -210,10 +150,15 @@ e 2 1 0.2 2
             yetAnotherNodeWithoutData,
             NodeTrustEdge(0.2, Timestamp(2))
         )
-        val newNodeToNodeNetwork = NodeToNodeNetwork(compactNodeToNodeGraph, NetworkRepresentation.COMPACT).graph
+        val newNodeToNodeNetwork = NodeToNodeNetwork(compactNodeToNodeGraph)
         Assert.assertEquals(
             nodeToNodeNetwork.graph,
-            newNodeToNodeNetwork
+            newNodeToNodeNetwork.graph
+        )
+        Assert.assertEquals(
+            newNodeToNodeNetwork.getAllNodes().filter { it.getNodeString() == randomNode }.first().personalisedPageRank,
+            randomNodeWithRandomPageRank.personalisedPageRank,
+            0.001
         )
     }
 

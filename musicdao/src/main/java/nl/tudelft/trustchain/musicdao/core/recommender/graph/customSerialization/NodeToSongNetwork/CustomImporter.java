@@ -15,16 +15,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-2.1-or-later
  */
-package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToNodeNetwork;
+package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToSongNetwork;
 
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToNodeNetwork.CustomEventDrivenImporter;
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.Quadruple;
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.Triple;
-import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge;
-import nl.tudelft.trustchain.musicdao.core.recommender.model.Node;
+import nl.tudelft.trustchain.musicdao.core.recommender.model.*;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.util.Pair;
-import org.jgrapht.nio.*;
+import org.jgrapht.nio.BaseEventDrivenImporter;
+import org.jgrapht.nio.GraphImporter;
+import org.jgrapht.nio.ImportException;
 import org.jgrapht.nio.dimacs.DIMACSFormat;
 
 import java.io.Reader;
@@ -47,9 +47,9 @@ import java.util.function.Function;
  */
 public class CustomImporter
     extends
-    BaseEventDrivenImporter<Node, NodeTrustEdge>
+    BaseEventDrivenImporter<NodeOrSong, NodeSongEdge>
     implements
-    GraphImporter<Node, NodeTrustEdge>
+    GraphImporter<NodeOrSong, NodeSongEdge>
 {
     /**
      * Default key used for vertex ID.
@@ -122,7 +122,7 @@ public class CustomImporter
      * @throws ImportException in case an error occurs, such as I/O or parse error
      */
     @Override
-    public void importGraph(Graph<Node, NodeTrustEdge> graph, Reader input)
+    public void importGraph(Graph<NodeOrSong, NodeSongEdge> graph, Reader input)
         throws ImportException
     {
         CustomEventDrivenImporter genericImporter =
@@ -135,43 +135,51 @@ public class CustomImporter
 
     private class Consumers
     {
-        private Graph<Node, NodeTrustEdge> graph;
-        private Map<Integer, Node> map;
+        private Graph<NodeOrSong, NodeSongEdge> graph;
+        private Map<Integer, NodeOrSong> map;
 
-        public Consumers(Graph<Node, NodeTrustEdge> graph)
+        public Consumers(Graph<NodeOrSong, NodeSongEdge> graph)
         {
             this.graph = graph;
             this.map = new HashMap<>();
         }
 
         public final Consumer<Triple<Integer, String, Float>> nodeConsumer = d -> {
-            Node node = new Node(d.getSecond(), d.getThird());
-            graph.addVertex(node);
-            map.put(d.getFirst() - 1, node);
-            notifyVertex(node);
+            if(d.getThird() == null) {
+                SongRecommendation song = new SongRecommendation(d.getSecond());
+                graph.addVertex(song);
+                map.put(d.getFirst() - 1, song);
+                notifyVertex(song);
+            }
+            else {
+                Node node = new Node(d.getSecond(), d.getThird());
+                graph.addVertex(node);
+                map.put(d.getFirst() - 1, node);
+                notifyVertex(node);
+            }
         };
 
         public final Consumer<Quadruple<Integer, Integer, Double, Long>> edgeConsumer = t -> {
             int source = t.getFirst();
-            Node from = getElement(map, source - 1);
+            NodeOrSong from = getElement(map, source - 1);
             if (from == null) {
                 throw new ImportException("Node " + source + " does not exist");
             }
 
             int target = t.getSecond();
-            Node to = getElement(map, target - 1);
+            NodeOrSong to = getElement(map, target - 1);
             if (to == null) {
                 throw new ImportException("Node " + target + " does not exist");
             }
 
-            NodeTrustEdge e = new NodeTrustEdge(t.getThird(), new Timestamp(t.getFourth()));
+            NodeSongEdge e = new NodeSongEdge(t.getThird(), new Timestamp(t.getFourth()));
             graph.addEdge(from, to, e);
             notifyEdge(e);
         };
 
     }
 
-    private static Node getElement(Map<Integer, Node> map, int index)
+    private static NodeOrSong getElement(Map<Integer, NodeOrSong> map, int index)
     {
         return index < map.size() ? map.get(index) : null;
     }
