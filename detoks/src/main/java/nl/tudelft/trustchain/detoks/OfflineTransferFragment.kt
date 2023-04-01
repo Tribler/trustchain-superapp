@@ -64,7 +64,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val view = inflater.inflate(R.layout.fragment_offline_transfer, container, false)
         wallet = Wallet.getInstance(view.context, getIpv8().myPeer.publicKey, getIpv8().myPeer.key as PrivateKey)
 
-        val friends = wallet!!.listOfFriends
+        val friends = wallet!!.getListOfFriends()
         val friendUsernames = mutableListOf<String>()
         for (f in friends){
             friendUsernames.add(f.username)
@@ -78,14 +78,19 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         // set adapter to the spinner
         spinnerFriends?.adapter = arrayAdapter
         arrayAdapter?.notifyDataSetChanged();
-//        view.invalidateDrawab;
         spinnerFriends?.refreshDrawableState();
+
         // Inflate the layout for this fragment
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val myPublicKey = getIpv8().myPeer.publicKey
+        val myPrivateKey = getIpv8().myPeer.key as PrivateKey
+//        val amountText = view.findViewById<EditText>(R.id.amount)
+//        val amount = amountText.text
 
         val buttonScan = view.findViewById<Button>(R.id.button_send)
         buttonScan.setOnClickListener {
@@ -98,23 +103,38 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             navController.navigate(R.id.addFriendFragment)
         }
 
-        val myPublicKey = getIpv8().myPeer.publicKey
-        val buttonRequest = view.findViewById<Button>(R.id.button_request)
-//        val wallet = Wallet.create(myPublicKey, getIpv8().myPeer.key as PrivateKey)
+
         val token = Token.create(1, myPublicKey.keyToBin())
         wallet?.addToken(token)
+        wallet?.addToken(token)
+        Log.v("Number of tokens", wallet!!.balance.toString())
 
+
+        val buttonRequest = view.findViewById<Button>(R.id.button_request)
+        val dbHelper = DbHelper(view.context)
         buttonRequest.setOnClickListener {
             //friend selected
-//            val friendUsername = spinnerFriends.selectedItem
+             val friendUsername = spinnerFriends?.selectedItem
 
             //get the friends public key from the db
+            val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername.toString())
+            Log.v("Friends PK", friendPublicKey.toString())
+            Toast.makeText(this.context, friendPublicKey.toString(), Toast.LENGTH_LONG).show()
+
             try {
-                val chosenToken = wallet?.tokens?.removeLast()
-                showQR(view, chosenToken!!, myPublicKey)
+                wallet!!.addToken(token)
+                Log.v("Number of tokens 2", wallet!!.balance.toString())
+//                Log.v("List is empty? ", wallet!!.tokens.get(0))
+//                val chosenToken = wallet?.tokens?.removeLast()
+                val chosenToken = wallet!!.getTokens().get(0)
+                val proof = myPrivateKey.sign(chosenToken.id + chosenToken.value + chosenToken.genesisHash + myPublicKey.keyToBin())
+                chosenToken.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
+                showQR(view, chosenToken, myPublicKey)
+                Toast.makeText(this.context,"Successful", Toast.LENGTH_LONG).show()
             } catch (e : NoSuchElementException){
                 Toast.makeText(this.context,"No money", Toast.LENGTH_LONG).show()
             }
+
 
         }
 
