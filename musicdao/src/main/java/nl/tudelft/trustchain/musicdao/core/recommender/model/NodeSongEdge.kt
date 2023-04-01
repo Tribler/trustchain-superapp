@@ -6,18 +6,12 @@ import java.sql.Timestamp
 
 @Serializable
 class NodeSongEdge (
-    val weight: Float = 0.0f,
+    val affinity: Double = 0.0,
     val timestamp: Timestamp = Timestamp(System.currentTimeMillis())
 ): DefaultWeightedEdge() {
-    fun getTimestampString(): String {
-        return timestamp.toString()
-    }
     companion object {
         const val TRUST = "trust"
         const val VERSION = "version"
-    }
-    override fun getWeight(): Double {
-        return weight.toDouble()
     }
 
     override fun hashCode(): Int {
@@ -25,7 +19,7 @@ class NodeSongEdge (
     }
 
     override fun toString(): String {
-        return "($source : $target $weight $timestamp)"
+        return "($source : $target $affinity $timestamp)"
     }
 
     override fun equals(other: Any?): Boolean {

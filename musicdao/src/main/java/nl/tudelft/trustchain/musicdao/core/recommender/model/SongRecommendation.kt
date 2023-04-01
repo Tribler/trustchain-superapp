@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.musicdao.core.recommender.model
 import kotlinx.serialization.Serializable
 @Serializable
 data class
-Song(
+SongRecommendation(
     val torrentHash: String
 ):NodeOrSong(identifier = torrentHash) {
 
@@ -12,6 +12,6 @@ Song(
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is Song && toString() == other.toString()
+        return other is SongRecommendation && toString() == other.toString()
     }
 }

@@ -15,10 +15,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-2.1-or-later
  */
-package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization;
+package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToNodeNetwork;
 
 import android.os.Build;
 import androidx.annotation.RequiresApi;
+import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.Quadruple;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node;
 import org.jgrapht.alg.util.Pair;
 import org.jgrapht.alg.util.Triple;

@@ -15,7 +15,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-2.1-or-later
  */
-package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization;
+package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToNodeNetwork;
 
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node;
