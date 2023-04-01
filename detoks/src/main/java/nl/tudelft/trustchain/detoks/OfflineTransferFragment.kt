@@ -108,13 +108,13 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val proof = myPrivateKey.sign(token.id + token.value + token.genesisHash + myPublicKey.keyToBin())
         token.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
 
-        val result = wallet!!.addToken(token)
-        if (result != -1L) {
-            Toast.makeText(this.context, "Added token!", Toast.LENGTH_LONG).show()
-        } else {
-            Toast.makeText(this.context, "Duplicate token!", Toast.LENGTH_LONG)
-                .show()
-        }
+//        val result = wallet!!.addToken(token)
+//        if (result != -1L) {
+            Toast.makeText(this.context, "Balance " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
+//        } else {
+//            Toast.makeText(this.context, "Duplicate token!", Toast.LENGTH_LONG)
+//                .show()
+//        }
 
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         val dbHelper = DbHelper(view.context)
@@ -133,10 +133,11 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
                                 Toast.makeText(this.context, "Not Successful (not enough money or could get amount)", Toast.LENGTH_LONG).show()
                             } else {
                                 showQR(view, chosenTokens, friendPublicKey)
-                                Toast.makeText(this.context, "Successful", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
+
                             }
                         } else {
-                            Toast.makeText(this.context, "No money", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
                         }
                 //TODO: disappear text field, button, spinner
                 // write some message you are sending blaabla
@@ -177,15 +178,12 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
         if (content != null) {
             // deserialize the content
-//            val obtainedTokens = Token.deserialize(content.toByteArray())
-            //add tokens to wallet
+            val obtainedTokens = Token.deserialize(content.toByteArray())
+            for(t in obtainedTokens)
+                wallet!!.addToken(t)
         } else {
             Toast.makeText(this.context,"Scanning failed!",  Toast.LENGTH_LONG).show()
         }
-        // retrieve the collection of tokens
-        // deserialize it
-        // increase the amount in the wallet
-
     }
 
     private fun createNextOwner(tokens : ArrayList<Token>, pubKeyRecipient: ByteArray) : ArrayList<Token> {

@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.google.common.primitives.Ints
 import nl.tudelft.trustchain.detoks.Token
 import nl.tudelft.trustchain.detoks.Token.Companion.serialize
 import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
@@ -81,6 +82,32 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             arrayOf<String>(java.lang.String.valueOf(token.id)),
         )
         db.close()
+    }
+
+    //returns the id and the value of the token
+    fun getAllTokens(): ArrayList<Token>{
+        val tokenList = arrayListOf<Token>()
+        val selectQueryId = "SELECT $COLUMN_SER_TOKEN FROM $TABLE_TOKEN"
+
+        val db = this.readableDatabase
+        val cursorId = db.rawQuery(selectQueryId, null)
+
+        if (cursorId.moveToFirst()) {
+            val columnIdIndex = cursorId.getColumnIndex(COLUMN_SER_TOKEN)
+
+            if (columnIdIndex >= 0) {
+                do {
+                    val token = cursorId.getBlob(columnIdIndex)
+                    val tokens = Token.deserialize(token)
+                    if(tokens.size == 1)
+                        tokenList.add(tokens.elementAt(0))
+//                    else error ?
+                } while (cursorId.moveToNext())
+            }
+        }
+        cursorId.close()
+        db.close()
+        return tokenList
     }
 
     fun addFriend(name: String, address: ByteArray): Long {

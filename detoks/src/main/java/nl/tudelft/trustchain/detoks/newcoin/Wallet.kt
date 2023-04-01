@@ -20,7 +20,7 @@ class Wallet(
                            privateKey: nl.tudelft.ipv8.keyvault.PrivateKey ): Wallet {
 
             dbHelper = DbHelper(context)
-            tokens = mutableListOf<Token>()
+            tokens = dbHelper!!.getAllTokens()
             listOfFriends = dbHelper!!.getAllFriends()
             wallet = Wallet(publicKey, privateKey)
 
@@ -36,26 +36,23 @@ class Wallet(
         return tokens!!
     }
 
-    fun setTokens(inputTokens : MutableList<Token>) {
-        tokens = inputTokens
-    }
+//    fun setTokens(inputTokens : MutableList<Token>) {
+//        tokens = inputTokens
+//    }
 
     fun getListOfFriends(): MutableList<OfflineFriend> {
         return listOfFriends!!
     }
 
-    fun setListOfFriends(inputListOfFriends : MutableList<OfflineFriend>) {
-        listOfFriends = inputListOfFriends
-    }
+//    fun setListOfFriends(inputListOfFriends : MutableList<OfflineFriend>) {
+//        listOfFriends = inputListOfFriends
+//    }
 
 
     val balance: Int get() {
         return tokens!!.size
     }
 
-//    private fun getMyTransactions() : Collection<TransactionOutput> {
-//        return blockChain.UTXO.filterValues { it.isMine(publicKey) }.values
-//    }
 
     public fun addFriend(friend: OfflineFriend): Long{
         val result = dbHelper?.addFriend(friend.username, friend.publicKey)
@@ -89,6 +86,7 @@ class Wallet(
     // For example: we need to pay 2 euros, but we have tokes of 0.50 cents, 1 euro token
     // This means we need to return either two 1 euro tokens or 4x0.50 cents tokens
 //    TODO: This method will not manage to get the right tokens always
+    @Synchronized
     fun getPayment(value: Int): ArrayList<Token>? {
         val tokensToPay = arrayListOf<Token>()
         var tempValue = 0
@@ -96,15 +94,20 @@ class Wallet(
         for(t in tokens!!) {
             if(tempValue + t.value <= value){
                 tempValue = tempValue + t.value
-                if(removeToken(t)) {
-                    tokensToPay.add(t)
-                }
+
+                tokensToPay.add(t)
+
             }
             if(tempValue == value) {
+                for (token in tokensToPay)
+                    removeToken(token)
                 return tokensToPay
             }
         }
+
         if(tempValue == value) {
+            for (token in tokensToPay)
+                removeToken(token)
             return tokensToPay
         }
         return null
