@@ -6,34 +6,51 @@ import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.PublicKey
 
-data class Wallet(
+class Wallet(
     val publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
     val privateKey: nl.tudelft.ipv8.keyvault.PrivateKey,
-    val tokens: MutableList<Token>,
-    val listOfFriends: MutableList<OfflineFriend>
 ) {
 
-    companion object {
+    companion object{
         private var wallet :Wallet? = null
-        private var dbHelper: DbHelper? = null;
+        private var dbHelper: DbHelper? = null
+        private var tokens : MutableList<Token>? = null
+        private var listOfFriends : MutableList<OfflineFriend>? = null
         private fun create(context: Context, publicKey : nl.tudelft.ipv8.keyvault.PublicKey,
                            privateKey: nl.tudelft.ipv8.keyvault.PrivateKey ): Wallet {
 
             dbHelper = DbHelper(context)
-//            val tokens = dbHelper.getAllTokens()
-            var listOfFriends = dbHelper?.getAllFriends()
-            wallet = Wallet(publicKey, privateKey, mutableListOf<Token>(), listOfFriends!!)
+            tokens = mutableListOf<Token>()
+            listOfFriends = dbHelper!!.getAllFriends()
+            wallet = Wallet(publicKey, privateKey)
 
-            return wallet as Wallet
+            return wallet!!
         }
         fun getInstance(context: Context, publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
                         privateKey: nl.tudelft.ipv8.keyvault.PrivateKey): Wallet {
-            return this.wallet ?: create(context, publicKey, privateKey)
+            return wallet ?: create(context, publicKey, privateKey)
         }
     }
 
+    fun getTokens(): MutableList<Token> {
+        return tokens!!
+    }
+
+    fun setTokens(inputTokens : MutableList<Token>) {
+        tokens = inputTokens
+    }
+
+    fun getListOfFriends(): MutableList<OfflineFriend> {
+        return listOfFriends!!
+    }
+
+    fun setListOfFriends(inputListOfFriends : MutableList<OfflineFriend>) {
+        listOfFriends = inputListOfFriends
+    }
+
+
     val balance: Int get() {
-        return tokens.size
+        return tokens!!.size
     }
 
 //    private fun getMyTransactions() : Collection<TransactionOutput> {
@@ -41,15 +58,15 @@ data class Wallet(
 //    }
 
     public fun addFriend(friend: OfflineFriend): Long{
-        val result = dbHelper!!.addFriend(friend.username, friend.publicKey)
+        val result = dbHelper?.addFriend(friend.username, friend.publicKey)
         if(result != -1L) {
-            listOfFriends.add(friend)
+            listOfFriends!!.add(friend)
         }
-        return result
+        return result!!
     }
 
     public fun addToken(token : Token) {
-        tokens.add(token)
+        tokens!!.add(token)
     }
 
 
