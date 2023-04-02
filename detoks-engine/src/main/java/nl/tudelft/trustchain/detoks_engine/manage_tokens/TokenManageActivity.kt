@@ -12,14 +12,14 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks_engine.R
 import nl.tudelft.trustchain.detoks_engine.db.TokenStore
-import nl.tudelft.trustchain.detoks_engine.trustchain.CommunityAdapter
+import nl.tudelft.trustchain.detoks_engine.trustchain.GroupedAdapter
 import nl.tudelft.trustchain.detoks_engine.trustchain.TrustChainTransactionCommunity
 import java.util.UUID
 
 class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
     private lateinit var tokenStore: TokenStore
     private lateinit var trustChainCommunity: TrustChainTransactionCommunity
-    private lateinit var communityAdapter: CommunityAdapter
+    private lateinit var communityAdapter: GroupedAdapter
 
     private lateinit var tokenData: ArrayList<String>
     private lateinit var peerData: ArrayList<Peer>
@@ -48,7 +48,7 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
 
         tokenStore = TokenStore.getInstance(this)
         trustChainCommunity = IPv8Android.getInstance().getOverlay<TrustChainTransactionCommunity>()!!
-        communityAdapter = CommunityAdapter(trustChainCommunity)
+        communityAdapter = GroupedAdapter(trustChainCommunity)
 
         tokenData = ArrayList(tokenStore.getAllToken())
         peerData = ArrayList(communityAdapter.getPeers())
@@ -61,8 +61,10 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
         peerListView.adapter = peerAdapter
 
 
-        communityAdapter.setReceiveAckHandler {
-            transactionId ->
+        communityAdapter.onTransactionAgreementReceived { transaction, isForMe ->
+            if (!isForMe)
+                return@onTransactionAgreementReceived
+            val transactionId = Transaction.fromTrustChainTransactionObject(transaction).transactionId
             val succeededTransaction = transactionsInTransit[transactionId]
             transactionsInTransit.remove(transactionId)
             succeededTransaction?.tokens?.forEach { t ->
@@ -71,9 +73,10 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
             }
         }
 
-        communityAdapter.setReceiveTransactionHandler {
-            transaction ->
-            transaction.tokens.forEach{ t ->
+        communityAdapter.onTransactionProposalReceived { transaction, isForMe ->
+            if (!isForMe)
+                return@onTransactionProposalReceived
+            Transaction.fromTrustChainTransactionObject(transaction).tokens.forEach { t ->
                 tokenStore.storeToken(t)
                 tokenData.add(t)
                 runOnUiThread{ tokenAdapter.notifyItemInserted(tokenData.size - 1) }
@@ -156,7 +159,7 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
         tokenAdapter.notifyItemChanged(tokenIndex)
         val transaction = Transaction(listOf(token))
         transactionsInTransit[transaction.transactionId] = transaction
-        communityAdapter.proposeTransaction(transaction, peerData[selectedPeerIndex])
+        communityAdapter.proposeTransaction(transaction.toTrustChainTransaction(), peerData[selectedPeerIndex])
         selectedTokenIndex = RecyclerView.NO_POSITION
     }
 
