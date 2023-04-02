@@ -9,7 +9,6 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.messaging.serializeVarLen
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
-import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
 import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.helpers.DateFormatter
 import nl.tudelft.trustchain.detoks.exception.InvalidMintException

@@ -5,7 +5,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
-import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
+import nl.tudelft.trustchain.detoks.util.CommunityConstants
 
 class SeedRewardBlock {
     /**
@@ -23,7 +23,7 @@ class SeedRewardBlock {
             "videoUpvotedBy" to upvotingPeer.publicKey.keyToBin().toHex(),
         )
         return upvoteCommunity?.createProposalBlock(
-            UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN,
+            CommunityConstants.GIVE_UPVOTE_TOKEN,
             transaction,
             seedingPeer.publicKey.keyToBin()
         );

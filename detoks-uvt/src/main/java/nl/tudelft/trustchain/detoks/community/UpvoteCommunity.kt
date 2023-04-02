@@ -15,14 +15,10 @@ import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
+import nl.tudelft.trustchain.detoks.util.CommunityConstants
 
 private val logger = KotlinLogging.logger {}
 
-object UpvoteTrustchainConstants {
-    const val GIVE_UPVOTE_TOKEN = "give_upvote_token_block"
-    const val GIVE_SEEDER_REWARD = "give_seeder_reward"
-    const val BALANCE_CHECKPOINT = "balance_checkpoint"
-}
 class UpvoteCommunity(
     val context: Context,
     settings: TrustChainSettings,
@@ -36,17 +32,10 @@ class UpvoteCommunity(
     var torrentManager: TorrentManager? = null
 
     init {
-        messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
-        messageHandlers[MessageID.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
-        messageHandlers[MessageID.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
+        messageHandlers[CommunityConstants.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
+        messageHandlers[CommunityConstants.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
+        messageHandlers[CommunityConstants.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
     }
-
-    object MessageID {
-        const val UPVOTE_TOKEN = 1
-        const val MAGNET_URI_AND_HASH = 2
-        const val UPVOTE_VIDEO = 3
-    }
-
 
     private fun onUpvoteTokenPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
@@ -116,6 +105,7 @@ class UpvoteCommunity(
 
         Toast.makeText(context, "Hurray! Received valid token!", Toast.LENGTH_SHORT).show()
 
+
     }
     /**
      * Selects a random Peer from the list of known Peers
@@ -137,7 +127,7 @@ class UpvoteCommunity(
         )
 
         val packet = serializePacket(
-            MessageID.MAGNET_URI_AND_HASH,
+            CommunityConstants.MAGNET_URI_AND_HASH,
             payload
         )
 
@@ -176,7 +166,7 @@ class UpvoteCommunity(
     fun sendUpvoteToken(upvoteTokens: List<UpvoteToken>): Boolean {
         val payload = UpvoteVideoPayload(upvoteTokens)
         val packet = serializePacket(
-            MessageID.UPVOTE_VIDEO,
+            CommunityConstants.UPVOTE_VIDEO,
             payload
         )
 
