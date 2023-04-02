@@ -50,17 +50,14 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
         lifecycleScope.launchWhenResumed {
             while (isActive) {
                 if (userWallet != null && adminWallet != null) {
-//                    println("BP1")
 
                     if (access == "admin") {
                         val items = adminWallet!!.tokens.map { token: Token -> TokenItem(token) }
                         adapter.updateItems(items)
                     } else if (access == "user") {
-                        val items = userWallet!!.tokens.map { token: Token -> TokenItem(token) }
+                        val items = userWallet!!.getTokens().map { token: Token -> TokenItem(token) }
                         adapter.updateItems(items)
                     }
-
-//                    println(userWallet!!.tokens.size)
 
                     adapter.notifyDataSetChanged()
                 }

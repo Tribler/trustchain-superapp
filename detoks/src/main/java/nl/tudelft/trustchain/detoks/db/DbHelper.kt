@@ -4,6 +4,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.google.common.primitives.Ints
 import nl.tudelft.trustchain.detoks.Token
 import nl.tudelft.trustchain.detoks.Token.Companion.serialize
@@ -17,7 +19,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
         const val TABLE_NAME = "friends"
         const val COLUMN_NAME = "name"
-        const val COLUMN_ADDRESS = "address"        const val TABLE_ADMIN_TOKEN = "admin_tokens"
+        const val COLUMN_ADDRESS = "address"
 
         const val TABLE_ADMIN_TOKEN = "admin_tokens"
 
@@ -87,6 +89,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     }
 
     //returns the id and the value of the token
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getAllTokens(): ArrayList<Token>{
         val tokenList = arrayListOf<Token>()
         val selectQueryId = "SELECT $COLUMN_SER_TOKEN FROM $TABLE_TOKEN"

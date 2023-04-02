@@ -17,6 +17,7 @@ class TokenAdminItemRenderer(
 ){
 
     override fun bindView(item: TokenItem, view: View) = with(view) {
+        println("tokenview")
         valueToken.text = item.token.value.toString()
         latestTimestamp.text = item.token.timestamp.toString()
         currentOwner.text = item.token.firstRecipient.toString()

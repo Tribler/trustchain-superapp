@@ -16,7 +16,7 @@ data class AdminWallet(val tokens: ArrayList<Token>) {
 //            val keyPair = generator.generateKeyPair()
 
             val dbHelper = DbHelper(context)
-            val tokens = dbHelper.getAllAdminTokens()
+            val tokens = dbHelper.getAllTokens()
 
             return AdminWallet(tokens)
         }

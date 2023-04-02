@@ -18,6 +18,7 @@ class Wallet(
         private var dbHelper: DbHelper? = null
         private var tokens : MutableList<Token>? = null
         private var listOfFriends : MutableList<OfflineFriend>? = null
+        @RequiresApi(Build.VERSION_CODES.O)
         private fun create(context: Context, publicKey : nl.tudelft.ipv8.keyvault.PublicKey,
                            privateKey: nl.tudelft.ipv8.keyvault.PrivateKey ): Wallet {
 
@@ -28,6 +29,7 @@ class Wallet(
 
             return wallet!!
         }
+        @RequiresApi(Build.VERSION_CODES.O)
         fun getInstance(context: Context, publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
                         privateKey: nl.tudelft.ipv8.keyvault.PrivateKey): Wallet {
             return wallet ?: create(context, publicKey, privateKey)
