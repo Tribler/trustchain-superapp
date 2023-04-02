@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.offlinemoney.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -11,7 +9,6 @@ import com.travijuu.numberpicker.library.Enums.ActionEnum
 import com.travijuu.numberpicker.library.Interface.ValueChangedListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.databinding.SendAmountFragmentBinding
@@ -21,12 +18,20 @@ import org.json.JSONObject
 class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragment) {
     private val binding by viewBinding(SendAmountFragmentBinding::bind)
 
-    private fun updateTextViewAmount() {
+    private fun updateSendAmount() {
         var sum = 0;
 
         sum += binding.numberPicker1.value * 1 + binding.numberPicker2.value * 2 + binding.numberPicker5.value * 5;
 
         binding.txtAmount.text = sum.toString()
+    }
+
+    private fun updateBalance() {
+        var sum = 0;
+
+        sum += binding.numberPicker1.max * 1 + binding.numberPicker2.max * 2 + binding.numberPicker5.max * 5;
+
+        binding.txtBalance.text = sum.toString();
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -36,17 +41,16 @@ class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragmen
             binding.numberPicker1.max = db.tokensDao().getCountTokensOfValue(1.0)
             binding.numberPicker2.max = db.tokensDao().getCountTokensOfValue(2.0)
             binding.numberPicker5.max = db.tokensDao().getCountTokensOfValue(5.0)
+            updateBalance()
         }
 
         binding.numberPicker1.value = 0
         binding.numberPicker2.value = 0
         binding.numberPicker5.value = 0
 
-        binding.txtBalance.text = 42.toString()
-
         class ValueListener : ValueChangedListener {
             override fun valueChanged(value: Int, action: ActionEnum) {
-                updateTextViewAmount()
+                updateSendAmount()
             }
         }
 
@@ -63,9 +67,9 @@ class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragmen
 
                 if (amount > 0) {
                     val connectionData = JSONObject()
-                    connectionData.put("5euro", binding.numberPicker5.value)
-                    connectionData.put("2euro", binding.numberPicker2.value)
-                    connectionData.put("1euro", binding.numberPicker1.value)
+                    connectionData.put(ARG_5EURO_COUNT, binding.numberPicker5.value)
+                    connectionData.put(ARG_2EURO_COUNT, binding.numberPicker2.value)
+                    connectionData.put(ARG_1EURO_COUNT, binding.numberPicker1.value)
 
                     val args = Bundle()
 
@@ -83,5 +87,8 @@ class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragmen
 
     companion object {
         const val ARG_RECEIVER = "public_key"
+        const val ARG_5EURO_COUNT = "5euro"
+        const val ARG_2EURO_COUNT = "2euro"
+        const val ARG_1EURO_COUNT = "1euro"
     }
 }
