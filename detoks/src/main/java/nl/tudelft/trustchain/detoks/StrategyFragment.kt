@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -58,6 +59,9 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
             leachingStrategySpinner.setSelection(torrentManager.strategies.leachingStrategy)
         }
         setSpinnerActions(leachingStrategySpinner) {
+            if (it != torrentManager.strategies.leachingStrategy) {
+                return@setSpinnerActions
+            }
             torrentManager.updateLeachingStrategy(it)
         }
 
@@ -71,6 +75,9 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
             seedingStrategySpinner.setSelection(torrentManager.strategies.seedingStrategy)
         }
         setSpinnerActions(seedingStrategySpinner) {
+            if (it != torrentManager.strategies.seedingStrategy) {
+                return@setSpinnerActions
+            }
             torrentManager.updateSeedingStrategy(strategyId = it)
             strategyRecyclerViewAdapter.updateView()
         }
@@ -165,8 +172,9 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
             .allTimeUpload() / 1000).toString()
 
         //TODO: replace by actual token balance
-        holder.balanceTextView.text = ((strategyData[position].handle.status().totalPayloadUpload()
-            - strategyData[position].handle.status().totalPayloadDownload()) / 100000).toString()
+        holder.balanceTextView.text = strategyData[position].handle.status().state().toString()
+//        holder.balanceTextView.text = ((strategyData[position].handle.status().allTimeUpload()
+//            - strategyData[position].handle.status().allTimeDownload()) / 100000).toString()
     }
 
     override fun getItemCount(): Int = strategyData.size
