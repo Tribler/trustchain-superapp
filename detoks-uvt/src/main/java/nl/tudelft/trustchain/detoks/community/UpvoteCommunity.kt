@@ -9,12 +9,14 @@ import nl.tudelft.ipv8.messaging.Packet
 import mu.KotlinLogging
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
 import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
+import nl.tudelft.trustchain.detoks.trustchain.blocks.SeedRewardBlock
 import nl.tudelft.trustchain.detoks.util.CommunityConstants
 
 private val logger = KotlinLogging.logger {}
@@ -89,6 +91,7 @@ class UpvoteCommunity(
         OwnedTokenManager(context).createOwnedUpvoteTokensTable()
         val upvoteTokens = payload.upvoteTokens
         val receivedTokenIDs: ArrayList<Int> = ArrayList()
+        var seedingPeerPublicKey: String = ""
 
         for (upvoteToken: UpvoteToken in upvoteTokens) {
             logger.debug { "[UPVOTETOKEN] -> received upvote token with id: ${upvoteToken.tokenID} from peer with member id: ${peer.mid}" }
@@ -96,6 +99,8 @@ class UpvoteCommunity(
             if (UpvoteTokenValidator.validateToken(upvoteToken)) {
                 OwnedTokenManager(context).addReceivedToken(upvoteToken)
                 receivedTokenIDs.add(upvoteToken.tokenID)
+
+                seedingPeerPublicKey = upvoteToken.publicKeySeeder
             }
 
         }
@@ -105,7 +110,9 @@ class UpvoteCommunity(
 
         Toast.makeText(context, "Hurray! Received valid token!", Toast.LENGTH_SHORT).show()
 
-
+        if (seedingPeerPublicKey != "") {
+            SeedRewardBlock().createRewardBlock(seedingPeerPublicKey, peer)
+        }
     }
     /**
      * Selects a random Peer from the list of known Peers

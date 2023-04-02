@@ -7,7 +7,7 @@ object CommunityConstants {
     val GIVE_SEEDER_REWARD = "give_seeder_reward"
     val BALANCE_CHECKPOINT = "balance_checkpoint"
     val UPVOTE_MINTING_TOKEN = 1
-    val DAILY_MINT_LIMIT = 10
+    val DAILY_MINT_LIMIT = 100
     val TOKENS_SENT_PER_UPVOTE = 3
 
     //MessageID constants
