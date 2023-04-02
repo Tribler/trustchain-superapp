@@ -56,7 +56,7 @@ class ProposalToken {
                 "The hash of this block is ${hash.toHex()}, corresponding hashCode is: ${hash.hashCode()} \n" +
                 "the block Id of this proposal block is: ${proposalBlock.blockId} \n" +
                 "the linked block id is: ${proposalBlock.linkedBlockId}\n"
-//            torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
+            // torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
             val torrentInfo = torrentManager.getSeedableTorrents().get(0)
             val magnetURI = torrentManager.seedTorrent(torrentInfo)
 

@@ -18,6 +18,7 @@ private val logger = KotlinLogging.logger {}
 
 object UpvoteTrustchainConstants {
     const val GIVE_UPVOTE_TOKEN = "give_upvote_token_block"
+    const val GIVE_SEEDER_REWARD = "give_seeder_reward"
     const val BALANCE_CHECKPOINT = "balance_checkpoint"
 }
 class UpvoteCommunity(
@@ -138,13 +139,8 @@ class UpvoteCommunity(
      * //TODO: only make an agreement block if the user did not like the video yet, if the user already like the video,
      * Sends a UpvoteToken to a random Peer
      */
-    fun sendUpvoteToken(upvoteToken: UpvoteToken): Boolean {
-        val payload = UpvoteTokenPayload(
-            upvoteToken.tokenID.toString(),
-            upvoteToken.date,
-            upvoteToken.publicKeyMinter,
-            upvoteToken.videoID)
-
+    fun sendUpvoteToken(upvoteTokens: List<UpvoteToken>): Boolean {
+        val payload = UpvoteVideoPayload(upvoteTokens)
         val packet = serializePacket(
             MessageID.UPVOTE_TOKEN,
             payload

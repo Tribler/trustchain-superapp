@@ -75,7 +75,7 @@ class VideosAdapter(
             tokensReceived = itemView.findViewById(R.id.tokensReceivedValue)
             tokensBalance = itemView.findViewById(R.id.tokensBalanceValue)
 
-            upvoteToken.setLikeListener(itemView, videoID, proposalBlockHash)
+            upvoteToken.setLikeListener(itemView, videoID.text.toString(), proposalBlockHash)
             proposalToken.setPostVideoListener(proposalSendButton, itemView, torrentManager)
             balance.checkTokenBalance(tokensSent, tokensReceived, tokensBalance)
             balance.dailyBalanceCheckpoint(tokensSent, tokensReceived, tokensBalance)
