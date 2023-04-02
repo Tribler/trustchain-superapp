@@ -27,19 +27,27 @@ class UpvoteVideoPayload constructor(val upvoteTokens: List<UpvoteToken>) : Seri
 
             while (localOffset < buffer.size) {
 
-                val (token_id, token_idSize) = deserializeVarLen(buffer, localOffset)
-                localOffset += token_idSize
+                val (idBytes, idSize) = deserializeVarLen(buffer, localOffset)
+                val id = idBytes.toString(Charsets.UTF_8).toInt()
+                localOffset += idSize
 
-                val (date, dateSize) = deserializeVarLen(buffer, localOffset)
+                val (dateBytes, dateSize) = deserializeVarLen(buffer, localOffset)
+                val date = dateBytes.toString(Charsets.UTF_8)
                 localOffset += dateSize
 
-                val (public_key, public_keySize) = deserializeVarLen(buffer, localOffset)
-                localOffset += public_keySize
+                val (keyMinterBytes, publicKeySize) = deserializeVarLen(buffer, localOffset)
+                val keyMinter = keyMinterBytes.toString(Charsets.UTF_8)
+                localOffset += publicKeySize
 
-                val (video_id, video_idSize) = deserializeVarLen(buffer, localOffset)
-                localOffset += video_idSize
+                val (videoIdBytes, videoIdSize) = deserializeVarLen(buffer, localOffset)
+                val videoId = videoIdBytes.toString(Charsets.UTF_8)
+                localOffset += videoIdSize
 
-                val upvoteToken = UpvoteToken(token_id.toString(Charsets.UTF_8).toInt(), date.toString(Charsets.UTF_8), public_key.toString(Charsets.UTF_8), video_id.toString(Charsets.UTF_8))
+                val (keySeederBytes, seederSize) = deserializeVarLen(buffer, localOffset)
+                val keySeeder = keySeederBytes.toString(Charsets.UTF_8)
+                localOffset += seederSize
+
+                val upvoteToken = UpvoteToken(id, date, keyMinter, videoId, keySeeder)
                 upvoteTokenList.add(upvoteToken)
             }
 

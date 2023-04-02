@@ -9,7 +9,7 @@ class UpvoteVideoPayloadTest {
     fun serialize_deserialize_single_test() {
         // Create the initial list of UpvoteTokens
         val inputList: List<UpvoteToken> = listOf(
-            UpvoteToken(1, "2023-04-01", "SomePublicKey", "SomeVideoID"),
+            UpvoteToken(1, "2023-04-01", "SomePublicKey", "SomeVideoID", "SeederID"),
         )
 
         // Serialize and deserialize the list
@@ -27,11 +27,11 @@ class UpvoteVideoPayloadTest {
     fun serialize_deserialize_multiple_test() {
         // Create the initial list of UpvoteTokens
         val inputList: List<UpvoteToken> = listOf(
-            UpvoteToken(1, "2023-04-01", "SomePublicKey", "SomeVideoID"),
-            UpvoteToken(2, "2023-04-02", "SomePublicKey2", "SomeVideoTestID"),
-            UpvoteToken(3, "2023-04-03", "SomePrivate?Key", "SomeDifferentVideoID"),
-            UpvoteToken(4, "2023-05-01", "TestingThisKey", "SomeVideoID4"),
-            UpvoteToken(5, "2022-04-01", "SomeOtherPublicKey", "SomeVideoOtherID"),
+            UpvoteToken(1, "2023-04-01", "SomePublicKey", "SomeVideoID", "SeederID"),
+            UpvoteToken(2, "2023-04-02", "SomePublicKey2", "SomeVideoTestID", "SeederIdentifier"),
+            UpvoteToken(3, "2023-04-03", "SomePrivate?Key", "SomeDifferentVideoID", "SomePrivate?Key"),
+            UpvoteToken(4, "2023-05-01", "TestingThisKey", "SomeVideoID4","SomePublicKey2"),
+            UpvoteToken(5, "2022-04-01", "SomeOtherPublicKey", "SomeVideoOtherID", "SeederId"),
         )
 
         // Serialize and deserialize the list
@@ -47,9 +47,9 @@ class UpvoteVideoPayloadTest {
     fun serialize_deserialize_differentLength_test() {
         // Create the initial list of UpvoteTokens
         val inputList: List<UpvoteToken> = listOf(
-            UpvoteToken(1, "2023-04-01", "SomePublicKey", "SomeVideoID"),
-            UpvoteToken(2, "2023-04-02", "SomePublicKey2", "SomeVideoTestID"),
-            UpvoteToken(3, "2023-04-03", "SomePrivate?Key", "SomeDifferentVideoID"),
+            UpvoteToken(1, "2023-04-01", "SomePublicKey", "SomeVideoID", "SeederID"),
+            UpvoteToken(2, "2023-04-02", "SomePublicKey2", "SomeVideoTestID", "SeederIdentifier"),
+            UpvoteToken(3, "2023-04-03", "SomePrivate?Key", "SomeDifferentVideoID", "SomePrivate?Key"),
         )
 
         // Serialize and deserialize the list

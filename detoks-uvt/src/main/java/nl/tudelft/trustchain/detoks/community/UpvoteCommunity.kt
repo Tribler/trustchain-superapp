@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.detoks.community
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
@@ -10,6 +11,7 @@ import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
+import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
@@ -36,11 +38,13 @@ class UpvoteCommunity(
     init {
         messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
         messageHandlers[MessageID.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
+        messageHandlers[MessageID.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
     }
 
     object MessageID {
         const val UPVOTE_TOKEN = 1
         const val MAGNET_URI_AND_HASH = 2
+        const val UPVOTE_VIDEO = 3
     }
 
 
@@ -48,6 +52,12 @@ class UpvoteCommunity(
         val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
         onUpvoteToken(peer, payload)
     }
+
+    private fun onUpvoteVideoPacket(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(UpvoteVideoPayload.Deserializer)
+        onUpvoteVideo(peer, payload)
+    }
+
 
     private fun onMagnetURIPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(MagnetURIPayload.Deserializer)
@@ -61,28 +71,52 @@ class UpvoteCommunity(
     }
 
     private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {
+        OwnedTokenManager(context).createOwnedUpvoteTokensTable()
         // do something with the payload
-        logger.debug { "[UPVOTETOKEN] -> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
+        logger.debug { "[DETOKS] -> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
         val upvoteToken = UpvoteToken(
             payload.token_id.toInt(),
             payload.date,
             payload.public_key_minter,
-            payload.video_id
+            payload.video_id,
+            ""
         )
 
         val isValid = UpvoteTokenValidator.validateToken(upvoteToken)
 
         if (isValid) {
-            // TODO Move table creation to correct place
-            OwnedTokenManager(context).createOwnedUpvoteTokensTable()
             OwnedTokenManager(context).addReceivedToken(upvoteToken)
             logger.debug { "[UPVOTETOKEN] Hurray! Received valid token!" }
+
         } else {
             logger.debug { "[UPVOTETOKEN] Oh no! Received invalid token!" }
         }
 
     }
 
+    private fun onUpvoteVideo(peer: Peer, payload: UpvoteVideoPayload) {
+        // do something with the payload
+
+        OwnedTokenManager(context).createOwnedUpvoteTokensTable()
+        val upvoteTokens = payload.upvoteTokens
+        val receivedTokenIDs: ArrayList<Int> = ArrayList()
+
+        for (upvoteToken: UpvoteToken in upvoteTokens) {
+            logger.debug { "[UPVOTETOKEN] -> received upvote token with id: ${upvoteToken.tokenID} from peer with member id: ${peer.mid}" }
+
+            if (UpvoteTokenValidator.validateToken(upvoteToken)) {
+                OwnedTokenManager(context).addReceivedToken(upvoteToken)
+                receivedTokenIDs.add(upvoteToken.tokenID)
+            }
+
+        }
+
+        if (receivedTokenIDs.isEmpty())
+            return
+
+        Toast.makeText(context, "Hurray! Received valid token!", Toast.LENGTH_SHORT).show()
+
+    }
     /**
      * Selects a random Peer from the list of known Peers
      * @returns A random Peer or null if there are no known Peers
@@ -142,7 +176,7 @@ class UpvoteCommunity(
     fun sendUpvoteToken(upvoteTokens: List<UpvoteToken>): Boolean {
         val payload = UpvoteVideoPayload(upvoteTokens)
         val packet = serializePacket(
-            MessageID.UPVOTE_TOKEN,
+            MessageID.UPVOTE_VIDEO,
             payload
         )
 
