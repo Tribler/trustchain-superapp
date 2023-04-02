@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import com.google.common.primitives.UnsignedBytes.toInt
 import kotlinx.android.synthetic.main.fragment_offline_transfer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,6 +42,9 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    var arrayAdapter: ArrayAdapter<String>? = null
+    var wallet : Wallet? = null
+    var spinnerFriends: Spinner? = null
 
     private val qrCodeUtils by lazy {
         QRCodeUtils(requireContext())
@@ -59,34 +63,36 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
+        val view = inflater.inflate(R.layout.fragment_offline_transfer, container, false)
+        wallet = Wallet.getInstance(view.context, getIpv8().myPeer.publicKey, getIpv8().myPeer.key as PrivateKey)
+
+        val friends = wallet!!.getListOfFriends()
+        val friendUsernames = mutableListOf<String>()
+        for (f in friends){
+            friendUsernames.add(f.username)
+        }
+
+        spinnerFriends = view.findViewById(R.id.spinner)
+        // create an array adapter and pass the required parameter
+        // in our case pass the context, drop down layout, and array.
+        arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friendUsernames)
+        // set adapter to the spinner
+        spinnerFriends?.adapter = arrayAdapter
+        arrayAdapter?.notifyDataSetChanged()
+        spinnerFriends?.refreshDrawableState()
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_offline_transfer, container, false)
+        return view
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val wallet = Wallet.getInstance(view.context,getIpv8().myPeer.publicKey, getIpv8().myPeer.key as PrivateKey)
-        val dbHelper = DbHelper(view.context)
-        val friendList = wallet.listOfFriends
-        val friendUsernames = arrayListOf<String>()
-        for (f in friendList){
-            friendUsernames.add(f.username)
-        }
-        val friends = friendUsernames.toMutableList() // Mutable?
-        if (friendUsernames.isEmpty()) {
-            friends.add("Add Friend")
-        }
 
-//        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, friendList)
-//        dropdownMenu.adapter = adapter
-//        val friends = Arrays.asList("Vyshnavi", "Ali", "Dany", "Julio")
-        val spinnerFriends: Spinner = view.findViewById(R.id.spinner)
-        // create an array adapter and pass the required parameter
-        // in our case pass the context, drop down layout, and array.
-        val arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friends)
-        // set adapter to the spinner
-        spinnerFriends.adapter = arrayAdapter
+        val myPublicKey = getIpv8().myPeer.publicKey
+        val myPrivateKey = getIpv8().myPeer.key as PrivateKey
+        val amountText = view.findViewById<EditText>(R.id.amount)
+
 
         val buttonScan = view.findViewById<Button>(R.id.button_send)
         buttonScan.setOnClickListener {
@@ -99,17 +105,49 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             navController.navigate(R.id.addFriendFragment)
         }
 
+
+        val token = Token.create(1, myPublicKey.keyToBin())
+        val proof = myPrivateKey.sign(token.id + token.value + token.genesisHash + myPublicKey.keyToBin())
+        token.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
+
+//        val result = wallet!!.addToken(token)
+//        if (result != -1L) {
+            Toast.makeText(this.context, "Balance " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
+//        } else {
+//            Toast.makeText(this.context, "Duplicate token!", Toast.LENGTH_LONG)
+//                .show()
+//        }
+
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
-        val amountText = view.findViewById<EditText>(R.id.amount)
-        val amount = amountText.text
-
-
+        val dbHelper = DbHelper(view.context)
         buttonRequest.setOnClickListener {
-            val friendUsername = spinnerFriends.selectedItem
+            //friend selected
+            val friendUsername = spinnerFriends?.selectedItem
+            val amount = amountText.text
+
+            //get the friends public key from the db
             val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername.toString())
-            // After tranfering the requested amount, remove it from the owner wallet.
-            val tokens = wallet.getPayment(amount.toString().toInt())  // removes the tokens from the db
-            showQR(view, tokens, friendPublicKey)
+            try {
+                //if(amount.toString().toInt() >= 0) {
+                        if (wallet!!.balance > 0) {
+                            val chosenTokens = wallet!!.getPayment(amount.toString().toInt())
+                            if(chosenTokens == null){
+                                Toast.makeText(this.context, "Not Successful (not enough money or could get amount)", Toast.LENGTH_LONG).show()
+                            } else {
+                                showQR(view, chosenTokens, friendPublicKey)
+                                Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
+
+                            }
+                        } else {
+                            Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
+                        }
+                //TODO: disappear text field, button, spinner
+                // write some message you are sending blaabla
+                // check amount more than 0
+            } catch (e : NumberFormatException){
+                Toast.makeText(this.context, "Please specify positive amount!", Toast.LENGTH_LONG).show()
+            }
+
         }
 
 //    companion object {
@@ -140,27 +178,21 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
         if (content != null) {
             // deserialize the content
-//            val obtainedTokens = Token.deserialize(content.toByteArray())
-            // add tokens to wallet
+            val obtainedTokens = Token.deserialize(content.toByteArray())
+            for(t in obtainedTokens)
+                wallet!!.addToken(t)
         } else {
             Toast.makeText(this.context, "Scanning failed!", Toast.LENGTH_LONG).show()
         }
-        // retrieve the collection of tokens
-        // deserialize it
-        // increase the amount in the wallet
     }
 
-    private fun createNextOwner(
-        tokens: ArrayList<Token>,
-        pubKeyRecipient: ByteArray
-    ) : ArrayList<Token> {
+    private fun createNextOwner(tokens : ArrayList<Token>, pubKeyRecipient: ByteArray) : ArrayList<Token> {
         val senderPrivateKey = getIpv8().myPeer.key
 
         // create the new ownership of the token
         for(token in tokens) {
             token.signByPeer(pubKeyRecipient, senderPrivateKey as PrivateKey)
         }
-
         return tokens
     }
 
@@ -171,9 +203,6 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
         val jsonObject = JSONObject()
         jsonObject.put("token", newToken)
-//        val amountText = view.findViewById<EditText>(R.id.amount)
-//        val amount = amountText.text
-//        jsonObject.put("amount_requested", amount)
         val jsonString = jsonObject.toString()
         hideKeyboard()
         lifecycleScope.launch {

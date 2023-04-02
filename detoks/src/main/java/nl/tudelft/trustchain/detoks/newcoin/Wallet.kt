@@ -8,77 +8,112 @@ import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.PublicKey
 
-data class Wallet(
+class Wallet(
     val publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
     val privateKey: nl.tudelft.ipv8.keyvault.PrivateKey,
-    val tokens: ArrayList<Token>,
-    val listOfFriends: ArrayList<OfflineFriend>
 ) {
 
-    companion object {
+    companion object{
         private var wallet :Wallet? = null
-        private val dbHelper: DbHelper? = null;
-        @RequiresApi(Build.VERSION_CODES.O)
+        private var dbHelper: DbHelper? = null
+        private var tokens : MutableList<Token>? = null
+        private var listOfFriends : MutableList<OfflineFriend>? = null
         private fun create(context: Context, publicKey : nl.tudelft.ipv8.keyvault.PublicKey,
                            privateKey: nl.tudelft.ipv8.keyvault.PrivateKey ): Wallet {
-//            val generator = KeyPairGenerator.getInstance("RSA")
-//            generator.initialize(2048)
-//            val keyPair = generator.generateKeyPair()
 
-            val dbHelper = DbHelper(context)
-            val tokens = dbHelper.getAllTokens()
-            val listOfFriends = dbHelper.getAllFriends()
+            dbHelper = DbHelper(context)
+            tokens = dbHelper!!.getAllTokens()
+            listOfFriends = dbHelper!!.getAllFriends()
+            wallet = Wallet(publicKey, privateKey)
 
-            return Wallet(publicKey, privateKey, tokens, listOfFriends)
+            return wallet!!
         }
-        @RequiresApi(Build.VERSION_CODES.O)
         fun getInstance(context: Context, publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
                         privateKey: nl.tudelft.ipv8.keyvault.PrivateKey): Wallet {
-            return this.wallet ?: create(context, publicKey, privateKey)
+            return wallet ?: create(context, publicKey, privateKey)
         }
     }
 
+    fun getTokens(): MutableList<Token> {
+        return tokens!!
+    }
+
+//    fun setTokens(inputTokens : MutableList<Token>) {
+//        tokens = inputTokens
+//    }
+
+    fun getListOfFriends(): MutableList<OfflineFriend> {
+        return listOfFriends!!
+    }
+
+//    fun setListOfFriends(inputListOfFriends : MutableList<OfflineFriend>) {
+//        listOfFriends = inputListOfFriends
+//    }
+
+
     val balance: Int get() {
-        return tokens.size
+        return tokens!!.size
     }
 
-    fun addFriend(friend: OfflineFriend){
-        listOfFriends.add(friend)
-        dbHelper?.addFriend(friend.username, friend.publicKey.toString())
+
+    public fun addFriend(friend: OfflineFriend): Long{
+        val result = dbHelper?.addFriend(friend.username, friend.publicKey)
+        if(result != -1L) {
+            listOfFriends!!.add(friend)
+        }
+        return result!!
     }
 
-    fun addToken(token : Token) {
-        tokens.add(token)
-        dbHelper?.addToken(token)
+    public fun addToken(token : Token) : Long {
+        val result = dbHelper!!.addToken(token)
+        if(result != -1L) {
+            tokens!!.add(token)
+        }
+        return result
     }
 
-    fun removeToken(token: Token): Token{
-        tokens.remove(token)
-        dbHelper?.removeToken(token)
-        return token
+    /**
+     * Returns true if the token was successfully removed
+     * false - if the token was not present
+     */
+    fun removeToken(token: Token): Boolean {
+        if(tokens!!.remove(token)) { // returns false if the element was not present in the collection
+            dbHelper?.removeToken(token)
+            return true
+        }
+        return false
     }
-
 
     // Return the number of tokens needed to pay the value
     // For example: we need to pay 2 euros, but we have tokes of 0.50 cents, 1 euro token
     // This means we need to return either two 1 euro tokens or 4x0.50 cents tokens
-    fun getPayment(value: Int): ArrayList<Token> {
-        val tokensToPay = arrayListOf<Token>();
-        var tempValue = 0;
+//    TODO: This method will not manage to get the right tokens always
+    @Synchronized
+    fun getPayment(value: Int): ArrayList<Token>? {
+        val tokensToPay = arrayListOf<Token>()
+        var tempValue = 0
 
-        for(t in tokens) {
+        for(t in tokens!!) {
             if(tempValue + t.value <= value){
                 tempValue = tempValue + t.value
-                tokensToPay.add(removeToken(t))
+
+                tokensToPay.add(t)
+
             }
             if(tempValue == value) {
-                break
+                for (token in tokensToPay)
+                    removeToken(token)
+                return tokensToPay
             }
         }
-        return tokensToPay
-    }
 
-// Update token for the admin maybe??
+        if(tempValue == value) {
+            for (token in tokensToPay)
+                removeToken(token)
+            return tokensToPay
+        }
+        return null
+    }
 
 //    fun sendFundsTo(recipient: PublicKey, amountToSend: Int) : Transaction {
 //

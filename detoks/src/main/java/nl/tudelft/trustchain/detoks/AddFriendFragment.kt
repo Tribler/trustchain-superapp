@@ -104,14 +104,15 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
            if(nameFriend?.text == null){
                Toast.makeText(this.context,"Enter friend's name!", Toast.LENGTH_LONG).show()
            } else {
-                val myPublicKey = getIpv8().myPeer.publicKey
-                val wallet = Wallet.getInstance(this.requireContext(), myPublicKey, getIpv8().myPeer.key as PrivateKey)
-                wallet.addFriend(OfflineFriend(username.toString(), content.toString().toByteArray()))
-//               if(newRowId != -1L){
-//                   Toast.makeText(this.context,"Added Friend!", Toast.LENGTH_LONG).show()
-//               } else {
-//                   Toast.makeText(this.context,"Duplicate Entry!", Toast.LENGTH_LONG).show()
-//               }
+               val myPublicKey = getIpv8().myPeer.publicKey
+               val wallet = Wallet.getInstance(this.requireContext(), myPublicKey, getIpv8().myPeer.key as PrivateKey)
+               val newRowId = wallet.addFriend(
+                   OfflineFriend(username.toString(), content.toString().toByteArray()))
+               if(newRowId != -1L){
+                   Toast.makeText(this.context,"Added Friend!", Toast.LENGTH_LONG).show()
+               } else {
+                   Toast.makeText(this.context,"Duplicate Entry!", Toast.LENGTH_LONG).show()
+               }
                //save call to db
 //               Log.v("newRowID", newRowId.toString())
                Log.v("Save pub key", content.toString())
