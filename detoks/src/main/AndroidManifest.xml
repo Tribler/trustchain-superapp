@@ -13,7 +13,6 @@
             android:name="nl.tudelft.trustchain.detoks.DeToksActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_main_detoks"
-            android:theme="@style/Fullscreen"
             android:windowSoftInputMode="stateHidden" />
     </application>
 

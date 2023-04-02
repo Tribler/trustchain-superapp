@@ -83,7 +83,7 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
                 }
                 My_QR.visibility = View.VISIBLE
                 My_QR.setImageBitmap(bitmap)
-
+                buttonShow.visibility = View.INVISIBLE
             }
         }
     }

@@ -5,29 +5,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:text="Scan public key"
+        style="@style/Button"
+        app:icon="@drawable/ic_baseline_photo_camera_24"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button_scan_public_key"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/button_show"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintVertical_bias="0.656" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:text="Show public key"
+        style="@style/Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button_show"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintVertical_bias="0.525" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <EditText
         android:id="@+id/name"
@@ -47,8 +46,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button_show" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:text="Save"
+        style="@style/Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/save_friend"
@@ -62,14 +62,13 @@
 
     <ImageView
         android:id="@+id/My_QR"
-        android:layout_width="282dp"
-        android:layout_height="284dp"
+        android:layout_width="320dp"
+        android:layout_height="313dp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintVertical_bias="0.533"
-        app:layout_constraintBottom_toTopOf="@+id/button_show" />
+        app:layout_constraintHorizontal_bias="0.5"
+        android:layout_marginTop="172dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

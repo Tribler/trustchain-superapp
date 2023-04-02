@@ -14,8 +14,9 @@
         tools:text="Name"
         app:layout_constraintEnd_toEndOf="@+id/latestTimestamp" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:text="History"
+        style="@style/Button"
         android:layout_width="90dp"
         android:layout_height="31dp"
         android:id="@+id/historyButton"
@@ -36,8 +37,9 @@
         app:layout_constraintStart_toEndOf="@+id/valueToken"
         android:layout_marginStart="32dp" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:text="Verify"
+        style="@style/Button"
         android:layout_width="90dp"
         android:layout_height="31dp"
         android:id="@+id/verifyButton"
