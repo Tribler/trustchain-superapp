@@ -7,8 +7,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.detoks.db.OurTransactionStore
-
-data class DeToksTransaction(val recipient: Peer, val toks: List<Token>)
+import kotlin.reflect.typeOf
 
 class DeToksTransactionEngine (
     val tokenStore: OurTransactionStore,
@@ -24,6 +23,7 @@ class DeToksTransactionEngine (
     private val GROUPED_BLOCK = "GroupedBlock"
 
     private val LOGTAG = "DeToksTransactionEngine"
+
 
     init {
         // setup block listeners
@@ -83,35 +83,63 @@ class DeToksTransactionEngine (
     }
 
     // Grouped tokens
-    fun sendTokenGrouped(transactions: List<List<Token>>, peer: Peer, groupSize: Int): TrustChainBlock {
+    fun sendTokenGrouped(transactions: List<List<Token>>, peer: Peer): TrustChainBlock {
 
-        val groups = transactions.chunked(groupSize)
-
-        for (group in groups) {
-            val transactionList: MutableList<Map<String, Any>> = mutableListOf()
+        val groupedTransactions = mutableListOf<List<String>>()
+        for (transaction in transactions) {
+            val tokenList: MutableList<String> = mutableListOf()
+            for (token in transaction) {
+                tokenList.add(token.toString())
+            }
+            groupedTransactions.add(tokenList)
         }
 
+        val transaction = mapOf("transactions" to groupedTransactions)
 
         Log.d(LOGTAG, "Sending grouped transactions: $transactions")
 
-//        return createProposalBlock(
-//            GROUPED_BLOCK,
-//            trustChainTransaction,
-//            peer.publicKey.keyToBin()
-//        )
+        return createProposalBlock(
+            GROUPED_BLOCK,
+            transaction,
+            peer.publicKey.keyToBin()
+        )
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenProposal(block: TrustChainBlock) {
-
-        val transactions = block.transaction["transactions"] as List<*>
-
-        Log.d(LOGTAG, "Received transactions: ${transactions}")
+        val transactions = block.transaction["transactions"] as List<List<String>>
+        Log.d(LOGTAG, "Received grouped transaction: ${transactions}")
+        //extract tokens, create grouped agreement block
+        val grouped_agreement_uids = mutableListOf<List<String>>()
+        for (transaction in transactions) {
+            val tokenList: MutableList<String> = mutableListOf()
+            for (token in transaction) {
+                val (uid, _) = token.split(",")
+                tokenList.add(uid)
+                // todo insert token in database
+                Log.d(LOGTAG, "Saving received $token to database")
+            }
+            grouped_agreement_uids.add(tokenList.toList())
+        }
+        val transaction = mapOf("tokensSent" to grouped_agreement_uids.toList())
+        createAgreementBlock(block, transaction)
     }
-
+    @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenAgreement(block: TrustChainBlock) {
-        val tokenId = block.transaction["tokenSent"] as String
+        Log.d(LOGTAG, "Received grouped agreement block")
+        Log.d(LOGTAG,"${block.transaction["tokensSent"]}")
+        Log.d(LOGTAG,"casting the list")
+        val tokenIds = block.transaction["tokensSent"] as List<List<String>>
+        Log.d(LOGTAG, "${tokenIds}}")
+        val tokensToRemove= mutableListOf<String>()
+        for (tokens in tokenIds ) {
+                for(token_id in tokens) {
+                    tokensToRemove.add(token_id)
+                }
+        }
+
         // todo insert token in database
-        Log.d(LOGTAG, "Removing spent $tokenId from database")
+        Log.d(LOGTAG, "Removing spent tokens in $block from database")
     }
 
 

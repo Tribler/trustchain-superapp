@@ -32,7 +32,7 @@
 
     <fragment
         android:id="@+id/TransactionFrequencyTestFragment"
-        android:name="nl.tudelft.trustchain.detoks.TransactionFrequencyTestFragment"
+        android:name="nl.tudelft.trustchain.detoks.BenchmarkFragment"
         android:label="TransactionFrequencyTest">
 
         <action
