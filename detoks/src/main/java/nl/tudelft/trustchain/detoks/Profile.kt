@@ -9,13 +9,7 @@ import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 class ProfileEntry(
     var watchTime: Long = 0, // Average watch time
     val firstSeen: Long = System.currentTimeMillis()
-) : Comparable<ProfileEntry> {
-    override fun compareTo(other: ProfileEntry): Int = when {
-        this.watchTime != other.watchTime -> this.watchTime compareTo other.watchTime
-        this.firstSeen != other.firstSeen -> this.firstSeen compareTo other.firstSeen
-        else -> 0
-    }
-}
+)
 
 class Profile(
     val profiles: HashMap<String, ProfileEntry> = HashMap()
