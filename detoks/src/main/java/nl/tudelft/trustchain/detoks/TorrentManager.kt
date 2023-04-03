@@ -263,7 +263,9 @@ class TorrentManager private constructor (
                     it
                 )
                 torrentFiles.add(torrent)
-                profile.torrents[torrent.handle.makeMagnetUri()] = ProfileEntry()
+                profile.torrents[torrent.handle.makeMagnetUri()] = ProfileEntry(
+                    uploadDate = torrentInfo.creationDate()
+                )
             }
         }
     }

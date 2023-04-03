@@ -100,8 +100,9 @@ class DeToksCommunity(private val context: Context) : Community() {
     }
 
     private fun onTorrentGossip(packet: Packet) {
-        val payload = packet.getPayload(TorrentMessage.Deserializer)
+        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
+        Log.d(LOGGING_TAG, "Received torrent entry from ${peer.mid}, payload: ${payload.data}")
         payload.data.forEach {
             torrentManager.addTorrent(Sha1Hash(MagnetLink.hashFromMagnet(it.first)), it.first)
             torrentManager.profile.updateEntryHopCount(

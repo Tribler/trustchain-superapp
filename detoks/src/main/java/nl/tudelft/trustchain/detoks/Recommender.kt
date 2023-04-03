@@ -7,9 +7,9 @@ import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
  * Basic structure for a profile entry
  */
 class ProfileEntry(
-    val uploadDate: Long = 0, // Unimplemented
-    val firstSeen:  Long = System.currentTimeMillis(),
     var watched:    Boolean = false,
+    val firstSeen:  Long = System.currentTimeMillis(),
+    var uploadDate: Long = 0, // This is the torrent creation date
     var watchTime:  Long = 0, // Average watch time
     var duration:   Long = 0, // Video duration
     var hopCount:   Int  = 0, // Amount of other nodes visited
