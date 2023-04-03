@@ -53,7 +53,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        var wallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
+        val wallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
         val createCoinButton = view.findViewById<Button>(R.id.button_create_coin)
         createCoinButton.setOnClickListener {
             // Create a new coin and add it to the wallet!
@@ -88,7 +88,10 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
      */
     @RequiresApi(Build.VERSION_CODES.O)
     fun creatNewCoin(wallet: Wallet) {
+        val myPrivateKey = getIpv8().myPeer.key as PrivateKey
         val token = Token.create(1, myPublicKey.keyToBin())
+        val proof = myPrivateKey.sign(token.id + token.value + token.genesisHash + myPublicKey.keyToBin())
+        token.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
         wallet.addToken(token)
         println("Wallet A balance: ${wallet.balance}")
     }
