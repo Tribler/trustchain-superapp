@@ -152,6 +152,7 @@ class TorrentManager constructor (
     @RequiresApi(Build.VERSION_CODES.O)
     fun addMagnet(magnet: String){
         val res = sessionManager.fetchMagnet(magnet, 10) ?: return
+
         val torrentInfo = TorrentInfo(res)
         val par = torrentDir.absolutePath
         val torrentPath = Paths.get("$par/${torrentInfo.infoHash()}.torrent")

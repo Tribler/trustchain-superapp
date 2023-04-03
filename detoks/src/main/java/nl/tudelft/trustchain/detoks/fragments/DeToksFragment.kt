@@ -57,6 +57,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             File("${requireActivity().cacheDir.absolutePath}/torrent"),
             DEFAULT_CACHING_AMOUNT
         )
+        SingleTM.torrentManager = torrentManager
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -90,9 +91,9 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         })
     }
 
-    companion object {
+    companion object SingleTM{
         const val DEFAULT_CACHING_AMOUNT = 2
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"
-        lateinit var torrentManager: TorrentManager
+        public lateinit var torrentManager: TorrentManager
     }
 }
