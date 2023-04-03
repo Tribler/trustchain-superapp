@@ -234,7 +234,7 @@ class UpvoteCommunity(
 
         }
 
-        val test = database.crawl(peer.publicKey.keyToBin(), payload.sequenceNr.toLong(), payload.sequenceNr.toLong() + 1);
+        //val test = database.crawl(peer.publicKey.keyToBin(), payload.sequenceNr.toLong(), payload.sequenceNr.toLong() + 1);
         val rewardBlockHash = payload.blockHash
         val rewardBlock = database.getBlockWithHash(rewardBlockHash)
         if (rewardBlock == null) {
@@ -346,23 +346,16 @@ class UpvoteCommunity(
 
         val receiver = getPeers().first { peer -> peer.publicKey.keyToBin().toHex() == (upvoteToken.publicKeySeeder) }
 
-        if (rewardBlock == null) {// || receiver == null) {
+        if (rewardBlock == null) {
             Log.e("Detoks", "Failed to create a reward block")
             return
         }
         val rewardBlockHash = rewardBlock.calculateHash()
-        val payload = SeedRewardPayload(rewardBlock.sequenceNumber, upvoteTokens)
+        val payload = SeedRewardPayload(rewardBlockHash, upvoteTokens)
         val packet = serializePacket(
             MessageID.SEED_REWARD,
             payload
         )
-
-        val rewardBlock2 = database.getBlockWithHash(rewardBlockHash)
-
-        if (rewardBlock2 == null) {
-            Log.e("Detoks", "Failed to find reward block with hash $rewardBlockHash")
-            return
-        }
 
         send(receiver, packet)
         Log.i("Detoks", "Sent reward block to seeding peer")
