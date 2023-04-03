@@ -56,6 +56,13 @@ class OwnedTokenManager (context: Context) {
         database.dbUpvoteTokenQueries.createSentUpvoteTokensTable()
     }
 
+    /**
+     * Gets the latest upvoted videos
+     */
+    fun getLatestThreeUpvotedVideos() : List<String> {
+        return database.dbUpvoteTokenQueries.getLatestThreeUpvotedVideos().executeAsList()
+    }
+
     companion object {
         private lateinit var instance: SentTokenManager
         fun getInstance(context: Context): SentTokenManager {

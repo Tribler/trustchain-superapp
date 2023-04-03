@@ -19,6 +19,9 @@ VALUES(?, ?, ?, ?, ?);
 getLastSentToken:
 SELECT * FROM sent_upvote_tokens ORDER BY date DESC, token_id DESC LIMIT 1;
 
+getFiveLatestUpvotedVideos:
+SELECT video_id FROM sent_upvote_tokens ORDER BY date DESC LIMIT 5;
+
 --deleteTable:
 --DROP TABLE sent_upvote_tokens;
 -- endregion Sent UpvoteTokens
@@ -37,4 +40,7 @@ CREATE TABLE IF NOT EXISTS owned_upvote_tokens (
 addOwnedUpvoteToken:
 INSERT INTO owned_upvote_tokens (token_id, date, public_key, video_id, public_key_seeder)
 VALUES(?, ?, ?, ?, ?);
+
+getLatestThreeUpvotedVideos:
+SELECT video_id FROM owned_upvote_tokens ORDER BY date DESC LIMIT 3;
 

@@ -50,7 +50,6 @@ class UpvoteToken constructor(
             // Check if we have sent a token already today
             val today = DateFormatter.startOfToday()
             val newToken: UpvoteToken
-
             // Check if a new sequence should be started
             if (lastUpvoteToken == null
                 || DateFormatter.stringToDate(lastUpvoteToken.date).before(today)) {
@@ -61,7 +60,8 @@ class UpvoteToken constructor(
             } else {
                 throw InvalidMintException("Mint limit exceeded")
             }
-
+            newToken.videoID += DateFormatter.startOfToday()
+            newToken.videoID += newToken.tokenID
             return newToken
         }
     }
