@@ -10,7 +10,6 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
-import nl.tudelft.trustchain.detoks.util.CommunityConstants
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 import nl.tudelft.trustchain.detoks.helpers.DateFormatter
 import java.time.LocalDateTime
@@ -40,7 +39,7 @@ class ProposalToken {
             "heartTokenGivenTo" to myPeer.publicKey.keyToBin().toHex()
         )
         val proposalBlock = upvoteCommunity?.createProposalBlock(
-            CommunityConstants.GIVE_UPVOTE_TOKEN,
+            UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN,
             transaction,
             ANY_COUNTERPARTY_PK
         )
@@ -52,8 +51,12 @@ class ProposalToken {
      * We do not have a post video functionality yet
      * Clicking the button represents/simulates a peer having posted a video
      */
-    fun setPostVideoListener(proposalSendButton: Button, itemView: View, torrentManager: TorrentManager) {
-        proposalSendButton.setOnClickListener{
+    fun setPostVideoListener(
+        proposalSendButton: Button,
+        itemView: View,
+        torrentManager: TorrentManager
+    ) {
+        proposalSendButton.setOnClickListener {
             val torrentInfo = torrentManager.getSeedableTorrents().get(0)
             val magnetURI = torrentManager.seedTorrent(torrentInfo)
             if (magnetURI == null) {
@@ -77,27 +80,13 @@ class ProposalToken {
                 "The hash of this block is ${hash.toHex()}, corresponding hashCode is: ${hash.hashCode()} \n" +
                 "the block Id of this proposal block is: ${proposalBlock.blockId} \n" +
                 "the linked block id is: ${proposalBlock.linkedBlockId}\n"
-//            torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
-            val torrentInfo = torrentManager.getSeedableTorrents().get(0)
-            val magnetURI = torrentManager.seedTorrent(torrentInfo)
-
-            if (magnetURI == null) {
-                Log.i("DeToks", "Seeding failed!")
-            } else {
-                Log.i("DeToks", "Seeding succeeded!")
-            }
-
-            if (magnetURI != null) {
-                upvoteCommunity?.sendVideoData(magnetURI, hash.toHex())
-            }
-
+            upvoteCommunity.sendVideoData(magnetURI, hash.toHex())
             Log.i("DeToks", message)
             Toast.makeText(
                 itemView.context,
                 message,
                 Toast.LENGTH_SHORT
             ).show()
-            createProposalToken() // TODO Check if this can be removed
         }
     }
 }

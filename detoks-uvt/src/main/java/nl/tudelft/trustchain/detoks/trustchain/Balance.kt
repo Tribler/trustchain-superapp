@@ -37,7 +37,7 @@ class Balance {
                 "balance" to received - sent
             )
             // Todo during the Wednesday groupmeeting on 15th of March 2023 we mentioned that it may be better to send the proposalblock to another peer instead?
-            upvoteCommunity.createProposalBlock(UpvoteTrustchainConstants.BALANCE_CHECKPOINT, transaction, myPublicKey)
+            upvoteCommunity.createProposalBlock(CommunityConstants.BALANCE_CHECKPOINT, transaction, myPublicKey)
         } else {
             // else case : first checkpoint block
             // get all balances
@@ -47,7 +47,7 @@ class Balance {
                 "received" to received,
                 "balance" to balance
             )
-            upvoteCommunity.createProposalBlock(UpvoteTrustchainConstants.BALANCE_CHECKPOINT, transaction, myPublicKey)
+            upvoteCommunity.createProposalBlock(CommunityConstants.BALANCE_CHECKPOINT, transaction, myPublicKey)
         }
     }
 

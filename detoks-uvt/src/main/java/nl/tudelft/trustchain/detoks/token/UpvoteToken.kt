@@ -21,7 +21,7 @@ class UpvoteToken constructor(
     val tokenID: Int,
     val date: String,
     val publicKeyMinter: String,
-    val videoID: String,
+    var videoID: String,
     val publicKeySeeder: String
 ) {
 
@@ -49,7 +49,7 @@ class UpvoteToken constructor(
             val lastUpvoteToken = SentTokenManager(context).getLastToken()
             // Check if we have sent a token already today
             val today = DateFormatter.startOfToday()
-            val newToken: UpvoteToken
+            var newToken: UpvoteToken
             // Check if a new sequence should be started
             if (lastUpvoteToken == null
                 || DateFormatter.stringToDate(lastUpvoteToken.date).before(today)) {

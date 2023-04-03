@@ -47,10 +47,10 @@ class UpvoteCommunity(
     var failedSeeds = mutableListOf<String>()
 
     init {
-        messageHandlers[CommunityConstants.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
-        messageHandlers[CommunityConstants.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
-        messageHandlers[CommunityConstants.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
-        messageHandlers[CommunityConstants.SEED_REWARD] = ::onSeedRewardPacket
+        messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
+        messageHandlers[MessageID.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
+        messageHandlers[MessageID.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
+        messageHandlers[MessageID.SEED_REWARD] = ::onSeedRewardPacket
         messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
         messageHandlers[MessageID.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
         this.registerBlockSigner(UpvoteTrustchainConstants.BALANCE_CHECKPOINT, object : BlockSigner {
@@ -67,6 +67,8 @@ class UpvoteCommunity(
         const val RECOMMENDATION_REQUEST = 2
         const val RECOMMENDATION_RECEIVED = 3
         const val MAGNET_URI_AND_HASH = 4
+        const val UPVOTE_VIDEO = 5
+        const val SEED_REWARD = 6
     }
 
     object ContentSeeding {
@@ -102,7 +104,7 @@ class UpvoteCommunity(
     }
 
     private fun onSeedRewardPacket(packet: Packet) {
-        val (_, payload) = packet.getAuthPayload(SeedRewardPayload.Deserializer)
+        val (peer, payload) = packet.getAuthPayload(SeedRewardPayload.Deserializer)
         onSeedReward(payload)
     }
 
@@ -232,9 +234,9 @@ class UpvoteCommunity(
 
         }
 
+        val test = database.crawl(peer.publicKey.keyToBin(), payload.sequenceNr.toLong(), payload.sequenceNr.toLong() + 1);
         val rewardBlockHash = payload.blockHash
         val rewardBlock = database.getBlockWithHash(rewardBlockHash)
-
         if (rewardBlock == null) {
             Log.e("Detoks", "Failed to find reward block with hash $rewardBlockHash")
             return
@@ -285,29 +287,22 @@ class UpvoteCommunity(
     }
 
     /**
-     * Sends a UpvoteToken to a random Peer
      * When a message is sent, a proposal block is created
      * //TODO: only make an agreement block if the user did not like the video yet, if the user already like the video,
      * Sends an UpvoteToken to a random Peer
      */
-    fun sendUpvoteToken(upvoteToken: UpvoteToken): Boolean {
-        val payload = UpvoteTokenPayload(
-            upvoteToken.tokenID.toString(),
-            upvoteToken.date,
-            upvoteToken.publicKeyMinter,
-            upvoteToken.videoID)
-
+    fun sendUpvoteToken(upvoteTokens: List<UpvoteToken>): Boolean {
+        val payload = UpvoteVideoPayload(upvoteTokens)
         val packet = serializePacket(
-            CommunityConstants.UPVOTE_VIDEO,
+            MessageID.UPVOTE_VIDEO,
             payload
         )
 
-        var peer = pickRandomPeer()
+        val peer = pickRandomPeer()
 
         if (peer != null) {
             val message = "[DETOKS] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
             logger.debug { message }
-            logger.debug { "[DETOKS] Upvoted video with id ${upvoteToken.videoID}" }
             send(peer, packet)
             return true
         }
@@ -356,11 +351,18 @@ class UpvoteCommunity(
             return
         }
         val rewardBlockHash = rewardBlock.calculateHash()
-        val payload = SeedRewardPayload(rewardBlockHash, upvoteTokens)
+        val payload = SeedRewardPayload(rewardBlock.sequenceNumber, upvoteTokens)
         val packet = serializePacket(
-            CommunityConstants.SEED_REWARD,
+            MessageID.SEED_REWARD,
             payload
         )
+
+        val rewardBlock2 = database.getBlockWithHash(rewardBlockHash)
+
+        if (rewardBlock2 == null) {
+            Log.e("Detoks", "Failed to find reward block with hash $rewardBlockHash")
+            return
+        }
 
         send(receiver, packet)
         Log.i("Detoks", "Sent reward block to seeding peer")
