@@ -1,23 +1,25 @@
 package nl.tudelft.trustchain.detoks
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.navigation.Navigation
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
+import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.detoks.databinding.FragmentTransactionfreqencyTestBinding
+import nl.tudelft.trustchain.detoks.databinding.FragmentBenchmarkBinding
 import kotlin.system.measureTimeMillis
-class BenchmarkFragment : BaseFragment(R.layout.fragment_transactionfreqency_test) {
+class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
-    private val binding by viewBinding(FragmentTransactionfreqencyTestBinding::bind)
+    private val binding by viewBinding(FragmentBenchmarkBinding::bind)
 
     private lateinit var ipv8: IPv8
     private lateinit var transactionEngine: DeToksTransactionEngine
-
     private lateinit var trustchainCommunity: TrustChainCommunity
+    private lateinit var adapter : TokenAdapter
 
     private var totalTransactions = 30
     private var groupSize = 10
@@ -85,14 +87,53 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_transactionfreqency_tes
             binding.singleTextField.text = "${singleBenchmark()} ms"
         }
 
-        binding.refreshDatabaseButton.setOnClickListener {
-            var res = ""
-            for (token in transactionEngine.tokenStore.getAllTokens()) {
-                res += token.toString() + " | "
-            }
-            binding.ownedTokenList.text = res
+        binding.otherPeers.text = connectedPeersToString()
+
+        adapter = TokenAdapter(requireActivity(),
+            transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
+        )
+        binding.blockListview.isClickable = true
+        binding.blockListview.adapter = adapter
+        binding.blockListview.setOnItemClickListener() { _, _, position, _ ->
+            val token = adapter.getItem(position)
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("Token ${token.unique_id}")
+            builder.setMessage("Sender: ${token.public_key}")
+            val dialog= builder.create()
+            dialog.show()
         }
 
+        binding.selectReceiverButton.setOnClickListener {
+            val navController = Navigation.findNavController(view)
+            navController.navigate(R.id.action_connect_to_peer_fragment)
+        }
+
+        binding.updateListButton.setOnClickListener {
+            adapter.clear()
+            for (token in transactionEngine.tokenStore.getAllTokens()){
+                adapter.insert(token, adapter.count)
+            }
+            binding.otherPeers.text = connectedPeersToString()
+        }
+
+        binding.clearReceiversButton.setOnClickListener {
+            transactionEngine.clearSelectedPeers()
+            binding.otherPeers.text = connectedPeersToString()
+        }
+
+    }
+
+    private fun connectedPeersToString() : String {
+        var peers = transactionEngine.getSelectedPeers()
+        var res = ""
+        if (peers.size > 0) {
+            for (p in peers) {
+                res += "[" + p.address.toString() + "]  "
+            }
+            return res
+        } else {
+            return "None"
+        }
     }
 
     fun switchEnvirmonments(view: View) {
