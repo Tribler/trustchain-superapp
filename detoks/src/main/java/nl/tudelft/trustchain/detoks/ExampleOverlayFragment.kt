@@ -21,11 +21,11 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
     private val binding by viewBinding(FragmentExampleoverlayBinding::bind)
 
     private lateinit var ipv8: IPv8
-    private lateinit var community: OurCommunity
+    private lateinit var community: DeToksTransactionEngine
     private lateinit var trustchainCommunity: TrustChainCommunity
     private val BLOCK_TYPE = "our_test_block"
 
-    
+
     private var transaction_index = 0;
 
     private val store by lazy {

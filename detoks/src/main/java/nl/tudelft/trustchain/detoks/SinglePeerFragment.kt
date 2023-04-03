@@ -2,25 +2,16 @@ package nl.tudelft.trustchain.detoks
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.ListView
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.detoks.databinding.FragmentExampleoverlayBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentSinglePeerBinding
 import nl.tudelft.trustchain.detoks.db.OurTransactionStore
 
@@ -29,7 +20,7 @@ class SinglePeerFragment : BaseFragment(R.layout.fragment_single_peer) {
     private val binding by viewBinding(FragmentSinglePeerBinding::bind)
 
     private lateinit var ipv8: IPv8
-    private lateinit var community: OurCommunity
+    private lateinit var community: DeToksTransactionEngine
     private lateinit var trustchainCommunity : TrustChainCommunity
 
     private lateinit var adapter : BlockAdapter
