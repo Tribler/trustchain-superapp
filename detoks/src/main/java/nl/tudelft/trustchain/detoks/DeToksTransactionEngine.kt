@@ -69,7 +69,7 @@ class DeToksTransactionEngine (
         val (uid, pk) = token.split(",")
         println(pk)
 
-        // todo insert token in database
+        // TODO insert token in database
         Log.d(LOGTAG, "Saving received $token to database")
 
         val transaction = mapOf("tokenSent" to uid)
@@ -78,7 +78,7 @@ class DeToksTransactionEngine (
 
     private fun receiveSingleTokenAgreement(block: TrustChainBlock) {
         val tokenId = block.transaction["tokenSent"] as String
-        // todo insert token in database
+        // TODO remove token from database
         Log.d(LOGTAG, "Removing spent $tokenId from database")
     }
 
@@ -116,7 +116,7 @@ class DeToksTransactionEngine (
             for (token in transaction) {
                 val (uid, _) = token.split(",")
                 tokenList.add(uid)
-                // todo insert token in database
+                //TODO insert token in database
                 Log.d(LOGTAG, "Saving received $token to database")
             }
             grouped_agreement_uids.add(tokenList.toList())
@@ -127,8 +127,6 @@ class DeToksTransactionEngine (
     @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenAgreement(block: TrustChainBlock) {
         Log.d(LOGTAG, "Received grouped agreement block")
-        Log.d(LOGTAG,"${block.transaction["tokensSent"]}")
-        Log.d(LOGTAG,"casting the list")
         val tokenIds = block.transaction["tokensSent"] as List<List<String>>
         Log.d(LOGTAG, "${tokenIds}}")
         val tokensToRemove= mutableListOf<String>()
@@ -137,9 +135,8 @@ class DeToksTransactionEngine (
                     tokensToRemove.add(token_id)
                 }
         }
-
-        // todo insert token in database
-        Log.d(LOGTAG, "Removing spent tokens in $block from database")
+        //TODO remove tokens from database (all in tokensToRemove)
+        Log.d(LOGTAG, "Removing spent tokens $tokensToRemove from database")
     }
 
 
