@@ -7,7 +7,6 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.detoks.db.TokenStore
-import kotlin.reflect.typeOf
 
 class DeToksTransactionEngine (
     val tokenStore: TokenStore,
@@ -23,6 +22,8 @@ class DeToksTransactionEngine (
     private val GROUPED_BLOCK = "GroupedBlock"
 
     private val LOGTAG = "DeToksTransactionEngine"
+
+    private var selectedPeers = ArrayList<Peer>()
 
 
     init {
@@ -143,6 +144,19 @@ class DeToksTransactionEngine (
         }
         Log.d(LOGTAG, "Removing spent tokens $tokensToRemove from database")
     }
+
+    fun addPeer(peer: Peer) {
+        selectedPeers.add(peer)
+    }
+
+    fun getSelectedPeers() : ArrayList<Peer> {
+        return selectedPeers
+    }
+
+    fun clearSelectedPeers() {
+        selectedPeers.clear()
+    }
+
 
 
     class Factory(

@@ -12,12 +12,21 @@
     </fragment>
 
     <fragment
+        android:id="@+id/BenchmarkFragment"
+        android:name="nl.tudelft.trustchain.detoks.BenchmarkFragment"
+        android:label="BenchmarkFragment">
+        <action
+            android:id="@+id/action_connect_to_peer_fragment"
+            app:destination="@id/peerConnectionFragment"/>
+    </fragment>
+
+    <fragment
         android:id="@+id/TestFragment"
         android:name="nl.tudelft.trustchain.detoks.TestFragment"
         android:label="TestFragment">
         <action
             android:id="@+id/action_go_to_testFreq"
-            app:destination="@id/TransactionFrequencyTestFragment" />
+            app:destination="@id/BenchmarkFragment" />
     </fragment>
 
     <fragment
@@ -27,7 +36,7 @@
 
 	  <action
             android:id="@+id/action_go_to_testEnvironment"
-            app:destination="@id/TransactionFrequencyTestFragment" />
+            app:destination="@id/BenchmarkFragment" />
     </fragment>
 
     <fragment
@@ -44,9 +53,12 @@
     </fragment>
 
     <fragment
-        android:id="@+id/singlePeerFragment"
-        android:name="nl.tudelft.trustchain.detoks.SinglePeerFragment"
-        android:label="SinglePeer">
+        android:id="@+id/peerConnectionFragment"
+        android:name="nl.tudelft.trustchain.detoks.PeerConnectionFragment"
+        android:label="PeerConnection">
+        <action
+            android:id="@+id/action_return_to_benchmark_fragment"
+            app:destination="@id/BenchmarkFragment"/>
     </fragment>
 
 
