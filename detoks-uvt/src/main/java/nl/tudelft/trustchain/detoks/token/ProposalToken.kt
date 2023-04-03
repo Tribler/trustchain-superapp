@@ -76,7 +76,7 @@ class ProposalToken {
                 message,
                 Toast.LENGTH_SHORT
             ).show()
-            createProposalToken()
+            createProposalToken() // TODO Check if this can be removed
         }
     }
 }

@@ -9,15 +9,16 @@ import nl.tudelft.ipv8.messaging.Packet
 import mu.KotlinLogging
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
-import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
 import nl.tudelft.trustchain.detoks.trustchain.blocks.SeedRewardBlock
 import nl.tudelft.trustchain.detoks.util.CommunityConstants
+
 
 private val logger = KotlinLogging.logger {}
 
@@ -37,11 +38,17 @@ class UpvoteCommunity(
         messageHandlers[CommunityConstants.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
         messageHandlers[CommunityConstants.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
         messageHandlers[CommunityConstants.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
+        messageHandlers[CommunityConstants.SEED_REWARD] = ::onSeedRewardPacket
     }
 
     private fun onUpvoteTokenPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
         onUpvoteToken(peer, payload)
+    }
+
+    private fun onSeedRewardPacket(packet: Packet) {
+        val (_, payload) = packet.getAuthPayload(SeedRewardPayload.Deserializer)
+        onSeedReward(payload)
     }
 
     private fun onUpvoteVideoPacket(packet: Packet) {
@@ -86,34 +93,68 @@ class UpvoteCommunity(
     }
 
     private fun onUpvoteVideo(peer: Peer, payload: UpvoteVideoPayload) {
-        // do something with the payload
+        OwnedTokenManager(context).createOwnedUpvoteTokensTable()
+        val upvoteTokens = payload.upvoteTokens
+        val validTokens: ArrayList<UpvoteToken> = ArrayList()
+
+        Log.i("Detoks", "Received an upvote")
+
+        for (upvoteToken: UpvoteToken in upvoteTokens) {
+            if (UpvoteTokenValidator.validateToken(upvoteToken)) {
+                validTokens.add(upvoteToken)
+            }
+        }
+
+        // Check if we received less than 2 valid tokens or minted the video ourselves
+        if (validTokens.size < 2 || validTokens[0].publicKeySeeder == myPeer.publicKey.toString()) {
+            for (upvoteToken: UpvoteToken in upvoteTokens)
+                OwnedTokenManager(context).addReceivedToken(upvoteToken)
+            return
+        }
+
+        Log.i("Detoks", "Sending seed reward")
+
+        val rewardTokens: ArrayList<UpvoteToken> = ArrayList()
+
+        for (i in 0..CommunityConstants.SEED_REWARD_TOKENS) {
+            rewardTokens.add(validTokens.removeFirst())
+        }
+
+        for (upvoteToken: UpvoteToken in validTokens)
+            OwnedTokenManager(context).addReceivedToken(upvoteToken)
+        sendSeedReward(rewardTokens, peer)
+
+        Toast.makeText(context, "Hurray! Received valid token!", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun onSeedReward(payload: SeedRewardPayload) {
 
         OwnedTokenManager(context).createOwnedUpvoteTokensTable()
         val upvoteTokens = payload.upvoteTokens
-        val receivedTokenIDs: ArrayList<Int> = ArrayList()
-        var seedingPeerPublicKey: String = ""
+        val validTokens: ArrayList<UpvoteToken> = ArrayList()
 
+        Log.i("Detoks", "Received seeding reward")
         for (upvoteToken: UpvoteToken in upvoteTokens) {
-            logger.debug { "[UPVOTETOKEN] -> received upvote token with id: ${upvoteToken.tokenID} from peer with member id: ${peer.mid}" }
-
             if (UpvoteTokenValidator.validateToken(upvoteToken)) {
                 OwnedTokenManager(context).addReceivedToken(upvoteToken)
-                receivedTokenIDs.add(upvoteToken.tokenID)
-
-                seedingPeerPublicKey = upvoteToken.publicKeySeeder
+                validTokens.add(upvoteToken)
             }
 
         }
 
-        if (receivedTokenIDs.isEmpty())
+        val rewardBlockHash = payload.blockHash
+        val rewardBlock = database.getBlockWithHash(rewardBlockHash)
+
+        if (rewardBlock == null) {
+            Log.e("Detoks", "Failed to find reward block with hash $rewardBlockHash")
             return
-
-        Toast.makeText(context, "Hurray! Received valid token!", Toast.LENGTH_SHORT).show()
-
-        if (seedingPeerPublicKey != "") {
-            SeedRewardBlock().createRewardBlock(seedingPeerPublicKey, peer)
         }
+
+        val agreementBlock = createAgreementBlock(rewardBlock, rewardBlock.transaction)
+        Log.i("Detoks", "Signed Agreementblock $agreementBlock")
+
     }
+
     /**
      * Selects a random Peer from the list of known Peers
      * @returns A random Peer or null if there are no known Peers
@@ -151,17 +192,6 @@ class UpvoteCommunity(
             send(peer, packet)
         }
         return true
-
-//        val peer = pickRandomPeer()
-//
-//        if (peer != null) {
-//            val message = "[MAGNETURIPAYLOAD] You/Peer with member id: ${myPeer.mid} is sending magnet uri to peer with peer id: ${peer.mid}"
-//            Log.i("Detoks", message)
-//            logger.debug { message }
-//            send(peer, packet)
-//            return true
-//        }
-//        throw PeerNotFoundException("Could not find a peer")
     }
 
     /**
@@ -186,6 +216,32 @@ class UpvoteCommunity(
             return true
         }
         throw PeerNotFoundException("Could not find a peer")
+    }
+
+    private fun sendSeedReward(upvoteTokens: List<UpvoteToken>, upvotingPeer: Peer) {
+        // Prepare the reward block
+        val upvoteToken = upvoteTokens[0]
+        val rewardBlock = SeedRewardBlock.createRewardBlock(
+            upvoteToken.videoID,
+            upvoteToken.publicKeySeeder,
+            upvotingPeer
+        )
+
+        val receiver = getPeers().first { peer -> peer.publicKey.keyToBin().toHex() == (upvoteToken.publicKeySeeder) }
+
+        if (rewardBlock == null) {// || receiver == null) {
+            Log.e("Detoks", "Failed to create a reward block")
+            return
+        }
+        val rewardBlockHash = rewardBlock.calculateHash()
+        val payload = SeedRewardPayload(rewardBlockHash, upvoteTokens)
+        val packet = serializePacket(
+            CommunityConstants.SEED_REWARD,
+            payload
+        )
+
+        send(receiver, packet)
+        Log.i("Detoks", "Sent reward block to seeding peer")
     }
 
     class Factory(
