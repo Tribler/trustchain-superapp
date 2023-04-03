@@ -21,7 +21,7 @@ class Profile(
     val profiles: HashMap<String, ProfileEntry> = HashMap()
 ) {
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
+        if (!profiles.contains(key)) profiles[key] = ProfileEntry()
 
         if (myUpdate) {
             profiles[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
@@ -29,6 +29,9 @@ class Profile(
             profiles[key]!!.watchTime += time
             profiles[key]!!.watchTime /= 2
         }
-        Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${profiles[key]!!.watchTime}")
+        Log.i(
+            DeToksCommunity.LOGGING_TAG,
+            "Updated watchtime of $key to ${profiles[key]!!.watchTime}"
+        )
     }
 }

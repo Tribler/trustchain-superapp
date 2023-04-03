@@ -61,7 +61,7 @@ class VideosAdapter(
                 txtDesc.text = content.torrentName
                 mVideoView.setVideoPath(content.fileURI)
                 mVideoView.setOnPreparedListener { mp ->
-                    // NOTE: Log the duration here potentially
+                    // TODO: Log the duration here potentially
                     mProgressBar.visibility = View.GONE
                     mp.start()
                     if (videoScaling) {
