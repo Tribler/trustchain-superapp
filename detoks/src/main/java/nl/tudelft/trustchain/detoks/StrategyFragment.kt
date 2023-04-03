@@ -164,17 +164,19 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.hashTextView.text = strategyData[position].handle.infoHash().toString()
+        val id = strategyData[position].fileIndex
+        val progressFile = strategyData[position].handle.fileProgress()[id]
 
-        holder.downloadTextView.text = (strategyData[position].handle.status()
-            .allTimeDownload() / 1000).toString()
+        holder.hashTextView.text =
+            "${(strategyData[position].handle.infoHash().toString())} -$id"
+
+        holder.downloadTextView.text = (progressFile / 1000).toString()
         holder.uploadTextView.text = (strategyData[position].handle.status()
             .allTimeUpload() / 1000).toString()
 
         //TODO: replace by actual token balance
-        holder.balanceTextView.text = strategyData[position].handle.status().state().toString()
-//        holder.balanceTextView.text = ((strategyData[position].handle.status().allTimeUpload()
-//            - strategyData[position].handle.status().allTimeDownload()) / 100000).toString()
+        holder.balanceTextView.text = ((strategyData[position].handle.status().allTimeUpload()
+            - strategyData[position].handle.status().allTimeDownload()) / 100000).toString()
     }
 
     override fun getItemCount(): Int = strategyData.size

@@ -330,7 +330,7 @@ class TorrentManager private constructor (
             withTimeout(timeout) {
                 Log.d(DeToksCommunity.LOGGING_TAG, "Waiting to download ${handler.torrentName}")
                 while (!handler.isDownloaded()) {
-                    Log.e(DeToksCommunity.LOGGING_TAG, "Trying to download... ${handler.handle.status().totalWantedDone()} / ${handler.handle.status().totalWanted()}")
+                    Log.d(DeToksCommunity.LOGGING_TAG, "Trying to download... ${handler.handle.status().totalWantedDone()} / ${handler.handle.status().totalWanted()}")
                     delay(300)
                 }
             }
