@@ -5,6 +5,7 @@ import Wallet
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,20 +38,22 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
-
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         val access = requireArguments().getString("access")
+        val view = inflater.inflate(R.layout.fragment_token_list, container, false)
+        adminWallet = AdminWallet.getInstance(view.context)
+        userWallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
 
         adapter.registerRenderer(TokenAdminItemRenderer(access!!, this))
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
                 if (userWallet != null && adminWallet != null) {
-
                     if (access == "admin") {
                         val items = adminWallet!!.tokens.map { token: Token -> TokenItem(token) }
                         adapter.updateItems(items)
@@ -65,15 +68,12 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
             }
         }
 
-        return inflater.inflate(R.layout.fragment_token_list, container, false)
+        return view
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        adminWallet = AdminWallet.getInstance(view.context)
-        userWallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
 
     }
 
