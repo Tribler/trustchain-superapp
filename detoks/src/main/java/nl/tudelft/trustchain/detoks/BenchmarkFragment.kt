@@ -19,9 +19,10 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_transactionfreqency_tes
 
     private lateinit var trustchainCommunity: TrustChainCommunity
 
-    private var totalTransactions = 100
+    private var totalTransactions = 30
     private var groupSize = 10
     private var tokensPerTransaction = 1
+    private var tokenIDCounter = 0
 
     private val dummyTokens = mutableListOf<Token>()
     private val dummyTransactions = mutableListOf<List<Token>>()
@@ -54,10 +55,15 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_transactionfreqency_tes
         ipv8 = getIpv8()
         transactionEngine = ipv8.getOverlay()!!
         trustchainCommunity = ipv8.getOverlay()!!
+        transactionEngine.tokenStore.removeAllTokens()
 
         // populate the dummy tokens list
         for (i in 0..totalTransactions) {
-            dummyTokens.add(Token("abc", ipv8.myPeer.publicKey.keyToBin()))
+            val token = Token(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin())
+            dummyTokens.add(token)
+            // Add Token to the token store
+            transactionEngine.tokenStore.addToken(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin().toString())
+            tokenIDCounter++
         }
 
         // populate the dummy transactions
@@ -77,6 +83,14 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_transactionfreqency_tes
 
         binding.singleTransactionsButton.setOnClickListener {
             binding.singleTextField.text = "${singleBenchmark()} ms"
+        }
+
+        binding.refreshDatabaseButton.setOnClickListener {
+            var res = ""
+            for (token in transactionEngine.tokenStore.getAllTokens()) {
+                res += token.toString() + " | "
+            }
+            binding.ownedTokenList.text = res
         }
 
     }

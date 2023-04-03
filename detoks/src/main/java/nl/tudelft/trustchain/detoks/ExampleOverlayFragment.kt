@@ -14,7 +14,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentExampleoverlayBinding
-import nl.tudelft.trustchain.detoks.db.OurTransactionStore
+import nl.tudelft.trustchain.detoks.db.TokenStore
 
 class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
 
@@ -29,7 +29,7 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
     private var transaction_index = 0;
 
     private val store by lazy {
-        OurTransactionStore.getInstance(requireContext())
+        TokenStore.getInstance(requireContext())
     }
 
     private fun createProposal(recipient: Peer, peer_id: Int) {
@@ -39,12 +39,7 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
             transaction,
             recipient.publicKey.keyToBin()
         )
-        store.addTransaction(
-            transaction_index,
-            ipv8.myPeer.publicKey.toString(),
-            recipient.publicKey.toString(),
-            "proposal"
-        )
+
         transaction_index += 1
     }
 
@@ -58,12 +53,6 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
             transaction,
         )
         // TODO - I increment transaction index here to keep unique IDs in the DB
-        store.addTransaction(
-            transaction_index,
-            ipv8.myPeer.publicKey.toString(),
-            block.transaction["peer_id"].toString(),
-            "agreement"
-        )
         transaction_index += 1
     }
 
@@ -77,9 +66,6 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
         trustchainCommunity = IPv8Android.getInstance().getOverlay()!!
         ipv8 = IPv8Android.getInstance()
 
-        // Reset DB
-        store.deleteAll()
-
         binding.peer1IpTextview.text = "${ipv8.myPeer.address.ip}"
         binding.peer2IpTextview.text = "${ipv8.myPeer.address.ip}"
 
@@ -92,9 +78,6 @@ class ExampleOverlayFragment : BaseFragment(R.layout.fragment_exampleoverlay) {
             createProposal(ipv8.myPeer, 2)
         }
 
-        binding.peer1ConfirmTokenButton.setOnClickListener {
-            binding.blockList1.text = store.getAllTransactions().toString()
-        }
 
         binding.peer2ConfirmTokenButton.setOnClickListener {
             binding.blockList2.text = trustchainCommunity.database.getAllBlocks().toString()

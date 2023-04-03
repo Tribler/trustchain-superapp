@@ -73,4 +73,21 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <Button
+            android:id="@+id/refresh_database_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update owned tokens list" />
+        <TextView
+            android:id="@+id/owned_token_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No tokens owned"
+            android:layout_marginStart="10dp" />
+    </LinearLayout>
+
 </LinearLayout>

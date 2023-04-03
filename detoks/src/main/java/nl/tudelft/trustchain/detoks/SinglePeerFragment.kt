@@ -13,7 +13,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentSinglePeerBinding
-import nl.tudelft.trustchain.detoks.db.OurTransactionStore
+import nl.tudelft.trustchain.detoks.db.TokenStore
 
 class SinglePeerFragment : BaseFragment(R.layout.fragment_single_peer) {
 
@@ -29,7 +29,7 @@ class SinglePeerFragment : BaseFragment(R.layout.fragment_single_peer) {
     private var transaction_index = 0;
 
     private val store by lazy {
-        OurTransactionStore.getInstance(requireContext())
+        TokenStore.getInstance(requireContext())
     }
 
     private fun createProposal(recipient: Peer, peer_id: Int) {
@@ -39,7 +39,6 @@ class SinglePeerFragment : BaseFragment(R.layout.fragment_single_peer) {
             transaction,
             recipient.publicKey.keyToBin()
         )
-        store.addTransaction(transaction_index, ipv8.myPeer.publicKey.toString(), recipient.publicKey.toString(), "proposal")
         transaction_index += 1
     }
 
@@ -50,7 +49,6 @@ class SinglePeerFragment : BaseFragment(R.layout.fragment_single_peer) {
             transaction,
         )
         // TODO - I increment transaction index here to keep unique IDs in the DB
-        store.addTransaction(transaction_index, ipv8.myPeer.publicKey.toString(), block.transaction["peer_id"].toString(), "agreement")
         transaction_index += 1
     }
 
@@ -65,7 +63,6 @@ class SinglePeerFragment : BaseFragment(R.layout.fragment_single_peer) {
         ipv8 = IPv8Android.getInstance()
 
         // Reset DB
-        store.deleteAll()
 
         binding.peerIp.text = "${ipv8.myPeer.address.ip}"
         binding.otherPeers.text = "Not implemented yet"

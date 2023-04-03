@@ -57,7 +57,7 @@ import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.detoks.db.OurTransactionStore
+import nl.tudelft.trustchain.detoks.db.TokenStore
 import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.DeToksTransactionEngine
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
@@ -452,7 +452,7 @@ class TrustChainApplication : Application() {
     private fun createOurCommunity(): OverlayConfiguration<DeToksTransactionEngine> {
 
         // tims store
-        val ourStore = OurTransactionStore.getInstance(this)
+        val ourStore = TokenStore.getInstance(this)
 
         val settings = TrustChainSettings()
         val driver = AndroidSqliteDriver(Database.Schema, this, "detokstruststore.db")

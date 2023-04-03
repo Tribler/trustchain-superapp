@@ -6,11 +6,11 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.trustchain.detoks.db.OurTransactionStore
+import nl.tudelft.trustchain.detoks.db.TokenStore
 import kotlin.reflect.typeOf
 
 class DeToksTransactionEngine (
-    val tokenStore: OurTransactionStore,
+    val tokenStore: TokenStore,
     val context: Context,
     settings: TrustChainSettings,
     database: TrustChainStore,
@@ -69,7 +69,9 @@ class DeToksTransactionEngine (
         val (uid, pk) = token.split(",")
         println(pk)
 
-        // TODO insert token in database
+        // Add token to personal database
+        tokenStore.addToken(uid, pk)
+
         Log.d(LOGTAG, "Saving received $token to database")
 
         val transaction = mapOf("tokenSent" to uid)
@@ -78,7 +80,8 @@ class DeToksTransactionEngine (
 
     private fun receiveSingleTokenAgreement(block: TrustChainBlock) {
         val tokenId = block.transaction["tokenSent"] as String
-        // TODO remove token from database
+        // Remove token from personal database
+        tokenStore.removeTokenByID(tokenId)
         Log.d(LOGTAG, "Removing spent $tokenId from database")
     }
 
@@ -116,7 +119,8 @@ class DeToksTransactionEngine (
             for (token in transaction) {
                 val (uid, _) = token.split(",")
                 tokenList.add(uid)
-                //TODO insert token in database
+                // Add token to personal database
+                tokenStore.addToken((uid.toInt() + 200).toString(), block.publicKey.toString())
                 Log.d(LOGTAG, "Saving received $token to database")
             }
             grouped_agreement_uids.add(tokenList.toList())
@@ -132,16 +136,17 @@ class DeToksTransactionEngine (
         val tokensToRemove= mutableListOf<String>()
         for (tokens in tokenIds ) {
                 for(token_id in tokens) {
+                    // Remove token from personal database
+                    tokenStore.removeTokenByID(token_id)
                     tokensToRemove.add(token_id)
                 }
         }
-        //TODO remove tokens from database (all in tokensToRemove)
         Log.d(LOGTAG, "Removing spent tokens $tokensToRemove from database")
     }
 
 
     class Factory(
-        private val store: OurTransactionStore,
+        private val store: TokenStore,
         private val context: Context,
         private val settings: TrustChainSettings,
         private val database: TrustChainStore,
