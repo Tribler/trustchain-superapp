@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks.gossiper
 
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive

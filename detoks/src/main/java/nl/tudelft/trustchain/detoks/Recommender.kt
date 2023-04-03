@@ -7,11 +7,14 @@ import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
  * Basic structure for a profile entry
  */
 class ProfileEntry(
-    val firstSeen: Long = System.currentTimeMillis(),
-    var watchTime: Long = 0, // Average watch time
-    var duration:  Long = 0, // Video duration
-    var hopCount:  Int  = 0, // Amount of other nodes visited
-    var timesSeen: Int  = 1  // Count of times we received it
+    val uploadDate: Long = 0, // Unimplemented
+    val firstSeen:  Long = System.currentTimeMillis(),
+    var watched:    Boolean = false,
+    var watchTime:  Long = 0, // Average watch time
+    var duration:   Long = 0, // Video duration
+    var hopCount:   Int  = 0, // Amount of other nodes visited
+    var timesSeen:  Int  = 1, // Count of times we received it
+    var likes:      Int  = 0  // Unimplemented
 ) : Comparable<ProfileEntry> {
     override fun compareTo(other: ProfileEntry): Int = when {
         this.watchTime != other.watchTime -> this.watchTime compareTo other.watchTime
@@ -23,10 +26,15 @@ class ProfileEntry(
 class Profile(
     val torrents: HashMap<String, ProfileEntry> = HashMap()
 ) {
+    fun hasWatched(key: String): Boolean {
+        return torrents.contains(key) && torrents[key]!!.watched
+    }
+
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
         if(!torrents.contains(key)) torrents[key] = ProfileEntry()
 
         if (myUpdate) {
+            torrents[key]!!.watched = true
             torrents[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
         } else {
             torrents[key]!!.watchTime += time
@@ -38,16 +46,19 @@ class Profile(
     fun updateEntryDuration(key: String, duration: Long) {
         if(!torrents.contains(key)) torrents[key] = ProfileEntry()
         torrents[key]!!.duration = duration
+        Log.i(DeToksCommunity.LOGGING_TAG, "Updated duration of $key to ${torrents[key]!!.duration}")
     }
 
     fun updateEntryHopCount(key: String, hopCount: Int) {
         if(!torrents.contains(key)) torrents[key] = ProfileEntry()
         torrents[key]!!.hopCount = hopCount
+        Log.i(DeToksCommunity.LOGGING_TAG, "Updated hop count of $key to ${torrents[key]!!.hopCount}")
     }
 
     fun incrementTimesSeen(key: String) {
         if(!torrents.contains(key)) torrents[key] = ProfileEntry(timesSeen = 0)
         torrents[key]!!.timesSeen += 1
+        Log.i(DeToksCommunity.LOGGING_TAG, "Updated times seen of $key to ${torrents[key]!!.timesSeen}")
     }
 }
 
