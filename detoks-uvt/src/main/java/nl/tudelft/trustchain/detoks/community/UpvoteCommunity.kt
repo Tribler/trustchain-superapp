@@ -104,7 +104,7 @@ class UpvoteCommunity(
     }
 
     private fun onSeedRewardPacket(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(SeedRewardPayload.Deserializer)
+        val (_, payload) = packet.getAuthPayload(SeedRewardPayload.Deserializer)
         onSeedReward(payload)
     }
 
@@ -234,7 +234,6 @@ class UpvoteCommunity(
 
         }
 
-        //val test = database.crawl(peer.publicKey.keyToBin(), payload.sequenceNr.toLong(), payload.sequenceNr.toLong() + 1);
         val rewardBlockHash = payload.blockHash
         val rewardBlock = database.getBlockWithHash(rewardBlockHash)
         if (rewardBlock == null) {

@@ -12,10 +12,4 @@ object CommunityConstants {
     private const val DAILY_VIDEO_UPVOTE_LIMIT = 100
     const val DAILY_MINT_LIMIT = TOKENS_SENT_PER_UPVOTE * DAILY_VIDEO_UPVOTE_LIMIT
     const val SEED_REWARD_TOKENS = 1
-
-    //MessageID constants
-    const val UPVOTE_TOKEN = 1
-    const val MAGNET_URI_AND_HASH = 2
-    const val UPVOTE_VIDEO = 3
-    const val SEED_REWARD = 4
 }
