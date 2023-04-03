@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
+import nl.tudelft.trustchain.detoks.recommendation.Recommender
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.ProposalToken
 import nl.tudelft.trustchain.detoks.trustchain.Balance
@@ -57,6 +58,11 @@ class VideosAdapter(
         var proposalBlockHash: TextView
         var videoID: TextView
         var videoPostedOn: TextView
+
+        // TODO: remove this, for testing of Recommender only
+        var recommendMostLikedButton: Button
+        var recommendRandomButton: Button
+
         var proposalSendButton: Button
         var tokensSent: TextView
         var tokensReceived: TextView
@@ -70,6 +76,8 @@ class VideosAdapter(
             proposalBlockHash = itemView.findViewById(R.id.proposalBlockHash)
             videoID = itemView.findViewById(R.id.videoID)
             videoPostedOn = itemView.findViewById(R.id.videoPostedOn)
+            recommendMostLikedButton = itemView.findViewById(R.id.recommendMostLiked)
+            recommendRandomButton = itemView.findViewById(R.id.recommendRandom)
             proposalSendButton = itemView.findViewById(R.id.proposalMockButton)
             tokensSent = itemView.findViewById(R.id.tokensSentValue)
             tokensReceived = itemView.findViewById(R.id.tokensReceivedValue)
@@ -87,6 +95,10 @@ class VideosAdapter(
                 Log.i("Detoks", "My peer public key is: ${upvoteCommunity.myPeer.publicKey.keyToBin().toHex()}")
                 upvoteCommunity.getContentToSeed()
             }
+            // TODO: remove this, for testing of Recommender only
+            recommendMostLikedButton.setOnClickListener { Recommender.recommendMostLiked() }
+            recommendRandomButton.setOnClickListener { Recommender.recommendRandom() }
+            recommendMostLikedButton.setOnClickListener { Recommender.requestRecommendations()}
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {

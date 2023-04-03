@@ -109,6 +109,24 @@
             android:textSize="10sp" />
 
         <Button
+            android:id="@+id/recommendMostLiked"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/recommend_most_liked_button" />
+
+        <Button
+            android:id="@+id/requestUpvotedContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Request upvoted content" />
+
+        <Button
+            android:id="@+id/recommendRandom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/recommend_random_button" />
+
+        <Button
             android:id="@+id/proposalMockButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

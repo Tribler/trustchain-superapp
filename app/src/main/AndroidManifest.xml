@@ -186,6 +186,11 @@
             android:enabled="true"
             android:exported="false" />
 
+<!--        <service-->
+<!--            android:name="nl.tudelft.trustchain.detoks.GossiperService"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false" />-->
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBAGd8-KwX1epS_0CPl5RF0hD8VeTmM-7Y" />

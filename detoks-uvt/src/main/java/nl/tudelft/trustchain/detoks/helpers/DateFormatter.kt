@@ -36,18 +36,18 @@ class DateFormatter {
             return formatter.parse(todayString) as Date
         }
 
-        fun localToGMT(time: Long): Long {
+        fun localTimeToGMTDate(time: Long): Date {
             try {
                 val date = Date(time)
                 val strDate = formatter.format(date)
                 //            System.out.println("Local Millis * " + date.getTime() + "  ---UTC time  " + strDate);//correct
                 val utcDate = formatter.parse(strDate)
                 //            System.out.println("UTC Millis * " + utcDate.getTime() + " ------  " + dateFormatLocal.format(utcDate));
-                return utcDate?.time!!
+                return utcDate!!
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            return time
+            return Date(time)
         }
 
 

@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -19,7 +20,7 @@ import java.io.File
  * It is responsible for downloading the torrent files and caching the videos.
  * It also provides the videos to the video adapter.
  */
-class TorrentManager(
+class TorrentManager private constructor (
     private val cacheDir: File,
     private val torrentDir: File,
     private val cachingAmount: Int = 1,
@@ -35,6 +36,20 @@ class TorrentManager(
         initializeSessionManager()
         buildTorrentIndex()
         initializeVideoPool()
+    }
+
+    companion object {
+        private lateinit var instance: TorrentManager
+        fun getInstance(context: Context): TorrentManager {
+            if (!::instance.isInitialized) {
+                instance = TorrentManager(
+                    File("${context.cacheDir.absolutePath}/media"),
+                    File("${context.cacheDir.absolutePath}/torrent"),
+                    DeToksFragment.DEFAULT_CACHING_AMOUNT
+                )
+            }
+            return instance
+        }
     }
 
     fun notifyIncrease() {
@@ -131,7 +146,7 @@ class TorrentManager(
                     val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
                     handle.prioritizeFiles(priorities)
                     handle.pause()
-                    for (it in 0..torrentInfo.numFiles()) {
+                    for (it in 0 until torrentInfo.numFiles()) {
                         val fileName = torrentInfo.files().fileName(it)
                         if (fileName.endsWith(".mp4")) {
                             torrentFiles.add(
@@ -189,6 +204,44 @@ class TorrentManager(
             child
         )
         fileOrDirectory.delete()
+    }
+
+    fun addTorrent(magnet: String) {
+        val torrentInfo = getInfoFromMagnet(magnet)?:return
+        val hash = torrentInfo.infoHash()
+
+        if(sessionManager.find(hash) != null) return
+        Log.d("DeToksCommunity","Is a new torrent: ${torrentInfo.name()}")
+
+        sessionManager.download(torrentInfo, cacheDir)
+        val handle = sessionManager.find(hash)
+        handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+        handle.prioritizeFiles(arrayOf(Priority.IGNORE))
+        handle.pause()
+
+        for (it in 0 until torrentInfo.numFiles()) {
+            val fileName = torrentInfo.files().fileName(it)
+            if (fileName.endsWith(".mp4")) {
+                torrentFiles.add(
+                    TorrentHandler(
+                        cacheDir,
+                        handle,
+                        torrentInfo.name(),
+                        fileName,
+                        it
+                    )
+                )
+            }
+        }
+    }
+
+    private fun getInfoFromMagnet(magnet: String): TorrentInfo? {
+        val bytes = sessionManager.fetchMagnet(magnet, 10)?:return null
+        return TorrentInfo.bdecode(bytes)
+    }
+
+    fun getListOfTorrents(): List<TorrentHandle> {
+        return torrentFiles.map {it.handle}.distinct()
     }
 
     class TorrentHandler(

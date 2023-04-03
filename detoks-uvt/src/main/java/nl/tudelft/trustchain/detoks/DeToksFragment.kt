@@ -7,6 +7,7 @@ import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
 import mu.KotlinLogging
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.detoks.recommendation.Recommender
 import nl.tudelft.trustchain.detoks.token.ProposalToken
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.trustchain.Balance
@@ -111,6 +112,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             File("${requireActivity().cacheDir.absolutePath}/seedableTorrents"),
             DEFAULT_CACHING_AMOUNT
         )
+        Recommender.initialize(torrentManager)
 
         upvoteToken = UpvoteToken(-100, "", "", "") //TODO: make constructor with no parameters for initialisation
         proposalToken = ProposalToken()

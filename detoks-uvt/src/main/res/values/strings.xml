@@ -2,4 +2,6 @@
 <resources>
     <string name="title_activity_main_detoks">DeToks</string>
     <string name="proposal_mock_button">Create Proposal Token</string>
+    <string name="recommend_most_liked_button">Recommend Most Liked</string>
+    <string name="recommend_random_button">Recommend Random</string>
 </resources>
