@@ -46,7 +46,7 @@ class TorrentManager constructor (
     private var currentIndex = 0
 
     init {
-        clearMediaCache()
+//        clearMediaCache()
         initializeSessionManager()
         buildTorrentIndex()
         initializeVideoPool()
@@ -483,12 +483,13 @@ class TorrentManager constructor (
         }
 
         fun deleteFile() {
-            handle.filePriority(fileIndex, Priority.IGNORE)
-            val file = File("$cacheDir/$torrentName/$fileName")
-            if (file.exists()) {
-                file.delete()
-            }
-            isDownloading = false
+            return
+//            handle.filePriority(fileIndex, Priority.IGNORE)
+//            val file = File("$cacheDir/$torrentName/$fileName")
+//            if (file.exists()) {
+//                file.delete()
+//            }
+//            isDownloading = false
         }
 
         fun downloadFile() {
