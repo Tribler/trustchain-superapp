@@ -23,7 +23,7 @@ class DeToksTransactionEngine (
 
     private val LOGTAG = "DeToksTransactionEngine"
 
-    private var selectedPeers = ArrayList<Peer>()
+    private lateinit var selectedPeer : Peer
 
 
     init {
@@ -146,15 +146,20 @@ class DeToksTransactionEngine (
     }
 
     fun addPeer(peer: Peer) {
-        selectedPeers.add(peer)
+        selectedPeer = peer
+        Log.d(LOGTAG, "Selected peer: ${selectedPeer.address.toString()}")
     }
 
-    fun getSelectedPeers() : ArrayList<Peer> {
-        return selectedPeers
+    fun getSelectedPeer() : Peer {
+        return selectedPeer
     }
 
-    fun clearSelectedPeers() {
-        selectedPeers.clear()
+//    fun clearSelectedPeer() {
+//        selectedPeer = null
+//    }
+
+    fun isPeerSelected() : Boolean {
+        return ::selectedPeer.isInitialized
     }
 
 

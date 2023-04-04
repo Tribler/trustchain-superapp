@@ -33,7 +33,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         val executionTime = measureTimeMillis {
             for (tok in dummyTokens) {
-                transactionEngine.sendTokenSingle(tok, ipv8.myPeer)
+                transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
             }
         }
 
@@ -45,7 +45,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         val executionTime = measureTimeMillis {
 
             for (transactionGroup in dummyTransactions.chunked(groupSize)) {
-                transactionEngine.sendTokenGrouped(transactionGroup, ipv8.myPeer)
+                transactionEngine.sendTokenGrouped(transactionGroup, transactionEngine.getSelectedPeer())
             }
              }
         return executionTime
@@ -58,6 +58,11 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         transactionEngine = ipv8.getOverlay()!!
         trustchainCommunity = ipv8.getOverlay()!!
         transactionEngine.tokenStore.removeAllTokens()
+
+        if (!transactionEngine.isPeerSelected()) {
+            transactionEngine.addPeer(ipv8.myPeer)
+        }
+
 
         // populate the dummy tokens list
         for (i in 0..totalTransactions) {
@@ -87,7 +92,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             binding.singleTextField.text = "${singleBenchmark()} ms"
         }
 
-        binding.otherPeers.text = connectedPeersToString()
+        binding.otherPeers.text = connectedPeerToString()
 
         adapter = TokenAdapter(requireActivity(),
             transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
@@ -113,27 +118,18 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             for (token in transactionEngine.tokenStore.getAllTokens()){
                 adapter.insert(token, adapter.count)
             }
-            binding.otherPeers.text = connectedPeersToString()
+            binding.otherPeers.text = connectedPeerToString()
         }
 
         binding.clearReceiversButton.setOnClickListener {
-            transactionEngine.clearSelectedPeers()
-            binding.otherPeers.text = connectedPeersToString()
+            transactionEngine.addPeer(ipv8.myPeer)
+            binding.otherPeers.text = connectedPeerToString()
         }
 
     }
 
-    private fun connectedPeersToString() : String {
-        var peers = transactionEngine.getSelectedPeers()
-        var res = ""
-        if (peers.size > 0) {
-            for (p in peers) {
-                res += "[" + p.address.toString() + "]  "
-            }
-            return res
-        } else {
-            return "None"
-        }
+    private fun connectedPeerToString() : String {
+        return transactionEngine.getSelectedPeer().address.toString()
     }
 
     fun switchEnvirmonments(view: View) {
