@@ -24,18 +24,21 @@ class DeToksTransactionEngine (
     private val LOGTAG = "DeToksTransactionEngine"
 
     private lateinit var selectedPeer : Peer
+    private var sendingToSelf = true
 
 
     init {
         // setup block listeners
         addListener(SINGLE_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                if (block.isProposal) {
-                    Log.d(LOGTAG, "Received SINGLE proposal block")
-                    receiveSingleTokenProposal(block)
-                } else if (block.isAgreement) {
-                    Log.d(LOGTAG, "Received SINGLE agreement block")
-                    receiveSingleTokenAgreement(block)
+                if (!sendingToSelf && block.publicKey == selectedPeer.publicKey.keyToBin()) {
+                    if (block.isProposal) {
+                        Log.d(LOGTAG, "Received SINGLE proposal block")
+                        receiveSingleTokenProposal(block)
+                    } else if (block.isAgreement) {
+                        Log.d(LOGTAG, "Received SINGLE agreement block")
+                        receiveSingleTokenAgreement(block)
+                    }
                 }
             }
         })
@@ -147,6 +150,7 @@ class DeToksTransactionEngine (
 
     fun addPeer(peer: Peer) {
         selectedPeer = peer
+        sendingToSelf = false
         Log.d(LOGTAG, "Selected peer: ${selectedPeer.address.toString()}")
     }
 
