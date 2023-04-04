@@ -71,11 +71,15 @@ class UpvoteCommunity(
         val otherPeersProposalBlocks = listOfPostsAndUpvotes.filter { it.isProposal
             && it.publicKey.toHex() != myPeer.publicKey.keyToBin().toHex()
             && !seedVideoIDs.contains(it.blockId)
-            && !failedSeeds.contains(it.blockId)}
+            && !failedSeeds.contains(it.blockId) && it.transaction.containsKey("magnetURI")}
         val additionalSeeds = min(otherPeersProposalBlocks.size, ContentSeeding.MAX_SEEDED_CONTENT-seedVideoIDs.size)
         val randomlyChosenProposalBlocks = otherPeersProposalBlocks.shuffled().take(additionalSeeds)
         for (block in randomlyChosenProposalBlocks) {
+            Log.i("Detoks", block.transaction.toString())
+        }
+        for (block in randomlyChosenProposalBlocks) {
             val magnetLink = block.transaction["magnetURI"].toString()
+            Log.i("Detoks", "The magnet link is: $magnetLink")
             val seeded = torrentManager?.seedTorrentFromMagnetLink(magnetLink)
             if (seeded !=null && seeded){
                 seedVideoIDs.add(block.blockId)
