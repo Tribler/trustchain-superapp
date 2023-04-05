@@ -60,7 +60,6 @@ class VideosAdapter(
                 txtTitle.text = content.fileName
                 txtDesc.text = content.torrentName
                 mVideoView.setVideoPath(content.fileURI)
-                Log.i("DeToks", "Received content: ${content.fileURI}")
                 mVideoView.setOnPreparedListener { mp ->
                     // TODO: Log the duration here potentially
                     mProgressBar.visibility = View.GONE

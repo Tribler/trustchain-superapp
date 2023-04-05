@@ -32,7 +32,7 @@ class WatchTimeGossiper(
 
         val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
         val randomProfileEntries = pickRandomN(
-            TorrentManager.getInstance(context).profile.torrents.entries.map { Pair(it.key, it.value.watchTime) },
+            TorrentManager.getInstance(context).profile.profiles.entries.map { Pair(it.key, it.value.watchTime) },
             blocks
         )
         if (randomPeers.isEmpty() || randomProfileEntries.isEmpty()) return
