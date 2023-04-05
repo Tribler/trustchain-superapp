@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -81,6 +82,9 @@ class TorrentManager private constructor (
                 while (!content.isDownloaded()) {
                     delay(100)
                 }
+                profile.updateEntryDuration(
+                    MagnetLink.hashFromMagnet(content.handle.makeMagnetUri()),
+                    content.getVideoDuration())
             }
             content.asMediaInfo()
         } catch (e: TimeoutCancellationException) {
@@ -113,15 +117,14 @@ class TorrentManager private constructor (
             return
         }
         if (cachingAmount * 2 + 1 >= getNumberOfTorrents()) {
-            // TODO: This could potentially lead to issues, since what happens if the user locks
-            //        their screen or switches to another app for a while? Maybe this could be
-            //        changed to a place in the video adapter as well, if we can detect maybe when
-            //        a video is done playing and starts again, then update the duration if possible
             val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
             profile.updateEntryWatchTime(
                 MagnetLink.hashFromMagnet(uri),
                 updateTime(),
                 true)
+            profile.updateEntryDuration(
+                MagnetLink.hashFromMagnet(uri),
+                torrentFiles.gett(currentIndex).getVideoDuration())
             currentIndex = newIndex
             return
         }
@@ -139,6 +142,9 @@ class TorrentManager private constructor (
             MagnetLink.hashFromMagnet(uri),
             updateTime(),
         true)
+        profile.updateEntryDuration(
+            MagnetLink.hashFromMagnet(uri),
+            torrentFiles.gett(currentIndex).getVideoDuration())
         currentIndex = newIndex
     }
 
@@ -249,15 +255,15 @@ class TorrentManager private constructor (
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
-                torrentFiles.add(
-                    TorrentHandler(
-                        cacheDir,
-                        handle,
-                        torrentInfo.name(),
-                        fileName,
-                        it
-                    )
+                val torrent = TorrentHandler(
+                    cacheDir,
+                    handle,
+                    torrentInfo.name(),
+                    fileName,
+                    it
                 )
+                torrentFiles.add(torrent)
+                profile.torrents[torrent.handle.makeMagnetUri()] = ProfileEntry()
             }
         }
     }
@@ -291,6 +297,13 @@ class TorrentManager private constructor (
 
         fun getPath(): String {
             return "$cacheDir/$torrentName/$fileName"
+        }
+
+        fun getVideoDuration() : Long {
+            if(!isDownloaded()) return 0
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(getPath())
+            return retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
         }
 
         fun isPlayable(): Boolean {

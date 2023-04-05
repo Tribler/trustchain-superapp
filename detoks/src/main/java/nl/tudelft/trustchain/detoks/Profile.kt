@@ -2,11 +2,11 @@ package nl.tudelft.trustchain.detoks
 
 import android.util.Log
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
+import java.lang.Long.min
 
-/**
- * Basic structure for a profile entry
- */
+
 class ProfileEntry(
+    var duration:  Long = 0, // Video duration
     var watchTime: Long = 0, // Average watch time
     val firstSeen: Long = System.currentTimeMillis()
 ) : Comparable<ProfileEntry> {
@@ -20,25 +20,24 @@ class ProfileEntry(
 class Profile(
     val torrents: HashMap<String, ProfileEntry> = HashMap()
 ) {
+    object ProfileConfig { const val MAX_DURATION_RATIO  = 10 }
+
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
         if(!torrents.contains(key)) torrents[key] = ProfileEntry()
 
-        if (myUpdate) {
-            torrents[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
+        if(myUpdate) {
+            val newTime = min(time, torrents[key]!!.watchTime  * ProfileConfig.MAX_DURATION_RATIO)
+            torrents[key]!!.watchTime += (newTime / NetworkSizeGossiper.networkSizeEstimate)
         } else {
             torrents[key]!!.watchTime += time
             torrents[key]!!.watchTime /= 2
         }
         Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${torrents[key]!!.watchTime}")
     }
-}
 
-class Recommender {
-    private fun coinTossRecommender(torrents: HashMap<String, ProfileEntry>): Map<String, ProfileEntry> {
-        return torrents.map { it.key to it.value }.shuffled().toMap()
-    }
-
-    private fun watchTimeRecommender(torrents: HashMap<String, ProfileEntry>): Map<String, ProfileEntry> {
-        return torrents.toList().sortedBy { (_, entry) -> entry }.toMap()
+    fun updateEntryDuration(key: String, duration: Long) {
+        if(!torrents.contains(key)) torrents[key] = ProfileEntry()
+        torrents[key]!!.duration = duration
+        Log.i(DeToksCommunity.LOGGING_TAG, "Updated duration of $key to ${torrents[key]!!.duration}")
     }
 }
