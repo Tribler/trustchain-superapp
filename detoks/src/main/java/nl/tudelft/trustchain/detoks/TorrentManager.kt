@@ -329,6 +329,7 @@ class TorrentManager private constructor (
         try {
             withTimeout(timeout) {
                 Log.d(DeToksCommunity.LOGGING_TAG, "Waiting to download ${handler.torrentName}")
+                Log.e(DeToksCommunity.LOGGING_TAG, "metadata: ${handler.handle.status().hasMetadata()}")
                 while (!handler.isDownloaded()) {
                     Log.d(DeToksCommunity.LOGGING_TAG, "Trying to download... ${handler.handle.status().totalWantedDone()} / ${handler.handle.status().totalWanted()}")
                     delay(300)

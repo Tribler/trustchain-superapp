@@ -21,7 +21,6 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     }
 
     init {
-
         strategyComparators[STRATEGY_HIGHEST_WATCH_TIME] = :: highestWatchTimeStrategy
         strategyComparators[STRATEGY_LOWEST_WATCH_TIME] = :: lowestWatchTimeStrategy
     }
@@ -53,7 +52,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     ): MutableList<TorrentHandler> {
         if (id == 0) return handlers.shuffled().toMutableList()
         if (!strategyComparators.contains(id)) return handlers
-
+        
         val handlerProfile = handlers.map {
             val key = it.handle.infoHash().toString()
             if (!profiles.contains(key)) return@map Pair(it, ProfileEntry())
