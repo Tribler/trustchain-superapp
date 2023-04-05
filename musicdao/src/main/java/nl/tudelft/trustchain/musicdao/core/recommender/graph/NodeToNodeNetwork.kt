@@ -4,7 +4,7 @@ import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToNodeNetwork.CustomExporter
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToNodeNetwork.CustomImporter
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
-import nl.tudelft.trustchain.musicdao.core.recommender.randomwalk.RandomWalk
+import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRank
 import org.jgrapht.graph.SimpleDirectedWeightedGraph
 import org.jgrapht.traverse.RandomWalkVertexIterator
 import java.io.ByteArrayOutputStream
@@ -92,17 +92,6 @@ class NodeToNodeNetwork {
         val bos = ByteArrayOutputStream()
         GZIPOutputStream(bos).bufferedWriter().use { it.write(content) }
         return bos.toByteArray()
-    }
-
-    private fun initPersonalizedPageRank(repetitions: Long, maxHops: Long) {
-        //TODO: parallelize
-        for (i in 0 until repetitions) {
-            val iterator = RandomWalkVertexIterator(graph, sourceNode, maxHops, true, Random())
-            val randomWalk = RandomWalk<Node>()
-            while (iterator.hasNext()) {
-                randomWalk.addElement(iterator.next())
-            }
-        }
     }
 
     private fun ungzip(content: ByteArray): String =
