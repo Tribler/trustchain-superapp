@@ -102,10 +102,16 @@ class UpvoteToken constructor(
             }
 
             upvoteCommunity.createAgreementBlock(proposalBlock, proposalBlock.transaction)
+            val seedingMagnetUri = upvoteCommunity.torrentManager?.seedLikedVideo()
+            var toastMsg: String? = if (seedingMagnetUri != null) {
+                "Agreement block created, upvoted successfully and now seeding liked video with magnetURI: $seedingMagnetUri"
+            } else {
+                "Agreement block created, upvoted successfully, but failed to seed this video you liked"
+            }
             Log.i("DeToks", "Agreement block created!")
             Toast.makeText(
                 itemView.context,
-                "Agreement block created, upvoted successfully",
+                toastMsg  ,
                 Toast.LENGTH_SHORT
             ).show()
         } else {
