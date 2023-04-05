@@ -9,5 +9,13 @@
         android:id="@+id/detoksFragment"
         android:name="nl.tudelft.trustchain.detoks.DeToksFragment"
         android:label="DeToks">
+        <action android:id="@+id/action_toStrategyFragment"
+            app:destination="@id/strategyFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/strategyFragment"
+        android:name="nl.tudelft.trustchain.detoks.StrategyFragment"
+        android:label="Strategy">
     </fragment>
 </navigation>

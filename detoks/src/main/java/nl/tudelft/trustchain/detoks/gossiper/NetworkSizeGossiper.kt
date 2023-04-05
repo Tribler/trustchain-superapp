@@ -7,6 +7,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.trustchain.detoks.DeToksCommunity
 import kotlin.random.Random.Default.nextDouble
 
@@ -50,7 +51,7 @@ class NetworkSizeGossiper(
             awaitingResponse.add(it.mid)
             deToksCommunity.gossipWith(
                 it,
-                GossipMessage(DeToksCommunity.MESSAGE_NETWORK_SIZE_ID, leaderEstimates),
+                NetworkSizeMessage(leaderEstimates),
                 DeToksCommunity.MESSAGE_NETWORK_SIZE_ID
             )
         }
@@ -66,30 +67,24 @@ class NetworkSizeGossiper(
         /**
          * Applies counting algorithm to determine network size.
          */
-        fun receivedResponse(msg: GossipMessage, peer: Peer) {
+        fun receivedResponse(msg: NetworkSizeMessage, peer: Peer) {
             if (!awaitingResponse.contains(peer.mid)) {
                 val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
                 deToksCommunity.gossipWith(
                     peer,
-                    GossipMessage(DeToksCommunity.MESSAGE_NETWORK_SIZE_ID, leaderEstimates),
+                    NetworkSizeMessage(leaderEstimates),
                     DeToksCommunity.MESSAGE_NETWORK_SIZE_ID
-                )
-            }
-            val entries = msg.data.map {
-                Pair(
-                    (it as Pair<*,*>).first as String,
-                    (it.second as String).toDouble()
                 )
             }
 
             val myKeys = leaderEstimates.map { it.first }
-            val otherKeys = entries.map { it.first }
+            val otherKeys = msg.data.map { it.first }
 
             val myUnique = leaderEstimates
                 .filter { !otherKeys.contains(it.first) }
                 .map { Pair(it.first, it.second / 2) }
 
-            val otherUnique = entries
+            val otherUnique = msg.data
                 .filter { !myKeys.contains(it.first) }
                 .map { Pair(it.first, it.second / 2) }
 
@@ -98,12 +93,23 @@ class NetworkSizeGossiper(
                 .map {
                     Pair(
                         it.first, it.second + (
-                            entries.find { it1 -> it1.first == it.first }?.second ?: 0.0
+                            msg.data.find { it1 -> it1.first == it.first }?.second ?: 0.0
                             )
                     )
                 }
 
             leaderEstimates = listOf(myUnique, otherUnique, shared).flatten()
+        }
+    }
+}
+
+class NetworkSizeMessage(data: List<Pair<String, Double>>) : GossipMessage<Double>(data) {
+    companion object Deserializer : Deserializable<NetworkSizeMessage> {
+        override fun deserialize(buffer: ByteArray, offset: Int): Pair<NetworkSizeMessage, Int> {
+            val msg = deserializeMessage(buffer, offset){
+                return@deserializeMessage Pair(it.getString(0), it.getDouble(1))
+            }
+            return Pair(NetworkSizeMessage(msg.first), msg.second)
         }
     }
 }

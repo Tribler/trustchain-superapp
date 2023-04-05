@@ -2,6 +2,8 @@ package nl.tudelft.trustchain.detoks
 
 import android.content.Context
 import android.util.Log
+import com.frostwire.jlibtorrent.Sha1Hash
+import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -10,9 +12,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
-import nl.tudelft.trustchain.detoks.gossiper.BootGossiper
-import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
-import nl.tudelft.trustchain.detoks.gossiper.GossipMessage
+import nl.tudelft.trustchain.detoks.gossiper.*
 
 
 class DeToksCommunity(private val context: Context,
@@ -31,7 +31,6 @@ class DeToksCommunity(private val context: Context,
         messageHandlers[MESSAGE_NETWORK_SIZE_ID] = :: onNetworkSizeGossip
         messageHandlers[MESSAGE_BOOT_REQUEST] = :: onBootRequestGossip
         messageHandlers[MESSAGE_BOOT_RESPONSE] = :: onBootResponseGossip
-
     }
 
     companion object {
@@ -112,36 +111,39 @@ class DeToksCommunity(private val context: Context,
     }
 
     private fun onTorrentGossip(packet: Packet) {
-        val payload = packet.getPayload(GossipMessage.Deserializer)
+        val payload = packet.getPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-        payload.data.forEach { torrentManager.addTorrent(it as String) }
+        payload.data.forEach {
+            torrentManager.addTorrent(Sha1Hash(it.first), it.second)
+        }
     }
 
     private fun onWatchTimeGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(GossipMessage.Deserializer)
+        val (peer, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
         Log.d(LOGGING_TAG, "Received watch time entry from ${peer.mid}, payload: ${payload.data}")
 
         payload.data.forEach {
             torrentManager.profile.updateEntryWatchTime(
-                (it as Pair<*, *>).first as String, it.second.toString().toLong(),
+                it.first,
+                it.second,
                 false
             )
         }
     }
 
     private fun onNetworkSizeGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(GossipMessage.Deserializer)
+        val (peer, payload) = packet.getAuthPayload(NetworkSizeMessage.Deserializer)
         NetworkSizeGossiper.receivedResponse(payload, peer)
     }
 
     private fun onBootRequestGossip(packet: Packet) {
-        val (peer, _) = packet.getAuthPayload(GossipMessage.Deserializer)
+        val (peer, _) = packet.getAuthPayload(BootMessage.Deserializer)
         BootGossiper.receivedRequest(peer)
     }
 
     private fun onBootResponseGossip(packet: Packet) {
-        val (_, payload) = packet.getAuthPayload(GossipMessage.Deserializer)
+        val (_, payload) = packet.getAuthPayload(BootMessage.Deserializer)
         BootGossiper.receivedResponse(payload.data)
     }
 

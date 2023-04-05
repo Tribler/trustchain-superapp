@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_activity_main_detoks">DeToks</string>
+    <string name="seeding_strategy">Seeding Strategy</string>
+    <string name="leaching_strategy">Leaching Strategy</string>
+    <string name="bandwidth_day_mb">Bandwidth/day (MB)</string>
+    <string name="hash">Hash</string>
+    <string name="download">Download</string>
+    <string name="upload">Upload</string>
+    <string name="balance">Balance</string>
 </resources>
