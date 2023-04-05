@@ -18,12 +18,21 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         const val STRATEGY_RANDOM = 0
         const val STRATEGY_HIGHEST_WATCH_TIME = 1
         const val STRATEGY_LOWEST_WATCH_TIME = 2
+        const val STRATEGY_HOT = 3
+        const val STRATEGY_RISING = 4
+        const val STRATEGY_NEW = 5
+        const val STRATEGY_TOP = 6
     }
 
     init {
 
         strategyComparators[STRATEGY_HIGHEST_WATCH_TIME] = :: highestWatchTimeStrategy
         strategyComparators[STRATEGY_LOWEST_WATCH_TIME] = :: lowestWatchTimeStrategy
+
+        strategyComparators[STRATEGY_HOT] = :: lowestWatchTimeStrategy
+        strategyComparators[STRATEGY_RISING] = :: lowestWatchTimeStrategy
+        strategyComparators[STRATEGY_NEW] = :: lowestWatchTimeStrategy
+        strategyComparators[STRATEGY_TOP] = :: lowestWatchTimeStrategy
     }
 
     /**
@@ -42,6 +51,10 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         p1: Pair<TorrentHandler, ProfileEntry?>
     ) : Int = p1.second!!.watchTime compareTo p0.second!!.watchTime
 
+    /**
+     * Returns the torrent handlers based on when they were first uploaded
+     */
+    //TODO: add the new strategies
 
     /**
      * Applies the sorting function sent as parameter, to the handlers, based on the profiles.

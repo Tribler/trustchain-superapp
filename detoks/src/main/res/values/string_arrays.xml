@@ -4,5 +4,9 @@
         <item>Random</item>
         <item>Highest watch time</item>
         <item>Lowest watch time</item>
+        <item>Hot</item>
+        <item>Rising</item>
+        <item>New</item>
+        <item>Top</item>
     </string-array>
 </resources>
