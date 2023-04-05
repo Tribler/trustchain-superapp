@@ -25,7 +25,6 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     }
 
     init {
-
         strategyComparators[STRATEGY_HIGHEST_WATCH_TIME] = :: highestWatchTimeStrategy
         strategyComparators[STRATEGY_LOWEST_WATCH_TIME] = :: lowestWatchTimeStrategy
 
