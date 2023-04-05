@@ -287,7 +287,11 @@ class TorrentManager private constructor (
         strategies.seedingStrategy = strategyId
         strategies.storageLimit = storageLimit
 
-        val seedingTorrentsSorted = strategies.applyStrategy(strategyId, torrentFiles, profile.profiles)
+        val seedingTorrentsSorted = strategies.applyStrategy(
+            strategyId,
+            torrentFiles,
+            profile.profiles
+        ).distinctBy { it.handle }
         var storage: Long = 0
 
         val jobs = mutableListOf<Job>()
@@ -295,8 +299,7 @@ class TorrentManager private constructor (
         val toStopSeeding = seedingTorrents.toMutableList()
         seedingTorrents.clear()
 
-
-        for (i in 0 until seedingTorrentsSorted.size) {
+        for (i in seedingTorrentsSorted.indices) {
             val size = seedingTorrentsSorted[i].handle.status().total() / 1000000 //TODO: store as byte to avoid all conversions
 
             if (storage + size > strategies.storageLimit) continue
@@ -328,8 +331,6 @@ class TorrentManager private constructor (
 
         try {
             withTimeout(timeout) {
-                Log.d(DeToksCommunity.LOGGING_TAG, "Waiting to download ${handler.torrentName}")
-                Log.e(DeToksCommunity.LOGGING_TAG, "metadata: ${handler.handle.status().hasMetadata()}")
                 while (!handler.isDownloaded()) {
                     Log.d(DeToksCommunity.LOGGING_TAG, "Trying to download... ${handler.handle.status().totalWantedDone()} / ${handler.handle.status().totalWanted()}")
                     delay(300)
@@ -355,7 +356,6 @@ class TorrentManager private constructor (
     }
 
     private fun stopSeedingTorrent(handler: TorrentHandler) {
-        Log.d(DeToksCommunity.LOGGING_TAG, "Stopping seeding for torrent ${handler.torrentName}")
         handler.handle.unsetFlags(TorrentFlags.SEED_MODE)
         handler.handle.pause()
         handler.handle.resume()

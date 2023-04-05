@@ -166,7 +166,7 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val handler = strategyData[position]
         val convBtoMB = 1000000
 
-        holder.hashTextView.text = strategyData[position].handle.infoHash().toString()
+        holder.hashTextView.text = strategyData[position].handle.name()
 
         holder.downloadTextView.text = (handler.handle.status().allTimeDownload()
             / convBtoMB).toString()
@@ -175,10 +175,10 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
             / convBtoMB).toString()
 
         //TODO: replace by actual token balance
-        holder.balanceTextView.text = ((strategyData[position].handle.status().allTimeUpload()
-            - strategyData[position].handle.status().allTimeDownload()) / 100000).toString()
-//        holder.balanceTextView.text = strategyData[position].handle.status().lastUpload().toString()
-
+        holder.balanceTextView.text = (
+            (strategyData[position].handle.status().allTimeUpload()
+            - strategyData[position].handle.status().allTimeDownload())
+            / convBtoMB).toString()
     }
 
     override fun getItemCount(): Int = strategyData.size
