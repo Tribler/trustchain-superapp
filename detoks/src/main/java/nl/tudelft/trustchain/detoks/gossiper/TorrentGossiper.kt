@@ -33,6 +33,7 @@ class TorrentGossiper(
         val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
         val handlers = TorrentManager.getInstance(context).getListOfTorrents()
+        val profile = TorrentManager.getInstance(context).profile
         if (randomPeers.isEmpty() || handlers.isEmpty()) return
 
         val max = if (handlers.size < blocks) handlers.size else blocks
@@ -40,10 +41,11 @@ class TorrentGossiper(
 
         if(randomMagnets.isNotEmpty())
             randomPeers.forEach {
-                val data = randomMagnets.map {it2 -> Pair(
-                    it2,
-                    TorrentManager.getInstance(context).profile
-                        .torrents[MagnetLink.hashFromMagnet(it2)]!!.hopCount + 1)} // increment hop
+                val data = randomMagnets
+                    .filter { it2 -> profile.torrents.containsKey(MagnetLink.hashFromMagnet(it2)) }
+                    .map { it3 -> Pair(
+                        it3,
+                        profile.torrents[MagnetLink.hashFromMagnet(it3)]!!.hopCount + 1) }
                 deToksCommunity.gossipWith(
                     it,
                     TorrentMessage(data),
