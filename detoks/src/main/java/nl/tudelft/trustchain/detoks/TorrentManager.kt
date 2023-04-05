@@ -9,7 +9,6 @@ import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
-import com.frostwire.jlibtorrent.alerts.TrackerErrorAlert
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import java.io.File
@@ -300,7 +299,7 @@ class TorrentManager private constructor (
         seedingTorrents.clear()
 
         for (i in seedingTorrentsSorted.indices) {
-            val size = seedingTorrentsSorted[i].handle.status().total() / 1000000 //TODO: store as byte to avoid all conversions
+            val size = seedingTorrentsSorted[i].handle.status().total() / 1000000
 
             if (storage + size > strategies.storageLimit) continue
 

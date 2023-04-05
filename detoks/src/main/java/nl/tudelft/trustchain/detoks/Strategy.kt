@@ -12,7 +12,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     var seedingStrategy = STRATEGY_RANDOM
 
     var seedingBandwidthLimit = 0
-    var storageLimit = 0
+    var storageLimit : Int = 0
 
     companion object {
         const val STRATEGY_RANDOM = 0
@@ -52,7 +52,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     ): MutableList<TorrentHandler> {
         if (id == 0) return handlers.shuffled().toMutableList()
         if (!strategyComparators.contains(id)) return handlers
-        
+
         val handlerProfile = handlers.map {
             val key = it.handle.infoHash().toString()
             if (!profiles.contains(key)) return@map Pair(it, ProfileEntry())

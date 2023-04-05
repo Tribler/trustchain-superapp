@@ -148,7 +148,7 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val balanceTextView: TextView
 
         init {
-            hashTextView = view.findViewById(R.id.hash)
+            hashTextView = view.findViewById(R.id.name)
             downloadTextView = view.findViewById(R.id.download)
             uploadTextView = view.findViewById(R.id.upload)
             balanceTextView = view.findViewById(R.id.balance)
