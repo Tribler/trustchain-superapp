@@ -7,14 +7,14 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
-import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
+import nl.tudelft.trustchain.detoks.util.CommunityConstants
 
 class Balance {
 
     fun dailyBalanceCheckpoint(tokensSent: TextView, tokensReceived: TextView, tokensBalance: TextView) {
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
         val myPublicKey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
-        val latestBalanceCheckpoint = upvoteCommunity.database.getLatest(myPublicKey, UpvoteTrustchainConstants.BALANCE_CHECKPOINT)
+        val latestBalanceCheckpoint = upvoteCommunity.database.getLatest(myPublicKey, CommunityConstants.BALANCE_CHECKPOINT)
         if (latestBalanceCheckpoint != null) {
             //if date is today then don't do anything because there is already a block for today
             if (DateUtils.isToday(latestBalanceCheckpoint.timestamp.time)) return
@@ -22,7 +22,7 @@ class Balance {
             var sent = latestBalanceCheckpoint.transaction.get("sent")!!.toString().toInt();
             var received = latestBalanceCheckpoint.transaction.get("received")!!.toString().toInt();
             for (block: TrustChainBlock in blocksToProcess){
-                if (block.type.equals(UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN)) {
+                if (block.type.equals(CommunityConstants.GIVE_UPVOTE_TOKEN)) {
                     if (block.isAgreement && block.linkPublicKey.toHex().equals(myPublicKey.toHex())) {
                         received++
                     }
@@ -36,7 +36,8 @@ class Balance {
                 "received" to received,
                 "balance" to received - sent
             )
-            upvoteCommunity.createProposalBlock(UpvoteTrustchainConstants.BALANCE_CHECKPOINT, transaction, myPublicKey)
+            // Todo during the Wednesday groupmeeting on 15th of March 2023 we mentioned that it may be better to send the proposalblock to another peer instead?
+            upvoteCommunity.createProposalBlock(CommunityConstants.BALANCE_CHECKPOINT, transaction, myPublicKey)
         } else {
             // else case : first checkpoint block
             // get all balances
@@ -46,13 +47,13 @@ class Balance {
                 "received" to received,
                 "balance" to balance
             )
-            upvoteCommunity.createProposalBlock(UpvoteTrustchainConstants.BALANCE_CHECKPOINT, transaction, myPublicKey)
+            upvoteCommunity.createProposalBlock(CommunityConstants.BALANCE_CHECKPOINT, transaction, myPublicKey)
         }
     }
 
     fun checkTokenBalance(tokensSent: TextView, tokensReceived: TextView, tokensBalance: TextView):Triple<Int, Int, Int> {
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
-        val allBlocks = upvoteCommunity.database.getBlocksWithType(UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN)
+        val allBlocks = upvoteCommunity.database.getBlocksWithType(CommunityConstants.GIVE_UPVOTE_TOKEN)
         var sent = 0;
         var received = 0;
         for (block: TrustChainBlock in allBlocks) {
