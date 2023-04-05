@@ -20,20 +20,18 @@ class ProfileEntry(
 class Profile(
     val torrents: HashMap<String, ProfileEntry> = HashMap()
 ) {
-    object ProfileConfig { const val MAX_DURATION_RATIO: Long = 10 }
+    object ProfileConfig { const val MAX_DURATION_RATIO  = 10 }
 
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
         if(!torrents.contains(key)) torrents[key] = ProfileEntry()
-        var newWatchTime = torrents[key]!!.watchTime
 
         if(myUpdate) {
-            newWatchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
+            val newTime = min(time, torrents[key]!!.watchTime  * ProfileConfig.MAX_DURATION_RATIO)
+            torrents[key]!!.watchTime += (newTime / NetworkSizeGossiper.networkSizeEstimate)
         } else {
-            newWatchTime += time
-            newWatchTime /= 2
+            torrents[key]!!.watchTime += time
+            torrents[key]!!.watchTime /= 2
         }
-        newWatchTime -= torrents[key]!!.watchTime
-        torrents[key]!!.watchTime += min(newWatchTime, torrents[key]!!.duration * ProfileConfig.MAX_DURATION_RATIO)
         Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${torrents[key]!!.watchTime}")
     }
 
