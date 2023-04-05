@@ -2,10 +2,9 @@ package nl.tudelft.trustchain.detoks
 
 import android.util.Log
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
+import java.lang.Long.min
 
-/**
- * Basic structure for a profile entry
- */
+
 class ProfileEntry(
     var duration:  Long = 0, // Video duration
     var watchTime: Long = 0, // Average watch time
@@ -21,15 +20,20 @@ class ProfileEntry(
 class Profile(
     val torrents: HashMap<String, ProfileEntry> = HashMap()
 ) {
+    object ProfileConfig { const val MAX_DURATION_RATIO: Long = 10 }
+
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
         if(!torrents.contains(key)) torrents[key] = ProfileEntry()
+        var newWatchTime = torrents[key]!!.watchTime
 
-        if (myUpdate) {
-            torrents[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
+        if(myUpdate) {
+            newWatchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
         } else {
-            torrents[key]!!.watchTime += time
-            torrents[key]!!.watchTime /= 2
+            newWatchTime += time
+            newWatchTime /= 2
         }
+        newWatchTime -= torrents[key]!!.watchTime
+        torrents[key]!!.watchTime += min(newWatchTime, torrents[key]!!.duration * ProfileConfig.MAX_DURATION_RATIO)
         Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${torrents[key]!!.watchTime}")
     }
 
