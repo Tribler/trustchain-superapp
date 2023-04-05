@@ -38,8 +38,6 @@ class TorrentManager(
     private var currentIndex = 0
     private val torrentHandleBeingSeeded = mutableListOf<TorrentHandle>()
     private val seedableTorrentInfo = mutableListOf<TorrentInfo>()
-    var sessionActive = false
-    internal var signal = CountDownLatch(0)
     init {
         clearMediaCache()
         initializeSessionManager()
@@ -191,7 +189,7 @@ class TorrentManager(
         }
         return TorrentInfo.bdecode(bytes)
     }
-    
+
     /**
      * Start seeding the video that is currently on the screen
      * To be called when the user double clicks, //TODO first check if the current video is created by someone else first
