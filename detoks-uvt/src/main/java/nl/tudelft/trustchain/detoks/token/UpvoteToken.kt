@@ -8,7 +8,9 @@ import android.widget.Toast
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.messaging.serializeVarLen
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
+import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.helpers.DateFormatter
 import nl.tudelft.trustchain.detoks.exception.InvalidMintException
@@ -81,6 +83,40 @@ class UpvoteToken constructor(
         val myPubKey = upvoteCommunity?.myPeer?.publicKey.toString()
         //val upvoteToken = UpvoteToken(1, "1679006615", "12345678910", 1)
         //val toastMessage = upvoteCommunity?.sendUpvoteToken(upvoteToken.tokenID.toString(), localToGMT(upvoteToken.date.toLong()).toString(), upvoteToken.publicKeyMinter, upvoteToken.videoID.toString())
+
+        // check if already liked by self
+        // getBlockWithHash Method below might fail to get the proposal block if it is not in this peer's truststore
+        val proposalBlock = upvoteCommunity?.database?.getBlockWithHash(proposalBlockHash.text.toString().hexToBytes())
+        if (proposalBlock != null) {
+            val linkedBlocks = upvoteCommunity?.database?.getAllLinked(proposalBlock)
+            val alreadyLiked = linkedBlocks?.find { it.type == UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN
+                && it.publicKey.toHex()contentEquals(myPubKey)}
+            if (alreadyLiked != null) {
+                Log.i("DeToks", "You already liked this video, cannot like again")
+                Toast.makeText(
+                    itemView.context,
+                    "Cannot like a video more than once!",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+
+            upvoteCommunity.createAgreementBlock(proposalBlock, proposalBlock.transaction)
+            Log.i("DeToks", "Agreement block created!")
+            Toast.makeText(
+                itemView.context,
+                "Agreement block created, upvoted successfully",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            Toast.makeText(
+                itemView.context,
+                "This video does not have a proposal block attached to it and is thus not posted by anyone",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
         var toastMessage: String?
 
         try {
@@ -118,26 +154,6 @@ class UpvoteToken constructor(
             toastMessage,
             Toast.LENGTH_SHORT
         ).show()
-        // getBlockHash Method below might fail to get the proposal block if it is not in this peer's truststore
-        val proposalBlock = upvoteCommunity?.database?.getBlockWithHash(proposalBlockHash.text.toString().hexToBytes())
-        if (proposalBlock != null) {
-            upvoteCommunity.createAgreementBlock(proposalBlock, proposalBlock.transaction)
-            Log.i("DeToks", "Agreement block created!")
-        } else {
-            Toast.makeText(
-                itemView.context,
-                "This video does not have a proposal block attached to it and is thus not posted by anyone",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-        //TODO when a video is posted by peer A on phone Ap by long pressing,
-        // how does peer B get the video posted by peer A on its phone Bp?
-        // peer B first: needs to have peer A's posted video displayed on phone Bp
-        // only when the above condition is satisfied can peer B create an agreement block
-        // for peer A's proposal block that was created when peer posted a video (thus liking the video posted by peer A)
-
-        // TODO: Currently, it seems that a peer can only like a video created by itself
-        //       when we can distribute a video added by a peer to another peer B, peer B will be able to like that video
     }
 
     /**
