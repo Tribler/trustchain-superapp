@@ -24,13 +24,16 @@ class DeToksTransactionEngine (
     private val LOGTAG = "DeToksTransactionEngine"
 
     private lateinit var selectedPeer : Peer
+    private lateinit var selfPeer : Peer
     private var sendingToSelf = true
 
+    private var tokenIDIncrementer = 100
 
     init {
         // setup block listeners
         addListener(SINGLE_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d(LOGTAG, "")
                 if (!sendingToSelf && block.publicKey == selectedPeer.publicKey.keyToBin()) {
                     if (block.isProposal) {
                         Log.d(LOGTAG, "Received SINGLE proposal block")
@@ -124,11 +127,12 @@ class DeToksTransactionEngine (
                 val (uid, _) = token.split(",")
                 tokenList.add(uid)
                 // Add token to personal database
-                tokenStore.addToken((uid.toInt() + 200).toString(), block.publicKey.toString())
+                tokenStore.addToken((uid.toInt() + tokenIDIncrementer).toString(), block.publicKey.toString())
                 Log.d(LOGTAG, "Saving received $token to database")
             }
             grouped_agreement_uids.add(tokenList.toList())
         }
+        tokenIDIncrementer += 100
         val transaction = mapOf("tokensSent" to grouped_agreement_uids.toList())
         createAgreementBlock(block, transaction)
     }
@@ -148,19 +152,26 @@ class DeToksTransactionEngine (
         Log.d(LOGTAG, "Removing spent tokens $tokensToRemove from database")
     }
 
-    fun addPeer(peer: Peer) {
+    fun addPeer(peer: Peer, self : Boolean = false) {
         selectedPeer = peer
-        sendingToSelf = false
+        if (!self) {
+            sendingToSelf = false
+        }
         Log.d(LOGTAG, "Selected peer: ${selectedPeer.address.toString()}")
+    }
+
+    fun initializePeers(self: Peer) {
+        selectedPeer = self
+        selfPeer = self
     }
 
     fun getSelectedPeer() : Peer {
         return selectedPeer
     }
 
-//    fun clearSelectedPeer() {
-//        selectedPeer = null
-//    }
+    fun getSelfPeer() : Peer {
+        return selfPeer
+    }
 
     fun isPeerSelected() : Boolean {
         return ::selectedPeer.isInitialized

@@ -47,7 +47,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             for (transactionGroup in dummyTransactions.chunked(groupSize)) {
                 transactionEngine.sendTokenGrouped(transactionGroup, transactionEngine.getSelectedPeer())
             }
-             }
+            tokenIDCounter += 200
+         }
         return executionTime
     }
 
@@ -60,7 +61,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         transactionEngine.tokenStore.removeAllTokens()
 
         if (!transactionEngine.isPeerSelected()) {
-            transactionEngine.addPeer(ipv8.myPeer)
+            transactionEngine.initializePeers(ipv8.myPeer)
         }
 
 
@@ -129,7 +130,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     }
 
     private fun connectedPeerToString() : String {
-        return transactionEngine.getSelectedPeer().address.toString()
+        return transactionEngine.getSelectedPeer().address.toString() + " | " + transactionEngine.getSelfPeer().address.toString()
     }
 
     fun switchEnvirmonments(view: View) {
