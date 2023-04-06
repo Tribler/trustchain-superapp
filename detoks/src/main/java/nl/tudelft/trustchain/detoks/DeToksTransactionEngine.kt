@@ -36,8 +36,7 @@ class DeToksTransactionEngine (
         addListener(SINGLE_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d(LOGTAG, "")
-                // TODO - add sending to self?
-                if (!block.linkPublicKey.contentEquals(selfPeer.publicKey.keyToBin())) {
+                if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
                     if (block.isProposal) {
                         Log.d(LOGTAG, "Received SINGLE proposal block")
                         receiveSingleTokenProposal(block)
