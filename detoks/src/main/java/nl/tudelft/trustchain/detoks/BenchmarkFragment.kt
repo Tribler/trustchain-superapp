@@ -29,13 +29,10 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private var tokensPerTransaction = 1
     private var tokenIDCounter = 0
 
-    private val dummyTokens = mutableListOf<Token>()
-    private val dummyTransactions = mutableListOf<List<Token>>()
-
     fun singleBenchmark(): Long {
 
         val executionTime = measureTimeMillis {
-            for (tok in dummyTokens) {
+            for (tok in transactionEngine.tokenStore.getAllTokens()) {
                 transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
             }
         }
@@ -60,26 +57,13 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         ipv8 = getIpv8()
         transactionEngine = ipv8.getOverlay()!!
         trustchainCommunity = ipv8.getOverlay()!!
-        transactionEngine.tokenStore.removeAllTokens()
 
+        // initialize the peers
         if (!transactionEngine.isPeerSelected()) {
             transactionEngine.initializePeers(ipv8.myPeer)
         }
 
-
-//        // populate the dummy tokens list
-//        for (i in 0..totalTransactions) {
-//            val token = Token(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin())
-//            dummyTokens.add(token)
-//            // Add Token to the token store
-//            transactionEngine.tokenStore.addToken(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin().toString())
-//            tokenIDCounter++
-//        }
-//
-//        // populate the dummy transactions
-//        for(i in 0 .. totalTransactions){
-//            dummyTransactions.add(listOf(dummyTokens[i]))
-//        }
+        binding.otherPeers.text = connectedPeerToString()
 
         binding.generateTokensButton.setOnClickListener {
             generateTokens()
@@ -129,11 +113,9 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             navController.navigate(R.id.action_connect_to_peer_fragment)
         }
 
-        binding.updateListButton.setOnClickListener {
-            updateList()
+        binding.resetTokensButton.setOnClickListener {
+            transactionEngine.tokenStore.removeAllTokens()
         }
-
-
 
     }
 
@@ -142,22 +124,22 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         for (token in transactionEngine.tokenStore.getAllTokens()){
             adapter.insert(token, adapter.count)
         }
-        //binding.otherPeers.text = connectedPeerToString()
     }
 
     private fun generateTokens() {
         for (i in 0..totalTransactions) {
-            val token = Token(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin())
-            dummyTokens.add(token)
             // Add Token to the token store
             transactionEngine.tokenStore.addToken(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin().toString())
             tokenIDCounter++
-            dummyTransactions.add(listOf(token))
         }
     }
 
     private fun connectedPeerToString() : String {
-        return transactionEngine.getSelectedPeer().publicKey.toString()
+        if (!transactionEngine.isPeerSelected()) {
+            return transactionEngine.getSelfPeer().publicKey.toString()
+        } else {
+            return transactionEngine.getSelectedPeer().publicKey.toString()
+        }
     }
 
     fun switchEnvirmonments(view: View) {

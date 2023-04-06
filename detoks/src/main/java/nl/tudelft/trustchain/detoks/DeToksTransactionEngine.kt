@@ -28,7 +28,8 @@ class DeToksTransactionEngine (
     private lateinit var selfPeer : Peer
     private var sendingToSelf = true
 
-    private var tokenIDIncrementer = 100
+    // This value is 1000 because we will be doing 1000 transactions benchmarks
+    private var tokenIDIncrementer = 1000
 
     init {
         // setup block listeners
@@ -144,9 +145,6 @@ class DeToksTransactionEngine (
             }
             grouped_agreement_uids.add(tokenList.toList())
         }
-//        if (sendingToSelf) {
-//            tokenIDIncrementer += 100
-//        }
         val transaction = mapOf("tokensSent" to grouped_agreement_uids.toList())
         createAgreementBlock(block, transaction)
     }
