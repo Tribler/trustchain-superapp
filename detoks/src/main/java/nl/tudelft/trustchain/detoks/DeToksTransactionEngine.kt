@@ -131,15 +131,23 @@ class DeToksTransactionEngine (
             for (token in transaction) {
                 val (uid, _) = token.split(",")
                 tokenList.add(uid)
+
                 // Add token to personal database
-                tokenStore.addToken((uid.toInt() + tokenIDIncrementer).toString(), block.publicKey.toString())
+                // If sending to self ->  Increment the ID to avoid duplicate ID errors.
+                var newID = uid.toInt()
+                Log.d(LOGTAG, "Sending to self: $sendingToSelf")
+                if (sendingToSelf) {
+                    newID += tokenIDIncrementer
+                }
+                tokenStore.addToken((newID).toString(), block.publicKey.toString())
                 Log.d(LOGTAG, "Saving received $token to database")
             }
             grouped_agreement_uids.add(tokenList.toList())
         }
-        tokenIDIncrementer += 100
+//        if (sendingToSelf) {
+//            tokenIDIncrementer += 100
+//        }
         val transaction = mapOf("tokensSent" to grouped_agreement_uids.toList())
-        Log.d(LOGTAG, "PROBLEMATIC TRANSACTION ^")
         createAgreementBlock(block, transaction)
     }
     @Suppress("UNCHECKED_CAST")
@@ -160,10 +168,8 @@ class DeToksTransactionEngine (
 
     fun addPeer(peer: Peer, self : Boolean = false) {
         selectedPeer = peer
-        if (!self) {
-            sendingToSelf = false
-        }
-        Log.d(LOGTAG, "Selected peer: ${selectedPeer.address.toString()}")
+        sendingToSelf = self
+        Log.d(LOGTAG, "Selected peer: ${selectedPeer.publicKey}")
     }
 
     fun initializePeers(self: Peer) {
