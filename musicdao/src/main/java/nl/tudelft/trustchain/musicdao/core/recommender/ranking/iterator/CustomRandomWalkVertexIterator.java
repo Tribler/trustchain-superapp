@@ -98,7 +98,7 @@ public class CustomRandomWalkVertexIterator<V, E>
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void computeNext()
     {
-        if (hops >= maxHops || rng.nextFloat() < resetProbability) {
+        if (hops >= maxHops || (rng.nextFloat() < resetProbability)) {
             nextVertex = null;
             return;
         }
@@ -131,7 +131,7 @@ public class CustomRandomWalkVertexIterator<V, E>
 
     private void computeNextPrimitive()
     {
-        if (hops >= maxHops || rng.nextFloat() < resetProbability) {
+        if (hops >= maxHops || (rng.nextFloat() < resetProbability)) {
             nextVertex = null;
             return;
         }
