@@ -35,11 +35,6 @@ class VideosAdapter(
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
         holder.setVideoData(mVideoItems[position], position, onPlaybackError)
-        // TODO: retrieve some metrics from here by setting a listener
-        // holder.itemView.setOnClickListener {
-        //   holder.mVideoView.isVisible
-        //   holder.mVideoView.isPlaying
-        // }
     }
 
     override fun getItemCount(): Int {

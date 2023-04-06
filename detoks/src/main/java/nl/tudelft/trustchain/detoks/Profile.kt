@@ -18,38 +18,43 @@ class ProfileEntry(
 class Profile(
     val profiles: HashMap<String, ProfileEntry> = HashMap()
 ) {
+    private fun log(string: String) {
+        Log.i(DeToksCommunity.LOGGING_TAG, string)
+    }
+
     fun hasWatched(key: String): Boolean {
         return profiles.contains(key) && profiles[key]!!.watched
     }
 
-    fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
+    fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean, log: Boolean = false) {
         if(!profiles.contains(key)) profiles[key] = ProfileEntry()
 
-        if (myUpdate) {
+        if(myUpdate) {
+            if(!profiles[key]!!.watched && log) log("Watched $key for the first time")
             profiles[key]!!.watched = true
             profiles[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
         } else {
             profiles[key]!!.watchTime += time
             profiles[key]!!.watchTime /= 2
         }
-        Log.i(DeToksCommunity.LOGGING_TAG, "Updated watchtime of $key to ${profiles[key]!!.watchTime}")
+        if(log) log("Updated watchtime of $key to ${profiles[key]!!.watchTime}")
     }
 
-    fun updateEntryDuration(key: String, duration: Long) {
+    fun updateEntryDuration(key: String, duration: Long, log: Boolean = false) {
         if(!profiles.contains(key)) profiles[key] = ProfileEntry()
         profiles[key]!!.duration = duration
-        Log.i(DeToksCommunity.LOGGING_TAG, "Updated duration of $key to ${profiles[key]!!.duration}")
+        if(log) log("Updated duration of $key to ${profiles[key]!!.duration}")
     }
 
-    fun updateEntryHopCount(key: String, hopCount: Int) {
+    fun updateEntryHopCount(key: String, hopCount: Int, log: Boolean = false) {
         if(!profiles.contains(key)) profiles[key] = ProfileEntry()
         profiles[key]!!.hopCount = hopCount
-        Log.i(DeToksCommunity.LOGGING_TAG, "Updated hop count of $key to ${profiles[key]!!.hopCount}")
+        if(log) log("Updated hop count of $key to ${profiles[key]!!.hopCount}")
     }
 
-    fun incrementTimesSeen(key: String) {
+    fun incrementTimesSeen(key: String, log: Boolean = false) {
         if(!profiles.contains(key)) profiles[key] = ProfileEntry(timesSeen = 0)
         profiles[key]!!.timesSeen += 1
-        Log.i(DeToksCommunity.LOGGING_TAG, "Updated times seen of $key to ${profiles[key]!!.timesSeen}")
+        if(log) log("Updated times seen of $key to ${profiles[key]!!.timesSeen}")
     }
 }

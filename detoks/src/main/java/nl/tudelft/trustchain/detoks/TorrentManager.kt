@@ -10,7 +10,6 @@ import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
-import com.frostwire.jlibtorrent.alerts.TrackerErrorAlert
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import java.io.File
@@ -46,7 +45,6 @@ class TorrentManager private constructor (
         buildTorrentIndex()
         initializeVideoPool()
         lastTimeStamp = System.currentTimeMillis()
-
         unwatchedVideos = torrentFiles
     }
 
@@ -128,7 +126,7 @@ class TorrentManager private constructor (
             //        their screen or switches to another app for a while? Maybe this could be
             //        changed to a place in the video adapter as well, if we can detect maybe when
             //        a video is done playing and starts again, then update the duration if possible
-            val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()    //todo: make torrentFiles into unwatched videos
+            val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()    // TODO: make torrentFiles into unwatched videos
             profile.updateEntryWatchTime(
                 MagnetLink.hashFromMagnet(uri),
                 updateTime(),
@@ -195,9 +193,7 @@ class TorrentManager private constructor (
                                 it
                             )
                             torrentFiles.add(torrent)
-                            profile.profiles[torrent.handle.makeMagnetUri()] = ProfileEntry(
-                                uploadDate = torrentInfo.creationDate()
-                            )
+                            addProfile(torrent.handle.makeMagnetUri())
                         }
                     }
                 }
@@ -271,11 +267,14 @@ class TorrentManager private constructor (
                     it
                 )
                 torrentFiles.add(torrent)
-                profile.profiles[torrent.handle.makeMagnetUri()] = ProfileEntry(
-                    uploadDate = torrentInfo.creationDate()
-                )
+                addProfile(torrent.handle.makeMagnetUri())
             }
         }
+    }
+
+    fun addProfile(magnet: String) {
+        profile.profiles[magnet] = ProfileEntry(
+            uploadDate = (getInfoFromMagnet(magnet)?:return).creationDate())
     }
 
     fun updateLeachingStrategy(strategyId: Int) {
@@ -415,7 +414,6 @@ class TorrentManager private constructor (
             if(!isDownloaded()) return 0
             val retriever = MediaMetadataRetriever()
             retriever.setDataSource(getPath())
-            Log.i(DeToksCommunity.LOGGING_TAG, "Requested duration of ${getPath()} which is ${retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0}")
             return retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
         }
 
