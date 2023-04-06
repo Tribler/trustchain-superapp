@@ -113,14 +113,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="example overlay"
-                    android:layout_marginEnd="20dp" />
+                    android:layout_marginEnd="20dp"
+                    android:visibility="gone"/>
 
                 <Button
                     android:id="@+id/toTest_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="To Test"
-                    android:layout_marginStart="20dp" />
+                    android:layout_marginStart="20dp"
+                    android:visibility="gone"/>
 
             </LinearLayout>
             <LinearLayout

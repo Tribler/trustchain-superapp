@@ -44,10 +44,9 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         val executionTime = measureTimeMillis {
 
-            for (transactionGroup in dummyTransactions.chunked(groupSize)) {
-                transactionEngine.sendTokenGrouped(transactionGroup, transactionEngine.getSelectedPeer())
+            for (transactionGroup in transactionEngine.tokenStore.getAllTokens().chunked(groupSize)) {
+                transactionEngine.sendTokenGrouped(listOf(transactionGroup), transactionEngine.getSelectedPeer())
             }
-            tokenIDCounter += 200
          }
         return executionTime
     }
