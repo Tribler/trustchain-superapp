@@ -2,6 +2,9 @@ package nl.tudelft.trustchain.detoks
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.navigation.Navigation
@@ -80,7 +83,6 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         binding.generateTokensButton.setOnClickListener {
             generateTokens()
-            updateList()
         }
 
         val environmentSwitchButton = view.findViewById<Button>(R.id.switch_environment_button)
@@ -91,12 +93,10 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         binding.startTransactionsButton.setOnClickListener {
             binding.transactionsPerSecondField.text = "${groupedBenchmark()} ms"
-            updateList()
         }
 
         binding.singleTransactionsButton.setOnClickListener {
             binding.singleTextField.text = "${singleBenchmark()} ms"
-            updateList()
         }
 
         binding.otherPeers.text = connectedPeerToString()
@@ -106,6 +106,15 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         )
         binding.blockListview.isClickable = true
         binding.blockListview.adapter = adapter
+
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                updateList()
+                handler.postDelayed(this, 1000)
+            }
+        }, 1000)
+
         binding.blockListview.setOnItemClickListener() { _, _, position, _ ->
             val token = adapter.getItem(position)
             val builder = AlertDialog.Builder(requireContext())
@@ -124,6 +133,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             updateList()
         }
 
+
+
     }
 
     private fun updateList() {
@@ -131,7 +142,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         for (token in transactionEngine.tokenStore.getAllTokens()){
             adapter.insert(token, adapter.count)
         }
-        binding.otherPeers.text = connectedPeerToString()
+        //binding.otherPeers.text = connectedPeerToString()
     }
 
     private fun generateTokens() {
