@@ -25,6 +25,7 @@ class DeToksTransactionEngine (
 
     private var selectedPeers = ArrayList<Peer>()
 
+    private val writeToDatabase: Boolean = true
 
     init {
         // setup block listeners
@@ -71,7 +72,9 @@ class DeToksTransactionEngine (
         println(pk)
 
         // Add token to personal database
-        tokenStore.addToken(uid, pk)
+        if (writeToDatabase) {
+            tokenStore.addToken(uid, pk)
+        }
 
         Log.d(LOGTAG, "Saving received $token to database")
 
@@ -81,8 +84,12 @@ class DeToksTransactionEngine (
 
     private fun receiveSingleTokenAgreement(block: TrustChainBlock) {
         val tokenId = block.transaction["tokenSent"] as String
-        // Remove token from personal database
-        tokenStore.removeTokenByID(tokenId)
+
+        if (writeToDatabase) {
+            // Remove token from personal database
+            tokenStore.removeTokenByID(tokenId)
+        }
+
         Log.d(LOGTAG, "Removing spent $tokenId from database")
     }
 
@@ -120,8 +127,12 @@ class DeToksTransactionEngine (
             for (token in transaction) {
                 val (uid, _) = token.split(",")
                 tokenList.add(uid)
-                // Add token to personal database
-                tokenStore.addToken((uid.toInt() + 200).toString(), block.publicKey.toString())
+
+                if (writeToDatabase) {
+                    // Add token to personal database
+                    tokenStore.addToken((uid.toInt() + 200).toString(), block.publicKey.toString())
+                }
+
                 Log.d(LOGTAG, "Saving received $token to database")
             }
             grouped_agreement_uids.add(tokenList.toList())
@@ -137,8 +148,12 @@ class DeToksTransactionEngine (
         val tokensToRemove= mutableListOf<String>()
         for (tokens in tokenIds ) {
                 for(token_id in tokens) {
-                    // Remove token from personal database
-                    tokenStore.removeTokenByID(token_id)
+
+                    if (writeToDatabase) {
+                        // Remove token from personal database
+                        tokenStore.removeTokenByID(token_id)
+                    }
+
                     tokensToRemove.add(token_id)
                 }
         }

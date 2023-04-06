@@ -7,11 +7,11 @@ import android.widget.Button
 import androidx.navigation.Navigation
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentBenchmarkBinding
 import kotlin.system.measureTimeMillis
+
 class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
     private val binding by viewBinding(FragmentBenchmarkBinding::bind)
@@ -19,9 +19,9 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private lateinit var ipv8: IPv8
     private lateinit var transactionEngine: DeToksTransactionEngine
     private lateinit var trustchainCommunity: TrustChainCommunity
-    private lateinit var adapter : TokenAdapter
+    private lateinit var adapter: TokenAdapter
 
-    private var totalTransactions = 30
+    private var totalTransactions = 1000
     private var groupSize = 10
     private var tokensPerTransaction = 1
     private var tokenIDCounter = 0
@@ -41,13 +41,12 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     }
 
     fun groupedBenchmark(): Long {
-
         val executionTime = measureTimeMillis {
 
             for (transactionGroup in dummyTransactions.chunked(groupSize)) {
                 transactionEngine.sendTokenGrouped(transactionGroup, ipv8.myPeer)
             }
-             }
+        }
         return executionTime
     }
 
@@ -64,12 +63,15 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             val token = Token(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin())
             dummyTokens.add(token)
             // Add Token to the token store
-            transactionEngine.tokenStore.addToken(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin().toString())
+            transactionEngine.tokenStore.addToken(
+                tokenIDCounter.toString(),
+                ipv8.myPeer.publicKey.keyToBin().toString()
+            )
             tokenIDCounter++
         }
 
         // populate the dummy transactions
-        for(i in 0 .. totalTransactions){
+        for (i in 0..totalTransactions) {
             dummyTransactions.add(listOf(dummyTokens[i]))
         }
 
@@ -89,9 +91,11 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         binding.otherPeers.text = connectedPeersToString()
 
-        adapter = TokenAdapter(requireActivity(),
+        adapter = TokenAdapter(
+            requireActivity(),
             transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
         )
+
         binding.blockListview.isClickable = true
         binding.blockListview.adapter = adapter
         binding.blockListview.setOnItemClickListener() { _, _, position, _ ->
@@ -110,7 +114,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         binding.updateListButton.setOnClickListener {
             adapter.clear()
-            for (token in transactionEngine.tokenStore.getAllTokens()){
+            for (token in transactionEngine.tokenStore.getAllTokens()) {
                 adapter.insert(token, adapter.count)
             }
             binding.otherPeers.text = connectedPeersToString()
@@ -123,8 +127,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
     }
 
-    private fun connectedPeersToString() : String {
-        var peers = transactionEngine.getSelectedPeers()
+    private fun connectedPeersToString(): String {
+        val peers = transactionEngine.getSelectedPeers()
         var res = ""
         if (peers.size > 0) {
             for (p in peers) {
