@@ -389,11 +389,11 @@ class TorrentManager private constructor (
     }
 
     fun getWatchedTorrents(): List<String> {
-        return (profile.profiles.keys).toList()
+        return profile.profiles.filter{ it.value.watched }.keys.toList()
     }
 
     fun getUnwatchedTorrents(): List<String> {
-        return (torrentFiles.map { it.handle.makeMagnetUri() } subtract profile.profiles.keys).toList()
+        return profile.profiles.filter{ !it.value.watched }.keys.toList()
     }
 
     class TorrentHandler(
