@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.detoks.gossiper
 
 import android.content.Context
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -42,10 +41,10 @@ class TorrentGossiper(
         if(randomMagnets.isNotEmpty())
             randomPeers.forEach {
                 val data = randomMagnets
-                    .filter { it2 -> profile.torrents.containsKey(MagnetLink.hashFromMagnet(it2)) }
+                    .filter { it2 -> profile.profiles.containsKey(MagnetLink.hashFromMagnet(it2)) }
                     .map { it3 -> Pair(
                         it3,
-                        profile.torrents[MagnetLink.hashFromMagnet(it3)]!!.hopCount + 1) }
+                        profile.profiles[MagnetLink.hashFromMagnet(it3)]!!.hopCount + 1) }
                 deToksCommunity.gossipWith(
                     it,
                     TorrentMessage(data),

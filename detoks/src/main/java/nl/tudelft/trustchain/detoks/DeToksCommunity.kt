@@ -23,7 +23,6 @@ class DeToksCommunity(private val context: Context) : Community() {
         messageHandlers[MESSAGE_NETWORK_SIZE_ID] = :: onNetworkSizeGossip
         messageHandlers[MESSAGE_BOOT_REQUEST] = :: onBootRequestGossip
         messageHandlers[MESSAGE_BOOT_RESPONSE] = :: onBootResponseGossip
-
     }
 
     companion object {
@@ -104,18 +103,15 @@ class DeToksCommunity(private val context: Context) : Community() {
         val torrentManager = TorrentManager.getInstance(context)
         Log.d(LOGGING_TAG, "Received torrent entry from ${peer.mid}, payload: ${payload.data}")
         payload.data.forEach {
-            torrentManager.addTorrent(Sha1Hash(MagnetLink.hashFromMagnet(it.first)), it.first)
-            torrentManager.profile.updateEntryHopCount(
-                MagnetLink.hashFromMagnet(it.first),
-                it.second
-            )
+            val hash = MagnetLink.hashFromMagnet(it.first)
+            torrentManager.addTorrent(Sha1Hash(hash), it.first)
+            torrentManager.profile.updateEntryHopCount(hash, it.second)
         }
     }
 
     private fun onWatchTimeGossip(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-        Log.d(LOGGING_TAG, "Received watch time entry from ${peer.mid}, payload: ${payload.data}")
 
         payload.data.forEach {
             torrentManager.profile.updateEntryWatchTime(
