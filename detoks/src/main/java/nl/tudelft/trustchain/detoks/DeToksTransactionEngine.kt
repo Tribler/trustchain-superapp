@@ -50,13 +50,8 @@ class DeToksTransactionEngine (
 
         addListener(GROUPED_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                if (!(AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey)) {
-                    Log.d(LOGTAG, "========== HERE ==========")
-                    Log.d(LOGTAG, "mypeer publickey: ${AndroidCryptoProvider.keyFromPublicBin(selfPeer.publicKey.keyToBin())}")
-                    Log.d(LOGTAG, "mypeer publickey: ${AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey)}")
-                    Log.d(LOGTAG, "block publickey: ${block.publicKey}")
-                    Log.d(LOGTAG, "========== HERE ==========")
-
+                // LinkPublicKey = the addressee of the block
+                if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
                     if (block.isProposal) {
                         Log.d(LOGTAG, "Received GROUPED proposal block")
                         receiveGroupedTokenProposal(block)

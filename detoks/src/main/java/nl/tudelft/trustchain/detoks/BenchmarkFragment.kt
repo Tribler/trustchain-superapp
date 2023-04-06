@@ -65,18 +65,23 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         }
 
 
-        // populate the dummy tokens list
-        for (i in 0..totalTransactions) {
-            val token = Token(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin())
-            dummyTokens.add(token)
-            // Add Token to the token store
-            transactionEngine.tokenStore.addToken(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin().toString())
-            tokenIDCounter++
-        }
+//        // populate the dummy tokens list
+//        for (i in 0..totalTransactions) {
+//            val token = Token(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin())
+//            dummyTokens.add(token)
+//            // Add Token to the token store
+//            transactionEngine.tokenStore.addToken(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin().toString())
+//            tokenIDCounter++
+//        }
+//
+//        // populate the dummy transactions
+//        for(i in 0 .. totalTransactions){
+//            dummyTransactions.add(listOf(dummyTokens[i]))
+//        }
 
-        // populate the dummy transactions
-        for(i in 0 .. totalTransactions){
-            dummyTransactions.add(listOf(dummyTokens[i]))
+        binding.generateTokensButton.setOnClickListener {
+            generateTokens()
+            updateList()
         }
 
         val environmentSwitchButton = view.findViewById<Button>(R.id.switch_environment_button)
@@ -87,10 +92,12 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         binding.startTransactionsButton.setOnClickListener {
             binding.transactionsPerSecondField.text = "${groupedBenchmark()} ms"
+            updateList()
         }
 
         binding.singleTransactionsButton.setOnClickListener {
             binding.singleTextField.text = "${singleBenchmark()} ms"
+            updateList()
         }
 
         binding.otherPeers.text = connectedPeerToString()
@@ -115,22 +122,32 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         }
 
         binding.updateListButton.setOnClickListener {
-            adapter.clear()
-            for (token in transactionEngine.tokenStore.getAllTokens()){
-                adapter.insert(token, adapter.count)
-            }
-            binding.otherPeers.text = connectedPeerToString()
-        }
-
-        binding.clearReceiversButton.setOnClickListener {
-            transactionEngine.addPeer(ipv8.myPeer)
-            binding.otherPeers.text = connectedPeerToString()
+            updateList()
         }
 
     }
 
+    private fun updateList() {
+        adapter.clear()
+        for (token in transactionEngine.tokenStore.getAllTokens()){
+            adapter.insert(token, adapter.count)
+        }
+        binding.otherPeers.text = connectedPeerToString()
+    }
+
+    private fun generateTokens() {
+        for (i in 0..totalTransactions) {
+            val token = Token(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin())
+            dummyTokens.add(token)
+            // Add Token to the token store
+            transactionEngine.tokenStore.addToken(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin().toString())
+            tokenIDCounter++
+            dummyTransactions.add(listOf(token))
+        }
+    }
+
     private fun connectedPeerToString() : String {
-        return transactionEngine.getSelectedPeer().address.toString() + " | " + transactionEngine.getSelfPeer().address.toString()
+        return transactionEngine.getSelectedPeer().publicKey.toString()
     }
 
     fun switchEnvirmonments(view: View) {
