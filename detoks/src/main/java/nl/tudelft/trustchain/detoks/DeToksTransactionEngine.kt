@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.detoks.db.TokenStore
@@ -35,7 +36,7 @@ class DeToksTransactionEngine (
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d(LOGTAG, "")
                 // TODO - add sending to self?
-                if (!block.linkPublicKey.contentEquals(myPeer.publicKey.keyToBin())) {
+                if (!block.linkPublicKey.contentEquals(selfPeer.publicKey.keyToBin())) {
                     if (block.isProposal) {
                         Log.d(LOGTAG, "Received SINGLE proposal block")
                         receiveSingleTokenProposal(block)
@@ -49,12 +50,20 @@ class DeToksTransactionEngine (
 
         addListener(GROUPED_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                if (block.isProposal) {
-                    Log.d(LOGTAG, "Received GROUPED proposal block")
-                    receiveGroupedTokenProposal(block)
-                } else if (block.isAgreement) {
-                    Log.d(LOGTAG, "Received GROUPED agreement block")
-                    receiveGroupedTokenAgreement(block)
+                if (!(AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey)) {
+                    Log.d(LOGTAG, "========== HERE ==========")
+                    Log.d(LOGTAG, "mypeer publickey: ${AndroidCryptoProvider.keyFromPublicBin(selfPeer.publicKey.keyToBin())}")
+                    Log.d(LOGTAG, "mypeer publickey: ${AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey)}")
+                    Log.d(LOGTAG, "block publickey: ${block.publicKey}")
+                    Log.d(LOGTAG, "========== HERE ==========")
+
+                    if (block.isProposal) {
+                        Log.d(LOGTAG, "Received GROUPED proposal block")
+                        receiveGroupedTokenProposal(block)
+                    } else if (block.isAgreement) {
+                        Log.d(LOGTAG, "Received GROUPED agreement block")
+                        receiveGroupedTokenAgreement(block)
+                    }
                 }
             }
         })
@@ -135,6 +144,7 @@ class DeToksTransactionEngine (
         }
         tokenIDIncrementer += 100
         val transaction = mapOf("tokensSent" to grouped_agreement_uids.toList())
+        Log.d(LOGTAG, "PROBLEMATIC TRANSACTION ^")
         createAgreementBlock(block, transaction)
     }
     @Suppress("UNCHECKED_CAST")
