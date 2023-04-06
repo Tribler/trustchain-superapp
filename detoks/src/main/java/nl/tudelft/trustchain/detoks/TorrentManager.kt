@@ -46,7 +46,7 @@ class TorrentManager constructor (
     private var currentIndex = 0
 
     init {
-        clearMediaCache()
+//        clearMediaCache()
         initializeSessionManager()
         buildTorrentIndex()
         initializeVideoPool()
@@ -152,6 +152,7 @@ class TorrentManager constructor (
     @RequiresApi(Build.VERSION_CODES.O)
     fun addMagnet(magnet: String){
         val res = sessionManager.fetchMagnet(magnet, 10) ?: return
+
         val torrentInfo = TorrentInfo(res)
         val par = torrentDir.absolutePath
         val torrentPath = Paths.get("$par/${torrentInfo.infoHash()}.torrent")
@@ -482,12 +483,13 @@ class TorrentManager constructor (
         }
 
         fun deleteFile() {
-            handle.filePriority(fileIndex, Priority.IGNORE)
-            val file = File("$cacheDir/$torrentName/$fileName")
-            if (file.exists()) {
-                file.delete()
-            }
-            isDownloading = false
+            return
+//            handle.filePriority(fileIndex, Priority.IGNORE)
+//            val file = File("$cacheDir/$torrentName/$fileName")
+//            if (file.exists()) {
+//                file.delete()
+//            }
+//            isDownloading = false
         }
 
         fun downloadFile() {

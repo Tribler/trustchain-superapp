@@ -48,25 +48,4 @@ class DeToksActivity : BaseActivity() {
             gossipService = null
         }
     }
-
-    private fun getPrivateKey(): PrivateKey {
-        // Load a key from the shared preferences
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val privateKey = prefs.getString(PREF_PRIVATE_KEY, null)
-        return if (privateKey == null) {
-            // Generate a new key on the first launch
-            val newKey = AndroidCryptoProvider.generateKey()
-            prefs.edit()
-                .putString(PREF_PRIVATE_KEY, newKey.keyToBin().toHex())
-                .apply()
-            newKey
-        } else {
-            AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
-        }
-    }
-
-    companion object {
-        private const val PREF_PRIVATE_KEY = "private_key"
-        private const val BLOCK_TYPE = "LIKE_BLOCK"
-    }
 }
