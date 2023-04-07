@@ -14,10 +14,10 @@ class TokenAdapter(private val context: Activity, private val tokenArray: ArrayL
         val token = getItem(position)
         val record = rowView.findViewById(R.id.item_number) as TextView
         val token_id = rowView.findViewById(R.id.item_id) as TextView
-        val public_key = rowView.findViewById(R.id.item_field1) as TextView
-
-        public_key.text = token.public_key.toString()
-        record.text = "Token: " + position.toString()
+//        val public_key = rowView.findViewById(R.id.item_field1) as TextView
+//
+//        public_key.text = token.public_key.toString()
+        record.text = "Token ID: " + token.unique_id
         token_id.text = "ID: " + token.unique_id
         return rowView
     }

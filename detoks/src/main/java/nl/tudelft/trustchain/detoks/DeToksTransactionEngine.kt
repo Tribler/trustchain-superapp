@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.detoks.db.TokenStore
@@ -23,32 +24,41 @@ class DeToksTransactionEngine (
 
     private val LOGTAG = "DeToksTransactionEngine"
 
-    private var selectedPeers = ArrayList<Peer>()
+    private lateinit var selectedPeer : Peer
+    private lateinit var selfPeer : Peer
+    private var sendingToSelf = true
 
-    private val writeToDatabase: Boolean = true
+    // This value is 1000 because we will be doing 1000 transactions benchmarks
+    private var tokenIDIncrementer = 1000
 
     init {
         // setup block listeners
         addListener(SINGLE_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                if (block.isProposal) {
-                    Log.d(LOGTAG, "Received SINGLE proposal block")
-                    receiveSingleTokenProposal(block)
-                } else if (block.isAgreement) {
-                    Log.d(LOGTAG, "Received SINGLE agreement block")
-                    receiveSingleTokenAgreement(block)
+                Log.d(LOGTAG, "")
+                if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
+                    if (block.isProposal) {
+                        Log.d(LOGTAG, "Received SINGLE proposal block")
+                        receiveSingleTokenProposal(block)
+                    } else if (block.isAgreement) {
+                        Log.d(LOGTAG, "Received SINGLE agreement block")
+                        receiveSingleTokenAgreement(block)
+                    }
                 }
             }
         })
 
         addListener(GROUPED_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                if (block.isProposal) {
-                    Log.d(LOGTAG, "Received GROUPED proposal block")
-                    receiveGroupedTokenProposal(block)
-                } else if (block.isAgreement) {
-                    Log.d(LOGTAG, "Received GROUPED agreement block")
-                    receiveGroupedTokenAgreement(block)
+                // LinkPublicKey = the addressee of the block
+                if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
+                    if (block.isProposal) {
+                        Log.d(LOGTAG, "Received GROUPED proposal block")
+                        receiveGroupedTokenProposal(block)
+                    } else if (block.isAgreement) {
+                        Log.d(LOGTAG, "Received GROUPED agreement block")
+                        receiveGroupedTokenAgreement(block)
+                    }
                 }
             }
         })
@@ -72,9 +82,7 @@ class DeToksTransactionEngine (
         println(pk)
 
         // Add token to personal database
-        if (writeToDatabase) {
-            tokenStore.addToken(uid, pk)
-        }
+        tokenStore.addToken(uid, pk)
 
         Log.d(LOGTAG, "Saving received $token to database")
 
@@ -85,10 +93,8 @@ class DeToksTransactionEngine (
     private fun receiveSingleTokenAgreement(block: TrustChainBlock) {
         val tokenId = block.transaction["tokenSent"] as String
 
-        if (writeToDatabase) {
-            // Remove token from personal database
-            tokenStore.removeTokenByID(tokenId)
-        }
+        // Remove token from personal database
+        tokenStore.removeTokenByID(tokenId)
 
         Log.d(LOGTAG, "Removing spent $tokenId from database")
     }
@@ -128,11 +134,14 @@ class DeToksTransactionEngine (
                 val (uid, _) = token.split(",")
                 tokenList.add(uid)
 
-                if (writeToDatabase) {
-                    // Add token to personal database
-                    tokenStore.addToken((uid.toInt() + 200).toString(), block.publicKey.toString())
+                // Add token to personal database
+                // If sending to self ->  Increment the ID to avoid duplicate ID errors.
+                var newID = uid.toInt()
+                Log.d(LOGTAG, "Sending to self: $sendingToSelf")
+                if (sendingToSelf) {
+                    newID += tokenIDIncrementer
                 }
-
+                tokenStore.addToken((newID).toString(), block.publicKey.toString())
                 Log.d(LOGTAG, "Saving received $token to database")
             }
             grouped_agreement_uids.add(tokenList.toList())
@@ -148,28 +157,35 @@ class DeToksTransactionEngine (
         val tokensToRemove= mutableListOf<String>()
         for (tokens in tokenIds ) {
                 for(token_id in tokens) {
-
-                    if (writeToDatabase) {
-                        // Remove token from personal database
-                        tokenStore.removeTokenByID(token_id)
-                    }
-
+                    // Remove token from personal database
+                    tokenStore.removeTokenByID(token_id)
                     tokensToRemove.add(token_id)
                 }
         }
         Log.d(LOGTAG, "Removing spent tokens $tokensToRemove from database")
     }
 
-    fun addPeer(peer: Peer) {
-        selectedPeers.add(peer)
+    fun addPeer(peer: Peer, self : Boolean = false) {
+        selectedPeer = peer
+        sendingToSelf = self
+        Log.d(LOGTAG, "Selected peer: ${selectedPeer.publicKey}")
     }
 
-    fun getSelectedPeers() : ArrayList<Peer> {
-        return selectedPeers
+    fun initializePeers(self: Peer) {
+        selectedPeer = self
+        selfPeer = self
     }
 
-    fun clearSelectedPeers() {
-        selectedPeers.clear()
+    fun getSelectedPeer() : Peer {
+        return selectedPeer
+    }
+
+    fun getSelfPeer() : Peer {
+        return selfPeer
+    }
+
+    fun isPeerSelected() : Boolean {
+        return ::selectedPeer.isInitialized
     }
 
 

@@ -57,13 +57,6 @@
                     android:text="Select Receiver"
                     android:onClick="selectPeer"
                     />
-                <Button
-                    android:id="@+id/clear_receivers_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Clear Receivers"
-                    android:onClick="selectPeer"
-                    />
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -120,21 +113,32 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="example overlay"
-                    android:layout_marginEnd="20dp" />
+                    android:layout_marginEnd="20dp"
+                    android:visibility="gone"/>
 
                 <Button
                     android:id="@+id/toTest_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="To Test"
-                    android:layout_marginStart="20dp" />
+                    android:layout_marginStart="20dp"
+                    android:visibility="gone"/>
 
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Update list"
-                android:id="@+id/update_list_button"></Button>
+                android:text="reset tokens"
+                android:id="@+id/reset_tokens_button"></Button>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Generate tokens"
+                android:id="@+id/generate_tokens_button"></Button>
+            </LinearLayout>
         </LinearLayout>
 
         <!-- ListView -->
@@ -147,7 +151,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Transaction List"
+                android:text="Token wallet:"
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 android:textSize="15dp"

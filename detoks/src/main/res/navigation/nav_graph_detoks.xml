@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     android:label="DeToks"
-    app:startDestination="@id/TestFragment">
+    app:startDestination="@id/BenchmarkFragment">
 
     <fragment
         android:id="@+id/detoksFragment"
@@ -59,6 +59,12 @@
         <action
             android:id="@+id/action_return_to_benchmark_fragment"
             app:destination="@id/BenchmarkFragment"/>
+        <action
+            android:id="@+id/action_to_test"
+            app:destination="@id/TestFragment" />
+        <action
+            android:id="@+id/action_switch_environment"
+            app:destination="@id/exampleOverlayFragment" />
     </fragment>
 
 

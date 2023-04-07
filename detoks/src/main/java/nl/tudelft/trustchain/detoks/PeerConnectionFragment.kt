@@ -46,7 +46,11 @@ class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
             builder.setMessage("Are you sure you want to connect to peer: ${peer.address}")
 
             builder.setPositiveButton("Yes") { _, _ ->
-                transactionEngine.addPeer(peer)
+                if (position == 0) {
+                    transactionEngine.addPeer(peer, true)
+                } else {
+                    transactionEngine.addPeer(peer, false)
+                }
                 val navController = Navigation.findNavController(view)
                 navController.navigate(R.id.action_return_to_benchmark_fragment)
             }
