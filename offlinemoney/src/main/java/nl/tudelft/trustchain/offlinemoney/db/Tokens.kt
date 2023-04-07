@@ -13,6 +13,10 @@ class Token(
 
 @Dao
 interface TokensDao {
+    // Retrieve all tokens in database
+    @Query("SELECT * FROM tokens_table ORDER BY token_value")
+    fun getAllTokens() : Array<Token>
+
     // Get all token_types from from database
     @Query("SELECT * FROM tokens_table WHERE token_value = :token_value")
     fun getAllTokensOfValue(token_value: Double) : Array<Token>
@@ -25,10 +29,7 @@ interface TokensDao {
     suspend fun insertToken(tokens: Token)
 
     // Delete transactions
-    @Delete
-    suspend fun deleteToken(tokens: Token)
-
-//    @Query("DELETE FROM tokens_table")
-//    suspend fun deleteToken()
+    @Query("DELETE FROM tokens_table WHERE token_id = :token_id")
+    fun deleteToken(token_id: String)
 
 }
