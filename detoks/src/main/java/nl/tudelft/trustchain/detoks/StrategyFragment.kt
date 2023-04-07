@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -149,7 +148,7 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val balanceTextView: TextView
 
         init {
-            hashTextView = view.findViewById(R.id.hash)
+            hashTextView = view.findViewById(R.id.name)
             downloadTextView = view.findViewById(R.id.download)
             uploadTextView = view.findViewById(R.id.upload)
             balanceTextView = view.findViewById(R.id.balance)
@@ -164,19 +163,22 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val id = strategyData[position].fileIndex
-        val progressFile = strategyData[position].handle.fileProgress()[id]
+        val handler = strategyData[position]
+        val convBtoMB = 1000000
 
-        holder.hashTextView.text =
-            "${(strategyData[position].handle.infoHash().toString())} -$id"
+        holder.hashTextView.text = strategyData[position].handle.name()
 
-        holder.downloadTextView.text = (progressFile / 1000).toString()
-        holder.uploadTextView.text = (strategyData[position].handle.status()
-            .allTimeUpload() / 1000).toString()
+        holder.downloadTextView.text = (handler.handle.status().allTimeDownload()
+            / convBtoMB).toString()
+
+        holder.uploadTextView.text = (strategyData[position].handle.status().allTimeUpload()
+            / convBtoMB).toString()
 
         //TODO: replace by actual token balance
-        holder.balanceTextView.text = ((strategyData[position].handle.status().allTimeUpload()
-            - strategyData[position].handle.status().allTimeDownload()) / 100000).toString()
+        holder.balanceTextView.text = (
+            (strategyData[position].handle.status().allTimeUpload()
+            - strategyData[position].handle.status().allTimeDownload())
+            / convBtoMB).toString()
     }
 
     override fun getItemCount(): Int = strategyData.size
