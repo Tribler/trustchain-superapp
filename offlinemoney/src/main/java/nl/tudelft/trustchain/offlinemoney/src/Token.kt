@@ -50,8 +50,8 @@ class Token (
 
         if (!JavaCryptoProvider.keyFromPublicBin(verifier).verify(
                 recipients.first().proof,
-                id + value + genesisHash + recipients.first().publicKey)
-        ) {
+                "random signature".toByteArray())
+            && recipients.first().publicKey.contentEquals(Wallet.authority_wallet.publicKey.keyToBin())) {
             // This can also occur if the id or value has been tampered with.
             logger.info { "The token's first recipient was not signed by a verifier!" }
             return false

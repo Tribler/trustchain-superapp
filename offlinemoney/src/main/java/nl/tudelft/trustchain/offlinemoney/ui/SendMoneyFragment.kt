@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
@@ -88,9 +89,9 @@ class SendMoneyFragment : OfflineMoneyBaseFragment(R.layout.send_money_fragment)
             runBlocking(Dispatchers.IO) {
                 for (token in tokensToSend) {
                     db.tokensDao().deleteToken(
-                            token.id.toString()
+                            token.id.toHex()
                     );
-                    Log.d("TOKEN", "delete token ${token.id.toString()}")
+                    Log.d("TOKEN", "delete token ${token.id.toHex()}")
                 }
 
                 val allTokens = db.tokensDao().getAllTokens()
