@@ -99,7 +99,7 @@ class DeToksCommunity(private val context: Context) : Community() {
     }
 
     private fun onTorrentGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
+        val (_, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
         payload.data.forEach {
             val hash = MagnetLink.hashFromMagnet(it.first)
@@ -109,7 +109,7 @@ class DeToksCommunity(private val context: Context) : Community() {
     }
 
     private fun onWatchTimeGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
+        val (_, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
 
         payload.data.forEach {
