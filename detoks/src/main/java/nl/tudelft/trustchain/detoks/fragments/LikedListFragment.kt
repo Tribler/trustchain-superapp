@@ -19,19 +19,21 @@ import nl.tudelft.trustchain.detoks.adapters.LikedListAdapter
 class LikedListFragment(private val likedVideos: List<String>) : Fragment() {
     private lateinit var adapter: ArrayAdapter<String>
 
-    fun updateLikedList() {
-        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-        val author = community.myPeer.publicKey.toString()
-        val likedVideos = community.listOfLikedVideosAndTorrents(author).map { it.second }
+    fun updateLiked() {
+        if (this::adapter.isInitialized) {
+            val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+            val author = community.myPeer.publicKey.toString()
+            val likedVideos = community.listOfLikedVideosAndTorrents(author).map { it.second }
 
-        adapter.clear()
-        adapter.addAll(likedVideos)
-        adapter.notifyDataSetChanged()
+            adapter.clear()
+            adapter.addAll(likedVideos)
+            adapter.notifyDataSetChanged()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        updateLikedList()
+        updateLiked()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

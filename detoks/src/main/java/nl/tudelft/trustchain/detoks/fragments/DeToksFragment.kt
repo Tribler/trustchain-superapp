@@ -7,8 +7,14 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
+import kotlinx.android.synthetic.main.item_video.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
+import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.VideosAdapter
@@ -17,6 +23,7 @@ import java.io.FileOutputStream
 
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var torrentManager: TorrentManager
+    private lateinit var adapter: VideosAdapter
     private val logger = KotlinLogging.logger {}
     private var previousVideoAdapterIndex = 0
 
@@ -24,6 +31,24 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         get() = "${requireActivity().cacheDir.absolutePath}/torrent"
     private val mediaCacheDir: String
         get() = "${requireActivity().cacheDir.absolutePath}/media"
+
+    fun update() {
+        CoroutineScope(Dispatchers.Main).launch {
+            if (this@DeToksFragment::adapter.isInitialized) {
+                val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+                val position = viewPagerVideos.currentItem
+                val content = adapter.mVideoItems[position].content(position, 10000)
+
+                this@DeToksFragment.viewPagerVideos.peerCount.text = "Peers: " + community.getPeers().size.toString()
+                this@DeToksFragment.viewPagerVideos.like_count.text = community.getLikes(content.fileName, content.torrentName).size.toString()
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        update()
+    }
 
     private fun cacheDefaultTorrent() {
         try {
@@ -62,7 +87,8 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewPagerVideos.adapter = VideosAdapter(torrentManager)
+        adapter = VideosAdapter(torrentManager)
+        viewPagerVideos.adapter = adapter
         viewPagerVideos.currentItem = 0
         onPageChangeCallback()
     }

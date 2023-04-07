@@ -21,7 +21,7 @@ class VideosAdapter(
     private val videoScaling: Boolean = false
 ) :
     RecyclerView.Adapter<VideosAdapter.VideoViewHolder?>() {
-    private val mVideoItems: List<VideoItem> =
+    val mVideoItems: List<VideoItem> =
         List(100) { VideoItem(torrentManager::provideContent) }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
