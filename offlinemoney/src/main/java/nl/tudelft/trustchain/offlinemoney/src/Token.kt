@@ -176,15 +176,19 @@ class Token (
             while (i < dataSize) {
 
                 if (i + 2 > dataSize) {
-                    logger.info { "Received a wrongly formatted list of tokens!" }
+                    logger.info { "Received a wrongly formatted list of tokens! (i + 2 > dataSize)" }
                     return mutableSetOf()
                 }
 
                 val numRecipients = copyByteArrayIntoShort(data, i)
                 i += 2
 
-                if (numRecipients < 1 || i + TOKEN_CREATION_SIZE + numRecipients * RECIPIENT_PAIR_SIZE > dataSize) {
-                    logger.info { "Received a wrongly formatted list of tokens!" }
+//                if (numRecipients < 1) {
+//                    logger.info { "Received a wrongly formatted list of tokens! (numRecipients < 1)" }
+//                    return mutableSetOf()
+//                }
+                if ( i + TOKEN_CREATION_SIZE + numRecipients * RECIPIENT_PAIR_SIZE > dataSize) {
+                    logger.info { "Received a wrongly formatted list of tokens! (i + TOKEN_CREATION_SIZE + numRecipients * RECIPIENT_PAIR_SIZE > dataSize)" }
                     return mutableSetOf()
                 }
 

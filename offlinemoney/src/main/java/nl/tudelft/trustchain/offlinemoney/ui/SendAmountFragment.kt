@@ -1,20 +1,24 @@
 package nl.tudelft.trustchain.offlinemoney.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.travijuu.numberpicker.library.Enums.ActionEnum
 import com.travijuu.numberpicker.library.Interface.ValueChangedListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.databinding.SendAmountFragmentBinding
+import org.json.JSONObject
 
 
 class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragment) {
     private val binding by viewBinding(SendAmountFragmentBinding::bind)
 
-    private fun updateTextViewAmount() {
+    private fun updateSendAmount() {
         var sum = 0;
 
         sum += binding.numberPicker1.value * 1 + binding.numberPicker2.value * 2 + binding.numberPicker5.value * 5;
@@ -22,22 +26,31 @@ class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragmen
         binding.txtAmount.text = sum.toString()
     }
 
+    private fun updateBalance() {
+        var sum = 0;
+
+        sum += binding.numberPicker1.max * 1 + binding.numberPicker2.max * 2 + binding.numberPicker5.max * 5;
+
+        binding.txtBalance.text = sum.toString();
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.numberPicker1.max = 11
-        binding.numberPicker2.max = 12
-        binding.numberPicker5.max = 15
+        lifecycleScope.launch(Dispatchers.IO) {
+            binding.numberPicker1.max = db.tokensDao().getCountTokensOfValue(1.0)
+            binding.numberPicker2.max = db.tokensDao().getCountTokensOfValue(2.0)
+            binding.numberPicker5.max = db.tokensDao().getCountTokensOfValue(5.0)
+            updateBalance()
+        }
 
         binding.numberPicker1.value = 0
         binding.numberPicker2.value = 0
         binding.numberPicker5.value = 0
 
-        binding.txtBalance.text = 42.toString()
-
         class ValueListener : ValueChangedListener {
             override fun valueChanged(value: Int, action: ActionEnum) {
-                updateTextViewAmount()
+                updateSendAmount()
             }
         }
 
@@ -50,32 +63,32 @@ class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragmen
         }
 
         binding.btnSend.setOnClickListener{
-    //            val amount = binding.edtAmount.text.toString().toDouble().toLong()
-    //
-    //            val pbk = transactionRepository.myPublicKey
-    //
-    //            val pvk = transactionRepository.myPrivateKey
-    //
-    //            val reqPayload = RequestPayload.fromJson(JSONObject(requireArguments().getString(ARG_RECEIVER)!!))!!
-    //            if (amount > 0) {
-    //                val promise = Promise.createPromise(pbk as PublicKey, reqPayload, amount, s_pvk = pvk)
-    //
-    //                val connectionData = promise.toJson()
-    //
-    //                val args = Bundle()
-    //
-    //                args.putString(SendMoneyFragment.ARG_DATA, connectionData.toString())
-    //
-                findNavController().navigate(
-                    R.id.action_sendAmountFragment_to_sendMoneyFragment,
-                    //args
-                )
-    //            }
+                val amount = binding.txtAmount.text.toString().toDouble()
 
+                if (amount > 0) {
+                    val connectionData = JSONObject()
+                    connectionData.put(ARG_5EURO_COUNT, binding.numberPicker5.value)
+                    connectionData.put(ARG_2EURO_COUNT, binding.numberPicker2.value)
+                    connectionData.put(ARG_1EURO_COUNT, binding.numberPicker1.value)
+
+                    val args = Bundle()
+
+                    args.putString(SendMoneyFragment.ARG_DATA, connectionData.toString())
+
+                    findNavController().navigate(
+                        R.id.action_sendAmountFragment_to_sendMoneyFragment,
+                        args
+                    )
+                } else {
+                    Toast.makeText(requireContext(), "You need to send an amount bigger than 0", Toast.LENGTH_LONG).show()
+                }
         }
     }
 
     companion object {
         const val ARG_RECEIVER = "public_key"
+        const val ARG_5EURO_COUNT = "5euro"
+        const val ARG_2EURO_COUNT = "2euro"
+        const val ARG_1EURO_COUNT = "1euro"
     }
 }
