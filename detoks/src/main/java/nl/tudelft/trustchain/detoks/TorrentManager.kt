@@ -193,7 +193,8 @@ class TorrentManager private constructor (
                                 it
                             )
                             torrentFiles.add(torrent)
-                            addProfile(torrent.handle.makeMagnetUri())
+                            val magnet = torrent.handle.makeMagnetUri()
+                            getInfoFromMagnet(magnet)?.let { it2 -> profile.addProfile(magnet, it2) }
                         }
                     }
                 }
@@ -243,10 +244,17 @@ class TorrentManager private constructor (
     }
 
     fun addTorrent(hash: Sha1Hash, magnet: String) {
-        profile.incrementTimesSeen(MagnetLink.hashFromMagnet(magnet))
-        if (sessionManager.find(hash) != null) return
-
         val torrentInfo = getInfoFromMagnet(magnet)?:return
+        var containsVideo = false
+        for (it in 0 until torrentInfo.numFiles()) {
+            if (torrentInfo.files().fileName(it).endsWith(".mp4")) {
+                containsVideo = true
+                break
+            }
+        }
+
+        if (!containsVideo) return else profile.incrementTimesSeen(MagnetLink.hashFromMagnet(magnet))
+        if (sessionManager.find(hash) != null) return
 
         Log.d(DeToksCommunity.LOGGING_TAG,"Adding new torrent: ${torrentInfo.name()}")
 
@@ -267,14 +275,9 @@ class TorrentManager private constructor (
                     it
                 )
                 torrentFiles.add(torrent)
-                addProfile(torrent.handle.makeMagnetUri())
+                getInfoFromMagnet(magnet)?.let { it2 -> profile.addProfile(magnet, it2) }
             }
         }
-    }
-
-    fun addProfile(magnet: String) {
-        profile.profiles[magnet] = ProfileEntry(
-            uploadDate = (getInfoFromMagnet(magnet)?:return).creationDate())
     }
 
     fun updateLeachingStrategy(strategyId: Int) {
@@ -386,14 +389,6 @@ class TorrentManager private constructor (
 
     fun getListOfTorrents(): List<TorrentHandle> {
         return torrentFiles.map {it.handle}.distinct()
-    }
-
-    fun getWatchedTorrents(): List<String> {
-        return profile.profiles.filter{ it.value.watched }.keys.toList()
-    }
-
-    fun getUnwatchedTorrents(): List<String> {
-        return profile.profiles.filter{ !it.value.watched }.keys.toList()
     }
 
     class TorrentHandler(
