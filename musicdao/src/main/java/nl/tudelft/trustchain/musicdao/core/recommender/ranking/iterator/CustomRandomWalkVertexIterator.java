@@ -22,7 +22,7 @@ import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 
 /**
- * A random walk iterator.
+ * A random walk iterator for weighted graphs.
  * 
  * "Given a graph and a starting point, we select a neighbor of it at random, and move to this
  * neighbor; then we select a neighbor of this point at random, and move to it etc. The (random)
@@ -40,10 +40,27 @@ public class CustomRandomWalkVertexIterator<V, E>
 {
     private final Random rng;
     private final Graph<V, E> graph;
-    private final boolean weighted;
     private final Map<V, Double> outEdgesTotalWeight;
     private final long maxHops;
+
+    public V getNextVertex() {
+        return nextVertex;
+    }
+
+    public void setNextVertex(V nextVertex) {
+        this.nextVertex = nextVertex;
+    }
+
     private long hops;
+
+    public long getHops() {
+        return hops;
+    }
+
+    public void setHops(long hops) {
+        this.hops = hops;
+    }
+
     private V nextVertex;
     private final float resetProbability;
 
@@ -53,16 +70,13 @@ public class CustomRandomWalkVertexIterator<V, E>
      * @param graph the graph
      * @param vertex the starting vertex
      * @param maxHops maximum hops to perform during the walk
-     * @param weighted whether to perform a weighted random walk (compute probabilities based on the
-     *        edge weights)
      * @param resetProbability probability between 0 and 1 with which to reset the random walk
      * @param rng the random number generator
      */
     public CustomRandomWalkVertexIterator(
-        Graph<V, E> graph, V vertex, long maxHops, boolean weighted, float resetProbability, Random rng)
+        Graph<V, E> graph, V vertex, long maxHops, float resetProbability, Random rng)
     {
         this.graph = Objects.requireNonNull(graph);
-        this.weighted = weighted;
         this.outEdgesTotalWeight = new HashMap<>();
         this.hops = 0;
         this.nextVertex = Objects.requireNonNull(vertex);
@@ -110,21 +124,16 @@ public class CustomRandomWalkVertexIterator<V, E>
         }
 
         E e = null;
-        if (weighted) {
-            double outEdgesWeight = outEdgesTotalWeight.computeIfAbsent(nextVertex, v -> graph
-                    .outgoingEdgesOf(v).stream().mapToDouble(graph::getEdgeWeight).sum());
-            double p = outEdgesWeight * rng.nextDouble();
-            double cumulativeP = 0d;
-            for (E curEdge : graph.outgoingEdgesOf(nextVertex)) {
-                cumulativeP += graph.getEdgeWeight(curEdge);
-                if (p <= cumulativeP) {
-                    e = curEdge;
-                    break;
-                }
+        double outEdgesWeight = outEdgesTotalWeight.computeIfAbsent(nextVertex, v -> graph
+                .outgoingEdgesOf(v).stream().mapToDouble(graph::getEdgeWeight).sum());
+        double p = outEdgesWeight * rng.nextDouble();
+        double cumulativeP = 0d;
+        for (E curEdge : graph.outgoingEdgesOf(nextVertex)) {
+            cumulativeP += graph.getEdgeWeight(curEdge);
+            if (p <= cumulativeP) {
+                e = curEdge;
+                break;
             }
-        } else {
-            List<E> outEdges = new ArrayList<>(graph.outgoingEdgesOf(nextVertex));
-            e = outEdges.get(rng.nextInt(outEdges.size()));
         }
         nextVertex = Graphs.getOppositeVertex(graph, e, nextVertex);
     }
@@ -143,7 +152,6 @@ public class CustomRandomWalkVertexIterator<V, E>
         }
 
         E e = null;
-        if (weighted) {
             double outEdgesWeight = 0;
             if(!outEdgesTotalWeight.containsKey(nextVertex)) {
                 for(E edge: graph.outgoingEdgesOf(nextVertex)) {
@@ -165,10 +173,6 @@ public class CustomRandomWalkVertexIterator<V, E>
                     break;
                 }
             }
-        } else {
-            List<E> outEdges = new ArrayList<>(graph.outgoingEdgesOf(nextVertex));
-            e = outEdges.get(rng.nextInt(outEdges.size()));
-        }
         nextVertex = Graphs.getOppositeVertex(graph, e, nextVertex);
     }
 

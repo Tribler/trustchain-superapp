@@ -18,6 +18,7 @@ class IncrementalPersonalizedPageRankTest {
     private val nNodes = 5000
     private val nEdges = 10
 
+    @Before
     fun setUp() {
         for(node in 0 until nNodes) {
             network.addNode(Node(node.toString()))
@@ -36,10 +37,10 @@ class IncrementalPersonalizedPageRankTest {
 
     @Test
     fun canCaclulatePersonalizedPageRank() {
-        incrementalPageRank = IncrementalPersonalizedPageRank(mutableListOf(), 1000, 10000, 0.01f, rootNode)
-        incrementalPageRank.initiateRandomWalks(network.graph, seed)
-        incrementalPageRank.calculatePersonalizedPageRank(network.graph)
-//        Assert.assertEquals(rootNode.personalisedPageRank, 0)
+        incrementalPageRank = IncrementalPersonalizedPageRank( 1000, 10000, rootNode, 0.01f, network.graph)
+        incrementalPageRank.initiateRandomWalks()
+        incrementalPageRank.calculatePersonalizedPageRank()
+        Assert.assertEquals(rootNode.personalisedPageRank, 0)
     }
 
 }

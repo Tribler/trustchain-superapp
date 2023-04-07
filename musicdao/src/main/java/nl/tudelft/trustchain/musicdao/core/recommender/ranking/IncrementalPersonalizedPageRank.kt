@@ -8,21 +8,17 @@ import org.jgrapht.graph.SimpleDirectedWeightedGraph
 import java.util.*
 
 class IncrementalPersonalizedPageRank (
-    storedRandomWalks: MutableList<MutableList<Node>> = mutableListOf(),
     private val maxWalkLength: Int,
     private val repetitions: Int,
-    private val resetProbability: Float,
-    private val rootNode: Node
+    private val rootNode: Node,
+    resetProbability: Float,
+    graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>
 ) {
     private val logger = KotlinLogging.logger {}
-    val randomWalks: MutableList<MutableList<Node>> = mutableListWithCapacity(repetitions)
+    private val iter = CustomRandomWalkVertexIterator(graph, rootNode, maxWalkLength.toLong(), resetProbability, Random())
+    private val randomWalks: MutableList<MutableList<Node>> = mutableListOf()
 
-    init {
-        randomWalks.addAll(storedRandomWalks)
-    }
-    private fun <T> mutableListWithCapacity(capacity: Int): MutableList<T> =
-        ArrayList(capacity)
-    fun completeExistingRandomWalk(graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, existingWalk: MutableList<Node>, seed: Long?) {
+    fun completeExistingRandomWalk(existingWalk: MutableList<Node>) {
         if(existingWalk.size == 0) {
             existingWalk.add(rootNode)
         }
@@ -30,29 +26,28 @@ class IncrementalPersonalizedPageRank (
             logger.error { "Random walk requested for already complete or overfull random walk" }
             return
         }
-        val iter = CustomRandomWalkVertexIterator(graph, existingWalk.last(),
-            (maxWalkLength - existingWalk.size).toLong(), true, resetProbability,
-            Random())
+        iter.nextVertex = existingWalk.last()
+        iter.hops = existingWalk.size.toLong() - 1
         iter.next()
         while(iter.hasNext()) {
             existingWalk.add(iter.next())
         }
     }
 
-    fun performNewRandomWalk(graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, seed: Long?): MutableList<Node> {
-        val randomWalk: MutableList<Node> = mutableListWithCapacity(maxWalkLength)
+    fun performNewRandomWalk(): MutableList<Node> {
+        val randomWalk: MutableList<Node> = mutableListOf()
         randomWalk.add(rootNode)
-        completeExistingRandomWalk(graph, randomWalk, seed)
+        completeExistingRandomWalk(randomWalk)
         return randomWalk
     }
 
-    fun initiateRandomWalks(graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, seed: Long?) {
+    fun initiateRandomWalks() {
         for(walk in 0 until repetitions) {
-            randomWalks.add(performNewRandomWalk(graph, seed))
+            randomWalks.add(performNewRandomWalk())
         }
     }
 
-    fun calculatePersonalizedPageRank(graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>) {
+    fun calculatePersonalizedPageRank() {
         val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount()
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
