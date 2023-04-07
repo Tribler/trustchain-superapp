@@ -22,36 +22,32 @@ class Profile(
     val profiles: HashMap<String, ProfileEntry> = HashMap()
 ) {
 
-    fun addProfile(magnet: String) {
-        profiles[magnet] = ProfileEntry()
+    fun addProfile(key: String) {
+        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
+        profiles[key] = ProfileEntry()
     }
 
-    fun addProfile(magnet: String, info: TorrentInfo) {
-        profiles[magnet] = ProfileEntry(uploadDate = (info.creationDate()))
+    fun addProfile(key: String, info: TorrentInfo) {
+        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
+        profiles[key] = ProfileEntry(uploadDate = (info.creationDate()))
     }
 
     fun hasWatched(key: String): Boolean {
         return profiles.contains(key) && profiles[key]!!.watched
     }
 
-    fun generateUploadDate(key: String, info: TorrentInfo): Long {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
-        profiles[key]!!.uploadDate = info.creationDate()
-        return profiles[key]!!.uploadDate
-    }
-
     fun updateEntryDuration(key: String, duration: Long) {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
+        addProfile(key)
         profiles[key]!!.duration = duration
     }
 
     fun updateEntryHopCount(key: String, hopCount: Int) {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
+        addProfile(key)
         profiles[key]!!.hopCount = hopCount
     }
 
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
+        addProfile(key)
 
         if(myUpdate) {
             profiles[key]!!.watched = true
@@ -60,6 +56,11 @@ class Profile(
             profiles[key]!!.watchTime += time
             profiles[key]!!.watchTime /= 2
         }
+    }
+
+    fun updateEntryUploadDate(key: String, info: TorrentInfo) {
+        addProfile(key)
+        profiles[key]!!.uploadDate = info.creationDate()
     }
 
     fun incrementTimesSeen(key: String) {
