@@ -3,6 +3,8 @@ package nl.tudelft.trustchain.detoks
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
+import androidx.navigation.Navigation
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -106,6 +108,9 @@ class TestFragment : BaseFragment(R.layout.fragment_test) {
             binding.debugTextView.maxLines = Integer.MAX_VALUE
             binding.debugTextView.maxWidth = Integer.MAX_VALUE
         }
+        val environmentSwitchButton = view.findViewById<Button>(R.id.toTransacFreq)
+        environmentSwitchButton.setOnClickListener { switchEnvirmonments(view) }
+
 
         trustchainCommunity.addListener(BLOCK_TYPE, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
@@ -136,6 +141,9 @@ class TestFragment : BaseFragment(R.layout.fragment_test) {
         })
 
 
-
+    }
+    fun switchEnvirmonments(view: View){
+        val navController = Navigation.findNavController(view)
+        navController.navigate(R.id.action_go_to_testFreq)
     }
 }

@@ -1,0 +1,27 @@
+CREATE TABLE tokens(
+    id TEXT NOT NULL,
+    publicKey TEXT NOT NULL,
+    PRIMARY KEY (id)
+);
+
+getAllTokens:
+SELECT id, publicKey FROM tokens;
+
+addToken:
+INSERT INTO tokens(id, publicKey)
+VALUES(?,?);
+
+
+removeTokenByID:
+DELETE FROM tokens WHERE id = ?;
+
+removeToken:
+DELETE FROM tokens
+    ORDER BY id
+    LIMIT 1;
+
+removeAllTokens:
+DELETE FROM tokens;
+
+getBalance:
+SELECT COUNT(id) FROM tokens;

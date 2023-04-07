@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     android:label="DeToks"
-    app:startDestination="@id/TestFragment">
+    app:startDestination="@id/BenchmarkFragment">
 
     <fragment
         android:id="@+id/detoksFragment"
@@ -12,21 +12,61 @@
     </fragment>
 
     <fragment
+        android:id="@+id/BenchmarkFragment"
+        android:name="nl.tudelft.trustchain.detoks.BenchmarkFragment"
+        android:label="BenchmarkFragment">
+        <action
+            android:id="@+id/action_connect_to_peer_fragment"
+            app:destination="@id/peerConnectionFragment"/>
+    </fragment>
+
+    <fragment
         android:id="@+id/TestFragment"
         android:name="nl.tudelft.trustchain.detoks.TestFragment"
         android:label="TestFragment">
+        <action
+            android:id="@+id/action_go_to_testFreq"
+            app:destination="@id/BenchmarkFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/exampleOverlayFragment"
         android:name="nl.tudelft.trustchain.detoks.ExampleOverlayFragment"
         android:label="ExampleOverlay">
+
+	  <action
+            android:id="@+id/action_go_to_testEnvironment"
+            app:destination="@id/BenchmarkFragment" />
     </fragment>
 
     <fragment
-        android:id="@+id/singlePeerFragment"
-        android:name="nl.tudelft.trustchain.detoks.SinglePeerFragment"
-        android:label="SinglePeer">
+        android:id="@+id/TransactionFrequencyTestFragment"
+        android:name="nl.tudelft.trustchain.detoks.BenchmarkFragment"
+        android:label="TransactionFrequencyTest">
+
+        <action
+            android:id="@+id/action_switch_environment"
+            app:destination="@id/exampleOverlayFragment" />
+        <action
+            android:id="@+id/action_to_test"
+            app:destination="@id/TestFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/peerConnectionFragment"
+        android:name="nl.tudelft.trustchain.detoks.PeerConnectionFragment"
+        android:label="PeerConnection">
+        <action
+            android:id="@+id/action_return_to_benchmark_fragment"
+            app:destination="@id/BenchmarkFragment"/>
+        <action
+            android:id="@+id/action_to_test"
+            app:destination="@id/TestFragment" />
+        <action
+            android:id="@+id/action_switch_environment"
+            app:destination="@id/exampleOverlayFragment" />
+    </fragment>
+
+
 
 </navigation>

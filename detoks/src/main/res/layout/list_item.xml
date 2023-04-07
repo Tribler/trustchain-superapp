@@ -17,16 +17,15 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                android:id="@+id/record_number"
+                android:id="@+id/item_number"
                 android:textColor="@color/black"
                 android:textSize="15sp"
                 android:textStyle="bold"
-                android:text="Record 1"/>
+                android:text="Item 1"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/token_id"
+                android:id="@+id/item_id"
                 android:textSize="10sp"
                 android:layout_marginTop="5dp"
                 android:text="Token: 420420"/>
@@ -34,9 +33,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="10sp"
-                android:id="@+id/block_type"
+                android:id="@+id/item_field1"
                 android:layout_marginTop="5dp"
-                android:text="Type: PROP"/>
+                android:text=""/>
 
 
         </LinearLayout>
@@ -51,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
 
-                android:id="@+id/block_number"
+                android:id="@+id/item_field4"
                 android:textColor="@color/black"
                 android:textSize="15sp"
                 android:textStyle="bold"
@@ -59,17 +58,17 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/sender_id"
+                android:id="@+id/item_field2"
                 android:layout_marginTop="5dp"
                 android:textSize="10sp"
-                android:text="S: sender@sender"/>
+                android:text=""/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/receiver_id"
+                android:id="@+id/item_field3"
                 android:layout_marginTop="5dp"
                 android:textSize="10sp"
-                android:text="R: receiver@receiver"/>
+                android:text=""/>
         </LinearLayout>
 
     </RelativeLayout>
