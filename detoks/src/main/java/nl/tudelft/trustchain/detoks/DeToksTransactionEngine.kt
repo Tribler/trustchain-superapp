@@ -82,8 +82,14 @@ class DeToksTransactionEngine (
         println(pk)
 
         // Add token to personal database
-        tokenStore.addToken(uid, pk)
-
+        // Add token to personal database
+        // If sending to self ->  Increment the ID to avoid duplicate ID errors.
+        var newID = uid.toInt()
+        Log.d(LOGTAG, "Sending to self: $sendingToSelf")
+        if (sendingToSelf) {
+            newID += tokenIDIncrementer
+        }
+        tokenStore.addToken((newID).toString(), pk)
         Log.d(LOGTAG, "Saving received $token to database")
 
         val transaction = mapOf("tokenSent" to uid)
