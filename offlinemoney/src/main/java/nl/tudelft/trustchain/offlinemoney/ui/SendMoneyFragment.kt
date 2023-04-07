@@ -38,7 +38,7 @@ class SendMoneyFragment : OfflineMoneyBaseFragment(R.layout.send_money_fragment)
         val token = Token(id, 5, verifier, genesisHash, mutableListOf())
         Log.d("TOKEN:", token.toString())
 
-        val tokens: Vector<Token> = Vector<Token>();
+        val tokens: MutableSet<Token> = mutableSetOf();
         tokens.add(token);
         val json = TransferQR.createJson(Wallet().privateKey, tokens);
 
