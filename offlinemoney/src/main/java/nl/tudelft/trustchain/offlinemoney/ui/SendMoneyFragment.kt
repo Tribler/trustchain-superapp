@@ -46,6 +46,7 @@ class SendMoneyFragment : OfflineMoneyBaseFragment(R.layout.send_money_fragment)
             var dbToken = dbTokens[i];
             var setOfToken = Token.deserialize(dbToken.token_data);
             for (t in setOfToken) {
+                Log.i("TOKEN", "token_id ${t.id}")
                 ret.add(t);
                 break;
             }
@@ -87,13 +88,14 @@ class SendMoneyFragment : OfflineMoneyBaseFragment(R.layout.send_money_fragment)
             runBlocking(Dispatchers.IO) {
                 for (token in tokensToSend) {
                     db.tokensDao().deleteToken(
-                        nl.tudelft.trustchain.offlinemoney.db.Token(
-                            token.id.toString(),
-                            token.value.toDouble(),
-                            Token.serialize(mutableSetOf(token))
-                        )
+                            token.id.toString()
                     );
-                    Log.d("TOKEN", "delete token");
+                    Log.d("TOKEN", "delete token ${token.id.toString()}")
+                }
+
+                val allTokens = db.tokensDao().getAllTokens()
+                for (token in allTokens) {
+                    Log.i("db_token", "Token_ID: ${token.token_id} \t Token value: ${token.token_value}")
                 }
             }
 
