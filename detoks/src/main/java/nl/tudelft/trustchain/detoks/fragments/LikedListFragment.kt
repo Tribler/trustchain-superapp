@@ -23,7 +23,7 @@ class LikedListFragment(private val likedVideos: List<String>) : Fragment() {
         if (this::adapter.isInitialized) {
             val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
             val author = community.myPeer.publicKey.toString()
-            val likedVideos = community.listOfLikedVideosAndTorrents(author).map { it.second }
+            val likedVideos = community.listOfLikedVideosAndTorrents(author).map { it.first }
 
             adapter.clear()
             adapter.addAll(likedVideos)
