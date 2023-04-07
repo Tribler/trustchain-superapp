@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
@@ -69,7 +70,7 @@ class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline
                     for (token in qr.tokens) {
                         db.tokensDao().insertToken(
                             nl.tudelft.trustchain.offlinemoney.db.Token(
-                                token.id.toString(),
+                                token.id.toHex(),
                                 token.value.toDouble(),
                                 Token.serialize(mutableSetOf(token))
                             )
