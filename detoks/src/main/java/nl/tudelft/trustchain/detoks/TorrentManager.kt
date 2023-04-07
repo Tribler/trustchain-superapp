@@ -244,18 +244,12 @@ class TorrentManager private constructor (
     }
 
     fun addTorrent(hash: Sha1Hash, magnet: String) {
-        val torrentInfo = getInfoFromMagnet(magnet)?:return
-        var containsVideo = false
-        for (it in 0 until torrentInfo.numFiles()) {
-            if (torrentInfo.files().fileName(it).endsWith(".mp4")) {
-                containsVideo = true
-                break
-            }
+        if (sessionManager.find(hash) != null) {
+            profile.incrementTimesSeen(MagnetLink.hashFromMagnet(magnet))
+            return
         }
 
-        if (!containsVideo) return else profile.incrementTimesSeen(MagnetLink.hashFromMagnet(magnet))
-        if (sessionManager.find(hash) != null) return
-
+        val torrentInfo = getInfoFromMagnet(magnet)?:return
         Log.d(DeToksCommunity.LOGGING_TAG,"Adding new torrent: ${torrentInfo.name()}")
 
         sessionManager.download(torrentInfo, cacheDir)
