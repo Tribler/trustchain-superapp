@@ -1,14 +1,12 @@
-package nl.tudelft.trustchain.offlinemoney.payloads
+package nl.tudelft.trustchain.offlinedigitaleuro.payloads
 
 import android.util.Log
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.offlinemoney.src.Token
-import org.json.JSONArray
+import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
 import org.json.JSONObject
-import java.util.Vector
 
 class TransferQR(
     public val pvk: PrivateKey,

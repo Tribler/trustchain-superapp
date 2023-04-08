@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinemoney.db
+package nl.tudelft.trustchain.offlinedigitaleuro.db
 
 import android.content.Context
 import androidx.room.Database

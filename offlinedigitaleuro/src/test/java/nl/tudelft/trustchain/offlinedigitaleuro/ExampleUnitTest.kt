@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinemoney
+package nl.tudelft.trustchain.offlinedigitaleuro
 
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinemoney.ui
+package nl.tudelft.trustchain.offlinedigitaleuro.ui
 
 import android.os.Bundle
 import android.view.Menu
@@ -10,8 +10,8 @@ import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import nl.tudelft.trustchain.offlinemoney.R
-import nl.tudelft.trustchain.offlinemoney.db.*
+import nl.tudelft.trustchain.offlinedigitaleuro.db.*
+import nl.tudelft.trustchain.offlinedigitaleuro.R
 
 open class OfflineDigitalEuroBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 

@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinemoney.ui
+package nl.tudelft.trustchain.offlinedigitaleuro.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -14,12 +14,12 @@ import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.offlinemoney.R
-import nl.tudelft.trustchain.offlinemoney.databinding.ActivityMainOfflineMoneyBinding
 import org.json.JSONObject
 import org.json.JSONException
-import nl.tudelft.trustchain.offlinemoney.payloads.TransferQR
-import nl.tudelft.trustchain.offlinemoney.src.Token
+import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
+import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
+import nl.tudelft.trustchain.offlinedigitaleuro.R
+import nl.tudelft.trustchain.offlinedigitaleuro.databinding.ActivityMainOfflineMoneyBinding
 
 class TransferFragment : OfflineDigitalEuroBaseFragment(R.layout.activity_main_offline_money) {
     private val binding by viewBinding(ActivityMainOfflineMoneyBinding::bind)
@@ -69,7 +69,7 @@ class TransferFragment : OfflineDigitalEuroBaseFragment(R.layout.activity_main_o
                 runBlocking(Dispatchers.IO) {
                     for (token in qr.tokens) {
                         db.tokensDao().insertToken(
-                            nl.tudelft.trustchain.offlinemoney.db.Token(
+                            nl.tudelft.trustchain.offlinedigitaleuro.db.Token(
                                 token.id.toHex(),
                                 token.value.toDouble(),
                                 Token.serialize(mutableSetOf(token))

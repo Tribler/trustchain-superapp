@@ -1,8 +1,6 @@
-package nl.tudelft.trustchain.offlinemoney.db
+package nl.tudelft.trustchain.offlinedigitaleuro.db
 
-import androidx.annotation.WorkerThread
 import androidx.room.*
-import kotlinx.coroutines.flow.Flow
 
 @Entity(tableName = "userdata_table")
 data class UserData(

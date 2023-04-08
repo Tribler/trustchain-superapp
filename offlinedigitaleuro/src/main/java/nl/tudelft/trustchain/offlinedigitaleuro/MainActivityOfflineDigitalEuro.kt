@@ -1,13 +1,13 @@
-package nl.tudelft.trustchain.offlinemoney
+package nl.tudelft.trustchain.offlinedigitaleuro
 
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.common.BaseActivity
 
-class MainActivityOfflineMoney() : BaseActivity() {
-    override val navigationGraph = R.navigation.nav_graph_offlinemoney
-    override val bottomNavigationMenu = R.menu.offlinemoney_menu
+class MainActivityOfflineDigitalEuro() : BaseActivity() {
+    override val navigationGraph = R.navigation.nav_graph_offlinedigitaleuro
+    override val bottomNavigationMenu = R.menu.offlinedigitaleuro_menu
 
     private fun testDB() {
         lifecycleScope.launch(Dispatchers.IO) {

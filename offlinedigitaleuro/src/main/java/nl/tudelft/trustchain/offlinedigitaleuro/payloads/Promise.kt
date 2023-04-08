@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinemoney.payloads
+package nl.tudelft.trustchain.offlinedigitaleuro.payloads
 
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey

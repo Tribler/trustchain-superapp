@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinemoney.ui
+package nl.tudelft.trustchain.offlinedigitaleuro.ui
 
 import android.os.Bundle
 import android.view.View
@@ -10,8 +10,8 @@ import com.travijuu.numberpicker.library.Interface.ValueChangedListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.offlinemoney.R
-import nl.tudelft.trustchain.offlinemoney.databinding.SendAmountFragmentBinding
+import nl.tudelft.trustchain.offlinedigitaleuro.R
+import nl.tudelft.trustchain.offlinedigitaleuro.databinding.SendAmountFragmentBinding
 import org.json.JSONObject
 
 

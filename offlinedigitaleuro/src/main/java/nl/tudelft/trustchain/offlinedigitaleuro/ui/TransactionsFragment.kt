@@ -1,8 +1,8 @@
-package nl.tudelft.trustchain.offlinemoney.ui
+package nl.tudelft.trustchain.offlinedigitaleuro.ui
 
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.offlinemoney.R
-import nl.tudelft.trustchain.offlinemoney.databinding.TransactionsFragmentBinding
+import nl.tudelft.trustchain.offlinedigitaleuro.R
+import nl.tudelft.trustchain.offlinedigitaleuro.databinding.TransactionsFragmentBinding
 
 class TransactionsFragment : OfflineDigitalEuroBaseFragment(R.layout.transactions_fragment) {
     private val binding by viewBinding(TransactionsFragmentBinding::bind)

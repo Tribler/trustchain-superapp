@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinemoney.ui
+package nl.tudelft.trustchain.offlinedigitaleuro.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -9,12 +9,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.offlinemoney.R
-import nl.tudelft.trustchain.offlinemoney.databinding.PrintMoneyFragmentBinding
-import nl.tudelft.trustchain.offlinemoney.src.RecipientPair
-import nl.tudelft.trustchain.offlinemoney.src.Token
-import nl.tudelft.trustchain.offlinemoney.src.Wallet
-import nl.tudelft.trustchain.offlinemoney.db.Token as DBToken
+import nl.tudelft.trustchain.offlinedigitaleuro.src.RecipientPair
+import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
+import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
+import nl.tudelft.trustchain.offlinedigitaleuro.R
+import nl.tudelft.trustchain.offlinedigitaleuro.databinding.PrintMoneyFragmentBinding
+import nl.tudelft.trustchain.offlinedigitaleuro.db.Token as DBToken
 
 class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_money_fragment) {
     private val binding by viewBinding(PrintMoneyFragmentBinding::bind)

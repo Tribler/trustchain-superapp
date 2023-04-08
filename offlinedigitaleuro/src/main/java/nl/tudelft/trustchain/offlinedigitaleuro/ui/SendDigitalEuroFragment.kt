@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinemoney.ui
+package nl.tudelft.trustchain.offlinedigitaleuro.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -12,13 +12,13 @@ import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.offlinemoney.R
-import nl.tudelft.trustchain.offlinemoney.databinding.SendMoneyFragmentBinding
-import nl.tudelft.trustchain.offlinemoney.src.Wallet
+import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
 import org.json.JSONObject
 
-import nl.tudelft.trustchain.offlinemoney.payloads.TransferQR
-import nl.tudelft.trustchain.offlinemoney.src.Token
+import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
+import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
+import nl.tudelft.trustchain.offlinedigitaleuro.R
+import nl.tudelft.trustchain.offlinedigitaleuro.databinding.SendMoneyFragmentBinding
 
 class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_money_fragment)  {
     private val binding by viewBinding(SendMoneyFragmentBinding::bind)
@@ -40,7 +40,7 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
         return ret;
     }
 
-    private fun dbTokens2Tokens(dbTokens: Array<nl.tudelft.trustchain.offlinemoney.db.Token>, count: Int): MutableList<Token> {
+    private fun dbTokens2Tokens(dbTokens: Array<nl.tudelft.trustchain.offlinedigitaleuro.db.Token>, count: Int): MutableList<Token> {
         var ret: MutableList<Token> = mutableListOf()
 
         for (i in 0 until count) {

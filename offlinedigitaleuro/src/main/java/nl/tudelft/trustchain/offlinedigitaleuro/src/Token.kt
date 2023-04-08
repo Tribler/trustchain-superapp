@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinemoney.src
+package nl.tudelft.trustchain.offlinedigitaleuro.src
 
 import mu.KotlinLogging
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider

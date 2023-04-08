@@ -1,12 +1,6 @@
-package nl.tudelft.trustchain.offlinemoney.db
+package nl.tudelft.trustchain.offlinedigitaleuro.db
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.annotation.WorkerThread
 import androidx.room.*
-import kotlinx.coroutines.flow.Flow
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 
 @Entity(tableName = "transactions_table")

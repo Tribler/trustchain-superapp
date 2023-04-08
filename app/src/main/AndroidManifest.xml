@@ -128,7 +128,7 @@
             android:theme="@style/Fullscreen" />
 
         <activity
-            android:name="nl.tudelft.trustchain.offlinemoney.MainActivityOfflineMoney"
+            android:name="nl.tudelft.trustchain.offlinedigitaleuro.MainActivityOfflineDigitalEuro"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:theme="@style/Theme.PeerChat" />
 
