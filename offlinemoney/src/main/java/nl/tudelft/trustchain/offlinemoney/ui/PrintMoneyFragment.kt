@@ -34,7 +34,7 @@ class PrintMoneyFragment : OfflineMoneyBaseFragment(R.layout.print_money_fragmen
         fun createTokens(token1_count:Int, token2_count:Int, token5_count:Int): Array<Token> {
             var tokenpackage:Array<Token> = arrayOf<Token>()
 
-            var resp = RecipientPair(Wallet.authority_wallet.publicKey.keyToBin(), Wallet.authority_wallet.privateKey.sign("random signature".toByteArray()))
+            var resp = RecipientPair(Wallet.CentralAuthority.publicKey.keyToBin(), Wallet.CentralAuthority.privateKey.sign("random signature".toByteArray()))
 
             for(i in 1..token1_count){
                 tokenpackage+=Token(
