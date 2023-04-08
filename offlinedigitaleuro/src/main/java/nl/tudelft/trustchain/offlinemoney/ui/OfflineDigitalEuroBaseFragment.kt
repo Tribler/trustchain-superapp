@@ -8,16 +8,12 @@ import android.view.View
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.db.*
-import kotlin.random.Random
 
-open class OfflineMoneyBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
+open class OfflineDigitalEuroBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 
     val db by lazy { OfflineMoneyRoomDatabase.getDatabase(requireContext()) }
 

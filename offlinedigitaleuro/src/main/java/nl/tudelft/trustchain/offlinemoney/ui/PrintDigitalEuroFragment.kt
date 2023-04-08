@@ -16,7 +16,7 @@ import nl.tudelft.trustchain.offlinemoney.src.Token
 import nl.tudelft.trustchain.offlinemoney.src.Wallet
 import nl.tudelft.trustchain.offlinemoney.db.Token as DBToken
 
-class PrintMoneyFragment : OfflineMoneyBaseFragment(R.layout.print_money_fragment) {
+class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_money_fragment) {
     private val binding by viewBinding(PrintMoneyFragmentBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -4,6 +4,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.databinding.TransactionsFragmentBinding
 
-class TransactionsFragment : OfflineMoneyBaseFragment(R.layout.transactions_fragment) {
+class TransactionsFragment : OfflineDigitalEuroBaseFragment(R.layout.transactions_fragment) {
     private val binding by viewBinding(TransactionsFragmentBinding::bind)
 }

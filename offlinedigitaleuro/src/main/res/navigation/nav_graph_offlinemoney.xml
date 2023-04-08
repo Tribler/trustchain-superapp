@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/sendMoneyFragment"
-        android:name="nl.tudelft.trustchain.offlinemoney.ui.SendMoneyFragment"
+        android:name="nl.tudelft.trustchain.offlinemoney.ui.SendDigitalEuroFragment"
         android:label="Transfer"
         tools:layout="@layout/send_money_fragment">
         <action
@@ -54,7 +54,7 @@
 
     <fragment
         android:id="@+id/printMoneyFragment"
-        android:name="nl.tudelft.trustchain.offlinemoney.ui.PrintMoneyFragment"
+        android:name="nl.tudelft.trustchain.offlinemoney.ui.PrintDigitalEuroFragment"
         android:label="Print Money"
         tools:layout="@layout/print_money_fragment">
         <action

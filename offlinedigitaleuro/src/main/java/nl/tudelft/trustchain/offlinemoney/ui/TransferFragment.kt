@@ -21,7 +21,7 @@ import org.json.JSONException
 import nl.tudelft.trustchain.offlinemoney.payloads.TransferQR
 import nl.tudelft.trustchain.offlinemoney.src.Token
 
-class TransferFragment : OfflineMoneyBaseFragment(R.layout.activity_main_offline_money) {
+class TransferFragment : OfflineDigitalEuroBaseFragment(R.layout.activity_main_offline_money) {
     private val binding by viewBinding(ActivityMainOfflineMoneyBinding::bind)
 
     private val qrCodeUtils by lazy {

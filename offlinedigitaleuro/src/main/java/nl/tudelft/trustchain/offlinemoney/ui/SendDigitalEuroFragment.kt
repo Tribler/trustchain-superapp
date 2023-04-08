@@ -20,7 +20,7 @@ import org.json.JSONObject
 import nl.tudelft.trustchain.offlinemoney.payloads.TransferQR
 import nl.tudelft.trustchain.offlinemoney.src.Token
 
-class SendMoneyFragment : OfflineMoneyBaseFragment(R.layout.send_money_fragment)  {
+class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_money_fragment)  {
     private val binding by viewBinding(SendMoneyFragmentBinding::bind)
 
     // load just enough tokens to transfer

@@ -15,7 +15,7 @@ import nl.tudelft.trustchain.offlinemoney.databinding.SendAmountFragmentBinding
 import org.json.JSONObject
 
 
-class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragment) {
+class SendAmountFragment : OfflineDigitalEuroBaseFragment(R.layout.send_amount_fragment) {
     private val binding by viewBinding(SendAmountFragmentBinding::bind)
 
     private fun updateSendAmount() {
@@ -73,7 +73,7 @@ class SendAmountFragment : OfflineMoneyBaseFragment(R.layout.send_amount_fragmen
 
                     val args = Bundle()
 
-                    args.putString(SendMoneyFragment.ARG_DATA, connectionData.toString())
+                    args.putString(SendDigitalEuroFragment.ARG_DATA, connectionData.toString())
 
                     findNavController().navigate(
                         R.id.action_sendAmountFragment_to_sendMoneyFragment,
