@@ -12,6 +12,7 @@ import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.frostwire.jlibtorrent.TorrentHandle
 import kotlinx.android.synthetic.main.fragment_strategy.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
@@ -165,19 +166,19 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val handler = strategyData[position]
         val convBtoMB = 1000000
+        val status = handler.handle.status()
 
         holder.hashTextView.text = strategyData[position].handle.name()
 
-        holder.downloadTextView.text = (handler.handle.status().allTimeDownload()
+        holder.downloadTextView.text = (status.allTimeDownload()
             / convBtoMB).toString()
 
-        holder.uploadTextView.text = (strategyData[position].handle.status().allTimeUpload()
+        holder.uploadTextView.text = (status.allTimeUpload()
             / convBtoMB).toString()
 
         //TODO: replace by actual token balance
         holder.balanceTextView.text = (
-            (strategyData[position].handle.status().allTimeUpload()
-            - strategyData[position].handle.status().allTimeDownload())
+            (status.allTimeUpload() - status.allTimeDownload())
             / convBtoMB).toString()
     }
 

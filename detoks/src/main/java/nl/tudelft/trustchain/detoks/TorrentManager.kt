@@ -310,19 +310,18 @@ class TorrentManager private constructor (
             val size = status.total() / 1000000 // Bytes to MB conversion
 
             if (storage + size > strategies.storageLimit) continue
+            storage += size
 
-            if (toStopSeeding.contains(seedingTorrentsSorted[i])
-                && status.lastUpload() - System.currentTimeMillis() < SEEDING_LOOP_TIME) {
+            if (toStopSeeding.contains(seedingTorrentsSorted[i])) {
+                if (status.lastUpload() - System.currentTimeMillis() > SEEDING_LOOP_TIME) continue
                 toStopSeeding.remove(seedingTorrentsSorted[i])
                 seedingTorrents.add(seedingTorrentsSorted[i])
-                storage += size
                 continue
             }
 
             jobs.add(CoroutineScope(Job() + Dispatchers.Default).launch {
                 if (downloadAndSeed(seedingTorrentsSorted[i])) {
                     seedingTorrents.add(seedingTorrentsSorted[i])
-                    storage += size
                 }
             })
         }
@@ -339,7 +338,7 @@ class TorrentManager private constructor (
         }
     }
 
-    private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 100000) : Boolean {
+    private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 400000) : Boolean {
         if (!handler.handle.isValid) return false
         handler.downloadFile()
 
@@ -347,11 +346,12 @@ class TorrentManager private constructor (
             withTimeout(timeout) {
                 while (!handler.isDownloaded()) {
                     Log.d(DeToksCommunity.LOGGING_TAG, "Trying to download... ${handler.handle.status().totalWantedDone()} / ${handler.handle.status().totalWanted()}")
-                    delay(300)
+                    delay(1000)
                 }
             }
         } catch (e: TimeoutCancellationException) {
             Log.d(DeToksCommunity.LOGGING_TAG, "Timeout for download ... ${handler.torrentName}")
+            handler.deleteFile()
             return false
         }
 
