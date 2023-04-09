@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.detoks.fragments.DeToksFragment
 import java.io.File
 import java.nio.file.Files
@@ -83,9 +84,37 @@ class TorrentManager constructor (
      * If the video is not downloaded after the timeout, it will return the video anyway.
      */
     suspend fun provideContent(index: Int = currentIndex, timeout: Long = 10000): TorrentMediaInfo {
-        Log.i("DeToks", "Providing content ... $index, ${index % getNumberOfTorrents()}")
-        torrentFiles.sort()
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+        val comparator = compareByDescending<TrustChainBlock>
+        {
+            community.getLikes(
+                it.transaction["video"] as String,
+                it.transaction["torrent"] as String
+            ).size
+        }.thenByDescending {
+            community.getEarliestDate(
+                it.transaction["video"] as String,
+                it.transaction["torrent"] as String
+            )
+        }
+        val a = community.database.getBlocksWithType(LIKE_BLOCK).sortedWith(comparator)
+        if(!a.isEmpty()) {
+            val b = a[0].transaction
+            val c = torrentFiles.filter { !it.watched }
+            for (t in c) {
+                if (t.fileName.equals(b["video"] as String) && t.torrentName.equals(b["torrent"] as String)) {
+                    if (index == -2) {
+                    }
+                    if (timeout.equals(-21)) {
+                    }
+                    t.watched = true
+                    return t.asMediaInfo()
+                }
+            }
+        }
         val content = torrentFiles.gett(index % getNumberOfTorrents())
+        //val content = torrentFiles.gett(0)
+
 
         return try {
             withTimeout(timeout) {
@@ -178,7 +207,8 @@ class TorrentManager constructor (
                         fileName,
                         it,
                         torrentInfo.creator(),
-                        torrentInfo.makeMagnetUri()
+                        torrentInfo.makeMagnetUri(),
+                        false
                     )
                 )
             }
@@ -219,7 +249,8 @@ class TorrentManager constructor (
                                     fileName,
                                     it,
                                     torrentInfo.creator(),
-                                    torrentInfo.makeMagnetUri()
+                                    torrentInfo.makeMagnetUri(),
+                                    false
                                 )
                             )
                         }
@@ -285,7 +316,8 @@ class TorrentManager constructor (
                         fileName,
                         it,
                         torrentInfo.creator(),
-                        magnUri
+                        magnUri,
+                        false
                     )
                 )
             }
@@ -434,7 +466,8 @@ class TorrentManager constructor (
                         fileName,
                         it,
                         community.myPeer.publicKey.toString(),
-                        ""
+                        "",
+                        false
                     )
                 )
             }
@@ -457,7 +490,8 @@ class TorrentManager constructor (
         val fileName: String,
         val fileIndex: Int,
         val creator: String,
-        val torrentMagnet: String
+        val torrentMagnet: String,
+        var watched: Boolean
     ) {
 
         var isDownloading: Boolean = false
