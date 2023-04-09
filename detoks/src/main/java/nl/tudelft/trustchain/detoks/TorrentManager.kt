@@ -299,7 +299,13 @@ class TorrentManager private constructor (
         seedingTorrents.clear()
 
         for (i in seedingTorrentsSorted.indices) {
-            val size = seedingTorrentsSorted[i].handle.status().total() / 1000000
+            seedingTorrentsSorted[i].handle.scrapeTracker()
+            val status = seedingTorrentsSorted[i].handle.status()
+            val seeders = status.numSeeds()
+            val leechers = status.numPeers() - seeders
+            if (leechers < seeders) continue
+
+            val size = status.total() / 1000000
 
             if (storage + size > strategies.storageLimit) continue
 
