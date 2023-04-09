@@ -52,16 +52,16 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
         )
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        val leachingStrategySpinner = view.findViewById<Spinner>(R.id.leachingStrategy)
-        leachingStrategySpinner.adapter = arrayAdapter
-        leachingStrategySpinner.post {
-            leachingStrategySpinner.setSelection(torrentManager.strategies.leachingStrategy)
+        val leechingStrategySpinner = view.findViewById<Spinner>(R.id.leechingStrategy)
+        leechingStrategySpinner.adapter = arrayAdapter
+        leechingStrategySpinner.post {
+            leechingStrategySpinner.setSelection(torrentManager.strategies.leechingStrategy)
         }
-        setSpinnerActions(leachingStrategySpinner) {
-            if (it != torrentManager.strategies.leachingStrategy) {
+        setSpinnerActions(leechingStrategySpinner) {
+            if (it != torrentManager.strategies.leechingStrategy) {
                 return@setSpinnerActions
             }
-            torrentManager.updateLeachingStrategy(it)
+            torrentManager.updateLeechingStrategy(it)
         }
 
         val seedingSwitch = view.findViewById<SwitchCompat>(R.id.isSeeding)

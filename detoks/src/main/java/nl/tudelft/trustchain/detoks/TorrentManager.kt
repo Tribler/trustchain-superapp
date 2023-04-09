@@ -48,6 +48,8 @@ class TorrentManager private constructor (
     }
 
     companion object {
+        const val SEEDING_LOOP_TIME : Long = 1800000 // Half hour
+
         private lateinit var instance: TorrentManager
         fun getInstance(context: Context): TorrentManager {
             if (!::instance.isInitialized) {
@@ -267,10 +269,10 @@ class TorrentManager private constructor (
         }
     }
 
-    fun updateLeachingStrategy(strategyId: Int) {
-        if (strategies.leachingStrategy == strategyId) return
+    fun updateLeechingStrategy(strategyId: Int) {
+        if (strategies.leechingStrategy == strategyId) return
 
-        strategies.leachingStrategy = strategyId
+        strategies.leechingStrategy = strategyId
 
         currentIndex = 0
         unwatchedVideos = strategies.applyStrategy(strategyId, unwatchedVideos, profile.profiles)
@@ -305,11 +307,12 @@ class TorrentManager private constructor (
             val leechers = status.numPeers() - seeders
             if (leechers < seeders) continue
 
-            val size = status.total() / 1000000
+            val size = status.total() / 1000000 // Bytes to MB conversion
 
             if (storage + size > strategies.storageLimit) continue
 
-            if (toStopSeeding.contains(seedingTorrentsSorted[i])) {
+            if (toStopSeeding.contains(seedingTorrentsSorted[i])
+                && status.lastUpload() - System.currentTimeMillis() < SEEDING_LOOP_TIME) {
                 toStopSeeding.remove(seedingTorrentsSorted[i])
                 seedingTorrents.add(seedingTorrentsSorted[i])
                 storage += size
@@ -327,6 +330,12 @@ class TorrentManager private constructor (
         CoroutineScope(Job() + Dispatchers.Default).launch {
             toStopSeeding.forEach { stopSeedingTorrent(it) }
             jobs.forEach { it.join() }
+
+            delay(SEEDING_LOOP_TIME)
+
+            if (strategies.seedingStrategy == strategyId
+                && strategies.storageLimit == storageLimit)
+                updateSeedingStrategy(strategyId, storageLimit)
         }
     }
 
@@ -361,6 +370,7 @@ class TorrentManager private constructor (
     }
 
     private fun stopSeedingTorrent(handler: TorrentHandler) {
+        seedingTorrents.remove(handler)
         handler.handle.unsetFlags(TorrentFlags.SEED_MODE)
         handler.handle.pause()
         handler.handle.resume()

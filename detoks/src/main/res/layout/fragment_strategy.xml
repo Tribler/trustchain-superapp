@@ -24,11 +24,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/leaching_strategy"
+                android:text="@string/leeching_strategy"
                 android:textSize="16sp" />
 
             <Spinner
-                android:id="@+id/leachingStrategy"
+                android:id="@+id/leechingStrategy"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
