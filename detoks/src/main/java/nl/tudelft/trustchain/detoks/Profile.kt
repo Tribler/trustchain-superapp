@@ -21,7 +21,7 @@ class ProfileEntry(
 class Profile(
     val profiles: HashMap<String, ProfileEntry> = HashMap()
 ) {
-    object ProfileConfig { const val MAX_DURATION_RATIO  = 10 }
+    object ProfileConfig { const val MAX_DURATION_FACTOR  = 10 }
 
     fun addProfile(key: String) {
         if(!profiles.contains(key)) profiles[key] = ProfileEntry()
@@ -44,7 +44,7 @@ class Profile(
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
         addProfile(key)
         if(myUpdate) {
-            val newTime = min(time, profiles[key]!!.watchTime  * ProfileConfig.MAX_DURATION_RATIO)
+            val newTime = min(time, profiles[key]!!.duration  * ProfileConfig.MAX_DURATION_FACTOR)
             profiles[key]!!.watchTime += (newTime / NetworkSizeGossiper.networkSizeEstimate)
             profiles[key]!!.watched = true
         } else {
