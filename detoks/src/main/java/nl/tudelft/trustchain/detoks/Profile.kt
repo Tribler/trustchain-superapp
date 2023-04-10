@@ -57,11 +57,6 @@ class Profile(
         profiles[key]!!.uploadDate = info.creationDate()
     }
 
-    fun incrementHopCount(key: String) {
-        addProfile(key)
-        profiles[key]!!.hopCount += 1
-    }
-
     fun incrementTimesSeen(key: String) {
         if(!profiles.contains(key)) profiles[key] = ProfileEntry(timesSeen = 0)
         profiles[key]!!.timesSeen += 1
