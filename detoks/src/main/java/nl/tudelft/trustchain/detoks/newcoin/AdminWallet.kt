@@ -4,21 +4,25 @@ import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.detoks.Token
 import nl.tudelft.trustchain.detoks.db.DbHelper
 
-data class AdminWallet(val tokens: ArrayList<Token>) {
+data class AdminWallet(
+    val publicKey: String
+) {
 
     companion object {
         private var wallet :AdminWallet? = null
-        private val dbHelper: DbHelper? = null
+        private var tokens : MutableList<Token>? = null
+        private var dbHelper: DbHelper? = null
         @RequiresApi(Build.VERSION_CODES.O)
         private fun create(context: Context): AdminWallet {
 //            val generator = KeyPairGenerator.getInstance("RSA")
 //            generator.initialize(2048)
 //            val keyPair = generator.generateKeyPair()
 
-            val dbHelper = DbHelper(context)
-            val tokens = dbHelper.getAllTokens()
+            dbHelper = DbHelper(context)
+            tokens = dbHelper!!.getAllTokens(admin = true)
+            wallet = AdminWallet("s")
 
-            return AdminWallet(tokens)
+            return wallet!!
         }
         @RequiresApi(Build.VERSION_CODES.O)
         fun getInstance(context: Context): AdminWallet {
@@ -26,18 +30,22 @@ data class AdminWallet(val tokens: ArrayList<Token>) {
         }
     }
 
+    fun getTokens(): MutableList<Token> {
+        return tokens!!
+    }
+
     val balance: Int get() {
-        return tokens.size
+        return tokens!!.size
     }
 
     fun addToken(token : Token) {
-        tokens.add(token)
-        dbHelper?.addToken(token)
+        tokens!!.add(token)
+        dbHelper?.addToken(token, admin = true)
     }
 
     fun removeToken(token: Token): Token{
-        tokens.remove(token)
-        dbHelper?.removeToken(token)
+        tokens!!.remove(token)
+        dbHelper?.removeToken(token, admin = true)
         return token
     }
 
@@ -49,7 +57,7 @@ data class AdminWallet(val tokens: ArrayList<Token>) {
         val tokensToPay = arrayListOf<Token>();
         var tempValue = 0;
 
-        for(t in tokens) {
+        for(t in tokens!!) {
             if(tempValue + t.value <= value){
                 tempValue = tempValue + t.value
                 tokensToPay.add(removeToken(t))

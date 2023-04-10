@@ -52,13 +52,23 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 "$COLUMN_GEN_HASH BLOB NOT NULL, " +
                 "$COLUMN_SER_TOKEN BLOB NOT NULL UNIQUE); ",
             )
+
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_ADMIN_TOKEN")
+        db?.execSQL(
+            "CREATE TABLE IF NOT EXISTS $TABLE_ADMIN_TOKEN (" +
+                "$COLUMN_TOKEN_ID BLOB PRIMARY KEY, " +
+                "$COLUMN_VALUE BLOB NOT NULL, " +
+                "$COLUMN_VERIFIER BLOB NOT NULL, " +
+                "$COLUMN_GEN_HASH BLOB NOT NULL, " +
+                "$COLUMN_SER_TOKEN BLOB NOT NULL UNIQUE); ",
+        )
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         // Handle database schema upgrades here if needed
     }
 
-    fun addToken(token: Token) : Long {
+    fun addToken(token: Token, admin: Boolean = false) : Long {
         val new_row = ContentValues()
         new_row.put(COLUMN_TOKEN_ID, token.id)
         new_row.put(COLUMN_VALUE, token.value)
@@ -67,10 +77,15 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         val collection = mutableListOf<Token>(token)
         new_row.put(COLUMN_SER_TOKEN, serialize(collection))
 
+        var table = TABLE_TOKEN
+        if (admin) {
+            table = TABLE_ADMIN_TOKEN
+        }
+
         val db = this.writableDatabase
 //        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME_TOKEN WHERE $COLUMN_TOKEN_ID=? OR $COLUMN_VALUE=?",
 //            arrayOf(token_id, value.toString()))
-        val newRowId = db.insert(TABLE_TOKEN, null, new_row) // null?
+        val newRowId = db.insert(table, null, new_row) // null?
         db.close()
         return newRowId
     }
@@ -78,10 +93,15 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     /**
      * Removes the specified token from the DB
      */
-    fun removeToken(token: Token) {
+    fun removeToken(token: Token, admin: Boolean = false) {
+        var table = TABLE_TOKEN
+        if (admin) {
+            table = TABLE_ADMIN_TOKEN
+        }
+
         val db = this.writableDatabase
         db.delete(
-            TABLE_TOKEN,
+            table,
             COLUMN_TOKEN_ID + " = ?",
             arrayOf<String>(java.lang.String.valueOf(token.id)),
         )
@@ -90,9 +110,14 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
     //returns the id and the value of the token
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getAllTokens(): ArrayList<Token>{
+    fun getAllTokens(admin: Boolean = false): ArrayList<Token>{
+        var table = TABLE_TOKEN
+        if (admin) {
+            table = TABLE_ADMIN_TOKEN
+        }
+
         val tokenList = arrayListOf<Token>()
-        val selectQueryId = "SELECT $COLUMN_SER_TOKEN FROM $TABLE_TOKEN"
+        val selectQueryId = "SELECT $COLUMN_SER_TOKEN FROM $table"
 
         val db = this.readableDatabase
         val cursorId = db.rawQuery(selectQueryId, null)

@@ -1,14 +1,21 @@
 package nl.tudelft.trustchain.detoks
 
+import AdminWallet
+import Wallet
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.annotation.RequiresApi
 import androidx.navigation.findNavController
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
 class AdminFragment : BaseFragment(R.layout.fragment_admin) {
+
+    private val myPublicKey = getIpv8().myPeer.publicKey
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,13 +29,16 @@ class AdminFragment : BaseFragment(R.layout.fragment_admin) {
         return inflater.inflate(R.layout.fragment_admin, container, false)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val wallet = AdminWallet.getInstance(view.context)
+        val userWallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
 
         val createTokenButton = view.findViewById<Button>(R.id.buttonTokenCreate)
         createTokenButton.setOnClickListener {
             // Create a new coin and add it to the wallet!
-//            creatNewCoin(wallet)
+            creatNewCoin(wallet, userWallet)
         }
 
         val buttonTokenList = view.findViewById<Button>(R.id.buttonTokenView)
@@ -40,6 +50,20 @@ class AdminFragment : BaseFragment(R.layout.fragment_admin) {
             navController.navigate(R.id.tokenListAdmin, bundle)
         }
 
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun creatNewCoin(wallet: AdminWallet, userWallet: Wallet) {
+        val myPrivateKey = getIpv8().myPeer.key as PrivateKey
+        val token = Token.create(1, myPublicKey.keyToBin())
+        val proof = myPrivateKey.sign(token.id + token.value + token.genesisHash + myPublicKey.keyToBin())
+        token.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
+
+        wallet.addToken(token)
+        userWallet.addToken(token)
+
+        println("Wallet A balance: ${wallet.balance}")
+        println("Wallet B balance: ${userWallet.balance}")
     }
 
     companion object {

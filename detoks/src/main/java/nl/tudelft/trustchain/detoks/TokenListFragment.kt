@@ -57,7 +57,9 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
                 if (userWallet != null && adminWallet != null) {
                     print("iteration X")
                     if (access == "admin") {
-                        val items = adminWallet!!.tokens.map { token: Token -> TokenItem(token) }
+                        print("adminbranch")
+                        print(adminWallet!!.getTokens())
+                        val items = adminWallet!!.getTokens().map { token: Token -> TokenItem(token) }
                         adapter.updateItems(items)
                     } else if (access == "user") {
                         print("Userbranch")
