@@ -111,17 +111,18 @@ class DeToksCommunity(private val context: Context,
     }
 
     private fun onTorrentGossip(packet: Packet) {
-        val payload = packet.getPayload(TorrentMessage.Deserializer)
+        val (_, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
         payload.data.forEach {
-            torrentManager.addTorrent(Sha1Hash(it.first), it.second)
+            val hash = MagnetLink.hashFromMagnet(it.first)
+            torrentManager.addTorrent(Sha1Hash(hash), it.first)
+            torrentManager.profile.updateEntryHopCount(hash, it.second)
         }
     }
 
     private fun onWatchTimeGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
+        val (_, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-        Log.d(LOGGING_TAG, "Received watch time entry from ${peer.mid}, payload: ${payload.data}")
 
         payload.data.forEach {
             torrentManager.profile.updateEntryWatchTime(
