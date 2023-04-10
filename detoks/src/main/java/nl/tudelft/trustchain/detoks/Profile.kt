@@ -58,8 +58,8 @@ class Profile(
     }
 
     fun incrementHopCount(key: String) {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
-        profiles[key]!!.timesSeen += 1
+        addProfile(key)
+        profiles[key]!!.hopCount += 1
     }
 
     fun incrementTimesSeen(key: String) {
