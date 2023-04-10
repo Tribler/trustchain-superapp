@@ -94,7 +94,7 @@ class NetworkSizeGossiper(
                     Pair(
                         it.first, it.second + (
                             msg.data.find { it1 -> it1.first == it.first }?.second ?: 0.0
-                            )
+                            ) / 2
                     )
                 }
 
