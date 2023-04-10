@@ -43,8 +43,8 @@ class TorrentGossiper(
                 val data = randomMagnets
                     .map { it2 ->
                         val key = MagnetLink.hashFromMagnet(it2)
-                        profile.incrementHopCount(key)
-                        Pair(it2, profile.profiles[MagnetLink.hashFromMagnet(it2)]!!.hopCount)
+                        profile.addProfile(key)
+                        Pair(it2, profile.profiles[MagnetLink.hashFromMagnet(it2)]!!.hopCount + 1)
                     }
                 deToksCommunity.gossipWith(
                     it,
