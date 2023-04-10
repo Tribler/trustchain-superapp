@@ -23,4 +23,4 @@ class WalletManager(context: Context) {
     }
 }
 
-data class Wallet(var balance: Float = 10.0f)
+data class Wallet(var balance: Float = 100.0f)

@@ -10,6 +10,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.trustchain.detoks.gossiper.*
@@ -31,6 +32,7 @@ class DeToksCommunity(private val context: Context,
         messageHandlers[MESSAGE_NETWORK_SIZE_ID] = :: onNetworkSizeGossip
         messageHandlers[MESSAGE_BOOT_REQUEST] = :: onBootRequestGossip
         messageHandlers[MESSAGE_BOOT_RESPONSE] = :: onBootResponseGossip
+        messageHandlers[MESSAGE_TOKEN_REQUEST_ID] = ::onTokenRequestMessage
     }
 
     companion object {
@@ -42,6 +44,7 @@ class DeToksCommunity(private val context: Context,
         const val MESSAGE_BOOT_REQUEST = 5
         const val MESSAGE_BOOT_RESPONSE = 6
         const val BLOCK_TYPE = "detoks_transaction"
+        const val MESSAGE_TOKEN_REQUEST_ID = 7
     }
 
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
@@ -73,6 +76,26 @@ class DeToksCommunity(private val context: Context,
         }
 
     }
+    fun requestTokens(amount: Int, recipientMid: String) {
+        if (myPeer.mid == recipientMid) {
+            Log.d(LOGGING_TAG, "Cannot request tokens from yourself.")
+            return
+        }
+
+        Log.d(LOGGING_TAG, "Requesting $amount tokens from $recipientMid")
+
+        // Find the peer by its mid
+        val recipientPeer = getPeers().find { it.mid == recipientMid }
+
+        // If the peer is found, send a token request message
+        if (recipientPeer != null) {
+            val requestMessage = TokenRequestMessage(amount, myPeer.mid, recipientMid)
+            gossipWith(recipientPeer, requestMessage, MESSAGE_TOKEN_REQUEST_ID)
+        } else {
+            Log.d(LOGGING_TAG, "Peer not found: $recipientMid")
+        }
+    }
+
 
     fun gossipWith(peer: Peer, message: Serializable, id: Int) {
         Log.d(LOGGING_TAG, "Gossiping with ${peer.mid}, msg id: $id")
@@ -82,7 +105,7 @@ class DeToksCommunity(private val context: Context,
         // Send a token only to a new peer
         if (!visitedPeers.contains(peer)) {
             visitedPeers.add(peer)
-            sendTokens(1, peer.mid)
+            //sendTokens(1, peer.mid)
             val transaction = mapOf("amount" to 1)
             createProposalBlock(BLOCK_TYPE, transaction, peer.publicKey.keyToBin())
             Log.d(LOGGING_TAG, "Created proposal block")
@@ -148,6 +171,22 @@ class DeToksCommunity(private val context: Context,
         BootGossiper.receivedResponse(payload.data)
     }
 
+    private fun onTokenRequestMessage(packet: Packet) {
+        val (_, payload) = packet.getAuthPayload(TokenRequestMessage.Deserializer)
+
+        Log.d(LOGGING_TAG, "Received token request from ${payload.senderMid}")
+
+
+         sendTokens(payload.amount, payload.senderMid)
+    }
+    fun findPeerByAddress(address: String): Peer? {
+        return getPeers().firstOrNull {
+
+            it.address.ip == address }
+    }
+    fun getBalance(): Float {
+        return walletManager.getOrCreateWallet(myPeer.mid).balance
+    }
     class Factory(
         private val context: Context,
         private val settings: TrustChainSettings,
