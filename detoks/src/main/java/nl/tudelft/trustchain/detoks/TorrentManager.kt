@@ -49,6 +49,8 @@ class TorrentManager private constructor (
     }
 
     companion object {
+        const val SEEDING_LOOP_TIME : Long = 1800000 // Half hour
+
         private lateinit var instance: TorrentManager
         fun getInstance(context: Context): TorrentManager {
             if (!::instance.isInitialized) {
@@ -285,10 +287,10 @@ class TorrentManager private constructor (
         }
     }
 
-    fun updateLeachingStrategy(strategyId: Int) {
-        if (strategies.leachingStrategy == strategyId) return
+    fun updateLeechingStrategy(strategyId: Int) {
+        if (strategies.leechingStrategy == strategyId) return
 
-        strategies.leachingStrategy = strategyId
+        strategies.leechingStrategy = strategyId
 
         currentIndex = 0
         unwatchedVideos = strategies.applyStrategy(strategyId, unwatchedVideos, profile.profiles)
@@ -304,7 +306,11 @@ class TorrentManager private constructor (
         strategies.seedingStrategy = strategyId
         strategies.storageLimit = storageLimit
 
-        val seedingTorrentsSorted = strategies.applyStrategy(strategyId, torrentFiles, profile.profiles)
+        val seedingTorrentsSorted = strategies.applyStrategy(
+            strategyId,
+            torrentFiles,
+            profile.profiles
+        ).distinctBy { it.handle }
         var storage: Long = 0
 
         val jobs = mutableListOf<Job>()
@@ -312,23 +318,28 @@ class TorrentManager private constructor (
         val toStopSeeding = seedingTorrents.toMutableList()
         seedingTorrents.clear()
 
+        for (i in seedingTorrentsSorted.indices) {
+            seedingTorrentsSorted[i].handle.scrapeTracker()
+            val status = seedingTorrentsSorted[i].handle.status()
+            val seeders = status.numSeeds()
+            val leechers = status.numPeers() - seeders
+            if (leechers < seeders) continue
 
-        for (i in 0 until seedingTorrentsSorted.size) {
-            val size = seedingTorrentsSorted[i].handle.status().total() / 1000000 //TODO: store as byte to avoid all conversions
+            val size = status.total() / 1000000 // Bytes to MB conversion
 
             if (storage + size > strategies.storageLimit) continue
+            storage += size
 
             if (toStopSeeding.contains(seedingTorrentsSorted[i])) {
+                if (status.lastUpload() - System.currentTimeMillis() > SEEDING_LOOP_TIME) continue
                 toStopSeeding.remove(seedingTorrentsSorted[i])
                 seedingTorrents.add(seedingTorrentsSorted[i])
-                storage += size
                 continue
             }
 
             jobs.add(CoroutineScope(Job() + Dispatchers.Default).launch {
                 if (downloadAndSeed(seedingTorrentsSorted[i])) {
                     seedingTorrents.add(seedingTorrentsSorted[i])
-                    storage += size
                 }
             })
         }
@@ -336,23 +347,29 @@ class TorrentManager private constructor (
         CoroutineScope(Job() + Dispatchers.Default).launch {
             toStopSeeding.forEach { stopSeedingTorrent(it) }
             jobs.forEach { it.join() }
+
+            delay(SEEDING_LOOP_TIME)
+
+            if (strategies.seedingStrategy == strategyId
+                && strategies.storageLimit == storageLimit)
+                updateSeedingStrategy(strategyId, storageLimit)
         }
     }
 
-    private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 100000) : Boolean {
+    private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 400000) : Boolean {
         if (!handler.handle.isValid) return false
         handler.downloadFile()
 
         try {
             withTimeout(timeout) {
-                Log.d(DeToksCommunity.LOGGING_TAG, "Waiting to download ${handler.torrentName}")
                 while (!handler.isDownloaded()) {
                     Log.d(DeToksCommunity.LOGGING_TAG, "Trying to download... ${handler.handle.status().totalWantedDone()} / ${handler.handle.status().totalWanted()}")
-                    delay(300)
+                    delay(1000)
                 }
             }
         } catch (e: TimeoutCancellationException) {
             Log.d(DeToksCommunity.LOGGING_TAG, "Timeout for download ... ${handler.torrentName}")
+            handler.deleteFile()
             return false
         }
 
@@ -371,7 +388,7 @@ class TorrentManager private constructor (
     }
 
     private fun stopSeedingTorrent(handler: TorrentHandler) {
-        Log.d(DeToksCommunity.LOGGING_TAG, "Stopping seeding for torrent ${handler.torrentName}")
+        seedingTorrents.remove(handler)
         handler.handle.unsetFlags(TorrentFlags.SEED_MODE)
         handler.handle.pause()
         handler.handle.resume()
