@@ -194,7 +194,13 @@ class TorrentManager private constructor (
                             )
                             torrentFiles.add(torrent)
                             val magnet = torrent.handle.makeMagnetUri()
-                            getInfoFromMagnet(magnet)?.let { it2 -> profile.addProfile(magnet, it2) }
+                            profile.addProfile(magnet)
+                            getInfoFromMagnet(magnet)?.let { it2 ->
+                                profile.updateEntryUploadDate(
+                                    magnet,
+                                    it2
+                                )
+                            }
                         }
                     }
                 }
@@ -269,7 +275,12 @@ class TorrentManager private constructor (
                     it
                 )
                 torrentFiles.add(torrent)
-                getInfoFromMagnet(magnet)?.let { it2 -> profile.addProfile(magnet, it2) }
+                getInfoFromMagnet(magnet)?.let { it2 ->
+                    profile.updateEntryUploadDate(
+                        magnet,
+                        it2
+                    )
+                }
             }
         }
     }

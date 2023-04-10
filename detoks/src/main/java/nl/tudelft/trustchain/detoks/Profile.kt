@@ -24,12 +24,6 @@ class Profile(
 
     fun addProfile(key: String) {
         if(!profiles.contains(key)) profiles[key] = ProfileEntry()
-        profiles[key] = ProfileEntry()
-    }
-
-    fun addProfile(key: String, info: TorrentInfo) {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
-        profiles[key] = ProfileEntry(uploadDate = (info.creationDate()))
     }
 
     fun hasWatched(key: String): Boolean {
@@ -61,6 +55,11 @@ class Profile(
     fun updateEntryUploadDate(key: String, info: TorrentInfo) {
         addProfile(key)
         profiles[key]!!.uploadDate = info.creationDate()
+    }
+
+    fun incrementHopCount(key: String) {
+        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
+        profiles[key]!!.timesSeen += 1
     }
 
     fun incrementTimesSeen(key: String) {
