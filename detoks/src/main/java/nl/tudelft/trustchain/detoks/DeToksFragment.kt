@@ -56,11 +56,14 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         super.onViewCreated(view, savedInstanceState)
 
         viewPagerVideos.adapter = VideosAdapter(torrentManager)
-        viewPagerVideos.currentItem = 0
+            viewPagerVideos.currentItem = 0
         onPageChangeCallback()
 
         val settingsButton = view.findViewById<Button>(R.id.strategyButton)
         settingsButton.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toStrategyFragment) }
+
+        val torrentButton = view.findViewById<Button>(R.id.torrentButton)
+        torrentButton.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toTorrentFragment) }
     }
 
     /**
