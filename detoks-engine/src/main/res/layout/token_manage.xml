@@ -65,13 +65,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" android:layout_weight="3" android:weightSum="5">
         <Button
-            android:text="Delete\n all"
+            android:text="Send 2"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" android:id="@+id/delete_all_button" android:layout_weight="1"/>
+            android:layout_height="match_parent" android:id="@+id/send2_button" android:layout_weight="1"/>
         <Button
-            android:text="Delete\n token"
+            android:text="Send 5"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" android:id="@+id/delete_button" android:layout_weight="1"/>
+            android:layout_height="match_parent" android:id="@+id/send5_button" android:layout_weight="1"/>
         <Button
             android:text="Gen\n token"
             android:layout_width="match_parent"
