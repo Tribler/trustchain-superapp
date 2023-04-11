@@ -16,8 +16,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import android.os.Build;
-import androidx.annotation.RequiresApi;
-import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 
@@ -101,15 +100,24 @@ public class CustomRandomWalkVertexIterator<V, E>
             throw new NoSuchElementException();
         }
         V value = nextVertex;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            computeNext();
-        } else {
-            computeNextPrimitive();
-        }
+        computeNext();
         return value;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void modifyEdge(V sourceNode)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            outEdgesTotalWeight.put(sourceNode, graph.outgoingEdgesOf(sourceNode).stream().mapToDouble(graph::getEdgeWeight).sum());
+        } else {
+            double outEdgesTotalWeightSum = 0.0;
+            for(E edge : graph.outgoingEdgesOf(sourceNode)) {
+                outEdgesTotalWeightSum += graph.getEdgeWeight(edge);
+            }
+            outEdgesTotalWeight.put(sourceNode, outEdgesTotalWeightSum);
+        }
+    }
+
+
     private void computeNext()
     {
         if (hops >= maxHops || (rng.nextFloat() < resetProbability)) {
@@ -124,8 +132,7 @@ public class CustomRandomWalkVertexIterator<V, E>
         }
 
         E e = null;
-        double outEdgesWeight = outEdgesTotalWeight.computeIfAbsent(nextVertex, v -> graph
-                .outgoingEdgesOf(v).stream().mapToDouble(graph::getEdgeWeight).sum());
+        double outEdgesWeight = getOutEdgesWeight(nextVertex);
         double p = outEdgesWeight * rng.nextDouble();
         double cumulativeP = 0d;
         for (E curEdge : graph.outgoingEdgesOf(nextVertex)) {
@@ -138,42 +145,26 @@ public class CustomRandomWalkVertexIterator<V, E>
         nextVertex = Graphs.getOppositeVertex(graph, e, nextVertex);
     }
 
-    private void computeNextPrimitive()
-    {
-        if (hops >= maxHops || (rng.nextFloat() < resetProbability)) {
-            nextVertex = null;
-            return;
-        }
-
-        hops++;
-        if (graph.outDegreeOf(nextVertex) == 0) {
-            nextVertex = null;
-            return;
-        }
-
-        E e = null;
-            double outEdgesWeight = 0;
-            if(!outEdgesTotalWeight.containsKey(nextVertex)) {
-                for(E edge: graph.outgoingEdgesOf(nextVertex)) {
+    @NotNull
+    private Double getOutEdgesWeight(V vertex) {
+        double outEdgesWeight = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            outEdgesWeight = outEdgesTotalWeight.computeIfAbsent(vertex, v -> graph
+                    .outgoingEdgesOf(v).stream().mapToDouble(graph::getEdgeWeight).sum());
+        } else {
+            if(!outEdgesTotalWeight.containsKey(vertex)) {
+                for(E edge: graph.outgoingEdgesOf(vertex)) {
                     outEdgesWeight += graph.getEdgeWeight(edge);
                 }
-                outEdgesTotalWeight.put(nextVertex, outEdgesWeight);
+                outEdgesTotalWeight.put(vertex, outEdgesWeight);
             } else {
-                Double weight = outEdgesTotalWeight.get(nextVertex);
+                Double weight = outEdgesTotalWeight.get(vertex);
                 if(weight != null) {
                     outEdgesWeight = weight;
                 }
             }
-            double p = outEdgesWeight * rng.nextDouble();
-            double cumulativeP = 0d;
-            for (E curEdge : graph.outgoingEdgesOf(nextVertex)) {
-                cumulativeP += graph.getEdgeWeight(curEdge);
-                if (p <= cumulativeP) {
-                    e = curEdge;
-                    break;
-                }
-            }
-        nextVertex = Graphs.getOppositeVertex(graph, e, nextVertex);
+        }
+        return outEdgesWeight;
     }
 
 }
