@@ -7,7 +7,12 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -29,20 +34,28 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private var tokensPerTransaction = 1
     private var tokenIDCounter = 0
 
+    val jobs = mutableListOf<Job>()
+
     fun singleBenchmark(): Long {
 
         val executionTime = measureTimeMillis {
-            for (tok in transactionEngine.tokenStore.getAllTokens()) {
-                transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
-            }
+//            for (tok in transactionEngine.tokenStore.getAllTokens()) {
+//                jobs += lifecycleScope.launch(Dispatchers.Default) {
+//                    transactionEngine.sendTokenSingle(tok, ipv8.myPeer)
+//                }
+//            }
+            transactionEngine.sendTokensSingle(transactionEngine.tokenStore.getAllTokens(), transactionEngine.getSelectedPeer())
         }
+
+//        runBlocking {
+//            jobs.map { it.join() }
+//        }
 
         return executionTime
     }
 
     fun groupedBenchmark(): Long {
         val executionTime = measureTimeMillis {
-
             for (transactionGroup in transactionEngine.tokenStore.getAllTokens().chunked(groupSize)) {
                 transactionEngine.sendTokenGrouped(listOf(transactionGroup), transactionEngine.getSelectedPeer())
             }
