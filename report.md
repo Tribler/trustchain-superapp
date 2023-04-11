@@ -46,14 +46,18 @@ We have implemented four different ways to recommend specific content to users:
 - Requesting from all peers in the network to send five videos they uploaded last.
 
 ### Tokenenomics
-A user can mint ten upvote tokens daily when using the application.
+In the application there are a few system settings defined determining several aspects of the tokenomics. These limits are designed to add scarcity of UpvoteTokens in the network. Currently there are 3 predefined limits, these are (current value is in brackets):
+- The number of tokens sent for each upvote (3)
+- The number of videos a user can upvote daily (10)
+- The number of tokens a creator has to send as reward for seeding a video (1)
+
+
+A user can mint a fixed amount of upvote tokens daily when using the application. This limit is calculated by multiplying the systemsettings tokens sent for each upvote and the daily upvote limit.
 These tokens can be used when double tapping on a video to send the token to the content creator.
-The limit of 10 tokens will be reset each day, but the unminted tokens will not be passed over to the next day,
-which is done to prevent token stacking.
-We have decided to store the following information in the token: token_id, date, public_key of the minter, and video_id.
-The token id is a value between 0 and 10 and will be unique in combination with the date and public key of the minter.
-We store the sent and received upvote tokens in a personal sqldelight table to use the information
-to find better-recommended content for the sender.
+This limit of tokens will be reset each day, but the unminted tokens will not be passed over to the next day, which is done to prevent token stacking.
+We have decided to store the following information in the token: token_id, date, public_key of the minter, video_id and the public_key of the seeder.
+The token id is a value between 0 and the limit and will be unique in combination with the date and public key of the minter.
+We store the sent and received upvote tokens in a personal sqldelight table to use the information to find better-recommended content for the sender.
 
 In order to keep the network alive, there must be enough seeders for the leechers to download (torrent) the content.
 We decided that each user that uploads content to the application will also seed that content to the network.
@@ -70,7 +74,11 @@ Using the magnet URI link in the transaction map of the proposal blocks, the use
 Once the content is seeded, the magnet URI link will be greedily sent to all users who are online.
 To make sure that the user's bandwidth is not only used for seeding content, we set restrict the number of videos a user can seed to a maximum of 5 videos.
 
+To incentivise peers to seed videos of other creators, we have designed a reward system. Whenever a peer upvotes a video it sends 5 (adjustable as system setting) UpvoteTokens to the creator of the video. In those tokens the public key of the seeder that delivered the most data for the seed of the video. The creator has to send a subset of the received UpvoteTokens to that seeder. Along side with the token, the creator also sends an hash of a trustchainblock of type `RewardSeeder`. The seeder can after receiving the tokens, sign the block to complete the reward. By integrating a trustchainblock in the transaction, all rewards are public for all peers. This way, seeders can check whether the creators they want to seed for are trustworthy and reward the peers that seed, or if they are not and should therefore be excluded from the network. 
 
 ## Known Issues and Limitations
 
 ## Future Work
+At the current state of the applications there are a several next steps to take to extend to current functionility. However the improvements listed below fall out of scope for the course and are thus not implemented (yet).
+- For now there is no way to spend the UpvoteTokens you have received. To add more value to the tokens besides social status, and incentivise peers more to create videos, it would be nice to have an in app store, where the UpvoteTokens can be traded for other collectible items, such as custom filters (potentially made by other peers), or other tokens that are designed to be used in the app.
+-  Currently the reward system for seeders uses a fixed (system setting) amount of UpvoteTokens as reward. However, it would be interesting if content creators can set their own reward amount of tokens for each video, such that seeders can make a trade off about which video's they want to seed. A video with a high reward might attract a lot of seeders, lowering the chance of a single seeder to seed the most bytes. For the content creator, offering more UpvoteTokens for seeding your video, might increase the amount of peers that want to seed for you, increasing the chance that your video might go viral. This concept can be extend more by creating a reward pool rather than just rewarding a single seeder. By creating a reward pool more seeders will be rewarded, instead of just a single seeder, making seeding more attractive.
