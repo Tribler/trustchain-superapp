@@ -51,8 +51,12 @@ class ProposalToken {
      * We do not have a post video functionality yet
      * Clicking the button represents/simulates a peer having posted a video
      */
-    fun setPostVideoListener(proposalSendButton: Button, itemView: View, torrentManager: TorrentManager) {
-        proposalSendButton.setOnClickListener{
+    fun setPostVideoListener(
+        proposalSendButton: Button,
+        itemView: View,
+        torrentManager: TorrentManager
+    ) {
+        proposalSendButton.setOnClickListener {
             val torrentInfo = torrentManager.getSeedableTorrents().get(0)
             val magnetURI = torrentManager.seedTorrent(torrentInfo)
             if (magnetURI == null) {

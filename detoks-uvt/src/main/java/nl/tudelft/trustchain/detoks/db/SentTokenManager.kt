@@ -15,13 +15,15 @@ class SentTokenManager (context: Context) {
             token_id : Long,
             date : String,
             public_key : String,
-            video_id : String
+            video_id : String,
+            public_key_seeder: String
         ->
         UpvoteToken(
             token_id.toInt(),
             date,
             public_key,
-            video_id
+            video_id,
+            public_key_seeder
         )
     }
 
@@ -41,7 +43,8 @@ class SentTokenManager (context: Context) {
             upvoteToken.tokenID.toLong(),
             upvoteToken.date,
             upvoteToken.publicKeyMinter,
-            upvoteToken.videoID
+            upvoteToken.videoID,
+            upvoteToken.publicKeySeeder
         )
         return true
     }

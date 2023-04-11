@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.messaging.serializeVarLen
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.db.SentTokenManager
@@ -13,28 +14,49 @@ import nl.tudelft.trustchain.detoks.helpers.DateFormatter
 import nl.tudelft.trustchain.detoks.exception.InvalidMintException
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
 import nl.tudelft.trustchain.detoks.helpers.DoubleClickListener
-import java.util.*
+import nl.tudelft.trustchain.detoks.util.CommunityConstants
+import kotlin.collections.ArrayList
 
 class UpvoteToken constructor(
     val tokenID: Int,
     val date: String,
     val publicKeyMinter: String,
-    var videoID: String
+    var videoID: String,
+    val publicKeySeeder: String
 ) {
 
+    fun toByteArray(): ByteArray {
+        return serializeVarLen(tokenID.toString().toByteArray()) +
+            serializeVarLen(date.toByteArray()) +
+            serializeVarLen(publicKeyMinter.toByteArray()) +
+            serializeVarLen(videoID.toByteArray()) +
+            serializeVarLen(publicKeySeeder.toByteArray())
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other is UpvoteToken) {
+            return tokenID == other.tokenID
+                && date == other.date
+                && publicKeyMinter == other.publicKeyMinter
+                && videoID == other.videoID
+                && publicKeySeeder == other.publicKeySeeder
+        }
+        return false
+    }
     companion object {
-        fun tryMintToken(context: Context, videoID: String, publicKey: String): UpvoteToken {
+        fun tryMintToken(context: Context, videoID: String, publicKey: String, publicKeySeeder: String): UpvoteToken {
             SentTokenManager(context).createSentUpvoteTokensTable()
             val lastUpvoteToken = SentTokenManager(context).getLastToken()
             // Check if we have sent a token already today
             val today = DateFormatter.startOfToday()
-            val newToken: UpvoteToken
+            var newToken: UpvoteToken
             // Check if a new sequence should be started
-            if (lastUpvoteToken == null || DateFormatter.stringToDate(lastUpvoteToken.date).before(today)) {
-                newToken = UpvoteToken(0, DateFormatter.todayAsString(), publicKey, videoID)
-            } else if (lastUpvoteToken.tokenID > -1 && lastUpvoteToken.tokenID < 9) {
+            if (lastUpvoteToken == null
+                || DateFormatter.stringToDate(lastUpvoteToken.date).before(today)) {
+                newToken = UpvoteToken(0, DateFormatter.todayAsString(), publicKey, videoID, publicKeySeeder)
+            } else if (lastUpvoteToken.tokenID > -1 && lastUpvoteToken.tokenID < CommunityConstants.DAILY_MINT_LIMIT) {
                 val nextId = lastUpvoteToken.tokenID + 1
-                newToken = UpvoteToken(nextId, DateFormatter.todayAsString(), publicKey, videoID)
+                newToken = UpvoteToken(nextId, DateFormatter.todayAsString(), publicKey, videoID, publicKeySeeder)
             } else {
                 throw InvalidMintException("Mint limit exceeded")
             }
@@ -53,7 +75,8 @@ class UpvoteToken constructor(
      * proposal block of this video -> if already liked once => show message to user / cannot like again
      * - if not then create an agreement block for this video
      */
-    fun sendUpvoteToken(itemView: View, videoID: TextView, proposalBlockHash: TextView) {
+    fun sendUpvoteToken(itemView: View, videoID: String, proposalBlockHash: TextView, publicKeySeeder: String) {
+
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
         val myPubKey = upvoteCommunity?.myPeer?.publicKey.toString()
         //val upvoteToken = UpvoteToken(1, "1679006615", "12345678910", 1)
@@ -61,14 +84,26 @@ class UpvoteToken constructor(
         var toastMessage: String?
 
         try {
-            val nextToken = tryMintToken(itemView.context, videoID.text.toString(), myPubKey)
-            val dbSuccess = SentTokenManager(itemView.context).addSentToken(nextToken)
-            val sendSuccess = upvoteCommunity?.sendUpvoteToken(nextToken)
+            val upvoteTokenList: ArrayList<UpvoteToken> = ArrayList()
+            val tokenIDList: ArrayList<Int> = ArrayList()
 
-            toastMessage = if (dbSuccess && sendSuccess == true) {
-                "Successfully sent the token ${nextToken.tokenID} to the creator of ${nextToken.videoID}"
+            var dbSuccess: Boolean
+
+            // Mint the required amount of tokens to upvote the video
+            while (upvoteTokenList.size < CommunityConstants.TOKENS_SENT_PER_UPVOTE) {
+                val nextToken = tryMintToken(itemView.context, videoID, myPubKey, publicKeySeeder)
+                 dbSuccess = SentTokenManager(itemView.context).addSentToken(nextToken)
+
+                if (!dbSuccess)
+                    throw InvalidMintException("Could not add the minted token to the database")
+                upvoteTokenList.add(nextToken)
+                tokenIDList.add(nextToken.tokenID)
+            }
+            val sendSuccess = upvoteCommunity?.sendUpvoteToken(upvoteTokenList)
+            toastMessage = if (sendSuccess == true) {
+                "Successfully sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
             } else {
-                "Failed to sent the token ${nextToken.tokenID} to the creator of ${nextToken.videoID}"
+                "Failed to sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
             }
 
         } catch (invalidMintException: InvalidMintException) {
@@ -108,13 +143,13 @@ class UpvoteToken constructor(
     /**
      * Sets a listener to like a video by double tapping the screen
      */
-    fun setLikeListener(itemView: View, videoID: TextView, proposalBlockHash: TextView) {
+    fun setLikeListener(itemView: View, videoID: String, proposalBlockHash: TextView, publicKeySeeder: String) {
         val adapter = this
 
         itemView.setOnClickListener(
             object : DoubleClickListener() {
                 override fun onDoubleClick(view: View?) {
-                    adapter.sendUpvoteToken(itemView, videoID, proposalBlockHash)
+                    adapter.sendUpvoteToken(itemView, videoID, proposalBlockHash, publicKeySeeder)
                 }
             }
         )
