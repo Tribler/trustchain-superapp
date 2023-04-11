@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import nl.tudelft.trustchain.detoks.R
+import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.adapters.TabBarAdapter
 
 class TabBarFragment : Fragment() {
@@ -28,10 +29,10 @@ class TabBarFragment : Fragment() {
         viewPager = view.findViewById(R.id.viewPager)
         viewPager.isUserInputEnabled = false
         viewPager.adapter = TabBarAdapter(this, listOf(DeToksFragment(), Fragment(), ProfileFragment()))
-
+        val torrentManager = TorrentManager.getInstance(requireActivity().applicationContext)
         val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
-                DeToksFragment.torrentManager.createTorrentInfo(uri, requireContext())
+                torrentManager.createTorrentInfo(uri, requireContext())
                 Toast.makeText(requireContext(), "Successfully uploaded.", Toast.LENGTH_LONG).show()
             }
         }

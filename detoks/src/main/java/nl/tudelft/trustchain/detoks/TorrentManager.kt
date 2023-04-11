@@ -42,7 +42,8 @@ class TorrentManager constructor (
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
     private val torrentFiles = mutableListOf<TorrentHandler>()
-
+    // maps torrent to videos acquired from them. Can help with preventing duplicate torrents.
+    private val torrentsList = HashMap<String, String>()
     private var currentIndex = 0
 
     init {
@@ -154,6 +155,7 @@ class TorrentManager constructor (
         val res = sessionManager.fetchMagnet(magnet, 10) ?: return
 
         val torrentInfo = TorrentInfo(res)
+        if(torrentsList.get(torrentInfo.infoHash().toString()) != null) return
         val par = torrentDir.absolutePath
         val torrentPath = Paths.get("$par/${torrentInfo.infoHash()}.torrent")
         val torrentFile = torrentPath.toFile()
@@ -168,8 +170,10 @@ class TorrentManager constructor (
         handle.pause()
 
         for (it in 0 until torrentInfo.numFiles()) {
+
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
+                torrentsList.put(torrentInfo.infoHash().toString(), fileName)
                 torrentFiles.add(
                     TorrentHandler(
                         cacheDir,
@@ -211,6 +215,7 @@ class TorrentManager constructor (
                         val fileName = torrentInfo.files().fileName(it)
                         Log.d("DeToks", "file ${fileName} in $it")
                         if (fileName.endsWith(".mp4")) {
+                            torrentsList.put(torrentInfo.infoHash().toString(), fileName)
                             torrentFiles.add(
                                 TorrentHandler(
                                     cacheDir,
@@ -276,6 +281,7 @@ class TorrentManager constructor (
             val fileName = torrentInfo.files().fileName(it)
             Log.d("DeToks", "file ${fileName} in $it")
             if (fileName.endsWith(".mp4")) {
+                torrentsList.put(torrentInfo.infoHash().toString(), fileName)
                 community.broadcastLike(fileName,torrentInfo.name(), torrentInfo.creator(),magnUri)
                 torrentFiles.add(
                     TorrentHandler(
