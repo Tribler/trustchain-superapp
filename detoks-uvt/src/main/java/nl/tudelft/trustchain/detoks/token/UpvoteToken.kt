@@ -80,6 +80,7 @@ class UpvoteToken constructor(
     fun sendUpvoteToken(itemView: View, videoID: String, proposalBlockHash: TextView, publicKeySeeder: String) {
 
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
+        upvoteCommunity?.torrentManager?.mvpSeeder()
         val myPubKey = upvoteCommunity?.myPeer?.publicKey.toString()
         //val upvoteToken = UpvoteToken(1, "1679006615", "12345678910", 1)
         //val toastMessage = upvoteCommunity?.sendUpvoteToken(upvoteToken.tokenID.toString(), localToGMT(upvoteToken.date.toLong()).toString(), upvoteToken.publicKeyMinter, upvoteToken.videoID.toString())
@@ -88,8 +89,8 @@ class UpvoteToken constructor(
         // getBlockWithHash Method below might fail to get the proposal block if it is not in this peer's truststore
         val proposalBlock = upvoteCommunity?.database?.getBlockWithHash(proposalBlockHash.text.toString().hexToBytes())
         if (proposalBlock != null) {
-            val linkedBlocks = upvoteCommunity?.database?.getAllLinked(proposalBlock)
-            val alreadyLiked = linkedBlocks?.find { it.type == UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN
+            val linkedBlocks = upvoteCommunity.database.getAllLinked(proposalBlock)
+            val alreadyLiked = linkedBlocks.find { it.type == UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN
                 && it.publicKey.toHex()contentEquals(myPubKey)}
             if (alreadyLiked != null) {
                 Log.i("DeToks", "You already liked this video, cannot like again")
@@ -103,6 +104,7 @@ class UpvoteToken constructor(
 
             upvoteCommunity.createAgreementBlock(proposalBlock, proposalBlock.transaction)
             val seedingMagnetUri = upvoteCommunity.torrentManager?.seedLikedVideo()
+            upvoteCommunity.torrentManager?.mvpSeeder()
             var toastMsg: String? = if (seedingMagnetUri != null) {
                 "Agreement block created, upvoted successfully and now seeding liked video with magnetURI: $seedingMagnetUri"
             } else {
@@ -141,7 +143,7 @@ class UpvoteToken constructor(
                 upvoteTokenList.add(nextToken)
                 tokenIDList.add(nextToken.tokenID)
             }
-            val sendSuccess = upvoteCommunity?.sendUpvoteToken(upvoteTokenList)
+            val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList)
             toastMessage = if (sendSuccess == true) {
                 "Successfully sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
             } else {

@@ -19,6 +19,7 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.Pair
 
 
 /**
@@ -96,12 +97,56 @@ class TorrentManager(
                     delay(100)
                 }
             }
+            mvpSeeder(content)
             content.asMediaInfo()
+            //TODO Add a method here for finding out who which peer provided the most bytes for this video
+            // input: val content, an object of the type TorrentHandler
         } catch (e: TimeoutCancellationException) {
             Log.i("DeToks", "Timeout for content ... $index")
             Log.i("DeToks", "Timeout for content ... ${content.asMediaInfo().fileName}")
             content.asMediaInfo()
         }
+    }
+
+    fun mvpSeeder(videoTorrentHandler: TorrentHandler): MutableList<Pair<String, String>> {
+        val peerInfo = videoTorrentHandler.handle.peerInfo()
+        // list of peer info objects -> you can get the
+        // bit torrent client and ip address of the peers
+        val downloadedFrom = mutableListOf<Pair<String, String>>()
+        for (peer in peerInfo) {
+            if (peer.totalDownload() > 0) {
+                Log.i("Detoks", "---------------------------------------------------------")
+                Log.i("Detoks", "downloaded from peer with ip adress ${peer.ip()}")
+                Log.i("Detoks", "this peer uses the following client ${peer.client()}")
+                Log.i("Detoks", "amount downloaded from this peer: ${peer.totalDownload()}")
+                Log.i("Detoks", "-----------------------------------------------------------")
+                downloadedFrom.add(Pair(peer.client(), peer.ip()))
+            }
+//            peer.ip()
+//            peer.client()
+        }
+        return downloadedFrom
+    }
+
+
+    fun mvpSeeder(): MutableList<Pair<String, String>> {
+        val peerInfo = torrentFiles.gett(currentIndex % getNumberOfTorrents()).handle.peerInfo()
+        // list of peer info objects -> you can get the
+        // bit torrent client and ip address of the peers
+        val downloadedFrom = mutableListOf<Pair<String, String>>()
+        for (peer in peerInfo) {
+            if (peer.totalDownload() > 0) {
+                Log.i("Detoks", "---------------------------------------------------------")
+                Log.i("Detoks", "downloaded from peer with ip adress ${peer.ip()}")
+                Log.i("Detoks", "this peer uses the following client ${peer.client()}")
+                Log.i("Detoks", "amount downloaded from this peer: ${peer.totalDownload()}")
+                Log.i("Detoks", "-----------------------------------------------------------")
+                downloadedFrom.add(Pair(peer.client(), peer.ip()))
+            }
+//            peer.ip()
+//            peer.client()
+        }
+        return downloadedFrom
     }
 
     fun getNumberOfTorrents(): Int {
@@ -156,7 +201,6 @@ class TorrentManager(
         val hash = torrentInfo.infoHash()
 
         if(sessionManager.find(hash) != null) return
-//        logger.info {  "Adding new torrent: ${torrentInfo.name()}"}
         Log.i("Detoks", "Adding new torrent: ${torrentInfo.name()}")
 
         sessionManager.download(torrentInfo, cacheDir)
@@ -197,7 +241,7 @@ class TorrentManager(
      * @return the magnet link of that is being seeded or null if failed to seed
      */
     fun seedLikedVideo(): String? {
-        val torrentHandle = torrentFiles.gett(currentIndex).handle
+        val torrentHandle = torrentFiles.gett(currentIndex % getNumberOfTorrents()).handle
         return if (torrentHandle.isValid) {
             torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
             torrentHandle.pause()
@@ -320,8 +364,6 @@ class TorrentManager(
             Log.i("Detoks", "name of the torrent file is: ${torrentInfo.name()}")
             Log.i("Detoks", "The magnet URI created by .makeMagnetUri() function is ${handle.makeMagnetUri()}")
             Log.i("Detoks", "The magnet URI create by constructMagnetLink() is ${MagnetUtils.constructMagnetLink(torrentInfo.infoHash(), torrentInfo.name())}")
-//                    logger.info {"The magnet URI created by .makeMagnetUri() function is ${handle.makeMagnetUri()}"}
-//                    logger.info {"The magnet URI create by constructMagnetLink() is ${MagnetUtils.constructMagnetLink(torrentInfo.infoHash(), torrentInfo.name())}" }
             for (it in 0..torrentInfo.numFiles()) {
                 val fileName = torrentInfo.files().fileName(it)
                 if (fileName.endsWith(".mp4")) {

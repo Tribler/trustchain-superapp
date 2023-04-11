@@ -92,6 +92,8 @@ class VideosAdapter(
                 upvoteCommunity.torrentManager = torrentManager
                 Log.i("Detoks", "My peer id is: ${upvoteCommunity.myPeer.mid}")
                 Log.i("Detoks", "My peer public key is: ${upvoteCommunity.myPeer.publicKey.keyToBin().toHex()}")
+                Log.i("Detoks", "My peer's IP adress is: ${upvoteCommunity.myPeer.address}")
+                upvoteCommunity.myPeer.publicKey
                 upvoteCommunity.getContentToSeed()
 
                 // TODO FIX SEEDER KEY (REPLY: Isn't the seeder the one who likes the video? Then the way below should be fine?)
