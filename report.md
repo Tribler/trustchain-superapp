@@ -22,6 +22,11 @@ Finally, we will also discuss the potential future work of the upvote token impl
 
 
 ## Project Structure
+The project has been forked from the original DeToks application as to not have compilation issues later when the project is finished and all other groups merge their project to the main DeToks application. The project is composed of a few packages and files, which the most important ones are:
+- ``community`` - This package contains the ``UpvoteCommunity`` which handles the Trustchain part of the protocol and calls relevant recommendation and upvoting code. Furthermore, it also contains the serializer and deserializer of the ``MagnetURIPayload``, ``RecommendedVideoPayload``, and ``UpvoteTokenPayload``
+- ``token`` - This package contains the ``ProposalToken`` and ``UpvoteToken``. These contains the most important block creation logic for upvoting content (minting tokens) and also for the proposal block which is created everytime a peer posts a video. 
+- ``trustchain`` - This package contains the logic ``Balance`` to check for the daily balance of each peer in the network without having to go through the entire Trustchain blockchain. It also contains a way to check a user's token balance. 
+- ``TorrentManager`` - This file contains the logic to manage the torrent files and the video pool. It is responsible for downloading the torrent files and caching the videos. It also provides the logic for seeding the videos to the network when upvoting. More on this will be found in the [Design Choices](#design-choices) section.
 
 ## Design Choices
 
