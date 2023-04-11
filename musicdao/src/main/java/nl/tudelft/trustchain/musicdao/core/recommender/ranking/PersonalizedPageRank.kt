@@ -7,7 +7,7 @@ import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomRa
 import org.jgrapht.graph.SimpleDirectedWeightedGraph
 import java.util.*
 
-class IncrementalPersonalizedPageRank (
+class PersonalizedPageRank (
     private val maxWalkLength: Int,
     private val repetitions: Int,
     private val rootNode: Node,
@@ -48,7 +48,7 @@ class IncrementalPersonalizedPageRank (
     }
 
     fun calculatePersonalizedPageRank() {
-        val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount()
+        val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it != rootNode }
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
             node.personalisedPageRank = (occ.toDouble() / totalOccs)

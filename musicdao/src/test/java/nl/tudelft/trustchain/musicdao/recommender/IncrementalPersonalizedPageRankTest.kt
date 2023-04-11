@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.musicdao.recommender
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRank
+import nl.tudelft.trustchain.musicdao.core.recommender.ranking.PersonalizedPageRank
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -11,7 +11,7 @@ import kotlin.random.Random
 
 class IncrementalPersonalizedPageRankTest {
     private var network: NodeToNodeNetwork = NodeToNodeNetwork()
-    private lateinit var incrementalPageRank: IncrementalPersonalizedPageRank
+    private lateinit var incrementalPageRank: PersonalizedPageRank
     private val seed = 42L
     private lateinit var rootNode: Node
     private val rng = Random(seed)
@@ -37,10 +37,14 @@ class IncrementalPersonalizedPageRankTest {
 
     @Test
     fun canCaclulatePersonalizedPageRank() {
-        incrementalPageRank = IncrementalPersonalizedPageRank( 1000, 10000, rootNode, 0.01f, network.graph)
+        incrementalPageRank = PersonalizedPageRank( 1000, 10000, rootNode, 0.01f, network.graph)
         incrementalPageRank.initiateRandomWalks()
         incrementalPageRank.calculatePersonalizedPageRank()
-        Assert.assertEquals(rootNode.personalisedPageRank, 0)
+        Assert.assertEquals(0.0, rootNode.personalisedPageRank, 0.001)
+        val rootNeighbors = network.getAllNodeToNodeNetworkEdges().filter { network.graph.getEdgeSource(it) == rootNode }.map { network.graph.getEdgeTarget(it) }
+        for(neighbour in rootNeighbors) {
+            Assert.assertTrue(neighbour.personalisedPageRank > 0.0)
+        }
     }
 
 }
