@@ -31,8 +31,8 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
 
         strategyComparators[STRATEGY_HOT] = :: lowestWatchTimeStrategy
         strategyComparators[STRATEGY_RISING] = :: lowestWatchTimeStrategy
-        strategyComparators[STRATEGY_NEW] = :: lowestWatchTimeStrategy
-        strategyComparators[STRATEGY_TOP] = :: lowestWatchTimeStrategy
+        strategyComparators[STRATEGY_NEW] = :: newestFirstStrategy
+        strategyComparators[STRATEGY_TOP] = :: topFirstStrategy
     }
 
     /**
@@ -49,12 +49,25 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     private fun lowestWatchTimeStrategy(
         p0: Pair<TorrentHandler, ProfileEntry?>,
         p1: Pair<TorrentHandler, ProfileEntry?>
-    ) : Int = p1.second!!.watchTime compareTo p0.second!!.watchTime
+    ) : Int = p0.second!!.watchTime compareTo p1.second!!.watchTime
+
+    /**
+     * Returns the torrent handlers based on number of likes
+     */
+
+    private fun topFirstStrategy(
+        p0: Pair<TorrentHandler, ProfileEntry?>,
+        p1: Pair<TorrentHandler, ProfileEntry?>
+    ) : Int = p0.second!!.likes compareTo p1.second!!.likes
 
     /**
      * Returns the torrent handlers based on when they were first uploaded
      */
-    //TODO: add the new strategies
+
+    private fun newestFirstStrategy(
+        p0: Pair<TorrentHandler, ProfileEntry?>,
+        p1: Pair<TorrentHandler, ProfileEntry?>
+    ) : Int = p0.second!!.uploadDate compareTo p1.second!!.uploadDate
 
     /**
      * Applies the sorting function sent as parameter, to the handlers, based on the profiles.
@@ -64,7 +77,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         handlers: MutableList<TorrentHandler>,
         profiles: HashMap<String, ProfileEntry>
     ): MutableList<TorrentHandler> {
-        if (id == 0) return handlers.shuffled().toMutableList()
+        if (id == STRATEGY_RANDOM) return handlers.shuffled().toMutableList()
         if (!strategyComparators.contains(id)) return handlers
 
         val handlerProfile = handlers.map {
