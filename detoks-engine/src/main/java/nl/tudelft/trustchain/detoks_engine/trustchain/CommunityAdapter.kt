@@ -77,11 +77,12 @@ class CommunityAdapter(
         logger.debug("Block token received: ${block.transaction}, is proposal: ${block.isProposal}, is agreement: ${block.isAgreement}, PK til 8: ${block.publicKey.toString().substring(0, 8)}, is self signed ${block.isSelfSigned}")
 
         // A proposal block for me (so i receive tokens), action is to agree
+        // When selfsigned its an injection, when not selfsigned and not my PK its sent by somebody else
         if (block.isProposal && (block.isSelfSigned || !block.publicKey.contentEquals(myPublicKey))) {
             agreeTransaction(block)
         }
 
-        // Agreement block signed by me means i accept the tokens sent to me
+        // Agreement block signed by me (my pk) means i accept the tokens sent to me
         else if (block.isAgreement && block.publicKey.contentEquals(myPublicKey)) {
             recvTransactionHandler(Transaction.fromTrustChainTransactionObject(block.transaction))
             val trans = Transaction.fromTrustChainTransactionObject(block.transaction)
@@ -92,8 +93,8 @@ class CommunityAdapter(
             }
         }
 
-        // Other party accepted my proposal
-        else if (block.isAgreement && block.publicKey.contentEquals(myPublicKey)) {
+        // Other party accepted my proposal, agreement signed by other party
+        else if (block.isAgreement && !block.publicKey.contentEquals(myPublicKey)) {
             transmittingBlocks.remove(block.linkedBlockId)?.cancel()
         }
     }
@@ -121,7 +122,7 @@ class CommunityAdapter(
                     // Inefficient. See above
                     val block = synchronized(trustChainCommunity.database) {
                         return@synchronized trustChainCommunity.createProposalBlock(
-                            GroupedAdapter.TOKEN_BLOCK_TYPE,
+                            TOKEN_BLOCK_TYPE,
                             Transaction(grouped).toTrustChainTransaction(),
                             peer.publicKey.keyToBin()
                         )
