@@ -17,7 +17,7 @@ class TokenAdapter(private val context: Activity, private val tokenArray: ArrayL
 //        val public_key = rowView.findViewById(R.id.item_field1) as TextView
 //
 //        public_key.text = token.public_key.toString()
-        record.text = "Token ID: " + token.unique_id
+        record.text = "Group:" + (token.tokenIntId / 10) + " Token ID: " + token.tokenIntId
         token_id.text = "ID: " + token.unique_id
         return rowView
     }

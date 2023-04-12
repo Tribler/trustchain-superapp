@@ -1,15 +1,16 @@
 CREATE TABLE tokens(
     id TEXT NOT NULL,
     publicKey TEXT NOT NULL,
+    tokenIntId INTEGER NOT NULL,
     PRIMARY KEY (id)
 );
 
 getAllTokens:
-SELECT id, publicKey FROM tokens;
+SELECT id, publicKey, tokenIntId FROM tokens;
 
 addToken:
-INSERT INTO tokens(id, publicKey)
-VALUES(?,?);
+INSERT INTO tokens(id, publicKey, tokenIntId)
+VALUES(?,?, ?);
 
 
 removeTokenByID:

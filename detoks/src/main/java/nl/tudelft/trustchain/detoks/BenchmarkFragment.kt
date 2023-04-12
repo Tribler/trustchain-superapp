@@ -13,6 +13,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentBenchmarkBinding
+import java.util.UUID
 import kotlin.system.measureTimeMillis
 
 class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
@@ -24,7 +25,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private lateinit var trustchainCommunity: TrustChainCommunity
     private lateinit var adapter: TokenAdapter
 
-    private var totalTransactions = 1000
+    private var totalTransactions = 30
     private var groupSize = 10
     private var tokensPerTransaction = 1
     private var tokenIDCounter = 0
@@ -44,6 +45,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         val executionTime = measureTimeMillis {
 
             for (transactionGroup in transactionEngine.tokenStore.getAllTokens().chunked(groupSize)) {
+
                 transactionEngine.sendTokenGrouped(listOf(transactionGroup), transactionEngine.getSelectedPeer())
             }
         }
@@ -129,7 +131,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private fun generateTokens() {
         for (i in 1..totalTransactions) {
             // Add Token to the token store
-            transactionEngine.tokenStore.addToken(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin().toString())
+            transactionEngine.tokenStore.addToken(UUID.randomUUID().toString(), ipv8.myPeer.publicKey.keyToBin().toString(), i.toLong())
             tokenIDCounter++
         }
     }

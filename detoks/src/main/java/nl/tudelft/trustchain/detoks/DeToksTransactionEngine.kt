@@ -8,6 +8,7 @@ import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.detoks.db.TokenStore
+import java.util.UUID
 
 class DeToksTransactionEngine (
     val tokenStore: TokenStore,
@@ -78,18 +79,18 @@ class DeToksTransactionEngine (
 
     private fun receiveSingleTokenProposal(block: TrustChainBlock) {
         val token = block.transaction["token"] as String
-        val (uid, pk) = token.split(",")
+        val (uid, pk, intId) = token.split(",")
         println(pk)
 
         // Add token to personal database
         // Add token to personal database
         // If sending to self ->  Increment the ID to avoid duplicate ID errors.
-        var newID = uid.toInt()
+        var newID = uid
         Log.d(LOGTAG, "Sending to self: $sendingToSelf")
         if (sendingToSelf) {
-            newID += tokenIDIncrementer
+            newID = UUID.randomUUID().toString()
         }
-        tokenStore.addToken((newID).toString(), pk)
+        tokenStore.addToken((newID), pk, intId.toLong())
         Log.d(LOGTAG, "Saving received $token to database")
 
         val transaction = mapOf("tokenSent" to uid)
@@ -137,17 +138,17 @@ class DeToksTransactionEngine (
         for (transaction in transactions) {
             val tokenList: MutableList<String> = mutableListOf()
             for (token in transaction) {
-                val (uid, _) = token.split(",")
+                val (uid, _, intId) = token.split(",")
                 tokenList.add(uid)
 
                 // Add token to personal database
                 // If sending to self ->  Increment the ID to avoid duplicate ID errors.
-                var newID = uid.toInt()
+                var newID = uid
                 Log.d(LOGTAG, "Sending to self: $sendingToSelf")
                 if (sendingToSelf) {
-                    newID += tokenIDIncrementer
+                    newID = UUID.randomUUID().toString()
                 }
-                tokenStore.addToken((newID).toString(), block.publicKey.toString())
+                tokenStore.addToken((newID), block.publicKey.toString(), intId.toLong())
                 Log.d(LOGTAG, "Saving received $token to database")
             }
             grouped_agreement_uids.add(tokenList.toList())
