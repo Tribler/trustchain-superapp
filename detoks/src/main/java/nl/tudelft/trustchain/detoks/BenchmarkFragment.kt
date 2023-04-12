@@ -25,10 +25,18 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private lateinit var trustchainCommunity: TrustChainCommunity
     private lateinit var adapter: TokenAdapter
 
-    private var totalTransactions = 30
-    private var groupSize = 10
+    private var totalTransactions = 1000
+    private var groupSize = 100
     private var tokensPerTransaction = 1
     private var tokenIDCounter = 0
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val runnable = object : Runnable {
+        override fun run() {
+            updateList()
+            handler.postDelayed(this, 1000)
+        }
+    }
 
     fun singleBenchmark(): Long {
 
@@ -94,14 +102,6 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         binding.blockListview.isClickable = true
         binding.blockListview.adapter = adapter
 
-        val handler = Handler(Looper.getMainLooper())
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                updateList()
-                handler.postDelayed(this, 1000)
-            }
-        }, 1000)
-
         binding.blockListview.setOnItemClickListener() { _, _, position, _ ->
             val token = adapter.getItem(position)
             val builder = AlertDialog.Builder(requireContext())
@@ -122,10 +122,12 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     }
 
     private fun updateList() {
+        Log.d("UPDATE_VIEWS", "Updating List")
         adapter.clear()
         for (token in transactionEngine.tokenStore.getAllTokens()){
             adapter.insert(token, adapter.count)
         }
+        binding.tokenAmount.text = transactionEngine.tokenStore.getBalance().toString() + " tokens"
     }
 
     private fun generateTokens() {
@@ -152,5 +154,17 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     fun toTest(view: View) {
         val navController = Navigation.findNavController(view)
         navController.navigate(R.id.action_to_test)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("UPDATE_VIEWS", "Handler set")
+        handler.postDelayed(runnable, 1000)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("UPDATE_VIEWS", "Handler stopped")
+        handler.removeCallbacks(runnable)
     }
 }

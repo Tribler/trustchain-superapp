@@ -2,6 +2,9 @@ package nl.tudelft.trustchain.detoks
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.View
 import androidx.navigation.Navigation
 import nl.tudelft.ipv8.IPv8
@@ -21,6 +24,14 @@ class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
     private lateinit var trustchainCommunity : TrustChainCommunity
 
     private lateinit var adapter : PeerAdapter
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val runnable = object : Runnable {
+        override fun run() {
+            adapter = PeerAdapter(requireActivity(), getPeers())
+            handler.postDelayed(this, 1000)
+        }
+    }
 
     /**
      * Updates a list of blocks for debug purposes
@@ -66,5 +77,17 @@ class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
         peers.add(transactionEngine.myPeer)
         peers.addAll(transactionEngine.getPeers() as ArrayList<Peer>)
         return peers
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("UPDATE_VIEWS", "Handler set")
+        handler.postDelayed(runnable, 1000)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("UPDATE_VIEWS", "Handler stopped")
+        handler.removeCallbacks(runnable)
     }
 }
