@@ -7,6 +7,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -15,6 +16,7 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentBenchmarkBinding
 import java.util.UUID
 import kotlin.system.measureTimeMillis
+import kotlinx.coroutines.*
 
 class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
@@ -26,7 +28,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private lateinit var adapter: TokenAdapter
 
     private var totalTransactions = 1000
-    private var groupSize = 100
+    private var groupSize = 10
     private var tokensPerTransaction = 1
     private var tokenIDCounter = 0
 
@@ -38,24 +40,38 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         }
     }
 
-    fun singleBenchmark(): Long {
+    suspend fun singleBenchmark(): Long {
 
         val executionTime = measureTimeMillis {
-            for (tok in transactionEngine.tokenStore.getAllTokens()) {
-                transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
-            }
+            var tokenList : ArrayList<Token>
+            do {
+                tokenList = transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
+                for (tok in tokenList){
+                    transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
+                }
+                updateList()
+                delay(10 * 1000L)
+
+            } while (tokenList.isNotEmpty())
         }
 
         return executionTime
     }
 
-    fun groupedBenchmark(): Long {
+    suspend fun groupedBenchmark(): Long {
         val executionTime = measureTimeMillis {
 
-            for (transactionGroup in transactionEngine.tokenStore.getAllTokens().chunked(groupSize)) {
+            var tokenList : ArrayList<Token>
+            do {
+                tokenList = transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
+                for (transactionGroup in transactionEngine.tokenStore.getAllTokens().chunked(groupSize)) {
+                    transactionEngine.sendTokenGrouped(listOf(transactionGroup), transactionEngine.getSelectedPeer())
+                }
+                updateList()
+                delay(10 * 1000L)
 
-                transactionEngine.sendTokenGrouped(listOf(transactionGroup), transactionEngine.getSelectedPeer())
-            }
+            } while (tokenList.isNotEmpty())
+
         }
         return executionTime
     }
@@ -85,11 +101,11 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         toTestButton.setOnClickListener { toTest(view) }
 
         binding.startTransactionsButton.setOnClickListener {
-            binding.transactionsPerSecondField.text = "${groupedBenchmark()} ms"
+            binding.transactionsPerSecondField.text = "${lifecycleScope.launch{groupedBenchmark()}} ms"
         }
 
         binding.singleTransactionsButton.setOnClickListener {
-            binding.singleTextField.text = "${singleBenchmark()} ms"
+            binding.singleTextField.text = "${lifecycleScope.launch{singleBenchmark()}} ms"
         }
 
         binding.otherPeers.text = connectedPeerToString()

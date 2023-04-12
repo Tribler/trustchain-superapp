@@ -26,3 +26,9 @@ DELETE FROM tokens;
 
 getBalance:
 SELECT COUNT(id) FROM tokens;
+
+checkToken:
+SELECT CASE
+WHEN EXISTS (SELECT * FROM tokens WHERE id = ?)
+THEN 'true'
+ELSE 'false' END;

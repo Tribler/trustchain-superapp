@@ -64,6 +64,10 @@ class TokenStore(context: Context){
         return database.tokenStoreQueries.getBalance().executeAsOne().toInt()
     }
 
+    fun checkToken(id : String) : Boolean {
+        return database.tokenStoreQueries.checkToken(id).toString().toBoolean()
+    }
+
     companion object {
         private lateinit var instance: TokenStore
         fun getInstance(context: Context): TokenStore {
