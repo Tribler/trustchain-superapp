@@ -38,7 +38,7 @@ class DeToksTransactionEngine (
         // Set up block listeners
         addListener(SINGLE_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d(LOGTAG, "")
+                // If the block is actually addressed to me, or if I'm sending to myself, process the block
                 if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
                     if (block.isProposal) {
                         Log.d(LOGTAG, "Received SINGLE proposal block")
@@ -53,7 +53,7 @@ class DeToksTransactionEngine (
 
         addListener(GROUPED_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                // LinkPublicKey = the addressee of the block
+                // If the block is actually addressed to me, or if I'm sending to myself, process the block
                 if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
                     if (block.isProposal) {
                         Log.d(LOGTAG, "Received GROUPED proposal block")
@@ -73,7 +73,7 @@ class DeToksTransactionEngine (
      * @param peer: The peer to send the token to
      */
     fun sendTokenSingle(tok: Token, peer: Peer): TrustChainBlock {
-        Log.d(LOGTAG, "Sending token")
+        Log.d(LOGTAG, "Sending single token ${tok.unique_id} to ${peer.mid}")
         val transaction = mapOf("token" to tok.toString())
 
         return createProposalBlock(
@@ -95,7 +95,6 @@ class DeToksTransactionEngine (
         // Add token to personal database
         // If sending to self ->  Increment the ID to avoid duplicate ID errors.
         var newID = uid.toInt()
-        Log.d(LOGTAG, "Sending to self: $sendingToSelf")
         if (sendingToSelf) {
             newID += tokenIDIncrementer
         }
@@ -137,9 +136,9 @@ class DeToksTransactionEngine (
             groupedTransactions.add(tokenList)
         }
 
-        val transaction = mapOf("transactions" to groupedTransactions)
-
         Log.d(LOGTAG, "Sending grouped transactions: $transactions")
+
+        val transaction = mapOf("transactions" to groupedTransactions)
 
         return createProposalBlock(
             GROUPED_BLOCK,
@@ -156,7 +155,8 @@ class DeToksTransactionEngine (
     private fun receiveGroupedTokenProposal(block: TrustChainBlock) {
         val transactions = block.transaction["transactions"] as List<List<String>>
         Log.d(LOGTAG, "Received grouped transaction: ${transactions}")
-        //extract tokens, create grouped agreement block
+
+        // Extract tokens from transactions field, create grouped agreement block as response
         val grouped_agreement_uids = mutableListOf<List<String>>()
         for (transaction in transactions) {
             val tokenList: MutableList<String> = mutableListOf()
@@ -186,18 +186,15 @@ class DeToksTransactionEngine (
      */
     @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenAgreement(block: TrustChainBlock) {
-        Log.d(LOGTAG, "Received grouped agreement block")
         val tokenIds = block.transaction["tokensSent"] as List<List<String>>
-        Log.d(LOGTAG, "${tokenIds}}")
-        val tokensToRemove= mutableListOf<String>()
+        Log.d(LOGTAG, "Removing spent tokens ${tokenIds}} from database")
+
         for (tokens in tokenIds ) {
                 for(token_id in tokens) {
                     // Remove token from personal database
                     tokenStore.removeTokenByID(token_id)
-                    tokensToRemove.add(token_id)
                 }
         }
-        Log.d(LOGTAG, "Removing spent tokens $tokensToRemove from database")
     }
 
     /**

@@ -31,7 +31,6 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
      * @param totalTransactions The total number of transactions to be sent
      */
     fun singleBenchmark(): Long {
-
         val executionTime = measureTimeMillis {
             for (tok in transactionEngine.tokenStore.getAllTokens()) {
                 transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
@@ -47,7 +46,6 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
      */
     fun groupedBenchmark(): Long {
         val executionTime = measureTimeMillis {
-
             for (transactionGroup in transactionEngine.tokenStore.getAllTokens().chunked(groupSize)) {
                 transactionEngine.sendTokenGrouped(listOf(transactionGroup), transactionEngine.getSelectedPeer())
             }
@@ -134,7 +132,6 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
      */
     private fun generateTokens() {
         for (i in 1..totalTransactions) {
-            // Add Token to the token store
             transactionEngine.tokenStore.addToken(tokenIDCounter.toString(), ipv8.myPeer.publicKey.keyToBin().toString())
             tokenIDCounter++
         }
