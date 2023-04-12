@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +12,7 @@ import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.frostwire.jlibtorrent.TorrentHandle
 import kotlinx.android.synthetic.main.fragment_strategy.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
@@ -53,16 +53,16 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
         )
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        val leachingStrategySpinner = view.findViewById<Spinner>(R.id.leachingStrategy)
-        leachingStrategySpinner.adapter = arrayAdapter
-        leachingStrategySpinner.post {
-            leachingStrategySpinner.setSelection(torrentManager.strategies.leachingStrategy)
+        val leechingStrategySpinner = view.findViewById<Spinner>(R.id.leechingStrategy)
+        leechingStrategySpinner.adapter = arrayAdapter
+        leechingStrategySpinner.post {
+            leechingStrategySpinner.setSelection(torrentManager.strategies.leechingStrategy)
         }
-        setSpinnerActions(leachingStrategySpinner) {
-            if (it != torrentManager.strategies.leachingStrategy) {
+        setSpinnerActions(leechingStrategySpinner) {
+            if (it != torrentManager.strategies.leechingStrategy) {
                 return@setSpinnerActions
             }
-            torrentManager.updateLeachingStrategy(it)
+            torrentManager.updateLeechingStrategy(it)
         }
 
         val seedingSwitch = view.findViewById<SwitchCompat>(R.id.isSeeding)
@@ -149,7 +149,7 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val balanceTextView: TextView
 
         init {
-            hashTextView = view.findViewById(R.id.hash)
+            hashTextView = view.findViewById(R.id.name)
             downloadTextView = view.findViewById(R.id.download)
             uploadTextView = view.findViewById(R.id.upload)
             balanceTextView = view.findViewById(R.id.balance)
@@ -164,19 +164,22 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val id = strategyData[position].fileIndex
-        val progressFile = strategyData[position].handle.fileProgress()[id]
+        val handler = strategyData[position]
+        val convBtoMB = 1000000
+        val status = handler.handle.status()
 
-        holder.hashTextView.text =
-            "${(strategyData[position].handle.infoHash().toString())} -$id"
+        holder.hashTextView.text = strategyData[position].handle.name()
 
-        holder.downloadTextView.text = (progressFile / 1000).toString()
-        holder.uploadTextView.text = (strategyData[position].handle.status()
-            .allTimeUpload() / 1000).toString()
+        holder.downloadTextView.text = (status.allTimeDownload()
+            / convBtoMB).toString()
+
+        holder.uploadTextView.text = (status.allTimeUpload()
+            / convBtoMB).toString()
 
         //TODO: replace by actual token balance
-        holder.balanceTextView.text = ((strategyData[position].handle.status().allTimeUpload()
-            - strategyData[position].handle.status().allTimeDownload()) / 100000).toString()
+        holder.balanceTextView.text = (
+            (status.allTimeUpload() - status.allTimeDownload())
+            / convBtoMB).toString()
     }
 
     override fun getItemCount(): Int = strategyData.size

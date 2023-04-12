@@ -2,10 +2,10 @@
 <resources>
     <string name="title_activity_main_detoks">DeToks</string>
     <string name="seeding_strategy">Seeding Strategy</string>
-    <string name="leaching_strategy">Leaching Strategy</string>
-    <string name="bandwidth_day_mb">Bandwidth/day (MB)</string>
-    <string name="hash">Hash</string>
+    <string name="leeching_strategy">Leeching Strategy</string>
+    <string name="bandwidth_day_mb">Bandwidth per day (MB)</string>
+    <string name="torrent_name">Torrent Name</string>
     <string name="download">Download</string>
+    <string name="detoks_balance">Balance</string>
     <string name="upload">Upload</string>
-    <string name="balance">Balance</string>
 </resources>

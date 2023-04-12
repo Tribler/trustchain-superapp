@@ -8,13 +8,14 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
 
     var isSeeding = false
 
-    var leachingStrategy = STRATEGY_RANDOM
+    var leechingStrategy = STRATEGY_RANDOM
     var seedingStrategy = STRATEGY_RANDOM
 
     var seedingBandwidthLimit = 0
-    var storageLimit = 0
+    var storageLimit : Int = 0
 
     companion object {
+
         const val STRATEGY_RANDOM = 0
         const val STRATEGY_HIGHEST_WATCH_TIME = 1
         const val STRATEGY_LOWEST_WATCH_TIME = 2
@@ -76,4 +77,6 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
 
         return sortedHandlerProfile.map { it.first }.toMutableList()
     }
+
+
 }

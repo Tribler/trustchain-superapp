@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -9,10 +10,10 @@ import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
-import com.frostwire.jlibtorrent.alerts.TrackerErrorAlert
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import java.io.File
+
 
 /**
  * This class manages the torrent files and the video pool.
@@ -44,11 +45,12 @@ class TorrentManager private constructor (
         buildTorrentIndex()
         initializeVideoPool()
         lastTimeStamp = System.currentTimeMillis()
-
         unwatchedVideos = torrentFiles
     }
 
     companion object {
+        const val SEEDING_LOOP_TIME : Long = 1800000 // Half hour
+
         private lateinit var instance: TorrentManager
         fun getInstance(context: Context): TorrentManager {
             if (!::instance.isInitialized) {
@@ -87,6 +89,9 @@ class TorrentManager private constructor (
                 while (!content.isDownloaded()) {
                     delay(100)
                 }
+                profile.updateEntryDuration(
+                    MagnetLink.hashFromMagnet(content.handle.makeMagnetUri()),
+                    content.getVideoDuration())
             }
             content.asMediaInfo()
         } catch (e: TimeoutCancellationException) {
@@ -123,11 +128,9 @@ class TorrentManager private constructor (
             //        their screen or switches to another app for a while? Maybe this could be
             //        changed to a place in the video adapter as well, if we can detect maybe when
             //        a video is done playing and starts again, then update the duration if possible
-            val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()    //todo: make torrentFiles into unwatched videos
-            profile.updateEntryWatchTime(
-                MagnetLink.hashFromMagnet(uri),
-                updateTime(),
-                true)
+            val key = MagnetLink.hashFromMagnet(torrentFiles.gett(currentIndex).handle.makeMagnetUri())    // TODO: make torrentFiles into unwatched videos
+            profile.updateEntryDuration(key, torrentFiles.gett(currentIndex).getVideoDuration())
+            profile.updateEntryWatchTime(key, updateTime(), true)
             currentIndex = newIndex
             return
         }
@@ -140,11 +143,9 @@ class TorrentManager private constructor (
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
 
         }
-        val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
-        profile.updateEntryWatchTime(
-            MagnetLink.hashFromMagnet(uri),
-            updateTime(),
-        true)
+        val key = MagnetLink.hashFromMagnet(torrentFiles.gett(currentIndex).handle.makeMagnetUri())
+        profile.updateEntryDuration(key, torrentFiles.gett(currentIndex).getVideoDuration())
+        profile.updateEntryWatchTime(key, updateTime(), true)
         currentIndex = newIndex
     }
 
@@ -190,7 +191,14 @@ class TorrentManager private constructor (
                                 it
                             )
                             torrentFiles.add(torrent)
-                            profile.profiles[torrent.handle.makeMagnetUri()] = ProfileEntry()
+                            val magnet = torrent.handle.makeMagnetUri()
+                            profile.addProfile(magnet)
+                            getInfoFromMagnet(magnet)?.let { it2 ->
+                                profile.updateEntryUploadDate(
+                                    magnet,
+                                    it2
+                                )
+                            }
                         }
                     }
                 }
@@ -240,10 +248,12 @@ class TorrentManager private constructor (
     }
 
     fun addTorrent(hash: Sha1Hash, magnet: String) {
-        if (sessionManager.find(hash) != null) return
+        if (sessionManager.find(hash) != null) {
+            profile.incrementTimesSeen(MagnetLink.hashFromMagnet(magnet))
+            return
+        }
 
         val torrentInfo = getInfoFromMagnet(magnet)?:return
-
         Log.d(DeToksCommunity.LOGGING_TAG,"Adding new torrent: ${torrentInfo.name()}")
 
         sessionManager.download(torrentInfo, cacheDir)
@@ -255,23 +265,28 @@ class TorrentManager private constructor (
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
-                torrentFiles.add(
-                    TorrentHandler(
-                        cacheDir,
-                        handle,
-                        torrentInfo.name(),
-                        fileName,
-                        it
-                    )
+                val torrent = TorrentHandler(
+                    cacheDir,
+                    handle,
+                    torrentInfo.name(),
+                    fileName,
+                    it
                 )
+                torrentFiles.add(torrent)
+                getInfoFromMagnet(magnet)?.let { it2 ->
+                    profile.updateEntryUploadDate(
+                        magnet,
+                        it2
+                    )
+                }
             }
         }
     }
 
-    fun updateLeachingStrategy(strategyId: Int) {
-        if (strategies.leachingStrategy == strategyId) return
+    fun updateLeechingStrategy(strategyId: Int) {
+        if (strategies.leechingStrategy == strategyId) return
 
-        strategies.leachingStrategy = strategyId
+        strategies.leechingStrategy = strategyId
 
         currentIndex = 0
         unwatchedVideos = strategies.applyStrategy(strategyId, unwatchedVideos, profile.profiles)
@@ -287,7 +302,11 @@ class TorrentManager private constructor (
         strategies.seedingStrategy = strategyId
         strategies.storageLimit = storageLimit
 
-        val seedingTorrentsSorted = strategies.applyStrategy(strategyId, torrentFiles, profile.profiles)
+        val seedingTorrentsSorted = strategies.applyStrategy(
+            strategyId,
+            torrentFiles,
+            profile.profiles
+        ).distinctBy { it.handle }
         var storage: Long = 0
 
         val jobs = mutableListOf<Job>()
@@ -295,23 +314,28 @@ class TorrentManager private constructor (
         val toStopSeeding = seedingTorrents.toMutableList()
         seedingTorrents.clear()
 
+        for (i in seedingTorrentsSorted.indices) {
+            seedingTorrentsSorted[i].handle.scrapeTracker()
+            val status = seedingTorrentsSorted[i].handle.status()
+            val seeders = status.numSeeds()
+            val leechers = status.numPeers() - seeders
+            if (leechers < seeders) continue
 
-        for (i in 0 until seedingTorrentsSorted.size) {
-            val size = seedingTorrentsSorted[i].handle.status().total() / 1000000 //TODO: store as byte to avoid all conversions
+            val size = status.total() / 1000000 // Bytes to MB conversion
 
             if (storage + size > strategies.storageLimit) continue
+            storage += size
 
             if (toStopSeeding.contains(seedingTorrentsSorted[i])) {
+                if (status.lastUpload() - System.currentTimeMillis() > SEEDING_LOOP_TIME) continue
                 toStopSeeding.remove(seedingTorrentsSorted[i])
                 seedingTorrents.add(seedingTorrentsSorted[i])
-                storage += size
                 continue
             }
 
             jobs.add(CoroutineScope(Job() + Dispatchers.Default).launch {
                 if (downloadAndSeed(seedingTorrentsSorted[i])) {
                     seedingTorrents.add(seedingTorrentsSorted[i])
-                    storage += size
                 }
             })
         }
@@ -319,23 +343,29 @@ class TorrentManager private constructor (
         CoroutineScope(Job() + Dispatchers.Default).launch {
             toStopSeeding.forEach { stopSeedingTorrent(it) }
             jobs.forEach { it.join() }
+
+            delay(SEEDING_LOOP_TIME)
+
+            if (strategies.seedingStrategy == strategyId
+                && strategies.storageLimit == storageLimit)
+                updateSeedingStrategy(strategyId, storageLimit)
         }
     }
 
-    private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 100000) : Boolean {
+    private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 400000) : Boolean {
         if (!handler.handle.isValid) return false
         handler.downloadFile()
 
         try {
             withTimeout(timeout) {
-                Log.d(DeToksCommunity.LOGGING_TAG, "Waiting to download ${handler.torrentName}")
                 while (!handler.isDownloaded()) {
                     Log.d(DeToksCommunity.LOGGING_TAG, "Trying to download... ${handler.handle.status().totalWantedDone()} / ${handler.handle.status().totalWanted()}")
-                    delay(300)
+                    delay(1000)
                 }
             }
         } catch (e: TimeoutCancellationException) {
             Log.d(DeToksCommunity.LOGGING_TAG, "Timeout for download ... ${handler.torrentName}")
+            handler.deleteFile()
             return false
         }
 
@@ -354,7 +384,7 @@ class TorrentManager private constructor (
     }
 
     private fun stopSeedingTorrent(handler: TorrentHandler) {
-        Log.d(DeToksCommunity.LOGGING_TAG, "Stopping seeding for torrent ${handler.torrentName}")
+        seedingTorrents.remove(handler)
         handler.handle.unsetFlags(TorrentFlags.SEED_MODE)
         handler.handle.pause()
         handler.handle.resume()
@@ -379,14 +409,6 @@ class TorrentManager private constructor (
         return torrentFiles.map {it.handle}.distinct()
     }
 
-    fun getWatchedTorrents(): List<String> {
-        return (profile.profiles.keys).toList()
-    }
-
-    fun getUnwatchedTorrents(): List<String> {
-        return (torrentFiles.map { it.handle.makeMagnetUri() } subtract profile.profiles.keys).toList()
-    }
-
     class TorrentHandler(
         private val cacheDir: File,
         val handle: TorrentHandle,
@@ -399,6 +421,13 @@ class TorrentManager private constructor (
 
         fun getPath(): String {
             return "$cacheDir/$torrentName/$fileName"
+        }
+
+        fun getVideoDuration() : Long {
+            if(!isDownloaded()) return 0
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(getPath())
+            return retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
         }
 
         fun isPlayable(): Boolean {
