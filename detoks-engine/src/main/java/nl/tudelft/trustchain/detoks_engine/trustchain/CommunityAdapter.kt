@@ -1,25 +1,37 @@
 package nl.tudelft.trustchain.detoks_engine.trustchain
 
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.detoks_engine.manage_tokens.Transaction
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.math.min
 
 class CommunityAdapter(
-    private val trustChainCommunity: TrustChainCommunity
+    private val trustChainCommunity: TrustChainCommunity,
+    private val maxGroupBy: Int = 4,
+    private val flushIntervalMillis: Long = 50,
+    private val resendTimeoutMillis: Long = 1000,
+    private val resendLimit: Int = 0
 ) {
     private val trustChainHelper: TrustChainHelper = TrustChainHelper(trustChainCommunity)
     val myPublicKey = trustChainHelper.getMyPublicKey()
     val logger = KotlinLogging.logger("TokenTransaction")
-    lateinit var recvAckHandler: ((transactionId: String) -> Unit)
+    private val scope = CoroutineScope(Dispatchers.IO)
     lateinit var recvTransactionHandler: ((transaction: Transaction) -> Unit)
     private var blockPointer = -1
     private var tokenInBlockPointer = -1
     private var tokenCount = 0
+
+
+    private val bufferedTransactions = ConcurrentHashMap<Peer, ConcurrentLinkedQueue<String>>()
+    private val transmittingBlocks = ConcurrentHashMap<String, Job>()
 
     init {
         trustChainCommunity.addListener(TOKEN_BLOCK_TYPE, object : BlockListener {
@@ -58,7 +70,7 @@ class CommunityAdapter(
             }
             block = trustChainCommunity.database.getBlockBefore(block, TOKEN_BLOCK_TYPE)
         }
-        logger.debug("test")
+        startSender()
     }
 
     private fun handleBlock(block: TrustChainBlock) {
@@ -80,12 +92,10 @@ class CommunityAdapter(
             }
         }
 
-        // TODO check agreement block of other party
-//        // Other party accepted my proposal
-//        else if (block.isProposal && block.publicKey.contentEquals(myPublicKey)) {
-//            tokenCount -= Transaction.fromTrustChainTransactionObject(block.transaction).tokens.size
-//            recvAckHandler(Transaction.fromTrustChainTransactionObject(block.transaction).transactionId)
-//        }
+        // Other party accepted my proposal
+        else if (block.isAgreement && block.publicKey.contentEquals(myPublicKey)) {
+            transmittingBlocks.remove(block.linkedBlockId)?.cancel()
+        }
     }
 
     fun sendTokens(amount: Int, peer: Peer) {
@@ -96,6 +106,46 @@ class CommunityAdapter(
                 tokens.add(popToken()!!)
             }
             proposeTransaction(Transaction(tokens), peer)
+        }
+
+    }
+    private fun startSender() = scope.launch {
+        while (isActive) {
+            delay(flushIntervalMillis)
+            for ((peer, buf) in bufferedTransactions) {
+                launch propose@{
+                    val grouped = buf.pollN(maxGroupBy)
+                    if (grouped.isEmpty())
+                        return@propose
+
+                    // Inefficient. See above
+                    val block = synchronized(trustChainCommunity.database) {
+                        return@synchronized trustChainCommunity.createProposalBlock(
+                            GroupedAdapter.TOKEN_BLOCK_TYPE,
+                            Transaction(grouped).toTrustChainTransaction(),
+                            peer.publicKey.keyToBin()
+                        )
+                    }
+                    logger.debug { "Send proposal block: ${block.summarize()}" }
+
+                    if (resendLimit > 0) {
+                        val job = launch {
+                            repeat(resendLimit) {
+                                delay(resendTimeoutMillis)
+                                if (isActive) {
+                                    trustChainCommunity.sendBlock(block, peer)
+                                    trustChainCommunity.sendBlock(block)
+                                    logger.debug { "Resend proposal block: ${block.summarize()}" }
+                                } else
+                                    return@repeat
+                            }
+                        }
+                        val prevJob = transmittingBlocks.replace(block.blockId, job)
+                        if (prevJob != null)
+                            throw RuntimeException("Duplicated job ${block.blockId}")
+                    }
+                }
+            }
         }
     }
 
@@ -137,17 +187,17 @@ class CommunityAdapter(
 
     private fun proposeTransaction(transaction: Transaction, peer: Peer) {
         logger.debug("Proposing transaction: ${transaction.transactionId} with first token: ${transaction.tokens[0]}")
-        trustChainCommunity.createProposalBlock(TOKEN_BLOCK_TYPE, transaction.toTrustChainTransaction(), peer.publicKey.keyToBin())
+        val buf = bufferedTransactions.getOrPut(peer) {ConcurrentLinkedQueue<String>()}
+        for (token: String in transaction.tokens) {
+            buf.offer(token)
+        }
+//        trustChainCommunity.createProposalBlock(TOKEN_BLOCK_TYPE, transaction.toTrustChainTransaction(), peer.publicKey.keyToBin())
     }
 
     fun injectTokens(tokens: List<String>) {
         logger.debug{"Starting token injection for $tokens"}
         val transaction = Transaction(tokens)
         trustChainCommunity.createProposalBlock(TOKEN_BLOCK_TYPE, transaction.toTrustChainTransaction(), myPublicKey)
-    }
-
-    fun setReceiveAckHandler(handler: ((transactionId: String) -> Unit)) {
-        recvAckHandler = handler
     }
 
     fun setReceiveTransactionHandler(handler: ((transaction: Transaction) -> Unit)) {
@@ -158,7 +208,9 @@ class CommunityAdapter(
         val trustTransaction = proposal.transaction
         val transaction = Transaction.fromTrustChainTransactionObject(trustTransaction)
         logger.debug("Agreeing to transaction: ${transaction.transactionId}")
-        trustChainHelper.createAgreementBlock(proposal, trustTransaction)
+        val block = synchronized(trustChainCommunity.database) {
+            return@synchronized trustChainHelper.createAgreementBlock(proposal, trustTransaction)
+        }
     }
 
     fun getPeers(): List<Peer> {
@@ -184,4 +236,22 @@ class CommunityAdapter(
         const val TOKEN_BLOCK_TYPE = "token_block"
     }
 
+    private fun <E> ConcurrentLinkedQueue<E>.pollN(n: Int): List<E> {
+        val list = mutableListOf<E>()
+        repeat(n) {
+            val ele = this.poll() ?: return@repeat
+            list.add(ele)
+        }
+        return list
+    }
+
+    private fun TrustChainBlock.summarize(): String = StringBuilder().let {
+        it.append("TrustChainBlock||: ")
+        it.append("fromID: ${publicKey.toString().substring(0, 8)}.$sequenceNumber, ")
+        it.append("toID: ${linkPublicKey.toString().substring(0, 8)}.$linkSequenceNumber, ")
+        it.append("isProposal/Agreement: $isProposal/$isAgreement, ")
+        it.append("transaction: $transaction ")
+        it.append(":||")
+        return@let it.toString()
+    }
 }
