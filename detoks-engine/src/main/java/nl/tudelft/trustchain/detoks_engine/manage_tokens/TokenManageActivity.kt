@@ -25,8 +25,6 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
     private lateinit var peerAdapter: ListAdapter<Peer>
     private val logger = KotlinLogging.logger {}
 
-    private val transactionsInTransit: MutableMap<String, Transaction> = mutableMapOf()
-
     private var selectedPeerIndex: Int = RecyclerView.NO_POSITION
 
 

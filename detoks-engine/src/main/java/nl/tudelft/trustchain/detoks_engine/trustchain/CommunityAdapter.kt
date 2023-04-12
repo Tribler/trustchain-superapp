@@ -206,11 +206,10 @@ class CommunityAdapter(
 
     private fun agreeTransaction(proposal: TrustChainBlock) {
         val trustTransaction = proposal.transaction
-        val transaction = Transaction.fromTrustChainTransactionObject(trustTransaction)
-        logger.debug("Agreeing to transaction: ${transaction.transactionId}")
         val block = synchronized(trustChainCommunity.database) {
             return@synchronized trustChainHelper.createAgreementBlock(proposal, trustTransaction)
         }
+        logger.debug("Agreeing to transactionblock: ${block.summarize()}")
     }
 
     fun getPeers(): List<Peer> {
