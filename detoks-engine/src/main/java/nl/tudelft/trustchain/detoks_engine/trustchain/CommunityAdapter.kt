@@ -13,6 +13,11 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.math.min
 
+/**
+ * Handles token communication over the [TrustChainCommunity]
+ * Groups tokens by [Peer] in a buffer and sends them after [flushIntervalMillis]
+ * When a [TrustChainBlock] is not received it retries [resendLimit] times with an interval of [resendTimeoutMillis]
+ */
 class CommunityAdapter(
     private val trustChainCommunity: TrustChainCommunity,
     private val maxGroupBy: Int = 4,
@@ -99,6 +104,10 @@ class CommunityAdapter(
         }
     }
 
+    /**
+     * Sends [amount] of tokens to [peer].
+     * When [amount] is bigger than max available tokens than all available tokens will be sent to [peer]
+     */
     fun sendTokens(amount: Int, peer: Peer) {
         if (tokenCount > 0) {
             val nToSend = min(amount, tokenCount)
@@ -192,15 +201,20 @@ class CommunityAdapter(
         for (token: String in transaction.tokens) {
             buf.offer(token)
         }
-//        trustChainCommunity.createProposalBlock(TOKEN_BLOCK_TYPE, transaction.toTrustChainTransaction(), peer.publicKey.keyToBin())
     }
 
+    /**
+     * Add [tokens] to my available token, aka token generation
+     */
     fun injectTokens(tokens: List<String>) {
         logger.debug{"Starting token injection for $tokens"}
         val transaction = Transaction(tokens)
         trustChainCommunity.createProposalBlock(TOKEN_BLOCK_TYPE, transaction.toTrustChainTransaction(), myPublicKey)
     }
 
+    /**
+     * [handler] gets called when a transaction has been received
+     */
     fun setReceiveTransactionHandler(handler: ((transaction: Transaction) -> Unit)) {
         recvTransactionHandler = handler
     }
@@ -213,10 +227,16 @@ class CommunityAdapter(
         logger.debug("Agreeing to transactionblock: ${block.summarize()}")
     }
 
+    /**
+     * get all available [Peer]s to communicate with
+     */
     fun getPeers(): List<Peer> {
         return trustChainCommunity.getPeers()
     }
 
+    /**
+     * @return all available tokens
+     */
     fun getTokens(): List<String> {
         val tokens = mutableListOf<String>()
         if (tokenCount == 0) return tokens
