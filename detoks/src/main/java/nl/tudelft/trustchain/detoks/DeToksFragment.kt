@@ -45,7 +45,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        cacheDefaultTorrent() //TODO: change to caching from peers
+        cacheDefaultTorrent()
         torrentManager = TorrentManager.getInstance(requireActivity())
     }
 

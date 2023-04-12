@@ -72,7 +72,6 @@ class VideosAdapter(
                             mVideoView.scaleX = scale
                         } else {
                             mVideoView.scaleY = 1f / scale
-
                         }
                     }
                 }
