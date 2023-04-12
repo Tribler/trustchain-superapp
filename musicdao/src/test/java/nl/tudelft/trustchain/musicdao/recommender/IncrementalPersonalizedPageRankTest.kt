@@ -47,4 +47,26 @@ class IncrementalPersonalizedPageRankTest {
         }
     }
 
+    @Test
+    fun canIncorporateModifiedEdgesAndRecalculatePageRankAccordingly() {
+        incrementalPageRank = IncrementalPersonalizedPageRank( 1000, 10000, rootNode, 0.01f, network.graph)
+        incrementalPageRank.initiateRandomWalks()
+        incrementalPageRank.calculatePersonalizedPageRank()
+        val rootNeighborEdges = network.getAllNodeToNodeNetworkEdges().filter { network.graph.getEdgeSource(it) == rootNode }
+        val rootNeighbors = rootNeighborEdges.map { network.graph.getEdgeTarget(it) }
+        val randomNeighborEdge = rootNeighborEdges.first()
+        val randomNeighbor = rootNeighbors.first()
+        val randomNode = network.getAllNodes().first { !rootNeighbors.contains(it) && it != rootNode }
+        val oldRandomNeighborPageRank = randomNeighbor.personalisedPageRank
+        val oldRandomNodePageRank = randomNode.personalisedPageRank
+        network.removeEdge(randomNeighborEdge)
+        network.addEdge(rootNode, randomNode, NodeTrustEdge(randomNeighborEdge.trust))
+        incrementalPageRank.modifyEdges(setOf(rootNode))
+        incrementalPageRank.calculatePersonalizedPageRank()
+        Assert.assertTrue(randomNeighbor.personalisedPageRank < oldRandomNeighborPageRank)
+        Assert.assertTrue(randomNode.personalisedPageRank > oldRandomNodePageRank)
+    }
+
+
+
 }

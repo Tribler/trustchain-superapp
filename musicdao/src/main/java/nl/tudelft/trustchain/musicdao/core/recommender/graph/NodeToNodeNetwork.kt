@@ -67,6 +67,16 @@ class NodeToNodeNetwork {
         }
     }
 
+    fun removeEdge(nodeEdge: NodeTrustEdge): Boolean {
+        return graph.removeEdge(nodeEdge).also {
+            if (!it) {
+                logger.error { "Couldn't remove edge $nodeEdge from network" }
+            } else {
+                graph.setEdgeWeight(nodeEdge, 0.0)
+            }
+        }
+    }
+
     fun getAllNodes(): Set<Node> {
         return graph.vertexSet()
     }

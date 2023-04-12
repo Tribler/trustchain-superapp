@@ -5,15 +5,7 @@
  */
 package nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import android.os.Build;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +14,7 @@ import org.jgrapht.Graphs;
 
 /**
  * A random walk iterator for weighted graphs.
- * 
+ *
  * "Given a graph and a starting point, we select a neighbor of it at random, and move to this
  * neighbor; then we select a neighbor of this point at random, and move to it etc. The (random)
  * sequence of points selected this way is a random walk on the graph." This very simple definition,
@@ -104,16 +96,19 @@ public class CustomRandomWalkVertexIterator<V, E>
         return value;
     }
 
-    public void modifyEdge(V sourceNode)
+    public void modifyEdges(Set<V> sourceNodes)
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            outEdgesTotalWeight.put(sourceNode, graph.outgoingEdgesOf(sourceNode).stream().mapToDouble(graph::getEdgeWeight).sum());
+            for(V sourceNode : sourceNodes)
+                outEdgesTotalWeight.put(sourceNode, graph.outgoingEdgesOf(sourceNode).stream().mapToDouble(graph::getEdgeWeight).sum());
         } else {
-            double outEdgesTotalWeightSum = 0.0;
-            for(E edge : graph.outgoingEdgesOf(sourceNode)) {
-                outEdgesTotalWeightSum += graph.getEdgeWeight(edge);
+            for(V sourceNode : sourceNodes) {
+                double outEdgesTotalWeightSum = 0.0;
+                for (E edge : graph.outgoingEdgesOf(sourceNode)) {
+                    outEdgesTotalWeightSum += graph.getEdgeWeight(edge);
+                }
+                outEdgesTotalWeight.put(sourceNode, outEdgesTotalWeightSum);
             }
-            outEdgesTotalWeight.put(sourceNode, outEdgesTotalWeightSum);
         }
     }
 

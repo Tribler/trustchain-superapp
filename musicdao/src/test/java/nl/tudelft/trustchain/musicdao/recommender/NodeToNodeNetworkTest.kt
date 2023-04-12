@@ -72,6 +72,25 @@ e 2 1 0.2 2
     }
 
     @Test
+    fun canRemoveEdgesFromNodeToNodeNetwork() {
+        nodeToNodeNetwork = NodeToNodeNetwork()
+        nodeToNodeNetwork.addNode(someNodeWithoutData)
+        nodeToNodeNetwork.addNode(anotherNodeWithoutData)
+
+        nodeToNodeNetwork.addEdge(someNodeWithoutData, anotherNodeWithoutData, someNodeEdge)
+        var allEdges = nodeToNodeNetwork.getAllNodeToNodeNetworkEdges()
+        Assert.assertEquals(1, allEdges.size)
+        nodeToNodeNetwork.removeEdge(someNodeEdge)
+        allEdges = nodeToNodeNetwork.getAllNodeToNodeNetworkEdges()
+        Assert.assertEquals(0, allEdges.size)
+        Assert.assertEquals(
+            0.0,
+            nodeToNodeNetwork.graph.getEdgeWeight(someNodeEdge),
+            0.001
+        )
+    }
+
+    @Test
     fun overwritesEdgeWhenANewEdgeIsAddedToTheSameNodes() {
         nodeToNodeNetwork = NodeToNodeNetwork()
         nodeToNodeNetwork.addNode(someNodeWithoutData)

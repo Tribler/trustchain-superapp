@@ -51,12 +51,12 @@ class IncrementalPersonalizedPageRank (
         }
     }
 
-    fun modifyEdge(sourceNode: Node) {
-        iter.modifyEdge(sourceNode)
+    fun modifyEdges(sourceNodes: Set<Node>) {
+        iter.modifyEdges(sourceNodes)
         for(i in 0 until randomWalks.size) {
             val walk = randomWalks[i]
             for(j in 0 until walk.size) {
-                if(walk[j] == sourceNode) {
+                if(sourceNodes.contains(walk[j])) {
                     randomWalks[i] = walk.slice(0..j).toMutableList()
                     completeExistingRandomWalk(randomWalks[i])
                 }
