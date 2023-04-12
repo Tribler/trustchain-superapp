@@ -2,17 +2,12 @@ package nl.tudelft.trustchain.detoks
 
 import android.content.Context
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.db.TokenStore
 
 data class DeToksTransaction(val tokens: List<Token>, val recipient: Peer)
@@ -42,83 +37,71 @@ class DeToksTransactionEngine(
     private var tokenIDIncrementer = 1000
 
     // Single token, no grouping
-    fun sendTokenSingle(tok: Token, peer: Peer): TrustChainBlock {
-        Log.d(LOGTAG, "Sending token")
-        val transaction = mapOf("token" to tok.toString())
+    fun sendTransactionSingle(transaction: DeToksTransaction): TrustChainBlock {
+        Log.d(LOGTAG, "Sending transaction")
+        val trustChainTransaction = mapOf("tokens" to transaction.tokens.map { it.toString() })
 
         return createProposalBlockMine(
             SINGLE_BLOCK,
-            transaction,
-            peer.publicKey.keyToBin()
+            trustChainTransaction,
+            transaction.recipient.publicKey.keyToBin()
         )
     }
 
-    fun sendTokensSingle(toks: List<Token>, peer: Peer) {
-
-        // TODO do in coroutine
-//        val blocks = toks.map {
-//            val transaction = mapOf("token" to it.toString())
-//            ProposalBlockBuilder(myPeer, database, SINGLE_BLOCK, transaction, peer.publicKey.keyToBin()).sign()
-//        }
-
-//        // create the blocks
-//        val blocks = mutableListOf<TrustChainBlock>()
+//    fun sendTokensSingle(toks: List<Token>, peer: Peer) {
 //
-//        val jobs = mutableListOf<Job>()
+//        // must be done sequentially
+//        val peerPk = peer.publicKey.keyToBin()
 //        for (tok in toks) {
-//            jobs += scope.launch(Dispatchers.Default) {
-//                val transaction = mapOf("token" to tok.toString())
-//                val block = ProposalBlockBuilder(myPeer, database, SINGLE_BLOCK, transaction, peer.publicKey.keyToBin()).sign()
-//                blocks.add(block)
-//            }
+//            val transaction = mapOf("token" to tok.toString())
+//            val block = ProposalBlockBuilder(myPeer, database, SINGLE_BLOCK, transaction, peerPk).sign()
+//            onBlockCreated(block)
+//            sendBlock(block)
 //        }
-//        runBlocking {
-//            jobs.map { it.join() }
-//        }
+//    }
 
-        // must be done sequentially
-        val peerPk = peer.publicKey.keyToBin()
-        for (tok in toks) {
-            val transaction = mapOf("token" to tok.toString())
-            val block = ProposalBlockBuilder(myPeer, database, SINGLE_BLOCK, transaction, peerPk).sign()
-            onBlockCreated(block)
-            sendBlock(block)
+    private fun receiveSingleTransactionProposal(block: TrustChainBlock) {
 
+        val tokens = block.transaction["tokens"] as List<*>
+
+        val tokenUids = tokens.map {tok ->
+            tok as String
+            val (uid, pk) = tok.split(",")
+
+            // Add token to personal database
+            // Add token to personal database
+            // If sending to self ->  Increment the ID to avoid duplicate ID errors.
+            var newID = uid.toInt()
+            Log.d(LOGTAG, "Sending to self: $sendingToSelf")
+            if (sendingToSelf) {
+                newID += tokenIDIncrementer
+            }
+            if (enableTokenDB) {
+                tokenStore.addToken(newID.toString(), pk)
+            }
+            Log.d(LOGTAG, "Saving received $tok to database")
+
+
+            uid
         }
 
-
-    }
-
-
-    private fun receiveSingleTokenProposal(block: TrustChainBlock) {
-        val token = block.transaction["token"] as String
-        val (uid, pk) = token.split(",")
-        println(pk)
-
-        // Add token to personal database
-        // Add token to personal database
-        // If sending to self ->  Increment the ID to avoid duplicate ID errors.
-        var newID = uid.toInt()
-        Log.d(LOGTAG, "Sending to self: $sendingToSelf")
-        if (sendingToSelf) {
-            newID += tokenIDIncrementer
-        }
-        if (enableTokenDB) {
-            tokenStore.addToken((newID).toString(), pk)
-        }
-        Log.d(LOGTAG, "Saving received $token to database")
-
-        val transaction = mapOf("tokenSent" to uid)
+        val transaction = mapOf("tokensSent" to tokenUids)
         createAgreementBlockMine(block, transaction)
     }
 
-    private fun receiveSingleTokenAgreement(block: TrustChainBlock) {
-        val tokenId = block.transaction["tokenSent"] as String
+    private fun receiveSingleTransactionAgreement(block: TrustChainBlock) {
+        val tokenIds = block.transaction["tokensSent"] as List<*>
 
-        // Remove token from personal database
-        tokenStore.removeTokenByID(tokenId)
+        for (tokenId in tokenIds) {
+            tokenId as String
 
-        Log.d(LOGTAG, "Removing spent $tokenId from database")
+            if (enableTokenDB) {
+                // Remove token from personal database
+                tokenStore.removeTokenByID(tokenId)
+            }
+            Log.d(LOGTAG, "Removing spent $tokenId from database")
+
+        }
     }
 
     // Grouped tokens
@@ -329,10 +312,10 @@ class DeToksTransactionEngine(
 
             if (block.isProposal) {
                 Log.d(LOGTAG, "Received SINGLE proposal block")
-                receiveSingleTokenProposal(block)
+                receiveSingleTransactionProposal(block)
             } else if (block.isAgreement) {
                 Log.d(LOGTAG, "Received SINGLE agreement block")
-                receiveSingleTokenAgreement(block)
+                receiveSingleTransactionAgreement(block)
             }
         }
 
