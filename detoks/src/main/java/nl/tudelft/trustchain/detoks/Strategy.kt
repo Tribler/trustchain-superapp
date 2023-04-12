@@ -29,7 +29,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         strategyComparators[STRATEGY_HIGHEST_WATCH_TIME] = :: highestWatchTimeStrategy
         strategyComparators[STRATEGY_LOWEST_WATCH_TIME] = :: lowestWatchTimeStrategy
 
-        strategyComparators[STRATEGY_HOT] = :: lowestWatchTimeStrategy
+        strategyComparators[STRATEGY_HOT] = :: hotStrategy
         strategyComparators[STRATEGY_RISING] = :: lowestWatchTimeStrategy
         strategyComparators[STRATEGY_NEW] = :: newestFirstStrategy
         strategyComparators[STRATEGY_TOP] = :: topFirstStrategy
@@ -54,7 +54,6 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     /**
      * Returns the torrent handlers based on number of likes
      */
-
     private fun topFirstStrategy(
         p0: Pair<TorrentHandler, ProfileEntry?>,
         p1: Pair<TorrentHandler, ProfileEntry?>
@@ -63,11 +62,18 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     /**
      * Returns the torrent handlers based on when they were first uploaded
      */
-
     private fun newestFirstStrategy(
         p0: Pair<TorrentHandler, ProfileEntry?>,
         p1: Pair<TorrentHandler, ProfileEntry?>
     ) : Int = p0.second!!.uploadDate compareTo p1.second!!.uploadDate
+
+    /**
+     * Returns the torrent handlers based on hopcount
+     */
+    private fun hotStrategy(
+        p0: Pair<TorrentHandler, ProfileEntry?>,
+        p1: Pair<TorrentHandler, ProfileEntry?>
+    ) : Int = p0.second!!.hopCount compareTo p1.second!!.hopCount
 
     /**
      * Applies the sorting function sent as parameter, to the handlers, based on the profiles.
@@ -85,6 +91,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
             if (!profiles.contains(key)) return@map Pair(it, ProfileEntry())
             return@map Pair(it, profiles[key])
         }
+
         val sortedHandlerProfile =
             handlerProfile.sortedWith(strategyComparators[id]!!).toMutableList()
 
