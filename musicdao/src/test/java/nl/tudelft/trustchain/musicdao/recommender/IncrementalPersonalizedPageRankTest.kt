@@ -67,6 +67,4 @@ class IncrementalPersonalizedPageRankTest {
         Assert.assertTrue(randomNode.personalisedPageRank > oldRandomNodePageRank)
     }
 
-
-
 }
