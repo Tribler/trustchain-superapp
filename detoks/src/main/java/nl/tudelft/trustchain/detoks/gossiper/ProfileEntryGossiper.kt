@@ -8,9 +8,10 @@ import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.trustchain.detoks.DeToksCommunity
+import nl.tudelft.trustchain.detoks.ProfileEntry
 import nl.tudelft.trustchain.detoks.TorrentManager
 
-class WatchTimeGossiper(
+class ProfileEntryGossiper(
     override val delay: Long,
     override val peers: Int,
     private val blocks: Int,
@@ -32,7 +33,7 @@ class WatchTimeGossiper(
 
         val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
         val randomProfileEntries = pickRandomN(
-            TorrentManager.getInstance(context).profile.profiles.entries.map { Pair(it.key, it.value.watchTime) },
+            TorrentManager.getInstance(context).profile.profiles.entries.map { Pair(it.key, it.value) },
             blocks
         )
         if (randomPeers.isEmpty() || randomProfileEntries.isEmpty()) return
@@ -40,20 +41,20 @@ class WatchTimeGossiper(
         randomPeers.forEach {
             deToksCommunity.gossipWith(
                 it,
-                WatchTimeMessage(randomProfileEntries),
-                DeToksCommunity.MESSAGE_WATCH_TIME_ID
+                ProfileEntryMessage(randomProfileEntries),
+                DeToksCommunity.MESSAGE_PROFILE_ENTRY_ID
             )
         }
     }
 }
 
-class WatchTimeMessage(data: List<Pair<String, Long>>) : GossipMessage<Long>(data) {
-    companion object Deserializer : Deserializable<WatchTimeMessage> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<WatchTimeMessage, Int> {
+class ProfileEntryMessage(data: List<Pair<String, ProfileEntry>>) : GossipMessage<ProfileEntry>(data) {
+    companion object Deserializer : Deserializable<ProfileEntryMessage> {
+        override fun deserialize(buffer: ByteArray, offset: Int): Pair<ProfileEntryMessage, Int> {
             val msg = deserializeMessage(buffer, offset){
-                return@deserializeMessage Pair(it.getString(0), it.getLong(1))
+                return@deserializeMessage Pair(it.getString(0), it.get(1) as ProfileEntry)
             }
-            return Pair(WatchTimeMessage(msg.first), msg.second)
+            return Pair(ProfileEntryMessage(msg.first), msg.second)
         }
     }
 }

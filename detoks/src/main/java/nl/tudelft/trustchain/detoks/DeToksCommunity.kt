@@ -19,7 +19,7 @@ class DeToksCommunity(private val context: Context) : Community() {
     init {
         messageHandlers[MESSAGE_TORRENT_ID] = ::onTorrentGossip
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
-        messageHandlers[MESSAGE_WATCH_TIME_ID] = :: onWatchTimeGossip
+        messageHandlers[MESSAGE_PROFILE_ENTRY_ID] = :: onProfileEntryGossip
         messageHandlers[MESSAGE_NETWORK_SIZE_ID] = :: onNetworkSizeGossip
         messageHandlers[MESSAGE_BOOT_REQUEST] = :: onBootRequestGossip
         messageHandlers[MESSAGE_BOOT_RESPONSE] = :: onBootResponseGossip
@@ -29,7 +29,7 @@ class DeToksCommunity(private val context: Context) : Community() {
         const val LOGGING_TAG = "DeToksCommunity"
         const val MESSAGE_TORRENT_ID = 1
         const val MESSAGE_TRANSACTION_ID = 2
-        const val MESSAGE_WATCH_TIME_ID = 3
+        const val MESSAGE_PROFILE_ENTRY_ID = 3
         const val MESSAGE_NETWORK_SIZE_ID = 4
         const val MESSAGE_BOOT_REQUEST = 5
         const val MESSAGE_BOOT_RESPONSE = 6
@@ -108,16 +108,20 @@ class DeToksCommunity(private val context: Context) : Community() {
         }
     }
 
-    private fun onWatchTimeGossip(packet: Packet) {
-        val (_, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
+    private fun onProfileEntryGossip(packet: Packet) {
+        val (_, payload) = packet.getAuthPayload(ProfileEntryMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
 
         payload.data.forEach {
-            torrentManager.profile.updateEntryWatchTime(
-                it.first,
-                it.second,
-                false
-            )
+            // TODO: Maybe make a merge(entry) function in the profile class
+            it.second.hopCount      // TODO: Ignore as its in torrent gossiper
+            it.second.duration      // TODO: Update the duration (if 0?)
+            it.second.uploadDate    // TODO: Update the upload date (if 0?)
+            it.second.timesSeen     // TODO: Set it to 0 if it does not exist
+            it.second.firstSeen     // TODO: Set it to 0 if it has not been seen
+            it.second.likes         // TODO: Take the highest value
+            it.second.watched       // TODO: Set it to false
+            torrentManager.profile.updateEntryWatchTime(it.first, it.second.watchTime, false)
         }
     }
 
