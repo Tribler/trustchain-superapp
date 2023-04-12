@@ -55,6 +55,9 @@ class TokenStore(context: Context){
     fun removeToken() {
         database.tokenStoreQueries.removeToken()
     }
+    fun getSingleToken(): Token {
+        return database.tokenStoreQueries.getToken(tokenMapper).executeAsOne()
+    }
 
     /**
      * Checks the balance of the user

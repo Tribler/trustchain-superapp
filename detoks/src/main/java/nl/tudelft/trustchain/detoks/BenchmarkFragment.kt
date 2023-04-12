@@ -29,6 +29,19 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private var tokensPerTransaction = 1
     private var tokenIDCounter = 0
 
+    fun singleTokenBenchmark(): Long {
+
+        val executionTime = measureTimeMillis {
+            transactionEngine.sendTokenSingle(
+                transactionEngine.tokenStore.getSingleToken(),
+                transactionEngine.getSelectedPeer()
+            )
+
+        }
+
+        return executionTime
+    }
+
     fun singleBenchmark(): Long {
 
         val executionTime = measureTimeMillis {
@@ -80,6 +93,10 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         binding.singleTransactionsButton.setOnClickListener {
             binding.singleTextField.text = "${singleBenchmark()} ms"
+        }
+
+        binding.singleTokenButton.setOnClickListener{
+            binding.singleTokenText.text ="${singleTokenBenchmark()} ms"
         }
 
         binding.otherPeers.text = connectedPeerToString()

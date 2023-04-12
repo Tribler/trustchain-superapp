@@ -20,6 +20,11 @@ DELETE FROM tokens
     ORDER BY id
     LIMIT 1;
 
+getToken:
+SELECT id, publicKey FROM tokens
+    ORDER BY id
+    LIMIT 1;
+
 removeAllTokens:
 DELETE FROM tokens;
 
