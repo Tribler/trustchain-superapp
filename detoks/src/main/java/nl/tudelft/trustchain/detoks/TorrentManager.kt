@@ -3,6 +3,8 @@ package nl.tudelft.trustchain.detoks
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.frostwire.jlibtorrent.*
@@ -13,6 +15,7 @@ import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import java.io.File
+import java.lang.Math.abs
 import kotlin.reflect.jvm.internal.impl.types.TypeCheckerState.SupertypesPolicy.None
 
 
@@ -123,6 +126,10 @@ class TorrentManager private constructor (
         if (newIndex == currentIndex) {
             return
         }
+
+        if (loopedToFront && newIndex == 0) unwatchedIndex = torrentFiles.size
+        else if (unwatchedIndex < newIndex) unwatchedIndex = newIndex
+
         if (cachingAmount * 2 + 1 >= getNumberOfTorrents()) {
             // TODO: This could potentially lead to issues, since what happens if the user locks
             //        their screen or switches to another app for a while? Maybe this could be
@@ -134,7 +141,6 @@ class TorrentManager private constructor (
                 updateTime(),
                 true)
             currentIndex = newIndex
-            if (unwatchedIndex != -1) unwatchedIndex = newIndex
             return
         }
 
@@ -151,7 +157,6 @@ class TorrentManager private constructor (
             updateTime(),
         true)
         currentIndex = newIndex
-        if (unwatchedIndex != -1) unwatchedIndex = if (loopedToFront) -1 else newIndex
     }
 
     private fun initializeVideoPool() {
@@ -280,11 +285,9 @@ class TorrentManager private constructor (
                 )
 
                 if (insertIndex == -1) {
-                    if (unwatchedIndex == -1) {
-                        unwatchedIndex = torrentFiles.size
-                        insertIndex = torrentFiles.size
-                    } else {
-                        insertIndex = strategies.findLeechingIndex(
+                    insertIndex = if (unwatchedIndex == torrentFiles.size) torrentFiles.size
+                    else {
+                        strategies.findLeechingIndex(
                             torrentFiles,
                             profile.profiles,
                             torrent,
@@ -310,7 +313,7 @@ class TorrentManager private constructor (
 
         val sortedTorrents: MutableList<TorrentHandler>
 
-        if (unwatchedIndex == -1) {
+        if (unwatchedIndex == torrentFiles.size) {
             currentIndex = 0
             sortedTorrents = strategies.applyStrategy(
                 strategyId,
