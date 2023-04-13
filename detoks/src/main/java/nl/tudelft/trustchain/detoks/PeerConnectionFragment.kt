@@ -28,7 +28,7 @@ class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
     private val handler = Handler(Looper.getMainLooper())
     private val runnable = object : Runnable {
         override fun run() {
-            adapter = PeerAdapter(requireActivity(), getPeers())
+            binding.peerListview.adapter = PeerAdapter(requireActivity(), getPeers())
             handler.postDelayed(this, 1000)
         }
     }
@@ -45,7 +45,7 @@ class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
         // Update the list adapter to incorporate all peers
         adapter = PeerAdapter(requireActivity(), getPeers())
         binding.peerlistUpdate.setOnClickListener {
-            adapter = PeerAdapter(requireActivity(), getPeers())
+            binding.peerListview.adapter = PeerAdapter(requireActivity(), getPeers())
         }
 
         binding.peerListview.isClickable = true
