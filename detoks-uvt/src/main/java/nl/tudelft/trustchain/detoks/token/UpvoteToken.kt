@@ -77,21 +77,35 @@ class UpvoteToken constructor(
      * proposal block of this video -> if already liked once => show message to user / cannot like again
      * - if not then create an agreement block for this video
      */
-    fun sendUpvoteToken(itemView: View, videoID: String, proposalBlockHash: TextView, publicKeySeeder: String) {
+    fun sendUpvoteToken(itemView: View, videoID: String) {
 
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
-        upvoteCommunity?.torrentManager?.mvpSeeder()
-        val myPubKey = upvoteCommunity?.myPeer?.publicKey.toString()
+        val seedersIPAddress =  upvoteCommunity?.torrentManager?.mvpSeeder()?.sortedByDescending { it.third }
+        Log.i("Detoks", "now logging peers who seeded this current vid")
+        seedersIPAddress?.forEach { it -> Log.i("Detoks", "client: ${it.first}, ip: ${it.second}, download bytes: ${it.third}") }
+        val allPeers = upvoteCommunity?.getPeers()!!
+        val chosenSeeder = seedersIPAddress?.firstOrNull {
+            allPeers.map { peer -> peer.lanAddress.ip }.contains(it.second.substringBefore(":")) ||
+                allPeers.map { peer -> peer.wanAddress.ip }.contains(it.second.substringBefore(":"))
+        }
+        var chosenSeederPublicKey = allPeers.firstOrNull { peer ->
+            peer.lanAddress.ip == chosenSeeder?.second?.substringBefore(":") || peer.wanAddress.ip == chosenSeeder?.second?.substringBefore(":")  }
+            ?.publicKey?.keyToBin()
+            ?.toHex()
+
+        val myPubKey = upvoteCommunity.myPeer.publicKey.keyToBin().toHex()
         //val upvoteToken = UpvoteToken(1, "1679006615", "12345678910", 1)
         //val toastMessage = upvoteCommunity?.sendUpvoteToken(upvoteToken.tokenID.toString(), localToGMT(upvoteToken.date.toLong()).toString(), upvoteToken.publicKeyMinter, upvoteToken.videoID.toString())
 
         // check if already liked by self
         // getBlockWithHash Method below might fail to get the proposal block if it is not in this peer's truststore
-        val proposalBlock = upvoteCommunity?.database?.getBlockWithHash(proposalBlockHash.text.toString().hexToBytes())
+//        upvoteCommunity?.torrentManager?.getHashOfCurrentVideo()!!.hexToBytes()
+        val currentVideoHash = upvoteCommunity.torrentManager?.getHashOfCurrentVideo()!!.hexToBytes()
+        val proposalBlock = upvoteCommunity.database.getBlockWithHash(currentVideoHash)
         if (proposalBlock != null) {
             val linkedBlocks = upvoteCommunity.database.getAllLinked(proposalBlock)
             val alreadyLiked = linkedBlocks.find { it.type == UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN
-                && it.publicKey.toHex()contentEquals(myPubKey)}
+                && it.publicKey.toHex().contentEquals(myPubKey) && it.isAgreement}
             if (alreadyLiked != null) {
                 Log.i("DeToks", "You already liked this video, cannot like again")
                 Toast.makeText(
@@ -116,64 +130,71 @@ class UpvoteToken constructor(
                 toastMsg  ,
                 Toast.LENGTH_SHORT
             ).show()
+
+            var toastMessage: String?
+
+            if (chosenSeederPublicKey == null) {
+                // Could not find the seeder, all rewards go to the peer who posted the video
+                Log.i("Detoks", "Could not find the seeder of this video you liked, all minted tokens will go the peer who posted this video you upvoted")
+                chosenSeederPublicKey = proposalBlock.publicKey.toHex()
+            }
+
+            try {
+                val upvoteTokenList: ArrayList<UpvoteToken> = ArrayList()
+                val tokenIDList: ArrayList<Int> = ArrayList()
+
+                var dbSuccess: Boolean
+
+                // Mint the required amount of tokens to upvote the video
+                while (upvoteTokenList.size < CommunityConstants.TOKENS_SENT_PER_UPVOTE) {
+                    val nextToken = tryMintToken(itemView.context, videoID, myPubKey, chosenSeederPublicKey)
+                    dbSuccess = SentTokenManager(itemView.context).addSentToken(nextToken)
+
+                    if (!dbSuccess)
+                        throw InvalidMintException("Could not add the minted token to the database")
+                    upvoteTokenList.add(nextToken)
+                    tokenIDList.add(nextToken.tokenID)
+                }
+                val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList)
+                toastMessage = if (sendSuccess == true) {
+                    "Successfully sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
+                } else {
+                    "Failed to sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
+                }
+
+            } catch (invalidMintException: InvalidMintException) {
+                toastMessage = invalidMintException.message
+            } catch (peerNotFoundException: PeerNotFoundException) {
+                // TODO Add DB Rollback and potential other network failures
+                toastMessage = peerNotFoundException.message
+            }
+            // Toast the result
+            Toast.makeText(
+                itemView.context,
+                toastMessage,
+                Toast.LENGTH_SHORT
+            ).show()
+
         } else {
             Toast.makeText(
                 itemView.context,
-                "This video does not have a proposal block attached to it and is thus not posted by anyone",
+                "Attempted to find a proposal Block with hash: $currentVideoHash, This video does not have a proposal block attached to it and is thus not posted by anyone",
                 Toast.LENGTH_SHORT
             ).show()
             return
         }
-
-        var toastMessage: String?
-
-        try {
-            val upvoteTokenList: ArrayList<UpvoteToken> = ArrayList()
-            val tokenIDList: ArrayList<Int> = ArrayList()
-
-            var dbSuccess: Boolean
-
-            // Mint the required amount of tokens to upvote the video
-            while (upvoteTokenList.size < CommunityConstants.TOKENS_SENT_PER_UPVOTE) {
-                val nextToken = tryMintToken(itemView.context, videoID, myPubKey, publicKeySeeder)
-                 dbSuccess = SentTokenManager(itemView.context).addSentToken(nextToken)
-
-                if (!dbSuccess)
-                    throw InvalidMintException("Could not add the minted token to the database")
-                upvoteTokenList.add(nextToken)
-                tokenIDList.add(nextToken.tokenID)
-            }
-            val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList)
-            toastMessage = if (sendSuccess == true) {
-                "Successfully sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
-            } else {
-                "Failed to sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
-            }
-
-        } catch (invalidMintException: InvalidMintException) {
-            toastMessage = invalidMintException.message
-        } catch (peerNotFoundException: PeerNotFoundException) {
-            // TODO Add DB Rollback and potential other network failures
-            toastMessage = peerNotFoundException.message
-        }
-        // Toast the result
-        Toast.makeText(
-            itemView.context,
-            toastMessage,
-            Toast.LENGTH_SHORT
-        ).show()
     }
 
     /**
      * Sets a listener to like a video by double tapping the screen
      */
-    fun setLikeListener(itemView: View, videoID: String, proposalBlockHash: TextView, publicKeySeeder: String) {
+    fun setLikeListener(itemView: View, videoID: String) {
         val adapter = this
 
         itemView.setOnClickListener(
             object : DoubleClickListener() {
                 override fun onDoubleClick(view: View?) {
-                    adapter.sendUpvoteToken(itemView, videoID, proposalBlockHash, publicKeySeeder)
+                    adapter.sendUpvoteToken(itemView, videoID)
                 }
             }
         )

@@ -35,7 +35,7 @@ class TorrentManager(
 ) {
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
-    private val torrentFiles = mutableListOf<TorrentHandler>()
+    private val torrentFiles = mutableListOf<TorrentHandlerPlusUserInfo>()
     private var currentIndex = 0
     private val torrentHandleBeingSeeded = mutableListOf<TorrentHandle>()
     private val seedableTorrentInfo = mutableListOf<TorrentInfo>()
@@ -61,6 +61,10 @@ class TorrentManager(
             proposalBlockHash,
             videoPostedOn,
             videoID))
+    }
+
+    fun getHashOfCurrentVideo(): String {
+        return torrentFiles.gett(currentIndex % getNumberOfTorrents()).proposalBlockHash
     }
 
     fun notifyIncrease() {
@@ -129,19 +133,19 @@ class TorrentManager(
     }
 
 
-    fun mvpSeeder(): MutableList<Pair<String, String>> {
+    fun mvpSeeder(): MutableList<Triple<String, String, Long>> {
         val peerInfo = torrentFiles.gett(currentIndex % getNumberOfTorrents()).handle.peerInfo()
         // list of peer info objects -> you can get the
         // bit torrent client and ip address of the peers
-        val downloadedFrom = mutableListOf<Pair<String, String>>()
+        val downloadedFrom = mutableListOf<Triple<String, String, Long>>()
         for (peer in peerInfo) {
             if (peer.totalDownload() > 0) {
                 Log.i("Detoks", "---------------------------------------------------------")
-                Log.i("Detoks", "downloaded from peer with ip adress ${peer.ip()}")
+                Log.i("Detoks", "downloaded from peer with ip address ${peer.ip()}")
                 Log.i("Detoks", "this peer uses the following client ${peer.client()}")
                 Log.i("Detoks", "amount downloaded from this peer: ${peer.totalDownload()}")
                 Log.i("Detoks", "-----------------------------------------------------------")
-                downloadedFrom.add(Pair(peer.client(), peer.ip()))
+                downloadedFrom.add(Triple(peer.client(), peer.ip(), peer.totalDownload()))
             }
 //            peer.ip()
 //            peer.client()
@@ -196,11 +200,26 @@ class TorrentManager(
         }
     }
 
-    fun addTorrent(magnet: String) {
+    fun addTorrent(magnet: String, proposalBlockHash: String, videoPostedOn: String, videoID: String) {
         val torrentInfo = getInfoFromMagnet(magnet)?:return
         val hash = torrentInfo.infoHash()
 
-        if(sessionManager.find(hash) != null) return
+//        if(sessionManager.find(hash) != null) {
+//            Log.i("Detoks", "sessionManager already has this torrent: ${sessionManager.find(hash).name()}")
+//            torrentFiles.forEach { it -> Log.i("Detoks", "torrentFiles => name: ${it.torrentName}") }
+//            val torrentHandler = torrentFiles.firstOrNull{ it.torrentName == torrentInfo.name()}!!
+//            torrentFiles.add(TorrentHandlerPlusUserInfo(cacheDir,
+//                torrentHandler.handle,
+//                torrentHandler.torrentName,
+//                torrentHandler.fileName,
+//                torrentHandler.fileIndex,
+//                proposalBlockHash,
+//                videoPostedOn,
+//                videoID))
+//            Log.i("Detoks", "Received and added new video data: magnet link: $magnet, proposalBlockHash: $proposalBlockHash")
+//            return
+//        }
+
         Log.i("Detoks", "Adding new torrent: ${torrentInfo.name()}")
 
         sessionManager.download(torrentInfo, cacheDir)
@@ -213,14 +232,18 @@ class TorrentManager(
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
                 torrentFiles.add(
-                    TorrentHandler(
+                    TorrentHandlerPlusUserInfo(
                         cacheDir,
                         handle,
                         torrentInfo.name(),
                         fileName,
-                        it
+                        it,
+                        proposalBlockHash,
+                        videoPostedOn,
+                        videoID
                     )
                 )
+                Log.i("Detoks", "Received and added new video data: magnet link: $magnet, proposalBlockHash: $proposalBlockHash")
             }
         }
     }
@@ -368,12 +391,13 @@ class TorrentManager(
                 val fileName = torrentInfo.files().fileName(it)
                 if (fileName.endsWith(".mp4")) {
                     torrentFiles.add(
-                        TorrentHandler(
+                        TorrentHandlerPlusUserInfo(
                             cacheDir,
                             handle,
                             torrentInfo.name(),
                             fileName,
-                            it
+                            it,
+                            "", "", ""
                         )
                     )
                 }

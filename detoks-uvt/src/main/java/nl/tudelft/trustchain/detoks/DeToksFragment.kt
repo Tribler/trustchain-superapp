@@ -44,8 +44,12 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             if (file.exists())  {
                 file.delete()
             }
+//            deleteFile(torrentDir, DEFAULT_POST_VIDEO2)
+//            deleteFile(torrentDir, DEFAULT_POST_VIDEO)
+//            deleteFile(torrentDir, BIGBUCKBUNNY)
             addFile(torrentDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
             addFile(torrentDir, LAUNDROMAT, R.raw.cosmos_laundromat)
+//            addFile(torrentDir, DEFAULT_POST_VIDEO, R.raw.sintel)
 //            if (!file.exists()) {
 //                val outputStream = FileOutputStream(file)
 //                val ins = requireActivity().resources.openRawResource(R.raw.detoks)
@@ -67,16 +71,19 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             // currently I only know how to add seedable torrents manually and one by one T_T
             // TODO: figure out how to add all seedable torrents all in one swoop and not one by one
             addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.sintel)
-            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.tears_of_steel)
+//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.tears_of_steel)
+//            addFile(seedableTorrentsDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
+//            addFile(seedableTorrentsDir, LAUNDROMAT, R.raw.cosmos_laundromat)
+//            deleteFile(seedableTorrentsDir, DEFAULT_POST_VIDEO)
+//            deleteFile(seedableTorrentsDir, LAUNDROMAT)
+//            deleteFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2)
+//            deleteFile(seedableTorrentsDir, BIGBUCKBUNNY)
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.chicken_20230326_archive)
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.file_20230326_archive)
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO3, R.raw.parrot_202303_archive)
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.cat)
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.blueparrot)
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO3,R.raw.arcane)
-            deleteFile(seedableTorrentsDir, "chicken_20230326_archive.torrent")
-            deleteFile(seedableTorrentsDir, "file_20230326_archive.torrent")
-            deleteFile(seedableTorrentsDir, "parrot_202303_archive.torrent")
         } catch (e: Exception) {
             Log.e("Detoks", "Failed to make a cache for seedable torrents")
         }
