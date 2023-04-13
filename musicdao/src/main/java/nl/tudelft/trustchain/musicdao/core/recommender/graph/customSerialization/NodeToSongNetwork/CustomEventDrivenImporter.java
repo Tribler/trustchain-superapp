@@ -81,9 +81,9 @@ import java.util.Arrays;
  */
 public class CustomEventDrivenImporter
     extends
-    BaseEventDrivenImporter<Triple<Integer, String, Float>, Quadruple<Integer, Integer, Double, Long>>
+    BaseEventDrivenImporter<Quadruple<Integer, String, Double, Boolean>, Quadruple<Integer, Integer, Double, Long>>
     implements
-    EventDrivenImporter<Triple<Integer, String, Float>, Quadruple<Integer, Integer, Double, Long>>
+    EventDrivenImporter<Quadruple<Integer, String, Double, Boolean>, Quadruple<Integer, Integer, Double, Long>>
 {
     /**
      * Construct a new importer
@@ -167,14 +167,14 @@ public class CustomEventDrivenImporter
                     throw new ImportException(
                         "Failed to parse node:" + e.getMessage(), e);
                 }
-                float pr;
+                double pr;
                 try {
-                    pr = Float.parseFloat(cols[3]);
+                    pr = Double.parseDouble(cols[3]);
                 } catch (NumberFormatException e) {
                     throw new ImportException(
                             "Failed to parse pr:" + e.getMessage(), e);
                 }
-                notifyVertex(Triple.of(nodeId, node, pr));
+                notifyVertex(Quadruple.of(nodeId, node, pr, false));
             } else if (cols[0].equals("s")) {
                 if (cols.length < 2) {
                     throw new ImportException("Failed to parse song:" + Arrays.toString(cols));
@@ -193,7 +193,14 @@ public class CustomEventDrivenImporter
                     throw new ImportException(
                         "Failed to parse song:" + e.getMessage(), e);
                 }
-                notifyVertex(Triple.of(songId, song, null));
+                double rs;
+                try {
+                    rs = Double.parseDouble(cols[3]);
+                } catch (NumberFormatException e) {
+                    throw new ImportException(
+                            "Failed to parse rs:" + e.getMessage(), e);
+                }
+                notifyVertex(Quadruple.of(songId, song, rs, true));
             }
             cols = skipComments(in);
         }

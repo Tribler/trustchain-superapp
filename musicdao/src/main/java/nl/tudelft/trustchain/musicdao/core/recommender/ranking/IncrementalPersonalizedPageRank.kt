@@ -8,12 +8,12 @@ import org.jgrapht.graph.SimpleDirectedWeightedGraph
 import java.util.*
 
 class IncrementalPersonalizedPageRank (
-    private val maxWalkLength: Int,
-    private val repetitions: Int,
-    private val rootNode: Node,
+    maxWalkLength: Int,
+    repetitions: Int,
+    rootNode: Node,
     resetProbability: Float,
     graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>
-) {
+): IncrementalRandomWalkedBasedRankingAlgo<SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, Node, NodeTrustEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}
     private val iter = CustomRandomWalkVertexIterator(graph, rootNode, maxWalkLength.toLong(), resetProbability, Random())
     private val randomWalks: MutableList<MutableList<Node>> = mutableListOf()
@@ -45,7 +45,7 @@ class IncrementalPersonalizedPageRank (
         return randomWalk
     }
 
-    fun initiateRandomWalks() {
+    override fun initiateRandomWalks() {
         for(walk in 0 until repetitions) {
             randomWalks.add(performNewRandomWalk())
         }
@@ -64,11 +64,11 @@ class IncrementalPersonalizedPageRank (
         }
     }
 
-    fun calculatePersonalizedPageRank() {
+    override fun calculateRankings() {
         val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it != rootNode }
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
-            node.personalisedPageRank = (occ.toDouble() / totalOccs)
+            node.setPersonalizedPageRankScore(occ.toDouble() / totalOccs)
         }
     }
 

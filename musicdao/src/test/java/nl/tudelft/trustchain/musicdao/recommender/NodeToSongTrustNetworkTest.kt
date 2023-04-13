@@ -13,8 +13,8 @@ class NodeToSongTrustNetworkTest {
     private val someNode = Node("someNode")
     private val randomNodeWithRandomPageRank = Node("randomNode", 0.3)
     private val anotherNode = Node("anotherNode")
-    private val someSongRecommendation = SongRecommendation("someTorrentHash")
-    private val anotherSongRecommendation = SongRecommendation("anotherTorrentHash")
+    private val someSongRecommendation = SongRecommendation("someTorrentHash", 0.5)
+    private val anotherSongRecommendation = SongRecommendation("anotherTorrentHash", 0.8)
     private val dummyValue = 0.5
     private val anotherDummyValue = 0.3
     private val yetAnotherDummyValue = 0.4
@@ -38,8 +38,8 @@ c
 p nodeToSong 4 3
 n 1 someNode 0.0
 n 2 randomNode 0.3
-s 3 someTorrentHash
-s 4 anotherTorrentHash
+s 3 someTorrentHash 0.5
+s 4 anotherTorrentHash 0.8
 e 1 3 0.5 1585451228000
 e 2 3 0.3 0
 e 1 4 0.4 1
@@ -119,8 +119,8 @@ e 1 4 0.4 1
             newNodeToSongNetwork.graph
         )
         Assert.assertEquals(
-            newNodeToSongNetwork.getAllNodes().filter { it.getNodeString() == randomNodeWithRandomPageRank.getNodeString() }.first().personalisedPageRank,
-            randomNodeWithRandomPageRank.personalisedPageRank,
+            newNodeToSongNetwork.getAllNodes().filter { it.getIpv8() == randomNodeWithRandomPageRank.getIpv8() }.first().getPersonalizedPageRankScore(),
+            randomNodeWithRandomPageRank.getPersonalizedPageRankScore(),
             0.001
         )
     }

@@ -113,10 +113,8 @@ public class CustomExporter
             out.print(getVertexId(vertex));
             out.print(" ");
             out.print(vertex.getIdentifier());
-            if(vertex instanceof Node) {
-                out.print(" ");
-                out.print(((Node) vertex).getPersonalisedPageRank());
-            }
+            out.print(" ");
+            out.print(vertex.getRankingScore());
             out.println();
         }
 

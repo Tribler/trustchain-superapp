@@ -144,7 +144,7 @@ public class CustomImporter
             this.map = new HashMap<>();
         }
 
-        public final Consumer<Triple<Integer, String, Float>> nodeConsumer = d -> {
+        public final Consumer<Triple<Integer, String, Double>> nodeConsumer = d -> {
             Node node = new Node(d.getSecond(), d.getThird());
             graph.addVertex(node);
             map.put(d.getFirst() - 1, node);

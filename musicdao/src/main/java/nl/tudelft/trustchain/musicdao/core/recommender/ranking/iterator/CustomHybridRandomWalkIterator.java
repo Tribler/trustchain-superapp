@@ -163,14 +163,14 @@ public class CustomHybridRandomWalkIterator<E>
         }
 
         E e = null;
-        double outEdgesWeight = getOutEdgesWeight((SongRecommendation) nextVertex) - lastNode.getPersonalisedPageRank();
+        double outEdgesWeight = getOutEdgesWeight((SongRecommendation) nextVertex) - lastNode.getPersonalizedPageRankScore();
         double p = outEdgesWeight * rng.nextDouble();
         double cumulativeP = 0d;
         Node oppositeNode = null;
         for (E curEdge : graph.outgoingEdgesOf(nextVertex)) {
             oppositeNode = (Node) Graphs.getOppositeVertex(graph, curEdge, nextVertex);
             if(oppositeNode != lastNode) {
-                cumulativeP += oppositeNode.getPersonalisedPageRank();
+                cumulativeP += oppositeNode.getPersonalizedPageRankScore();
                 if (p <= cumulativeP) {
                     e = curEdge;
                     break;
@@ -204,7 +204,7 @@ public class CustomHybridRandomWalkIterator<E>
 
     private Double returnPageRankOfNeighbour(E edge) {
         Node coerced = (Node) Graphs.getOppositeVertex(graph, edge, nextVertex);
-        return coerced.getPersonalisedPageRank();
+        return coerced.getPersonalizedPageRankScore();
     }
 
     @NotNull

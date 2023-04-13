@@ -77,9 +77,9 @@ import java.util.Arrays;
  */
 public class CustomEventDrivenImporter
     extends
-    BaseEventDrivenImporter<Triple<Integer, String, Float>, Quadruple<Integer, Integer, Double, Long>>
+    BaseEventDrivenImporter<Triple<Integer, String, Double>, Quadruple<Integer, Integer, Double, Long>>
     implements
-    EventDrivenImporter<Triple<Integer, String, Float>, Quadruple<Integer, Integer, Double, Long>>
+    EventDrivenImporter<Triple<Integer, String, Double>, Quadruple<Integer, Integer, Double, Long>>
 {
     /**
      * Construct a new importer
@@ -163,9 +163,9 @@ public class CustomEventDrivenImporter
                     throw new ImportException(
                         "Failed to parse edge target node:" + e.getMessage(), e);
                 }
-                float pr;
+                double pr;
                 try {
-                    pr = Float.parseFloat(cols[3]);
+                    pr = Double.parseDouble(cols[3]);
                 } catch (NumberFormatException e) {
                     throw new ImportException(
                         "Failed to parse pr:" + e.getMessage(), e);

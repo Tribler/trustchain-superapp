@@ -1,17 +1,27 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.model
 
-import kotlinx.serialization.Serializable
-@Serializable
-data class
-SongRecommendation(
-    val torrentHash: String
-):NodeOrSong(identifier = torrentHash) {
+class SongRecommendation(
+    torrentHash: String,
+    recommendationScore: Double
+):NodeOrSong(torrentHash, recommendationScore) {
+
+    fun getTorrentHash(): String {
+        return identifier
+    }
+
+    fun getRecommendationScore(): Double {
+        return rankingScore
+    }
+
+    fun setRecommendationScore(score: Double) {
+        rankingScore = score
+    }
 
     override fun hashCode(): Int {
-        return toString().hashCode()
+        return identifier.hashCode()
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is SongRecommendation && toString() == other.toString()
+        return other is SongRecommendation && identifier == other.identifier
     }
 }

@@ -144,9 +144,9 @@ public class CustomImporter
             this.map = new HashMap<>();
         }
 
-        public final Consumer<Triple<Integer, String, Float>> nodeConsumer = d -> {
-            if(d.getThird() == null) {
-                SongRecommendation song = new SongRecommendation(d.getSecond());
+        public final Consumer<Quadruple<Integer, String, Double, Boolean>> nodeConsumer = d -> {
+            if(d.getFourth()) {
+                SongRecommendation song = new SongRecommendation(d.getSecond(), d.getThird());
                 graph.addVertex(song);
                 map.put(d.getFirst() - 1, song);
                 notifyVertex(song);

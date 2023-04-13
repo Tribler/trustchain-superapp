@@ -1,29 +1,27 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.model
 
-import kotlinx.serialization.Serializable
-@Serializable
-data class Node(
-    val ipv8: String,
-    var personalisedPageRank: Double = 0.0
-):NodeOrSong(identifier = ipv8) {
+class Node(
+    ipv8: String,
+    personalisedPageRankScore: Double = 0.0
+):NodeOrSong(ipv8, personalisedPageRankScore) {
 
-    companion object {
-        val IPV8 = Node::ipv8.name
-        val PAGERANK = "pr"
+    fun getIpv8(): String {
+        return identifier
     }
 
-    fun getNodeString(): String {
-        return ipv8
+    fun getPersonalizedPageRankScore(): Double {
+        return rankingScore
     }
-    override fun toString(): String {
-        return ipv8
+
+    fun setPersonalizedPageRankScore(score: Double) {
+        rankingScore = score
     }
 
     override fun hashCode(): Int {
-        return toString().hashCode()
+        return identifier.hashCode()
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is Node && toString() == other.toString()
+        return other is Node && identifier == other.identifier
     }
 }

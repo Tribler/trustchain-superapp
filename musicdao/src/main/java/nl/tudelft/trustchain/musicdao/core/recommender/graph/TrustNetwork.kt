@@ -35,7 +35,7 @@ class TrustNetwork {
         nodeToSongNetwork = NodeToSongNetwork(serializedGraphs.nodeToSongNetwork)
         val allNodesList = nodeToNodeNetwork.getAllNodes()
         allNodes = allNodesList.toMutableList()
-        rootNode = allNodes.first { it.ipv8 == sourceNodeAddress}
+        rootNode = allNodes.first { it.getIpv8() == sourceNodeAddress}
         incrementalPersonalizedPageRank = IncrementalPersonalizedPageRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, nodeToNodeNetwork.graph)
     }
 
