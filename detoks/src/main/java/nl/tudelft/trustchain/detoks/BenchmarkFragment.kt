@@ -28,7 +28,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private lateinit var adapter: TokenAdapter
 
     private var totalTransactions = 1000
-    private var groupSize = 10
+    private var groupSize = 100
     private var tokensPerTransaction = 1
     private var tokenIDCounter = 0
 
@@ -42,38 +42,65 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
     suspend fun singleBenchmark(): Long {
 
-        val executionTime = measureTimeMillis {
-            var tokenList : ArrayList<Token>
-            do {
-                tokenList = transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
-                for (tok in tokenList){
-                    transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
-                }
-                updateList()
-                delay(10 * 1000L)
+        val startTime = System.nanoTime()
+        var tokenList : ArrayList<Token>
+        do {
+            tokenList = transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
+            for (tok in tokenList){
+                transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
+            }
+            val sendingTime = (System.nanoTime() - startTime) / 1000000
+            Log.d(
+                "BENCHMARK",
+                "Batch of groups has been sent. Execution time: ${sendingTime} s"
+            )
+            delay(30 * 1000L)
 
-            } while (tokenList.isNotEmpty())
-        }
+        } while (transactionEngine.tokenStore.getAllTokens().isNotEmpty())
 
-        return executionTime
+        val totalExecutionTime = (System.nanoTime() - startTime) / 1000000000
+        Log.d(
+            "BENCHMARK",
+            "All tokens sent. Total Execution time: ${totalExecutionTime} s"
+        )
+
+        return totalExecutionTime
     }
 
     suspend fun groupedBenchmark(): Long {
-        val executionTime = measureTimeMillis {
+        val startTime = System.nanoTime()
+        var tokenList: ArrayList<Token>
+        do {
+            tokenList = transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
+            Log.d("BENCHMARK", "Sending ${tokenList.size} tokens. List: ${tokenList}")
+            for (transactionGroup in transactionEngine.tokenStore.getAllTokens()
+                .chunked(groupSize)) {
+                transactionEngine.sendTokenGrouped(
+                    listOf(transactionGroup),
+                    transactionEngine.getSelectedPeer()
+                )
+            }
+            val sendingTime = (System.nanoTime() - startTime) / 1000000
+            Log.d(
+                "BENCHMARK",
+                "Batch of groups has been sent. Execution time: ${sendingTime} s"
+            )
 
-            var tokenList : ArrayList<Token>
-            do {
-                tokenList = transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
-                for (transactionGroup in transactionEngine.tokenStore.getAllTokens().chunked(groupSize)) {
-                    transactionEngine.sendTokenGrouped(listOf(transactionGroup), transactionEngine.getSelectedPeer())
-                }
-                updateList()
-                delay(10 * 1000L)
+            delay(30 * 1000000L)
+            Log.d(
+                "BENCHMARK",
+                "Remaining group ${transactionEngine.tokenStore.getAllTokens().size}. List: ${transactionEngine.tokenStore.getAllTokens()}"
+            )
 
-            } while (tokenList.isNotEmpty())
+        } while (transactionEngine.tokenStore.getAllTokens().isNotEmpty())
 
-        }
-        return executionTime
+        val totalExecutionTime = (System.nanoTime() - startTime) / 1000000000
+        Log.d(
+            "BENCHMARK",
+            "All tokens sent. Total Execution time: ${totalExecutionTime} s"
+        )
+
+        return totalExecutionTime
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
