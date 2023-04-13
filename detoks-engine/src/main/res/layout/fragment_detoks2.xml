@@ -18,12 +18,12 @@
             android:layout_width="match_parent"
             android:layout_height="1300px"/>
         <Button
-            android:text="Button"
+            android:text="Benchmark"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/button2"
+            android:layout_height="wrap_content" android:id="@+id/openbenchmark"
         />
         <Button
-            android:text="Send tokens"
+            android:text="Manage tokens"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:id="@+id/opentk"/>
         <TextView

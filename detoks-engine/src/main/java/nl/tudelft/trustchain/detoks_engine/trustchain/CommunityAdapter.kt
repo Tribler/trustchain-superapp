@@ -32,7 +32,7 @@ class CommunityAdapter(
     lateinit var recvTransactionHandler: ((transaction: Transaction) -> Unit)
     private var blockPointer = -1
     private var tokenInBlockPointer = -1
-    private var tokenCount = 0
+    public var tokenCount = 0
 
 
     private val bufferedTransactions = ConcurrentHashMap<Peer, ConcurrentLinkedQueue<String>>()
@@ -47,11 +47,13 @@ class CommunityAdapter(
 
         // Find last sent token
         var lastSentToken: String? = null
+        var blockSeqLastSentToken = 0u
         var block = trustChainCommunity.database.getLatest(myPublicKey, TOKEN_BLOCK_TYPE)
         while(block != null) {
             // Proposal with my public key is a sent token block
             if (block.isProposal && !block.isSelfSigned) {
                 lastSentToken = Transaction.fromTrustChainTransactionObject(block.transaction).tokens.last()
+                blockSeqLastSentToken = block.sequenceNumber
                 break
             }
             block = trustChainCommunity.database.getBlockBefore(block, TOKEN_BLOCK_TYPE)
@@ -65,7 +67,7 @@ class CommunityAdapter(
             if (block.isAgreement) {
                 blockPointer = block.sequenceNumber.toInt()
                 tokenInBlockPointer = 0
-                if (lastSentToken != null && Transaction.fromTrustChainTransactionObject(block.transaction).tokens.contains(lastSentToken)) {
+                if (lastSentToken != null && block.sequenceNumber < blockSeqLastSentToken && Transaction.fromTrustChainTransactionObject(block.transaction).tokens.contains(lastSentToken)) {
                     tokenInBlockPointer = Transaction.fromTrustChainTransactionObject(block.transaction).tokens.indexOf(lastSentToken)
                     tokenCount += Transaction.fromTrustChainTransactionObject(block.transaction).tokens.size - tokenInBlockPointer
                     popToken()

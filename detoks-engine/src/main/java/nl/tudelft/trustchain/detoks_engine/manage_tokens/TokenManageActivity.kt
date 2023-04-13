@@ -28,10 +28,6 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
     private var selectedPeerIndex: Int = RecyclerView.NO_POSITION
 
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-    }
-
     override fun onStart() {
         super.onStart()
         findViewById<Button>(R.id.refresh_button).setOnClickListener { _ -> refresh() }

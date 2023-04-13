@@ -14,6 +14,7 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.detoks_engine.db.TokenStore
+import nl.tudelft.trustchain.detoks_engine.manage_tokens.TokenBenchmarkActivity
 import nl.tudelft.trustchain.detoks_engine.manage_tokens.TokenManageActivity
 import java.io.File
 import java.io.FileOutputStream
@@ -74,9 +75,9 @@ class DeToksEngineFragment : BaseFragment(R.layout.fragment_detoks2) {
         viewPagerVideos.adapter = VideosAdapter(torrentManager)
         viewPagerVideos.currentItem = 0
 
-        val button = view.findViewById<Button>(R.id.button2)
+        val button = view.findViewById<Button>(R.id.openbenchmark)
         button.setOnClickListener {
-            startActivity(Intent(requireActivity(), TokenManageActivity::class.java))
+            startActivity(Intent(requireActivity(), TokenBenchmarkActivity::class.java))
         }
 
         val button2 = view.findViewById<Button>(R.id.opentk)
