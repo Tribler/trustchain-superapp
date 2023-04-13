@@ -76,6 +76,14 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     ) : Int = p0.second!!.hopCount compareTo p1.second!!.hopCount
 
     /**
+     * Returns the torrent handlers based on likes / hopcount ratio
+     */
+    private fun risingStrategy(
+        p0: Pair<TorrentHandler, ProfileEntry?>,
+        p1: Pair<TorrentHandler, ProfileEntry?>
+    ) : Int = (p0.second!!.likes / (p0.second!!.hopCount + 1)) compareTo (p1.second!!.likes / (p1.second!!.hopCount + 1))
+
+    /**
      * Applies the sorting function sent as parameter, to the handlers, based on the profiles.
      */
     internal fun applyStrategy(
