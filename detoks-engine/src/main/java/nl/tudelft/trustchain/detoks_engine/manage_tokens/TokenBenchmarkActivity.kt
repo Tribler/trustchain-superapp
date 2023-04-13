@@ -37,7 +37,7 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
         findViewById<Button>(R.id.gen_10000).setOnClickListener{ _ -> gen1000(10)}
 
         trustChainCommunity = IPv8Android.getInstance().getOverlay<TrustChainTransactionCommunity>()!!
-        communityAdapter = CommunityAdapter(trustChainCommunity)
+        communityAdapter = CommunityAdapter.getInstance(trustChainCommunity)
 
         peerData = ArrayList(communityAdapter.getPeers())
         val peerListView = findViewById<RecyclerView>(R.id.peer_list)
@@ -61,6 +61,8 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
                 tokenCounter.text = tokenCount.toString()
             }
         }
+        val myId = trustChainCommunity.myPeer.mid.substring(0, 5)
+        findViewById<TextView>(R.id.my_peer).text = "Peers (my id: ${myId}..)"
 
     }
 

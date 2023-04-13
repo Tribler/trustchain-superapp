@@ -18,7 +18,7 @@ import kotlin.math.min
  * Groups tokens by [Peer] in a buffer and sends them after [flushIntervalMillis]
  * When a [TrustChainBlock] is not received it retries [resendLimit] times with an interval of [resendTimeoutMillis]
  */
-class CommunityAdapter(
+class CommunityAdapter private constructor(
     private val trustChainCommunity: TrustChainCommunity,
     private val maxGroupBy: Int = 4,
     private val flushIntervalMillis: Long = 50,
@@ -29,8 +29,8 @@ class CommunityAdapter(
     val myPublicKey = trustChainHelper.getMyPublicKey()
     val logger = KotlinLogging.logger("TokenTransaction")
     private val scope = CoroutineScope(Dispatchers.IO)
-    lateinit var recvTransactionHandler: ((transaction: Transaction) -> Unit)
-    lateinit var recAgreementHandler: ((transaction: Transaction) -> Unit)
+    var recvTransactionHandler: ((transaction: Transaction) -> Unit) = {}
+    var recAgreementHandler: ((transaction: Transaction) -> Unit) = {}
     private var blockPointer = -1
     private var tokenInBlockPointer = -1
     public var tokenCount = 0
@@ -262,6 +262,25 @@ class CommunityAdapter(
 
     companion object {
         const val TOKEN_BLOCK_TYPE = "token_block"
+        private var instance: CommunityAdapter? = null
+        fun getInstance(
+        trustChainCommunity: TrustChainCommunity,
+        maxGroupBy: Int = 4,
+        flushIntervalMillis: Long = 50,
+        resendTimeoutMillis: Long = 1000,
+        resendLimit: Int = 0
+        ) : CommunityAdapter {
+            if (instance == null) {
+                instance = CommunityAdapter(
+                    trustChainCommunity,
+                    maxGroupBy,
+                    flushIntervalMillis,
+                    resendTimeoutMillis,
+                    resendLimit
+                )
+            }
+            return instance as CommunityAdapter
+        }
     }
 
     private fun <E> ConcurrentLinkedQueue<E>.pollN(n: Int): List<E> {
