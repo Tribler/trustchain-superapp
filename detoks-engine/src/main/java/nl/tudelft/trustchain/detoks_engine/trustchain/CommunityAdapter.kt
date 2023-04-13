@@ -30,6 +30,7 @@ class CommunityAdapter(
     val logger = KotlinLogging.logger("TokenTransaction")
     private val scope = CoroutineScope(Dispatchers.IO)
     lateinit var recvTransactionHandler: ((transaction: Transaction) -> Unit)
+    lateinit var recAgreementHandler: ((transaction: Transaction) -> Unit)
     private var blockPointer = -1
     private var tokenInBlockPointer = -1
     public var tokenCount = 0
@@ -103,6 +104,7 @@ class CommunityAdapter(
         // Other party accepted my proposal, agreement signed by other party
         else if (block.isAgreement && !block.publicKey.contentEquals(myPublicKey)) {
             transmittingBlocks.remove(block.linkedBlockId)?.cancel()
+            recAgreementHandler(Transaction.fromTrustChainTransactionObject(block.transaction))
         }
     }
 
@@ -219,6 +221,10 @@ class CommunityAdapter(
      */
     fun setReceiveTransactionHandler(handler: ((transaction: Transaction) -> Unit)) {
         recvTransactionHandler = handler
+    }
+
+    fun setReceiveAgreementHandler(handler: (transaction: Transaction) -> Unit) {
+        recAgreementHandler = handler
     }
 
     private fun agreeTransaction(proposal: TrustChainBlock) {

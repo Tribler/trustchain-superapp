@@ -54,6 +54,14 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
                 tokenCounter.text = tokenCount.toString()
             }
         }
+
+        communityAdapter.setReceiveAgreementHandler {
+            tokenCount = communityAdapter.tokenCount
+            runOnUiThread {
+                tokenCounter.text = tokenCount.toString()
+            }
+        }
+
     }
 
     private fun sendPerSecond() {
