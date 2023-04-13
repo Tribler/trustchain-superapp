@@ -4,11 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
+
 import nl.tudelft.trustchain.detoks.Token
 import nl.tudelft.trustchain.detoks.db.TokenStore
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -64,56 +65,56 @@ class TokenStoreTest {
 
         assertEquals(listOf(token1, token2), tokens)
     }
+
+
+    @Test
+    fun testRemoveTokenByID() {
+        val token1 = Token("123", byteArrayOf(1, 2, 3))
+        val token2 = Token("456", byteArrayOf(4, 5, 6))
+        store.addToken(token1.unique_id, token1.public_key.contentToString())
+        store.addToken(token2.unique_id, token2.public_key.contentToString())
+
+        store.removeTokenByID(token1.unique_id)
+        val tokens = store.getAllTokens()
+
+        assertEquals(listOf(token2), tokens)
+    }
+
+    @Test
+    fun testRemoveAllTokens() {
+        val token1 = Token("123", byteArrayOf(1, 2, 3))
+        val token2 = Token("456", byteArrayOf(4, 5, 6))
+        store.addToken(token1.unique_id, token1.public_key.contentToString())
+        store.addToken(token2.unique_id, token2.public_key.contentToString())
+
+        store.removeAllTokens()
+        val tokens = store.getAllTokens()
+
+        assertTrue(tokens.isEmpty())
+    }
+
+    @Test
+    fun testGetBalance() {
+        val token1 = Token("123", byteArrayOf(1, 2, 3))
+        val token2 = Token("456", byteArrayOf(4, 5, 6))
+        store.addToken(token1.unique_id, token1.public_key.contentToString())
+        store.addToken(token2.unique_id, token2.public_key.contentToString())
+
+        val balance = store.getBalance()
+
+        assertEquals(2, balance)
+    }
+
+    @Test
+    fun testGetSingleToken() {
+        val token1 = Token("123", byteArrayOf(1, 2, 3))
+        val token2 = Token("456", byteArrayOf(4, 5, 6))
+
+        store.addToken(token1.unique_id, token1.public_key.contentToString())
+        store.addToken(token2.unique_id, token2.public_key.contentToString())
+
+        val singleToken = store.getSingleToken()
+
+        assertTrue(singleToken == token1 || singleToken == token2)
+    }
 }
-//
-//    @Test
-//    fun testRemoveTokenByID() {
-//        val token1 = Token("123", byteArrayOf(1, 2, 3))
-//        val token2 = Token("456", byteArrayOf(4, 5, 6))
-//        store.addToken(token1.unique_id, token1.public_key.contentToString())
-//        store.addToken(token2.unique_id, token2.public_key.contentToString())
-//
-//        store.removeTokenByID(token1.unique_id)
-//        val tokens = store.getAllTokens()
-//
-//        assertEquals(listOf(token2), tokens)
-//    }
-//
-//    @Test
-//    fun testRemoveAllTokens() {
-//        val token1 = Token("123", byteArrayOf(1, 2, 3))
-//        val token2 = Token("456", byteArrayOf(4, 5, 6))
-//        store.addToken(token1.unique_id, token1.public_key.contentToString())
-//        store.addToken(token2.unique_id, token2.public_key.contentToString())
-//
-//        store.removeAllTokens()
-//        val tokens = store.getAllTokens()
-//
-//        assertTrue(tokens.isEmpty())
-//    }
-//
-//    @Test
-//    fun testGetBalance() {
-//        val token1 = Token("123", byteArrayOf(1, 2, 3))
-//        val token2 = Token("456", byteArrayOf(4, 5, 6))
-//        store.addToken(token1.unique_id, token1.public_key.contentToString())
-//        store.addToken(token2.unique_id, token2.public_key.contentToString())
-//
-//        val balance = store.getBalance()
-//
-//        assertEquals(2, balance)
-//    }
-//
-//    @Test
-//    fun testGetSingleToken() {
-//        val token1 = Token("123", byteArrayOf(1, 2, 3))
-//        val token2 = Token("456", byteArrayOf(4, 5, 6))
-//
-//        store.addToken(token1.unique_id, token1.public_key.contentToString())
-//        store.addToken(token2.unique_id, token2.public_key.contentToString())
-//
-//        val singleToken = store.getSingleToken()
-//
-//        assertTrue(singleToken == token1 || singleToken == token2)
-//    }
-//}
