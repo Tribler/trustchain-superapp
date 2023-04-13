@@ -33,7 +33,10 @@ class CommunityAdapter private constructor(
     var recAgreementHandler: ((transaction: Transaction) -> Unit) = {}
     private var blockPointer = -1
     private var tokenInBlockPointer = -1
-    public var tokenCount = 0
+    public var tokenCount = 0;
+
+    private var transactionsSend = 1;
+    private var transactionsThrough = 1;
 
 
     private val bufferedTransactions = ConcurrentHashMap<Peer, ConcurrentLinkedQueue<String>>()
@@ -82,7 +85,7 @@ class CommunityAdapter private constructor(
     }
 
     private fun handleBlock(block: TrustChainBlock) {
-        logger.debug("Block token received: ${block.transaction}, is proposal: ${block.isProposal}, is agreement: ${block.isAgreement}, PK til 8: ${block.publicKey.toString().substring(0, 8)}, is self signed ${block.isSelfSigned}")
+        logger.debug("Throughput: ${(transactionsThrough.toDouble() / transactionsSend) * 100} trough:${transactionsThrough} send:${transactionsSend} %, Block token received: ${block.transaction}, is proposal: ${block.isProposal}, is agreement: ${block.isAgreement}, PK til 8: ${block.publicKey.toString().substring(0, 8)}, is self signed ${block.isSelfSigned}")
 
         // A proposal block for me (so i receive tokens), action is to agree
         // When selfsigned its an injection, when not selfsigned and not my PK its sent by somebody else
@@ -103,6 +106,7 @@ class CommunityAdapter private constructor(
 
         // Other party accepted my proposal, agreement signed by other party
         else if (block.isAgreement && !block.publicKey.contentEquals(myPublicKey)) {
+            transactionsThrough++
             transmittingBlocks.remove(block.linkedBlockId)?.cancel()
             recAgreementHandler(Transaction.fromTrustChainTransactionObject(block.transaction))
         }
@@ -117,6 +121,7 @@ class CommunityAdapter private constructor(
             val nToSend = min(amount, tokenCount)
             val tokens = mutableListOf<String>()
             repeat(nToSend) {
+                transactionsSend ++;
                 tokens.add(popToken()!!)
             }
             proposeTransaction(Transaction(tokens), peer)
