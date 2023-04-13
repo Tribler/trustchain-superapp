@@ -11,15 +11,13 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks_engine.R
-import nl.tudelft.trustchain.detoks_engine.db.TokenStore
-import nl.tudelft.trustchain.detoks_engine.trustchain.GroupedAdapter
+import nl.tudelft.trustchain.detoks_engine.trustchain.CommunityAdapter
 import nl.tudelft.trustchain.detoks_engine.trustchain.TrustChainTransactionCommunity
 import java.util.UUID
 
 class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
-    private lateinit var tokenStore: TokenStore
     private lateinit var trustChainCommunity: TrustChainTransactionCommunity
-    private lateinit var communityAdapter: GroupedAdapter
+    private lateinit var communityAdapter: CommunityAdapter
 
     private lateinit var tokenData: ArrayList<String>
     private lateinit var peerData: ArrayList<Peer>
@@ -27,76 +25,51 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
     private lateinit var peerAdapter: ListAdapter<Peer>
     private val logger = KotlinLogging.logger {}
 
-    private val transactionsInTransit: MutableMap<String, Transaction> = mutableMapOf()
-
-    private var selectedTokenIndex: Int = RecyclerView.NO_POSITION
     private var selectedPeerIndex: Int = RecyclerView.NO_POSITION
 
-
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-    }
 
     override fun onStart() {
         super.onStart()
         findViewById<Button>(R.id.refresh_button).setOnClickListener { _ -> refresh() }
-        findViewById<Button>(R.id.send_button).setOnClickListener { _ -> send() }
+        findViewById<Button>(R.id.send_button).setOnClickListener { _ -> send(1) }
         findViewById<Button>(R.id.generate_button).setOnClickListener { _ -> generate() }
-        findViewById<Button>(R.id.delete_button).setOnClickListener{ _ -> delete() }
-        findViewById<Button>(R.id.delete_all_button).setOnClickListener{ _ -> deleteAll() }
+        findViewById<Button>(R.id.send2_button).setOnClickListener{ _ -> send(2) }
+        findViewById<Button>(R.id.send5_button).setOnClickListener{ _ -> send(5) }
 
 
-        tokenStore = TokenStore.getInstance(this)
         trustChainCommunity = IPv8Android.getInstance().getOverlay<TrustChainTransactionCommunity>()!!
-        communityAdapter = GroupedAdapter(trustChainCommunity)
+        communityAdapter = CommunityAdapter.getInstance(trustChainCommunity)
 
-        tokenData = ArrayList(tokenStore.getAllToken())
+
+        tokenData = ArrayList(communityAdapter.getTokens())
         peerData = ArrayList(communityAdapter.getPeers())
         val tokenListView = findViewById<RecyclerView>(R.id.token_list)
         val peerListView = findViewById<RecyclerView>(R.id.peer_list)
 
-        tokenAdapter = ListAdapter(tokenData, {t -> t}, ::onTokenClick)
+        tokenAdapter = ListAdapter(tokenData, {t -> t}, {_ -> onTokenClick()})
         peerAdapter = ListAdapter(peerData, { peer -> peer.mid }, ::onPeerClick)
         tokenListView.adapter = tokenAdapter
         peerListView.adapter = peerAdapter
 
 
-        communityAdapter.onTransactionAgreementReceived { transaction, isForMe ->
-            if (!isForMe)
-                return@onTransactionAgreementReceived
-            val transactionId = Transaction.fromTrustChainTransactionObject(transaction).transactionId
-            val succeededTransaction = transactionsInTransit[transactionId]
-            transactionsInTransit.remove(transactionId)
-            succeededTransaction?.tokens?.forEach { t ->
-                tokenStore.removeToken(t)
-                runOnUiThread{tokenAdapter.removeAt(tokenData.indexOf("... $t"))}
-            }
-        }
 
-        communityAdapter.onTransactionProposalReceived { transaction, isForMe ->
-            if (!isForMe)
-                return@onTransactionProposalReceived
-            Transaction.fromTrustChainTransactionObject(transaction).tokens.forEach { t ->
-                tokenStore.storeToken(t)
+        communityAdapter.setReceiveTransactionHandler {
+            transaction ->
+            transaction.tokens.forEach{ t ->
                 tokenData.add(t)
                 runOnUiThread{ tokenAdapter.notifyItemInserted(tokenData.size - 1) }
             }
         }
 
-//        transactionCommunity.setHandler {
-//                msg: String ->
-//            tokenStore.storeToken(msg)
-//            tokenData.add(msg)
-//            runOnUiThread{ tokenAdapter.notifyItemInserted(tokenData.size - 1) }
-//        }
 
         val myId = trustChainCommunity.myPeer.mid.substring(0, 5)
         findViewById<TextView>(R.id.my_peer).text = "Peers (my id: ${myId}..)"
 
     }
 
-    fun onTokenClick(index: Int) {
-        selectedTokenIndex = index
+    fun onTokenClick() {
+        val toast = Toast.makeText(this, "sending specific tokens is not supported", Toast.LENGTH_SHORT)
+        toast.show()
     }
 
     fun onPeerClick(index: Int) {
@@ -105,7 +78,7 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
 
     fun refresh() {
         tokenData.clear()
-        tokenData.addAll(tokenStore.getAllToken())
+        tokenData.addAll(communityAdapter.getTokens())
         peerData.clear()
         peerData.addAll(communityAdapter.getPeers())
         tokenAdapter.notifyDataSetChanged()
@@ -114,53 +87,20 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
 
     fun generate() {
         val newToken: String = UUID.randomUUID().toString().substring(0, 4)
-        tokenStore.storeToken(newToken)
-        tokenData.add(newToken)
-        tokenAdapter.notifyItemInserted(tokenData.size - 1)
+        communityAdapter.injectTokens(listOf(newToken))
     }
 
-    fun delete() {
-        val tokenIndex = selectedTokenIndex
-        if (tokenIndex == -1) {
-            val toast = Toast.makeText(this, "Select a token to delete", Toast.LENGTH_SHORT)
-            toast.show()
-            return
-        }
-
-        val token = tokenData[tokenIndex]
-        tokenStore.removeToken(token)
-        selectedTokenIndex = RecyclerView.NO_POSITION
-        tokenAdapter.removeAt(tokenIndex)
-    }
-
-    fun deleteAll() {
-        for (token in tokenData) {
-            tokenStore.removeToken(token)
-        }
-        tokenAdapter.removeAll()
-    }
-
-    fun send() {
-        val tokenIndex = selectedTokenIndex
-        if (tokenIndex == -1) {
-            val toast = Toast.makeText(this, "Select a token to send", Toast.LENGTH_SHORT)
-            toast.show()
-            return
-        }
-
+    fun send(nTokens: Int) {
         if (selectedPeerIndex == -1) {
             val toast = Toast.makeText(this, "Select a peer to send to", Toast.LENGTH_SHORT)
             toast.show()
             return
         }
 
-        val token = tokenData[tokenIndex]
-        tokenData[tokenIndex] = "... $token"
-        tokenAdapter.notifyItemChanged(tokenIndex)
-        val transaction = Transaction(listOf(token))
-        transactionsInTransit[transaction.transactionId] = transaction
-        communityAdapter.proposeTransaction(transaction.toTrustChainTransaction(), peerData[selectedPeerIndex])
-        selectedTokenIndex = RecyclerView.NO_POSITION
+        repeat(nTokens) {
+            tokenAdapter.removeAt(0)
+        }
+        communityAdapter.sendTokens(nTokens, peerData[selectedPeerIndex])
     }
 
 }
