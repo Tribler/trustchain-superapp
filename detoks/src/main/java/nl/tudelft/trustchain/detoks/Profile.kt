@@ -1,8 +1,8 @@
 package nl.tudelft.trustchain.detoks
 
-import android.content.Context
 import com.frostwire.jlibtorrent.TorrentInfo
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
+import java.lang.Long.min
 
 
 class ProfileEntry(
@@ -14,13 +14,12 @@ class ProfileEntry(
     var hopCount:   Int  = 0,           // Amount of other nodes visited
     var timesSeen:  Int  = 1,           // Count of times we received it
     var likes:      Int  = 0,           // TODO: Dependent on other team
-) {
-
-}
+)
 
 class Profile(
     val profiles: HashMap<String, ProfileEntry> = HashMap()
 ) {
+    object ProfileConfig { const val MAX_DURATION_FACTOR  = 10 }
 
     fun addProfile(key: String) {
         if(!profiles.contains(key)) profiles[key] = ProfileEntry()
@@ -42,10 +41,10 @@ class Profile(
 
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
         addProfile(key)
-
         if(myUpdate) {
+            val newTime = min(time, profiles[key]!!.duration  * ProfileConfig.MAX_DURATION_FACTOR)
+            profiles[key]!!.watchTime += (newTime / NetworkSizeGossiper.networkSizeEstimate)
             profiles[key]!!.watched = true
-            profiles[key]!!.watchTime += (time / NetworkSizeGossiper.networkSizeEstimate)
         } else {
             profiles[key]!!.watchTime += time
             profiles[key]!!.watchTime /= 2
@@ -55,11 +54,6 @@ class Profile(
     fun updateEntryUploadDate(key: String, info: TorrentInfo) {
         addProfile(key)
         profiles[key]!!.uploadDate = info.creationDate()
-    }
-
-    fun incrementHopCount(key: String) {
-        addProfile(key)
-        profiles[key]!!.hopCount += 1
     }
 
     fun incrementTimesSeen(key: String) {
