@@ -39,10 +39,12 @@ class Profile(
         val entry = if(profiles.containsKey(key)) profiles[key] else ProfileEntry(firstSeen = 0L, timesSeen = 0)
         entry!!.duration = max(entry.duration, otherEntry.duration)     // Pick the non-zero value
         entry.uploadDate = max(entry.uploadDate, otherEntry.uploadDate) // Pick the non-zero value
+
+        // If we only gossiped this value, take the max, if we have the torrent, take most recent
         if(entry.firstSeen == 0L) entry.likes = max(entry.likes , otherEntry.likes)
         else entry.likes = if(otherEntry.firstSeen < entry.firstSeen) otherEntry.likes else entry.likes
 
-        profiles[key] = entry
+        profiles[key] = entry // Update the profile entry and watch time
         updateEntryWatchTime(key, otherEntry.watchTime, false)
     }
 
