@@ -35,12 +35,14 @@ class CommunityAdapter private constructor(
     private var tokenInBlockPointer = -1
     public var tokenCount = 0;
 
-    private var transactionsSend = 1;
-    private var transactionsBack = 1;
-    public var packetsLost = 100.00;
+    private var transactionsSend = 1
+    private var transactionsBack = 1
+    public var packetsLost = 100.00
 
-    private var lastAgreementBlockReceived = System.currentTimeMillis();
-    public var throughput : Long = 1000;
+    private var lastAgreementBlockReceived = System.currentTimeMillis()
+    public var throughput : Long = 1000
+
+    public var latency : Long = 0
 
 
     private val bufferedTransactions = ConcurrentHashMap<Peer, ConcurrentLinkedQueue<String>>()
@@ -90,7 +92,7 @@ class CommunityAdapter private constructor(
 
     private fun handleBlock(block: TrustChainBlock) {
         packetsLost = 100*(transactionsBack.toDouble()/transactionsSend)
-        logger.debug("lost: ${100*(transactionsBack.toDouble()/transactionsSend)} trough:${transactionsBack} send:${transactionsSend} %, Block token received: ${block.transaction}, is proposal: ${block.isProposal}, is agreement: ${block.isAgreement}, PK til 8: ${block.publicKey.toString().substring(0, 8)}, is self signed ${block.isSelfSigned}")
+        logger.debug("latency: ${latency}, lost: ${100*(transactionsBack.toDouble()/transactionsSend)} trough:${transactionsBack} send:${transactionsSend} %, Block token received: ${block.transaction}, is proposal: ${block.isProposal}, is agreement: ${block.isAgreement}, PK til 8: ${block.publicKey.toString().substring(0, 8)}, is self signed ${block.isSelfSigned}")
 
         // A proposal block for me (so i receive tokens), action is to agree
         // When selfsigned its an injection, when not selfsigned and not my PK its sent by somebody else
@@ -113,7 +115,11 @@ class CommunityAdapter private constructor(
         else if (block.isAgreement && !block.publicKey.contentEquals(myPublicKey)) {
             transactionsBack++
             throughput = System.currentTimeMillis()-lastAgreementBlockReceived
+//            numOfTokens = Transaction.fromTrustChainTransactionObject(block.transaction).tokens.size
             lastAgreementBlockReceived = System.currentTimeMillis()
+            latency = System.currentTimeMillis() - Transaction.fromTrustChainTransactionObject(block.transaction).createdAt
+
+
             transmittingBlocks.remove(block.linkedBlockId)?.cancel()
             recAgreementHandler(Transaction.fromTrustChainTransactionObject(block.transaction))
         }

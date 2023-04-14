@@ -42,6 +42,14 @@
             android:text="throughput=1000packets/s"
             android:textSize="32dp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/latency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="latency=0ms"
+            android:textSize="32dp"
+            android:textStyle="bold" />
     </LinearLayout>
     <View
         android:layout_width="fill_parent"

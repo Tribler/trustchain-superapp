@@ -31,6 +31,7 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
     private var tokenCount: Int = 0
     private var packetsLost: Double = 100.00
     private var throughput: Long = 1000
+    private var latency: Long = 0
 
     override fun onStart() {
         super.onStart()
@@ -52,13 +53,17 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
         tokenCount = communityAdapter.tokenCount
         tokenCounter.text = tokenCount.toString()
 
-        val packetslostCounter = findViewById<TextView>(R.id.packetslost)
-        packetsLost = communityAdapter.packetsLost
-        packetslostCounter.text = "packets received: ${packetsLost.roundToInt()}%"
+//        val packetslostCounter = findViewById<TextView>(R.id.packetslost)
+//        packetsLost = communityAdapter.packetsLost
+//        packetslostCounter.text = "packets received: ${packetsLost.roundToInt()}%"
+//
+//        val throughputCounter = findViewById<TextView>(R.id.throughput)
+//        throughput = communityAdapter.throughput
+//        throughputCounter.text = "${(1000/throughput).toInt()} packets/second"
 
-        val throughputCounter = findViewById<TextView>(R.id.throughput)
-        throughput = communityAdapter.throughput
-        throughputCounter.text = "${(1000/throughput).toInt()} packets/second"
+        val latencyCounter = findViewById<TextView>(R.id.latency)
+        latency = communityAdapter.latency
+        latencyCounter.text = "Latency: ${latency}ms"
 
 
         communityAdapter.setReceiveTransactionHandler {
@@ -72,10 +77,12 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
             tokenCount = communityAdapter.tokenCount
             packetsLost = communityAdapter.packetsLost
             throughput = communityAdapter.throughput
+            latency = communityAdapter.latency
             runOnUiThread {
                 tokenCounter.text = tokenCount.toString()
-                packetslostCounter.text = "packets received: ${packetsLost.roundToInt()}%"
-                throughputCounter.text = "${(1000/throughput).toInt()} packets/second"
+//                packetslostCounter.text = "packets received: ${packetsLost.roundToInt()}%"
+//                throughputCounter.text = "${(1000/throughput).toInt()} packets/second"
+                latencyCounter.text = "Latency: ${latency}ms"
             }
         }
         val myId = trustChainCommunity.myPeer.mid.substring(0, 5)
