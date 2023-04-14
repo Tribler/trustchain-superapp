@@ -28,7 +28,7 @@ The [WatchTimeGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossi
 
 In order to be able to work with recommendations, DeToks keeps track of a profile of each torrent. Useful metadata is stored in these profiles that help the other parts of DeToks with choosing which torrents to seed leech and recommend to the user. This section describes stored parameters in the profile.
 
-####
+#### TODO: add profiles
 
 ## Leeching Strategies
 
