@@ -57,6 +57,14 @@ class ProposalToken {
         torrentManager: TorrentManager
     ) {
         proposalSendButton.setOnClickListener {
+            if (torrentManager.getSeedableTorrents().isEmpty()) {
+                Toast.makeText(
+                    itemView.context,
+                    "No more videos for you to post",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
             val torrentInfo = torrentManager.getSeedableTorrents().get(0)
             val magnetURI = torrentManager.seedTorrent(torrentInfo)
             if (magnetURI == null) {
