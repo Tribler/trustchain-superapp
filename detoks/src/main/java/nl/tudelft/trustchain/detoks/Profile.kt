@@ -24,7 +24,7 @@ class Profile(
     object ProfileConfig { const val MAX_DURATION_FACTOR  = 10 }
 
     fun addProfile(key: String) {
-        if(!profiles.contains(key)) incrementTimesSeen(key) // Also creates the profile
+        if(!profiles.contains(key)) ProfileEntry(timesSeen = 1)
     }
 
     fun hasWatched(key: String): Boolean {
@@ -32,11 +32,10 @@ class Profile(
     }
 
     fun mergeWith(key: String, otherEntry: ProfileEntry) {
-        val entry = if(profiles.containsKey(key)) profiles[key] else ProfileEntry(timesSeen = 0)
-        entry!!.duration = max(entry.duration, otherEntry.duration)     // Pick the non-zero value
-        entry.uploadDate = max(entry.uploadDate, otherEntry.uploadDate) // Pick the non-zero value
+        if(!profiles.containsKey(key)) profiles[key] = ProfileEntry()
+        profiles[key]!!.duration = max(profiles[key]!!.duration, otherEntry.duration)
+        profiles[key]!!.uploadDate = max(profiles[key]!!.uploadDate, otherEntry.uploadDate)
 
-        profiles[key] = entry
         updateEntryWatchTime(key, otherEntry.watchTime, false)
         updateEntryLikes(key, otherEntry.likes, false)
     }
@@ -54,10 +53,10 @@ class Profile(
     fun updateEntryLikes(key: String, likes: Int, myUpdate: Boolean) {
         addProfile(key)
         if(myUpdate) {
-            profiles[key]!!.watchTime += (likes / NetworkSizeGossiper.networkSizeEstimate)
+            profiles[key]!!.likes += (likes / NetworkSizeGossiper.networkSizeEstimate)
         } else {
-            profiles[key]!!.watchTime += likes
-            profiles[key]!!.watchTime /= 2
+            profiles[key]!!.likes += likes
+            profiles[key]!!.likes /= 2
         }
     }
 
