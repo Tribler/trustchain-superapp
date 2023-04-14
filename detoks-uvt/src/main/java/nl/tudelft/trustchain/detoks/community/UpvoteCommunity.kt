@@ -303,7 +303,7 @@ class UpvoteCommunity(
         }
         send(myPeer, packet)
         Log.i("Detoks", "Sending this magnetLink to self :$magnetURI")
-        onMagnetURI(myPeer, payload)
+//        onMagnetURI(myPeer, payload)
         return true
     }
 

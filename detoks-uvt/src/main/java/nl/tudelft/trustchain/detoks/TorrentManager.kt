@@ -73,7 +73,7 @@ class TorrentManager(
 
         val recommendedVideo: List<String>? = Recommender.getNextRecommendation()
         if (recommendedVideo != null && recommendedVideo.size == 4) {
-            Log.i("DeToks", "Now adding this recommended video ID: $recommendedVideo to peers video deed")
+            Log.i("DeToks", "Now adding this recommended video ID: $recommendedVideo to peers video feed")
             addTorrent(recommendedVideo[0], recommendedVideo[1], recommendedVideo[2], recommendedVideo[3])
         } else {
             Log.i("DeToks", "Could not get recommended video")
@@ -104,8 +104,6 @@ class TorrentManager(
             }
             mvpSeeder(content)
             content.asMediaInfo()
-            //TODO Add a method here for finding out who which peer provided the most bytes for this video
-            // input: val content, an object of the type TorrentHandler
         } catch (e: TimeoutCancellationException) {
             Log.i("DeToks", "Timeout for content ... $index")
             Log.i("DeToks", "Timeout for content ... ${content.asMediaInfo().fileName}")

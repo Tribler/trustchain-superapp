@@ -74,6 +74,10 @@ class Recommender {
             if (recommendations.size > 0) {
                 val recommendedVideoID = recommendations.first()
                 recommendations.remove(recommendedVideoID)
+                if (!recommendedVideoID.contains(".")){
+                    // Dirty way of not using old stale video IDs
+                    return null
+                }
                 val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
                 val pubkey = recommendedVideoID.substringBefore(".")
                 val sequenceNumber = recommendedVideoID.substringAfter(".").toLong()
@@ -116,12 +120,15 @@ class Recommender {
                 if (prob <= peersWeight) {
                     if (peerRecommendations.size > 0)
                         newVideoID = peerRecommendations.removeFirst()
+                    Log.i("Detoks", "adding videoID from peerRecommendations: $newVideoID")
                 } else if (prob <= peersWeight + mostLikedWeight) {
                     if (mostLikedRecommendations.size > 0)
                         newVideoID = mostLikedRecommendations.removeFirst()
+                    Log.i("Detoks", "adding videoID from peerRecommendations: $newVideoID")
                 } else {
                     if (randomRecommendations.size > 0)
                         newVideoID = randomRecommendations.removeFirst()
+                    Log.i("Detoks", "adding videoID from randomRecommendations: $newVideoID")
                 }
                 if (newVideoID != null) {
                     recommendations.add(newVideoID)

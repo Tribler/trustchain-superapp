@@ -62,9 +62,6 @@ class Balance {
             if (block.isAgreement && block.publicKey.toHex().contentEquals(IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex())) {
                 sent++
             }
-            else {
-                Log.i("DeToks", "Other type of block found: ${block.blockId}")
-            }
         }
         Log.i("DeToks", "Tokens sent: $sent received: $received")
         tokensSent.text = "$sent"
