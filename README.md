@@ -32,12 +32,14 @@ Sprint highlights discussed in this Tribler issue: https://github.com/Tribler/tr
 DeToks downloads videos, in the form of torrents, of content creators in the background and will display them to the end-user.
 
 #### Show gif of the video loading in the app
-
-The user can then double tap the screen in order to upvote the video and send an ``UpvoteToken`` to the content creator. 
-
 #### Show gif of the upvoting with the toast messages
 #### Show gif and explanation of the recommendation with toast messages
 #### Show gif and explanation of the proposal blocks and explanation of the use of trustchain
+
+#### TODO: Small example on how to initialize the code in the project structure.
+#### TODO: Main methods that we call from our logic. For example, call METHOD to initialize the recommender from this PACKAGE.
+
+The user can then double tap the screen in order to upvote the video and send an ``UpvoteToken`` to the content creator. 
 
 Double spending mitigation: Explain the double spending mitigation in short, by explaining our token design and choices. 
 
