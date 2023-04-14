@@ -2,7 +2,7 @@ package nl.tudelft.trustchain.musicdao.core.recommender.model
 
 class SongRecommendation(
     torrentHash: String,
-    recommendationScore: Double
+    recommendationScore: Double = 0.0
 ):NodeOrSong(torrentHash, recommendationScore) {
 
     fun getTorrentHash(): String {

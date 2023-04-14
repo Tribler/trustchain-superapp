@@ -17,6 +17,8 @@ class IncrementalPersonalizedPageRankTest {
     private val rng = Random(seed)
     private val nNodes = 5000
     private val nEdges = 10
+    private val repetitions = 10000
+    private val maxWalkLength = 10000
 
     @Before
     fun setUp() {
@@ -37,8 +39,7 @@ class IncrementalPersonalizedPageRankTest {
 
     @Test
     fun canCaclulatePersonalizedPageRank() {
-        incrementalPageRank = IncrementalPersonalizedPageRank( 1000, 10000, rootNode, 0.01f, network.graph)
-        incrementalPageRank.initiateRandomWalks()
+        incrementalPageRank = IncrementalPersonalizedPageRank( maxWalkLength, repetitions, rootNode, 0.01f, network.graph)
         incrementalPageRank.calculateRankings()
         Assert.assertEquals(0.0, rootNode.getPersonalizedPageRankScore(), 0.001)
         val rootNeighbors = network.getAllNodeToNodeNetworkEdges().filter { network.graph.getEdgeSource(it) == rootNode }.map { network.graph.getEdgeTarget(it) }
@@ -48,9 +49,44 @@ class IncrementalPersonalizedPageRankTest {
     }
 
     @Test
+    fun storesRandomWalks() {
+        incrementalPageRank = IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.01f, network.graph)
+        val randomWalks = incrementalPageRank.randomWalks
+        Assert.assertEquals(randomWalks.size, repetitions)
+    }
+
+    @Test
+    fun decreasingResetProbabilityProportionatelyDecreasesChanceOfResetInRandomWalks() {
+        incrementalPageRank = IncrementalPersonalizedPageRank( maxWalkLength, repetitions, rootNode, 0.01f, network.graph)
+        val randomWalksWithHighResetProbability = incrementalPageRank.randomWalks
+        val nRandomWalksWithHighResetProbability = randomWalksWithHighResetProbability.flatten().count()
+        incrementalPageRank = IncrementalPersonalizedPageRank( maxWalkLength, repetitions, rootNode, 0.001f, network.graph)
+        val randomWalksWithLowerResetProbability = incrementalPageRank.randomWalks
+        val nRandomWalksWithLowerResetProbability = randomWalksWithLowerResetProbability.flatten().count()
+        //The Reset Probability decreases by 10, so increase in random walk sizes should lie somewhere between 9 and 11 times
+        Assert.assertTrue(nRandomWalksWithHighResetProbability * 9 < nRandomWalksWithLowerResetProbability)
+        Assert.assertTrue(nRandomWalksWithHighResetProbability * 11 > nRandomWalksWithLowerResetProbability)
+    }
+
+    @Test
+    fun onlyJumpsToNeighborsInRandomWalks() {
+        incrementalPageRank = IncrementalPersonalizedPageRank( maxWalkLength, repetitions, rootNode, 0.01f, network.graph)
+        val randomWalk = incrementalPageRank.randomWalks
+        val randomIndex = rng.nextInt(0, randomWalk.size - 1)
+        val randomlySelectedWalk = randomWalk.get(randomIndex)
+        Assert.assertEquals(rootNode, randomlySelectedWalk[0])
+        var lastNode = rootNode
+        for(i in 1 until randomlySelectedWalk.size) {
+            val neighborEdges = network.getAllNodeToNodeNetworkEdges().filter { network.graph.getEdgeSource(it) == lastNode }
+            val neighborsOfLastNode = neighborEdges.map { network.graph.getEdgeTarget(it) }
+            Assert.assertTrue(neighborsOfLastNode.contains(randomlySelectedWalk[i]))
+            lastNode = randomlySelectedWalk[i]
+        }
+    }
+
+    @Test
     fun canIncorporateModifiedEdgesAndRecalculatePageRankAccordingly() {
-        incrementalPageRank = IncrementalPersonalizedPageRank( 1000, 10000, rootNode, 0.01f, network.graph)
-        incrementalPageRank.initiateRandomWalks()
+        incrementalPageRank = IncrementalPersonalizedPageRank( maxWalkLength, repetitions, rootNode, 0.01f, network.graph)
         incrementalPageRank.calculateRankings()
         val rootNeighborEdges = network.getAllNodeToNodeNetworkEdges().filter { network.graph.getEdgeSource(it) == rootNode }
         val rootNeighbors = rootNeighborEdges.map { network.graph.getEdgeTarget(it) }

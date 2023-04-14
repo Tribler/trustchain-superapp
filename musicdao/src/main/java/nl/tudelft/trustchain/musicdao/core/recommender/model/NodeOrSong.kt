@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.model
 
-open class
-NodeOrSong(
+abstract class NodeOrSong(
     val identifier: String,
     var rankingScore: Double
 ) {

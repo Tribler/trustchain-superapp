@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.ranking
 
+import androidx.annotation.VisibleForTesting
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge
@@ -16,7 +17,7 @@ class IncrementalPersonalizedPageRank (
 ): IncrementalRandomWalkedBasedRankingAlgo<SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, Node, NodeTrustEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}
     private val iter = CustomRandomWalkVertexIterator(graph, rootNode, maxWalkLength.toLong(), resetProbability, Random())
-    private val randomWalks: MutableList<MutableList<Node>> = mutableListOf()
+    lateinit var randomWalks: MutableList<MutableList<Node>>
 
     init {
         initiateRandomWalks()
@@ -46,6 +47,7 @@ class IncrementalPersonalizedPageRank (
     }
 
     override fun initiateRandomWalks() {
+        randomWalks = mutableListOf()
         for(walk in 0 until repetitions) {
             randomWalks.add(performNewRandomWalk())
         }
