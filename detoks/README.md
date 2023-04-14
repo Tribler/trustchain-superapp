@@ -38,6 +38,8 @@ In order to be able to work with recommendations, DeToks keeps track of a profil
 
 DeToks allows the user to choose between multiple seeding strategies. This section explains the different strategies available.
 
+The seeding strategies are defined in [Strategy.kt](./src/main/java/nl/tudelft/trustchain/detoks/Strategy.kt)
+
 #### `STRATEGY_RANDOM`
 
 The random strategy simply chooses torrents to seed at random.
