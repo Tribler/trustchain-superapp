@@ -70,13 +70,7 @@ class UpvoteToken constructor(
 
     /**
      * Sends a UpvoteToken to a random user and displays the result in a toast message
-     * TODO: change this function so that:
-     * - it gets the hash or proposal block of the video that is currently displayed on the
-     * scree
-     * - checks if this peer/user already liked or already created a proposal block for the
-     * proposal block of this video -> if already liked once => show message to user / cannot like again
-     * - if not then create an agreement block for this video
-     */
+     * */
     fun sendUpvoteToken(itemView: View, videoID: String) {
 
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
@@ -94,12 +88,7 @@ class UpvoteToken constructor(
             ?.toHex()
 
         val myPubKey = upvoteCommunity.myPeer.publicKey.keyToBin().toHex()
-        //val upvoteToken = UpvoteToken(1, "1679006615", "12345678910", 1)
-        //val toastMessage = upvoteCommunity?.sendUpvoteToken(upvoteToken.tokenID.toString(), localToGMT(upvoteToken.date.toLong()).toString(), upvoteToken.publicKeyMinter, upvoteToken.videoID.toString())
 
-        // check if already liked by self
-        // getBlockWithHash Method below might fail to get the proposal block if it is not in this peer's truststore
-//        upvoteCommunity?.torrentManager?.getHashOfCurrentVideo()!!.hexToBytes()
         val currentVideoHash = upvoteCommunity.torrentManager?.getHashOfCurrentVideo()!!.hexToBytes()
         val proposalBlock = upvoteCommunity.database.getBlockWithHash(currentVideoHash)
         if (proposalBlock != null) {
@@ -156,7 +145,7 @@ class UpvoteToken constructor(
                     tokenIDList.add(nextToken.tokenID)
                 }
                 //FIXME fix upvoteCommunity.sendUpvoteToken(upvoteTokenList) => it currently sends the token to a random peer which is wrong!!!
-                val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList)
+                val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList, proposalBlock.publicKey)
                 toastMessage = if (sendSuccess) {
                     "Successfully sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
                 } else {

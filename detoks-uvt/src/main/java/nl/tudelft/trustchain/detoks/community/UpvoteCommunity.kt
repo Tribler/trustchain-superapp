@@ -308,18 +308,17 @@ class UpvoteCommunity(
     }
 
     /**
-     * When a message is sent, a proposal block is created
-     * //TODO: only make an agreement block if the user did not like the video yet, if the user already like the video,
-     * Sends an UpvoteToken to a random Peer
+     * Send tokens to the peer that posted the video that the user upvoted by double tapping
      */
-    fun sendUpvoteToken(upvoteTokens: List<UpvoteToken>): Boolean {
+    fun sendUpvoteToken(upvoteTokens: List<UpvoteToken>, receiverPublicKey: ByteArray): Boolean {
         val payload = UpvoteVideoPayload(upvoteTokens)
         val packet = serializePacket(
             MessageID.UPVOTE_VIDEO,
             payload
         )
 
-        val peer = pickRandomPeer()
+        val peers = getPeers()
+        val peer = peers.firstOrNull { it.publicKey.keyToBin().contentEquals(receiverPublicKey) }
 
         if (peer != null) {
             val message = "[DETOKS] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
