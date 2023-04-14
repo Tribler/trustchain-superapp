@@ -42,7 +42,7 @@ class IncrementalPersonalizedPageRankTest {
         incrementalPageRank = IncrementalPersonalizedPageRank( maxWalkLength, repetitions, rootNode, 0.01f, network.graph)
         incrementalPageRank.calculateRankings()
         Assert.assertEquals(0.0, rootNode.getPersonalizedPageRankScore(), 0.001)
-        val rootNeighbors = network.getAllNodeToNodeNetworkEdges().filter { network.graph.getEdgeSource(it) == rootNode }.map { network.graph.getEdgeTarget(it) }
+        val rootNeighbors = network.getAllEdges().filter { network.graph.getEdgeSource(it) == rootNode }.map { network.graph.getEdgeTarget(it) }
         for(neighbour in rootNeighbors) {
             Assert.assertTrue(neighbour.getPersonalizedPageRankScore() > 0.0)
         }
@@ -77,7 +77,7 @@ class IncrementalPersonalizedPageRankTest {
         Assert.assertEquals(rootNode, randomlySelectedWalk[0])
         var lastNode = rootNode
         for(i in 1 until randomlySelectedWalk.size) {
-            val neighborEdges = network.getAllNodeToNodeNetworkEdges().filter { network.graph.getEdgeSource(it) == lastNode }
+            val neighborEdges = network.getAllEdges().filter { network.graph.getEdgeSource(it) == lastNode }
             val neighborsOfLastNode = neighborEdges.map { network.graph.getEdgeTarget(it) }
             Assert.assertTrue(neighborsOfLastNode.contains(randomlySelectedWalk[i]))
             lastNode = randomlySelectedWalk[i]
@@ -88,7 +88,7 @@ class IncrementalPersonalizedPageRankTest {
     fun canIncorporateModifiedEdgesAndRecalculatePageRankAccordingly() {
         incrementalPageRank = IncrementalPersonalizedPageRank( maxWalkLength, repetitions, rootNode, 0.01f, network.graph)
         incrementalPageRank.calculateRankings()
-        val rootNeighborEdges = network.getAllNodeToNodeNetworkEdges().filter { network.graph.getEdgeSource(it) == rootNode }
+        val rootNeighborEdges = network.getAllEdges().filter { network.graph.getEdgeSource(it) == rootNode }
         val rootNeighbors = rootNeighborEdges.map { network.graph.getEdgeTarget(it) }
         val randomNeighborEdge = rootNeighborEdges.first()
         val randomNeighbor = rootNeighbors.first()

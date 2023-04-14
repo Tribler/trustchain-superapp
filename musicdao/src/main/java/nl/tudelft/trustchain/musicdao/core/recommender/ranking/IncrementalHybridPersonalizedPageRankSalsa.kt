@@ -57,6 +57,19 @@ class IncrementalHybridPersonalizedPageRankSalsa (
         }
     }
 
+    private fun modifyEdges(changedNodesOrSongs: Set<NodeOrSong>) {
+        iter.modifyEdges(changedNodesOrSongs)
+        for(i in 0 until randomWalks.size) {
+            val walk = randomWalks[i]
+            for(j in 0 until walk.size) {
+                if(changedNodesOrSongs.contains(walk[j])) {
+                    randomWalks[i] = walk.slice(0..j).toMutableList()
+                    completeExistingRandomWalk(randomWalks[i])
+                }
+            }
+        }
+    }
+
     private fun performNewRandomWalk(): MutableList<NodeOrSong> {
         val randomWalk: MutableList<NodeOrSong> = mutableListOf()
         randomWalk.add(rootNode)

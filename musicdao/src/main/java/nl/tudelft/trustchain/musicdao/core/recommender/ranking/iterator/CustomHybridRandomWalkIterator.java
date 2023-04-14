@@ -107,21 +107,33 @@ public class CustomHybridRandomWalkIterator<E>
         return value;
     }
 
-//    public void modifyEdges(Set<V> sourceNodes)
-//    {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//            for(NodeOrSong sourceNode : sourceNodes)
-//                outEdgesTotalWeight.put(sourceNode, graph.outgoingEdgesOf(sourceNode).stream().mapToDouble(graph::getEdgeWeight).sum());
-//        } else {
-//            for(NodeOrSong sourceNode : sourceNodes) {
-//                double outEdgesTotalWeightSum = 0.0;
-//                for (E edge : graph.outgoingEdgesOf(sourceNode)) {
-//                    outEdgesTotalWeightSum += graph.getEdgeWeight(edge);
-//                }
-//                outEdgesTotalWeight.put(sourceNode, outEdgesTotalWeightSum);
-//            }
-//        }
-//    }
+    public void modifyEdges(Set<NodeOrSong> changedNodesOrSongs)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            for(NodeOrSong nodeOrSong : changedNodesOrSongs) {
+                if(nodeOrSong instanceof Node)
+                    outEdgesTotalWeight.put((Node) nodeOrSong, graph.outgoingEdgesOf(nodeOrSong).stream().mapToDouble(graph::getEdgeWeight).sum());
+                else
+                    personalizedPageRankTotalWeight.put((SongRecommendation) nodeOrSong,  graph.outgoingEdgesOf(nodeOrSong).stream().mapToDouble(this::returnPageRankOfNeighbour).sum());
+            }
+        } else {
+            for(NodeOrSong nodeOrSong : changedNodesOrSongs) {
+                if(nodeOrSong instanceof Node) {
+                    double outEdgesTotalWeightSum = 0.0;
+                    for (E edge : graph.outgoingEdgesOf(nodeOrSong)) {
+                        outEdgesTotalWeightSum += graph.getEdgeWeight(edge);
+                    }
+                    outEdgesTotalWeight.put((Node) nodeOrSong, outEdgesTotalWeightSum);
+                } else {
+                    double outEdgesTotalWeightSum = 0.0;
+                    for(E edge: graph.outgoingEdgesOf(nodeOrSong)) {
+                        outEdgesTotalWeightSum += returnPageRankOfNeighbour(edge);
+                    }
+                    personalizedPageRankTotalWeight.put((SongRecommendation) nodeOrSong, outEdgesTotalWeightSum);
+                }
+            }
+        }
+    }
 
 
     private void computeNextSong()

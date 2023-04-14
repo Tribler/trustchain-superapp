@@ -81,7 +81,7 @@ class NodeToNodeNetwork {
         return graph.vertexSet()
     }
 
-    fun getAllNodeToNodeNetworkEdges(): Set<NodeTrustEdge> {
+    fun getAllEdges(): Set<NodeTrustEdge> {
         return graph.edgeSet()
     }
 

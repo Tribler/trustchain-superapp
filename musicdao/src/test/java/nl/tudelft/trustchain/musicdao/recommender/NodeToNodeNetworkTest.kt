@@ -61,7 +61,7 @@ e 2 1 0.2 2
         nodeToNodeNetwork.addNode(anotherNodeWithoutData)
 
         nodeToNodeNetwork.addEdge(someNodeWithoutData, anotherNodeWithoutData, someNodeEdge)
-        val allEdges = nodeToNodeNetwork.getAllNodeToNodeNetworkEdges()
+        val allEdges = nodeToNodeNetwork.getAllEdges()
         Assert.assertEquals(1, allEdges.size)
         Assert.assertEquals(someNodeEdge, allEdges.first())
         Assert.assertEquals(
@@ -78,10 +78,10 @@ e 2 1 0.2 2
         nodeToNodeNetwork.addNode(anotherNodeWithoutData)
 
         nodeToNodeNetwork.addEdge(someNodeWithoutData, anotherNodeWithoutData, someNodeEdge)
-        var allEdges = nodeToNodeNetwork.getAllNodeToNodeNetworkEdges()
+        var allEdges = nodeToNodeNetwork.getAllEdges()
         Assert.assertEquals(1, allEdges.size)
         nodeToNodeNetwork.removeEdge(someNodeEdge)
-        allEdges = nodeToNodeNetwork.getAllNodeToNodeNetworkEdges()
+        allEdges = nodeToNodeNetwork.getAllEdges()
         Assert.assertEquals(0, allEdges.size)
         Assert.assertEquals(
             0.0,
@@ -98,7 +98,7 @@ e 2 1 0.2 2
 
         nodeToNodeNetwork.addEdge(someNodeWithoutData, anotherNodeWithoutData, someNodeEdge)
         nodeToNodeNetwork.addEdge(someNodeWithoutData, anotherNodeWithoutData, anotherNodeEdge)
-        val allEdges = nodeToNodeNetwork.getAllNodeToNodeNetworkEdges()
+        val allEdges = nodeToNodeNetwork.getAllEdges()
         Assert.assertEquals(1, allEdges.size)
         Assert.assertEquals(anotherNodeEdge, allEdges.first())
     }
