@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.detoks.community
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import nl.tudelft.ipv8.Overlay
@@ -100,6 +98,7 @@ class UpvoteCommunity(
             }
         }
         for (pair in seedVideoIDs) {
+            // greedily sending seeded content to all other peers
             // greedily sending seeded content to all other peers
             sendVideoData(pair.second, pair.first)
         }
@@ -328,7 +327,8 @@ class UpvoteCommunity(
             send(peer, packet)
             return true
         }
-        throw PeerNotFoundException("Could not find a peer")
+        Log.i("Detoks", "Did not find a peer to send upvote token to")
+        return false
     }
 
     private fun sendLastUpvotedVideos(peer: Peer) {

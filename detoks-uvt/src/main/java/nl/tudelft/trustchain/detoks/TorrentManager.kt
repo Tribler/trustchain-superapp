@@ -71,9 +71,10 @@ class TorrentManager(
         Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
 
-        val recommendedVideo: String? = Recommender.getNextRecommendation()
-        if (recommendedVideo != null) {
+        val recommendedVideo: List<String>? = Recommender.getNextRecommendation()
+        if (recommendedVideo != null && recommendedVideo.size != 4) {
             Log.i("DeToks", "Recommended video ID: $recommendedVideo")
+            addTorrent(recommendedVideo[0], recommendedVideo[1], recommendedVideo[2], recommendedVideo[3])
         } else {
             Log.i("DeToks", "Could not get recommended video")
         }
@@ -203,22 +204,6 @@ class TorrentManager(
     fun addTorrent(magnet: String, proposalBlockHash: String, videoPostedOn: String, videoID: String) {
         val torrentInfo = getInfoFromMagnet(magnet)?:return
         val hash = torrentInfo.infoHash()
-
-//        if(sessionManager.find(hash) != null) {
-//            Log.i("Detoks", "sessionManager already has this torrent: ${sessionManager.find(hash).name()}")
-//            torrentFiles.forEach { it -> Log.i("Detoks", "torrentFiles => name: ${it.torrentName}") }
-//            val torrentHandler = torrentFiles.firstOrNull{ it.torrentName == torrentInfo.name()}!!
-//            torrentFiles.add(TorrentHandlerPlusUserInfo(cacheDir,
-//                torrentHandler.handle,
-//                torrentHandler.torrentName,
-//                torrentHandler.fileName,
-//                torrentHandler.fileIndex,
-//                proposalBlockHash,
-//                videoPostedOn,
-//                videoID))
-//            Log.i("Detoks", "Received and added new video data: magnet link: $magnet, proposalBlockHash: $proposalBlockHash")
-//            return
-//        }
 
         Log.i("Detoks", "Adding new torrent: ${torrentInfo.name()}")
 

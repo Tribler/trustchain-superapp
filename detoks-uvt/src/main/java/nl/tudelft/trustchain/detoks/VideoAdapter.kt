@@ -42,7 +42,6 @@ class VideosAdapter(
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         Log.i("DeToks", "onBindViewHolder: $position")
         holder.setVideoData(mVideoItems[position], position, onPlaybackError)
-        Log.i("Detoks", "setting like listener with the following values: videoID: ${holder.itemView.videoID.text}, hash: ${holder.proposalBlockHash.text}")
     }
 
     override fun getItemCount(): Int {

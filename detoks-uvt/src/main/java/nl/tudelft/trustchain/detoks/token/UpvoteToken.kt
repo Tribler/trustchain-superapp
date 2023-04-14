@@ -147,7 +147,7 @@ class UpvoteToken constructor(
 
                 // Mint the required amount of tokens to upvote the video
                 while (upvoteTokenList.size < CommunityConstants.TOKENS_SENT_PER_UPVOTE) {
-                    val nextToken = tryMintToken(itemView.context, videoID, myPubKey, chosenSeederPublicKey)
+                    val nextToken = tryMintToken(itemView.context, proposalBlock.blockId, myPubKey, chosenSeederPublicKey)
                     dbSuccess = SentTokenManager(itemView.context).addSentToken(nextToken)
 
                     if (!dbSuccess)
@@ -157,7 +157,7 @@ class UpvoteToken constructor(
                 }
                 //FIXME fix upvoteCommunity.sendUpvoteToken(upvoteTokenList) => it currently sends the token to a random peer which is wrong!!!
                 val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList)
-                toastMessage = if (sendSuccess == true) {
+                toastMessage = if (sendSuccess) {
                     "Successfully sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
                 } else {
                     "Failed to sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"

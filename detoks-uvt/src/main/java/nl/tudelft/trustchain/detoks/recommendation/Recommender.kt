@@ -3,6 +3,8 @@ package nl.tudelft.trustchain.detoks.recommendation
 import android.util.Log
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
@@ -34,8 +36,8 @@ class Recommender {
             Log.i("DeToks", "Initializing Recommender...")
             Log.i("DeToks", "Recommendation Weights: \n\tPEERS: $peersWeight " +
                 "\n\tMOST LIKED: $mostLikedWeight \n\tRANDOM: $randomWeight")
-            val allTorrents: List<TorrentManager.TorrentHandler> = torrentManager.getAllTorrents()
-            recommendations.addAll(allTorrents.map { it.asMediaInfo().videoID }.toMutableList())
+//            val allTorrents: List<TorrentManager.TorrentHandler> = torrentManager.getAllTorrents()
+//            recommendations.addAll(allTorrents.map { it.asMediaInfo().videoID }.toMutableList())
             isInitialized = true
         }
 
@@ -71,11 +73,25 @@ class Recommender {
          * Get the next recommendation when there are recommendations left or update the list of
          * recommendations when there are no more recommendations.
          */
-        fun getNextRecommendation(): String? {
+        fun getNextRecommendation(): List<String>? {
             if (recommendations.size > 0) {
                 val recommendedVideoID = recommendations.first()
                 recommendations.remove(recommendedVideoID)
-                return recommendedVideoID
+                val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
+                val pubkey = recommendedVideoID.substringBefore(".")
+                val sequenceNumber = recommendedVideoID.substringAfter(".").toLong()
+                val blocks = upvoteCommunity.database.crawl(pubkey.hexToBytes(), sequenceNumber, sequenceNumber)
+                if (blocks.isNotEmpty()) {
+                    val videoInfo = mutableListOf<String>()
+                    val proposalBlock = blocks[0]
+                    videoInfo.add(proposalBlock.transaction["magnetURI"].toString())
+                    videoInfo.add(proposalBlock.calculateHash().toHex())
+                    videoInfo.add(proposalBlock.timestamp.toString())
+                    videoInfo.add(proposalBlock.blockId)
+                    return videoInfo
+                } else {
+                    return null
+                }
             } else {
                 createNewRecommendations()
                 if (recommendations.size == 0)
@@ -128,13 +144,13 @@ class Recommender {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val allUpvoteTokens = upvoteCommunity?.database?.getBlocksWithType(
                 UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN) ?: return listOf()
-            Log.i("DeToks", "RECEIVED ${allUpvoteTokens.size} UPVOTE TOKENS!")
+            Log.i("DeToks", "FOUND ${allUpvoteTokens.size} PROPOSAL BLOCKS, NOW PICKING THE MOST LIKED ONES!")
 
             val videoHashMap: HashMap<String, Int> = hashMapOf()
             for (block: TrustChainBlock in allUpvoteTokens) {
                 if (block.isAgreement) {
-                    val videoID: String = block.transaction["videoID"] as String
-                    Log.i("DeToks", "Like for video: $videoID")
+                    val videoID: String = block.linkedBlockId
+                    Log.i("DeToks", "Adding another like for video with videoID: $videoID")
 
                     if (videoHashMap.containsKey(videoID)) {
                         val currentLikes = videoHashMap[videoID]
@@ -162,9 +178,9 @@ class Recommender {
             proposalTokens = proposalTokens.shuffled()
             Log.i("DeToks", "Random video IDs: ${proposalTokens.size}")
             for (token in proposalTokens) {
-                Log.i("DeToks", "\tVideo ID: ${token.transaction["videoID"]}")
+                Log.i("DeToks", "\tVideo ID: ${token.blockId}")
             }
-            return proposalTokens.map { it.transaction["videoID"].toString() }.toList()
+            return proposalTokens.map { it.blockId }.toList()
         }
 
         /**
