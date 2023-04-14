@@ -25,7 +25,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
-    private lateinit var networkSize: TextView
+    private lateinit var networkLabel: TextView
     private lateinit var torrentManager: TorrentManager
     private lateinit var adapter: VideosAdapter
     private val logger = KotlinLogging.logger {}
@@ -36,17 +36,17 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private val mediaCacheDir: String
         get() = "${requireActivity().cacheDir.absolutePath}/media"
 
-    private fun updateNetworkSize(size: Int) {
+    private fun updateNetworkLabel(size: Int) {
         try {
-            networkSize.text = "Network: " + size.toString()
+            networkLabel.text = "Network: " + size.toString()
         } catch (_: NumberFormatException) {
-            Log.d("DeToks", "Could not update the network size.")
+            Log.d("DeToks", "Could not update the network label.")
         }
     }
 
     fun update() {
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-        updateNetworkSize(community.getPeers().size)
+        updateNetworkLabel(community.getPeers().size)
 
         if (this::adapter.isInitialized) {
             val position = viewPagerVideos.currentItem
@@ -111,10 +111,15 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         viewPagerVideos.setCurrentItem(lastIndex, false)
         onPageChangeCallback()
 
-        networkSize = view.findViewById(R.id.networkSize)
-        networkSize.setOnClickListener {
+        networkLabel = view.findViewById(R.id.networkLabel)
+        networkLabel.setOnClickListener {
             lastIndex = viewPagerVideos.currentItem
             it.findNavController().navigate(TabBarFragmentDirections.actionTabBarFragmentToNetworkFragment())
+        }
+        networkLabel.setOnLongClickListener {
+            lastIndex = viewPagerVideos.currentItem
+            it.findNavController().navigate(TabBarFragmentDirections.actionTabBarFragmentToDiscoveryFragment())
+            true
         }
     }
 
@@ -138,7 +143,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
                     previousVideoAdapterIndex = viewPagerVideos.currentItem
 
                     val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-                    updateNetworkSize(community.getPeers().size)
+                    updateNetworkLabel(community.getPeers().size)
                 }
             }
         })
