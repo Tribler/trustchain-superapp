@@ -34,8 +34,8 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         strategyComparators[STRATEGY_HIGHEST_WATCH_TIME] = :: highestWatchTimeStrategy
         strategyComparators[STRATEGY_LOWEST_WATCH_TIME] = :: lowestWatchTimeStrategy
 
-        strategyComparators[STRATEGY_HOT] = :: hotStrategy
-        strategyComparators[STRATEGY_RISING] = :: risingStrategy
+        strategyComparators[STRATEGY_HOT] = :: highestWatchTimeStrategy
+        strategyComparators[STRATEGY_RISING] = :: highestWatchTimeStrategy
         strategyComparators[STRATEGY_NEW] = :: newestFirstStrategy
         strategyComparators[STRATEGY_TOP] = :: topFirstStrategy
         strategyComparators[STRATEGY_HOPCOUNT] = :: hopCountStrategy
@@ -76,26 +76,10 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     /**
      * Returns the torrent handlers based on hopcount
      */
-    private fun hotStrategy(
-        p0: Pair<TorrentHandler, ProfileEntry?>,
-        p1: Pair<TorrentHandler, ProfileEntry?>
-    ) : Int = p0.second!!.likes compareTo p1.second!!.likes
-
-    /**
-     * Returns the torrent handlers based on hopcount
-     */
     private fun hopCountStrategy(
         p0: Pair<TorrentHandler, ProfileEntry?>,
         p1: Pair<TorrentHandler, ProfileEntry?>
     ) : Int = p0.second!!.hopCount compareTo p1.second!!.hopCount
-
-    /**
-     * Returns the torrent handlers based on likes / hopcount ratio
-     */
-    private fun risingStrategy(
-        p0: Pair<TorrentHandler, ProfileEntry?>,
-        p1: Pair<TorrentHandler, ProfileEntry?>
-    ) : Int = (p0.second!!.likes / (p0.second!!.hopCount + 1)) compareTo (p1.second!!.likes / (p1.second!!.hopCount + 1))
 
     /**
      * Determines if a torrent should be high in the rising list by checking the upload
