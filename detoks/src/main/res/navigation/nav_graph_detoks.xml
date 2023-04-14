@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     android:label="DeToks"
     app:startDestination="@id/tabBarFragment">
@@ -9,5 +10,17 @@
         android:id="@+id/tabBarFragment"
         android:name="nl.tudelft.trustchain.detoks.fragments.TabBarFragment"
         android:label="DeToks">
+        <action
+            android:id="@+id/action_tabBarFragment_to_networkFragment"
+            app:destination="@id/networkFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/networkFragment"
+        android:name="nl.tudelft.trustchain.detoks.fragments.NetworkFragment"
+        android:label="fragment_network"
+        tools:layout="@layout/fragment_network" >
+        <action
+            android:id="@+id/action_networkFragment_to_tabBarFragment"
+            app:destination="@id/tabBarFragment" />
     </fragment>
 </navigation>

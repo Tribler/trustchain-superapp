@@ -1,0 +1,234 @@
+[1mdiff --git a/detoks/build.gradle b/detoks/build.gradle[m
+[1mindex 16e19ba5..e2dc32a3 100644[m
+[1m--- a/detoks/build.gradle[m
+[1m+++ b/detoks/build.gradle[m
+[36m@@ -1,6 +1,7 @@[m
+ apply plugin: 'com.android.library'[m
+ apply plugin: 'kotlin-android'[m
+ apply plugin: 'kotlin-android-extensions'[m
+[32m+[m[32mapply plugin: 'androidx.navigation.safeargs'[m
+ [m
+ android {[m
+     compileSdkVersion 33[m
+[1mdiff --git a/detoks/src/main/java/nl/tudelft/trustchain/detoks/VideoAdapter.kt b/detoks/src/main/java/nl/tudelft/trustchain/detoks/VideoAdapter.kt[m
+[1mindex 98029868..cb2c750d 100644[m
+[1m--- a/detoks/src/main/java/nl/tudelft/trustchain/detoks/VideoAdapter.kt[m
+[1m+++ b/detoks/src/main/java/nl/tudelft/trustchain/detoks/VideoAdapter.kt[m
+[36m@@ -67,7 +67,6 @@[m [mclass VideosAdapter([m
+         var mVideoView: VideoView[m
+         var txtTitle: TextView[m
+         var txtDesc: TextView[m
+[31m-        var peerCount: TextView[m
+         var mProgressBar: ProgressBar[m
+         var likeButton: ImageButton[m
+         var likeCount: TextView[m
+[36m@@ -93,7 +92,6 @@[m [mclass VideosAdapter([m
+             mVideoView = itemView.findViewById(R.id.videoView)[m
+             txtTitle = itemView.findViewById(R.id.txtTitle)[m
+             txtDesc = itemView.findViewById(R.id.txtDesc)[m
+[31m-            peerCount = itemView.findViewById(R.id.peerCount)[m
+             mProgressBar = itemView.findViewById(R.id.progressBar)[m
+             likeButton = itemView.findViewById(R.id.like_button)[m
+             likeCount = itemView.findViewById(R.id.like_count)[m
+[36m@@ -103,7 +101,6 @@[m [mclass VideosAdapter([m
+ [m
+             // Disable the click sound effects.[m
+             mVideoView.isSoundEffectsEnabled = false[m
+[31m-            likeButton.isSoundEffectsEnabled = false[m
+         }[m
+ [m
+         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {[m
+[36m@@ -137,9 +134,12 @@[m [mclass VideosAdapter([m
+                     }[m
+                 })[m
+ [m
+[32m+[m[32m                mVideoView.setOnFocusChangeListener { view, isFocused ->[m
+[32m+[m[32m                    if (isFocused) view.performClick()[m
+[32m+[m[32m                }[m
+[32m+[m
+                 txtTitle.text = content.creator[m
+                 txtDesc.text = content.torrentName[m
+[31m-                peerCount.text = "Peers: " + community.getPeers().size.toString()[m
+                 Log.d("DeToks", content.fileURI)[m
+                 mVideoView.setVideoPath(content.fileURI)[m
+                 Log.i("DeToks", "Received content: ${content.fileURI}")[m
+[1mdiff --git a/detoks/src/main/java/nl/tudelft/trustchain/detoks/fragments/DeToksFragment.kt b/detoks/src/main/java/nl/tudelft/trustchain/detoks/fragments/DeToksFragment.kt[m
+[1mindex 61bb11ce..ffd1f8e8 100644[m
+[1m--- a/detoks/src/main/java/nl/tudelft/trustchain/detoks/fragments/DeToksFragment.kt[m
+[1m+++ b/detoks/src/main/java/nl/tudelft/trustchain/detoks/fragments/DeToksFragment.kt[m
+[36m@@ -4,9 +4,12 @@[m [mimport android.os.Build[m
+ import android.os.Bundle[m
+ import android.util.Log[m
+ import android.view.View[m
+[32m+[m[32mimport android.widget.TextView[m
+ import androidx.annotation.RequiresApi[m
+[32m+[m[32mimport androidx.navigation.findNavController[m
+ import androidx.viewpager2.widget.ViewPager2[m
+ import kotlinx.android.synthetic.main.fragment_detoks.*[m
+[32m+[m[32mimport kotlinx.android.synthetic.main.item_video.*[m
+ import kotlinx.android.synthetic.main.item_video.view.*[m
+ import kotlinx.coroutines.CoroutineScope[m
+ import kotlinx.coroutines.Dispatchers[m
+[36m@@ -22,6 +25,7 @@[m [mimport java.io.File[m
+ import java.io.FileOutputStream[m
+ [m
+ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {[m
+[32m+[m[32m    private lateinit var networkSize: TextView[m
+     private lateinit var torrentManager: TorrentManager[m
+     private lateinit var adapter: VideosAdapter[m
+     private val logger = KotlinLogging.logger {}[m
+[36m@@ -32,15 +36,29 @@[m [mclass DeToksFragment : BaseFragment(R.layout.fragment_detoks) {[m
+     private val mediaCacheDir: String[m
+         get() = "${requireActivity().cacheDir.absolutePath}/media"[m
+ [m
+[32m+[m[32m    private fun updateNetworkSize(size: Int) {[m
+[32m+[m[32m        try {[m
+[32m+[m[32m            networkSize.text = "Network: " + size.toString()[m
+[32m+[m[32m        } catch (_: NumberFormatException) {[m
+[32m+[m[32m            Log.d("DeToks", "Could not update the network size.")[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+     fun update() {[m
+[31m-        CoroutineScope(Dispatchers.Main).launch {[m
+[31m-            if (this@DeToksFragment::adapter.isInitialized) {[m
+[31m-                val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!![m
+[31m-                val position = viewPagerVideos.currentItem[m
+[32m+[m[32m        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!![m
+[32m+[m[32m        updateNetworkSize(community.getPeers().size)[m
+[32m+[m
+[32m+[m[32m        if (this::adapter.isInitialized) {[m
+[32m+[m[32m            val position = viewPagerVideos.currentItem[m
+[32m+[m
+[32m+[m[32m            CoroutineScope(Dispatchers.Main).launch {[m
+                 val content = adapter.mVideoItems[position].content(position, 10000)[m
+ [m
+[31m-                this@DeToksFragment.viewPagerVideos.peerCount.text = "Peers: " + community.getPeers().size.toString()[m
+[31m-                this@DeToksFragment.viewPagerVideos.like_count.text = community.getLikes(content.fileName, content.torrentName).size.toString()[m
+[32m+[m[32m                try {[m
+[32m+[m[32m                    if (viewPagerVideos != null) viewPagerVideos.like_count.text = community.getLikes(content.fileName, content.torrentName).size.toString()[m
+[32m+[m[32m                } catch (_: NumberFormatException) {[m
+[32m+[m[32m                    Log.d("DeToks", "Could not update the like counter.")[m
+[32m+[m[32m                }[m
+             }[m
+         }[m
+     }[m
+[36m@@ -89,8 +107,14 @@[m [mclass DeToksFragment : BaseFragment(R.layout.fragment_detoks) {[m
+ [m
+         adapter = VideosAdapter(torrentManager)[m
+         viewPagerVideos.adapter = adapter[m
+[31m-        viewPagerVideos.currentItem = 0[m
+[32m+[m[32m        viewPagerVideos.setCurrentItem(lastIndex, false)[m
+         onPageChangeCallback()[m
+[32m+[m
+[32m+[m[32m        networkSize = view.findViewById(R.id.networkSize)[m
+[32m+[m[32m        networkSize.setOnClickListener {[m
+[32m+[m[32m            lastIndex = viewPagerVideos.currentItem[m
+[32m+[m[32m            it.findNavController().navigate(TabBarFragmentDirections.actionTabBarFragmentToNetworkFragment())[m
+[32m+[m[32m        }[m
+     }[m
+ [m
+     /**[m
+[36m@@ -111,6 +135,9 @@[m [mclass DeToksFragment : BaseFragment(R.layout.fragment_detoks) {[m
+                         }[m
+                     }[m
+                     previousVideoAdapterIndex = viewPagerVideos.currentItem[m
+[32m+[m
+[32m+[m[32m                    val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!![m
+[32m+[m[32m                    updateNetworkSize(community.getPeers().size)[m
+                 }[m
+             }[m
+         })[m
+[36m@@ -120,5 +147,6 @@[m [mclass DeToksFragment : BaseFragment(R.layout.fragment_detoks) {[m
+         const val DEFAULT_CACHING_AMOUNT = 2[m
+         const val DEFAULT_TORRENT_FILE = "detoks.torrent"[m
+         lateinit var torrentManager: TorrentManager[m
+[32m+[m[32m        var lastIndex: Int = 0[m
+     }[m
+ }[m
+[1mdiff --git a/detoks/src/main/res/layout/fragment_detoks.xml b/detoks/src/main/res/layout/fragment_detoks.xml[m
+[1mindex 83292c21..41fcdda1 100644[m
+[1m--- a/detoks/src/main/res/layout/fragment_detoks.xml[m
+[1m+++ b/detoks/src/main/res/layout/fragment_detoks.xml[m
+[36m@@ -1,5 +1,5 @@[m
+ <?xml version="1.0" encoding="utf-8"?>[m
+[31m-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"[m
+[32m+[m[32m<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"[m
+     xmlns:app="http://schemas.android.com/apk/res-auto"[m
+     android:layout_width="match_parent"[m
+     android:layout_height="match_parent"[m
+[36m@@ -9,5 +9,20 @@[m
+         android:id="@+id/viewPagerVideos"[m
+         android:orientation="vertical"[m
+         android:layout_width="match_parent"[m
+[31m-        android:layout_height="match_parent"/>[m
+[31m-</FrameLayout>[m
+[32m+[m[32m        android:layout_height="match_parent"[m
+[32m+[m[32m        app:layout_constraintStart_toStartOf="parent"[m
+[32m+[m[32m        app:layout_constraintEnd_toEndOf="parent"[m
+[32m+[m[32m        app:layout_constraintTop_toTopOf="parent"[m
+[32m+[m[32m        app:layout_constraintBottom_toBottomOf="parent"/>[m
+[32m+[m
+[32m+[m[32m    <TextView[m
+[32m+[m[32m        android:id="@+id/networkSize"[m
+[32m+[m[32m        android:layout_width="wrap_content"[m
+[32m+[m[32m        android:layout_height="wrap_content"[m
+[32m+[m[32m        app:layout_constraintTop_toTopOf="parent"[m
+[32m+[m[32m        app:layout_constraintStart_toStartOf="parent"[m
+[32m+[m[32m        app:layout_constraintEnd_toEndOf="parent"[m
+[32m+[m[32m        android:textAlignment="center"[m
+[32m+[m[32m        android:textColor="@color/white"[m
+[32m+[m[32m        android:textSize="15sp"/>[m
+[32m+[m[32m</androidx.constraintlayout.widget.ConstraintLayout>[m
+[1mdiff --git a/detoks/src/main/res/layout/item_video.xml b/detoks/src/main/res/layout/item_video.xml[m
+[1mindex 5b751778..f419fec1 100644[m
+[1m--- a/detoks/src/main/res/layout/item_video.xml[m
+[1m+++ b/detoks/src/main/res/layout/item_video.xml[m
+[36m@@ -30,17 +30,6 @@[m
+         app:layout_constraintStart_toStartOf="parent"[m
+         app:layout_constraintTop_toTopOf="parent" />[m
+ [m
+[31m-    <TextView[m
+[31m-        android:id="@+id/peerCount"[m
+[31m-        android:layout_width="wrap_content"[m
+[31m-        android:layout_height="wrap_content"[m
+[31m-        app:layout_constraintTop_toTopOf="parent"[m
+[31m-        app:layout_constraintStart_toStartOf="parent"[m
+[31m-        app:layout_constraintEnd_toEndOf="parent"[m
+[31m-        android:textAlignment="center"[m
+[31m-        android:textColor="@color/white"[m
+[31m-        android:textSize="15sp"/>[m
+[31m-[m
+     <LinearLayout[m
+         android:layout_width="wrap_content"[m
+         android:layout_height="wrap_content"[m
+[1mdiff --git a/detoks/src/main/res/navigation/nav_graph_detoks.xml b/detoks/src/main/res/navigation/nav_graph_detoks.xml[m
+[1mindex 72ef2451..7e7b3ed8 100644[m
+[1m--- a/detoks/src/main/res/navigation/nav_graph_detoks.xml[m
+[1m+++ b/detoks/src/main/res/navigation/nav_graph_detoks.xml[m
+[36m@@ -1,6 +1,7 @@[m
+ <?xml version="1.0" encoding="utf-8"?>[m
+ <navigation xmlns:android="http://schemas.android.com/apk/res/android"[m
+     xmlns:app="http://schemas.android.com/apk/res-auto"[m
+[32m+[m[32m    xmlns:tools="http://schemas.android.com/tools"[m
+     android:id="@+id/nav_graph"[m
+     android:label="DeToks"[m
+     app:startDestination="@id/tabBarFragment">[m
+[36m@@ -9,5 +10,17 @@[m
+         android:id="@+id/tabBarFragment"[m
+         android:name="nl.tudelft.trustchain.detoks.fragments.TabBarFragment"[m
+         android:label="DeToks">[m
+[32m+[m[32m        <action[m
+[32m+[m[32m            android:id="@+id/action_tabBarFragment_to_networkFragment"[m
+[32m+[m[32m            app:destination="@id/networkFragment" />[m
+[32m+[m[32m    </fragment>[m
+[32m+[m[32m    <fragment[m
+[32m+[m[32m        android:id="@+id/networkFragment"[m
+[32m+[m[32m        android:name="nl.tudelft.trustchain.detoks.fragments.NetworkFragment"[m
+[32m+[m[32m        android:label="fragment_network"[m
+[32m+[m[32m        tools:layout="@layout/fragment_network" >[m
+[32m+[m[32m        <action[m
+[32m+[m[32m            android:id="@+id/action_networkFragment_to_tabBarFragment"[m
+[32m+[m[32m            app:destination="@id/tabBarFragment" />[m
+     </fragment>[m
+ </navigation>[m
