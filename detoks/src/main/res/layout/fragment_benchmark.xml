@@ -101,31 +101,6 @@
 
             </LinearLayout>
 
-            <!-- Bottom Buttons -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="50dp"
-                android:gravity="center">
-
-                <Button
-                    android:id="@+id/switch_environment_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="example overlay"
-                    android:layout_marginEnd="20dp"
-                    android:visibility="gone"/>
-
-                <Button
-                    android:id="@+id/toTest_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="To Test"
-                    android:layout_marginStart="20dp"
-                    android:visibility="gone"/>
-
-            </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
@@ -140,18 +115,23 @@
                 android:text="Generate tokens"
                 android:id="@+id/generate_tokens_button"></Button>
             </LinearLayout>
-
-            <Button
-                android:id="@+id/single_token_button"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Single Token Transaction" />
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <Button
+                    android:id="@+id/single_token_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Single Token Transaction" />
 
-            <TextView
-                android:id="@+id/single_token_text"
-                android:layout_width="94dp"
-                android:layout_height="64dp"
-                android:text="0 ms" />
+                <TextView
+                    android:id="@+id/single_token_text"
+                    android:layout_width="94dp"
+                    android:layout_height="64dp"
+                    android:text="0 ms" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- ListView -->
@@ -161,21 +141,40 @@
             android:layout_height="match_parent"
             android:layout_weight="4"
             android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Token wallet:"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:textSize="15dp"
-                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="20"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Token wallet: "
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:textSize="15dp"
+                    />
+
+                <TextView
+                    android:id="@+id/token_amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 Tokens"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:textSize="15dp"
+                    />
+            </LinearLayout>
+
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:id="@+id/token_list_view"
                 tools:listitem="@layout/list_item"
                 android:divider="#000000"
-                android:dividerHeight="1dp"/>
+                android:dividerHeight="1dp" />
         </LinearLayout>
 
     </LinearLayout>

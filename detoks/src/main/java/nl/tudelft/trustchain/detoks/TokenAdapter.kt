@@ -19,7 +19,7 @@ class TokenAdapter(private val context: Activity, private val tokenArray: ArrayL
         val record = rowView.findViewById(R.id.item_number) as TextView
         val token_id = rowView.findViewById(R.id.item_id) as TextView
 
-        record.text = "Token ID: " + token.unique_id
+        record.text = "Group:" + (token.tokenIntId / 10) + " Token ID: " + token.tokenIntId
         token_id.text = "ID: " + token.unique_id
         return rowView
     }

@@ -8,6 +8,7 @@ import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.detoks.db.TokenStore
+import java.util.UUID
 
 /**
  * Handles the sending and receiving of transactions
@@ -89,17 +90,20 @@ class DeToksTransactionEngine (
      */
     private fun receiveSingleTokenProposal(block: TrustChainBlock) {
         val token = block.transaction["token"] as String
-        val (uid, pk) = token.split(",")
-        println(pk)
+        val (uid, intId) = token.split(",")
 
         // Add token to personal database
         // If sending to self ->  Increment the ID to avoid duplicate ID errors.
-        var newID = uid.toInt()
+        var newID = uid
+        Log.d(LOGTAG, "Sending to self: $sendingToSelf")
+
         if (sendingToSelf) {
-            newID += tokenIDIncrementer
+            newID = UUID.randomUUID().toString()
+        }
+        if(!(tokenStore.checkToken(newID))){
+            tokenStore.addToken((newID), intId.toLong())
         }
 
-        tokenStore.addToken((newID).toString(), pk)
         Log.d(LOGTAG, "Saving received $token to database")
 
         // Create an agreement block to send back
@@ -126,7 +130,8 @@ class DeToksTransactionEngine (
      * @param peer: Peer to send the tokens to
      */
     fun sendTokenGrouped(transactions: List<List<Token>>, peer: Peer): TrustChainBlock {
-
+        Log.d(LOGTAG, "Sending grouped TokenList")
+        val startTime = System.nanoTime()
         val groupedTransactions = mutableListOf<List<String>>()
         for (transaction in transactions) {
             val tokenList: MutableList<String> = mutableListOf()
@@ -136,7 +141,10 @@ class DeToksTransactionEngine (
             groupedTransactions.add(tokenList)
         }
 
-        Log.d(LOGTAG, "Sending grouped transactions: $transactions")
+        Log.d(
+            LOGTAG,
+            "Execution time sendTokenGrouped: ${(System.nanoTime() - startTime)/1000000}"
+        )
 
         val transaction = mapOf("transactions" to groupedTransactions)
 
@@ -153,31 +161,40 @@ class DeToksTransactionEngine (
      */
     @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenProposal(block: TrustChainBlock) {
+        val startTime = System.nanoTime()
         val transactions = block.transaction["transactions"] as List<List<String>>
-        Log.d(LOGTAG, "Received grouped transaction: ${transactions}")
+
+        Log.d(LOGTAG, "Received grouped proposal: ${transactions}")
 
         // Extract tokens from transactions field, create grouped agreement block as response
         val grouped_agreement_uids = mutableListOf<List<String>>()
+        val tokensToAdd = mutableListOf<Token>()
+
         for (transaction in transactions) {
             val tokenList: MutableList<String> = mutableListOf()
             for (token in transaction) {
-                val (uid, _) = token.split(",")
+                val (uid, intId) = token.split(",")
                 tokenList.add(uid)
 
-                // Add token to personal database
                 // If sending to self ->  Increment the ID to avoid duplicate ID errors.
-                var newID = uid.toInt()
-                Log.d(LOGTAG, "Sending to self: $sendingToSelf")
+                var newID = uid
+                //Log.d(LOGTAG, "Sending to self: $sendingToSelf")
                 if (sendingToSelf) {
-                    newID += tokenIDIncrementer
+                    newID = UUID.randomUUID().toString()
                 }
-                tokenStore.addToken((newID).toString(), block.publicKey.toString())
-                Log.d(LOGTAG, "Saving received $token to database")
+
+                // Add token to personal database
+                tokensToAdd.add(Token(newID, intId.toInt()))
             }
             grouped_agreement_uids.add(tokenList.toList())
         }
+        tokenStore.addTokenList(tokensToAdd)
         val transaction = mapOf("tokensSent" to grouped_agreement_uids.toList())
         createAgreementBlock(block, transaction)
+        Log.d(
+            "DeToksTransactionEngine",
+            "Execution time receiveGroupedTokenProposal: ${(System.nanoTime() - startTime)/1000000}"
+        )
     }
 
     /**
@@ -186,15 +203,22 @@ class DeToksTransactionEngine (
      */
     @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenAgreement(block: TrustChainBlock) {
+        val startTime = System.nanoTime()
+        Log.d(LOGTAG, "Received grouped agreement block")
         val tokenIds = block.transaction["tokensSent"] as List<List<String>>
-        Log.d(LOGTAG, "Removing spent tokens ${tokenIds}} from database")
+        val tokensToRemove= mutableListOf<String>()
 
         for (tokens in tokenIds ) {
                 for(token_id in tokens) {
                     // Remove token from personal database
-                    tokenStore.removeTokenByID(token_id)
+                    tokensToRemove.add(token_id)
                 }
         }
+        tokenStore.removeTokenList(tokensToRemove.toList())
+        Log.d(
+            "DeToksTransactionEngine",
+            "Execution time receiveGroupedTokenAgreement: ${(System.nanoTime() - startTime)/1000000}"
+        )
     }
 
     /**
