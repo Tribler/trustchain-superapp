@@ -8,7 +8,6 @@ import kotlin.math.max
 
 class ProfileEntry(
     var watched:    Boolean = false,    // True if the video was watched
-    var lastUpdate: Long = 0,           // Updated when torrent received
     var watchTime:  Long = 0,           // Average watch time
     var duration:   Long = 0,           // Video duration
     var uploadDate: Long = 0,           // This is the torrent creation date
@@ -26,7 +25,6 @@ class Profile(
 
     fun addProfile(key: String) {
         if(!profiles.contains(key)) incrementTimesSeen(key) // Also creates the profile
-        profiles[key]!!.lastUpdate = System.currentTimeMillis()
     }
 
     fun hasWatched(key: String): Boolean {
