@@ -53,13 +53,13 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
         tokenCount = communityAdapter.tokenCount
         tokenCounter.text = tokenCount.toString()
 
-//        val packetslostCounter = findViewById<TextView>(R.id.packetslost)
-//        packetsLost = communityAdapter.packetsLost
-//        packetslostCounter.text = "packets received: ${packetsLost.roundToInt()}%"
-//
-//        val throughputCounter = findViewById<TextView>(R.id.throughput)
-//        throughput = communityAdapter.throughput
-//        throughputCounter.text = "${(1000/throughput).toInt()} packets/second"
+        val packetslostCounter = findViewById<TextView>(R.id.packetslost)
+        packetsLost = communityAdapter.packetsLost
+        packetslostCounter.text = "packets received: ${packetsLost.toInt()}%"
+
+        val throughputCounter = findViewById<TextView>(R.id.throughput)
+        throughput = communityAdapter.throughput
+        throughputCounter.text = "${throughput.toInt()} tokens/second"
 
         val latencyCounter = findViewById<TextView>(R.id.latency)
         latency = communityAdapter.latency
@@ -80,8 +80,8 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
             latency = communityAdapter.latency
             runOnUiThread {
                 tokenCounter.text = tokenCount.toString()
-//                packetslostCounter.text = "packets received: ${packetsLost.roundToInt()}%"
-//                throughputCounter.text = "${(1000/throughput).toInt()} packets/second"
+                packetslostCounter.text = "packets received: ${packetsLost.toInt()}%"
+                throughputCounter.text = "${throughput.toInt()} tokens/second"
                 latencyCounter.text = "Latency: ${latency}ms"
             }
         }

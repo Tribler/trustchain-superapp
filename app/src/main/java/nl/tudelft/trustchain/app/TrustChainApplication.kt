@@ -298,7 +298,6 @@ class TrustChainApplication : Application() {
         )
     }
 
-
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
         val randomWalk = RandomWalk.Factory()
         val randomChurn = RandomChurn.Factory()

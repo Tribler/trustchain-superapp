@@ -114,11 +114,11 @@ class CommunityAdapter private constructor(
         // Other party accepted my proposal, agreement signed by other party
         else if (block.isAgreement && !block.publicKey.contentEquals(myPublicKey)) {
             transactionsBack++
-            throughput = System.currentTimeMillis()-lastAgreementBlockReceived
-//            numOfTokens = Transaction.fromTrustChainTransactionObject(block.transaction).tokens.size
+            val numOfTokens = Transaction.fromTrustChainTransactionObject(block.transaction).tokens.size
+            throughput = numOfTokens*(1000/(System.currentTimeMillis()-lastAgreementBlockReceived))
             lastAgreementBlockReceived = System.currentTimeMillis()
-            latency = System.currentTimeMillis() - Transaction.fromTrustChainTransactionObject(block.transaction).createdAt
-
+            val old = Transaction.fromTrustChainTransactionObject(block.transaction).createdAt
+            latency = System.currentTimeMillis() - old
 
             transmittingBlocks.remove(block.linkedBlockId)?.cancel()
             recAgreementHandler(Transaction.fromTrustChainTransactionObject(block.transaction))

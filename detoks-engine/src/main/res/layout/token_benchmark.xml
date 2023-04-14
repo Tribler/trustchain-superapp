@@ -31,7 +31,7 @@
             android:id="@+id/packetslost"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="throughput=100%"
+            android:text="packets received=100%"
             android:textSize="32dp"
             android:textStyle="bold" />
 
@@ -39,7 +39,7 @@
             android:id="@+id/throughput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="throughput=1000packets/s"
+            android:text="throughput=0tokens/s"
             android:textSize="32dp"
             android:textStyle="bold" />
 
