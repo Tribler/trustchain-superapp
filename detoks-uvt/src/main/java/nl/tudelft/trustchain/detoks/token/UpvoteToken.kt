@@ -144,7 +144,6 @@ class UpvoteToken constructor(
                     upvoteTokenList.add(nextToken)
                     tokenIDList.add(nextToken.tokenID)
                 }
-                //FIXME fix upvoteCommunity.sendUpvoteToken(upvoteTokenList) => it currently sends the token to a random peer which is wrong!!!
                 val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList, proposalBlock.publicKey)
                 toastMessage = if (sendSuccess) {
                     "Successfully sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
@@ -169,7 +168,7 @@ class UpvoteToken constructor(
             Toast.makeText(
                 itemView.context,
                 "Attempted to find a proposal Block with hash: $currentVideoHash, This video does not have a proposal block attached to it and is thus not posted by anyone",
-                Toast.LENGTH_SHORT
+                Toast.LENGTH_LONG
             ).show()
             return
         }

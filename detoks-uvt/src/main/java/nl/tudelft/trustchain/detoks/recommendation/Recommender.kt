@@ -5,7 +5,6 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 import kotlin.random.Random
@@ -30,14 +29,12 @@ class Recommender {
          * Initialize the list of recommendations with all the torrents in the TorrentManager
          * at start up to prevent user having to wait for recommendations.
          */
-        fun initialize(torrentManager: TorrentManager) {
+        fun initialize() {
             if (isInitialized)
                 return
             Log.i("DeToks", "Initializing Recommender...")
             Log.i("DeToks", "Recommendation Weights: \n\tPEERS: $peersWeight " +
                 "\n\tMOST LIKED: $mostLikedWeight \n\tRANDOM: $randomWeight")
-//            val allTorrents: List<TorrentManager.TorrentHandler> = torrentManager.getAllTorrents()
-//            recommendations.addAll(allTorrents.map { it.asMediaInfo().videoID }.toMutableList())
             isInitialized = true
         }
 
