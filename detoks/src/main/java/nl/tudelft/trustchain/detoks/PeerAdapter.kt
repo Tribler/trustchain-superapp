@@ -7,6 +7,9 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import nl.tudelft.ipv8.Peer
 
+/**
+ * Adapter class to create list items for the peer list
+ */
 class PeerAdapter (private val context: Activity, private val peerArray: ArrayList<Peer>) : ArrayAdapter<Peer>(context, R.layout.list_item, peerArray){
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -25,6 +28,10 @@ class PeerAdapter (private val context: Activity, private val peerArray: ArrayLi
         return rowView
     }
 
+    /**
+     * Retrieves item at position
+     * @param position: position of item
+     */
     override fun getItem(position: Int): Peer {
         return peerArray[position]
     }

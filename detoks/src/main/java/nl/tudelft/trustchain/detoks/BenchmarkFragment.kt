@@ -6,7 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.Button
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import nl.tudelft.ipv8.IPv8
@@ -28,6 +27,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private lateinit var adapter: TokenAdapter
 
     private var totalTransactions = 1000
+
     private var groupSize = 100
     private var tokenIDCounter = 0
 
@@ -39,6 +39,26 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         }
     }
 
+    /**
+     * Sends a single token to the selected peer
+     */
+    fun sendSingleToken(): Long {
+
+        val executionTime = measureTimeMillis {
+            transactionEngine.sendTokenSingle(
+                transactionEngine.tokenStore.getSingleToken(),
+                transactionEngine.getSelectedPeer()
+            )
+
+        }
+
+        return executionTime
+    }
+
+    /**
+     * Start benchmark for single token transactions
+     * @param totalTransactions The total number of transactions to be sent
+     */
     suspend fun singleBenchmark(): Long {
 
         val startTime = System.nanoTime()
@@ -66,6 +86,10 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         return totalExecutionTime
     }
 
+    /**
+     * Start benchmark for grouped transactions
+     * @param totalTransactions The total number of transactions to be sent
+     */
     suspend fun groupedBenchmark(): Long {
         val startTime = System.nanoTime()
         do {
@@ -98,29 +122,22 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
-        // get communities and services
+        // Get communities and services
         ipv8 = getIpv8()
         transactionEngine = ipv8.getOverlay()!!
         trustchainCommunity = ipv8.getOverlay()!!
 
-        // initialize the peers
+        // Initialize the peer variables and set selected peer textview
         if (!transactionEngine.isPeerSelected()) {
             transactionEngine.initializePeers(ipv8.myPeer)
         }
-
         binding.otherPeers.text = connectedPeerToString()
 
+        // Set button onclick listeners
         binding.generateTokensButton.setOnClickListener {
             generateTokens()
             updateList()
         }
-
-        val environmentSwitchButton = view.findViewById<Button>(R.id.switch_environment_button)
-        environmentSwitchButton.setOnClickListener { switchEnvirmonments(view) }
-
-        val toTestButton = view.findViewById<Button>(R.id.toTest_button)
-        toTestButton.setOnClickListener { toTest(view) }
 
         binding.startTransactionsButton.setOnClickListener {
             binding.transactionsPerSecondField.text = "${lifecycleScope.launch{groupedBenchmark()}} ms"
@@ -130,17 +147,30 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             binding.singleTextField.text = "${lifecycleScope.launch{singleBenchmark()}} ms"
         }
 
-        binding.otherPeers.text = connectedPeerToString()
+        binding.singleTokenButton.setOnClickListener{
+            binding.singleTokenText.text ="${sendSingleToken()} ms"
+        }
 
+        binding.otherPeers.text = connectedPeerToString()
+        binding.resetTokensButton.setOnClickListener {
+            transactionEngine.tokenStore.removeAllTokens()
+        }
+
+        binding.selectReceiverButton.setOnClickListener {
+            val navController = Navigation.findNavController(view)
+            navController.navigate(R.id.action_connect_to_peer_fragment)
+        }
+
+        // Initialize listview adapter and set listview onclick listeners
         adapter = TokenAdapter(
             requireActivity(),
             transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
         )
 
-        binding.blockListview.isClickable = true
-        binding.blockListview.adapter = adapter
+        binding.tokenListView.isClickable = true
+        binding.tokenListView.adapter = adapter
 
-        binding.blockListview.setOnItemClickListener() { _, _, position, _ ->
+        binding.tokenListView.setOnItemClickListener() { _, _, position, _ ->
             val token = adapter.getItem(position)
             val builder = AlertDialog.Builder(requireContext())
             builder.setTitle("Token ${token.unique_id}")
@@ -160,6 +190,9 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         }
     }
 
+    /**
+     * Updates the list of tokens
+     */
     private fun updateList() {
         Log.d("UPDATE_VIEWS", "Updating List")
         adapter.clear()
@@ -169,30 +202,28 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         binding.tokenAmount.text = transactionEngine.tokenStore.getBalance().toString() + " tokens"
     }
 
+    /**
+     * Generates tokens based on the totalTransactions variable and
+     * adds them to local tokenStore
+     * @param totalTransactions the amount of tokens to generate
+     */
     private fun generateTokens() {
         for (i in 1..totalTransactions) {
             // Add Token to the token store
             transactionEngine.tokenStore.addToken(UUID.randomUUID().toString(), ipv8.myPeer.publicKey.keyToBin().toString(), i.toLong())
-            tokenIDCounter++
         }
     }
 
+    /**
+     * Returns the PublicKey string format of the connected peer
+     * returns your own PublicKey if no peer is selected
+     */
     private fun connectedPeerToString() : String {
         if (!transactionEngine.isPeerSelected()) {
             return transactionEngine.getSelfPeer().publicKey.toString()
         } else {
             return transactionEngine.getSelectedPeer().publicKey.toString()
         }
-    }
-
-    fun switchEnvirmonments(view: View) {
-        val navController = Navigation.findNavController(view)
-        navController.navigate(R.id.action_switch_environment)
-    }
-
-    fun toTest(view: View) {
-        val navController = Navigation.findNavController(view)
-        navController.navigate(R.id.action_to_test)
     }
 
     override fun onResume() {
