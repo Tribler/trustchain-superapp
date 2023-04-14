@@ -23,6 +23,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         const val STRATEGY_RISING = 4
         const val STRATEGY_NEW = 5
         const val STRATEGY_TOP = 6
+        const val STRATEGY_HOPCOUNT = 7
     }
 
     init {
@@ -30,9 +31,10 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         strategyComparators[STRATEGY_LOWEST_WATCH_TIME] = :: lowestWatchTimeStrategy
 
         strategyComparators[STRATEGY_HOT] = :: hotStrategy
-        strategyComparators[STRATEGY_RISING] = :: lowestWatchTimeStrategy
+        strategyComparators[STRATEGY_RISING] = :: risingStrategy
         strategyComparators[STRATEGY_NEW] = :: newestFirstStrategy
         strategyComparators[STRATEGY_TOP] = :: topFirstStrategy
+        strategyComparators[STRATEGY_HOPCOUNT] = :: hopCountStrategy
     }
 
     /**
@@ -71,6 +73,14 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
      * Returns the torrent handlers based on hopcount
      */
     private fun hotStrategy(
+        p0: Pair<TorrentHandler, ProfileEntry?>,
+        p1: Pair<TorrentHandler, ProfileEntry?>
+    ) : Int = p0.second!!.hopCount compareTo p1.second!!.hopCount
+
+    /**
+     * Returns the torrent handlers based on hopcount
+     */
+    private fun hopCountStrategy(
         p0: Pair<TorrentHandler, ProfileEntry?>,
         p1: Pair<TorrentHandler, ProfileEntry?>
     ) : Int = p0.second!!.hopCount compareTo p1.second!!.hopCount

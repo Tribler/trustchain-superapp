@@ -8,5 +8,6 @@
         <item>Rising</item>
         <item>New</item>
         <item>Top</item>
+        <item>Hop Count</item>
     </string-array>
 </resources>
