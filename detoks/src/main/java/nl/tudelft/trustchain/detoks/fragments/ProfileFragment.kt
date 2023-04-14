@@ -20,18 +20,20 @@ class ProfileFragment : Fragment() {
     private val LIKED_INDEX = 1
     private val NOTIFICATIONS_INDEX = 2
 
+    private var isInitial = false
+
     private lateinit var numVideosLabel: TextView
     private lateinit var numLikesLabel: TextView
+    private lateinit var videosListFragment: VideosListFragment
+    private lateinit var likedListFragment: LikedListFragment
+    private lateinit var notificationsListFragment: NotificationsListFragment
 
     lateinit var viewPager: ViewPager2
-    lateinit var videosListFragment: VideosListFragment
-    lateinit var likedListFragment: LikedListFragment
-    lateinit var notificationsListFragment: NotificationsListFragment
 
     fun update() {
-        if (this::viewPager.isInitialized) {
-            updatePersonalInformation()
+        updatePersonalInformation()
 
+        if (this::viewPager.isInitialized) {
             when (viewPager.currentItem) {
                 VIDEOS_INDEX -> {
                     videosListFragment.updateVideos()
@@ -60,12 +62,20 @@ class ProfileFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+
+        if (isInitial) {
+            isInitial = false;
+            return
+        }
+
         updatePersonalInformation()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        isInitial = true
 
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val author = community.myPeer.publicKey.toString()
@@ -80,7 +90,7 @@ class ProfileFragment : Fragment() {
         updatePersonalInformation(videos)
 
         videosListFragment = VideosListFragment(videos)
-        likedListFragment = LikedListFragment(community.listOfLikedVideosAndTorrents(author).map { it.second })
+        likedListFragment = LikedListFragment(community.listOfLikedVideosAndTorrents(author).map { it.first })
         notificationsListFragment = NotificationsListFragment(community.getBlocksByAuthor(author).map {"Received a like: " + it.transaction["video"]})
 
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)

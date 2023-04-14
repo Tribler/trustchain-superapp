@@ -124,7 +124,7 @@ class VideosAdapter(
                 // Show the like button.
                 likeButton.visibility = View.VISIBLE
 
-                likeButton.setOnClickListener{
+                likeButton.setOnClickListener {
                     likeVideo(content)
                 }
 
