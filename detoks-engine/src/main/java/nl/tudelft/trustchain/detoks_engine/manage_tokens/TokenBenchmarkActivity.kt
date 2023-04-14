@@ -5,6 +5,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.token_benchmark.*
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.detoksengine.sqldelight.Tokens
@@ -15,6 +16,7 @@ import nl.tudelft.trustchain.detoks_engine.trustchain.CommunityAdapter
 import nl.tudelft.trustchain.detoks_engine.trustchain.TrustChainTransactionCommunity
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.roundToInt
 
 class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
     private lateinit var trustChainCommunity: TrustChainTransactionCommunity
@@ -27,6 +29,8 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
 
     private var selectedPeerIndex: Int = RecyclerView.NO_POSITION
     private var tokenCount: Int = 0
+    private var packetsLost: Double = 100.00
+    private var throughput: Long = 1000
 
     override fun onStart() {
         super.onStart()
@@ -48,6 +52,15 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
         tokenCount = communityAdapter.tokenCount
         tokenCounter.text = tokenCount.toString()
 
+        val packetslostCounter = findViewById<TextView>(R.id.packetslost)
+        packetsLost = communityAdapter.packetsLost
+        packetslostCounter.text = "packets received: ${packetsLost.roundToInt()}%"
+
+        val throughputCounter = findViewById<TextView>(R.id.throughput)
+        throughput = communityAdapter.throughput
+        throughputCounter.text = "${(1000/throughput).toInt()} packets/second"
+
+
         communityAdapter.setReceiveTransactionHandler {
             tokenCount = communityAdapter.tokenCount
             runOnUiThread {
@@ -57,8 +70,12 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
 
         communityAdapter.setReceiveAgreementHandler {
             tokenCount = communityAdapter.tokenCount
+            packetsLost = communityAdapter.packetsLost
+            throughput = communityAdapter.throughput
             runOnUiThread {
                 tokenCounter.text = tokenCount.toString()
+                packetslostCounter.text = "packets received: ${packetsLost.roundToInt()}%"
+                throughputCounter.text = "${(1000/throughput).toInt()} packets/second"
             }
         }
         val myId = trustChainCommunity.myPeer.mid.substring(0, 5)

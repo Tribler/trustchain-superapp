@@ -36,7 +36,11 @@ class CommunityAdapter private constructor(
     public var tokenCount = 0;
 
     private var transactionsSend = 1;
-    private var transactionsThrough = 1;
+    private var transactionsBack = 1;
+    public var packetsLost = 100.00;
+
+    private var lastAgreementBlockReceived = System.currentTimeMillis();
+    public var throughput : Long = 1000;
 
 
     private val bufferedTransactions = ConcurrentHashMap<Peer, ConcurrentLinkedQueue<String>>()
@@ -85,7 +89,8 @@ class CommunityAdapter private constructor(
     }
 
     private fun handleBlock(block: TrustChainBlock) {
-        logger.debug("Throughput: ${(transactionsThrough.toDouble() / transactionsSend) * 100} trough:${transactionsThrough} send:${transactionsSend} %, Block token received: ${block.transaction}, is proposal: ${block.isProposal}, is agreement: ${block.isAgreement}, PK til 8: ${block.publicKey.toString().substring(0, 8)}, is self signed ${block.isSelfSigned}")
+        packetsLost = 100*(transactionsBack.toDouble()/transactionsSend)
+        logger.debug("lost: ${100*(transactionsBack.toDouble()/transactionsSend)} trough:${transactionsBack} send:${transactionsSend} %, Block token received: ${block.transaction}, is proposal: ${block.isProposal}, is agreement: ${block.isAgreement}, PK til 8: ${block.publicKey.toString().substring(0, 8)}, is self signed ${block.isSelfSigned}")
 
         // A proposal block for me (so i receive tokens), action is to agree
         // When selfsigned its an injection, when not selfsigned and not my PK its sent by somebody else
@@ -106,7 +111,9 @@ class CommunityAdapter private constructor(
 
         // Other party accepted my proposal, agreement signed by other party
         else if (block.isAgreement && !block.publicKey.contentEquals(myPublicKey)) {
-            transactionsThrough++
+            transactionsBack++
+            throughput = System.currentTimeMillis()-lastAgreementBlockReceived
+            lastAgreementBlockReceived = System.currentTimeMillis()
             transmittingBlocks.remove(block.linkedBlockId)?.cancel()
             recAgreementHandler(Transaction.fromTrustChainTransactionObject(block.transaction))
         }
@@ -121,7 +128,6 @@ class CommunityAdapter private constructor(
             val nToSend = min(amount, tokenCount)
             val tokens = mutableListOf<String>()
             repeat(nToSend) {
-                transactionsSend ++;
                 tokens.add(popToken()!!)
             }
             proposeTransaction(Transaction(tokens), peer)
@@ -145,6 +151,7 @@ class CommunityAdapter private constructor(
                             peer.publicKey.keyToBin()
                         )
                     }
+                    transactionsSend ++;
                     logger.debug { "Send proposal block: ${block.summarize()}" }
 
                     if (resendLimit > 0) {
@@ -152,6 +159,7 @@ class CommunityAdapter private constructor(
                             repeat(resendLimit) {
                                 delay(resendTimeoutMillis)
                                 if (isActive) {
+                                    transactionsSend ++;
                                     trustChainCommunity.sendBlock(block, peer)
                                     trustChainCommunity.sendBlock(block)
                                     logger.debug { "Resend proposal block: ${block.summarize()}" }

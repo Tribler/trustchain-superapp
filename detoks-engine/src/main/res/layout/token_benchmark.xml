@@ -26,6 +26,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/token_count"/>
+
+        <TextView
+            android:id="@+id/packetslost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="throughput=100%"
+            android:textSize="32dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/throughput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="throughput=1000packets/s"
+            android:textSize="32dp"
+            android:textStyle="bold" />
     </LinearLayout>
     <View
         android:layout_width="fill_parent"
