@@ -2,11 +2,12 @@ package nl.tudelft.trustchain.detoks
 
 import com.frostwire.jlibtorrent.TorrentInfo
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
-import java.lang.Long.min
+import kotlin.math.min
+import kotlin.math.max
 
 
 class ProfileEntry(
-    val firstSeen:  Long = System.currentTimeMillis(),
+    var firstSeen:  Long = System.currentTimeMillis(),
     var watched:    Boolean = false,    // True if the video was watched
     var watchTime:  Long = 0,           // Average watch time
     var duration:   Long = 0,           // Video duration
@@ -24,11 +25,22 @@ class Profile(
     object ProfileConfig { const val MAX_DURATION_FACTOR  = 10 }
 
     fun addProfile(key: String) {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
+        if(!profiles.contains(key)) incrementTimesSeen(key) // Also creates the profile
+        else if(profiles[key]!!.firstSeen == 0L) { // If only the profile was seen through gossiping
+            profiles[key]!!.firstSeen = System.currentTimeMillis()
+        }
     }
 
     fun hasWatched(key: String): Boolean {
         return profiles.contains(key) && profiles[key]!!.watched
+    }
+
+    fun mergeWith(key: String, otherEntry: ProfileEntry) {
+        val entry = if (profiles.containsKey(key)) profiles[key] else ProfileEntry(timesSeen = 0, firstSeen = 0)
+        entry!!.duration = max(entry.duration, otherEntry.duration)     // Pick the non-zero value
+        entry.uploadDate = max(entry.uploadDate, otherEntry.uploadDate) // Pick the non-zero value
+        entry.likes = max(entry.likes, otherEntry.likes)                // Pick the highest value
+        updateEntryWatchTime(key, otherEntry.watchTime, false)
     }
 
     fun updateEntryDuration(key: String, duration: Long) {

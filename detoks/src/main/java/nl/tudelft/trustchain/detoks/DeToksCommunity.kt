@@ -111,18 +111,7 @@ class DeToksCommunity(private val context: Context) : Community() {
     private fun onProfileEntryGossip(packet: Packet) {
         val (_, payload) = packet.getAuthPayload(ProfileEntryMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-
-        payload.data.forEach {
-            // TODO: Maybe make a merge(entry) function in the profile class
-            it.second.hopCount      // TODO: Ignore as its in torrent gossiper
-            it.second.duration      // TODO: Update the duration (if 0?)
-            it.second.uploadDate    // TODO: Update the upload date (if 0?)
-            it.second.timesSeen     // TODO: Set it to 0 if it does not exist
-            it.second.firstSeen     // TODO: Set it to 0 if it has not been seen
-            it.second.likes         // TODO: Take the highest value
-            it.second.watched       // TODO: Set it to false
-            torrentManager.profile.updateEntryWatchTime(it.first, it.second.watchTime, false)
-        }
+        payload.data.forEach { torrentManager.profile.mergeWith(it.first, it.second) }
     }
 
     private fun onNetworkSizeGossip(packet: Packet) {
