@@ -71,7 +71,7 @@ class UpvoteToken constructor(
     /**
      * Sends a UpvoteToken to a random user and displays the result in a toast message
      * */
-    fun sendUpvoteToken(itemView: View, videoID: String) {
+    fun sendUpvoteToken(itemView: View) {
 
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
         val seedersIPAddress =  upvoteCommunity?.torrentManager?.mvpSeeder()?.sortedByDescending { it.third }
@@ -146,9 +146,9 @@ class UpvoteToken constructor(
                 }
                 val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList, proposalBlock.publicKey)
                 toastMessage = if (sendSuccess) {
-                    "Successfully sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
+                    "Successfully sent the token ${tokenIDList.joinToString(", ")} \n to the creator of ${proposalBlock.blockId}"
                 } else {
-                    "Failed to sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
+                    "Failed to sent the token ${tokenIDList.joinToString(", ")} \n to the creator of ${proposalBlock.blockId}"
                 }
 
             } catch (invalidMintException: InvalidMintException) {
@@ -161,7 +161,7 @@ class UpvoteToken constructor(
             Toast.makeText(
                 itemView.context,
                 toastMessage,
-                Toast.LENGTH_SHORT
+                Toast.LENGTH_LONG
             ).show()
 
         } else {
@@ -177,13 +177,13 @@ class UpvoteToken constructor(
     /**
      * Sets a listener to like a video by double tapping the screen
      */
-    fun setLikeListener(itemView: View, videoID: String) {
+    fun setLikeListener(itemView: View) {
         val adapter = this
 
         itemView.setOnClickListener(
             object : DoubleClickListener() {
                 override fun onDoubleClick(view: View?) {
-                    adapter.sendUpvoteToken(itemView, videoID)
+                    adapter.sendUpvoteToken(itemView)
                 }
             }
         )

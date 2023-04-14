@@ -110,7 +110,7 @@ class VideosAdapter(
                     }
                 }
 
-                upvoteToken.setLikeListener(itemView, videoID.text.toString())
+                upvoteToken.setLikeListener(itemView)
             }
             // TODO: remove this, for testing of Recommender only
             recommendMostLikedButton.setOnClickListener { Recommender.recommendMostLiked() }

@@ -39,6 +39,8 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             val dir2 = File(torrentDir)
             if (!dir2.exists()) {
                 dir2.mkdirs()
+            } else {
+                dir2.delete()
             }
             val file = File("$torrentDir/$DEFAULT_TORRENT_FILE")
             if (file.exists())  {
@@ -65,8 +67,11 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private fun makeSeedableTorrentDirAndPopulate(){
         try{
             val dir3 = File(seedableTorrentsDir)
+
             if (!dir3.exists()) {
                 dir3.mkdirs()
+            } else {
+                dir3.delete()
             }
             // currently I only know how to add seedable torrents manually and one by one T_T
             // TODO: figure out how to add all seedable torrents all in one swoop and not one by one
@@ -75,7 +80,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             addFile(seedableTorrentsDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
 //            addFile(seedableTorrentsDir, LAUNDROMAT, R.raw.cosmos_laundromat)
             deleteFile(seedableTorrentsDir, DEFAULT_POST_VIDEO)
-//            deleteFile(seedableTorrentsDir, LAUNDROMAT)
+            deleteFile(seedableTorrentsDir, LAUNDROMAT)
 //            deleteFile(seedableTorrentsDir, BIGBUCKBUNNY)
         } catch (e: Exception) {
             Log.e("Detoks", "Failed to make a cache for seedable torrents")
@@ -114,7 +119,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             File("${requireActivity().cacheDir.absolutePath}/seedableTorrents"),
             DEFAULT_CACHING_AMOUNT
         )
-        Recommender.initialize(torrentManager)
+        Recommender.initialize()
 
         upvoteToken = UpvoteToken(-100, "", "", "", "") //TODO: make constructor with no parameters for initialisation
         proposalToken = ProposalToken()
