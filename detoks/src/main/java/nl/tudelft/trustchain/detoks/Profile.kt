@@ -7,13 +7,13 @@ import kotlin.math.max
 
 
 class ProfileEntry(
-    var firstSeen:  Long = System.currentTimeMillis(),
     var watched:    Boolean = false,    // True if the video was watched
+    var lastUpdate: Long = 0,           // Updated when torrent received
     var watchTime:  Long = 0,           // Average watch time
     var duration:   Long = 0,           // Video duration
     var uploadDate: Long = 0,           // This is the torrent creation date
     var hopCount:   Int  = 0,           // Amount of other nodes visited
-    var timesSeen:  Int  = 1,           // Count of times we received it
+    var timesSeen:  Int  = 0,           // Count of times we received it
     var likes:      Int  = 0,           // TODO: Dependent on other team
 ) {
 
@@ -26,9 +26,7 @@ class Profile(
 
     fun addProfile(key: String) {
         if(!profiles.contains(key)) incrementTimesSeen(key) // Also creates the profile
-        else if(profiles[key]!!.firstSeen == 0L) { // If only the profile was seen through gossiping
-            profiles[key]!!.firstSeen = System.currentTimeMillis()
-        }
+        profiles[key]!!.lastUpdate = System.currentTimeMillis()
     }
 
     fun hasWatched(key: String): Boolean {
@@ -36,13 +34,14 @@ class Profile(
     }
 
     fun mergeWith(key: String, otherEntry: ProfileEntry) {
-        val entry = if(profiles.containsKey(key)) profiles[key] else ProfileEntry(firstSeen = 0L, timesSeen = 0)
+        val entry = if(profiles.containsKey(key)) profiles[key] else
+            ProfileEntry(timesSeen = 0, likes = otherEntry.likes, lastUpdate = otherEntry.lastUpdate)
         entry!!.duration = max(entry.duration, otherEntry.duration)     // Pick the non-zero value
         entry.uploadDate = max(entry.uploadDate, otherEntry.uploadDate) // Pick the non-zero value
 
-        // If we only gossiped this value, take the max, if we have the torrent, take most recent
-        if(entry.firstSeen == 0L) entry.likes = max(entry.likes , otherEntry.likes)
-        else entry.likes = if(otherEntry.firstSeen < entry.firstSeen) otherEntry.likes else entry.likes
+        // Take the most recent timestamp and update both the last update and likes fields
+        entry.likes = if(otherEntry.lastUpdate > entry.lastUpdate) otherEntry.likes else entry.likes
+        entry.lastUpdate = max(entry.lastUpdate, otherEntry.lastUpdate)
 
         profiles[key] = entry // Update the profile entry and watch time
         updateEntryWatchTime(key, otherEntry.watchTime, false)
@@ -76,7 +75,7 @@ class Profile(
     }
 
     fun incrementTimesSeen(key: String) {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry(timesSeen = 0)
+        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
         profiles[key]!!.timesSeen += 1
     }
 }
