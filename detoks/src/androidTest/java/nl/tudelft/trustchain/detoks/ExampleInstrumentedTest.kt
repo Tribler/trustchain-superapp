@@ -41,11 +41,11 @@ class TokenStoreTest {
 
     @Test
     fun testAddAndGetAllTokens() {
-        val token1 = Token("123", byteArrayOf(1, 2, 3))
-        val token2 = Token("456", byteArrayOf(4, 5, 6))
+        val token1 = Token("123", byteArrayOf(1, 2, 3), 10)
+        val token2 = Token("456", byteArrayOf(4, 5, 6), 11)
 
-        store.addToken(token1.unique_id, token1.public_key.contentToString())
-        store.addToken(token2.unique_id, token2.public_key.contentToString())
+        store.addToken(token1.unique_id, token1.public_key.contentToString(), token1.tokenIntId.toLong())
+        store.addToken(token2.unique_id, token2.public_key.contentToString(), token2.tokenIntId.toLong())
         val tokens = store.getAllTokens()
 
         assertEquals(listOf(token1, token2).map{it.unique_id}, tokens.map{it.unique_id})
@@ -54,10 +54,11 @@ class TokenStoreTest {
 
     @Test
     fun testRemoveTokenByID() {
-        val token1 = Token("123", byteArrayOf(1, 2, 3))
-        val token2 = Token("456", byteArrayOf(4, 5, 6))
-        store.addToken(token1.unique_id, token1.public_key.contentToString())
-        store.addToken(token2.unique_id, token2.public_key.contentToString())
+        val token1 = Token("123", byteArrayOf(1, 2, 3), 10)
+        val token2 = Token("456", byteArrayOf(4, 5, 6), 11)
+
+        store.addToken(token1.unique_id, token1.public_key.contentToString(), token1.tokenIntId.toLong())
+        store.addToken(token2.unique_id, token2.public_key.contentToString(), token2.tokenIntId.toLong())
 
         store.removeTokenByID(token1.unique_id)
         val tokens = store.getAllTokens()
@@ -67,10 +68,11 @@ class TokenStoreTest {
 
     @Test
     fun testRemoveAllTokens() {
-        val token1 = Token("123", byteArrayOf(1, 2, 3))
-        val token2 = Token("456", byteArrayOf(4, 5, 6))
-        store.addToken(token1.unique_id, token1.public_key.contentToString())
-        store.addToken(token2.unique_id, token2.public_key.contentToString())
+        val token1 = Token("123", byteArrayOf(1, 2, 3), 10)
+        val token2 = Token("456", byteArrayOf(4, 5, 6), 11)
+
+        store.addToken(token1.unique_id, token1.public_key.contentToString(), token1.tokenIntId.toLong())
+        store.addToken(token2.unique_id, token2.public_key.contentToString(), token2.tokenIntId.toLong())
 
         store.removeAllTokens()
         val tokens = store.getAllTokens()
@@ -80,10 +82,11 @@ class TokenStoreTest {
 
     @Test
     fun testGetBalance() {
-        val token1 = Token("123", byteArrayOf(1, 2, 3))
-        val token2 = Token("456", byteArrayOf(4, 5, 6))
-        store.addToken(token1.unique_id, token1.public_key.contentToString())
-        store.addToken(token2.unique_id, token2.public_key.contentToString())
+        val token1 = Token("123", byteArrayOf(1, 2, 3), 10)
+        val token2 = Token("456", byteArrayOf(4, 5, 6), 11)
+
+        store.addToken(token1.unique_id, token1.public_key.contentToString(), token1.tokenIntId.toLong())
+        store.addToken(token2.unique_id, token2.public_key.contentToString(), token2.tokenIntId.toLong())
 
         val balance = store.getBalance()
 
@@ -92,11 +95,11 @@ class TokenStoreTest {
 
     @Test
     fun testGetSingleToken() {
-        val token1 = Token("123", byteArrayOf(1, 2, 3))
-        val token2 = Token("456", byteArrayOf(4, 5, 6))
+        val token1 = Token("123", byteArrayOf(1, 2, 3), 10)
+        val token2 = Token("456", byteArrayOf(4, 5, 6), 11)
 
-        store.addToken(token1.unique_id, token1.public_key.contentToString())
-        store.addToken(token2.unique_id, token2.public_key.contentToString())
+        store.addToken(token1.unique_id, token1.public_key.contentToString(), token1.tokenIntId.toLong())
+        store.addToken(token2.unique_id, token2.public_key.contentToString(), token2.tokenIntId.toLong())
 
         val singleToken = store.getSingleToken()
 
