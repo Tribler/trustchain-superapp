@@ -27,10 +27,18 @@ class TokenStore(context: Context){
         return database.tokenStoreQueries.getAllTokens(tokenMapper).executeAsList()
     }
 
+    /**
+     * Removes a list of tokens from the database
+     * @param tokenList: list of tokens to be removed
+     */
     fun removeTokenList(tokenList : List<String>){
         return database.tokenStoreQueries.removeTokenList(tokenList)
     }
 
+    /**
+     * Adds a list of tokens to the database
+     * @param tokens: list of tokens to be added
+     */
     fun addTokenList(tokens : List<Token>) {
         database.tokenStoreQueries.transaction {
             tokens.forEach { token ->
@@ -66,11 +74,8 @@ class TokenStore(context: Context){
     }
 
     /**
-     * Removes a single token from the database
+     * Retreives a single token from the database
      */
-    fun removeToken() {
-        database.tokenStoreQueries.removeToken()
-    }
     fun getSingleToken(): Token {
         return database.tokenStoreQueries.getToken(tokenMapper).executeAsOne()
     }
@@ -82,6 +87,9 @@ class TokenStore(context: Context){
         return database.tokenStoreQueries.getBalance().executeAsOne().toInt()
     }
 
+    /**
+     * Checks if a token exists in the database
+     */
     fun checkToken(id : String) : Boolean {
         return database.tokenStoreQueries.checkToken(id).toString().toBoolean()
     }

@@ -30,6 +30,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
     private var groupSize = 100
 
+    // Looper for updating the list of tokens
     private val handler = Handler(Looper.getMainLooper())
     private val runnable = object : Runnable {
         override fun run() {
