@@ -14,6 +14,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     var seedingBandwidthLimit = 0
     var storageLimit : Int = 0
 
+
     companion object {
 
         const val STRATEGY_RANDOM = 0
@@ -24,6 +25,9 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         const val STRATEGY_NEW = 5
         const val STRATEGY_TOP = 6
         const val STRATEGY_HOPCOUNT = 7
+
+        const val RISING_CUTOFF_SECONDS = 7200 // 2 hour cutoff
+        const val HOT_CUTOFF_SECONDS = 24 * 3600//  1 day cutoff
     }
 
     init {
@@ -75,7 +79,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     private fun hotStrategy(
         p0: Pair<TorrentHandler, ProfileEntry?>,
         p1: Pair<TorrentHandler, ProfileEntry?>
-    ) : Int = p0.second!!.hopCount compareTo p1.second!!.hopCount
+    ) : Int = p0.second!!.likes compareTo p1.second!!.likes
 
     /**
      * Returns the torrent handlers based on hopcount
@@ -94,6 +98,36 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     ) : Int = (p0.second!!.likes / (p0.second!!.hopCount + 1)) compareTo (p1.second!!.likes / (p1.second!!.hopCount + 1))
 
     /**
+     * Determines if a torrent should be high in the rising list by checking the upload
+     * time to the current time
+     */
+    private fun risingCutoffComparator(
+        p0: Pair<TorrentHandler, ProfileEntry?>,
+        p1: Pair<TorrentHandler, ProfileEntry?>
+
+    ): Int {
+        val currentTime = System.currentTimeMillis() / 1000;
+        val minimumDate = currentTime - RISING_CUTOFF_SECONDS
+
+        return (p0.second!!.uploadDate >= minimumDate) compareTo (p1.second!!.uploadDate >= minimumDate)
+    }
+
+        /**
+     * Determines if a torrent should be high in the hot list by checking the upload
+     * time to the current time
+     */
+    private fun hotCutoffComparator(
+        p0: Pair<TorrentHandler, ProfileEntry?>,
+        p1: Pair<TorrentHandler, ProfileEntry?>
+
+    ): Int {
+        val currentTime = System.currentTimeMillis() / 1000;
+        val minimumDate = currentTime - HOT_CUTOFF_SECONDS
+
+        return (p0.second!!.uploadDate >= minimumDate) compareTo (p1.second!!.uploadDate >= minimumDate)
+    }
+
+    /**
      * Applies the sorting function sent as parameter, to the handlers, based on the profiles.
      */
     internal fun applyStrategy(
@@ -104,10 +138,18 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         if (id == STRATEGY_RANDOM) return handlers.shuffled().toMutableList()
         if (!strategyComparators.contains(id)) return handlers
 
-        val handlerProfile = handlers.map {
+        var handlerProfile = handlers.map {
             val key = it.handle.infoHash().toString()
             if (!profiles.contains(key)) return@map Pair(it, ProfileEntry())
             return@map Pair(it, profiles[key])
+        }
+
+        if (id == STRATEGY_RISING){
+            handlerProfile = handlerProfile.sortedWith(:: risingCutoffComparator).toMutableList()
+        }
+
+        if (id == STRATEGY_HOT) {
+            handlerProfile = handlerProfile.sortedWith(:: hotCutoffComparator).toMutableList()
         }
 
         val sortedHandlerProfile =
