@@ -29,7 +29,6 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private var totalTransactions = 1000
 
     private var groupSize = 100
-    private var tokenIDCounter = 0
 
     private val handler = Handler(Looper.getMainLooper())
     private val runnable = object : Runnable {
@@ -140,7 +139,9 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         }
 
         binding.startTransactionsButton.setOnClickListener {
-            binding.transactionsPerSecondField.text = "${lifecycleScope.launch{groupedBenchmark()}} ms"
+            var totalExecutionTime = 0L
+            lifecycleScope.launch{totalExecutionTime = groupedBenchmark()}
+            binding.transactionsPerSecondField.text = "${totalExecutionTime} ms"
         }
 
         binding.singleTransactionsButton.setOnClickListener {
@@ -173,8 +174,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         binding.tokenListView.setOnItemClickListener() { _, _, position, _ ->
             val token = adapter.getItem(position)
             val builder = AlertDialog.Builder(requireContext())
-            builder.setTitle("Token ${token.unique_id}")
-            builder.setMessage("Sender: ${token.public_key}")
+            builder.setTitle("Token ${token.tokenIntId}")
+            builder.setMessage("UUID: ${token.unique_id}")
             val dialog= builder.create()
             dialog.show()
         }
@@ -210,7 +211,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private fun generateTokens() {
         for (i in 1..totalTransactions) {
             // Add Token to the token store
-            transactionEngine.tokenStore.addToken(UUID.randomUUID().toString(), ipv8.myPeer.publicKey.keyToBin().toString(), i.toLong())
+            transactionEngine.tokenStore.addToken(UUID.randomUUID().toString(), i.toLong())
         }
     }
 

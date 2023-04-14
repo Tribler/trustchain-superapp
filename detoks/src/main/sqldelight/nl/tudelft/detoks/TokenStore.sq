@@ -1,16 +1,15 @@
 CREATE TABLE tokens(
     id TEXT NOT NULL,
-    publicKey TEXT NOT NULL,
     tokenIntId INTEGER NOT NULL,
     PRIMARY KEY (id)
 );
 
 getAllTokens:
-SELECT id, publicKey, tokenIntId FROM tokens;
+SELECT id, tokenIntId FROM tokens;
 
 addToken:
-INSERT INTO tokens(id, publicKey, tokenIntId)
-VALUES(?,?, ?);
+INSERT INTO tokens(id, tokenIntId)
+VALUES(?, ?);
 
 removeTokenByID:
 DELETE FROM tokens WHERE id = ?;
@@ -21,7 +20,7 @@ DELETE FROM tokens
     LIMIT 1;
 
 getToken:
-SELECT id, publicKey, tokenIntId FROM tokens
+SELECT id, tokenIntId FROM tokens
     ORDER BY id
     LIMIT 1;
 

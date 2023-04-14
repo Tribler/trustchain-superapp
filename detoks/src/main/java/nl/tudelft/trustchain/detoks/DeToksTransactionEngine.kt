@@ -90,8 +90,7 @@ class DeToksTransactionEngine (
      */
     private fun receiveSingleTokenProposal(block: TrustChainBlock) {
         val token = block.transaction["token"] as String
-        val (uid, pk, intId) = token.split(",")
-        println(pk)
+        val (uid, intId) = token.split(",")
 
         // Add token to personal database
         // If sending to self ->  Increment the ID to avoid duplicate ID errors.
@@ -102,7 +101,7 @@ class DeToksTransactionEngine (
             newID = UUID.randomUUID().toString()
         }
         if(!(tokenStore.checkToken(newID))){
-            tokenStore.addToken((newID), pk, intId.toLong())
+            tokenStore.addToken((newID), intId.toLong())
         }
 
         Log.d(LOGTAG, "Saving received $token to database")
@@ -174,7 +173,7 @@ class DeToksTransactionEngine (
         for (transaction in transactions) {
             val tokenList: MutableList<String> = mutableListOf()
             for (token in transaction) {
-                val (uid, _, intId) = token.split(",")
+                val (uid, intId) = token.split(",")
                 tokenList.add(uid)
 
                 // If sending to self ->  Increment the ID to avoid duplicate ID errors.
@@ -185,7 +184,7 @@ class DeToksTransactionEngine (
                 }
 
                 // Add token to personal database
-                tokensToAdd.add(Token(newID, block.publicKey, intId.toInt()))
+                tokensToAdd.add(Token(newID, intId.toInt()))
             }
             grouped_agreement_uids.add(tokenList.toList())
         }

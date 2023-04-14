@@ -13,11 +13,10 @@ class TokenStore(context: Context){
      */
     private val tokenMapper = {
             id : String,
-            publicKey: String,
             tokenIntId: Long,
         ->
         Token(
-            id, publicKey.toByteArray(), tokenIntId.toInt()
+            id, tokenIntId.toInt()
         )
     }
 
@@ -37,7 +36,6 @@ class TokenStore(context: Context){
             tokens.forEach { token ->
                 database.tokenStoreQueries.addToken(
                     id = token.unique_id,
-                    publicKey = token.public_key.toString(),
                     tokenIntId = token.tokenIntId.toLong()
                 )
             }
@@ -48,8 +46,8 @@ class TokenStore(context: Context){
     /**
      * Adds a transaction to the database
      */
-    fun addToken(id : String, publicKey: String, tokenIntId: Long){
-        database.tokenStoreQueries.addToken(id, publicKey, tokenIntId)
+    fun addToken(id : String, tokenIntId: Long){
+        database.tokenStoreQueries.addToken(id, tokenIntId)
     }
 
     /**
