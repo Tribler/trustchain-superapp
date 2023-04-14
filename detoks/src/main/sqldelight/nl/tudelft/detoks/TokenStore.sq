@@ -12,7 +12,6 @@ addToken:
 INSERT INTO tokens(id, publicKey, tokenIntId)
 VALUES(?,?, ?);
 
-
 removeTokenByID:
 DELETE FROM tokens WHERE id = ?;
 
@@ -26,6 +25,10 @@ DELETE FROM tokens;
 
 getBalance:
 SELECT COUNT(id) FROM tokens;
+
+removeTokenList:
+DELETE FROM tokens
+WHERE id IN ?;
 
 checkToken:
 SELECT CASE

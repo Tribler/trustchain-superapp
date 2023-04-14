@@ -28,6 +28,23 @@ class TokenStore(context: Context){
         return database.tokenStoreQueries.getAllTokens(tokenMapper).executeAsList()
     }
 
+    fun removeTokenList(tokenList : List<String>){
+        return database.tokenStoreQueries.removeTokenList(tokenList)
+    }
+
+    fun addTokenList(tokens : List<Token>) {
+        database.tokenStoreQueries.transaction {
+            tokens.forEach { token ->
+                database.tokenStoreQueries.addToken(
+                    id = token.unique_id,
+                    publicKey = token.public_key.toString(),
+                    tokenIntId = token.tokenIntId.toLong()
+                )
+            }
+        }
+
+    }
+
     /**
      * Adds a transaction to the database
      */

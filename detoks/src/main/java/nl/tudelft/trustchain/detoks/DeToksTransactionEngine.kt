@@ -101,7 +101,6 @@ class DeToksTransactionEngine (
 
     private fun receiveSingleTokenAgreement(block: TrustChainBlock) {
         val tokenId = block.transaction["tokenSent"] as String
-
         // Remove token from personal database
         tokenStore.removeTokenByID(tokenId)
 
@@ -110,7 +109,8 @@ class DeToksTransactionEngine (
 
     // Grouped tokens
     fun sendTokenGrouped(transactions: List<List<Token>>, peer: Peer): TrustChainBlock {
-
+        Log.d(LOGTAG, "Sending grouped TokenList")
+        val startTime = System.nanoTime()
         val groupedTransactions = mutableListOf<List<String>>()
         for (transaction in transactions) {
             val tokenList: MutableList<String> = mutableListOf()
@@ -122,7 +122,10 @@ class DeToksTransactionEngine (
 
         val transaction = mapOf("transactions" to groupedTransactions)
 
-        Log.d(LOGTAG, "Sending grouped transactions: $transactions")
+        Log.d(
+            "DeToksTransactionEngine",
+            "Execution time sendTokenGrouped: ${(System.nanoTime() - startTime)/1000000}"
+        )
 
         return createProposalBlock(
             GROUPED_BLOCK,
@@ -133,47 +136,57 @@ class DeToksTransactionEngine (
 
     @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenProposal(block: TrustChainBlock) {
+        val startTime = System.nanoTime()
         val transactions = block.transaction["transactions"] as List<List<String>>
-        Log.d(LOGTAG, "Received grouped transaction: ${transactions}")
+        Log.d(LOGTAG, "Received grouped Proposal block")
         //extract tokens, create grouped agreement block
         val grouped_agreement_uids = mutableListOf<List<String>>()
+        val tokensToAdd = mutableListOf<Token>()
+
         for (transaction in transactions) {
             val tokenList: MutableList<String> = mutableListOf()
             for (token in transaction) {
                 val (uid, _, intId) = token.split(",")
                 tokenList.add(uid)
 
-                // Add token to personal database
                 // If sending to self ->  Increment the ID to avoid duplicate ID errors.
                 var newID = uid
-                Log.d(LOGTAG, "Sending to self: $sendingToSelf")
+                //Log.d(LOGTAG, "Sending to self: $sendingToSelf")
                 if (sendingToSelf) {
                     newID = UUID.randomUUID().toString()
                 }
-                if(!(tokenStore.checkToken(newID))){
-                    tokenStore.addToken((newID), block.publicKey.toString(), intId.toLong())
-                }
-                Log.d(LOGTAG, "Saving received $token to database")
+
+                // Add token to personal database
+                tokensToAdd.add(Token(newID, block.publicKey, intId.toInt()))
             }
             grouped_agreement_uids.add(tokenList.toList())
         }
+        tokenStore.addTokenList(tokensToAdd)
         val transaction = mapOf("tokensSent" to grouped_agreement_uids.toList())
         createAgreementBlock(block, transaction)
+        Log.d(
+            "DeToksTransactionEngine",
+            "Execution time receiveGroupedTokenProposal: ${(System.nanoTime() - startTime)/1000000}"
+        )
     }
     @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenAgreement(block: TrustChainBlock) {
+        val startTime = System.nanoTime()
         Log.d(LOGTAG, "Received grouped agreement block")
         val tokenIds = block.transaction["tokensSent"] as List<List<String>>
-        Log.d(LOGTAG, "${tokenIds}}")
         val tokensToRemove= mutableListOf<String>()
+
         for (tokens in tokenIds ) {
                 for(token_id in tokens) {
                     // Remove token from personal database
-                    tokenStore.removeTokenByID(token_id)
                     tokensToRemove.add(token_id)
                 }
         }
-        Log.d(LOGTAG, "Removing spent tokens $tokensToRemove from database")
+        tokenStore.removeTokenList(tokensToRemove.toList())
+        Log.d(
+            "DeToksTransactionEngine",
+            "Execution time receiveGroupedTokenAgreement: ${(System.nanoTime() - startTime)/1000000}"
+        )
     }
 
     fun addPeer(peer: Peer, self : Boolean = false) {

@@ -29,7 +29,6 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
     private var totalTransactions = 1000
     private var groupSize = 100
-    private var tokensPerTransaction = 1
     private var tokenIDCounter = 0
 
     private val handler = Handler(Looper.getMainLooper())
@@ -51,7 +50,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             }
             val sendingTime = (System.nanoTime() - startTime) / 1000000
             Log.d(
-                "BENCHMARK",
+                "DeToksTransactionEngine",
                 "Batch of groups has been sent. Execution time: ${sendingTime} s"
             )
             delay(30 * 1000L)
@@ -60,7 +59,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         val totalExecutionTime = (System.nanoTime() - startTime) / 1000000000
         Log.d(
-            "BENCHMARK",
+            "DeToksTransactionEngine",
             "All tokens sent. Total Execution time: ${totalExecutionTime} s"
         )
 
@@ -69,10 +68,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
     suspend fun groupedBenchmark(): Long {
         val startTime = System.nanoTime()
-        var tokenList: ArrayList<Token>
         do {
-            tokenList = transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
-            Log.d("BENCHMARK", "Sending ${tokenList.size} tokens. List: ${tokenList}")
             for (transactionGroup in transactionEngine.tokenStore.getAllTokens()
                 .chunked(groupSize)) {
                 transactionEngine.sendTokenGrouped(
@@ -82,24 +78,22 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             }
             val sendingTime = (System.nanoTime() - startTime) / 1000000
             Log.d(
-                "BENCHMARK",
-                "Batch of groups has been sent. Execution time: ${sendingTime} s"
+                "DeToksTransactionEngine",
+                "Batch of groups has been sent. Execution time: ${sendingTime} ms"
             )
 
-            delay(30 * 1000000L)
+            delay(30 * 1000L)
             Log.d(
-                "BENCHMARK",
-                "Remaining group ${transactionEngine.tokenStore.getAllTokens().size}. List: ${transactionEngine.tokenStore.getAllTokens()}"
+                "DeToksTransactionEngine",
+                "Current tokens in wallet: ${transactionEngine.tokenStore.getAllTokens()} ms"
             )
-
         } while (transactionEngine.tokenStore.getAllTokens().isNotEmpty())
 
         val totalExecutionTime = (System.nanoTime() - startTime) / 1000000000
         Log.d(
-            "BENCHMARK",
+            "DeToksTransactionEngine",
             "All tokens sent. Total Execution time: ${totalExecutionTime} s"
         )
-
         return totalExecutionTime
     }
 
@@ -119,6 +113,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         binding.generateTokensButton.setOnClickListener {
             generateTokens()
+            updateList()
         }
 
         val environmentSwitchButton = view.findViewById<Button>(R.id.switch_environment_button)
@@ -161,6 +156,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         binding.resetTokensButton.setOnClickListener {
             transactionEngine.tokenStore.removeAllTokens()
+            updateList()
         }
     }
 
