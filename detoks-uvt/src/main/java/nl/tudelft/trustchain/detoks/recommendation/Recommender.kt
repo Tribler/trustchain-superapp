@@ -87,6 +87,7 @@ class Recommender {
                     videoInfo.add(proposalBlock.blockId)
                     return videoInfo
                 } else {
+                    Log.i("Detoks", "recommended wrong stale video ID: $recommendedVideoID")
                     return null
                 }
             } else {
