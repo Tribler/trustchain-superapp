@@ -45,7 +45,7 @@ class AdminFragment : BaseFragment(R.layout.fragment_admin) {
         buttonTokenList.setOnClickListener {
             val navController = view.findNavController()
             val bundle = Bundle().apply {
-                putString("access", "user")
+                putString("access", "admin")
             }
             navController.navigate(R.id.tokenListAdmin, bundle)
         }
