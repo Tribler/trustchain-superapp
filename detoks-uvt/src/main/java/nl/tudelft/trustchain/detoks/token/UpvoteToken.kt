@@ -155,6 +155,7 @@ class UpvoteToken constructor(
                     upvoteTokenList.add(nextToken)
                     tokenIDList.add(nextToken.tokenID)
                 }
+                //FIXME fix upvoteCommunity.sendUpvoteToken(upvoteTokenList) => it currently sends the token to a random peer which is wrong!!!
                 val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList)
                 toastMessage = if (sendSuccess == true) {
                     "Successfully sent the token ${tokenIDList.joinToString(", ")} to the creator of $videoID"
