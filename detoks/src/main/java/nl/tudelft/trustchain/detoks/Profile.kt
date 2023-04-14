@@ -14,9 +14,7 @@ class ProfileEntry(
     var hopCount:   Int  = 0,           // Amount of other nodes visited
     var timesSeen:  Int  = 1,           // Count of times we received it
     var likes:      Int  = 0,           // TODO: Dependent on other team
-) {
-
-}
+)
 
 class Profile(
     val profiles: HashMap<String, ProfileEntry> = HashMap()

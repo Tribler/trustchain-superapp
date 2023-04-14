@@ -1,6 +1,9 @@
 package nl.tudelft.trustchain.detoks
 
+import android.util.Log
 import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
+import java.nio.channels.Selector
+import kotlin.random.Random
 
 class Strategy {
 
@@ -65,5 +68,29 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         return sortedHandlerProfile.map { it.first }.toMutableList()
     }
 
+    internal fun findLeechingIndex(
+        handlers: MutableList<TorrentHandler>,
+        profiles: HashMap<String, ProfileEntry>,
+        newHandler: TorrentHandler,
+        startIndex: Int
+    ) : Int {
+        if (leechingStrategy == 0 || (!strategyComparators.contains(leechingStrategy)))
+            return Random.nextInt(startIndex, handlers.size)
 
+        val handlerComparator =
+            Comparator<TorrentHandler> { th0, th1 ->
+                compareValuesBy(th0, th1, strategyComparators[leechingStrategy]!!) { handler ->
+                    Pair(
+                        handler,
+                        profiles[handler.handle.infoHash().toString()]
+                    )
+                }
+            }
+
+        return handlers.binarySearch(newHandler,
+            handlerComparator,
+            startIndex,
+            handlers.size
+        )
+    }
 }
