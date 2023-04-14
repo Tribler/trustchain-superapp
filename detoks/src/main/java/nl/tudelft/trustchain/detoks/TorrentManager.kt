@@ -6,12 +6,10 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.AlertType
-import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
+import com.frostwire.jlibtorrent.alerts.*
 import kotlinx.coroutines.*
 import mu.KotlinLogging
+import nl.tudelft.ipv8.android.IPv8Android
 import java.io.File
 
 
@@ -39,6 +37,7 @@ class TorrentManager private constructor (
     private var lastTimeStamp: Long
     private var currentIndex = 0
 
+    private lateinit var job: Job
     init {
         clearMediaCache()
         initializeSessionManager()
@@ -157,6 +156,7 @@ class TorrentManager private constructor (
         for (i in (currentIndex - cachingAmount)..(currentIndex + cachingAmount)) {
             val torrent = torrentFiles.gett(i)
             if (i == currentIndex) {
+
                 torrent.downloadWithMaxPriority()
             } else {
                 torrent.downloadFile()
@@ -228,12 +228,21 @@ class TorrentManager private constructor (
                     AlertType.TORRENT_FINISHED -> {
                         logger.info { "Torrent finished" }
                     }
+                    AlertType.LISTEN_SUCCEEDED -> {
+                        val listenSucceededAlert = alert as ListenSucceededAlert
+                        val ipAddress = listenSucceededAlert.address().toString().substring(1)
+                        val port = listenSucceededAlert.port()
+                        Log.d(DeToksCommunity.LOGGING_TAG,"IP: $ipAddress, Port: $port")
+                        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+                        community.saveLibTorrentPort(port.toString())
+                    }
                     else -> {}
                 }
             }
         })
 
         sessionManager.start()
+        Log.d(DeToksCommunity.LOGGING_TAG, sessionManager.listenEndpoints().toString())
     }
 
     private fun clearMediaCache() {
@@ -351,7 +360,38 @@ class TorrentManager private constructor (
                 updateSeedingStrategy(strategyId, storageLimit)
         }
     }
+    fun startMonitoringLeechers(handler: TorrentHandler) {
+       // val pastLeechers = mutableSetOf<String>()
 
+        job = CoroutineScope(Dispatchers.Main).launch {
+            while (isActive) {
+                val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+                val connectedLeechers = handler.handle.peerInfo().filter { peer ->
+                    peer.downSpeed() > 0
+
+                }
+                for (leecher in connectedLeechers) {
+
+                    Log.d(DeToksCommunity.LOGGING_TAG, "found a leecher ")
+                    Log.d(DeToksCommunity.LOGGING_TAG, leecher.ip())
+                    val ip = leecher.ip().split(":")[0]
+                    val port = leecher.ip().split(":")[1]
+
+                    for (peer in community.getPeers()) {
+                        Log.d(DeToksCommunity.LOGGING_TAG, "ip address: ${peer.address.ip} port: ${peer.address.port}" )
+                    }
+                    community.findPeerByAddress(ip, port)
+//                    if (peer != null && !pastLeechers.contains(peer.mid)) {
+//                        community.requestTokens(1, peer.mid)
+//                        pastLeechers.add(peer.mid)
+//                    }
+
+                }
+
+                delay(3000) // Check for connected leechers every second
+            }
+        }
+    }
     private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 400000) : Boolean {
         if (!handler.handle.isValid) return false
         handler.downloadFile()
@@ -360,6 +400,7 @@ class TorrentManager private constructor (
             withTimeout(timeout) {
                 while (!handler.isDownloaded()) {
                     Log.d(DeToksCommunity.LOGGING_TAG, "Trying to download... ${handler.handle.status().totalWantedDone()} / ${handler.handle.status().totalWanted()}")
+
                     delay(1000)
                 }
             }
@@ -373,6 +414,8 @@ class TorrentManager private constructor (
         handler.handle.pause()
         handler.handle.resume()
 
+        startMonitoringLeechers(handler)
+
         return true
     }
 
@@ -381,6 +424,7 @@ class TorrentManager private constructor (
         seedingTorrents.forEach {
             stopSeedingTorrent(it)
         }
+        job.cancel()
     }
 
     private fun stopSeedingTorrent(handler: TorrentHandler) {
@@ -393,7 +437,9 @@ class TorrentManager private constructor (
                 return
         }
         handler.deleteFile()
+        job.cancel()
     }
+
 
     fun setUploadRateLimit(bandwidth: Int) {
         Log.d(DeToksCommunity.LOGGING_TAG, "Updated the upload limit")
@@ -422,7 +468,9 @@ class TorrentManager private constructor (
         fun getPath(): String {
             return "$cacheDir/$torrentName/$fileName"
         }
-
+        fun peerInfo(): MutableList<PeerInfo>? {
+            return handle.peerInfo()
+        }
         fun getVideoDuration() : Long {
             if(!isDownloaded()) return 0
             val retriever = MediaMetadataRetriever()

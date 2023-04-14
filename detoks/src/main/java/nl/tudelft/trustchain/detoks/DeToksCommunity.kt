@@ -24,6 +24,8 @@ class DeToksCommunity(private val context: Context,
 
     private val walletManager = WalletManager(context)
     private val visitedPeers  = mutableListOf<Peer>()
+    private lateinit var libtorrentPort: String
+
 
     init {
         messageHandlers[MESSAGE_TORRENT_ID] = ::onTorrentGossip
@@ -33,6 +35,7 @@ class DeToksCommunity(private val context: Context,
         messageHandlers[MESSAGE_BOOT_REQUEST] = :: onBootRequestGossip
         messageHandlers[MESSAGE_BOOT_RESPONSE] = :: onBootResponseGossip
         messageHandlers[MESSAGE_TOKEN_REQUEST_ID] = ::onTokenRequestMessage
+        messageHandlers[MESSAGE_PORT_REQUEST_ID] = ::onPortRequestMessage
     }
 
     companion object {
@@ -45,6 +48,7 @@ class DeToksCommunity(private val context: Context,
         const val MESSAGE_BOOT_RESPONSE = 6
         const val BLOCK_TYPE = "detoks_transaction"
         const val MESSAGE_TOKEN_REQUEST_ID = 7
+        const val MESSAGE_PORT_REQUEST_ID = 8
     }
 
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
@@ -96,9 +100,12 @@ class DeToksCommunity(private val context: Context,
         }
     }
 
+    fun saveLibTorrentPort(port: String) {
+        libtorrentPort = port
+    }
 
     fun gossipWith(peer: Peer, message: Serializable, id: Int) {
-        Log.d(LOGGING_TAG, "Gossiping with ${peer.mid}, msg id: $id")
+        // Log.d(LOGGING_TAG, "Gossiping with ${peer.mid}, msg id: $id")
 
         val packet = serializePacket(id, message)
 
@@ -156,6 +163,56 @@ class DeToksCommunity(private val context: Context,
         }
     }
 
+    private fun onPortRequestMessage(packet: Packet) {
+
+        Log.d(LOGGING_TAG, "here?")
+        try {
+            val (_, payload) = packet.getAuthPayload(PortRequestMessage.Deserializer)
+
+            Log.d(LOGGING_TAG, "Received port request from ${payload.senderMid}")
+
+            // Check if the received port matches the libtorrent port
+            if (payload.port == libtorrentPort) {
+                // If the port matches, you can call the sendTokens function or perform any other action
+                sendTokens(1, payload.senderMid)
+            } else {
+                Log.d(
+                    LOGGING_TAG,
+                    "Received port ${payload.port} does not match libtorrent port $libtorrentPort"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(LOGGING_TAG, "Error deserializing PortRequestMessage payload: ${e.message}")
+        }
+    }
+
+
+    fun requestPeerLibtorrentPort(recipientMid: String, port: String) {
+        if (myPeer.mid == recipientMid) {
+            Log.d(LOGGING_TAG, "Cannot request port from yourself.")
+            return
+        }
+
+        Log.d(LOGGING_TAG, "Requesting libtorrent port from $recipientMid")
+
+        // Find the peer by its mid
+        val recipientPeer = getPeers().find { it.mid == recipientMid }
+
+        // If the peer is found, send a port request message
+        if (recipientPeer != null) {
+            val requestMessage = PortRequestMessage(myPeer.mid, port)
+            val packet = serializePacket(
+                MESSAGE_PORT_REQUEST_ID,
+                requestMessage
+            )
+            send(recipientPeer.address, packet)
+            Log.d(LOGGING_TAG, "sent message")
+            //gossipWith(recipientPeer, requestMessage, MESSAGE_PORT_REQUEST_ID)
+        } else {
+            Log.d(LOGGING_TAG, "Peer not found: $recipientMid")
+        }
+    }
+
     private fun onNetworkSizeGossip(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(NetworkSizeMessage.Deserializer)
         NetworkSizeGossiper.receivedResponse(payload, peer)
@@ -179,10 +236,18 @@ class DeToksCommunity(private val context: Context,
 
          sendTokens(payload.amount, payload.senderMid)
     }
-    fun findPeerByAddress(address: String): Peer? {
-        return getPeers().firstOrNull {
+    fun findPeerByAddress(ip: String, port: String) {
+        Log.d(LOGGING_TAG, "calling findPeerByAddress with ip $ip and port $port"  )
+        Log.d(LOGGING_TAG, " $port mylibtorrent port: $libtorrentPort actual port: ${myPeer.address.port}"  )
+       val peerlist =  getPeers().filter {
+            print(port)
+            it.address.ip == ip }
 
-            it.address.ip == address }
+        for (peer in peerlist) {
+            requestPeerLibtorrentPort(peer.mid, port)
+        }
+
+
     }
     fun getBalance(): Float {
         return walletManager.getOrCreateWallet(myPeer.mid).balance
