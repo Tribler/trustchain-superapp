@@ -34,17 +34,13 @@ class Profile(
     }
 
     fun mergeWith(key: String, otherEntry: ProfileEntry) {
-        val entry = if(profiles.containsKey(key)) profiles[key] else
-            ProfileEntry(timesSeen = 0, likes = otherEntry.likes, lastUpdate = otherEntry.lastUpdate)
+        val entry = if(profiles.containsKey(key)) profiles[key] else ProfileEntry(timesSeen = 0)
         entry!!.duration = max(entry.duration, otherEntry.duration)     // Pick the non-zero value
         entry.uploadDate = max(entry.uploadDate, otherEntry.uploadDate) // Pick the non-zero value
 
-        // Take the most recent timestamp and update both the last update and likes fields
-        entry.likes = if(otherEntry.lastUpdate > entry.lastUpdate) otherEntry.likes else entry.likes
-        entry.lastUpdate = max(entry.lastUpdate, otherEntry.lastUpdate)
-
-        profiles[key] = entry // Update the profile entry and watch time
+        profiles[key] = entry
         updateEntryWatchTime(key, otherEntry.watchTime, false)
+        updateEntryLikes(key, otherEntry.likes, false)
     }
 
     fun updateEntryDuration(key: String, duration: Long) {
@@ -55,6 +51,16 @@ class Profile(
     fun updateEntryHopCount(key: String, hopCount: Int) {
         addProfile(key)
         profiles[key]!!.hopCount = hopCount
+    }
+
+    fun updateEntryLikes(key: String, likes: Int, myUpdate: Boolean) {
+        addProfile(key)
+        if(myUpdate) {
+            profiles[key]!!.watchTime += (likes / NetworkSizeGossiper.networkSizeEstimate)
+        } else {
+            profiles[key]!!.watchTime += likes
+            profiles[key]!!.watchTime /= 2
+        }
     }
 
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
@@ -72,6 +78,10 @@ class Profile(
     fun updateEntryUploadDate(key: String, info: TorrentInfo) {
         addProfile(key)
         profiles[key]!!.uploadDate = info.creationDate()
+    }
+
+    fun incrementLikes(key: String) {
+        updateEntryLikes(key, likes = 1, myUpdate = true)
     }
 
     fun incrementTimesSeen(key: String) {
