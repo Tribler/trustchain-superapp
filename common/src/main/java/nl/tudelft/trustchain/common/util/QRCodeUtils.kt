@@ -50,7 +50,7 @@ class QRCodeUtils(private val context: Context) {
         text: String,
         size: Int = QRCodeSize,
         pColor: Int = pixelColor,
-        bColor: Int = backgroundColor,
+        bColor: Int = backgroundColor
     ): Bitmap? {
         if (text.isEmpty()) {
             Toast.makeText(context, "Enter String!", Toast.LENGTH_SHORT).show()
@@ -72,7 +72,7 @@ class QRCodeUtils(private val context: Context) {
         value: String,
         size: Int = QRCodeSize,
         pColor: Int = pixelColor,
-        bColor: Int = backgroundColor,
+        bColor: Int = backgroundColor
     ): Bitmap? {
         val bitMatrix: BitMatrix
         try {
@@ -80,8 +80,7 @@ class QRCodeUtils(private val context: Context) {
                 value,
                 BarcodeFormat.QR_CODE,
                 size,
-                size,
-                null,
+                size, null
             )
         } catch (IllegalArgumentException: IllegalArgumentException) {
             return null
@@ -94,11 +93,10 @@ class QRCodeUtils(private val context: Context) {
         for (y in 0 until bitMatrixHeight) {
             val offset = y * bitMatrixWidth
             for (x in 0 until bitMatrixWidth) {
-                pixels[offset + x] = if (bitMatrix.get(x, y)) {
+                pixels[offset + x] = if (bitMatrix.get(x, y))
                     ContextCompat.getColor(context, pColor)
-                } else {
+                else
                     ContextCompat.getColor(context, bColor)
-                }
             }
         }
         val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_8888)
