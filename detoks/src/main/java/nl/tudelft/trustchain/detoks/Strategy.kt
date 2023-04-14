@@ -86,14 +86,12 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
      * time to the current time
      */
     private fun risingCutoffComparator(
-        p0: Pair<TorrentHandler, ProfileEntry?>,
-        p1: Pair<TorrentHandler, ProfileEntry?>
-
-    ): Int {
+        item: Pair<TorrentHandler, ProfileEntry?>,
+    ): Boolean {
         val currentTime = System.currentTimeMillis() / 1000;
         val minimumDate = currentTime - RISING_CUTOFF_SECONDS
 
-        return (p0.second!!.uploadDate >= minimumDate) compareTo (p1.second!!.uploadDate >= minimumDate)
+        return item.second!!.uploadDate >= minimumDate
     }
 
         /**
@@ -101,14 +99,13 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
      * time to the current time
      */
     private fun hotCutoffComparator(
-        p0: Pair<TorrentHandler, ProfileEntry?>,
-        p1: Pair<TorrentHandler, ProfileEntry?>
+        item: Pair<TorrentHandler, ProfileEntry?>,
 
-    ): Int {
+    ): Boolean {
         val currentTime = System.currentTimeMillis() / 1000;
         val minimumDate = currentTime - HOT_CUTOFF_SECONDS
 
-        return (p0.second!!.uploadDate >= minimumDate) compareTo (p1.second!!.uploadDate >= minimumDate)
+        return item.second!!.uploadDate >= minimumDate
     }
 
     /**
@@ -128,16 +125,28 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
             return@map Pair(it, profiles[key])
         }
 
+        var sortedHandlerProfile =
+            handlerProfile.sortedWith(strategyComparators[id]!!).toMutableList()
+
         if (id == STRATEGY_RISING){
-            handlerProfile = handlerProfile.sortedWith(:: risingCutoffComparator).toMutableList()
+            val filteredLow = handlerProfile.filter(::risingCutoffComparator)
+            val filteredHigh = handlerProfile.filterNot(::risingCutoffComparator)
+
+            val sortedLow = filteredLow.sortedWith(strategyComparators[id]!!).toMutableList()
+            val sortedHigh = filteredHigh.sortedWith(strategyComparators[id]!!).toMutableList()
+
+            sortedHandlerProfile = (sortedLow + sortedHigh).toMutableList()
         }
 
         if (id == STRATEGY_HOT) {
-            handlerProfile = handlerProfile.sortedWith(:: hotCutoffComparator).toMutableList()
-        }
+            val filteredLow = handlerProfile.filter(::hotCutoffComparator)
+            val filteredHigh = handlerProfile.filterNot(::hotCutoffComparator)
 
-        val sortedHandlerProfile =
-            handlerProfile.sortedWith(strategyComparators[id]!!).toMutableList()
+            val sortedLow = filteredLow.sortedWith(strategyComparators[id]!!).toMutableList()
+            val sortedHigh = filteredHigh.sortedWith(strategyComparators[id]!!).toMutableList()
+
+            sortedHandlerProfile = (sortedLow + sortedHigh).toMutableList()
+        }
 
         return sortedHandlerProfile.map { it.first }.toMutableList()
     }
