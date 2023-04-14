@@ -172,7 +172,7 @@
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/block_listview"
+                android:id="@+id/token_list_view"
                 tools:listitem="@layout/list_item"
                 android:divider="#000000"
                 android:dividerHeight="1dp"/>

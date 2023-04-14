@@ -12,6 +12,9 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentPeerConnectionBinding
 
+/**
+ * Fragment for selecting a peer to send tokens to
+ */
 class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
 
     private val binding by viewBinding(FragmentPeerConnectionBinding::bind)
@@ -22,20 +25,14 @@ class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
 
     private lateinit var adapter : PeerAdapter
 
-    /**
-     * Updates a list of blocks for debug purposes
-     */
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // Get communities and services
         ipv8 = IPv8Android.getInstance()
         transactionEngine = ipv8.getOverlay()!!
         trustchainCommunity = ipv8.getOverlay()!!
 
-        // Update the list adapter to incorporate all peers
+        // Set the list adapter for the ListView and add on click listeners
         adapter = PeerAdapter(requireActivity(), getPeers())
-        binding.peerlistUpdate.setOnClickListener {
-            adapter = PeerAdapter(requireActivity(), getPeers())
-        }
 
         binding.peerListview.isClickable = true
         binding.peerListview.adapter = adapter
@@ -45,12 +42,9 @@ class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
             builder.setTitle("Peer ${position}")
             builder.setMessage("Are you sure you want to connect to peer: ${peer.address}")
 
+            // If we select a peer, return to the benchmark fragment
             builder.setPositiveButton("Yes") { _, _ ->
-                if (position == 0) {
-                    transactionEngine.addPeer(peer, true)
-                } else {
-                    transactionEngine.addPeer(peer, false)
-                }
+                transactionEngine.setPeer(peer)
                 val navController = Navigation.findNavController(view)
                 navController.navigate(R.id.action_return_to_benchmark_fragment)
             }
@@ -60,7 +54,19 @@ class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
             val dialog= builder.create()
             dialog.show()
         }
+
+        // Set the update list button on click listener
+        binding.peerlistUpdate.setOnClickListener {
+            adapter.clear()
+            for (peer in getPeers()){
+                adapter.insert(peer, adapter.count)
+            }
+        }
     }
+
+    /**
+     * Returns a list of peers found in the TransactionEngine TrustChainCommunity
+     */
     private fun getPeers(): ArrayList<Peer> {
         var peers = ArrayList<Peer>()
         peers.add(transactionEngine.myPeer)
