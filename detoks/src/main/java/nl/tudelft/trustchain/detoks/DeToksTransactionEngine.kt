@@ -10,6 +10,8 @@ import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.detoks.db.TokenStore
 import java.util.UUID
 
+data class DeToksTransaction(val tokens: List<Token>, val recipient: Peer)
+
 /**
  * Handles the sending and receiving of transactions
  */
@@ -31,9 +33,6 @@ class DeToksTransactionEngine (
     private lateinit var selectedPeer : Peer
     private lateinit var selfPeer : Peer
     private var sendingToSelf = true
-
-    // Value to increment the token ID with when sending to self to avoid duplicate ID errors
-    private var tokenIDIncrementer = 1000
 
     init {
         // Set up block listeners
@@ -68,19 +67,34 @@ class DeToksTransactionEngine (
         })
     }
 
+//    /**
+//     * Send a single token, no grouping
+//     * @param tok: The token to send
+//     * @param peer: The peer to send the token to
+//     */
+//    fun sendTokenSingle(tok: Token, peer: Peer): TrustChainBlock {
+//        Log.d(LOGTAG, "Sending single token ${tok.unique_id} to ${peer.mid}")
+//        val transaction = mapOf("token" to tok.toString())
+//
+//        return createProposalBlock(
+//            SINGLE_BLOCK,
+//            transaction,
+//            peer.publicKey.keyToBin()
+//        )
+//    }
+
     /**
-     * Send a single token, no grouping
-     * @param tok: The token to send
-     * @param peer: The peer to send the token to
+     * Send a single transaction, no grouping
+     * @param transaction: The transaction to send
      */
-    fun sendTokenSingle(tok: Token, peer: Peer): TrustChainBlock {
-        Log.d(LOGTAG, "Sending single token ${tok.unique_id} to ${peer.mid}")
-        val transaction = mapOf("token" to tok.toString())
+    fun sendTokenSingle(transaction: DeToksTransaction): TrustChainBlock {
+        Log.d(LOGTAG, "Sending single transaction to ${transaction.recipient.mid}")
+        val trustChainTransaction = mapOf("tokens" to transaction.tokens.map { it.toString() })
 
         return createProposalBlock(
             SINGLE_BLOCK,
-            transaction,
-            peer.publicKey.keyToBin()
+            trustChainTransaction,
+            transaction.recipient.publicKey.keyToBin()
         )
     }
 
@@ -89,26 +103,33 @@ class DeToksTransactionEngine (
      * @param block: The proposal block
      */
     private fun receiveSingleTokenProposal(block: TrustChainBlock) {
-        val token = block.transaction["token"] as String
-        val (uid, intId) = token.split(",")
 
-        // Add token to personal database
-        // If sending to self ->  Increment the ID to avoid duplicate ID errors.
-        var newID = uid
-        Log.d(LOGTAG, "Sending to self: $sendingToSelf")
+        val tokenStrings = block.transaction["tokens"] as List<*>
 
-        if (sendingToSelf) {
-            newID = UUID.randomUUID().toString()
+        val tokensToAdd = tokenStrings.map {
+            it as String
+            val (uid, intId) = it.split(",")
+
+            // If sending to self ->  Increment the ID to avoid duplicate ID errors.
+            var newID = uid
+            if (sendingToSelf) {
+                newID = UUID.randomUUID().toString()
+            }
+
+            Token(newID, intId.toInt())
+        }.filter {
+            // check if token is already in database
+            !(tokenStore.checkToken(it.unique_id))
         }
-        if(!(tokenStore.checkToken(newID))){
-            tokenStore.addToken((newID), intId.toLong())
-        }
 
-        Log.d(LOGTAG, "Saving received $token to database")
+        // save tokens to token db
+        Log.d(LOGTAG, "Saving received  to database")
+        tokenStore.addTokenList(tokensToAdd)
 
         // Create an agreement block to send back
-        val transaction = mapOf("tokenSent" to uid)
+        val transaction = mapOf("tokensSent" to tokensToAdd.map { it.unique_id })
         createAgreementBlock(block, transaction)
+
     }
 
     /**
@@ -116,12 +137,13 @@ class DeToksTransactionEngine (
      * @param block: The agreement block
      */
     private fun receiveSingleTokenAgreement(block: TrustChainBlock) {
-        val tokenId = block.transaction["tokenSent"] as String
+        val tokenIds = block.transaction["tokensSent"] as List<*>
+        val tokenUids = tokenIds.map { it as String }
 
-        // Token was received correctly, remove token from personal database
-        tokenStore.removeTokenByID(tokenId)
+        tokenStore.removeTokenList(tokenUids)
 
-        Log.d(LOGTAG, "Removing spent $tokenId from database")
+        Log.d(LOGTAG, "Removing spent $tokenIds from database")
+        tokenStore.removeTokenList(tokenUids)
     }
 
     /**

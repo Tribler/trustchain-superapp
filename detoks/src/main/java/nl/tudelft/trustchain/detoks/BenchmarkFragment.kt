@@ -44,12 +44,12 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
      */
     fun sendSingleToken(): Long {
 
-        val executionTime = measureTimeMillis {
-            transactionEngine.sendTokenSingle(
-                transactionEngine.tokenStore.getSingleToken(),
-                transactionEngine.getSelectedPeer()
-            )
+        val recipient = transactionEngine.getSelectedPeer()
 
+        val executionTime = measureTimeMillis {
+            val token = transactionEngine.tokenStore.getSingleToken()
+            val transaction = DeToksTransaction(listOf(token), recipient)
+            transactionEngine.sendTokenSingle(transaction)
         }
 
         return executionTime
@@ -66,7 +66,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         do {
             tokenList = transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
             for (tok in tokenList){
-                transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
+                transactionEngine.sendTokenSingle(DeToksTransaction(listOf(tok), transactionEngine.getSelectedPeer()))
             }
             val sendingTime = (System.nanoTime() - startTime) / 1000000
             Log.d(
