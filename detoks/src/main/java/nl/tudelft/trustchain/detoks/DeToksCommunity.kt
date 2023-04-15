@@ -42,7 +42,6 @@ class DeToksCommunity(
                 val magnet = block.transaction.get("torrentMagnet") as String
                 Log.d("Detoks", "Received like for $video, $torrent")
                 if (firstInstance(video, torrent)) TorrentManager.getInstance(context).addMagnet(magnet)
-
             }
         })
     }

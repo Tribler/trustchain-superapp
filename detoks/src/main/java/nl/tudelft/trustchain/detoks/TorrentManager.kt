@@ -101,11 +101,11 @@ class TorrentManager constructor (
         var i = 0
         while(i < a.size) {
             val b = a[i].transaction
-            Log.wtf("detoks",i.toString())
+
             i += 1
             val c = torrentFiles.filter { !it.watched }
             for (t in c) {
-                if (t.fileName.equals(b["video"] as String) && t.torrentName.equals(b["torrent"] as String)) {
+                if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String) {
                     t.watched = true
                     return t.asMediaInfo()
                 }
