@@ -39,33 +39,10 @@ data class AdminWallet(
     }
 
     fun addToken(token : Token) {
-        tokens!!.add(token)
-        dbHelper?.addToken(token, admin = true)
-    }
-
-    fun removeToken(token: Token): Token{
-        tokens!!.remove(token)
-        dbHelper?.removeToken(token, admin = true)
-        return token
-    }
-
-
-    // Return the number of tokens needed to pay the value
-    // For example: we need to pay 2 euros, but we have tokes of 0.50 cents, 1 euro token
-    // This means we need to return either two 1 euro tokens or 4x0.50 cents tokens
-    fun getPayment(value: Int): ArrayList<Token> {
-        val tokensToPay = arrayListOf<Token>();
-        var tempValue = 0;
-
-        for(t in tokens!!) {
-            if(tempValue + t.value <= value){
-                tempValue = tempValue + t.value
-                tokensToPay.add(removeToken(t))
-            }
-            if(tempValue == value) {
-                break
-            }
+        val result = dbHelper?.addToken(token, admin = true)
+        if(result != -1L) {
+            tokens!!.add(token)
         }
-        return tokensToPay
+        tokens!!.add(token)
     }
 }
