@@ -208,7 +208,7 @@ class TorrentManager(
             // no need to download again if it was already downloaded before: prevents warning and crash bugs
             Log.i("Detoks", "there is no torrenthandle yet for the video with this hash: $proposalBlockHash \n and this magnetlink: $magnet")
             sessionManager.download(torrentInfo, cacheDir)
-            var handle = sessionManager.find(hash)
+            handle = sessionManager.find(hash)
             handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
             handle.prioritizeFiles(arrayOf(Priority.IGNORE))
             handle.pause()
