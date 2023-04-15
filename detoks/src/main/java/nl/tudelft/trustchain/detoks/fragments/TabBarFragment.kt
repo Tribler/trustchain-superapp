@@ -1,8 +1,8 @@
 package nl.tudelft.trustchain.detoks.fragments
 
 import android.Manifest
+import android.graphics.Color
 import android.os.Build
-import android.os.Build.VERSION_CODES.TIRAMISU
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,16 +18,27 @@ import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.adapters.TabBarAdapter
 
 class TabBarFragment : Fragment() {
-    private lateinit var viewPager: ViewPager2
+    private val HOME_INDEX = 0
+    private val UPLOAD_VIDEO_INDEX = 1
+    private val PROFILE_INDEX = 2
 
-    @RequiresApi(TIRAMISU)
+    private lateinit var viewPager: ViewPager2
+    private lateinit var detoksFragment: DeToksFragment
+    private lateinit var profileFragment: ProfileFragment
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        detoksFragment = DeToksFragment()
+        profileFragment = ProfileFragment()
+
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)
+        tabLayout.getTabAt(UPLOAD_VIDEO_INDEX)?.icon?.setTint(Color.RED)
+
         viewPager = view.findViewById(R.id.viewPager)
         viewPager.isUserInputEnabled = false
-        viewPager.adapter = TabBarAdapter(this, listOf(DeToksFragment(), Fragment(), ProfileFragment()))
+        viewPager.adapter = TabBarAdapter(this, listOf(detoksFragment, Fragment(), profileFragment))
 
         val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
@@ -47,7 +58,9 @@ class TabBarFragment : Fragment() {
 
         tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
-                if (tab.position == 1) {
+                tabLayout.getTabAt(UPLOAD_VIDEO_INDEX)?.icon?.setTint(Color.RED)
+
+                if (tab.position == UPLOAD_VIDEO_INDEX) {
                     val previousTabIndex = viewPager.currentItem
 
                     if (Build.VERSION.SDK_INT > 32) {
@@ -63,9 +76,19 @@ class TabBarFragment : Fragment() {
                 viewPager.currentItem = tab.position
             }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabUnselected(tab: TabLayout.Tab) {
+                tabLayout.getTabAt(UPLOAD_VIDEO_INDEX)?.icon?.setTint(Color.RED)
+            }
 
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab) {
+                tabLayout.getTabAt(UPLOAD_VIDEO_INDEX)?.icon?.setTint(Color.RED)
+
+                if (tab.position == HOME_INDEX) {
+                    detoksFragment.update()
+                } else if (tab.position == PROFILE_INDEX) {
+                    profileFragment.update()
+                }
+            }
         })
     }
 

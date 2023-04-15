@@ -21,7 +21,7 @@ class VideosAdapter(
     private val videoScaling: Boolean = false
 ) :
     RecyclerView.Adapter<VideosAdapter.VideoViewHolder?>() {
-    private val mVideoItems: List<VideoItem> =
+    val mVideoItems: List<VideoItem> =
         List(100) { VideoItem(torrentManager::provideContent) }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
@@ -67,7 +67,6 @@ class VideosAdapter(
         var mVideoView: VideoView
         var txtTitle: TextView
         var txtDesc: TextView
-        var peerCount: TextView
         var mProgressBar: ProgressBar
         var likeButton: ImageButton
         var likeCount: TextView
@@ -93,7 +92,6 @@ class VideosAdapter(
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
-            peerCount = itemView.findViewById(R.id.peerCount)
             mProgressBar = itemView.findViewById(R.id.progressBar)
             likeButton = itemView.findViewById(R.id.like_button)
             likeCount = itemView.findViewById(R.id.like_count)
@@ -103,7 +101,6 @@ class VideosAdapter(
 
             // Disable the click sound effects.
             mVideoView.isSoundEffectsEnabled = false
-            likeButton.isSoundEffectsEnabled = false
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
@@ -127,7 +124,7 @@ class VideosAdapter(
                 // Show the like button.
                 likeButton.visibility = View.VISIBLE
 
-                likeButton.setOnClickListener{
+                likeButton.setOnClickListener {
                     likeVideo(content)
                 }
 
@@ -137,9 +134,12 @@ class VideosAdapter(
                     }
                 })
 
+                mVideoView.setOnFocusChangeListener { view, isFocused ->
+                    if (isFocused) view.performClick()
+                }
+
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
-                peerCount.text = "Peers: " + community.getPeers().size.toString()
                 Log.d("DeToks", content.fileURI)
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")

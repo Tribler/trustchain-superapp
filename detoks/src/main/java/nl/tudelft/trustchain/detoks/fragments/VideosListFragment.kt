@@ -20,13 +20,15 @@ class VideosListFragment(private val likesPerVideo: List<Pair<String, Int>>) : F
     private lateinit var adapter: ArrayAdapter<Pair<String, Int>>
 
     fun updateVideos() {
-        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-        val author = community.myPeer.publicKey.toString()
-        val videos = community.getPostedVideos(author)
+        if (this::adapter.isInitialized) {
+            val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+            val author = community.myPeer.publicKey.toString()
+            val videos = community.getPostedVideos(author)
 
-        adapter.clear()
-        adapter.addAll(videos)
-        adapter.notifyDataSetChanged()
+            adapter.clear()
+            adapter.addAll(videos)
+            adapter.notifyDataSetChanged()
+        }
     }
 
     override fun onResume() {
