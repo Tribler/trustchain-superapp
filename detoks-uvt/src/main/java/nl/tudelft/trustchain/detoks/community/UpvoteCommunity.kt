@@ -127,6 +127,7 @@ class UpvoteCommunity(
         onMagnetURI(peer, payload)
     }
 
+
     private fun onMagnetURI(peer: Peer, payload: MagnetURIPayload) {
         Log.i(
             "Detoks",

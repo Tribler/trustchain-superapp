@@ -202,14 +202,20 @@ class TorrentManager(
     fun addTorrent(magnet: String, proposalBlockHash: String, videoPostedOn: String, videoID: String) {
         val torrentInfo = getInfoFromMagnet(magnet)?:return
         val hash = torrentInfo.infoHash()
+        var handle = sessionManager.find(hash)
+
+        if (sessionManager.find(hash) == null) {
+            // no need to download again if it was already downloaded before: prevents warning and crash bugs
+            Log.i("Detoks", "there is no torrenthandle yet for the video with this hash: $proposalBlockHash \n and this magnetlink: $magnet")
+            sessionManager.download(torrentInfo, cacheDir)
+            var handle = sessionManager.find(hash)
+            handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+            handle.prioritizeFiles(arrayOf(Priority.IGNORE))
+            handle.pause()
+        }
 
         Log.i("Detoks", "Adding new torrent: ${torrentInfo.name()}")
 
-        sessionManager.download(torrentInfo, cacheDir)
-        val handle = sessionManager.find(hash)
-        handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
-        handle.prioritizeFiles(arrayOf(Priority.IGNORE))
-        handle.pause()
 
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
