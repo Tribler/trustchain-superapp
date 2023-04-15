@@ -5,7 +5,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-class TokenAdapter(private val context: Activity, private val tokenArray: ArrayList<nl.tudelft.trustchain.detoks.Token>) : ArrayAdapter<Token>(context, R.layout.list_item, tokenArray){
+
+/**
+ * Adapter class to create list items for the token list
+ */
+class TokenAdapter(private val context: Activity, private val tokenArray: ArrayList<Token>) : ArrayAdapter<Token>(context, R.layout.list_item, tokenArray){
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val inflater = context.layoutInflater
@@ -14,14 +18,16 @@ class TokenAdapter(private val context: Activity, private val tokenArray: ArrayL
         val token = getItem(position)
         val record = rowView.findViewById(R.id.item_number) as TextView
         val token_id = rowView.findViewById(R.id.item_id) as TextView
-//        val public_key = rowView.findViewById(R.id.item_field1) as TextView
-//
-//        public_key.text = token.public_key.toString()
-        record.text = "Token ID: " + token.unique_id
+
+        record.text = "Group:" + (token.tokenIntId / 10) + " Token ID: " + token.tokenIntId
         token_id.text = "ID: " + token.unique_id
         return rowView
     }
 
+    /**
+     * Retrieves item at position
+     * @param position: position of item
+     */
     override fun getItem(position: Int): Token {
         return tokenArray[position]
     }

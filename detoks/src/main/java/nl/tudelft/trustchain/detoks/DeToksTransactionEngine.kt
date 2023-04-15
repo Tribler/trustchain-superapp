@@ -7,12 +7,15 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.trustchain.detoks.db.TokenStore
+import java.util.UUID
 
 data class DeToksTransaction(val tokens: List<Token>, val recipient: Peer)
 
-class DeToksTransactionEngine(
+/**
+ * Handles the sending and receiving of transactions
+ */
+class DeToksTransactionEngine (
     val tokenStore: TokenStore,
     val context: Context,
     settings: TrustChainSettings,
@@ -27,93 +30,145 @@ class DeToksTransactionEngine(
 
     private val LOGTAG = "DeToksTransactionEngine"
 
-    private lateinit var selectedPeer: Peer
-    private lateinit var selfPeer: Peer
+    private lateinit var selectedPeer : Peer
+    private lateinit var selfPeer : Peer
     private var sendingToSelf = true
 
-    private val enableTokenDB = false
+    init {
+        // Set up block listeners
+        addListener(SINGLE_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                // If the block is actually addressed to me, or if I'm sending to myself, process the block
+                if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
+                    if (block.isProposal) {
+                        Log.d(LOGTAG, "Received SINGLE proposal block")
+                        receiveSingleTokenProposal(block)
+                    } else if (block.isAgreement) {
+                        Log.d(LOGTAG, "Received SINGLE agreement block")
+                        receiveSingleTokenAgreement(block)
+                    }
+                }
+            }
+        })
 
-    // This value is 1000 because we will be doing 1000 transactions benchmarks
-    private var tokenIDIncrementer = 1000
+        addListener(GROUPED_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                // If the block is actually addressed to me, or if I'm sending to myself, process the block
+                if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
+                    if (block.isProposal) {
+                        Log.d(LOGTAG, "Received GROUPED proposal block")
+                        receiveGroupedTokenProposal(block)
+                    } else if (block.isAgreement) {
+                        Log.d(LOGTAG, "Received GROUPED agreement block")
+                        receiveGroupedTokenAgreement(block)
+                    }
+                }
+            }
+        })
+    }
 
-    // Single token, no grouping
-    fun sendTransactionSingle(transaction: DeToksTransaction): TrustChainBlock {
-        Log.d(LOGTAG, "Sending transaction")
+//    /**
+//     * Send a single token, no grouping
+//     * @param tok: The token to send
+//     * @param peer: The peer to send the token to
+//     */
+//    fun sendTokenSingle(tok: Token, peer: Peer): TrustChainBlock {
+//        Log.d(LOGTAG, "Sending single token ${tok.unique_id} to ${peer.mid}")
+//        val transaction = mapOf("token" to tok.toString())
+//
+//        return createProposalBlock(
+//            SINGLE_BLOCK,
+//            transaction,
+//            peer.publicKey.keyToBin()
+//        )
+//    }
+
+    /**
+     * Send a single transaction, no grouping
+     * @param transaction: The transaction to send
+     */
+    fun sendTokenSingle(transaction: DeToksTransaction): TrustChainBlock {
+        Log.d(LOGTAG, "Sending single transaction to ${transaction.recipient.mid}")
         val trustChainTransaction = mapOf("tokens" to transaction.tokens.map { it.toString() })
 
-        return createProposalBlockMine(
+        return createProposalBlock(
             SINGLE_BLOCK,
             trustChainTransaction,
             transaction.recipient.publicKey.keyToBin()
         )
     }
 
-//    fun sendTokensSingle(toks: List<Token>, peer: Peer) {
-//
-//        // must be done sequentially
-//        val peerPk = peer.publicKey.keyToBin()
-//        for (tok in toks) {
-//            val transaction = mapOf("token" to tok.toString())
-//            val block = ProposalBlockBuilder(myPeer, database, SINGLE_BLOCK, transaction, peerPk).sign()
-//            onBlockCreated(block)
-//            sendBlock(block)
-//        }
-//    }
+    /**
+     * Receive a single token proposal, no grouping
+     * @param block: The proposal block
+     */
+    private fun receiveSingleTokenProposal(block: TrustChainBlock) {
 
-    private fun receiveSingleTransactionProposal(block: TrustChainBlock) {
+        val tokenStrings = block.transaction["tokens"] as List<*>
 
-        val tokens = block.transaction["tokens"] as List<*>
+        val tokensToAdd = tokenStrings.map {
+            it as String
+            val (uid, intId) = it.split(",")
 
-        val tokenUids = tokens.map {tok ->
-            tok as String
-            val (uid, pk) = tok.split(",")
-
-            // Add token to personal database
-            // Add token to personal database
             // If sending to self ->  Increment the ID to avoid duplicate ID errors.
-            var newID = uid.toInt()
-            Log.d(LOGTAG, "Sending to self: $sendingToSelf")
+            var newID = uid
             if (sendingToSelf) {
-                newID += tokenIDIncrementer
+                newID = UUID.randomUUID().toString()
             }
-            if (enableTokenDB) {
-                tokenStore.addToken(newID.toString(), pk)
-            }
-            Log.d(LOGTAG, "Saving received $tok to database")
 
-
-            uid
+            Token(newID, intId.toInt())
+        }.filter {
+            // check if token is already in database
+            !(tokenStore.checkToken(it.unique_id))
         }
 
-        val transaction = mapOf("tokensSent" to tokenUids)
-        createAgreementBlockMine(block, transaction)
+        // save tokens to token db
+        Log.d(LOGTAG, "Saving received  to database")
+        tokenStore.addTokenList(tokensToAdd)
+
+        // Create an agreement block to send back
+        val transaction = mapOf("tokensSent" to tokensToAdd.map { it.unique_id })
+        createAgreementBlock(block, transaction)
+
     }
 
-    private fun receiveSingleTransactionAgreement(block: TrustChainBlock) {
+    /**
+     * Receive a single token agreement block and remove token from personal database, no grouping
+     * @param block: The agreement block
+     */
+    private fun receiveSingleTokenAgreement(block: TrustChainBlock) {
         val tokenIds = block.transaction["tokensSent"] as List<*>
+        val tokenUids = tokenIds.map { it as String }
 
-        for (tokenId in tokenIds) {
-            tokenId as String
+        tokenStore.removeTokenList(tokenUids)
 
-            if (enableTokenDB) {
-                // Remove token from personal database
-                tokenStore.removeTokenByID(tokenId)
-            }
-            Log.d(LOGTAG, "Removing spent $tokenId from database")
-
-        }
+        Log.d(LOGTAG, "Removing spent $tokenIds from database")
+        tokenStore.removeTokenList(tokenUids)
     }
 
-    // Grouped tokens
+    /**
+     * Send a list of tokens, grouped
+     * @param transactions: List of lists of tokens to be sent
+     * @param peer: Peer to send the tokens to
+     */
     fun sendTokenGrouped(transactions: List<List<Token>>, peer: Peer): TrustChainBlock {
-
-        val transactionsList = transactions.map { transaction ->
-            transaction.map { tok -> tok.toString() }
+        Log.d(LOGTAG, "Sending grouped TokenList")
+        val startTime = System.nanoTime()
+        val groupedTransactions = mutableListOf<List<String>>()
+        for (transaction in transactions) {
+            val tokenList: MutableList<String> = mutableListOf()
+            for (token in transaction) {
+                tokenList.add(token.toString())
+            }
+            groupedTransactions.add(tokenList)
         }
 
-        val transaction = mapOf("transactions" to transactionsList)
+        Log.d(
+            LOGTAG,
+            "Execution time sendTokenGrouped: ${(System.nanoTime() - startTime)/1000000}"
+        )
 
-        Log.d(LOGTAG, "Sending grouped transactions: $transactions")
+        val transaction = mapOf("transactions" to groupedTransactions)
 
         return createProposalBlock(
             GROUPED_BLOCK,
@@ -122,89 +177,112 @@ class DeToksTransactionEngine(
         )
     }
 
-    fun sendTokenGrouped(transactions: List<DeToksTransaction>): TrustChainBlock {
-
-        val transactionsList = transactions.map { transaction ->
-            Pair(transaction.tokens.map { it.toString() }, transaction.recipient)
-        }
-
-        val transaction = mapOf("transactions" to transactionsList)
-
-        Log.d(LOGTAG, "Sending grouped transactions: $transactions")
-
-        return createProposalBlock(
-            GROUPED_BLOCK,
-            transaction,
-            transactions[0].recipient.publicKey.keyToBin()
-        )
-    }
-
+    /**
+     * Receive a grouped token proposal
+     * @param block: The proposal block
+     */
     @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenProposal(block: TrustChainBlock) {
+        val startTime = System.nanoTime()
         val transactions = block.transaction["transactions"] as List<List<String>>
-        Log.d(LOGTAG, "Received grouped transaction: ${transactions}")
-        //extract tokens, create grouped agreement block
+
+        Log.d(LOGTAG, "Received grouped proposal: ${transactions}")
+
+        // Extract tokens from transactions field, create grouped agreement block as response
         val grouped_agreement_uids = mutableListOf<List<String>>()
+        val tokensToAdd = mutableListOf<Token>()
+
         for (transaction in transactions) {
             val tokenList: MutableList<String> = mutableListOf()
             for (token in transaction) {
-                val (uid, _) = token.split(",")
+                val (uid, intId) = token.split(",")
                 tokenList.add(uid)
 
-                // Add token to personal database
                 // If sending to self ->  Increment the ID to avoid duplicate ID errors.
-                var newID = uid.toInt()
-                Log.d(LOGTAG, "Sending to self: $sendingToSelf")
+                var newID = uid
+                //Log.d(LOGTAG, "Sending to self: $sendingToSelf")
                 if (sendingToSelf) {
-                    newID += tokenIDIncrementer
+                    newID = UUID.randomUUID().toString()
                 }
-                if (enableTokenDB) {
-                    tokenStore.addToken((newID).toString(), block.publicKey.toString())
-                }
-                Log.d(LOGTAG, "Saving received $token to database")
+
+                // Add token to personal database
+                tokensToAdd.add(Token(newID, intId.toInt()))
             }
             grouped_agreement_uids.add(tokenList.toList())
         }
+        tokenStore.addTokenList(tokensToAdd)
         val transaction = mapOf("tokensSent" to grouped_agreement_uids.toList())
         createAgreementBlock(block, transaction)
+        Log.d(
+            "DeToksTransactionEngine",
+            "Execution time receiveGroupedTokenProposal: ${(System.nanoTime() - startTime)/1000000}"
+        )
     }
 
+    /**
+     * Receive a grouped token agreement block and remove tokens from personal database
+     * @param block: The agreement block
+     */
     @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenAgreement(block: TrustChainBlock) {
+        val startTime = System.nanoTime()
         Log.d(LOGTAG, "Received grouped agreement block")
         val tokenIds = block.transaction["tokensSent"] as List<List<String>>
-        Log.d(LOGTAG, "${tokenIds}}")
-        val tokensToRemove = mutableListOf<String>()
-        for (tokens in tokenIds) {
-            for (token_id in tokens) {
-                // Remove token from personal database
-                tokenStore.removeTokenByID(token_id)
-                tokensToRemove.add(token_id)
-            }
+        val tokensToRemove= mutableListOf<String>()
+
+        for (tokens in tokenIds ) {
+                for(token_id in tokens) {
+                    // Remove token from personal database
+                    tokensToRemove.add(token_id)
+                }
         }
-        Log.d(LOGTAG, "Removing spent tokens $tokensToRemove from database")
+        tokenStore.removeTokenList(tokensToRemove.toList())
+        Log.d(
+            "DeToksTransactionEngine",
+            "Execution time receiveGroupedTokenAgreement: ${(System.nanoTime() - startTime)/1000000}"
+        )
     }
 
-    fun addPeer(peer: Peer, self: Boolean = false) {
-        selectedPeer = peer
-        sendingToSelf = self
-        Log.d(LOGTAG, "Selected peer: ${selectedPeer.publicKey}")
-    }
-
+    /**
+     * Initializes self and selected peer variables
+     * Sets both peers to self as a default starting point
+     * @param self: The self peer
+     */
     fun initializePeers(self: Peer) {
         selectedPeer = self
         selfPeer = self
     }
 
-    fun getSelectedPeer(): Peer {
+    /**
+     * Gets the selected peer
+     */
+    fun getSelectedPeer() : Peer {
         return selectedPeer
     }
 
-    fun getSelfPeer(): Peer {
+    /**
+     * Gets the self peer
+     */
+    fun getSelfPeer() : Peer {
         return selfPeer
     }
 
-    fun isPeerSelected(): Boolean {
+    /**
+     * Sets the selected peer
+     * Also sets the sendingToSelf variable if the selected peer is the self peer
+     * @param peer: The peer to set as selected
+     */
+    fun setPeer(peer: Peer) {
+        selectedPeer = peer
+        sendingToSelf = peer == selfPeer
+        Log.d(LOGTAG, "Selected peer: ${selectedPeer.publicKey}")
+    }
+
+
+    /**
+     * Checks if the peers are initialized yet, used in the onViewCreated method of BenchmarkFragment
+     */
+    fun isPeerSelected() : Boolean {
         return ::selectedPeer.isInitialized
     }
 
@@ -219,120 +297,5 @@ class DeToksTransactionEngine(
             return DeToksTransactionEngine(store, context, settings, database, crawler)
         }
     }
-
-    fun createProposalBlockMine(
-        blockType: String,
-        transaction: TrustChainTransaction,
-        publicKey: ByteArray
-    ): TrustChainBlock {
-        val block = ProposalBlockBuilder(myPeer, database, blockType, transaction, publicKey).sign()
-
-        onBlockCreated(block)
-
-        sendBlock(block)
-
-        return block
-    }
-
-
-    /**
-     * Creates an agreement block that will be linked to the proposal block.
-     *
-     * @param link The proposal block which the agreement block will be linked to.
-     * @param transaction A map with supplementary information concerning the transaction.
-     */
-    fun createAgreementBlockMine(
-        link: TrustChainBlock,
-        transaction: TrustChainTransaction
-    ): TrustChainBlock {
-        assert(
-            link.linkPublicKey.contentEquals(myPeer.publicKey.keyToBin()) ||
-                link.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
-        ) {
-            "Cannot counter sign block not addressed to self"
-        }
-
-        assert(link.linkSequenceNumber == UNKNOWN_SEQ) {
-            "Cannot counter sign block that is not a request"
-        }
-
-        val block = AgreementBlockBuilder(myPeer, database, link, transaction).sign()
-
-        onBlockCreated(block)
-
-        sendBlockPair(link, block)
-
-        return block
-    }
-
-    private fun onBlockCreated(block: TrustChainBlock) {
-
-        // validate, sign and persist block, stop if does not validate
-        val validation = validateAndPersistBlock(block)
-        Log.d(LOGTAG, "Signed block, result: $validation")
-        if (validation !is ValidationResult.PartialNext && validation !is ValidationResult.Valid) {
-            throw RuntimeException("Signed block did not validate")
-        }
-
-        // send block to the counterparty
-        val peer = network.getVerifiedByPublicKeyBin(block.linkPublicKey)
-        if (peer != null) {
-            // If there is a counterparty to sign, we send it
-            sendBlock(block, peer = peer)
-        }
-    }
-
-    fun validateAndPersistBlock(block: TrustChainBlock): ValidationResult {
-        val validationResult = block.validate(database)
-
-        if (validationResult is ValidationResult.Invalid) {
-            Log.d(LOGTAG, "Block is invalid: ${validationResult.errors}")
-        } else {
-            if (!database.contains(block)) {
-                try {
-                    Log.d(LOGTAG, "addBlock " + block.sequenceNumber)
-                    database.addBlock(block)
-                } catch (e: Exception) {
-                    Log.d(LOGTAG, "Failed to insert block into database")
-                }
-
-                // Replace listeners with this
-                if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
-                    onBlockReceived(block)
-                }
-
-            }
-        }
-        return validationResult
-    }
-
-    private fun onBlockReceived(block: TrustChainBlock) {
-
-        if (block.type == SINGLE_BLOCK) {
-
-            if (block.isProposal) {
-                Log.d(LOGTAG, "Received SINGLE proposal block")
-                receiveSingleTransactionProposal(block)
-            } else if (block.isAgreement) {
-                Log.d(LOGTAG, "Received SINGLE agreement block")
-                receiveSingleTransactionAgreement(block)
-            }
-        }
-
-        if (block.type == GROUPED_BLOCK) {
-
-            // LinkPublicKey = the addressee of the block
-            if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
-                if (block.isProposal) {
-                    Log.d(LOGTAG, "Received GROUPED proposal block")
-                    receiveGroupedTokenProposal(block)
-                } else if (block.isAgreement) {
-                    Log.d(LOGTAG, "Received GROUPED agreement block")
-                    receiveGroupedTokenAgreement(block)
-                }
-            }
-        }
-
-    }
-
 }
+
