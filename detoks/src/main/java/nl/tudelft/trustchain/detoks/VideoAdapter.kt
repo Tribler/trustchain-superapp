@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +62,6 @@ class VideosAdapter(
                 txtDesc.text = content.torrentName
                 mVideoView.setVideoPath(content.fileURI)
                 mVideoView.setOnPreparedListener { mp ->
-                    // NOTE: Log the duration here potentially
                     mProgressBar.visibility = View.GONE
                     mp.start()
                     if (videoScaling) {

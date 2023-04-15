@@ -1,6 +1,9 @@
 package nl.tudelft.trustchain.detoks
 
+import android.util.Log
 import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
+import java.nio.channels.Selector
+import kotlin.random.Random
 
 class Strategy {
 
@@ -8,20 +11,20 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
 
     var isSeeding = false
 
-    var leachingStrategy = STRATEGY_RANDOM
+    var leechingStrategy = STRATEGY_RANDOM
     var seedingStrategy = STRATEGY_RANDOM
 
     var seedingBandwidthLimit = 0
-    var storageLimit = 0
+    var storageLimit : Int = 0
 
     companion object {
+
         const val STRATEGY_RANDOM = 0
         const val STRATEGY_HIGHEST_WATCH_TIME = 1
         const val STRATEGY_LOWEST_WATCH_TIME = 2
     }
 
     init {
-
         strategyComparators[STRATEGY_HIGHEST_WATCH_TIME] = :: highestWatchTimeStrategy
         strategyComparators[STRATEGY_LOWEST_WATCH_TIME] = :: lowestWatchTimeStrategy
     }
@@ -63,5 +66,31 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
             handlerProfile.sortedWith(strategyComparators[id]!!).toMutableList()
 
         return sortedHandlerProfile.map { it.first }.toMutableList()
+    }
+
+    internal fun findLeechingIndex(
+        handlers: MutableList<TorrentHandler>,
+        profiles: HashMap<String, ProfileEntry>,
+        newHandler: TorrentHandler,
+        startIndex: Int
+    ) : Int {
+        if (leechingStrategy == 0 || (!strategyComparators.contains(leechingStrategy)))
+            return Random.nextInt(startIndex, handlers.size)
+
+        val handlerComparator =
+            Comparator<TorrentHandler> { th0, th1 ->
+                compareValuesBy(th0, th1, strategyComparators[leechingStrategy]!!) { handler ->
+                    Pair(
+                        handler,
+                        profiles[handler.handle.infoHash().toString()]
+                    )
+                }
+            }
+
+        return handlers.binarySearch(newHandler,
+            handlerComparator,
+            startIndex,
+            handlers.size
+        )
     }
 }

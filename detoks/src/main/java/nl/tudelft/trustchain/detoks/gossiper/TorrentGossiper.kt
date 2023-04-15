@@ -32,6 +32,7 @@ class TorrentGossiper(
         val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
         val handlers = TorrentManager.getInstance(context).getListOfTorrents()
+        val profile = TorrentManager.getInstance(context).profile
         if (randomPeers.isEmpty() || handlers.isEmpty()) return
 
         val max = if (handlers.size < blocks) handlers.size else blocks
@@ -39,20 +40,26 @@ class TorrentGossiper(
 
         if(randomMagnets.isNotEmpty())
             randomPeers.forEach {
+                val data = randomMagnets
+                    .map { it2 ->
+                        val key = MagnetLink.hashFromMagnet(it2)
+                        profile.addProfile(key)
+                        Pair(it2, profile.profiles[key]!!.hopCount + 1)
+                    }
                 deToksCommunity.gossipWith(
                     it,
-                    TorrentMessage(randomMagnets.map { it2 -> Pair(MagnetLink.hashFromMagnet(it2), it2) }),
+                    TorrentMessage(data),
                     DeToksCommunity.MESSAGE_TORRENT_ID
                 )
             }
     }
 }
 
-class TorrentMessage(data: List<Pair<String, String>>) : GossipMessage<String>(data) {
+class TorrentMessage(data: List<Pair<String, Int>>) : GossipMessage<Int>(data) {
     companion object Deserializer : Deserializable<TorrentMessage> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<TorrentMessage, Int> {
             val msg = deserializeMessage(buffer, offset){
-                return@deserializeMessage Pair(it.getString(0), it.getString(1))
+                return@deserializeMessage Pair(it.getString(0), it.getInt(1))
             }
             return Pair(TorrentMessage(msg.first), msg.second)
         }
