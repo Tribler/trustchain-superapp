@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -113,6 +114,8 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
         val verified = verify(token, access)
         if (verified) {
             reissueToken(token, access)
+        } else {
+            Toast.makeText(this.context, "Verification failed! A participant is not correctly signed by previous one!", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -120,7 +123,10 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
         if (access != "admin") {
             return false
         }
-        return true
+        val passVerification = token.verifyRecipients(token.verifier)
+        if(passVerification)
+            return true
+        return false
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
