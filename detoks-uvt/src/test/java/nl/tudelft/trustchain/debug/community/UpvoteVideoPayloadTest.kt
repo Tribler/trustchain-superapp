@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.debug
+package nl.tudelft.trustchain.debug.community
 
 import nl.tudelft.trustchain.detoks.community.UpvoteVideoPayload
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
