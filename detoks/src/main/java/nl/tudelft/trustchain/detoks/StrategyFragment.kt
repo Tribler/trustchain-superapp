@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.frostwire.jlibtorrent.TorrentHandle
@@ -169,6 +170,7 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val status = handler.handle.status()
 
         holder.hashTextView.text = strategyData[position].handle.name()
+        holder.hashTextView.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toTorrentFragment) }
 
         holder.downloadTextView.text = (status.allTimeDownload()
             / convBtoMB).toString()
