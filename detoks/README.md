@@ -93,8 +93,10 @@ To partially use the optimization thought in the [previous point](#Coroutines-fo
 The IPv8 overlay, while it made it easier to send messages, caused us some problems during the development of the engine. More specifically, in creating our community, we always found peer discovery, which is being able to locate other devices connected to the same community, inconsistent (a questo non abbiamo saputo dare rimedio). Plus, a few times we encountered packet loss in the network, which combined with the stateless UDP protocol that Trustchain uses, is not notified.
 
 ## Future Works
-//TODO
-### Multiple blocks broadcasted at once
-//TODO
+In this section we report some ideas that could be implemented in the future to improve the performance of the Engine and expand its functionality to apply it to different uses
 ### Remediation for lost packets
-//TODO
+Although the choice to use the trustchain community to exchange tokens has greatly limited packet loss, if one wants to be certain of completing transactions one must keep in mind that both the proposal half-block and the agreement half-block could be lost. Creating new blocks containing the same transactions would place a new block into the network containing the same transaction as one already shared, in addition to having an incomplete half-block pair. The correct implementation of a mechanism to remedy packet-loss should not create half blocks again, but retrieve those already used and stored in the TrustStore and reexchange them with the targetPeer and the network, in order to properly complete the transaction and have the correct blocks
+### IPv8 messages or smart broadcast
+The mechanism that Trustchain develops with the halfblocks including creation, signing, validation, storage, and sending requires a considerable amount of computation time. If you are aiming for a faster and quicker Engine without necessarily having the need for this process there are two main options:
+- Use only the Ipv8 network and exchange tokens with a standard form of encryption, with the use of a simpler database that stores transactions made in the form [sender, receiver, tokens exchanged]
+- Take advantage of the fact that proposal half-blocks are broadcasted to the network and include multiple proposal half-blocks addressed to multiple recipients in a single packet. A peer receiving this packet will later create agreement blocks only for the proposal half-blocks that have him as the target. 
