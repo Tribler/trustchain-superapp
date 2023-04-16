@@ -455,7 +455,7 @@ class TrustChainApplication : Application() {
         val ourStore = TokenStore.getInstance(this)
 
         val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "detokstruststore122.db")
+        val driver = AndroidSqliteDriver(Database.Schema, this, "detokstruststore.db")
         val store = TrustChainSQLiteStore(Database(driver))
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
