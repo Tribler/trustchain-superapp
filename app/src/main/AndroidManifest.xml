@@ -125,7 +125,7 @@
         <activity
             android:name="nl.tudelft.trustchain.detoks.DeToksActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:theme="@style/Fullscreen" />
+            android:theme="@style/Theme.PeerChat" />
 
         <activity
             android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"

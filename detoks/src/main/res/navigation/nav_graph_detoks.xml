@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     android:label="DeToks"
     app:startDestination="@id/detoksFragment">
@@ -9,5 +10,57 @@
         android:id="@+id/detoksFragment"
         android:name="nl.tudelft.trustchain.detoks.DeToksFragment"
         android:label="DeToks">
+        <action
+            android:id="@+id/action_detoksFragment_to_offlineTransferFragment"
+            app:destination="@id/offlineTransferFragment" />
+        <action
+            android:id="@+id/action_detoksFragment_to_walletFragment"
+            app:destination="@id/walletFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/walletFragment"
+        android:name="nl.tudelft.trustchain.detoks.WalletFragment"
+        android:label="Wallet"
+        tools:layout="@layout/wallet_fragment"
+        >
+        <action
+            android:id="@+id/action_walletFragment_to_adminFragment"
+            app:destination="@id/adminFragment" />
+        <action
+            android:id="@+id/action_walletFragment_to_tokenListAdmin"
+            app:destination="@id/tokenListAdmin" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/offlineTransferFragment"
+        android:name="nl.tudelft.trustchain.detoks.OfflineTransferFragment"
+        android:label="fragment_offline_transfer"
+        tools:layout="@layout/fragment_offline_transfer" >
+        <action
+            android:id="@+id/action_offlineTransferFragment_to_addFriendFragment"
+            app:destination="@id/addFriendFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addFriendFragment"
+        android:name="nl.tudelft.trustchain.detoks.AddFriendFragment"
+        android:label="fragment_add_friend"
+        tools:layout="@layout/fragment_add_friend" />
+    <fragment
+        android:id="@+id/adminFragment"
+        android:name="nl.tudelft.trustchain.detoks.AdminFragment"
+        android:label="AdminFragment" >
+        <action
+            android:id="@+id/action_adminFragment_to_baseFragment"
+            app:destination="@id/tokenListAdmin" />
+    </fragment>
+    <fragment
+        android:id="@+id/tokenListAdmin"
+        android:name="nl.tudelft.trustchain.detoks.TokenListFragment"
+        android:label="tokenListAdmin" >
+        <argument
+            android:name="access"
+            app:argType="string" />
     </fragment>
 </navigation>

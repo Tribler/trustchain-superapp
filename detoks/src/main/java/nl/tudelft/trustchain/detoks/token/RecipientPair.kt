@@ -1,5 +1,8 @@
 package nl.tudelft.trustchain.detoks
 
+/*
+ * publicKey of the new recipient
+ */
 data class RecipientPair(val publicKey: ByteArray, val proof: ByteArray) {
 
     override fun equals(other: Any?): Boolean {
