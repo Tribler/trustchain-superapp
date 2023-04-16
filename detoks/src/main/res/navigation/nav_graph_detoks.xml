@@ -62,5 +62,17 @@
         <argument
             android:name="access"
             app:argType="string" />
+        <action
+            android:id="@+id/action_tokenListAdmin_to_tkoenHistory2"
+            app:destination="@id/tokenHistory" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/tokenHistory"
+        android:name="nl.tudelft.trustchain.detoks.TokenHistoryFragment"
+        android:label="tokenHistory" >
+        <argument
+            android:name="access"
+            app:argType="string" />
     </fragment>
 </navigation>
