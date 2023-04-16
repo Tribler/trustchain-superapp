@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -37,7 +38,7 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
 
     private var adminWallet: AdminWallet? = null;
     private var userWallet: Wallet? = null;
-
+    private var access: String? = null;
     private val binding by viewBinding(FragmentTokenListBinding::bind)
 
     private val adapter = ItemAdapter()
@@ -49,7 +50,7 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val access = requireArguments().getString("access")
+        access = requireArguments().getString("access")
         print("viewInit")
         adapter.registerRenderer(TokenAdminItemRenderer(access!!, this))
 
@@ -90,8 +91,16 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
      override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val balanceText = view.findViewById<TextView>(R.id.tokenCount)
+
         adminWallet = AdminWallet.getInstance(view.context)
         userWallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
+
+        if (access == "admin") {
+            balanceText.text = adminWallet!!.balance.toString()
+        } else {
+            balanceText.text = userWallet!!.balance.toString()
+        }
 
         binding.list.adapter = adapter
         binding.list.layoutManager = LinearLayoutManager(context)
