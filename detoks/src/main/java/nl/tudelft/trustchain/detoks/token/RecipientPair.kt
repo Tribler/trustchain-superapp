@@ -22,4 +22,9 @@ data class RecipientPair(val publicKey: ByteArray, val proof: ByteArray) {
         result = 31 * result + proof.contentHashCode()
         return result
     }
+
+    override fun toString(): String {
+        return "RecipientPair(publicKey=${publicKey.contentToString()}, proof=${proof.contentToString()})"
+    }
+
 }

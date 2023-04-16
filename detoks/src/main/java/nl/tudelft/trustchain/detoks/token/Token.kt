@@ -103,6 +103,11 @@ class Token(
         )
     }
 
+    override fun toString(): String {
+        return "Token(id=${id.contentToString()}, timestamp=$timestamp, value=$value, verifier=${verifier.contentToString()}, genesisHash=${genesisHash.contentToString()}, recipients=$recipients)"
+    }
+
+
     companion object {
         private val logger = KotlinLogging.logger {}
         private val secureRandom = SecureRandom()
@@ -203,6 +208,7 @@ class Token(
             while (i < dataSize) {
                 if (i + 2 > dataSize) {
                     logger.info { "Received a wrongly formatted list of tokens!" }
+                    logger.info {"DataSize too big???"}
                     return mutableSetOf()
                 }
 
@@ -211,6 +217,7 @@ class Token(
 
                 if (numRecipients < 1 || i + TOKEN_CREATION_SIZE + numRecipients * RECIPIENT_PAIR_SIZE > dataSize) {
                     logger.info { "Received a wrongly formatted list of tokens!" }
+                    logger.info { "Number of recipients ${numRecipients} " }
                     return mutableSetOf()
                 }
 

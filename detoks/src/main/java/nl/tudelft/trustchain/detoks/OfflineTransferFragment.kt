@@ -15,7 +15,9 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import ch.qos.logback.core.pattern.parser.Parser
 import com.google.common.primitives.UnsignedBytes.toInt
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.fragment_offline_transfer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,7 +26,9 @@ import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.detoks.db.DbHelper
+import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File.separator
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -180,9 +184,31 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
         if (content != null) {
             // deserialize the content
-            val obtainedTokens = Token.deserialize(content.toByteArray())
-            for(t in obtainedTokens)
-                wallet!!.addToken(t)
+            var map: Map<String, ArrayList<Token>> = HashMap()
+            map = Gson().fromJson(content, map.javaClass)
+            println("Map tokennnn: ${map["token"].toString()}")
+//            val jsonObject = JSONObject(content)
+//            var value : JSONArray?  = null
+//            for (key in jsonObject.keys()) {
+//                value = jsonObject.getJSONArray(key)
+//                println("JSON Object ---> $key : $value")
+//            }
+            //TODO:check whether tokens are sent, but not sth else
+            //TODO:check whether the tokens are not empty list
+            val obtainedTokens =  map["token"] ?: return  //Token.deserialize(content.toByteArray()) //
+            //
+            for(t in obtainedTokens ){
+//                var t = value?.get(0)
+                Log.v("Tokennnnn", t.toString())
+                println("New tokensss: ${wallet!!.balance}")
+                println("Tokennnnn $t.toString()")
+                val successful = wallet!!.addToken(t)
+                if(successful == -1L) {
+                    Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
         } else {
             Toast.makeText(this.context, "Scanning failed!", Toast.LENGTH_LONG).show()
         }
@@ -204,7 +230,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         // encode newToken
 
         val jsonObject = JSONObject()
-        jsonObject.put("token", newToken)
+        jsonObject.put("token", newToken.toString())
         val jsonString = jsonObject.toString()
         hideKeyboard()
         lifecycleScope.launch {
