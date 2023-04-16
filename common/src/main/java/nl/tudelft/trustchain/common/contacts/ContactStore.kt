@@ -34,17 +34,17 @@ class ContactStore(context: Context) {
     }
 
     fun getContactFromPublickey(publicKey: PublicKey): Flow<Contact?> {
-        return database.dbContactQueries.getContact(publicKey.keyToBin()) { name, publicKeyDB ->
+        return database.dbContactQueries.getContact(publicKey.keyToBin()) { name, public_key ->
             Contact(
                 name,
-                defaultCryptoProvider.keyFromPublicBin(publicKeyDB)
+                defaultCryptoProvider.keyFromPublicBin(public_key)
             )
         }.asFlow().mapToOneOrNull()
     }
 
     fun getContacts(): Flow<List<Contact>> {
-        return database.dbContactQueries.getAll { name: String, publicKeyDB: ByteArray ->
-            val publicKey = defaultCryptoProvider.keyFromPublicBin(publicKeyDB)
+        return database.dbContactQueries.getAll { name, public_key ->
+            val publicKey = defaultCryptoProvider.keyFromPublicBin(public_key)
             Contact(name, publicKey)
         }.asFlow().mapToList()
     }

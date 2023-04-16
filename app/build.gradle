@@ -29,10 +29,10 @@ ktlint {
     ignoreFailures = false
 }
 
- // Generate a version code from git commit count
- static def generateVersionCode() {
-     return "git rev-list HEAD --count".execute().text.trim().toInteger()
- }
+// Generate a version code from git commit count
+static def generateVersionCode() {
+    return "git rev-list HEAD --count".execute().text.trim().toInteger()
+}
 
 
 android {

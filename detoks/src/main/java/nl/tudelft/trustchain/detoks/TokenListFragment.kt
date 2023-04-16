@@ -2,8 +2,10 @@ package nl.tudelft.trustchain.detoks
 
 import AdminWallet
 import Wallet
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +15,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.liveData
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
@@ -21,6 +22,10 @@ import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.contacts.ContactStore
+import nl.tudelft.trustchain.common.eurotoken.Transaction
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentTokenListBinding
@@ -100,8 +105,7 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
     }
 
     override fun onHistoryClick(token: Token, access: String) {
-        view?.let { TokenHistoryFragment.start(it.context, token.recipients) }
-        view?.findNavController()?.navigate(R.id.tokenHistory)
+        TODO("Not yet implemented")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

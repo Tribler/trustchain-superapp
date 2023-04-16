@@ -61,14 +61,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:textSize="22sp" />
 
-<!--    Here we add euro images depending on the value-->
-<!--    <ImageView-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:id="@+id/valueToken"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        android:layout_marginStart="32dp"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent" />-->
-
 </androidx.constraintlayout.widget.ConstraintLayout>
