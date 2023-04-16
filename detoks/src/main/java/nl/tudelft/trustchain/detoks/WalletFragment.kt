@@ -55,14 +55,9 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment) {
         super.onViewCreated(view, savedInstanceState)
         val wallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
         val createCoinButton = view.findViewById<Button>(R.id.button_create_coin)
-
-        val balanceText = view.findViewById<TextView>(R.id.balance)
-        balanceText.text = wallet.balance.toString()
-
         createCoinButton.setOnClickListener {
             // Create a new coin and add it to the wallet!
             creatNewCoin(wallet)
-            balanceText.text = wallet.balance.toString()
         }
 
 //        val buttonShow = view.findViewById<Button>(R.id.button_show)
