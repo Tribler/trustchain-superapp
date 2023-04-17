@@ -108,15 +108,15 @@ In Figure (**FIGURE_REF!!!**), the time per function call is plotted with the 10
 
 Looking at the graph, there are some significant peaks for the response time of one public key. Since we believe this might be due to a bad internet connection, we have also plotted the same results without the data from the outlier public key in Figure (**FIGURE_REF!!!**).
 
-![](doc/detoks-uvt/timings_per_public_key.jpg)
+![](../doc/detoks-uvt/timings_per_public_key.jpg)
 
 Below, the same graph as before has been plotted, but now the blue outlier has been left out to give a better overview of the response time of the recommendation system.
 
-![](doc/detoks-uvt/timings_per_public_key_without_outlier.jpg)
+![](../doc/detoks-uvt/timings_per_public_key_without_outlier.jpg)
 
 With the outlier removed, we can see that most of the response times lie in the 0-20 ms range, with some public keys experiencing slower response times, sometimes upwards of 100 ms. What must be noted, however, is that these devices did run on different network configurations. Therefore the speed of the internet can play a significant role in the experienced response times. To illustrate this further, please refer to Figure (**FIGURE_REF!!!**), where we plotted the average total time spent by any device waiting for the 100 recommendation function calls to finish. Thus if a device $X$ did $3$ benchmark runs, where each benchmark run consists of $100$ recommendation function calls and the total time of those $3$ runs is 12s, then we plot the average total time as 4s. 
 
-![](doc/detoks-uvt/bar_chart_per_publickey.png)
+![](../doc/detoks-uvt/bar_chart_per_publickey.png)
 
 The average total times have been sorted in ascending order to show the variance in response times per public key.
 
