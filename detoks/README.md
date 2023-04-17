@@ -78,7 +78,7 @@ To further increase token transaction efficiency, we aimed to keep the amount of
 
 
 ### UI
-The UI consists of two fragments: the the Benchmark Fragment and the Peer Connection Fragment.
+The UI consists of two fragments: the Benchmark Fragment and the Peer Connection Fragment.
 
 The Benchmark Fragment, or the 'DeToks Transaction Hub', functions as a central hub to perform benchmarks.  To start off, a user can select the peer to which it wants to send tokens by pressing the 'select receiver' button.  This navigates the app to the other fragment; the Peer Connection Fragment.
 
