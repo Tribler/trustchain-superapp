@@ -141,9 +141,11 @@ class DeToksCommunity(
         if (peer.address in DEFAULT_ADDRESSES) {
             lastTrackerResponses[peer.address] = Date()
         }
+        // We meet a new peer -> crawl their chain
         runBlocking {
+            // Blocking!!!
             launch { // launch a new coroutine and continue
-                super.crawlChain(peer, null)
+                super.crawlChain(peer, null) // Crawl their chain (unknown last block)
             }
 
         }

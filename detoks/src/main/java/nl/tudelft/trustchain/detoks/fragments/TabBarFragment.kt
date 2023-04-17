@@ -29,16 +29,20 @@ class TabBarFragment : Fragment() {
         viewPager = view.findViewById(R.id.viewPager)
         viewPager.isUserInputEnabled = false
         viewPager.adapter = TabBarAdapter(this, listOf(DeToksFragment(), Fragment(), ProfileFragment()))
+
         val torrentManager = TorrentManager.getInstance(requireActivity().applicationContext)
+        // Request Android content selection for video
         val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
+                // Video selected -> seed it
                 torrentManager.createTorrentInfo(uri, requireContext())
                 Toast.makeText(requireContext(), "Successfully uploaded.", Toast.LENGTH_LONG).show()
             }
         }
-
+        // On the fly request for permissions
         val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
+                // Get videos only
                 getContent.launch("video/*")
             } else {
                 Toast.makeText(this.requireContext(), "Permission has been denied!", Toast.LENGTH_LONG).show()
@@ -51,6 +55,7 @@ class TabBarFragment : Fragment() {
                 if (tab.position == 1) {
                     val previousTabIndex = viewPager.currentItem
 
+                    // Different permission depending on version :/
                     if (Build.VERSION.SDK_INT > 32) {
                         requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_VIDEO)
                     } else {
