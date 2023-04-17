@@ -205,7 +205,7 @@ The most liked videos appear at the top of your feed, a profile page lets you vi
 - The videos you have uploaded and how many likes they have received
 - Notifications about likes you have received
 
-![Detoks GIF](https://github.com/NikolayBlagoev/trustchain-superapp/blob/Quality-of-life-improvements/detoks/doc/detoks.gif)
+![Detoks GIF](detoks/doc/detoks.gif)
 
 [More about Detoks](detoks/README.md)
 
