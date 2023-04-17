@@ -57,15 +57,16 @@ class UpvoteCommunity(
         })
         messageHandlers[MessageID.RECOMMENDATION_REQUEST] = ::onRecommendationRequestPacket
         messageHandlers[MessageID.RECOMMENDATION_RECEIVED] = ::onRecommendationReceivedPacket
+        messageHandlers.entries.forEach { Log.i("Detoks", "key is ${it.key} and function is ${it.value.toString()}") }
     }
 
     object MessageID {
-        const val UPVOTE_TOKEN = 1
-        const val RECOMMENDATION_REQUEST = 2
-        const val RECOMMENDATION_RECEIVED = 3
-        const val MAGNET_URI_AND_HASH = 4
-        const val UPVOTE_VIDEO = 5
-        const val SEED_REWARD = 6
+        const val UPVOTE_TOKEN = 8
+        const val RECOMMENDATION_REQUEST = 9
+        const val RECOMMENDATION_RECEIVED = 10
+        const val MAGNET_URI_AND_HASH = 11
+        const val UPVOTE_VIDEO = 12
+        const val SEED_REWARD = 13
     }
 
     object ContentSeeding {
@@ -362,6 +363,7 @@ class UpvoteCommunity(
 
         send(peer, packet)
     }
+
     private fun sendSeedReward(upvoteTokens: List<UpvoteToken>, upvotingPeer: Peer) {
         // Prepare the reward block
         val upvoteToken = upvoteTokens[0]

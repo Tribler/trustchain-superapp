@@ -12,7 +12,6 @@ import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 import nl.tudelft.trustchain.detoks.helpers.DateFormatter
-import java.time.LocalDateTime
 import java.util.*
 
 class ProposalToken {
