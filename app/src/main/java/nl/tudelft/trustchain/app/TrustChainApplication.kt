@@ -110,18 +110,7 @@ class TrustChainApplication : Application() {
                 createPeerChatCommunity(),
                 createEuroTokenCommunity(),
                 createTFTPCommunity(),
-                createDemoCommunity(),
-                createWalletCommunity(),
-                createAtomicSwapCommunity(),
-                createMarketCommunity(),
-                createCoinCommunity(),
-                createDaoCommunity(),
-                createVotingCommunity(),
-                createMusicCommunity(),
-                createLiteratureCommunity(),
-                createRecommenderCommunity(),
                 createIdentityCommunity(),
-                createFOCCommunity(),
                 createDeToksCommunity(),
                 createTransactionCommunity(),
                 createTrustChainTransactionCommunity()
@@ -308,7 +297,6 @@ class TrustChainApplication : Application() {
             listOf(randomWalk)
         )
     }
-
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
         val randomWalk = RandomWalk.Factory()

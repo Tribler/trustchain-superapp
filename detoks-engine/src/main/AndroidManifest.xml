@@ -18,5 +18,9 @@
             android:name=".manage_tokens.TokenManageActivity"
             android:label="@string/title_activity_main_detoks"
             android:theme="@style/Fullscreen" />
+        <activity
+            android:name=".manage_tokens.TokenBenchmarkActivity"
+            android:label="@string/title_activity_main_detoks"
+            android:theme="@style/Fullscreen" />
     </application>
 </manifest>
