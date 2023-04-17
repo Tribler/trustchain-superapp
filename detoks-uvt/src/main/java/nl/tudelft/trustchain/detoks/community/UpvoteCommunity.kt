@@ -144,9 +144,9 @@ class UpvoteCommunity(
         val block = this.database.getBlockWithHash(payload.proposal_token_hash.hexToBytes())
         if (block != null) {
             torrentManager?.addTorrent(payload.magnet_uri, payload.proposal_token_hash, block.timestamp.toString(), block.blockId)
-            Log.i("Detoks", "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}")
+            Log.i("Detoks", "[Detoks] -> SUCESSSSSSSSSSSSSSSSSS! received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}")
         } else {
-            Log.i("Detoks", "failed to add torrent to video feed because block is null")
+            Log.i("Detoks", "failed to add torrent to video feed because block is null \n attempted to get block with hash: ${payload.proposal_token_hash}")
         }
     }
     private fun onRecommendationRequestPacket(packet: Packet) {

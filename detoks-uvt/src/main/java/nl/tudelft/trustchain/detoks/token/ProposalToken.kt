@@ -79,7 +79,8 @@ class ProposalToken {
             Log.i("DeToks", "Seeding succeeded!")
             val proposalBlock = createProposalToken(magnetURI)
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
-            val hash = proposalBlock?.calculateHash()!!
+            upvoteCommunity.sendBlock(proposalBlock!!)
+            val hash = proposalBlock.calculateHash()
             val myPeer = IPv8Android.getInstance().myPeer
             val message = "You posted a video! Your public key: " +
                 "${myPeer.publicKey.keyToBin().toHex()} and member id:\n" +
