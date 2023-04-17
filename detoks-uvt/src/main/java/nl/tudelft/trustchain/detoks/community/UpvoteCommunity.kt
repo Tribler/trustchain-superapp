@@ -80,9 +80,12 @@ class UpvoteCommunity(
             && it.publicKey.toHex() != myPeer.publicKey.keyToBin().toHex()
             && seedVideoIDs.firstOrNull { pair -> pair.first == it.calculateHash().toHex()} == null
             && failedSeeds.firstOrNull { pair -> pair.first == it.calculateHash().toHex()} == null
-            && it.transaction.containsKey("magnetURI")}
+            && it.transaction.containsKey("magnetURI")
+        }
         val additionalSeeds = min(otherPeersProposalBlocks.size, ContentSeeding.MAX_SEEDED_CONTENT-seedVideoIDs.size)
         val randomlyChosenProposalBlocks = otherPeersProposalBlocks.shuffled().take(additionalSeeds)
+        Log.i("Detoks", "getContentToSeed: otherPeersProposalBlocks size: ${otherPeersProposalBlocks.size}, additional seeds: ${additionalSeeds}, randomly chosen size : ${randomlyChosenProposalBlocks.size
+        }")
         for (block in randomlyChosenProposalBlocks) {
             Log.i("Detoks", block.transaction.toString())
         }
@@ -305,7 +308,7 @@ class UpvoteCommunity(
             send(peer, packet)
         }
         send(myPeer, packet)
-        Log.i("Detoks", "Sending this magnetLink to self :$magnetURI")
+//        Log.i("Detoks", "Sending this magnetLink to self :$magnetURI")
 //        onMagnetURI(myPeer, payload)
         return true
     }

@@ -212,6 +212,8 @@ class TorrentManager(
             handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
             handle.prioritizeFiles(arrayOf(Priority.IGNORE))
             handle.pause()
+        } else {
+            Log.i("Detoks", "no need to download again, torrenthandle for this video with this hash already exists: $proposalBlockHash \n and this magnetlink: $magnet")
         }
 
         Log.i("Detoks", "Adding new torrent: ${torrentInfo.name()}")
