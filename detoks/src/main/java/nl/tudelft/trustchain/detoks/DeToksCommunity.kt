@@ -4,6 +4,9 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
@@ -16,7 +19,8 @@ import java.util.*
 const val LIKE_BLOCK: String = "like_block"
 
 class DeToksCommunity(
-    private val context: Context, settings: TrustChainSettings,
+    private val context: Context,
+    settings: TrustChainSettings,
     database: TrustChainStore,
     crawler: TrustChainCrawler = TrustChainCrawler()
 ) : TrustChainCommunity(settings, database, crawler) {
@@ -25,6 +29,7 @@ class DeToksCommunity(
     private val visitedPeers  = mutableListOf<Peer>()
 
     init {
+
         messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
         registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
@@ -107,7 +112,9 @@ class DeToksCommunity(
         val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
         Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
+
         torrentManager.addTorrent(payload.magnet)
+
     }
     private fun onTransactionMessage(packet: Packet) {
         val (_, payload) = packet.getAuthPayload(TransactionMessage.Deserializer)
@@ -134,6 +141,16 @@ class DeToksCommunity(
         if (peer.address in DEFAULT_ADDRESSES) {
             lastTrackerResponses[peer.address] = Date()
         }
+        // We meet a new peer -> crawl their chain
+        runBlocking {
+            // Blocking!!!
+            launch { // launch a new coroutine and continue
+                super.crawlChain(peer, null) // Crawl their chain (unknown last block)
+            }
+
+        }
+
+
     }
 
     fun broadcastLike(vid: String, torrent: String, creator: String, magnet: String) {
