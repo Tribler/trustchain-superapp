@@ -66,6 +66,16 @@ class NodeToSongNetwork {
         }
     }
 
+    fun removeEdge(nodeEdge: NodeSongEdge): Boolean {
+        return graph.removeEdge(nodeEdge).also {
+            if (!it) {
+                logger.error { "Couldn't remove edge $nodeEdge from network" }
+            } else {
+                graph.setEdgeWeight(nodeEdge, 0.0)
+            }
+        }
+    }
+
     fun getAllNodes(): Set<Node> {
         return graph.vertexSet().filterIsInstance<Node>().toSet()
     }

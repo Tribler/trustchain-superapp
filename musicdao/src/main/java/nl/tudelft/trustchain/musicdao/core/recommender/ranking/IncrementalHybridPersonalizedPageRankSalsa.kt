@@ -3,9 +3,7 @@ package nl.tudelft.trustchain.musicdao.core.recommender.ranking
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkIterator
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomRandomWalkVertexIterator
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
-import org.jgrapht.graph.SimpleDirectedWeightedGraph
 import java.util.*
 
 class IncrementalHybridPersonalizedPageRankSalsa (
@@ -57,12 +55,13 @@ class IncrementalHybridPersonalizedPageRankSalsa (
         }
     }
 
-    private fun modifyEdges(changedNodesOrSongs: Set<NodeOrSong>) {
-        iter.modifyEdges(changedNodesOrSongs)
+    fun modifyNodesOrSongs(changedNodes: Set<Node>, changedSongs: Set<SongRecommendation>) {
+        iter.modifyEdges(changedNodes)
+        iter.modifyPersonalizedPageRanks(changedSongs)
         for(i in 0 until randomWalks.size) {
             val walk = randomWalks[i]
             for(j in 0 until walk.size) {
-                if(changedNodesOrSongs.contains(walk[j])) {
+                if(changedNodes.contains(walk[j]) || changedSongs.contains(walk[j])) {
                     randomWalks[i] = walk.slice(0..j).toMutableList()
                     completeExistingRandomWalk(randomWalks[i])
                 }

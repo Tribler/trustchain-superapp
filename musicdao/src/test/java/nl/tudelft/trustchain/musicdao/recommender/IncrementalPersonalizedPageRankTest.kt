@@ -85,7 +85,7 @@ class IncrementalPersonalizedPageRankTest {
     }
 
     @Test
-    fun canIncorporateModifiedEdgesAndRecalculatePageRankAccordingly() {
+    fun canIncorporateModifiedEdgesAndIncrementallyRecalculatePageRankAccordingly() {
         incrementalPageRank = IncrementalPersonalizedPageRank( maxWalkLength, repetitions, rootNode, 0.01f, network.graph)
         incrementalPageRank.calculateRankings()
         val rootNeighborEdges = network.getAllEdges().filter { network.graph.getEdgeSource(it) == rootNode }

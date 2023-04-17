@@ -17,7 +17,7 @@ import java.util.*;
 
 /**
  * A hybrid personalized PageRank/SALSA random walk iterator for undirected bipartite graphs.
- *
+ * <p>
  * Given a bipartite graph with vertexes NodeOrSong and S and a starting point in V, we select a neighbour
  * in S weighted by edges from the starting point to S. After this, we take an edge back to
  * NodeOrSong from S weighted by the PageRank of the node set of edges back.
@@ -25,9 +25,8 @@ import java.util.*;
  * @param <E> the graph edge type
  */
 public class CustomHybridRandomWalkIterator<E>
-    implements
-    Iterator<NodeOrSong>
-{
+        implements
+        Iterator<NodeOrSong> {
     private final Random rng;
     private final Graph<NodeOrSong, E> graph;
     private final Map<Node, Double> outEdgesTotalWeight;
@@ -57,21 +56,21 @@ public class CustomHybridRandomWalkIterator<E>
     public void setLastNode(Node lastNode) {
         this.lastNode = lastNode;
     }
+
     private Node lastNode;
     private final float resetProbability;
 
     /**
      * Create a new iterator
      *
-     * @param graph the graph
-     * @param vertex the starting vertex
-     * @param maxHops maximum hops to perform during the walk
+     * @param graph            the graph
+     * @param vertex           the starting vertex
+     * @param maxHops          maximum hops to perform during the walk
      * @param resetProbability probability between 0 and 1 with which to reset the random walk
-     * @param rng the random number generator
+     * @param rng              the random number generator
      */
     public CustomHybridRandomWalkIterator(
-        Graph<NodeOrSong, E> graph, Node vertex, long maxHops, float resetProbability, Random rng)
-    {
+            Graph<NodeOrSong, E> graph, Node vertex, long maxHops, float resetProbability, Random rng) {
         this.graph = Objects.requireNonNull(graph);
         this.outEdgesTotalWeight = new HashMap<>();
         this.personalizedPageRankTotalWeight = new HashMap<>();
@@ -86,58 +85,58 @@ public class CustomHybridRandomWalkIterator<E>
     }
 
     @Override
-    public boolean hasNext()
-    {
+    public boolean hasNext() {
         return nextVertex != null;
     }
 
     @Override
-    public NodeOrSong next()
-    {
+    public NodeOrSong next() {
         if (nextVertex == null) {
             throw new NoSuchElementException();
         }
         NodeOrSong value = nextVertex;
-        if(value instanceof Node) {
+        if (value instanceof Node) {
             lastNode = (Node) value;
             computeNextSong();
-        }
-        else
+        } else
             computeNextNode();
         return value;
     }
 
-    public void modifyEdges(Set<NodeOrSong> changedNodesOrSongs)
-    {
+    public void modifyPersonalizedPageRanks(Set<SongRecommendation> affectedSongs) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            for(NodeOrSong nodeOrSong : changedNodesOrSongs) {
-                if(nodeOrSong instanceof Node)
-                    outEdgesTotalWeight.put((Node) nodeOrSong, graph.outgoingEdgesOf(nodeOrSong).stream().mapToDouble(graph::getEdgeWeight).sum());
-                else
-                    personalizedPageRankTotalWeight.put((SongRecommendation) nodeOrSong,  graph.outgoingEdgesOf(nodeOrSong).stream().mapToDouble(this::returnPageRankOfNeighbour).sum());
+            for (SongRecommendation changedSongRec : affectedSongs) {
+                personalizedPageRankTotalWeight.put(changedSongRec, graph.outgoingEdgesOf(changedSongRec).stream().mapToDouble(this::returnPageRankOfNeighbour).sum());
             }
         } else {
-            for(NodeOrSong nodeOrSong : changedNodesOrSongs) {
-                if(nodeOrSong instanceof Node) {
-                    double outEdgesTotalWeightSum = 0.0;
-                    for (E edge : graph.outgoingEdgesOf(nodeOrSong)) {
-                        outEdgesTotalWeightSum += graph.getEdgeWeight(edge);
-                    }
-                    outEdgesTotalWeight.put((Node) nodeOrSong, outEdgesTotalWeightSum);
-                } else {
-                    double outEdgesTotalWeightSum = 0.0;
-                    for(E edge: graph.outgoingEdgesOf(nodeOrSong)) {
-                        outEdgesTotalWeightSum += returnPageRankOfNeighbour(edge);
-                    }
-                    personalizedPageRankTotalWeight.put((SongRecommendation) nodeOrSong, outEdgesTotalWeightSum);
+            for (SongRecommendation changedSongRec : affectedSongs) {
+                double outEdgesTotalWeightSum = 0.0;
+                for (E edge : graph.outgoingEdgesOf(changedSongRec)) {
+                    outEdgesTotalWeightSum += returnPageRankOfNeighbour(edge);
                 }
+                personalizedPageRankTotalWeight.put(changedSongRec, outEdgesTotalWeightSum);
+            }
+        }
+    }
+
+    public void modifyEdges(Set<Node> changedSourceNodes) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            for (Node changedSourceNode : changedSourceNodes) {
+                outEdgesTotalWeight.put(changedSourceNode, graph.outgoingEdgesOf(changedSourceNode).stream().mapToDouble(graph::getEdgeWeight).sum());
+            }
+        } else {
+            for (Node changedSourceNode : changedSourceNodes) {
+                double outEdgesTotalWeightSum = 0.0;
+                for (E edge : graph.outgoingEdgesOf(changedSourceNode)) {
+                    outEdgesTotalWeightSum += graph.getEdgeWeight(edge);
+                }
+                outEdgesTotalWeight.put(changedSourceNode, outEdgesTotalWeightSum);
             }
         }
     }
 
 
-    private void computeNextSong()
-    {
+    private void computeNextSong() {
         if (hops >= maxHops || (rng.nextFloat() < resetProbability)) {
             nextVertex = null;
             return;
@@ -161,12 +160,11 @@ public class CustomHybridRandomWalkIterator<E>
             }
         }
         nextVertex = Graphs.getOppositeVertex(graph, e, nextVertex);
-        if(nextVertex instanceof Node)
+        if (nextVertex instanceof Node)
             throw new RuntimeException("Found Node to Node edge in Node To Song graph: " + e);
     }
 
-    private void computeNextNode()
-    {
+    private void computeNextNode() {
         if (hops >= maxHops || (rng.nextFloat() < resetProbability)) {
             nextVertex = null;
             return;
@@ -180,7 +178,7 @@ public class CustomHybridRandomWalkIterator<E>
 
         E e = null;
         double outEdgesWeight = getOutEdgesWeight((SongRecommendation) nextVertex) - lastNode.getPersonalizedPageRankScore();
-        if(outEdgesWeight == 0) {
+        if (outEdgesWeight == 0) {
             List<E> outEdges = new ArrayList<>(graph.outgoingEdgesOf(nextVertex));
             int randIndex = rng.nextInt(outEdges.size() - 1);
             E randEdge = outEdges.get(randIndex);
@@ -193,7 +191,7 @@ public class CustomHybridRandomWalkIterator<E>
         Node oppositeNode = null;
         for (E curEdge : graph.outgoingEdgesOf(nextVertex)) {
             oppositeNode = (Node) Graphs.getOppositeVertex(graph, curEdge, nextVertex);
-            if(oppositeNode != lastNode) {
+            if (oppositeNode != lastNode) {
                 cumulativeP += oppositeNode.getPersonalizedPageRankScore();
                 if (p <= cumulativeP) {
                     break;
@@ -210,14 +208,14 @@ public class CustomHybridRandomWalkIterator<E>
             outEdgesWeight = outEdgesTotalWeight.computeIfAbsent(vertex, v -> graph
                     .outgoingEdgesOf(v).stream().mapToDouble(graph::getEdgeWeight).sum());
         } else {
-            if(!outEdgesTotalWeight.containsKey(vertex)) {
-                for(E edge: graph.outgoingEdgesOf(vertex)) {
+            if (!outEdgesTotalWeight.containsKey(vertex)) {
+                for (E edge : graph.outgoingEdgesOf(vertex)) {
                     outEdgesWeight += graph.getEdgeWeight(edge);
                 }
                 outEdgesTotalWeight.put(vertex, outEdgesWeight);
             } else {
                 Double weight = outEdgesTotalWeight.get(vertex);
-                if(weight != null) {
+                if (weight != null) {
                     outEdgesWeight = weight;
                 }
             }
@@ -237,14 +235,14 @@ public class CustomHybridRandomWalkIterator<E>
             outEdgesWeight = personalizedPageRankTotalWeight.computeIfAbsent(song, s -> graph
                     .outgoingEdgesOf(s).stream().mapToDouble(this::returnPageRankOfNeighbour).sum());
         } else {
-            if(!personalizedPageRankTotalWeight.containsKey(song)) {
-                for(E edge: graph.outgoingEdgesOf(song)) {
+            if (!personalizedPageRankTotalWeight.containsKey(song)) {
+                for (E edge : graph.outgoingEdgesOf(song)) {
                     outEdgesWeight += returnPageRankOfNeighbour(edge);
                 }
                 personalizedPageRankTotalWeight.put(song, outEdgesWeight);
             } else {
                 Double weight = personalizedPageRankTotalWeight.get(song);
-                if(weight != null) {
+                if (weight != null) {
                     outEdgesWeight = weight;
                 }
             }

@@ -81,4 +81,25 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
         Assert.assertTrue(leastTrustedNeighborSongsWeight < mostTrustedNeighborSongsWeight)
     }
 
+    @Test
+    fun canModifyNodeToSongEdgesWhichIncrementallyAltersSongRanking() {
+        val pageRank = IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.01f, nodeToNodeNetwork.graph)
+        pageRank.calculateRankings()
+        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.01f, nodeToSongNetwork.graph)
+        incrementalHybrid.calculateRankings()
+        val rootSongEdges = nodeToSongNetwork.getAllEdges().filter { nodeToSongNetwork.graph.getEdgeSource(it) == rootNode }
+        val rootSongs = rootSongEdges.map { nodeToSongNetwork.graph.getEdgeTarget(it) }
+        val randomRootSongEdge = rootSongEdges.first()
+        val randomRootSong = rootSongs.first()
+        val randomNonRootSong = nodeToSongNetwork.getAllSongs().first { !rootSongs.contains(it) }
+        val oldRootSongRank = randomRootSong.rankingScore
+        val oldNonRootSongScore = randomNonRootSong.rankingScore
+        nodeToSongNetwork.removeEdge(randomRootSongEdge)
+        nodeToSongNetwork.addEdge(rootNode, randomRootSong, NodeSongEdge(oldRootSongRank))
+        incrementalHybrid.modifyNodesOrSongs(setOf(rootNode), setOf())
+        incrementalHybrid.calculateRankings()
+        Assert.assertTrue(randomRootSong.rankingScore < oldRootSongRank)
+        Assert.assertTrue(randomNonRootSong.rankingScore > oldNonRootSongScore)
+    }
+
 }
