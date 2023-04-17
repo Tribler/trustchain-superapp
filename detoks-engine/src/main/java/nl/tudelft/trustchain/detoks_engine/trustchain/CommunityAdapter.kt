@@ -20,7 +20,7 @@ import kotlin.math.min
  */
 class CommunityAdapter private constructor(
     private val trustChainCommunity: TrustChainCommunity,
-    private val maxGroupBy: Int = 4,
+    private val maxGroupBy: Int = 100,
     private val flushIntervalMillis: Long = 50,
     private val resendTimeoutMillis: Long = 1000,
     private val resendLimit: Int = 0
