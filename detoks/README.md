@@ -1,73 +1,91 @@
 # DeToks
 
-This document describes the functionallity of DeToks.
+This document describes the functionallity provided in DeToks. Currently it contains the following functionality:
+* Watch videos that are shared via the DeToks Community.
+* Select a strategy with which to determine which video is played next.
+* Option to seed videos for token profit based on a selected seeding strategy, maximum storage size and maximum upload bandwidth.
+* View torrent information and statistics of seeded torrents.
 
 ## Gossiping
 
-Several gossipers are used to share useful information between peers in the DeToks community. This section gives short descriptions of each of them.
+A Large part of the DeToks back-end depends on information being gossiped over the DeToks community network. Gossiping works by selecting a random subset of all known peers of a node and passing messages between them. Since different kinds of data is shared, several gossipers are used. Namely:
+* [BootGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/BootGossiper.kt): gossips boot related data.
+* [NetworkSizeGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/NetworkSizeGossiper.kt): estimates network size.
+* [TorrentGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/TorrentGossiper.kt): gossips torrents and corresponding hopcounts.
+* [ProfileGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/ProfileGossiper.kt): gossips the statistics in the profiles.
 
-Gossiping works by selecting a random subset of all known peers of a node and passing messages between them. New information then slowly traverses the community.
+All of these extend `Gossiper`. This section gives short descriptions of each of them.
 
 ### BootGossiper
 
-The [BootGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/BootGossiper.kt) is used to bootstrap the session when starting up the app. The app mainly uses this to bootstrap the networksize value, which then is further kept up to date by the [NetworkSizeGossiper](#NetworkSizeGossiper)
+The [BootGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/BootGossiper.kt) is used to bootstrap the session when starting up the app. The app mainly uses this to bootstrap the networksize value, which then is further kept up to date by the [NetworkSizeGossiper](#NetworkSizeGossiper).
+
+The network size specifically is requested on boot because it plays an important role in determining the size of the other metrics. For example, the total watch time and total likes on a video are determined using this value. 
 
 ### NetworkSizeGossiper
 
-The [NetworkSizeGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/NetworkSizeGossiper.kt) is used to estimate the current total size of the DeToks Community network. This is done by utilizing the counting algorithm as described in [Gossip-Based Aggregation in Large Dynamic Networks](https://dl-acm-org.tudelft.idm.oclc.org/doi/pdf/10.1145/1082469.1082470)
+The [NetworkSizeGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/NetworkSizeGossiper.kt) is used to estimate the current total size of the DeToks community network. This is done by utilizing the count algorithm as described in [Gossip-Based Aggregation in Large Dynamic Networks](https://dl-acm-org.tudelft.idm.oclc.org/doi/pdf/10.1145/1082469.1082470).
 
 ### TorrentGossiper
 
-The [TorrentGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/TorrentGossiper.kt) is used to spread torrent files throughout the network. A random torrent is selected and then send to a random subset of peers. This happens every few seconds to ensure a good spread of torrents throughout the network.
+The [TorrentGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/TorrentGossiper.kt) is used to spread torrent files throughout the network. A random subset of torrents is selected and then sent to a random subset of peers. This happens every few seconds to ensure a good spread of torrents throughout the network.
 
-### WatchTimeGossiper
+Next to the torrent it also shares the hopcount statistic. This statistic details how many hops a torrent was shared from its origin. This is a useful statistic for debugging, but it is also incorporated in one of the leeching and seeding strategies.
 
-The [WatchTimeGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/WatchTimeGossiper.kt) is used to spread profile metrics through the network. This is used to update peers on the current profiles of each other which can then be used to update their seeding and leeching strategies.
+### ProfileGossiper
+
+The [ProfileGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/ProfileGossiper.kt) is used to spread profile metrics throughout the network. This is used to update peers on the profile data it has for a specific torrent. These statistics are used for the seeding and leeching strategies and/or for debugging.
+Shared metrics include:
+* `watchTime`: average watch time of torrent on the network.
+* `duration`: duration of torrent.
+* `uploadDate`: upload date of torrent.
+* `hopCount`: hop count of torrent.
+* `timesSeen`: number of times this node has received this torrent.
 
 ## Torrent Profiles
 
-In order to be able to work with recommendations, DeToks keeps track of a profile of each torrent. Useful metadata is stored in these profiles that help the other parts of DeToks with choosing which torrents to seed leech and recommend to the user. This section describes stored parameters in the profile.
+In order to be able to work with recommendations, DeToks keeps track of a profile of each torrent. Useful metadata is stored in these profiles that help the other parts of DeToks with choosing which torrents to seed, leech and recommend to the user. This section describes stored parameters in the profile.
 
-#### TODO: add profiles
+`TODO: add metrics`
 
-## Leeching Strategies
+## Strategies 
 
-`TODO: add leeching strategies`
+The user can specify a leeching and optionally also a seeding strategy. The user can pick the same strategies for leeching and seeding, as both need the torrents to be sorted based on profile metrics. However, the leeching strategy determines which videos are played for the user in the video screen, while the seeding strategy determines in which way the torrents are sorted to be considered for seeding. 
 
-## Seeding Strategies
+### Defined Strategies
+The available strategies are defined in [Strategy.kt](./src/main/java/nl/tudelft/trustchain/detoks/Strategy.kt), and include:
+* `STRATEGY_RANDOM`: The random strategy simply chooses torrents to seed at random.
+* `STRATEGY_HIGHEST_WATCH_TIME`: This strategy sorts the torrents by watchtime in descending order.
+* `STRATEGY_LOWEST_WATCH_TIME`: This strategy sorts the torrents by watchtime in ascending order.
+* `STRATEGY_HOT`: This strategy splits the torrents into two lists based on a time cut-off, and sorts both lists by watchtime in descending order. These lists are then merged again, where the list under the cut-off is added in front.
+* `STRATEGY_RISING`: This strategy is the same as `HOT_STRATEGY`, but the time cut-off is lower.
+* `STRATEGY_NEW`: This strategy sorts the torrents by upload date from newest to oldest.
+* `STRATEGY_TOP`: This strategy sorts torrents by number of likes in descending order.
+* `STRATEGY_HOPCOUNT`: This strategy sorts the torrents by hopcount in descending order.
 
-DeToks allows the user to choose between multiple seeding strategies. This section explains the different strategies available.
+### Leeching 
 
-The seeding strategies are defined in [Strategy.kt](./src/main/java/nl/tudelft/trustchain/detoks/Strategy.kt)
+As previously mentioned, the leeching strategy determines which videos are played for the user. This happens by applying the strategy to the specific unwatched part of the available torrents. To do so, an index is kept track of that specifies until where the user has watched. When a new torrent is received, this is inserted into the right place in that part of the list as well. If the user has watched all of its known torrents, the entire list will be sorted instead. 
 
-#### `STRATEGY_RANDOM`
+### Seeding
 
-The random strategy simply chooses torrents to seed at random.
+A user can seed torrents to earn tokens on the DeToks community network. This option can be turned on in the Settings view:
 
-#### `STRATEGY_HIGHEST_WATCH_TIME`
+`TODO: insert image when branch is finalized`
 
-This strategy sorts the torrents by watchtime in descending order.
+The user has to specify:
+* Maximum bandwidth per day (in MB): sets the maximum upload rate.
+* Maximum storage used for seeding (in MB): sets the maximum accumulated size of all seeded torrents combined after download.
+* Seeding strategy: the default is `STRATEGY_RANDOM` but other strategies can be selected. Used to sort the torrents for consideration of seeding.
 
-#### `STRATEGY_LOWEST_WATCH_TIME`
+The seeded torrents will then be shown to the user in the overview below. For a seeded torrent the name, total amount downloaded in a session (in MB), total amount uploaded in a session (in MB), and balance of earned tokens for seeding that torrent in this session is shown.
 
-This strategy sorts the torrents by watchtime in ascending order.
-
-#### `STRATEGY_HOT`
-
-This strategy sorts the torrents by hopcount, a torrent is considered hot if it is passed along peers a lot.
-
-#### `STRATEGY_RISING`
-
-This strategy first takes the ratio between likes and hops of a torrent to predict wether or not a torrent will be likely to be passed along.
-
-#### `STRATEGY_NEW`
-
-This strategy sorts the torrents for seeding by looking at their first appearance date.
-
-#### `STRATEGY_TOP`
-
-This strategy sorts torrents by number of likes in descending order.
+The seeding strategy only sorts the torrents into a list of torrents that will be considered for seeding. In order for a video to be seeded it needs to have more leechers than seeders, and then it will only be selected if it doesn't push the size of the selected torrents over the maximum storage threshold. When it is selected it will attempt to download the torrent with a timeout. If the download is successful, the `SHARE_MODE` flag of the torrent will be turned on, completing the process.
 
 ## Tokens
 
 `TODO: add tokens`
+
+## Debug Screen
+
+`TODO: add docs and image debug screen`
