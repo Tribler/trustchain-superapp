@@ -8,7 +8,7 @@ abstract class NodeOrSong(
 ) {
 
     override fun toString(): String {
-        return "${if(this is Node) "Node:" else "SongRec:"} identifier: $identifier score: $rankingScore"
+        return "${if(this is Node) "Node:" else "SongRec:"} $identifier"
     }
 
     private fun hashCodeString(): String {

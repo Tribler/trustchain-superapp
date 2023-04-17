@@ -23,8 +23,8 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
     private val nNodes = 5000
     private val nSongs = nNodes / 10
     private val nEdges = 10
-    private val repetitions = 100000
-    private val maxWalkLength = 100000
+    private val repetitions = 10000
+    private val maxWalkLength = 10000
 
     @Before
     fun setUp() {
@@ -92,14 +92,16 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
         val randomRootSongEdge = rootSongEdges.first()
         val randomRootSong = rootSongs.first()
         val randomNonRootSong = nodeToSongNetwork.getAllSongs().first { !rootSongs.contains(it) }
+        Assert.assertTrue(randomNonRootSong.rankingScore < randomRootSong.rankingScore)
         val oldRootSongRank = randomRootSong.rankingScore
         val oldNonRootSongScore = randomNonRootSong.rankingScore
         nodeToSongNetwork.removeEdge(randomRootSongEdge)
-        nodeToSongNetwork.addEdge(rootNode, randomRootSong, NodeSongEdge(oldRootSongRank))
+        nodeToSongNetwork.addEdge(rootNode, randomNonRootSong, NodeSongEdge(randomRootSongEdge.affinity))
         incrementalHybrid.modifyNodesOrSongs(setOf(rootNode), setOf())
         incrementalHybrid.calculateRankings()
         Assert.assertTrue(randomRootSong.rankingScore < oldRootSongRank)
         Assert.assertTrue(randomNonRootSong.rankingScore > oldNonRootSongScore)
+        Assert.assertTrue(randomNonRootSong.rankingScore > randomRootSong.rankingScore)
     }
 
 }
