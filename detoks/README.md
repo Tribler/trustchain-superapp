@@ -84,10 +84,9 @@ The Benchmark Fragment, or the 'DeToks Transaction Hub', functions as a central 
 
 This fragment scans the network for peers connected to the DeToksTransactionEngine, and automatically updates the list of available peers.  Upon pressing a listed peer, the user is prompted to confirm their desire to connect to this peer, returning the app to the Benchmark Fragment upon confirmation.
 
-<\br>
+<br />
 <img src="docs/images/benchmarkfragment.jpg" width="200px"><img src="docs/images/peerconnectionfragment.jpg" width="200px">
-<\br>
-
+<br />
 
 Once returned in the Benchmark  Fragment, the connected peer field will be updated, making us ready to send tokens. The Benchmark Fragment allows for various modes of sending, described below.
 
