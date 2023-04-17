@@ -4,7 +4,7 @@
 # Detoks Transaction Engine group III
 /TODO INSERT DETOKS IMAGE
 
-Detoks is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). Detoks' purpose is to be a blockchain-based alternative version of Tiktok built from scratch. Our contribution was to build a Transaction engine API that allows to send multiple tokens through a single transaction to another peer and operate multiple transactions simultaneously to reduce the time needed to complete them. We also have benchmarks test the
+DeToks is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). DeToks' purpose is to be a blockchain-based alternative version of Tiktok built from scratch. Our contribution was to build a Transaction engine API that allows to send multiple tokens through a single transaction to another peer and operate multiple transactions simultaneously to reduce the time needed to complete them. We also have benchmarks test the
 This report is further divided into the following sections:
 * **Design of DetoksTransactionEngine**: In this section we describe how we have structered the transaction engine, tokens, fragments and so forth. We additionaly describe our design choices in the development process.
 * **API**: In this section we describe in details how to use the functions in the DetoksTransactionEngine for future works.
@@ -14,14 +14,14 @@ This report is further divided into the following sections:
 
 
 ## Table of Contents
-- [DetoksTransactionEngine](#DetoksTransactionEngine)
+- [DeToksTransactionEngine](#DetoksTransactionEngine)
     - [Table of Contents](#Table-of-contents)
     - [Project Structure](#Project-Structure)
     - [Transaction Engine](Transaction-Engine)
-        - [UI](#UI)
         - [Token Structure](#Token-Structure)
-        - [Transaction Engine Features](#Transaction-Engine-Features)
         - [Database design](#Database-design)
+        - [UI](#UI)
+        - [Transaction Engine Features](#Transaction-Engine-Features)
         - [Contrib proposal and agreement blocks over Trustchain](#Contrib-proposal-and-agreement-blocks-over-Trustchain)
         - [Design choices to group transactions](#Design-choices-to-group-transactions)
         - [Unit Tests](#Unit-Tests)
@@ -50,6 +50,8 @@ The project and code is split into the following three parts:
 - `util`: Utility classes and functions used in the transaction engine and the UI
 - `test`: Unit tests for the transaction engine
 
+// TODO - i wrote this cause its nice to have some kind of structure in our files, but this should still be implemented in the actual project
+
 ## Transaction Engine
 In the context of the Detoks project, the transaction engine is a module that allows to send tokens to other peers. In doing so, peers should be able to freely use the DeToks app without any noticeable delay in the user experience.  This means that the transaction engine should be fast; transactions should happen in the background in orders of milliseconds, but also reliable; integrity should be maintained automatically while the service remains available.
 
@@ -63,15 +65,14 @@ Finally, the transaction engine is also designed to be modular, so that it can b
 //TODO - is the above true?
 
 ### Token Structure
-To realize our transaction engine, we have opted for the use of 'owned' virtual tokens as a way to dictate a users' balance instead of an integer balance. We have opted for this choice as this would, in future work, allow us to validate ownership of specific tokens through the TrustChain network. Unfortunately, due to limited availability of hardware, In section [Limitations encountered](#Limitations-encountered), we discuss this limitation in more detail.
+To realize our transaction engine, we have opted for the use of 'owned' virtual tokens as a way to dictate a users' balance instead of an integer balance. We have opted for this choice as this would, in future work, allow us to validate ownership of specific tokens through the TrustChain network. Unfortunately, due to limited availability of hardware, this was quite difficult for us to test, and therefore we opted to focus more on transaction efficiency _whilst keeping our design open to integrity validation in the future_. We discuss this limitation in more detail in section [Limitations encountered](#Limitations-encountered).
 
 //TODO check this; maybe elaborate more/better on why we dont do validation ourselves or why its future work
 
-As for the design of the token, we use a simple design; each token only consists of a UUID and an integer ID, of which the latter only functions for debugging. UUIDs are widely used as a method to create unique IDs for each object, which we use in the DeToks Transaction Engine as a way to identify a single token.
-//TODO add UUID link
+As for the design of the token, we use a simple design; each token consists of a [UUID](https://docs.oracle.com/javase/7/docs/api/java/util/UUID.html) and an integer ID, of which the latter only functions for debugging. UUIDs are widely used as a method to create unique IDs for each object, which we use in the DeToks Transaction Engine as a way to identify a single token.
 
 ### Database design
-This choice in use of tokens required a local storage of tokens.  Each peer keeps track of their currently owned tokens in an SQLite database. SQLite was opted for as it is a lightweight server-less relational database management system suitable for embedded systems such as phones.
+This choice in use of tokens required a local storage of tokens.  Each peer keeps track of their currently owned tokens in an SQLite dasending to selftabase. SQLite was opted for as it is a lightweight server-less relational database management system suitable for embedded systems such as phones.
 
 To further increase token transaction efficiency, we aimed to keep the amount of database accesses to a minimum, as we found that database accesses were quite straining on runtime. To handle grouping of transactions more effficiently, we used [SQLite transactions](https://cashapp.github.io/sqldelight/2.0.0-alpha05/android_sqlite/transactions/). These transactions allow you to execute multiple statements under a single database transaction.
 
@@ -88,14 +89,26 @@ This fragment scans the network for peers connected to the DeToksTransactionEngi
 <\br>
 
 
-Once returned in the Benchmark  Fragment, the connected peer field will be updated, making us ready to send tokens. The Benchmark Fragment allows for various modes of sending, described below.
+Once returned in the Benchmark  Fragment, the connected peer field will be updated, making us ready to send tokens. The list on the bottom of the screen denotes your current token wallet, showing each token found in your local database. This token list is automatically updated once a change to your wallet happens.
+
+Furthermore, the Benchmark Fragment allows for various modes of sending, which are described below.
 
 ### Transaction Engine Features
-//TODO - benchmark amount specification, grouping factor
+Within the Benchmark fragment, as shown above, there are many UI elements to use and simultaneously benchmark the DeToks transaction engine. First of all, your token balance is shown in the aforementioned token list, which can be edited by either resetting your token balance or generating additional tokens with the two buttons above it.
 
+Then, once tokens are available to be sent, the user can select the amount of tokens to be sent with the `benchmark-amount` selector. Additionally, the user can change the `grouping-amount` selector to change the amount of transactions grouped when using the **Grouped Transactions** mode of sending.
 
+Once a peer is selected ([sending to self](#Sending-to-self) is also possible), tokens are available and the sending parameters have been set, the user can choose from three modes of sending:
+- **A single transaction** - send a single token from your wallet to the selected peer.
 - **Single Transactions** - sends an amount of single proposal blocks based on the selected`benchmark-amount`. Displays the amount of time taken to receive all agreements from the receiving peer below the button.
-- **Grouped Transactions** - sends an amount of
+- **Grouped Transactions** - sends an amount (`benchmark-amount`) of grouped proposal blocks, with `x=grouping-amount` transactions grouped per proposal block.
+
+After the full transaction benchmark has finished, e.g. the receiving peer has responded with an Agreement and the sending peer has processed all agreements, the benchmarked time is displayed beneath the button used to start the benchmark.
+
+Additionally, we attempted two other methods of sending in order increase transaction throughput, both using coroutines. However, these two methods proved to be infeasible, of which a discussion can be found in the [limitations](#Limitations-encountered) section.
+
+#### Sending to self
+For debugging purposes, sending to yourself is also possible. This is your default selected peer; in case you do not select any other peer, you will send to yourself. In this case, UUIDs are regenerated each time you receive tokens from yourself to avoid duplicate ID errors in the local database.
 
 
 ### Contrib proposal and agreement blocks over Trustchain
@@ -103,7 +116,8 @@ Once returned in the Benchmark  Fragment, the connected peer field will be updat
 ### Design choices to group transactions
 //TODO
 ### Unit Tests
-//TODO
+We have implemented numerous unit tests, mainly to tests the IO-operations of our app. We attempted to create larger integration tests, but unfortunately, we found this to be impossible since this would require the hosting of virtual devices.
+// TODO - rework this
 ## API
 //TODO
 ### Single Transaction
