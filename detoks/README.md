@@ -1,5 +1,6 @@
 
 
+
 # Detoks Transaction Engine group III
 /TODO INSERT DETOKS IMAGE
 
@@ -70,11 +71,9 @@ As for the design of the token, we use a simple design; each token only consists
 //TODO add UUID link
 
 ### Database design
-This choice in use of tokens required a local storage of tokens.
+This choice in use of tokens required a local storage of tokens.  Each peer keeps track of their currently owned tokens in an SQLite database. SQLite was opted for as it is a lightweight server-less relational database management system suitable for embedded systems such as phones.
 
-Token choice implied a database design choice. We decided to use a database that would allow us to store the tokens in a way that would allow us to easily retrieve them and update them. We chose to use a SQLite database, a lightweight relational database
--> Lightweight
--> Usage of database access limited to increase transaction throughput
+To further increase token transaction efficiency, we aimed to keep the amount of database accesses to a minimum, as we found that database accesses were quite straining on runtime. To handle grouping of transactions more effficiently, we used [SQLite transactions](https://cashapp.github.io/sqldelight/2.0.0-alpha05/android_sqlite/transactions/). These transactions allow you to execute multiple statements under a single database transaction.
 
 
 ### UI
@@ -84,9 +83,10 @@ The Benchmark Fragment, or the 'DeToks Transaction Hub', functions as a central 
 
 This fragment scans the network for peers connected to the DeToksTransactionEngine, and automatically updates the list of available peers.  Upon pressing a listed peer, the user is prompted to confirm their desire to connect to this peer, returning the app to the Benchmark Fragment upon confirmation.
 
-<br />
+<\br>
 <img src="docs/images/benchmarkfragment.jpg" width="200px"><img src="docs/images/peerconnectionfragment.jpg" width="200px">
-<br />
+<\br>
+
 
 Once returned in the Benchmark  Fragment, the connected peer field will be updated, making us ready to send tokens. The Benchmark Fragment allows for various modes of sending, described below.
 
