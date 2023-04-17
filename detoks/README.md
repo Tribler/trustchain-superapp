@@ -1,11 +1,12 @@
 
+
 # Detoks Transaction Engine group III
 /TODO INSERT DETOKS IMAGE
 
 Detoks is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). Detoks' purpose is to be a blockchain-based alternative version of Tiktok built from scratch. Our contribution was to build a Transaction engine API that allows to send multiple tokens through a single transaction to another peer and operate multiple transactions simultaneously to reduce the time needed to complete them. We also have benchmarks test the
-We will divide this report in multiple sections:
+This report is further divided into the following sections:
 * **Design of DetoksTransactionEngine**: In this section we describe how we have structered the transaction engine, tokens, fragments and so forth. We additionaly describe our design choices in the development process.
-* **API**: In this section we describe in details how to use the functions in the DetoksTransactionEngine for future works. 
+* **API**: In this section we describe in details how to use the functions in the DetoksTransactionEngine for future works.
 * **Benchmarks design and results**: In this section we present how we have designed our benchamrks and the results we have obtained.
 * **Limitations encountered**: In this section we describe the limitations that we encountered while trying to optimizing the transaction engine, as well as what limitations our design choices have implied.
 * **Future Works**: In this section we describe possible improvements that can optimize or extend our work.
@@ -40,19 +41,64 @@ We will divide this report in multiple sections:
     - [Future works](#Future-works)
         - [Multiple blocks broadcasted at once](#Multiple-blocks-broadcasted-at-once)
         - [Remediation for lost packets](#Remediation-for-lost-packets)
-        
+
 ## Project Structure
-//TODO
+The project and code is split into the following three parts:
+- `transactionEngine`: The transaction engine itself, which is a modular transaction engine that can be used in other projects or communities.
+- `UI`: The UI of the transaction engine, consisting of the benchmark fragment and the peer connection fragment
+- `util`: Utility classes and functions used in the transaction engine and the UI
+- `test`: Unit tests for the transaction engine
+
 ## Transaction Engine
-//TODO
-### UI
-//TODO
+In the context of the Detoks project, the transaction engine is a module that allows to send tokens to other peers. In doing so, peers should be able to freely use the DeToks app without any noticeable delay in the user experience.  This means that the transaction engine should be fast; transactions should happen in the background in orders of milliseconds, but also reliable; integrity should be maintained automatically while the service remains available.
+
+The transaction engine presented in this report aims to  fulfill both of these points. It is a modular transaction engine built on top of the [IPv8](https://github.com/Tribler/kotlin-ipv8) network overlay.  To ensure integrity and validity, it builds upon the [TrustChain Community](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md).  One of the key features of TrustChain is its resistance to Sybil attacks, which occur when a malicious entity creates multiple identities to gain control over the network. Additionally, TrustChain offers retrospective validation and integrity through the use of tamper-proof, temporal ordered and cryptographically signed transaction records to create irrefutable proof of past interactions.
+
+We extend on TrustchainCommunity, inheriting all of its properties, and adding the following features:
+- **Multiple tokens in a single transaction**: The transaction engine allows to send multiple tokens in a single transaction to another peer.
+- **Grouped transactions**: The transaction engine allows to group multiple transactions into a single block, which is broadcasted to the network.
+
+Finally, the transaction engine is also designed to be modular, so that it can be used in other projects or communities.
+//TODO - is the above true?
+
 ### Token Structure
-//TODO
-### Transaction Engine Features
-//TODO
+To realize our transaction engine, we have opted for the use of 'owned' virtual tokens as a way to dictate a users' balance instead of an integer balance. We have opted for this choice as this would, in future work, allow us to validate ownership of specific tokens through the TrustChain network. Unfortunately, due to limited availability of hardware, In section [Limitations encountered](#Limitations-encountered), we discuss this limitation in more detail.
+
+//TODO check this; maybe elaborate more/better on why we dont do validation ourselves or why its future work
+
+As for the design of the token, we use a simple design; each token only consists of a UUID and an integer ID, of which the latter only functions for debugging. UUIDs are widely used as a method to create unique IDs for each object, which we use in the DeToks Transaction Engine as a way to identify a single token.
+//TODO add UUID link
+
 ### Database design
-//TODO
+This choice in use of tokens required a local storage of tokens.
+
+Token choice implied a database design choice. We decided to use a database that would allow us to store the tokens in a way that would allow us to easily retrieve them and update them. We chose to use a SQLite database, a lightweight relational database
+-> Lightweight
+-> Usage of database access limited to increase transaction throughput
+
+
+### UI
+The UI consists of two fragments: the the Benchmark Fragment and the Peer Connection Fragment.
+
+The Benchmark Fragment, or the 'DeToks Transaction Hub', functions as a central hub to perform benchmarks.  To start off, a user can select the peer to which it wants to send tokens by pressing the 'select receiver' button.  This navigates the app to the other fragment; the Peer Connection Fragment.
+
+This fragment scans the network for peers connected to the DeToksTransactionEngine, and automatically updates the list of available peers.  Upon pressing a listed peer, the user is prompted to confirm their desire to connect to this peer, returning the app to the Benchmark Fragment upon confirmation.
+
+<\br>
+<img src="docs/images/benchmarkfragment.jpg" width="200px"><img src="docs/images/peerconnectionfragment.jpg" width="200px">
+<\br>
+
+
+Once returned in the Benchmark  Fragment, the connected peer field will be updated, making us ready to send tokens. The Benchmark Fragment allows for various modes of sending, described below.
+
+### Transaction Engine Features
+//TODO - benchmark amount specification, grouping factor
+
+
+- **Single Transactions** - sends an amount of single proposal blocks based on the selected`benchmark-amount`. Displays the amount of time taken to receive all agreements from the receiving peer below the button.
+- **Grouped Transactions** - sends an amount of
+
+
 ### Contrib proposal and agreement blocks over Trustchain
 //TODO
 ### Design choices to group transactions
@@ -99,4 +145,4 @@ Although the choice to use the trustchain community to exchange tokens has great
 ### IPv8 messages or smart broadcast
 The mechanism that Trustchain develops with the halfblocks including creation, signing, validation, storage, and sending requires a considerable amount of computation time. If you are aiming for a faster and quicker Engine without necessarily having the need for this process there are two main options:
 - Use only the Ipv8 network and exchange tokens with a standard form of encryption, with the use of a simpler database that stores transactions made in the form [sender, receiver, tokens exchanged]
-- Take advantage of the fact that proposal half-blocks are broadcasted to the network and include multiple proposal half-blocks addressed to multiple recipients in a single packet. A peer receiving this packet will later create agreement blocks only for the proposal half-blocks that have him as the target. 
+- Take advantage of the fact that proposal half-blocks are broadcasted to the network and include multiple proposal half-blocks addressed to multiple recipients in a single packet. A peer receiving this packet will later create agreement blocks only for the proposal half-blocks that have him as the target.
