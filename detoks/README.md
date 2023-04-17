@@ -1,9 +1,7 @@
-# Detoks
+# DeToks
 
-Decentralized version of TikTok, you can upload videos and like videos by others.
-The most liked videos appear at the top of your feed, a profile page lets you view:
-- The videos you have liked
-- The videos you have uploaded and how many likes they have received
-- Notifications about likes you have received
+## Torrenting
 
-![Detoks GIF](https://github.com/NikolayBlagoev/trustchain-superapp/blob/Quality-of-life-improvements/detoks/doc/detoks.gif)
+The torrenting is handled by the TorrentManager class (located in TorrentManager.kt). A single instance needs to exist for it for the entire duration of the app, as different fragments and classes interact with it. Hence why to get access to it, one needs to use TorrentManager.getInstance() method.
+
+Since the user uploads their own videos, clearing the cache is not recommended (as then the app can no longer seed).
