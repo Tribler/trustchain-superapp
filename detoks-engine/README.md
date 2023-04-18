@@ -10,7 +10,7 @@ Our app has the following content:
   
 - **Visible peers:** We maintain a list of the peers currently in proximity. It's very easily possible to see what peers are currently around with their id's in a handy list. It's also possible to refresh, as other peers may have joined in as well during the usage.
 
--**Sending tokens to peers**: It is possible to send many tokens at once to other peers in the vicinity, this can be done individually to a scale of a thousand tokens per second
+- **Sending tokens to peers:** It is possible to send many tokens at once to other peers in the vicinity, this can be done individually to a scale of a thousand tokens per second
 
 ## The structure of the project
 
