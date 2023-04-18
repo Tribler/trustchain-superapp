@@ -105,13 +105,13 @@ class CommunityAdapter private constructor(
 
         // Agreement block signed by me (my pk) means i accept the tokens sent to me
         else if (block.isAgreement && block.publicKey.contentEquals(myPublicKey)) {
-            recvTransactionHandler(Transaction.fromTrustChainTransactionObject(block.transaction))
             val trans = Transaction.fromTrustChainTransactionObject(block.transaction)
             tokenCount.addAndGet(trans.tokens.size)
             if (blockPointer == -1) {
                 blockPointer = block.sequenceNumber.toInt()
                 tokenInBlockPointer = 0
             }
+            recvTransactionHandler(Transaction.fromTrustChainTransactionObject(block.transaction))
         }
 
         // Other party accepted my proposal, agreement signed by other party
