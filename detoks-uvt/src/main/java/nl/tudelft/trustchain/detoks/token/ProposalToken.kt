@@ -12,7 +12,6 @@ import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 import nl.tudelft.trustchain.detoks.helpers.DateFormatter
-import java.time.LocalDateTime
 import java.util.*
 
 class ProposalToken {
@@ -57,6 +56,14 @@ class ProposalToken {
         torrentManager: TorrentManager
     ) {
         proposalSendButton.setOnClickListener {
+            if (torrentManager.getSeedableTorrents().isEmpty()) {
+                Toast.makeText(
+                    itemView.context,
+                    "No more videos for you to post",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
             val torrentInfo = torrentManager.getSeedableTorrents().get(0)
             val magnetURI = torrentManager.seedTorrent(torrentInfo)
             if (magnetURI == null) {
@@ -72,9 +79,10 @@ class ProposalToken {
             Log.i("DeToks", "Seeding succeeded!")
             val proposalBlock = createProposalToken(magnetURI)
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
-            val hash = proposalBlock?.calculateHash()!!
+            upvoteCommunity.sendBlock(proposalBlock!!)
+            val hash = proposalBlock.calculateHash()
             val myPeer = IPv8Android.getInstance().myPeer
-            val message = "Button Clicked! Your public key: " +
+            val message = "You posted a video! Your public key: " +
                 "${myPeer.publicKey.keyToBin().toHex()} and member id:\n" +
                 "$myPeer.mid has created a proposalblock on this timestamp: ${proposalBlock.timestamp} \n" +
                 "The hash of this block is ${hash.toHex()}, corresponding hashCode is: ${hash.hashCode()} \n" +

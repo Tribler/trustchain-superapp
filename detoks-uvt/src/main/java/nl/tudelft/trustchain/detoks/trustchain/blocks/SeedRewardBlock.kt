@@ -38,7 +38,6 @@ class SeedRewardBlock {
                     peer.publicKey.keyToBin()
                 )
             }
-
             return null
         }
     }

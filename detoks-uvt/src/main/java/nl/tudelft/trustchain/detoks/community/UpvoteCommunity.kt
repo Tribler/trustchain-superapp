@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.detoks.community
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import nl.tudelft.ipv8.Overlay
@@ -43,8 +41,8 @@ class UpvoteCommunity(
      */
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
     var torrentManager: TorrentManager? = null
-    var seedVideoIDs = mutableListOf<String>()
-    var failedSeeds = mutableListOf<String>()
+    var seedVideoIDs = mutableListOf<Pair<String, String>>()
+    var failedSeeds = mutableListOf<Pair<String, String>>()
 
     init {
         messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
@@ -52,7 +50,6 @@ class UpvoteCommunity(
         messageHandlers[MessageID.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
         messageHandlers[MessageID.SEED_REWARD] = ::onSeedRewardPacket
         messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
-        messageHandlers[MessageID.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
         this.registerBlockSigner(UpvoteTrustchainConstants.BALANCE_CHECKPOINT, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
                 this@UpvoteCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
@@ -60,15 +57,16 @@ class UpvoteCommunity(
         })
         messageHandlers[MessageID.RECOMMENDATION_REQUEST] = ::onRecommendationRequestPacket
         messageHandlers[MessageID.RECOMMENDATION_RECEIVED] = ::onRecommendationReceivedPacket
+        messageHandlers.entries.forEach { Log.i("Detoks", "key is ${it.key} and function is ${it.value.toString()}") }
     }
 
     object MessageID {
-        const val UPVOTE_TOKEN = 1
-        const val RECOMMENDATION_REQUEST = 2
-        const val RECOMMENDATION_RECEIVED = 3
-        const val MAGNET_URI_AND_HASH = 4
-        const val UPVOTE_VIDEO = 5
-        const val SEED_REWARD = 6
+        const val UPVOTE_TOKEN = 8
+        const val RECOMMENDATION_REQUEST = 9
+        const val RECOMMENDATION_RECEIVED = 10
+        const val MAGNET_URI_AND_HASH = 11
+        const val UPVOTE_VIDEO = 12
+        const val SEED_REWARD = 13
     }
 
     object ContentSeeding {
@@ -81,10 +79,14 @@ class UpvoteCommunity(
         val listOfPostsAndUpvotes = database.getBlocksWithType(UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN)
         val otherPeersProposalBlocks = listOfPostsAndUpvotes.filter { it.isProposal
             && it.publicKey.toHex() != myPeer.publicKey.keyToBin().toHex()
-            && !seedVideoIDs.contains(it.blockId)
-            && !failedSeeds.contains(it.blockId) && it.transaction.containsKey("magnetURI")}
+            && seedVideoIDs.firstOrNull { pair -> pair.first == it.calculateHash().toHex()} == null
+            && failedSeeds.firstOrNull { pair -> pair.first == it.calculateHash().toHex()} == null
+            && it.transaction.containsKey("magnetURI")
+        }
         val additionalSeeds = min(otherPeersProposalBlocks.size, ContentSeeding.MAX_SEEDED_CONTENT-seedVideoIDs.size)
         val randomlyChosenProposalBlocks = otherPeersProposalBlocks.shuffled().take(additionalSeeds)
+        Log.i("Detoks", "getContentToSeed: otherPeersProposalBlocks size: ${otherPeersProposalBlocks.size}, additional seeds: ${additionalSeeds}, randomly chosen size : ${randomlyChosenProposalBlocks.size
+        }")
         for (block in randomlyChosenProposalBlocks) {
             Log.i("Detoks", block.transaction.toString())
         }
@@ -93,13 +95,19 @@ class UpvoteCommunity(
             Log.i("Detoks", "The magnet link is: $magnetLink")
             val seeded = torrentManager?.seedTorrentFromMagnetLink(magnetLink)
             if (seeded !=null && seeded){
-                seedVideoIDs.add(block.blockId)
+                seedVideoIDs.add(Pair(block.calculateHash().toHex(), magnetLink))
                 // Greedily send to all other peers who are online
-                sendVideoData(magnetLink, block.calculateHash().toHex())
             } else {
-                failedSeeds.add(block.blockId)
+                failedSeeds.add(Pair(block.calculateHash().toHex(), magnetLink))
             }
         }
+        for (pair in seedVideoIDs) {
+            // greedily sending seeded content to all other peers
+            // greedily sending seeded content to all other peers
+            sendVideoData(pair.second, pair.first)
+        }
+        Log.i("Detoks", "${seedVideoIDs.size}")
+        seedVideoIDs.forEach { Log.i("Detoks", "Your peer is seeding $it") }
     }
 
     private fun onUpvoteTokenPacket(packet: Packet) {
@@ -123,13 +131,23 @@ class UpvoteCommunity(
         onMagnetURI(peer, payload)
     }
 
+
     private fun onMagnetURI(peer: Peer, payload: MagnetURIPayload) {
         Log.i(
             "Detoks",
             "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}"
         )
-        logger.debug { "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}" }
-        torrentManager?.addTorrent(payload.magnet_uri)
+        Log.i(
+            "Detoks",
+            "function: onMagnetURI: attempting to get block with the following hash: ${payload.proposal_token_hash}"
+        )
+        val block = this.database.getBlockWithHash(payload.proposal_token_hash.hexToBytes())
+        if (block != null) {
+            torrentManager?.addTorrent(payload.magnet_uri, payload.proposal_token_hash, block.timestamp.toString(), block.blockId)
+            Log.i("Detoks", "[Detoks] -> SUCESSSSSSSSSSSSSSSSSS! received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}")
+        } else {
+            Log.i("Detoks", "failed to add torrent to video feed because block is null \n attempted to get block with hash: ${payload.proposal_token_hash}")
+        }
     }
     private fun onRecommendationRequestPacket(packet: Packet) {
         val (peer, _) = packet.getAuthPayload(RecommendedVideosPayload.Deserializer)
@@ -257,7 +275,11 @@ class UpvoteCommunity(
     fun pickRandomPeer(): Peer? {
         val peers = getPeers()
         for (peer in peers) {
+            Log.i("Detoks", "------------------------------------------------------------")
             Log.i("Detoks", "This peer with peer mid is online: ${peer.mid}")
+            Log.i("Detoks", "This peer with this wan address is online: ${peer.wanAddress}")
+            Log.i("Detoks", "This peer with this lan address is online: ${peer.lanAddress}")
+            Log.i("Detoks", "------------------------------------------------------------")
         }
         if (peers.isEmpty()) return null
         return peers.random()
@@ -276,32 +298,34 @@ class UpvoteCommunity(
 
         val peers = getPeers()
         if (peers.isEmpty()) {
-            Log.i("Detoks", "No peers are online at this momemt, you/peer with mid :${myPeer.mid} cannot sent (hash,magnetUri) = (${proposalTokenHash},${magnetURI}) to anyone")
-            throw PeerNotFoundException("Could not find a peer")
+            Log.i("Detoks", "No peers are online at this moment, you/peer with mid :${myPeer.mid} cannot sent (hash,magnetUri) = (${proposalTokenHash},${magnetURI}) to anyone")
+//            throw PeerNotFoundException("Could not find a peer")
         }
         for (peer in peers) {
             Log.i("Detoks", "This peer with peer mid is online: ${peer.mid}")
-            val message = "[MAGNETURIPAYLOAD] You/Peer with member id: ${myPeer.mid} is sending magnet uri to peer with peer id: ${peer.mid}"
+            val message = "[MAGNETURIPAYLOAD] You/Peer with member id: ${myPeer.mid} is sending magnet uri to peer with peer id: ${peer.mid} \n" +  "the magnet URI is $magnetURI"
             Log.i("Detoks", message)
             logger.debug { message }
             send(peer, packet)
         }
+        send(myPeer, packet)
+//        Log.i("Detoks", "Sending this magnetLink to self :$magnetURI")
+//        onMagnetURI(myPeer, payload)
         return true
     }
 
     /**
-     * When a message is sent, a proposal block is created
-     * //TODO: only make an agreement block if the user did not like the video yet, if the user already like the video,
-     * Sends an UpvoteToken to a random Peer
+     * Send tokens to the peer that posted the video that the user upvoted by double tapping
      */
-    fun sendUpvoteToken(upvoteTokens: List<UpvoteToken>): Boolean {
+    fun sendUpvoteToken(upvoteTokens: List<UpvoteToken>, receiverPublicKey: ByteArray): Boolean {
         val payload = UpvoteVideoPayload(upvoteTokens)
         val packet = serializePacket(
             MessageID.UPVOTE_VIDEO,
             payload
         )
 
-        val peer = pickRandomPeer()
+        val peers = getPeers()
+        val peer = peers.firstOrNull { it.publicKey.keyToBin().contentEquals(receiverPublicKey) }
 
         if (peer != null) {
             val message = "[DETOKS] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
@@ -309,7 +333,8 @@ class UpvoteCommunity(
             send(peer, packet)
             return true
         }
-        throw PeerNotFoundException("Could not find a peer")
+        Log.i("Detoks", "Did not find a peer to send upvote token to")
+        return false
     }
 
     private fun sendLastUpvotedVideos(peer: Peer) {
@@ -338,6 +363,7 @@ class UpvoteCommunity(
 
         send(peer, packet)
     }
+
     private fun sendSeedReward(upvoteTokens: List<UpvoteToken>, upvotingPeer: Peer) {
         // Prepare the reward block
         val upvoteToken = upvoteTokens[0]

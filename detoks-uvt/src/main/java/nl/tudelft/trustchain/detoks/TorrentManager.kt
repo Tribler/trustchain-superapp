@@ -19,6 +19,7 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.Pair
 
 
 /**
@@ -34,12 +35,10 @@ class TorrentManager(
 ) {
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
-    private val torrentFiles = mutableListOf<TorrentHandler>()
+    private val torrentFiles = mutableListOf<TorrentHandlerPlusUserInfo>()
     private var currentIndex = 0
     private val torrentHandleBeingSeeded = mutableListOf<TorrentHandle>()
     private val seedableTorrentInfo = mutableListOf<TorrentInfo>()
-    var sessionActive = false
-    internal var signal = CountDownLatch(0)
     init {
         clearMediaCache()
         initializeSessionManager()
@@ -64,13 +63,18 @@ class TorrentManager(
             videoID))
     }
 
+    fun getHashOfCurrentVideo(): String {
+        return torrentFiles.gett(currentIndex % getNumberOfTorrents()).proposalBlockHash
+    }
+
     fun notifyIncrease() {
         Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
 
-        val recommendedVideo: String? = Recommender.getNextRecommendation()
-        if (recommendedVideo != null) {
-            Log.i("DeToks", "Recommended video ID: $recommendedVideo")
+        val recommendedVideo: List<String>? = Recommender.getNextRecommendation()
+        if (recommendedVideo != null && recommendedVideo.size == 4) {
+            Log.i("DeToks", "Now adding this recommended video ID: $recommendedVideo to peers video feed")
+            addTorrent(recommendedVideo[0], recommendedVideo[1], recommendedVideo[2], recommendedVideo[3])
         } else {
             Log.i("DeToks", "Could not get recommended video")
         }
@@ -98,12 +102,54 @@ class TorrentManager(
                     delay(100)
                 }
             }
+            mvpSeeder(content)
             content.asMediaInfo()
         } catch (e: TimeoutCancellationException) {
             Log.i("DeToks", "Timeout for content ... $index")
             Log.i("DeToks", "Timeout for content ... ${content.asMediaInfo().fileName}")
             content.asMediaInfo()
         }
+    }
+
+    fun mvpSeeder(videoTorrentHandler: TorrentHandler): MutableList<Pair<String, String>> {
+        val peerInfo = videoTorrentHandler.handle.peerInfo()
+        // list of peer info objects -> you can get the
+        // bit torrent client and ip address of the peers
+        val downloadedFrom = mutableListOf<Pair<String, String>>()
+        for (peer in peerInfo) {
+            if (peer.totalDownload() > 0) {
+                Log.i("Detoks", "---------------------------------------------------------")
+                Log.i("Detoks", "downloaded from peer with ip adress ${peer.ip()}")
+                Log.i("Detoks", "this peer uses the following client ${peer.client()}")
+                Log.i("Detoks", "amount downloaded from this peer: ${peer.totalDownload()}")
+                Log.i("Detoks", "-----------------------------------------------------------")
+                downloadedFrom.add(Pair(peer.client(), peer.ip()))
+            }
+//            peer.ip()
+//            peer.client()
+        }
+        return downloadedFrom
+    }
+
+
+    fun mvpSeeder(): MutableList<Triple<String, String, Long>> {
+        val peerInfo = torrentFiles.gett(currentIndex % getNumberOfTorrents()).handle.peerInfo()
+        // list of peer info objects -> you can get the
+        // bit torrent client and ip address of the peers
+        val downloadedFrom = mutableListOf<Triple<String, String, Long>>()
+        for (peer in peerInfo) {
+            if (peer.totalDownload() > 0) {
+                Log.i("Detoks", "---------------------------------------------------------")
+                Log.i("Detoks", "downloaded from peer with ip address ${peer.ip()}")
+                Log.i("Detoks", "this peer uses the following client ${peer.client()}")
+                Log.i("Detoks", "amount downloaded from this peer: ${peer.totalDownload()}")
+                Log.i("Detoks", "-----------------------------------------------------------")
+                downloadedFrom.add(Triple(peer.client(), peer.ip(), peer.totalDownload()))
+            }
+//            peer.ip()
+//            peer.client()
+        }
+        return downloadedFrom
     }
 
     fun getNumberOfTorrents(): Int {
@@ -153,32 +199,42 @@ class TorrentManager(
         }
     }
 
-    fun addTorrent(magnet: String) {
+    fun addTorrent(magnet: String, proposalBlockHash: String, videoPostedOn: String, videoID: String) {
         val torrentInfo = getInfoFromMagnet(magnet)?:return
         val hash = torrentInfo.infoHash()
+        var handle = sessionManager.find(hash)
 
-        if(sessionManager.find(hash) != null) return
-//        logger.info {  "Adding new torrent: ${torrentInfo.name()}"}
+        if (sessionManager.find(hash) == null) {
+            // no need to download again if it was already downloaded before: prevents warning and crash bugs
+            Log.i("Detoks", "there is no torrenthandle yet for the video with this hash: $proposalBlockHash \n and this magnetlink: $magnet")
+            sessionManager.download(torrentInfo, cacheDir)
+            handle = sessionManager.find(hash)
+            handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+            handle.prioritizeFiles(arrayOf(Priority.IGNORE))
+            handle.pause()
+        } else {
+            Log.i("Detoks", "no need to download again, torrenthandle for this video with this hash already exists: $proposalBlockHash \n and this magnetlink: $magnet")
+        }
+
         Log.i("Detoks", "Adding new torrent: ${torrentInfo.name()}")
 
-        sessionManager.download(torrentInfo, cacheDir)
-        val handle = sessionManager.find(hash)
-        handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
-        handle.prioritizeFiles(arrayOf(Priority.IGNORE))
-        handle.pause()
 
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
                 torrentFiles.add(
-                    TorrentHandler(
+                    TorrentHandlerPlusUserInfo(
                         cacheDir,
                         handle,
                         torrentInfo.name(),
                         fileName,
-                        it
+                        it,
+                        proposalBlockHash,
+                        videoPostedOn,
+                        videoID
                     )
                 )
+                Log.i("Detoks", "Received and added new video data: magnet link: $magnet, proposalBlockHash: $proposalBlockHash")
             }
         }
     }
@@ -193,122 +249,13 @@ class TorrentManager(
     }
 
     /**
-     * A method for downloading given a magnet link from AppGossiper.kt from FOC nl.tudelft.trustchain.FOC
-     * If the AddTorrent Method does not work then try this one
-     */
-    fun getMagnetLink(magnetLink: String) {
-        // Handling of the case where the user is already downloading the
-        // same or another torrent
-
-        if (sessionActive)
-            return
-
-//        downloadHasStarted(torrentName)
-//
-//        activity.runOnUiThread {
-//            printToast("Found new torrent $torrentName attempting to download!")
-//        }
-//        val startIndexName = magnetLink.indexOf(displayNameAppender)
-//        val stopIndexName =
-//            if (magnetLink.contains(addressTrackerAppender)) magnetLink.indexOf(addressTracker) else magnetLink.length
-//
-//        val magnetNameRaw = magnetLink.substring(startIndexName + 4, stopIndexName)
-//        logger.info { magnetNameRaw }
-//        val magnetName = magnetNameRaw.replace('+', ' ', false)
-//        val magnetInfoHash = magnetLink.substring(preHashString.length, startIndexName)
-//        logger.info { magnetName }
-
-        val sp = SettingsPack()
-        sp.seedingOutgoingConnections(true)
-        val params =
-            SessionParams(sp)
-        sessionManager.start(params)
-
-        val timer = Timer()
-        timer.schedule(
-            object : TimerTask() {
-                override fun run() {
-                    val nodes = sessionManager.stats().dhtNodes()
-                    // wait for at least 10 nodes in the DHT.
-                    if (nodes >= 10) {
-                        logger.info { "DHT contains $nodes nodes" }
-                        // signal.countDown();
-                        timer.cancel()
-                    }
-                }
-            },
-            0, 1000
-        )
-
-        logger.info { "Detoks, Fetching the magnet uri, please wait..." }
-        val data: ByteArray
-        try {
-            data = sessionManager.fetchMagnet(magnetLink, 30)
-        } catch (e: Exception) {
-            logger.info { "Detoks, Failed to retrieve the magnet" }
-            Log.e("Detoks", "This peer failed get content using the provided magnet link: $magnetLink logged on line 239 of TorrentManager")
-            return
-        }
-
-        if (data != null) {
-            val torrentInfo = TorrentInfo.bdecode(data)
-            sessionActive = true
-            signal = CountDownLatch(1)
-
-            sessionManager.download(torrentInfo, cacheDir)
-            val handle = sessionManager.find(torrentInfo.infoHash())
-            handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
-            handle.prioritizeFiles(arrayOf(Priority.IGNORE))
-            handle.pause()
-
-            for (it in 0 until torrentInfo.numFiles()) {
-                val fileName = torrentInfo.files().fileName(it)
-                if (fileName.endsWith(".mp4")) {
-                    torrentFiles.add(
-                        TorrentHandler(
-                            cacheDir,
-                            handle,
-                            torrentInfo.name(),
-                            fileName,
-                            it
-                        )
-                    )
-                }
-            }
-//            activity.runOnUiThread { printToast("Managed to fetch torrent info for $torrentName, trying to download it via torrent!") }
-
-            signal.await(1, TimeUnit.MINUTES)
-
-            if (signal.count.toInt() == 1) {
-//                activity.runOnUiThread { printToast("Attempt to download timed out for $torrentName!") }
-                signal = CountDownLatch(0)
-                sessionManager.find(torrentInfo.infoHash())?.let { torrentHandle ->
-                    sessionManager.remove(torrentHandle)
-                }
-
-                Log.e("Detoks", "This peer failed get content using the provided magnet link: $magnetLink because of:")
-                Log.e("Detoks", "Attempt to download timed out for $magnetLink, logged by line 281 of torrentManager")
-//                onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
-            } else {
-//                onDownloadSuccess(magnetName)
-            }
-            sessionActive = false
-        } else {
-            logger.info { "Failed to retrieve the magnet" }
-            Log.e("Detoks", "This peer failed get content using the provided magnet link: $magnetLink logged on line 289 of TorrentManager")
-//            activity.runOnUiThread { printToast("Failed to retrieve magnet for $torrentName!") }
-//            onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
-        }
-    }
-
-    /**
      * Start seeding the video that is currently on the screen
      * To be called when the user double clicks, //TODO first check if the current video is created by someone else first
      * or else the user will be seeding a video that wasn't posted by anyone
      * @return the magnet link of that is being seeded or null if failed to seed
      */
     fun seedLikedVideo(): String? {
-        val torrentHandle = torrentFiles.gett(currentIndex).handle
+        val torrentHandle = torrentFiles.gett(currentIndex % getNumberOfTorrents()).handle
         return if (torrentHandle.isValid) {
             torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
             torrentHandle.pause()
@@ -431,18 +378,17 @@ class TorrentManager(
             Log.i("Detoks", "name of the torrent file is: ${torrentInfo.name()}")
             Log.i("Detoks", "The magnet URI created by .makeMagnetUri() function is ${handle.makeMagnetUri()}")
             Log.i("Detoks", "The magnet URI create by constructMagnetLink() is ${MagnetUtils.constructMagnetLink(torrentInfo.infoHash(), torrentInfo.name())}")
-//                    logger.info {"The magnet URI created by .makeMagnetUri() function is ${handle.makeMagnetUri()}"}
-//                    logger.info {"The magnet URI create by constructMagnetLink() is ${MagnetUtils.constructMagnetLink(torrentInfo.infoHash(), torrentInfo.name())}" }
             for (it in 0..torrentInfo.numFiles()) {
                 val fileName = torrentInfo.files().fileName(it)
                 if (fileName.endsWith(".mp4")) {
                     torrentFiles.add(
-                        TorrentHandler(
+                        TorrentHandlerPlusUserInfo(
                             cacheDir,
                             handle,
                             torrentInfo.name(),
                             fileName,
-                            it
+                            it,
+                            "", "", ""
                         )
                     )
                 }
