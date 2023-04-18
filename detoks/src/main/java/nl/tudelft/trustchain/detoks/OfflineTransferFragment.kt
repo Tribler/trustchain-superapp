@@ -98,7 +98,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val myPublicKey = getIpv8().myPeer.publicKey
         val myPrivateKey = getIpv8().myPeer.key as PrivateKey
         val amountText = view.findViewById<EditText>(R.id.amount)
-
+        val balanceText = view.findViewById<TextView>(R.id.txtBalance)
+        balanceText.text = wallet!!.balance.toString()
 
         val buttonScan = view.findViewById<Button>(R.id.button_send)
         buttonScan.setOnClickListener {
@@ -137,7 +138,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
                             } else {
                                 showQR(view, chosenTokens, friendPublicKey)
                                 Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
-
+                                balanceText.text = wallet!!.balance.toString()
                             }
                         } else {
                             Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()

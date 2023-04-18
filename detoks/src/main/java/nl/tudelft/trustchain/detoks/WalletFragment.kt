@@ -80,6 +80,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
         createCoinButton.setOnClickListener {
             // Create a new coin and add it to the wallet!
             creatNewCoin(wallet)
+            balanceText.text = wallet.balance.toString()
         }
 
 //        val buttonShow = view.findViewById<Button>(R.id.button_show)
