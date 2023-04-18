@@ -126,15 +126,15 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
             return@map Pair(it, profiles[key])
         }
 
-        var sortedHandlerProfile =
-            handlerProfile.sortedWith(strategyComparators[id]!!).toMutableList()
+        var sortedHandlerProfile: MutableList<Pair<TorrentHandler, ProfileEntry?>>
 
         if (id == STRATEGY_RISING){
             sortedHandlerProfile = filteredSort(handlerProfile, id, RISING_CUTOFF_SECONDS)
-        }
-
-        if (id == STRATEGY_HOT) {
+        } else if (id == STRATEGY_HOT) {
             sortedHandlerProfile = filteredSort(handlerProfile, id, HOT_CUTOFF_SECONDS)
+        } else {
+            sortedHandlerProfile =
+                handlerProfile.sortedWith(strategyComparators[id]!!).toMutableList()
         }
 
         return sortedHandlerProfile.map { it.first }.toMutableList()
