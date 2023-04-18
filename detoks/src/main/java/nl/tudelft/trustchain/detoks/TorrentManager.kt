@@ -274,6 +274,7 @@ class TorrentManager constructor (
         tb.path(File(cacheDir.getPath()+"/"+collection.hashCode().toString()))
         tb.addTracker("http://opensharing.org:2710/announce")
         tb.addTracker("http://open.acgnxtracker.com:80/announce")
+        tb.addTracker("udp://tracker.openbittorrent.com:6969/announce")
         tb.setPrivate(false)
 
         Log.d("DeToks", folder.toString())
