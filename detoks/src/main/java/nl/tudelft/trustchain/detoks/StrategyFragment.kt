@@ -59,7 +59,7 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
             leechingStrategySpinner.setSelection(torrentManager.strategies.leechingStrategy)
         }
         setSpinnerActions(leechingStrategySpinner) {
-            if (it != torrentManager.strategies.leechingStrategy) {
+            if (it == torrentManager.strategies.leechingStrategy) {
                 return@setSpinnerActions
             }
             torrentManager.updateLeechingStrategy(it)
@@ -75,7 +75,7 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
             seedingStrategySpinner.setSelection(torrentManager.strategies.seedingStrategy)
         }
         setSpinnerActions(seedingStrategySpinner) {
-            if (it != torrentManager.strategies.seedingStrategy) {
+            if (it == torrentManager.strategies.seedingStrategy) {
                 return@setSpinnerActions
             }
             torrentManager.updateSeedingStrategy(strategyId = it)
