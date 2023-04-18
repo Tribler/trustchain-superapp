@@ -29,8 +29,8 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         const val STRATEGY_HIGHEST_WATCH_TIME = 6
         const val STRATEGY_LOWEST_WATCH_TIME = 7
 
-        const val RISING_CUTOFF_SECONDS = 7200 // 2 hour cutoff
-        const val HOT_CUTOFF_SECONDS = 24 * 3600//  1 day cutoff
+        const val RISING_CUTOFF_SECONDS = 7200 * 1000 // 2 hour cutoff in milliseconds
+        const val HOT_CUTOFF_SECONDS = 24 * 3600  * 1000//  1 day cutoff in milliseconds
     }
 
     init {
@@ -92,7 +92,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         item: Pair<TorrentHandler, ProfileEntry?>,
         cutoff: Int
     ): Boolean {
-        val currentTime = System.currentTimeMillis() / 1000;
+        val currentTime = System.currentTimeMillis();
         val minimumDate = currentTime - cutoff
 
         return item.second!!.uploadDate >= minimumDate
