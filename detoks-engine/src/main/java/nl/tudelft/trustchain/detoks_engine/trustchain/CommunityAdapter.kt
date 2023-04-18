@@ -129,6 +129,9 @@ class CommunityAdapter private constructor(
         }
     }
 
+    /**
+     * Returns the amount of tokens in possession
+     */
     fun getTokenCount(): Int {
         return tokenCount.get()
     }
