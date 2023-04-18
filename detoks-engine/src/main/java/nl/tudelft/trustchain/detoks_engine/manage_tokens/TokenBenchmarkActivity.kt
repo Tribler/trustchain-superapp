@@ -50,7 +50,7 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
         peerListView.adapter = peerAdapter
 
         val tokenCounter = findViewById<TextView>(R.id.token_count)
-        tokenCount = communityAdapter.tokenCount
+        tokenCount = communityAdapter.getTokenCount()
         tokenCounter.text = tokenCount.toString()
 
         val packetslostCounter = findViewById<TextView>(R.id.packetslost)
@@ -67,14 +67,14 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
 
 
         communityAdapter.setReceiveTransactionHandler {
-            tokenCount = communityAdapter.tokenCount
+            tokenCount = communityAdapter.getTokenCount()
             runOnUiThread {
                 tokenCounter.text = tokenCount.toString()
             }
         }
 
         communityAdapter.setReceiveAgreementHandler {
-            tokenCount = communityAdapter.tokenCount
+            tokenCount = communityAdapter.getTokenCount()
             packetsLost = communityAdapter.packetsLost
             throughput = communityAdapter.throughput
             latency = communityAdapter.latency
@@ -89,6 +89,7 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
         findViewById<TextView>(R.id.my_peer).text = "Peers (my id: ${myId}..)"
 
     }
+
 
     private fun sendPerSecond() {
         if (selectedPeerIndex == -1) {

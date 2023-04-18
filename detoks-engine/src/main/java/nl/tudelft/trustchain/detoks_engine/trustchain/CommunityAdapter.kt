@@ -11,6 +11,7 @@ import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.detoks_engine.manage_tokens.Transaction
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
 
 /**
@@ -20,10 +21,10 @@ import kotlin.math.min
  */
 class CommunityAdapter private constructor(
     private val trustChainCommunity: TrustChainCommunity,
-    private val maxGroupBy: Int = 100,
-    private val flushIntervalMillis: Long = 50,
-    private val resendTimeoutMillis: Long = 1000,
-    private val resendLimit: Int = 0
+    private val maxGroupBy: Int,
+    private val flushIntervalMillis: Long,
+    private val resendTimeoutMillis: Long,
+    private val resendLimit: Int
 ) {
     private val trustChainHelper: TrustChainHelper = TrustChainHelper(trustChainCommunity)
     val myPublicKey = trustChainHelper.getMyPublicKey()
@@ -33,10 +34,10 @@ class CommunityAdapter private constructor(
     var recAgreementHandler: ((transaction: Transaction) -> Unit) = {}
     private var blockPointer = -1
     private var tokenInBlockPointer = -1
-    public var tokenCount = 0;
+    public var tokenCount = AtomicInteger(0)
 
-    private var transactionsSend = 1
-    private var transactionsBack = 1
+    private var transactionsSend = AtomicInteger(1)
+    private var transactionsBack = AtomicInteger(1)
     public var packetsLost = 100.00
 
     private var lastAgreementBlockReceived = System.currentTimeMillis()
@@ -79,11 +80,11 @@ class CommunityAdapter private constructor(
                 tokenInBlockPointer = 0
                 if (lastSentToken != null && block.sequenceNumber < blockSeqLastSentToken && Transaction.fromTrustChainTransactionObject(block.transaction).tokens.contains(lastSentToken)) {
                     tokenInBlockPointer = Transaction.fromTrustChainTransactionObject(block.transaction).tokens.indexOf(lastSentToken)
-                    tokenCount += Transaction.fromTrustChainTransactionObject(block.transaction).tokens.size - tokenInBlockPointer
+                    tokenCount.addAndGet(Transaction.fromTrustChainTransactionObject(block.transaction).tokens.size - tokenInBlockPointer)
                     popToken()
                     break
                 }
-                tokenCount += Transaction.fromTrustChainTransactionObject(block.transaction).tokens.size
+                tokenCount.addAndGet(Transaction.fromTrustChainTransactionObject(block.transaction).tokens.size)
             }
             block = trustChainCommunity.database.getBlockBefore(block, TOKEN_BLOCK_TYPE)
         }
@@ -91,8 +92,7 @@ class CommunityAdapter private constructor(
     }
 
     private fun handleBlock(block: TrustChainBlock) {
-        packetsLost = 100*(transactionsBack.toDouble()/transactionsSend)
-        logger.debug("latency: ${latency}, lost: ${100*(transactionsBack.toDouble()/transactionsSend)} trough:${transactionsBack} send:${transactionsSend} %, Block token received: ${block.transaction}, is proposal: ${block.isProposal}, is agreement: ${block.isAgreement}, PK til 8: ${block.publicKey.toString().substring(0, 8)}, is self signed ${block.isSelfSigned}")
+        logger.debug("latency: ${latency}, lost: ${100*(transactionsBack.toDouble()/transactionsSend.get())} trough:${transactionsBack} send:${transactionsSend} %, Block token received: ${block.transaction}, is proposal: ${block.isProposal}, is agreement: ${block.isAgreement}, PK til 8: ${block.publicKey.toString().substring(0, 8)}, is self signed ${block.isSelfSigned}")
 
         // A proposal block for me (so i receive tokens), action is to agree
         // When selfsigned its an injection, when not selfsigned and not my PK its sent by somebody else
@@ -104,7 +104,7 @@ class CommunityAdapter private constructor(
         else if (block.isAgreement && block.publicKey.contentEquals(myPublicKey)) {
             recvTransactionHandler(Transaction.fromTrustChainTransactionObject(block.transaction))
             val trans = Transaction.fromTrustChainTransactionObject(block.transaction)
-            tokenCount += trans.tokens.size
+            tokenCount.addAndGet(trans.tokens.size)
             if (blockPointer == -1) {
                 blockPointer = block.sequenceNumber.toInt()
                 tokenInBlockPointer = 0
@@ -113,7 +113,7 @@ class CommunityAdapter private constructor(
 
         // Other party accepted my proposal, agreement signed by other party
         else if (block.isAgreement && !block.publicKey.contentEquals(myPublicKey)) {
-            transactionsBack++
+            transactionsBack.incrementAndGet()
             val numOfTokens = Transaction.fromTrustChainTransactionObject(block.transaction).tokens.size
             throughput = numOfTokens*(1000/(System.currentTimeMillis()-lastAgreementBlockReceived))
             lastAgreementBlockReceived = System.currentTimeMillis()
@@ -121,17 +121,21 @@ class CommunityAdapter private constructor(
             latency = System.currentTimeMillis() - old
 
             transmittingBlocks.remove(block.linkedBlockId)?.cancel()
+            packetsLost = 100*(transactionsBack.toDouble()/transactionsSend.toDouble())
             recAgreementHandler(Transaction.fromTrustChainTransactionObject(block.transaction))
         }
     }
 
+    fun getTokenCount(): Int {
+        return tokenCount.get()
+    }
     /**
      * Sends [amount] of tokens to [peer].
      * When [amount] is bigger than max available tokens than all available tokens will be sent to [peer]
      */
     fun sendTokens(amount: Int, peer: Peer) {
-        if (tokenCount > 0) {
-            val nToSend = min(amount, tokenCount)
+        if (tokenCount.get() > 0) {
+            val nToSend = min(amount, tokenCount.get())
             val tokens = mutableListOf<String>()
             repeat(nToSend) {
                 tokens.add(popToken()!!)
@@ -157,7 +161,7 @@ class CommunityAdapter private constructor(
                             peer.publicKey.keyToBin()
                         )
                     }
-                    transactionsSend ++;
+                    transactionsSend.incrementAndGet()
                     logger.debug { "Send proposal block: ${block.summarize()}" }
 
                     if (resendLimit > 0) {
@@ -165,7 +169,7 @@ class CommunityAdapter private constructor(
                             repeat(resendLimit) {
                                 delay(resendTimeoutMillis)
                                 if (isActive) {
-                                    transactionsSend ++;
+                                    transactionsSend.incrementAndGet()
                                     trustChainCommunity.sendBlock(block, peer)
                                     trustChainCommunity.sendBlock(block)
                                     logger.debug { "Resend proposal block: ${block.summarize()}" }
@@ -183,17 +187,17 @@ class CommunityAdapter private constructor(
     }
 
     private fun popToken() : String? {
-        if (tokenCount > 0) {
+        if (tokenCount.get() > 0) {
             // Fetch token at pointer
             val block = trustChainCommunity.database.get(myPublicKey, blockPointer.toUInt())!!
             val transaction = Transaction.fromTrustChainTransactionObject(block.transaction)
             val token = transaction.tokens[tokenInBlockPointer]
 
             // Decrement token count
-            tokenCount--
+            tokenCount.decrementAndGet()
 
             // If last token set pointers to -1 and return
-            if (tokenCount == 0) {
+            if (tokenCount.get() == 0) {
                 blockPointer = -1
                 tokenInBlockPointer = -1
                 return token
@@ -232,7 +236,13 @@ class CommunityAdapter private constructor(
     fun injectTokens(tokens: List<String>) {
         logger.debug{"Starting token injection for $tokens"}
         val transaction = Transaction(tokens)
-        trustChainCommunity.createProposalBlock(TOKEN_BLOCK_TYPE, transaction.toTrustChainTransaction(), myPublicKey)
+        synchronized(trustChainCommunity.database) {
+            trustChainCommunity.createProposalBlock(
+                TOKEN_BLOCK_TYPE,
+                transaction.toTrustChainTransaction(),
+                myPublicKey
+            )
+        }
     }
 
     /**
@@ -266,10 +276,10 @@ class CommunityAdapter private constructor(
      */
     fun getTokens(): List<String> {
         val tokens = mutableListOf<String>()
-        if (tokenCount == 0) return tokens
+        if (tokenCount.get() == 0) return tokens
 
         var currentBlock: TrustChainBlock? = trustChainCommunity.database.get(myPublicKey, blockPointer.toUInt())
-        while (tokens.size < tokenCount) {
+        while (tokens.size < tokenCount.get()) {
             currentBlock!!
             if (currentBlock.isAgreement) {
                 tokens.addAll(Transaction.fromTrustChainTransactionObject(currentBlock.transaction).tokens)
@@ -284,7 +294,7 @@ class CommunityAdapter private constructor(
         private var instance: CommunityAdapter? = null
         fun getInstance(
         trustChainCommunity: TrustChainCommunity,
-        maxGroupBy: Int = 4,
+        maxGroupBy: Int = 100,
         flushIntervalMillis: Long = 50,
         resendTimeoutMillis: Long = 1000,
         resendLimit: Int = 0
