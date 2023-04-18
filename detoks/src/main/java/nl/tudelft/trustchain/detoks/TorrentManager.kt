@@ -240,6 +240,7 @@ class TorrentManager constructor (
      * directory to Libtorrent and selects all .mp4 files for download.
      */
     private fun buildTorrentIndex() {
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val files = torrentDir.listFiles()
         if (files != null) {
             for (file in files) {
@@ -277,7 +278,7 @@ class TorrentManager constructor (
                                     torrentInfo.name(),
                                     fileName,
                                     it,
-                                    torrentInfo.creator(),
+                                    community.getAuthorOfMagnet(torrentInfo.makeMagnetUri()),
                                     torrentInfo.makeMagnetUri(),
                                     false
                                 )
