@@ -12,7 +12,7 @@ A Large part of the DeToks back-end depends on information being gossiped over t
 * [BootGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/BootGossiper.kt): gossips boot related data.
 * [NetworkSizeGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/NetworkSizeGossiper.kt): estimates network size.
 * [TorrentGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/TorrentGossiper.kt): gossips torrents and corresponding hopcounts.
-* [ProfileGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/ProfileGossiper.kt): gossips the statistics in the profiles.
+* [ProfileEntryGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/ProfileEntryGossiper.kt): gossips the statistics in the profiles.
 
 All of these extend `Gossiper`. This section gives short descriptions of each of them.
 
@@ -32,25 +32,25 @@ The [TorrentGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossipe
 
 Next to the torrent it also shares the hopcount statistic. This statistic details how many hops a torrent was shared from its origin. This is a useful statistic for debugging, but it is also incorporated in one of the leeching and seeding strategies.
 
-### ProfileGossiper
+### ProfileEntryGossiper
 
-The [ProfileGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/ProfileGossiper.kt) is used to spread profile metrics throughout the network. This is used to update peers on the profile data it has for a specific torrent. These statistics are used for the seeding and leeching strategies and/or for debugging.
-Shared metrics include:
-* `watchTime`: average watch time of torrent on the network.
-* `duration`: duration of torrent.
-* `uploadDate`: upload date of torrent.
-* `timesSeen`: number of times this node has received this torrent.
+The [ProfileEntryGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/ProfileEntryGossiper.kt) is used to spread profile metrics throughout the network. This is used to update peers on the profile data it has for a specific torrent. These statistics are used for the seeding and leeching strategies and/or for debugging.
+Together with the identifier of the profile the shared metrics are:
+* `watchTime`: when received, update the average watch time of torrent on the network.
+* `duration`: when received, set duration of torrent if it was unknown.
+* `uploadDate`: when received, set upload date of torrent if it was unknown.
+* `likes`: when received, update the estimated likes of torrent on the network.
 
 ## Profiles
 
-The [Profile](./src/main/java/nl/tudelft/trustchain/detoks/Profile.kt) class is used to store a certain set of metrics in a profile entry for each video. Useful metadata is stored in these entries that help the other parts of DeToks with choosing which torrents to seed, leech and recommend to the user. Each node within the network has their own aggregate of profile entries, thir profile. This section describes stored parameters in the profile entries. Entries are added to the profile when either a new torrent is received, or if an entry is shared through gossiping. Almost all values are initialised to zero. The exception is the *watched* field, which is initialised to *false*. The class also contains some auxilliary functions for updating parameters.
+The [Profile](./src/main/java/nl/tudelft/trustchain/detoks/Profile.kt) class is used to store a certain set of metrics in a profile entry for each torrent. Useful metadata is stored in these entries that help the other parts of DeToks with choosing which torrents to seed, leech and recommend to the user. Each node within the network has their own aggregate of profile entries, their profile. This section describes stored parameters in the profile entries. Entries are added to the profile when either a new torrent is received, or if an entry is shared through gossiping. Almost all values are initialised to zero. The exception is the *watched* field, which is initialised to *false*. The class also contains some auxilliary functions for updating parameters.
 
-* `watched`: set to true if the video was watched.
+* `watched`: set to true if a video of the torrent was watched.
 * `watchTime`: average watch time of torrent on the network.
-* `duration`: the duration of the video which is set when a video starts playing for the first time.
-* `uploadDate`: the creation date of the torrent that consists the video.
+* `duration`: the duration of the first watched video in the torrent.
+* `uploadDate`: the creation date of the torrent.
 * `hopCount`: the amount of hops the torrent made over the network.
-* `timesSeen`: the amount of times a node has received the same torrent.
+* `timesSeen`: the amount of times this node has received the same torrent.
 * `likes`: the amount of likes, this is currently a stub and depends on the implementation of another team.
 
 ## Strategies 
