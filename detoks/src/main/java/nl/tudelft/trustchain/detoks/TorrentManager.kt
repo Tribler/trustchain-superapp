@@ -42,10 +42,16 @@ class TorrentManager constructor (
 ) {
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
+
     val torrentFiles = mutableListOf<TorrentHandler>()
 
+    // maps torrent to videos acquired from them. Can help with preventing duplicate torrents.
+    private val torrentsList = HashMap<String, String>()
     private var currentIndex = 0
 
+    /**
+     * If we want to seed torrents we cannot clear the cache
+     */
     init {
 //        clearMediaCache()
         initializeSessionManager()
@@ -53,6 +59,9 @@ class TorrentManager constructor (
         initializeVideoPool()
     }
 
+    /**
+     * ONLY CREATE NEW TORRENT MANAGERS WITH THIS GET INSTANCE!!
+     */
     companion object {
         private lateinit var instance: TorrentManager
         fun getInstance(context: Context): TorrentManager {
@@ -177,6 +186,12 @@ class TorrentManager constructor (
             }
         }
     }
+
+    /**
+     * Adds a torrent to the torrent handler list.
+     * If the torrent is not being seeded (fetching magnet returns null) we do not add it.
+     * @param magnet - magnet link in string format
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     fun addMagnet(magnet: String){
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
@@ -184,6 +199,7 @@ class TorrentManager constructor (
         val res = sessionManager.fetchMagnet(magnet, 10) ?: return
 
         val torrentInfo = TorrentInfo(res)
+        if(torrentsList.get(torrentInfo.infoHash().toString()) != null) return
         val par = torrentDir.absolutePath
         val torrentPath = Paths.get("$par/${torrentInfo.infoHash()}.torrent")
         val torrentFile = torrentPath.toFile()
@@ -198,8 +214,10 @@ class TorrentManager constructor (
         handle.pause()
 
         for (it in 0 until torrentInfo.numFiles()) {
+
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
+                torrentsList.put(torrentInfo.infoHash().toString(), fileName)
                 torrentFiles.add(
                     TorrentHandler(
                         cacheDir,
@@ -242,6 +260,7 @@ class TorrentManager constructor (
                         val fileName = torrentInfo.files().fileName(it)
                         Log.d("DeToks", "file ${fileName} in $it")
                         if (fileName.endsWith(".mp4")) {
+                            torrentsList.put(torrentInfo.infoHash().toString(), fileName)
                             torrentFiles.add(
                                 TorrentHandler(
                                     cacheDir,
@@ -260,15 +279,19 @@ class TorrentManager constructor (
             }
         }
     }
+
+    /**
+     * Creates a new torrent and start seeding it (also adds it to the torrent handler list)
+     * @param collection - the uri of the file for which a torrent is to be generated (in the format of media:numbers usually)
+     * @param context - the current context of execution (needed for path creation)
+     * @return A pair with a path to the torrent file and a Torrent info object
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     fun createTorrentInfo(collection: Uri, context: Context): Pair<Path, TorrentInfo>? {
         val parentDir = Paths.get(cacheDir.getPath()+"/"+collection.hashCode().toString())
         val out = copyToTempFolder(context, listOf(collection), parentDir)
 
         Log.d("DeToks", collection.toString())
-        val out2 = getVideoFilePath(collection,context)
-        val folder = Paths.get(out2.first)
-
         Log.d("DeToks", "VALID: ${out.second.is_valid}" )
 
         val tb = TorrentBuilder()
@@ -279,9 +302,7 @@ class TorrentManager constructor (
         tb.addTracker("udp://tracker.openbittorrent.com:6969/announce")
         tb.setPrivate(false)
 
-        Log.d("DeToks", folder.toString())
-        Log.d("DeToks", out2.first!!)
-        Log.d("DeToks", out.first.absolutePath)
+
 
         val torrentInfo = TorrentInfo(tb.generate().entry().bencode())
         val infoHash = torrentInfo.infoHash().toString()
@@ -309,6 +330,7 @@ class TorrentManager constructor (
             val fileName = torrentInfo.files().fileName(it)
             Log.d("DeToks", "file ${fileName} in $it")
             if (fileName.endsWith(".mp4")) {
+                torrentsList.put(torrentInfo.infoHash().toString(), fileName)
                 community.broadcastLike(fileName,torrentInfo.name(), torrentInfo.creator(),magnUri)
                 torrentFiles.add(
                     TorrentHandler(
@@ -327,6 +349,13 @@ class TorrentManager constructor (
         return Pair(torrentPath, torrentInfo)
     }
 
+    /**
+     * Copies a list of files to a temp folder
+     * @param context - current context
+     * @param uris - a list of media uris to be copied
+     * @param parentDir - Path to the parent directory where files will be copied
+     * @return A pair of file object (representing the parent folder) and a file_storage (used for torrent creation) of the parent folder
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun copyToTempFolder(context: Context, uris: List<Uri>, parentDir: Path): Pair<File, file_storage> {
         Log.d(
@@ -371,6 +400,12 @@ class TorrentManager constructor (
         return Pair(parentDir.toFile(), fs)
     }
 
+    /**
+     * Given an android media uri it will convert it to a concrete path
+     * @param uri - the media uri of the video
+     * @param context - current execution context
+     * @return A pair of string (the file path) a
+     */
     @SuppressLint("Range")
     fun getVideoFilePath(uri: Uri, context: Context):  Pair<String?, Long> {
         val cursor: Cursor = context.getContentResolver().query(uri, null, null, null, null)!!
