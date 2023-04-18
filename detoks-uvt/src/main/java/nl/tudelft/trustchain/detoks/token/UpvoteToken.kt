@@ -167,7 +167,7 @@ class UpvoteToken constructor(
         } else {
             Toast.makeText(
                 itemView.context,
-                "Attempted to find a proposal Block with hash: $currentVideoHash, This video does not have a proposal block attached to it and is thus not posted by anyone",
+                "Attempted to find a proposal Block with hash: ${currentVideoHash.toHex()}, This video does not have a proposal block attached to it and is thus not posted by anyone",
                 Toast.LENGTH_LONG
             ).show()
             return
