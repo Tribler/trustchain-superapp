@@ -61,10 +61,10 @@ class DeToksCommunity(
     fun sendTokens(amount: Int, recipientMid: String) {
         val senderWallet = walletManager.getOrCreateWallet(myPeer.mid)
 
-        Log.d("DetoksCommunity", "my wallet ${senderWallet.balance}")
+//        Log.d("DetoksCommunity", "my wallet ${senderWallet.balance}")
 
         if (senderWallet.balance >= amount) {
-            Log.d("DetoksCommunity", "Sending $amount money to $recipientMid")
+//            Log.d("DetoksCommunity", "Sending $amount money to $recipientMid")
             senderWallet.balance -= amount
             walletManager.setWalletBalance(myPeer.mid, senderWallet.balance)
 
@@ -80,7 +80,7 @@ class DeToksCommunity(
                 send(peer.address, packet)
             }
         } else {
-            Log.d("DeToksCommunity", "Insufficient funds!")
+//            Log.d("DeToksCommunity", "Insufficient funds!")
         }
 
     }
@@ -107,7 +107,7 @@ class DeToksCommunity(
     private fun onGossip(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
+//        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
         torrentManager.addTorrent(payload.magnet)
     }
     private fun onTransactionMessage(packet: Packet) {
