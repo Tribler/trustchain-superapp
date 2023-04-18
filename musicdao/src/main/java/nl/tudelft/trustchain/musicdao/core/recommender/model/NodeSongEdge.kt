@@ -1,12 +1,14 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.model
 
 import kotlinx.serialization.Serializable
+import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.Edge.TimeStampAsLongSerializer
 import org.jgrapht.graph.DefaultWeightedEdge
 import java.sql.Timestamp
 
 @Serializable
 class NodeSongEdge (
     val affinity: Double = 0.0,
+    @Serializable(with = TimeStampAsLongSerializer::class)
     val timestamp: Timestamp = Timestamp(System.currentTimeMillis())
 ): DefaultWeightedEdge() {
     companion object {

@@ -1,7 +1,9 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.model
 
+import kotlinx.serialization.Serializable
 import nl.tudelft.trustchain.musicdao.core.repositories.model.Song
 
+@Serializable
 abstract class NodeOrSong(
     val identifier: String,
     var rankingScore: Double

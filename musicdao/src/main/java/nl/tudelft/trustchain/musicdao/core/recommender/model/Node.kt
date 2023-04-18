@@ -1,5 +1,4 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.model
-
 class Node(
     ipv8: String,
     personalisedPageRankScore: Double = 0.0
