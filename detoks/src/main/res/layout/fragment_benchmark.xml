@@ -60,6 +60,63 @@
                     />
             </LinearLayout>
             <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Transaction amount: "
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="10dp"
+                        android:layout_gravity="center_horizontal"/>
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/transaction_amount_selector"
+                        android:layout_gravity="center_horizontal"
+                        android:ems="4"
+                        android:text=""
+                        android:outlineAmbientShadowColor="@color/colorPrimaryDark"
+                        android:inputType="number">
+                    </EditText>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_weight="1">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Grouping amount: "
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="10dp"
+                        android:layout_gravity="center_horizontal"
+                        />
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/grouping_amount_selector"
+                        android:layout_gravity="center_horizontal"
+                        android:ems="4"
+                        android:text="10"
+                        android:outlineAmbientShadowColor="@color/colorPrimaryDark"
+                        android:inputType="number">
+                    </EditText>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -104,16 +161,16 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="reset tokens"
-                android:id="@+id/reset_tokens_button"></Button>
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Generate tokens"
-                android:id="@+id/generate_tokens_button"></Button>
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="reset tokens"
+                    android:id="@+id/reset_tokens_button"></Button>
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Generate tokens"
+                    android:id="@+id/generate_tokens_button"></Button>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -124,12 +181,12 @@
                     android:id="@+id/single_token_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Single Token Transaction" />
+                    android:text="Send single token" />
 
                 <TextView
                     android:id="@+id/single_token_text"
                     android:layout_width="94dp"
-                    android:layout_height="64dp"
+                    android:layout_height="wrap_content"
                     android:text="0 ms" />
             </LinearLayout>
         </LinearLayout>
@@ -139,7 +196,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="4"
+            android:layout_weight="6"
             android:orientation="vertical">
             <LinearLayout
                 android:layout_width="match_parent"

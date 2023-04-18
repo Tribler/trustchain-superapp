@@ -192,6 +192,15 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         }
     }
 
+    private fun initializeSelectors() {
+        val transactionAmountSelector = binding.transactionAmountSelector
+        val groupingAmountSelector = binding.groupingAmountSelector
+
+        transactionAmountSelector.minValue = 1
+        transactionAmountSelector.maxValue = 10000
+        transactionAmountSelector.
+    }
+
     /**
      * Updates the list of tokens
      */
