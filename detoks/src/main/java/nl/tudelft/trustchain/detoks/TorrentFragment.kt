@@ -35,7 +35,8 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
 
         val errorTV = view.findViewById<TextView>(R.id.errorTextView)
 
-        val passedName = "electricsheep-flock-248-7500-9"
+        val args = arguments
+        val passedName = args?.getString("torrent_name")
 
         var torrent: TorrentHandle? = null
         for (torrentHandle in torrentManager.getListOfTorrents()) {
