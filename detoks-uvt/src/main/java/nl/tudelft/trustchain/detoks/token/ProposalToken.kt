@@ -10,7 +10,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
-import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
+import nl.tudelft.trustchain.detoks.community.UpvoteTrustChainConstants
 import nl.tudelft.trustchain.detoks.helpers.DateFormatter
 import java.util.*
 
@@ -38,7 +38,7 @@ class ProposalToken {
             "heartTokenGivenTo" to myPeer.publicKey.keyToBin().toHex()
         )
         val proposalBlock = upvoteCommunity?.createProposalBlock(
-            UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN,
+            UpvoteTrustChainConstants.GIVE_UPVOTE_TOKEN,
             transaction,
             ANY_COUNTERPARTY_PK
         )

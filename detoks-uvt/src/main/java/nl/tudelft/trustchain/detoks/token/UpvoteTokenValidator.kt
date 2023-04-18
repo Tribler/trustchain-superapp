@@ -4,7 +4,7 @@ import nl.tudelft.trustchain.detoks.helpers.DateFormatter
 import nl.tudelft.trustchain.detoks.util.CommunityConstants
 import java.util.*
 
-class UpvoteTokenValidator{
+class UpvoteTokenValidator {
 
     companion object {
         fun validateToken(upvoteToken: UpvoteToken) : Boolean {

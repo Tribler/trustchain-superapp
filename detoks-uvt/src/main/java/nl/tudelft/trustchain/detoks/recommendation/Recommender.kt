@@ -6,7 +6,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
-import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
+import nl.tudelft.trustchain.detoks.community.UpvoteTrustChainConstants
 import kotlin.random.Random
 
 enum class RecommendationType {
@@ -148,7 +148,7 @@ class Recommender {
         private fun getMostLikedVideoIDs(): List<String> {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val allUpvoteTokens = upvoteCommunity?.database?.getBlocksWithType(
-                UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN) ?: return listOf()
+                UpvoteTrustChainConstants.GIVE_UPVOTE_TOKEN) ?: return listOf()
             Log.i("DeToks", "FOUND ${allUpvoteTokens.size} PROPOSAL BLOCKS, NOW PICKING THE MOST LIKED ONES!")
 
             val videoHashMap: HashMap<String, Int> = hashMapOf()
@@ -178,7 +178,7 @@ class Recommender {
         private fun getRandomVideoIDs(): List<String> {
             val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val allUpvoteTokens = upvoteCommunity?.database?.getBlocksWithType(
-                UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN) ?: return listOf()
+                UpvoteTrustChainConstants.GIVE_UPVOTE_TOKEN) ?: return listOf()
             var proposalTokens = allUpvoteTokens.filter { it.isProposal }
             proposalTokens = proposalTokens.shuffled()
             Log.i("DeToks", "Random video IDs: ${proposalTokens.size}")
