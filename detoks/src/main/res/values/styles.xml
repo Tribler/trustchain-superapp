@@ -22,6 +22,13 @@
         <item name="android:letterSpacing">0</item>
     </style>
 
+    <style name="GreyButton" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/gray</item>
+        <item name="android:textColor">@color/black</item>
+<!--        <item name="android:textColorSecondary">@color/dark_gray</item>-->
+        <item name="android:textColorHighlight">@color/dark_gray</item>
+    </style>
+
     <style name="ButtonAppearance">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">30dp</item>

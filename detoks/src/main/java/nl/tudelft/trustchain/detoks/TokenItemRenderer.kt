@@ -21,13 +21,16 @@ class TokenAdminItemRenderer(
         valueToken.text = item.token.value.toString()
         latestTimestamp.text = item.token.timestamp.toString()
         currentOwner.text = item.token.firstRecipient.toString()
-
-        verifyButton.setOnClickListener{
-            listener.onVerifyClick(item.token, displayAs)
-        }
-
-        historyButton.setOnClickListener{
-            listener.onHistoryClick(item.token, displayAs)
+        if (displayAs == "user") {
+            verifyButton.visibility = View.INVISIBLE
+            historyButton.visibility = View.INVISIBLE
+        } else {
+            historyButton.setOnClickListener {
+                listener.onHistoryClick(item.token, displayAs)
+            }
+            verifyButton.setOnClickListener {
+                listener.onVerifyClick(item.token, displayAs)
+            }
         }
     }
 
