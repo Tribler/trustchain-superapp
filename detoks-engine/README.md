@@ -26,7 +26,7 @@ The project and the code can be found in the current folder, the ```trustchain-s
 
 When opening the application, you see a page with two buttons. These buttons both bring you to a different page. Manage tokens, where you can send and generate tokens, and benchmarks, where you can also see some statistics.
 
-![](https://github.com/bbrockbernd/trustchain-superapp/tree/Documentation/detoks-engine/Screenshot_20230417_182253.png)
+![](detoks-engine/Screenshot_20230417_182253.png)
 
 On the manage tokens page, you will find a list of all your tokens at the top, followed by a list of currently available peers. To create a new token, you can click on the "gen token" button located at the bottom of the page. Once you have accumulated enough tokens, you can send them to a selected peer by clicking on either the "send", "send 2", or "send 5" buttons, which will respectively send 1, 2, or 5 tokens. The application operates on the FIFO principle, meaning that the tokens generated first will be sent first. Lastly, you can refresh the page by clicking on the refresh button.
 
