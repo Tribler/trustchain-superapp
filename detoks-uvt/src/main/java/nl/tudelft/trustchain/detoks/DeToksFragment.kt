@@ -39,13 +39,19 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             val dir2 = File(torrentDir)
             if (!dir2.exists()) {
                 dir2.mkdirs()
+            } else {
+                dir2.delete()
             }
             val file = File("$torrentDir/$DEFAULT_TORRENT_FILE")
             if (file.exists())  {
                 file.delete()
             }
+            deleteFile(torrentDir, DEFAULT_POST_VIDEO)
+//            deleteFile(torrentDir, BIGBUCKBUNNY)
+            deleteFile(torrentDir, LAUNDROMAT)
             addFile(torrentDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
-            addFile(torrentDir, LAUNDROMAT, R.raw.cosmos_laundromat)
+//            addFile(torrentDir, LAUNDROMAT, R.raw.cosmos_laundromat)
+            addFile(torrentDir, DEFAULT_POST_VIDEO, R.raw.sintel)
 //            if (!file.exists()) {
 //                val outputStream = FileOutputStream(file)
 //                val ins = requireActivity().resources.openRawResource(R.raw.detoks)
@@ -61,22 +67,21 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private fun makeSeedableTorrentDirAndPopulate(){
         try{
             val dir3 = File(seedableTorrentsDir)
+
             if (!dir3.exists()) {
                 dir3.mkdirs()
+            } else {
+                dir3.delete()
             }
             // currently I only know how to add seedable torrents manually and one by one T_T
             // TODO: figure out how to add all seedable torrents all in one swoop and not one by one
-            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.sintel)
-            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.tears_of_steel)
-//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.chicken_20230326_archive)
-//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.file_20230326_archive)
-//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO3, R.raw.parrot_202303_archive)
-//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.cat)
-//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.blueparrot)
-//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO3,R.raw.arcane)
-            deleteFile(seedableTorrentsDir, "chicken_20230326_archive.torrent")
-            deleteFile(seedableTorrentsDir, "file_20230326_archive.torrent")
-            deleteFile(seedableTorrentsDir, "parrot_202303_archive.torrent")
+//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.sintel)
+//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.tears_of_steel)
+            addFile(seedableTorrentsDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
+//            addFile(seedableTorrentsDir, LAUNDROMAT, R.raw.cosmos_laundromat)
+            deleteFile(seedableTorrentsDir, DEFAULT_POST_VIDEO)
+            deleteFile(seedableTorrentsDir, LAUNDROMAT)
+//            deleteFile(seedableTorrentsDir, BIGBUCKBUNNY)
         } catch (e: Exception) {
             Log.e("Detoks", "Failed to make a cache for seedable torrents")
         }
@@ -114,7 +119,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             File("${requireActivity().cacheDir.absolutePath}/seedableTorrents"),
             DEFAULT_CACHING_AMOUNT
         )
-        Recommender.initialize(torrentManager)
+        Recommender.initialize()
 
         upvoteToken = UpvoteToken(-100, "", "", "", "") //TODO: make constructor with no parameters for initialisation
         proposalToken = ProposalToken()

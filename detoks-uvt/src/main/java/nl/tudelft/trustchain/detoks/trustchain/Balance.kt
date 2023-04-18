@@ -23,10 +23,10 @@ class Balance {
             var received = latestBalanceCheckpoint.transaction.get("received")!!.toString().toInt();
             for (block: TrustChainBlock in blocksToProcess){
                 if (block.type.equals(CommunityConstants.GIVE_UPVOTE_TOKEN)) {
-                    if (block.isAgreement && block.linkPublicKey.toHex().equals(myPublicKey.toHex())) {
+                    if (block.isAgreement && block.linkPublicKey.toHex().contentEquals(myPublicKey.toHex())) {
                         received++
                     }
-                    else if (block.isAgreement && block.publicKey.toHex().equals(myPublicKey.toHex())) {
+                    if (block.isAgreement && block.publicKey.toHex().contentEquals(myPublicKey.toHex())) {
                         sent++
                     }
                 }
@@ -36,7 +36,6 @@ class Balance {
                 "received" to received,
                 "balance" to received - sent
             )
-            // Todo during the Wednesday groupmeeting on 15th of March 2023 we mentioned that it may be better to send the proposalblock to another peer instead?
             upvoteCommunity.createProposalBlock(CommunityConstants.BALANCE_CHECKPOINT, transaction, myPublicKey)
         } else {
             // else case : first checkpoint block
@@ -54,17 +53,14 @@ class Balance {
     fun checkTokenBalance(tokensSent: TextView, tokensReceived: TextView, tokensBalance: TextView):Triple<Int, Int, Int> {
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
         val allBlocks = upvoteCommunity.database.getBlocksWithType(CommunityConstants.GIVE_UPVOTE_TOKEN)
-        var sent = 0;
+        var sent  = 0;
         var received = 0;
         for (block: TrustChainBlock in allBlocks) {
-            if (block.isAgreement && block.linkPublicKey.toHex().equals(IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex())) {
+            if (block.isAgreement && block.linkPublicKey.toHex().contentEquals(IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex())) {
                 received++
             }
-            else if (block.isAgreement && block.publicKey.toHex().equals(IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex())) {
+            if (block.isAgreement && block.publicKey.toHex().contentEquals(IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex())) {
                 sent++
-            }
-            else {
-                Log.i("DeToks", "Other type of block found: ${block.blockId}")
             }
         }
         Log.i("DeToks", "Tokens sent: $sent received: $received")
