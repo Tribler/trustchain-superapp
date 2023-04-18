@@ -333,7 +333,7 @@ class UpvoteCommunity(
             send(peer, packet)
             return true
         }
-        Log.i("Detoks", "Did not find a peer to send upvote token to")
+        Log.i("Detoks", "Did not find a peer with pubkey ${receiverPublicKey.toHex()} to send upvote token to")
         return false
     }
 
