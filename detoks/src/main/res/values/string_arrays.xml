@@ -2,12 +2,12 @@
 <resources>
     <string-array name="strategies_array">
         <item>Random</item>
-        <item>Highest watch time</item>
-        <item>Lowest watch time</item>
         <item>Hot</item>
         <item>Rising</item>
         <item>New</item>
         <item>Top</item>
         <item>Hop Count</item>
+        <item>Highest watch time</item>
+        <item>Lowest watch time</item>
     </string-array>
 </resources>

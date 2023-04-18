@@ -18,13 +18,13 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     companion object {
 
         const val STRATEGY_RANDOM = 0
-        const val STRATEGY_HIGHEST_WATCH_TIME = 1
-        const val STRATEGY_LOWEST_WATCH_TIME = 2
-        const val STRATEGY_HOT = 3
-        const val STRATEGY_RISING = 4
-        const val STRATEGY_NEW = 5
-        const val STRATEGY_TOP = 6
-        const val STRATEGY_HOPCOUNT = 7
+        const val STRATEGY_HOT = 1
+        const val STRATEGY_RISING = 2
+        const val STRATEGY_NEW = 3
+        const val STRATEGY_TOP = 4
+        const val STRATEGY_HOPCOUNT = 5
+        const val STRATEGY_HIGHEST_WATCH_TIME = 6
+        const val STRATEGY_LOWEST_WATCH_TIME = 7
 
         const val RISING_CUTOFF_SECONDS = 7200 // 2 hour cutoff
         const val HOT_CUTOFF_SECONDS = 24 * 3600//  1 day cutoff
@@ -88,7 +88,6 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     private fun cutoffComparator(
         item: Pair<TorrentHandler, ProfileEntry?>,
         cutoff: Int
-
     ): Boolean {
         val currentTime = System.currentTimeMillis() / 1000;
         val minimumDate = currentTime - cutoff
