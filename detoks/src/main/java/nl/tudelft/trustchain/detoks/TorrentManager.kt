@@ -252,10 +252,17 @@ class TorrentManager constructor (
                     val handle = sessionManager.find(torrentInfo.infoHash())
 
                     handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
-                    val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
-                    handle.prioritizeFiles(priorities)
-                    handle.pause()
 
+                    if (torrentInfo.creator() == IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!.myPeer.publicKey.toString()){
+                        val priorities = Array(torrentInfo.numFiles()) { Priority.SEVEN }
+                        handle.prioritizeFiles(priorities)
+                        handle.pause()
+                        handle.resume()
+                    }else{
+                        val priorities = Array(torrentInfo.numFiles()) { Priority.NORMAL }
+                        handle.prioritizeFiles(priorities)
+                        handle.pause()
+                    }
                     for (it in 0 until torrentInfo.numFiles()) {
                         val fileName = torrentInfo.files().fileName(it)
                         Log.d("DeToks", "file ${fileName} in $it")
@@ -297,9 +304,11 @@ class TorrentManager constructor (
         val tb = TorrentBuilder()
         tb.creator(IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!.myPeer.publicKey.toString())
         tb.path(File(cacheDir.getPath()+"/"+collection.hashCode().toString()))
-        tb.addTracker("http://opensharing.org:2710/announce")
-        tb.addTracker("http://open.acgnxtracker.com:80/announce")
-        tb.addTracker("udp://tracker.openbittorrent.com:6969/announce")
+
+        tb.addTracker("http://tracker.openbittorrent.com:80/announce", 0)
+        tb.addTracker("http://open.acgnxtracker.com:80/announce", 1)
+        tb.addTracker("udp://tracker.openbittorrent.com:6969/announce", 1)
+
         tb.setPrivate(false)
 
 
@@ -320,9 +329,10 @@ class TorrentManager constructor (
         val handle = sessionManager.find(torrentInfo.infoHash())
 
         handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
-        val priorities = Array(torrentInfo.numFiles()) { Priority.IGNORE }
+        val priorities = Array(torrentInfo.numFiles()) { Priority.SEVEN }
         handle.prioritizeFiles(priorities)
         handle.pause()
+        handle.resume()
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val magnUri = torrentInfo.makeMagnetUri()
         Log.d("DeToks", "THIS HAS ${torrentInfo.numFiles()} : ${torrentInfo.creator()}  from ${torrentInfo.name()}")
