@@ -39,13 +39,20 @@ class TokenStore(context: Context){
      * Adds a list of tokens to the database
      * @param tokens: list of tokens to be added
      */
-    fun addTokenList(tokens : List<Token>) {
+    fun addTokenList(tokens : List<Token>, check: Boolean = false) {
         database.tokenStoreQueries.transaction {
             tokens.forEach { token ->
-                database.tokenStoreQueries.addToken(
-                    id = token.unique_id,
-                    tokenIntId = token.tokenIntId.toLong()
-                )
+                if(check){
+                    database.tokenStoreQueries.addTokenWithCheck(
+                        id = token.unique_id,
+                        tokenIntId = token.tokenIntId.toLong()
+                    )
+                }
+                else{
+                    database.tokenStoreQueries.addToken(
+                        id = token.unique_id,
+                        tokenIntId = token.tokenIntId.toLong())
+                }
             }
         }
 
@@ -54,9 +61,17 @@ class TokenStore(context: Context){
     /**
      * Adds a transaction to the database
      */
-    fun addToken(id : String, tokenIntId: Long){
-        database.tokenStoreQueries.addToken(id, tokenIntId)
+    fun addToken(id : String, tokenIntId: Long, check: Boolean = false){
+        if(check){
+            database.tokenStoreQueries.addTokenWithCheck(id, tokenIntId)
+        }
+        else{
+            database.tokenStoreQueries.addToken(id, tokenIntId)
+        }
     }
+
+
+
 
     /**
      * Deletes a transaction from the database based on an ID
@@ -85,13 +100,6 @@ class TokenStore(context: Context){
      */
     fun getBalance() : Int {
         return database.tokenStoreQueries.getBalance().executeAsOne().toInt()
-    }
-
-    /**
-     * Checks if a token exists in the database
-     */
-    fun checkToken(id : String) : Boolean {
-        return database.tokenStoreQueries.checkToken(id).toString().toBoolean()
     }
 
     companion object {

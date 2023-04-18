@@ -11,6 +11,10 @@ addToken:
 INSERT INTO tokens(id, tokenIntId)
 VALUES(?, ?);
 
+addTokenWithCheck:
+INSERT OR IGNORE INTO tokens(id, tokenIntId)
+VALUES(?, ?);
+
 removeTokenByID:
 DELETE FROM tokens WHERE id = ?;
 
@@ -33,9 +37,3 @@ SELECT COUNT(id) FROM tokens;
 removeTokenList:
 DELETE FROM tokens
 WHERE id IN ?;
-
-checkToken:
-SELECT CASE
-WHEN EXISTS (SELECT * FROM tokens WHERE id = ?)
-THEN 'true'
-ELSE 'false' END;
