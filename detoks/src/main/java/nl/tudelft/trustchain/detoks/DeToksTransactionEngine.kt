@@ -32,16 +32,21 @@ class DeToksTransactionEngine (
     private lateinit var selfPeer : Peer
     private var sendingToSelf = true
 
+    public var totalTimeTracker = 0L
+
     init {
         // Set up block listeners
         addListener(SINGLE_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
+                var startBenchmark = System.nanoTime()
                 // If the block is actually addressed to me, or if I'm sending to myself, process the block
                 if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
                     if (block.isProposal) {
                         receiveSingleTokenProposal(block)
+                        totalTimeTracker += (System.nanoTime() - startBenchmark)
                     } else if (block.isAgreement) {
                         receiveSingleTokenAgreement(block)
+                        totalTimeTracker += (System.nanoTime() - startBenchmark)
                     }
                 }
             }
@@ -49,14 +54,17 @@ class DeToksTransactionEngine (
 
         addListener(GROUPED_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
+                var startBenchmark = System.nanoTime()
                 // If the block is actually addressed to me, or if I'm sending to myself, process the block
                 if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
                     if (block.isProposal) {
-                        Log.d(LOGTAG, "Received GROUPED proposal block")
                         receiveGroupedTokenProposal(block)
+                        totalTimeTracker += (System.nanoTime() - startBenchmark)
+                        Log.d(LOGTAG, "Received GROUPED proposal block, time added: ${System.nanoTime() - startBenchmark}")
                     } else if (block.isAgreement) {
-                        Log.d(LOGTAG, "Received GROUPED agreement block")
                         receiveGroupedTokenAgreement(block)
+                        totalTimeTracker += (System.nanoTime() - startBenchmark)
+                        Log.d(LOGTAG, "Received GROUPED agreement block, time added: ${System.nanoTime() - startBenchmark}")
                     }
                 }
             }

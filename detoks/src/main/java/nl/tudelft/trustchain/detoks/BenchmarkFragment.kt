@@ -29,10 +29,9 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private val MILLISECOND = 1000000
     private val SECOND = 1000000000
     var startBenchmark = 0L
-    var singleBenchmark = false
     var benchMarking = ""
     private var totalTransactions = 1000
-    private var groupSize = 100
+    private var groupSize = 20
 
     // Looper for updating the list of tokens
     private val handler = Handler(Looper.getMainLooper())
@@ -71,8 +70,11 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private fun singleBenchmark() {
         this.startBenchmark = System.nanoTime()
         this.benchMarking = "SingleBatch"
-        for (tok in transactionEngine.tokenStore.getAllTokens()){
-            transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
+//        for (tok in transactionEngine.tokenStore.getAllTokens()){
+//            transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
+//        }
+        repeat(totalTransactions){
+            sendSingleToken()
         }
         val sendingTime = (System.nanoTime() - this.startBenchmark) / MILLISECOND
         Log.d(
@@ -124,11 +126,11 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         }
 
         binding.startTransactionsButton.setOnClickListener {
-            groupedBenchmark()
+            lifecycleScope.launch{groupedBenchmark()}
         }
 
         binding.singleTransactionsButton.setOnClickListener {
-            singleBenchmark()
+            lifecycleScope.launch{singleBenchmark()}
         }
 
         binding.singleTokenButton.setOnClickListener{
@@ -186,7 +188,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             binding.singleTokenText.text = "${endTime} ms"
             Log.d(
                 LOGTAG,
-                "TokenList is empty, time: ${endTime} ms"
+                "TokenList is empty, totalTime: ${transactionEngine.totalTimeTracker / MILLISECOND} ms"
             )
             benchMarking = ""
         }
@@ -203,18 +205,17 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
                 binding.singleTextField.text = "${endTime} s"
                 Log.d(
                     LOGTAG,
-                    "TokenList is empty, time: ${endTime} s"
-                )
+                    "TokenList is empty, totalTime: ${transactionEngine.totalTimeTracker / MILLISECOND} ms"                )
 
             } else if (benchMarking == "GroupedBatch"){
-                binding.transactionsPerSecondField.text = endTime.toString()
+                binding.transactionsPerSecondField.text = "${endTime} s"
                 Log.d(
                     LOGTAG,
-                    "TokenList is empty, time: ${endTime} s"
-                )
+                    "TokenList is empty, totalTime: ${transactionEngine.totalTimeTracker / MILLISECOND} ms"                )
 
             }
             benchMarking = ""
+            transactionEngine.totalTimeTracker = 0L
         }
         binding.tokenAmount.text = transactionEngine.tokenStore.getBalance().toString() + " tokens"
     }
