@@ -117,22 +117,13 @@ In figure 2, the same graph as before has been plotted, but now the blue outlier
 <img src="../doc/detoks-uvt/timings_per_public_key_without_outlier-v2.jpg" width="700" height="400" />
 Figure 2: Timings per public key (without outlier). <br><br>
 
-With the outlier removed, we can see that most of the response times lie in the 0-20 ms range, with some public keys experiencing slower response times, sometimes upwards of 100 ms. What must be noted, however, is that these devices did run on different network configurations. Therefore the speed of the internet can play a significant role in the experienced response times. To illustrate this further, please refer to figure 3, where we plotted the average total time spent by any device waiting for the 100 recommendation function calls to finish. Thus if a device $X$ did $3$ benchmark runs, where each benchmark run consists of $100$ recommendation function calls and the total time of those $3$ runs is 12s, then we plot the average total time as 4s.
+With the outlier removed, we can see that most of the response times lie in the 0-20 ms range, with some public keys experiencing slower response times, sometimes upwards of 100 ms. What must be noted, however, is that these devices did run on different network configurations. Therefore the speed of the internet can play a significant role in the experienced response times. To illustrate this further, please refer to figure 3, where we plotted the average total time spent by any device waiting for the 100 recommendation function calls to finish. Thus if a device $X$ did $3$ benchmark runs, where each benchmark run consists of $100$ recommendation function calls and the total time of those $3$ runs is 12s, then we plot the average total time as 4s. The average total times have been sorted in ascending order to show the variance in response times per public key.
+
 
 <!-- ![bar_chart_per_publickey.png](../doc/detoks-uvt/bar_chart_per_publickey.png) -->
 <img src="../doc/detoks-uvt/bar_chart_per_publickey.png" width="700" height="600" />
 Figure 3: Average time by public key. <br><br>
 
-
-The average total times have been sorted in ascending order to show the variance in response times per public key.
-
-
-
-![line_chart_single_device.png](../doc/detoks-uvt/line_chart_single_device.png)
-
-Figure 4: Average time of all public keys combined. <br><br>
-
-TODO Gijs: Add explanation. 
 
 
 
