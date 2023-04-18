@@ -462,7 +462,6 @@ class TrustChainApplication : Application() {
             DeToksTransactionEngine.Factory(ourStore, this, settings, store),
             listOf(randomWalk)
         )
-
     }
 
     private fun createDeToksCommunity(): OverlayConfiguration<DeToksCommunity> {
