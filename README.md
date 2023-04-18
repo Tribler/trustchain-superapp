@@ -198,7 +198,7 @@ Sharing, storing, and searching of scientific publications through the p2p ipv8 
 DeToks is a decentralized TikTok skeleton application where several different groups implemented parts of the application. The application will utilize a peer-to-peer network consisting strictly of smartphones only. Currently, the application only works on Android-powered smartphones. The focus of this application will be the token economy, Torrent-based streaming videos, and basic app logic.
 Sprint highlights discussed in this Tribler issue: https://github.com/Tribler/tribler/issues/7305
 
-DeToks downloads videos, in the form of torrents, of content creators in the background and will display them to the end-user.
+DeToks downloads videos, in the form of torrents, of content creators in the background and will display them to the end-user. The following GIFs demonstrate the loading screen, a user posting a video, and a user liking a video.
 
 ![loading_screen](https://user-images.githubusercontent.com/56682985/232781937-76e2c81c-8ec7-4fa5-b800-143e25645ca8.gif)
 ![post_video](https://user-images.githubusercontent.com/56682985/232781925-8a003a16-e808-4e75-b208-63045d98ad7e.gif)
