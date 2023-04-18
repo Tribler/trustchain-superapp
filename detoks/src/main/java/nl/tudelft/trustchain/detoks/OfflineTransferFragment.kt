@@ -15,9 +15,8 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
-import ch.qos.logback.core.pattern.parser.Parser
-import com.google.common.primitives.UnsignedBytes.toInt
-import com.google.gson.Gson
+import com.google.gson.*
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_offline_transfer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,11 +25,13 @@ import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.detoks.db.DbHelper
-import org.json.JSONArray
-import org.json.JSONObject
-import java.io.File.separator
+import java.io.ByteArrayOutputStream
+import java.lang.reflect.Type
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.collections.ArrayList
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -115,13 +116,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val proof = myPrivateKey.sign(token.id + token.value + token.genesisHash + myPublicKey.keyToBin())
         token.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
 
-//        val result = wallet!!.addToken(token)
-//        if (result != -1L) {
-            Toast.makeText(this.context, "Balance " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
-//        } else {
-//            Toast.makeText(this.context, "Duplicate token!", Toast.LENGTH_LONG)
-//                .show()
-//        }
+
+        Toast.makeText(this.context, "Balance " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
 
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         val dbHelper = DbHelper(view.context)
@@ -182,33 +178,40 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val content = qrCodeUtils.parseActivityResult(requestCode, resultCode, data)
         Log.v("Transfer data ", content.toString())
 
+
         if (content != null) {
-            // deserialize the content
-            var map: Map<String, ArrayList<Token>> = HashMap()
-            map = Gson().fromJson(content, map.javaClass)
-            println("Map tokennnn: ${map["token"].toString()}")
-//            val jsonObject = JSONObject(content)
-//            var value : JSONArray?  = null
-//            for (key in jsonObject.keys()) {
-//                value = jsonObject.getJSONArray(key)
-//                println("JSON Object ---> $key : $value")
-//            }
-            //TODO:check whether tokens are sent, but not sth else
-            //TODO:check whether the tokens are not empty list
-            val obtainedTokens =  map["token"] ?: return  //Token.deserialize(content.toByteArray()) //
-            //
-            for(t in obtainedTokens ){
-//                var t = value?.get(0)
-                Log.v("Tokennnnn", t.toString())
-                println("New tokensss: ${wallet!!.balance}")
-                println("Tokennnnn $t.toString()")
-                val successful = wallet!!.addToken(t)
-                if(successful == -1L) {
-                    Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
+            val proba = ungzip(content)
+
+            val dateJsonDeserializer = object : JsonDeserializer<LocalDateTime> {
+                val  formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("d::MMM::uuuu HH::mm::ss")
+
+                override fun deserialize(json: JsonElement?, typeOfT: Type?,
+                    context: JsonDeserializationContext?): LocalDateTime {
+                    return LocalDateTime.parse(json?.getAsString(),
+                        formatter)
                 }
             }
+            val gsonObject = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, dateJsonDeserializer).create()
 
-            Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
+            var map = object :  TypeToken<Token>() {}.type
+            val result: Token = gsonObject.fromJson(proba, map)
+
+            //TODO:check whether tokens are sent, but not sth else
+            //TODO:check whether the tokens are not empty list
+//            val obtainedTokens =  result //?: return  //Token.deserialize(content.toByteArray()) //
+
+            val t = result
+//            for(t in obtainedTokens ){
+//                var t = value?.get(0)
+            Log.v("Tokennnnn", t.toString())
+            println("New tokensss: ${wallet!!.balance}")
+            println("Tokennnnn $t.toString()")
+            val successful = wallet!!.addToken(t)
+            if(successful == -1L) {
+                Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
+            }
         } else {
             Toast.makeText(this.context, "Scanning failed!", Toast.LENGTH_LONG).show()
         }
@@ -225,17 +228,27 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun showQR(view: View, token: ArrayList<Token>, friendPublicKey: ByteArray) {
         val newToken = createNextOwner(token, friendPublicKey)
         // encode newToken
 
-        val jsonObject = JSONObject()
-        jsonObject.put("token", newToken.toString())
-        val jsonString = jsonObject.toString()
+        val dateJsonSerializer = object : JsonSerializer<LocalDateTime> {
+            val  formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("d::MMM::uuuu HH::mm::ss")
+
+            override fun serialize(localDateTime: LocalDateTime?, typeOfSrc: Type?,
+                context: JsonSerializationContext?): JsonElement {
+                return JsonPrimitive(formatter.format(localDateTime));
+            }
+        }
+        val gsonObject = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, dateJsonSerializer).create()
+
+        val result = gsonObject.toJson(newToken.get(0))
+        val compressedJSONString = gzip(result)
         hideKeyboard()
         lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.Default) {
-                qrCodeUtils.createQR(jsonString)
+                qrCodeUtils.createQR(compressedJSONString)
             }
             val qrCodeImage = view.findViewById<ImageView>(R.id.QR)
             qrCodeImage.setImageBitmap(bitmap)
@@ -244,6 +257,18 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 //        amountText.clearFocus()
         button_send.visibility = View.INVISIBLE
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun gzip(content: String): String {
+        val bos = ByteArrayOutputStream()
+        GZIPOutputStream(bos).bufferedWriter().use { it.write(content) }
+        val test = bos.toByteArray()
+        return  String(Base64.getEncoder().encode(test))
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun ungzip(content: String): String =
+        GZIPInputStream(Base64.getDecoder().decode(content).inputStream()).bufferedReader().use { it.readText() }
 
     private fun hideKeyboard() {
         val inputManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
