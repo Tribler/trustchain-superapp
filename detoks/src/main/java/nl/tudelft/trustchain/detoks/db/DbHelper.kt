@@ -100,11 +100,14 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         }
 
         val db = this.writableDatabase
-        db.delete(
-            table,
-            COLUMN_TOKEN_ID + " = ?",
-            arrayOf<String>(java.lang.String.valueOf(token.id)),
-        )
+//        val argument = arrayOf<String>(java.lang.String.valueOf(token.id))
+//        val numberOfAffectedRows = db.delete(
+//            table,
+//            COLUMN_TOKEN_ID + " = ?",
+//            argument)
+//        println("Number of affected rows $numberOfAffectedRows")
+        db.execSQL("DELETE FROM " + table +" WHERE "+ COLUMN_TOKEN_ID +"=?",
+            arrayOf<ByteArray>(token.id))
         db.close()
     }
 
