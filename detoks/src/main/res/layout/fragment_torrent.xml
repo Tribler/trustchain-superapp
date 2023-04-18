@@ -22,6 +22,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
+        android:text="@string/info_hash"
         app:layout_constraintTop_toBottomOf="@+id/errorTextView"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -32,6 +33,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
+        android:text="@string/magnet_link"
         app:layout_constraintTop_toBottomOf="@+id/infoHashTextView"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -42,6 +44,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
+        android:text="@string/files"
         app:layout_constraintTop_toBottomOf="@+id/magnetLinkTextView"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -52,16 +55,18 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
+        android:text="@string/downloaded_bytes"
         app:layout_constraintTop_toBottomOf="@+id/filesTextView"
         app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
-        android:id="@+id/totalWatchTimeTextView"
+        android:id="@+id/watchTimeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
+        android:text="@string/watch_time"
         app:layout_constraintTop_toBottomOf="@+id/downloadedBytesTextView"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -72,7 +77,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@+id/totalWatchTimeTextView"
+        android:text="@string/hop_count"
+        app:layout_constraintTop_toBottomOf="@+id/watchTimeTextView"
         app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
@@ -82,6 +88,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
+        android:text="@string/watched"
         app:layout_constraintTop_toBottomOf="@+id/hopCountTextView"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -92,6 +99,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
+        android:text="@string/duration"
         app:layout_constraintTop_toBottomOf="@+id/watchedTextView"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -102,6 +110,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
+        android:text="@string/likes"
         app:layout_constraintTop_toBottomOf="@+id/durationTextView"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -112,6 +121,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
+        android:text="@string/times_seen"
         app:layout_constraintTop_toBottomOf="@+id/likesTextView"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -122,6 +132,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
+        android:text="@string/upload_date"
         app:layout_constraintTop_toBottomOf="@+id/timesSeenTextView"
         app:layout_constraintStart_toStartOf="parent"/>
 
