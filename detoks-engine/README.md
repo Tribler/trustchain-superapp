@@ -52,6 +52,22 @@ The benchmarks page displays various statistics related to the application. At t
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
 
+## Implementation
+
+The core of the application is the CommunityAdapter.kt file. Here all communication over the TrustChainCommunity is handled. The following functions are all public and can be used by anyone that wants to use our implementation:
+
+_sendTokens_: This function takes an integer and a peer as arguments. It then sends a number of tokens equal to that integer to the specified peer.
+
+_injectTokens_: This function takes a list of tokens as an argument and adds a new token to it. In other words, this function handles token generation.
+
+_setReceiveTransactionHandler_: This function takes a handler as an argument and makes sure that this handler gets called for every transaction that is received.
+
+_setReceiveAgreementHandler_: This function takes a handler as an argument and makes sure that this handler gets called for every agreement that is received.
+
+_getPeers_: This function returns a list of all currently available peers that you can communicate with.
+
+_getTokens_: This function returns a list of all your available tokens.
+
 ## Build
 
 If you want to build an APK, run the following command:
