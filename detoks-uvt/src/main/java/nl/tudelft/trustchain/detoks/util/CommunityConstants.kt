@@ -11,5 +11,5 @@ object CommunityConstants {
     const val TOKENS_SENT_PER_UPVOTE = 3
     private const val DAILY_VIDEO_UPVOTE_LIMIT = 100
     const val DAILY_MINT_LIMIT = TOKENS_SENT_PER_UPVOTE * DAILY_VIDEO_UPVOTE_LIMIT
-    const val SEED_REWARD_TOKENS = 1
+    const val SEED_REWARD_TOKENS = 2
 }

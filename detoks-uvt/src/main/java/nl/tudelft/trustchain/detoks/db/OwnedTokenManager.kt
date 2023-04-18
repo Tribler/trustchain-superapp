@@ -3,6 +3,7 @@ import android.content.Context
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import nl.tudelft.trustchain.detoks.Database
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
+import java.security.PublicKey
 
 class OwnedTokenManager (context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "owned_upvote_tokens.db")
@@ -64,10 +65,10 @@ class OwnedTokenManager (context: Context) {
     }
 
     companion object {
-        private lateinit var instance: SentTokenManager
-        fun getInstance(context: Context): SentTokenManager {
+        private lateinit var instance: OwnedTokenManager
+        fun getInstance(context: Context): OwnedTokenManager {
             if (!::instance.isInitialized) {
-                instance = SentTokenManager(context)
+                instance = OwnedTokenManager(context)
             }
             return instance
         }

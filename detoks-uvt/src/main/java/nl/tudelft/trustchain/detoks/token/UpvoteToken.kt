@@ -10,7 +10,7 @@ import nl.tudelft.ipv8.messaging.serializeVarLen
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
-import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
+import nl.tudelft.trustchain.detoks.community.UpvoteTrustChainConstants
 import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.helpers.DateFormatter
 import nl.tudelft.trustchain.detoks.exception.InvalidMintException
@@ -93,7 +93,7 @@ class UpvoteToken constructor(
         val proposalBlock = upvoteCommunity.database.getBlockWithHash(currentVideoHash)
         if (proposalBlock != null) {
             val linkedBlocks = upvoteCommunity.database.getAllLinked(proposalBlock)
-            val alreadyLiked = linkedBlocks.find { it.type == UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN
+            val alreadyLiked = linkedBlocks.find { it.type == UpvoteTrustChainConstants.GIVE_UPVOTE_TOKEN
                 && it.publicKey.toHex().contentEquals(myPubKey) && it.isAgreement}
             if (alreadyLiked != null) {
                 Log.i("DeToks", "You already liked this video, cannot like again")
