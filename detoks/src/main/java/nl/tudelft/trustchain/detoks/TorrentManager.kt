@@ -213,8 +213,10 @@ class TorrentManager constructor (
         handle.prioritizeFiles(priorities)
         handle.pause()
 
-        for (it in 0 until torrentInfo.numFiles()) {
+        val author = community.getAuthorOfMagnet(magnet)
+        Log.d("Detoks", "$author | ${torrentInfo.creator()}")
 
+        for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
                 torrentsList.put(torrentInfo.infoHash().toString(), fileName)
@@ -225,7 +227,7 @@ class TorrentManager constructor (
                         torrentInfo.name(),
                         fileName,
                         it,
-                        torrentInfo.creator(),
+                        author,
                         torrentInfo.makeMagnetUri(),
                         false
                     )
@@ -307,11 +309,8 @@ class TorrentManager constructor (
 
         tb.addTracker("http://tracker.openbittorrent.com:80/announce", 0)
         tb.addTracker("http://open.acgnxtracker.com:80/announce", 1)
-//        tb.addTracker("udp://tracker.openbittorrent.com:6969/announce", 1)
 
         tb.setPrivate(false)
-
-
 
         val torrentInfo = TorrentInfo(tb.generate().entry().bencode())
         val infoHash = torrentInfo.infoHash().toString()

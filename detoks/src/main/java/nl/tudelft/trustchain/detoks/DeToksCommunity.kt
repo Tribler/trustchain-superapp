@@ -175,6 +175,11 @@ class DeToksCommunity(
         val unique = videos.filter{ video -> videos.count { it.transaction["video"] == video.transaction["video"] && it.transaction["torrent"] == video.transaction["torrent"] } == 1}
         return unique.map { Pair(it.transaction["video"] as String,it.transaction["torrent"] as String) }
     }
+    fun getAuthorOfMagnet(magnet: String): String {
+        return database.getBlocksWithType(LIKE_BLOCK).first {
+            it.transaction["torrentMagnet"] == magnet
+        }.transaction["author"] as String
+    }
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
         val authorsBlocks =  database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["author"] == author
