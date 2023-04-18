@@ -2,13 +2,11 @@ package nl.tudelft.trustchain.detoks_engine
 
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
-import nl.tudelft.trustchain.detoks_engine.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.BaseActivity
-import nl.tudelft.trustchain.detoks_engine.db.TokenStore
 
 class DeToksEngineMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_detoks_engine

@@ -38,7 +38,7 @@ class TokenManageActivity: AppCompatActivity(R.layout.token_manage) {
 
 
         trustChainCommunity = IPv8Android.getInstance().getOverlay<TrustChainTransactionCommunity>()!!
-        communityAdapter = CommunityAdapter.getInstance(trustChainCommunity)
+        communityAdapter = CommunityAdapter.getInstance(applicationContext, trustChainCommunity)
 
 
         tokenData = ArrayList(communityAdapter.getTokens())

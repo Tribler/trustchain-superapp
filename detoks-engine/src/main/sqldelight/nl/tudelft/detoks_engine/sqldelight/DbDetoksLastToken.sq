@@ -1,0 +1,12 @@
+createTokenTable:
+CREATE TABLE IF NOT EXISTS lasttoken (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token TEXT NOT NULL
+);
+
+setLastToken:
+REPLACE INTO lasttoken (id, token) VALUES(1, ?);
+
+getLastToken:
+SELECT token FROM lasttoken
+WHERE id = 1;

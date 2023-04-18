@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks_engine.trustchain
 
+import android.content.Context
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
@@ -8,6 +9,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.trustchain.common.util.TrustChainHelper
+import nl.tudelft.trustchain.detoks_engine.db.LastTokenStore
 import nl.tudelft.trustchain.detoks_engine.manage_tokens.Transaction
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -20,12 +22,14 @@ import kotlin.math.min
  * When a [TrustChainBlock] is not received it retries [resendLimit] times with an interval of [resendTimeoutMillis]
  */
 class CommunityAdapter private constructor(
+    context: Context,
     private val trustChainCommunity: TrustChainCommunity,
     private val maxGroupBy: Int,
     private val flushIntervalMillis: Long,
     private val resendTimeoutMillis: Long,
     private val resendLimit: Int
 ) {
+    private val lastTokenDb = LastTokenStore.getInstance(context)
     private val trustChainHelper: TrustChainHelper = TrustChainHelper(trustChainCommunity)
     val myPublicKey = trustChainHelper.getMyPublicKey()
     val logger = KotlinLogging.logger("TokenTransaction")
@@ -57,13 +61,12 @@ class CommunityAdapter private constructor(
         })
 
         // Find last sent token
-        var lastSentToken: String? = null
+        var lastSentToken: String? = lastTokenDb.getLastToken()
         var blockSeqLastSentToken = 0u
         var block = trustChainCommunity.database.getLatest(myPublicKey, TOKEN_BLOCK_TYPE)
-        while(block != null) {
+        while(block != null && lastSentToken != null) {
             // Proposal with my public key is a sent token block
-            if (block.isProposal && !block.isSelfSigned) {
-                lastSentToken = Transaction.fromTrustChainTransactionObject(block.transaction).tokens.last()
+            if (block.isProposal && !block.isSelfSigned && Transaction.fromTrustChainTransactionObject(block.transaction).tokens.last().contentEquals(lastSentToken)) {
                 blockSeqLastSentToken = block.sequenceNumber
                 break
             }
@@ -140,6 +143,7 @@ class CommunityAdapter private constructor(
             repeat(nToSend) {
                 tokens.add(popToken()!!)
             }
+            lastTokenDb.saveLastToken(tokens.last())
             proposeTransaction(Transaction(tokens), peer)
         }
 
@@ -293,6 +297,7 @@ class CommunityAdapter private constructor(
         const val TOKEN_BLOCK_TYPE = "token_block"
         private var instance: CommunityAdapter? = null
         fun getInstance(
+            context: Context,
         trustChainCommunity: TrustChainCommunity,
         maxGroupBy: Int = 100,
         flushIntervalMillis: Long = 50,
@@ -301,6 +306,7 @@ class CommunityAdapter private constructor(
         ) : CommunityAdapter {
             if (instance == null) {
                 instance = CommunityAdapter(
+                    context,
                     trustChainCommunity,
                     maxGroupBy,
                     flushIntervalMillis,

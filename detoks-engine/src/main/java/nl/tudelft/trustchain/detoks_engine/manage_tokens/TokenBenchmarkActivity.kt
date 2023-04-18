@@ -5,10 +5,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.token_benchmark.*
 import kotlinx.coroutines.*
 import mu.KotlinLogging
-import nl.tudelft.detoksengine.sqldelight.Tokens
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks_engine.R
@@ -16,7 +14,6 @@ import nl.tudelft.trustchain.detoks_engine.trustchain.CommunityAdapter
 import nl.tudelft.trustchain.detoks_engine.trustchain.TrustChainTransactionCommunity
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.roundToInt
 
 class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
     private lateinit var trustChainCommunity: TrustChainTransactionCommunity
@@ -42,7 +39,7 @@ class TokenBenchmarkActivity : AppCompatActivity(R.layout.token_benchmark) {
         findViewById<Button>(R.id.gen_10000).setOnClickListener{ _ -> gen1000(10)}
 
         trustChainCommunity = IPv8Android.getInstance().getOverlay<TrustChainTransactionCommunity>()!!
-        communityAdapter = CommunityAdapter.getInstance(trustChainCommunity)
+        communityAdapter = CommunityAdapter.getInstance(applicationContext, trustChainCommunity)
 
         peerData = ArrayList(communityAdapter.getPeers())
         val peerListView = findViewById<RecyclerView>(R.id.peer_list)
