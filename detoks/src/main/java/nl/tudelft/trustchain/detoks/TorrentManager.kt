@@ -325,7 +325,7 @@ class TorrentManager private constructor (
         }
 
         // Preserve cached if again in cache
-        val cacheEnd = currentIndex + cachingAmount
+        val cacheEnd = Math.min(torrentFiles.size - 1, currentIndex + cachingAmount)
         val newCache = sortedTorrents.subList(0, cachingAmount)
 
         for (i in currentIndex .. cacheEnd) {
