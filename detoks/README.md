@@ -87,5 +87,25 @@ The seeding strategy only sorts the torrents into a list of torrents that will b
 `TODO: add tokens`
 
 ## Debug Screen
+A user may access the debug screen for a torrent by clicking on its name (circled in orange) in the list of seeded torrents shown in [Seeding](#seeding).   
+<img src="https://user-images.githubusercontent.com/57201085/232646069-cc0b9fcc-b5ee-49b0-8713-40cab2c4138a.jpg" alt="fu1" width="25%"> <img src="https://user-images.githubusercontent.com/57201085/232646748-47d9bdd4-c549-4c21-8c80-2499e2ee5b1e.jpg" alt="fu1" width="25%">
 
-`TODO: add docs and image debug screen`
+It displays libtorrent metadata on the torrent such as:
+* `infoHash`: info hash of the torrent.
+* `magnetLink`: magnet link of the torrent.
+* `files`: list of files that are contained in the torrent.
+* `downloadedBytes`: total number of bytes that have been downloaded from the torrent since it started.
+
+It also displays torrent profile metrics as mentioned in [ProfileGossiper](#profilegossiper):
+* `watchTime`
+* `hopCount` 
+* `duration`
+* `timesSeen`
+* `uploadDate`   
+
+and two extra profile metrics:
+
+* `watched`: whether or not the video was watched
+* `likes`: number of likes that the torrent has
+
+
