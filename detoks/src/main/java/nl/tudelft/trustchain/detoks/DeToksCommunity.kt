@@ -107,7 +107,7 @@ class DeToksCommunity(
     private fun onGossip(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-//        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
+        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
         torrentManager.addTorrent(payload.magnet)
     }
     private fun onTransactionMessage(packet: Packet) {
@@ -153,7 +153,7 @@ class DeToksCommunity(
     }
     fun getAllUniqueVideos(): List<Pair<String,String>> {
         val videos = database.getBlocksWithType(LIKE_BLOCK)
-        val unique = videos.filter{ video -> videos.count { it.transaction["video"] == video.transaction["videos"] && it.transaction["torrent"] == video.transaction["torrent"] } == 1}
+        val unique = videos.filter{ video -> videos.count { it.transaction["video"] == video.transaction["video"] && it.transaction["torrent"] == video.transaction["torrent"] } == 1}
         return unique.map { Pair(it.transaction["video"] as String,it.transaction["torrent"] as String) }
     }
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {

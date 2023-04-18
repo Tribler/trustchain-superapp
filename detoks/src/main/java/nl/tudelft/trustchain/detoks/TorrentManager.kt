@@ -179,6 +179,8 @@ class TorrentManager constructor (
     }
     @RequiresApi(Build.VERSION_CODES.O)
     fun addMagnet(magnet: String){
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+        Log.wtf("detoks", community.getAllUniqueVideos().toString())
         val res = sessionManager.fetchMagnet(magnet, 10) ?: return
 
         val torrentInfo = TorrentInfo(res)
