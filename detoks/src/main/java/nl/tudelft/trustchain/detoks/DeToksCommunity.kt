@@ -9,6 +9,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.trustchain.detoks.gossiper.*
+import kotlin.math.max
 
 
 class DeToksCommunity(private val context: Context) : Community() {
@@ -110,8 +111,22 @@ class DeToksCommunity(private val context: Context) : Community() {
 
     private fun onProfileEntryGossip(packet: Packet) {
         val (_, payload) = packet.getAuthPayload(ProfileEntryMessage.Deserializer)
-        val torrentManager = TorrentManager.getInstance(context)
-        payload.data.forEach { torrentManager.profile.mergeWith(it.first, it.second) }
+        val data = payload.data
+        if(data[0].first != "Key") {
+            Log.d(LOGGING_TAG, "Received data in profile entry message that wasn't recognized")
+            return
+        }
+        val key = data[0].second
+        val profile = TorrentManager.getInstance(context).profile
+        data.drop(0).forEach {
+            when(it.first) {
+                "WatchTime" -> profile.updateEntryWatchTime(key, it.second.toLong(), false)
+                "Likes" -> profile.updateEntryLikes(key, it.second.toInt(), false)
+                "Duration" -> profile.profiles[key]!!.duration = max(profile.profiles[key]!!.duration, it.second.toLong())
+                "UploadDate" -> profile.profiles[key]!!.uploadDate = max(profile.profiles[key]!!.uploadDate, it.second.toLong())
+                else -> Log.d(LOGGING_TAG, "Received data in profile entry message that wasn't recognized")
+            }
+        }
     }
 
     private fun onNetworkSizeGossip(packet: Packet) {

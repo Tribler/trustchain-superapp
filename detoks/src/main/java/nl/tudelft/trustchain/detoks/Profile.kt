@@ -31,15 +31,6 @@ class Profile(
         return profiles.contains(key) && profiles[key]!!.watched
     }
 
-    fun mergeWith(key: String, otherEntry: ProfileEntry) {
-        if(!profiles.containsKey(key)) profiles[key] = ProfileEntry()
-        profiles[key]!!.duration = max(profiles[key]!!.duration, otherEntry.duration)
-        profiles[key]!!.uploadDate = max(profiles[key]!!.uploadDate, otherEntry.uploadDate)
-
-        updateEntryWatchTime(key, otherEntry.watchTime, false)
-        updateEntryLikes(key, otherEntry.likes, false)
-    }
-
     fun updateEntryDuration(key: String, duration: Long) {
         addProfile(key)
         profiles[key]!!.duration = duration
