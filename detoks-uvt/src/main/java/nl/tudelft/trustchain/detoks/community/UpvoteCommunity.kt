@@ -13,6 +13,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
+import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.recommendation.RecommendationType
 import nl.tudelft.trustchain.detoks.recommendation.Recommender
 import nl.tudelft.trustchain.detoks.services.SeedRewardService
@@ -58,7 +59,8 @@ class UpvoteCommunity(
         messageHandlers[MessageID.RECOMMENDATION_REQUEST] = ::onRecommendationRequestPacket
         messageHandlers[MessageID.RECOMMENDATION_RECEIVED] = ::onRecommendationReceivedPacket
         messageHandlers.entries.forEach { Log.i("Detoks", "key is ${it.key} and function is ${it.value.toString()}") }
-        upvoteService = UpvoteService(context)
+
+        upvoteService = UpvoteService(OwnedTokenManager(context), SentTokenManager(context))
         seedRewardService = SeedRewardService(OwnedTokenManager(context))
 
     }
