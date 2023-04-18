@@ -68,7 +68,7 @@ These tokens can be used when double tapping on a video to send the token to the
 This limit of tokens will be reset each day, but the unminted tokens will not be passed over to the next day, which is done to prevent token stacking.
 We have decided to store the following information in the token: token_id, date, public_key of the minter, video_id, and the public_key of the seeder.
 The token id is a value between 0 and the limit and will be unique in combination with the date and public key of the minter.
-We store the sent and received upvote tokens in a personal sidelight table to use the information to find better-recommended content for the sender.
+We store the sent and received upvote tokens in a personal sqldelight table to use the information to find better-recommended content for the sender.
 
 In order to keep the network alive, there must be enough seeders for the leechers to download (torrent) the content.
 We decided that each user that uploads content to the application will also seed that content to the network.
@@ -130,17 +130,17 @@ The average total times have been sorted in ascending order to show the variance
 
 ## Challenges
 
-During development of the application we faced some challenges. We have listed the main challenges we encountered below:
+During the development of the application, we faced some challenges. We have listed the main challenges we encountered below:
 
-- The first main issue when developing was regarding extending the seeding functionality of the application. When booting the application we faced the problem that the application would chrash when it started to download a magnet url from a seed. We based the code for seeding based on another submodule (LiteratureGossiper). However it turned out the issue was a faulty method used in that codebase. After adapting with code based other modules the issue was resolved.
+- The first main issue when developing was regarding extending the seeding functionality of the application. When booting the application, we faced the problem that it would crash when it started downloading a magnet URL from a seed. We based the code for seeding based on another submodule (LiteratureGossiper). However, the issue was a faulty method used in that codebase. After adapting to code-based other modules, the issue was resolved.
 
-- The second large bug we encountered was that newly created HalfBlocks where not received and persisted by other Peers, resulting in that they could not find the block in the database. The cause of this bug was that we had overwritten the messageId of the default TrustChain listeners, defined in the `TrustChainCommunity.kt` file. By overwriting these handlers, the logic of handling blocks was not triggered anymore. This also goes wrong in other submodules.
+- The second considerable bug we encountered was that newly created HalfBlocks were not received and persisted by other Peers, so they could not find the block in the database. The cause of this bug was that we had overwritten the messageId of the default TrustChain listeners, defined in the `TrustChainCommunity.kt` file. By overwriting these handlers, the logic of handling blocks was not triggered anymore. This issue also goes wrong in other submodules.
 
-- Related to that is a Proposal block set to be signed by any counterparty, was still not found after the solution mentioned above. After some debugging we found that the hash of the block arrived earlier at the peer than that the Proposal block was spread over the network. We resolved this issue by broadcasting the block first, before sending the hash of the block to any peer. This also allows for more discoverability of new content in the network.
+- Related to that is a Proposal block set to be signed by any counterparty, which was still not found after the abovementioned solution. After some debugging, we found that the block's hash arrived earlier at the peer than that the Proposal block was spread over the network. We resolved this issue by broadcasting the block first before sending the block's hash to any peer. This fix also allows for more discoverability of new content in the network.
 
 ## Known Issues and Limitations
 
-- In order to reward peers who seed content to keep the content network alive, we need to figure out the public keys of the seeders. Currently, we make use of JLibtorrent to get the IP addresses of all seeders or peers who provided content. If any of these IP addresses match the IP addresses of the peers who are online, they will be mapped said peer's public key. A limitation of this approach of finding the public key of the seeder, is that is does not take into account the possibility of peers being able to dynamically change their IP addresses when they move around. As a result, it can cause a peer to give the seed rewards to a peer who didn't seed the video content. A better approach might be to use the unique `peer_id` which is described in the [specification of the BitTorrent protocol](https://wiki.theory.org/BitTorrentSpecification#peer_id). JLibtorrent does not yet implement `peer_id`s, so it might be useful to look into other implementations of the BitTorrent protocol.
+- To reward peers who seed content to keep the content network alive, we need to figure out the public keys of the seeders. Currently, we use JLibtorrent to get the IP addresses of all seeders or peers who provided content. If any IP addresses match the IP addresses of the online peers, they will be mapped to their public key. A limitation of this approach of finding the public key of the seeder is that it does not consider the possibility of peers being able to change their IP addresses when they move around dynamically. As a result, it can cause a peer to give the seed rewards to a peer who did not seed the video content. A better approach might be to use the unique `peer_id` described in the [specification of the BitTorrent protocol](https://wiki.theory.org/BitTorrentSpecification#peer_id). JLibtorrent does not yet implement `peer_id`s, so it might be helpful to look into other implementations of the BitTorrent protocol.
 
 ## Future Work
 
