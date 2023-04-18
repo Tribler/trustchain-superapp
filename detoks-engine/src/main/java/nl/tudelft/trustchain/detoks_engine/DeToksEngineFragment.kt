@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import nl.tudelft.trustchain.detoks_engine.db.TokenStore
 import nl.tudelft.trustchain.detoks_engine.manage_tokens.TokenBenchmarkActivity
 import nl.tudelft.trustchain.detoks_engine.manage_tokens.TokenManageActivity
 import java.io.File
@@ -25,8 +24,6 @@ class DeToksEngineFragment : BaseFragment(R.layout.fragment_detoks2) {
     private lateinit var transactionCommunity: TransactionCommunity
     private val logger = KotlinLogging.logger {}
     private var previousVideoAdapterIndex = 0
-    private lateinit var tokenStore: TokenStore
-
     private val torrentDir: String
         get() = "${requireActivity().cacheDir.absolutePath}/torrent"
     private val mediaCacheDir: String
@@ -59,8 +56,6 @@ class DeToksEngineFragment : BaseFragment(R.layout.fragment_detoks2) {
         super.onCreate(savedInstanceState)
         cacheDefaultTorrent()
 
-        tokenStore = TokenStore.getInstance(requireContext())
-
         torrentManager = TorrentManager(
             File("${requireActivity().cacheDir.absolutePath}/media"),
             File("${requireActivity().cacheDir.absolutePath}/torrent"),
@@ -90,7 +85,6 @@ class DeToksEngineFragment : BaseFragment(R.layout.fragment_detoks2) {
                 msg: String ->
             logger.debug("Detoks_engine", "handler in fragment")
             textView.text = msg
-            tokenStore.storeToken(msg)
         }
         onPageChangeCallback()
     }
