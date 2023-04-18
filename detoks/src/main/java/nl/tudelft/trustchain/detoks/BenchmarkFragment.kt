@@ -103,17 +103,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             "Batch of groups has been sent. Execution time: ${sendingTime} ms"
         )
 
-//        for (transactionGroup in transactionEngine.tokenStore.getAllTokens()
-//            .chunked(groupSize)) {
-//            transactionEngine.sendTokenGrouped(
-//                listOf(transactionGroup),
-//                transactionEngine.getSelectedPeer(),
-//                resend = true
-//            )
-//        }
-
-        delay(5000L)
         while(transactionEngine.tokenStore.getAllTokens().isNotEmpty()){
+            delay(3000L)
             for (transactionGroup in transactionEngine.tokenStore.getAllTokens()
                 .chunked(groupSize)) {
                 transactionEngine.sendTokenGrouped(

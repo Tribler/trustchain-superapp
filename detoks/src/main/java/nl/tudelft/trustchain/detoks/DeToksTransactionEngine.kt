@@ -106,11 +106,7 @@ class DeToksTransactionEngine (
         if (sendingToSelf) {
             newID = UUID.randomUUID().toString()
         }
-        Log.d(LOGTAG, "Adding UID: ${newID} to database")
         tokenStore.addToken(newID, intId.toLong(), true)
-//        if(!(tokenStore.checkToken(newID))){
-//            tokenStore.addToken((newID), intId.toLong())
-//        }
 
         // Create an agreement block to send back
         val transaction = mapOf("tokenSent" to uid)
@@ -177,7 +173,6 @@ class DeToksTransactionEngine (
                 }
 
                 // Add token to personal database
-                Log.d(LOGTAG, "Adding UID: ${newID} to database")
                 tokensToAdd.add(Token(newID, intId.toInt()))
             }
             grouped_agreement_uids.add(tokenList.toList())
