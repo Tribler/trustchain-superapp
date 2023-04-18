@@ -89,7 +89,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" android:id="@+id/gen_1000" android:layout_weight="1"/>
         <Button
-            android:text="Gen 10 10000"
+            android:text="Gen 10000"
             android:layout_width="match_parent"
             android:layout_height="match_parent" android:id="@+id/gen_10000" android:layout_weight="1"/>
         <Button
