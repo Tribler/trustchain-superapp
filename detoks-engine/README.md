@@ -2,19 +2,15 @@
 
 This folder contains our implemented and working token transaction engine. This engine allows for a fast and lightweight solution for fast token transactions based on the [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md). We make use of an [IPv8](https://github.com/Tribler/kotlin-ipv8) overlay on which we've built forward. The concept of Trustchain is one used for communicating and bookkeeping, to make sure the transactions are communicated properly, and that also the integrity can be maintained and ensured. 
 
-*insert title screenshot here* 
-
 ## Content
 
 Our app has the following content:
 
 - **Token generation:** With our app it is possible to generate tokens on a large scale. The purpose of this is to create some form of currency to send to other peers currently active, you will also be able to see what tokens you have, and which ones you've recieved. To generate a token, simply use the button to generate one, then, select a peer in the current peers list, and then hit send to give them a token! If for some reason you don't like one of the tokens you've generated, you can select them and delete them too, or just delete them all.
-
-*insert screenshot here*
   
 - **Visible peers:** We maintain a list of the peers currently in proximity. It's very easily possible to see what peers are currently around with their id's in a handy list. It's also possible to refresh, as other peers may have joined in as well during the usage.
 
-*insert screenshot here*
+-**Sending tokens to peers**: It is possible to send many tokens at once to other peers in the vicinity, this can be done individually to a scale of a thousand tokens per second
 
 ## The structure of the project
 
