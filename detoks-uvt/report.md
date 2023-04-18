@@ -68,7 +68,7 @@ These tokens can be used when double tapping on a video to send the token to the
 This limit of tokens will be reset each day, but the unminted tokens will not be passed over to the next day, which is done to prevent token stacking.
 We have decided to store the following information in the token: token_id, date, public_key of the minter, video_id, and the public_key of the seeder.
 The token id is a value between 0 and the limit and will be unique in combination with the date and public key of the minter.
-We store the sent and received upvote tokens in a personal sqldelight table to use the information to find better-recommended content for the sender.
+We store the sent and received upvote tokens in a personal sidelight table to use the information to find better-recommended content for the sender.
 
 In order to keep the network alive, there must be enough seeders for the leechers to download (torrent) the content.
 We decided that each user that uploads content to the application will also seed that content to the network.
@@ -102,7 +102,7 @@ The recommendation system we implemented can be benchmarked by measuring how lon
 
 - Each phone called the `getNextRecommendation` function 100 times in one sequential loop
 
-- All results stored in a Firestore database
+- All results are stored in a Firestore database
 
 In Figure (**FIGURE_REF!!!**), the time per function call is plotted with the 100 calls on the x-axis and the time it took in ms on the y-axis. Each line represents one device with its corresponding public key shown in the legend in the top right corner.
 
