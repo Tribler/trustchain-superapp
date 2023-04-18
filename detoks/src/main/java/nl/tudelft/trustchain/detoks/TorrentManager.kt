@@ -120,8 +120,8 @@ class TorrentManager constructor (
                 }
             }
         }
-        val content = torrentFiles.gett(index % getNumberOfTorrents())
-        //val content = torrentFiles.gett(0)
+        //val content = torrentFiles.gett(index % getNumberOfTorrents())
+        val content = torrentFiles.gett(0)
 
 
         return try {
@@ -269,7 +269,7 @@ class TorrentManager constructor (
                     for (it in 0 until torrentInfo.numFiles()) {
                         val fileName = torrentInfo.files().fileName(it)
                         Log.d("DeToks", "file ${fileName} in $it")
-                        if (fileName.endsWith(".mp4")) {
+                        if (fileName.endsWith(".mp4") && community.getAuthorOfMagnet(torrentInfo.makeMagnetUri())!="") {
                             torrentsList.put(torrentInfo.infoHash().toString(), fileName)
                             torrentFiles.add(
                                 TorrentHandler(
@@ -279,6 +279,20 @@ class TorrentManager constructor (
                                     fileName,
                                     it,
                                     community.getAuthorOfMagnet(torrentInfo.makeMagnetUri()),
+                                    torrentInfo.makeMagnetUri(),
+                                    false
+                                )
+                            )
+                        }else if (fileName.endsWith(".mp4")) {
+                            torrentsList.put(torrentInfo.infoHash().toString(), fileName)
+                            torrentFiles.add(
+                                TorrentHandler(
+                                    cacheDir,
+                                    handle,
+                                    torrentInfo.name(),
+                                    fileName,
+                                    it,
+                                    torrentInfo.creator(),
                                     torrentInfo.makeMagnetUri(),
                                     false
                                 )
@@ -608,7 +622,8 @@ class TorrentManager constructor (
     }
     // Extension functions to loop around the index of a lists.
     private fun <E> List<E>.gett(index: Int): E  {
-        return this[index.mod(size)]
+        if(size!=0) return this[index.mod(size)]
+        return this[0]
     }
     private fun <E> List<E>.gettIndex(index: Int): Int = index.mod(size)
 }

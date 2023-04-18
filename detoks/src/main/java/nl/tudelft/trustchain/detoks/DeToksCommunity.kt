@@ -53,7 +53,7 @@ class DeToksCommunity(
                 Log.d("Detoks", "Received like for $video, $torrent")
                 Log.d("Detoks", "new number of likes: $new_likes")
                 // don't add duplicate videos
-                if (!firstInstance(video, torrent)) return
+                //if (!firstInstance(video, torrent)) return
                 TorrentManager.getInstance(context).addMagnet(magnet)
             }
         })
@@ -176,9 +176,12 @@ class DeToksCommunity(
         return unique.map { Pair(it.transaction["video"] as String,it.transaction["torrent"] as String) }
     }
     fun getAuthorOfMagnet(magnet: String): String {
-        return database.getBlocksWithType(LIKE_BLOCK).first {
+        val a = database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["torrentMagnet"] == magnet
-        }.transaction["author"] as String
+        }
+        if(a.isEmpty()) return ""
+        return a[0].transaction["author"] as String
+
     }
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
         val authorsBlocks =  database.getBlocksWithType(LIKE_BLOCK).filter {
