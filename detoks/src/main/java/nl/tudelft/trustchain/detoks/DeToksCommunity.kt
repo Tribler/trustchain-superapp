@@ -43,7 +43,7 @@ class DeToksCommunity(
                 val torrent = block.transaction.get("torrent") as String
                 val magnet = block.transaction.get("torrentMagnet") as String
                 Log.d("Detoks", "Received like for $video, $torrent")
-                if (firstInstance(video, torrent)) TorrentManager.getInstance(context).addMagnet(magnet)
+                TorrentManager.getInstance(context).addMagnet(magnet)
             }
         })
     }
@@ -61,10 +61,10 @@ class DeToksCommunity(
     fun sendTokens(amount: Int, recipientMid: String) {
         val senderWallet = walletManager.getOrCreateWallet(myPeer.mid)
 
-        Log.d("DetoksCommunity", "my wallet ${senderWallet.balance}")
+//        Log.d("DetoksCommunity", "my wallet ${senderWallet.balance}")
 
         if (senderWallet.balance >= amount) {
-            Log.d("DetoksCommunity", "Sending $amount money to $recipientMid")
+//            Log.d("DetoksCommunity", "Sending $amount money to $recipientMid")
             senderWallet.balance -= amount
             walletManager.setWalletBalance(myPeer.mid, senderWallet.balance)
 
@@ -80,15 +80,15 @@ class DeToksCommunity(
                 send(peer.address, packet)
             }
         } else {
-            Log.d("DeToksCommunity", "Insufficient funds!")
+//            Log.d("DeToksCommunity", "Insufficient funds!")
         }
 
     }
 
     fun gossipWith(peer: Peer) {
-        Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
-        Log.d("DetoksCommunity", "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
-        Log.d("DetoksCommunity", "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
+//        Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
+//        Log.d("DetoksCommunity", "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
+//        Log.d("DetoksCommunity", "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
         val listOfTorrents = TorrentManager.getInstance(context).getListOfTorrents()
         if(listOfTorrents.isEmpty()) return
         val magnet = listOfTorrents.random().makeMagnetUri()
@@ -151,7 +151,11 @@ class DeToksCommunity(
             it.transaction["video"] == vid && it.transaction["torrent"] == torrent
         }
     }
-
+    fun getAllUniqueVideos(): List<Pair<String,String>> {
+        val videos = database.getBlocksWithType(LIKE_BLOCK)
+        val unique = videos.filter{ video -> videos.count { it.transaction["video"] == video.transaction["video"] && it.transaction["torrent"] == video.transaction["torrent"] } == 1}
+        return unique.map { Pair(it.transaction["video"] as String,it.transaction["torrent"] as String) }
+    }
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
         val authorsBlocks =  database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["author"] == author
@@ -179,6 +183,9 @@ class DeToksCommunity(
         fun TrustChainBlock.toKey() = Key(transaction["video"] as String, transaction["torrent"] as String)
             val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
         // no need to sort here as getblocksbyauthor already sorts
+//        for (block in getBlocksByAuthor(author)) {
+//            Log.d("Detoks", getLikes(block.transaction["video"] as String, block.transaction["torrent"] as String).size.toString())
+//        }
         return likes.entries.map {
             Pair(it.key.video, it.value.size)
         }

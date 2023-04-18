@@ -179,6 +179,8 @@ class TorrentManager constructor (
     }
     @RequiresApi(Build.VERSION_CODES.O)
     fun addMagnet(magnet: String){
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+        Log.wtf("detoks", community.getAllUniqueVideos().toString())
         val res = sessionManager.fetchMagnet(magnet, 10) ?: return
 
         val torrentInfo = TorrentInfo(res)
@@ -279,9 +281,11 @@ class TorrentManager constructor (
         val tb = TorrentBuilder()
         tb.creator(IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!.myPeer.publicKey.toString())
         tb.path(File(cacheDir.getPath()+"/"+collection.hashCode().toString()))
+
         tb.addTracker("http://tracker.openbittorrent.com:80/announce", 0)
         tb.addTracker("http://open.acgnxtracker.com:80/announce", 1)
         tb.addTracker("udp://tracker.openbittorrent.com:6969/announce", 1)
+
         tb.setPrivate(false)
 
         Log.d("DeToks", folder.toString())
