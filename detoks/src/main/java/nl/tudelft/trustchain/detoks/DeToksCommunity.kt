@@ -10,6 +10,7 @@ import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
@@ -47,7 +48,12 @@ class DeToksCommunity(
                 val video = block.transaction.get("video") as String
                 val torrent = block.transaction.get("torrent") as String
                 val magnet = block.transaction.get("torrentMagnet") as String
+                val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+                val new_likes = community.getLikes(video, torrent).size
                 Log.d("Detoks", "Received like for $video, $torrent")
+                Log.d("Detoks", "new number of likes: $new_likes")
+                // don't add duplicate videos
+                if (!firstInstance(video, torrent)) return
                 TorrentManager.getInstance(context).addMagnet(magnet)
             }
         })
@@ -110,9 +116,9 @@ class DeToksCommunity(
     }
 
     private fun onGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
+        val (_, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
+//        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
 
         torrentManager.addTorrent(payload.magnet)
 
@@ -130,9 +136,9 @@ class DeToksCommunity(
             recipientWallet.balance += payload.amount
             walletManager.setWalletBalance(payload.recipientMID, recipientWallet.balance)
 
-            Log.d("DeToksCommunity", "Received ${payload.amount} tokens from ${payload.senderMID}")
+//            Log.d("DeToksCommunity", "Received ${payload.amount} tokens from ${payload.senderMID}")
         } else {
-            Log.d("DeToksCommunity", "Insufficient funds from ${payload.senderMID}!")
+//            Log.d("DeToksCommunity", "Insufficient funds from ${payload.senderMID}!")
         }
     }
 
@@ -148,19 +154,15 @@ class DeToksCommunity(
             launch { // launch a new coroutine and continue
                 super.crawlChain(peer, null) // Crawl their chain (unknown last block)
             }
-
         }
-
-
     }
 
     fun broadcastLike(vid: String, torrent: String, creator: String, magnet: String) {
         if(userLikedVideo(vid,torrent,myPeer.publicKey.toString())) return
         Log.d("DeToks", "Liking: $vid")
         val timestamp = System.currentTimeMillis().toString()
-        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator,timestamp, magnet)
+        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator, timestamp, magnet)
         createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
-        Log.d("DeToks", "$like")
     }
 
     fun getLikes(vid: String, torrent: String): List<TrustChainBlock> {
@@ -180,6 +182,10 @@ class DeToksCommunity(
         if(authorsBlocks.isEmpty()) return authorsBlocks
         return authorsBlocks.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()})
     }
+    fun getNotifications(author: String): List<TrustChainBlock> {
+        return getBlocksByAuthor(author).filter { it.transaction["liker"] != author }
+    }
+
     fun getEarliestDate(vid: String, torrent: String):Long {
         if(firstInstance(vid,torrent)) return Long.MAX_VALUE
         return (getLikes(vid,torrent).sortedBy{(it.transaction["timestamp"] as String).toLong()}.get(0).transaction["timestamp"] as String).toLong()
@@ -200,9 +206,10 @@ class DeToksCommunity(
         fun TrustChainBlock.toKey() = Key(transaction["video"] as String, transaction["torrent"] as String)
             val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
         // no need to sort here as getblocksbyauthor already sorts
-//        for (block in getBlocksByAuthor(author)) {
-//            Log.d("Detoks", getLikes(block.transaction["video"] as String, block.transaction["torrent"] as String).size.toString())
-//        }
+        for (block in getBlocksByAuthor(author)) {
+            Log.d("Detoks", block.transaction["author"] as String)
+            Log.d("Detoks", getLikes(block.transaction["video"] as String, block.transaction["torrent"] as String).size.toString())
+        }
         return likes.entries.map {
             Pair(it.key.video, it.value.size)
         }

@@ -33,7 +33,7 @@ class VideosAdapter(
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
-        Log.i("DeToks", "onBindViewHolder: $position")
+//        Log.i("DeToks", "onBindViewHolder: $position")
         holder.setVideoData(mVideoItems[position], position, onPlaybackError)
     }
 
@@ -85,6 +85,8 @@ class VideosAdapter(
             }
 
             val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+            // content.creator is not correct!!! its just your publickey for some reason
+            Log.d("Detoks", "liking video by ${content.creator}")
             community.broadcastLike(content.fileName, content.torrentName, content.creator, content.torrentMagnet)
         }
 
@@ -143,7 +145,6 @@ class VideosAdapter(
 
                 txtTitle.text = content.creator
                 txtDesc.text = content.torrentName
-                Log.d("DeToks", content.fileURI)
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
 

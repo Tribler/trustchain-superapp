@@ -91,7 +91,7 @@ class ProfileFragment : Fragment() {
 
         videosListFragment = VideosListFragment(videos)
         likedListFragment = LikedListFragment(community.listOfLikedVideosAndTorrents(author).map { it.first })
-        notificationsListFragment = NotificationsListFragment(community.getBlocksByAuthor(author).map {"Received a like: " + it.transaction["video"]})
+        notificationsListFragment = NotificationsListFragment(community.getNotifications(author).map {"Received a like: " + it.transaction["video"]})
 
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)
 

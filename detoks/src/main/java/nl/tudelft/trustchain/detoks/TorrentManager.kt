@@ -77,13 +77,13 @@ class TorrentManager constructor (
     }
 
     fun notifyIncrease() {
-        Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
+//        Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
 
     }
 
     fun notifyDecrease() {
-        Log.i("DeToks", "Decreasing index ... ${(currentIndex - 1) % getNumberOfTorrents()}")
+//        Log.i("DeToks", "Decreasing index ... ${(currentIndex - 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex - 1) % getNumberOfTorrents())
     }
 
@@ -126,7 +126,7 @@ class TorrentManager constructor (
 
         return try {
             withTimeout(timeout) {
-                Log.i("DeToks", "Waiting for content ... $index")
+//                Log.i("DeToks", "Waiting for content ... $index")
                 while (!content.isDownloaded()) {
                     delay(100)
                 }
@@ -307,7 +307,7 @@ class TorrentManager constructor (
 
         tb.addTracker("http://tracker.openbittorrent.com:80/announce", 0)
         tb.addTracker("http://open.acgnxtracker.com:80/announce", 1)
-        tb.addTracker("udp://tracker.openbittorrent.com:6969/announce", 1)
+//        tb.addTracker("udp://tracker.openbittorrent.com:6969/announce", 1)
 
         tb.setPrivate(false)
 
@@ -324,7 +324,7 @@ class TorrentManager constructor (
         Log.d("DeToks", "Making magnet")
         Log.d("DeToks", torrentInfo.makeMagnetUri())
         sessionManager.download(torrentInfo, cacheDir )
-        val res = sessionManager.fetchMagnet(torrentInfo.makeMagnetUri(), 10)
+        val res = sessionManager.fetchMagnet(torrentInfo.makeMagnetUri(), 20)
         if (res == null) Log.d("DeToks", "NO DATA :(")
         val handle = sessionManager.find(torrentInfo.infoHash())
 
@@ -341,7 +341,7 @@ class TorrentManager constructor (
             Log.d("DeToks", "file ${fileName} in $it")
             if (fileName.endsWith(".mp4")) {
                 torrentsList.put(torrentInfo.infoHash().toString(), fileName)
-                community.broadcastLike(fileName,torrentInfo.name(), torrentInfo.creator(),magnUri)
+                community.broadcastLike(fileName, torrentInfo.name(), torrentInfo.creator(), magnUri)
                 torrentFiles.add(
                     TorrentHandler(
                         cacheDir,
@@ -493,7 +493,7 @@ class TorrentManager constructor (
         val hash = torrentInfo.infoHash()
 
         if(sessionManager.find(hash) != null) return
-        Log.d("DeToksCommunity","Is a new torrent: ${torrentInfo.name()}")
+//        Log.d("DeToksCommunity","Is a new torrent: ${torrentInfo.name()}")
 
         sessionManager.download(torrentInfo, cacheDir)
         val handle = sessionManager.find(hash)
@@ -513,7 +513,7 @@ class TorrentManager constructor (
                         fileName,
                         it,
                         community.myPeer.publicKey.toString(),
-                        "",
+                        magnet,
                         false
                     )
                 )

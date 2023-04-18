@@ -23,7 +23,8 @@ class NotificationsListFragment(private val notifications: List<String>) : Fragm
         if (this::adapter.isInitialized) {
             val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
             val author = community.myPeer.publicKey.toString()
-            val notifications = community.getBlocksByAuthor(author).map { "Received a like: " + it.transaction["video"] }
+            val notifications = community.getNotifications(author)
+                .map { "Received a like: " + it.transaction["video"] }
 
             adapter.clear()
             adapter.addAll(notifications)

@@ -53,7 +53,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
             CoroutineScope(Dispatchers.Main).launch {
                 val content = adapter.mVideoItems[position].content(position, 10000)
-
                 try {
                     if (viewPagerVideos != null) viewPagerVideos.like_count.text = community.getLikes(content.fileName, content.torrentName).size.toString()
                 } catch (_: NumberFormatException) {

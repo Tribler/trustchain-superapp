@@ -30,12 +30,6 @@ class DeToksActivity : BaseActivity() {
             startService(intent)
             bindService(intent, gossipConnection, Context.BIND_AUTO_CREATE)
         }
-
-        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-        val peers = community.getPeers()
-        for (peer in peers) {
-            Log.d("DeToks", peer.mid)
-        }
     }
 
     private val gossipConnection = object : ServiceConnection {
