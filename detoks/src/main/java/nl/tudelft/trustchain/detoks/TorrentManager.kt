@@ -42,7 +42,7 @@ class TorrentManager constructor (
 ) {
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
-    private val torrentFiles = mutableListOf<TorrentHandler>()
+    val torrentFiles = mutableListOf<TorrentHandler>()
 
     private var currentIndex = 0
 
@@ -106,7 +106,7 @@ class TorrentManager constructor (
             val c = torrentFiles.filter { !it.watched }
             for (t in c) {
                 if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String) {
-                    t.watched = true
+//                    t.watched = true
                     return t.asMediaInfo()
                 }
             }

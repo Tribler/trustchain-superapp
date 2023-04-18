@@ -25,7 +25,7 @@ class VideosAdapter(
         List(100) { VideoItem(torrentManager::provideContent) }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
-        return VideoViewHolder(
+        return VideoViewHolder(torrentManager,
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_video, parent, false),
             videoScaling,
@@ -62,7 +62,7 @@ class VideosAdapter(
         }
     }
 
-    class VideoViewHolder(itemView: View, private val videoScaling: Boolean = false) :
+    class VideoViewHolder(torrentManager: TorrentManager,itemView: View, private val videoScaling: Boolean = false) :
         RecyclerView.ViewHolder(itemView) {
         var mVideoView: VideoView
         var txtTitle: TextView
@@ -71,7 +71,7 @@ class VideosAdapter(
         var likeButton: ImageButton
         var likeCount: TextView
         var isLiked: Boolean = false
-
+        var tm = torrentManager
         private fun likeVideo(content: TorrentMediaInfo) {
             if (isLiked) return
 
@@ -107,7 +107,11 @@ class VideosAdapter(
             CoroutineScope(Dispatchers.Main).launch {
                 val content = item.content(position, 10000)
                 val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-
+                for (t in tm.torrentFiles){
+                    if(content.fileName == t.fileName && content.torrentName == t.torrentName){
+                        t.watched = true
+                    }
+                }
                 likeCount.text = community.getLikes(content.fileName, content.torrentName).size.toString()
 
                 isLiked = community.userLikedVideo(
@@ -115,7 +119,6 @@ class VideosAdapter(
                     content.torrentName,
                     community.myPeer.publicKey.toString()
                 )
-
                 if (isLiked)
                     likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
                 else
