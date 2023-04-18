@@ -39,14 +39,19 @@ Shared metrics include:
 * `watchTime`: average watch time of torrent on the network.
 * `duration`: duration of torrent.
 * `uploadDate`: upload date of torrent.
-* `hopCount`: hop count of torrent.
 * `timesSeen`: number of times this node has received this torrent.
 
-## Torrent Profiles
+## Profiles
 
-In order to be able to work with recommendations, DeToks keeps track of a profile of each torrent. Useful metadata is stored in these profiles that help the other parts of DeToks with choosing which torrents to seed, leech and recommend to the user. This section describes stored parameters in the profile.
+The [Profile](./src/main/java/nl/tudelft/trustchain/detoks/Profile.kt) class is used to store a certain set of metrics in a profile entry for each video. Useful metadata is stored in these entries that help the other parts of DeToks with choosing which torrents to seed, leech and recommend to the user. Each node within the network has their own aggregate of profile entries, thir profile. This section describes stored parameters in the profile entries. Entries are added to the profile when either a new torrent is received, or if an entry is shared through gossiping. Almost all values are initialised to zero. The exception is the *watched* field, which is initialised to *false*. The class also contains some auxilliary functions for updating parameters.
 
-`TODO: add metrics`
+* `watched`: set to true if the video was watched.
+* `watchTime`: average watch time of torrent on the network.
+* `duration`: the duration of the video which is set when a video starts playing for the first time.
+* `uploadDate`: the creation date of the torrent that consists the video.
+* `hopCount`: the amount of hops the torrent made over the network.
+* `timesSeen`: the amount of times a node has received the same torrent.
+* `likes`: the amount of likes, this is currently a stub and depends on the implementation of another team.
 
 ## Strategies 
 
