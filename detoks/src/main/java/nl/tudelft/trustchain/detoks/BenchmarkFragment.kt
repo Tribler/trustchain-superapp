@@ -1,7 +1,9 @@
 package nl.tudelft.trustchain.detoks
 
 import android.app.AlertDialog
+import android.icu.util.MeasureUnit.MEGABYTE
 import android.os.Bundle
+import android.os.Debug
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -122,6 +124,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Debug.startMethodTracing("benchMark2", 1024*128*128);
+
         // Get communities and services
         ipv8 = getIpv8()
         transactionEngine = ipv8.getOverlay()!!
@@ -190,6 +194,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             transactionEngine.tokenStore.removeAllTokens()
             updateList()
         }
+        Debug.stopMethodTracing()
     }
 
     /**
