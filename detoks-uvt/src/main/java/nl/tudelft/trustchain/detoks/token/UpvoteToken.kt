@@ -100,7 +100,7 @@ class UpvoteToken constructor(
                 Toast.makeText(
                     itemView.context,
                     "Cannot like a video more than once!",
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_LONG
                 ).show()
                 return
             }
@@ -109,15 +109,15 @@ class UpvoteToken constructor(
             val seedingMagnetUri = upvoteCommunity.torrentManager?.seedLikedVideo()
             upvoteCommunity.torrentManager?.mvpSeeder()
             var toastMsg: String? = if (seedingMagnetUri != null) {
-                "Agreement block created, upvoted successfully and now seeding liked video with magnetURI: $seedingMagnetUri"
+                "Upvoted, now seeding this video: $seedingMagnetUri"
             } else {
-                "Agreement block created, upvoted successfully, but failed to seed this video you liked"
+                "Upvoted, but failed to seed this video"
             }
             Log.i("DeToks", "Agreement block created!")
             Toast.makeText(
                 itemView.context,
                 toastMsg  ,
-                Toast.LENGTH_SHORT
+                Toast.LENGTH_LONG
             ).show()
 
             var toastMessage: String?
@@ -127,6 +127,12 @@ class UpvoteToken constructor(
                 Log.i("Detoks", "Could not find the seeder of this video you liked, all minted tokens will go the peer who posted this video you upvoted")
                 chosenSeederPublicKey = proposalBlock.publicKey.toHex()
             }
+
+            Toast.makeText(
+                itemView.context,
+                "reward seeder with this pub key: \n $chosenSeederPublicKey",
+                Toast.LENGTH_LONG
+            ).show()
 
             try {
                 val upvoteTokenList: ArrayList<UpvoteToken> = ArrayList()
@@ -167,7 +173,7 @@ class UpvoteToken constructor(
         } else {
             Toast.makeText(
                 itemView.context,
-                "Attempted to find a proposal Block with hash: ${currentVideoHash.toHex()}, This video does not have a proposal block attached to it and is thus not posted by anyone",
+                "Attempted to find a proposal Block with hash: \n ${currentVideoHash.toHex()}, \nThis video does not have a proposal block attached to it \n and is thus not posted by anyone",
                 Toast.LENGTH_LONG
             ).show()
             return

@@ -47,10 +47,10 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
                 file.delete()
             }
             deleteFile(torrentDir, DEFAULT_POST_VIDEO)
-            deleteFile(torrentDir, BIGBUCKBUNNY)
-//            deleteFile(torrentDir, LAUNDROMAT)
-//            addFile(torrentDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
-            addFile(torrentDir, LAUNDROMAT, R.raw.cosmos_laundromat)
+//            deleteFile(torrentDir, BIGBUCKBUNNY)
+            deleteFile(torrentDir, LAUNDROMAT)
+            addFile(torrentDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
+//            addFile(torrentDir, LAUNDROMAT, R.raw.cosmos_laundromat)
             addFile(torrentDir, DEFAULT_POST_VIDEO, R.raw.sintel)
 //            if (!file.exists()) {
 //                val outputStream = FileOutputStream(file)
