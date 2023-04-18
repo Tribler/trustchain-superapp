@@ -58,15 +58,15 @@ The core of the application is the CommunityAdapter.kt file. Here all communicat
 
 ```sendTokens(amount: Int, peer: Peer)```: This function takes an integer and a peer as arguments. It then sends a number of tokens equal to that integer to the specified peer.
 
-_injectTokens_: This function takes a list of tokens as an argument and adds a new token to it. In other words, this function handles token generation.
+```injectTokens(tokens: List<String>)```: This function takes a list of tokens as an argument and adds a new token to it. In other words, this function handles token generation.
 
-_setReceiveTransactionHandler_: This function takes a handler as an argument and makes sure that this handler gets called for every transaction that is received.
+```setReceiveTransactionHandler(handler: ((transaction: Transaction) -> Unit))```: This function takes a handler as an argument and makes sure that this handler gets called for every transaction that is received.
 
-_setReceiveAgreementHandler_: This function takes a handler as an argument and makes sure that this handler gets called for every agreement that is received.
+```setReceiveAgreementHandler(handler: (transaction: Transaction) -> Unit)```: This function takes a handler as an argument and makes sure that this handler gets called for every agreement that is received.
 
-_getPeers_: This function returns a list of all currently available peers that you can communicate with.
+```getPeers()```: This function returns a list of all currently available peers that you can communicate with.
 
-_getTokens_: This function returns a list of all your available tokens.
+```getTokens()```: This function returns a list of all your available tokens.
 
 ## Build
 
