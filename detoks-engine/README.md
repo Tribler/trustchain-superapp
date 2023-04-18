@@ -34,8 +34,6 @@ Lastly, the buttons on the bottom allow you to not only generate the tokens on a
 3) Determine if you want to send many tokens at once or some per second, and press the button
 4) Afterwards the statistics on the top of the screen will update accordingly
 
-## The transaction protocol
-
 ## Design
 
 When opening the application, you see a page with two buttons. These buttons both bring you to a different page. Manage tokens, where you can send and generate tokens, and benchmarks, where you can also see some statistics.
