@@ -29,7 +29,9 @@ class DeToksCommunity(
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
         registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
-                if(userLikedVideo(block.transaction["video"] as String,block.transaction["torrent"] as String, block.transaction["liker"] as String)) return
+                //if(userLikedVideo(block.transaction["video"] as String,block.transaction["torrent"] as String, block.transaction["liker"] as String)) return
+                Log.wtf("detoks","liker is "+block.transaction["liker"] as String )
+                Log.wtf("detoks","video is "+block.transaction["video"] as String)
                 createAgreementBlock(block, block.transaction)
             }
         })
