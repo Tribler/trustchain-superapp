@@ -27,6 +27,12 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
         val downloadedBytesTV = view.findViewById<TextView>(R.id.downloadedBytesTextView)
         val totalWatchTimeTV = view.findViewById<TextView>(R.id.totalWatchTimeTextView)
         val hopCountTV = view.findViewById<TextView>(R.id.hopCountTextView)
+        val watchedTV = view.findViewById<TextView>(R.id.watchedTextView)
+        val durationTV = view.findViewById<TextView>(R.id.durationTextView)
+        val likesTV = view.findViewById<TextView>(R.id.likesTextView)
+        val timesSeenTV = view.findViewById<TextView>(R.id.timesSeenTextView)
+        val uploadDateTV = view.findViewById<TextView>(R.id.uploadDateTextView)
+
         val errorTV = view.findViewById<TextView>(R.id.errorTextView)
 
         val passedName = "electricsheep-flock-248-7500-9"
@@ -64,7 +70,25 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
                 torrentManager.profile.profiles[torrent.infoHash().toString()]!!.hopCount
             hopCountTV.text = hopCountText
 
+            val watchedText = "Watched: " +
+                torrentManager.profile.profiles[torrent.infoHash().toString()]!!.watched
+            watchedTV.text = watchedText
 
+            val durationText = "Duration: " +
+                torrentManager.profile.profiles[torrent.infoHash().toString()]!!.duration
+            durationTV.text = durationText
+
+            val likesText = "Likes: " +
+                torrentManager.profile.profiles[torrent.infoHash().toString()]!!.likes
+            likesTV.text = likesText
+
+            val timesSeenText = "Times seen: " +
+                torrentManager.profile.profiles[torrent.infoHash().toString()]!!.timesSeen
+            timesSeenTV.text = timesSeenText
+
+            val uploadDateText = "Upload date: " +
+                torrentManager.profile.profiles[torrent.infoHash().toString()]!!.uploadDate
+            uploadDateTV.text = uploadDateText
 
         }
         else {
