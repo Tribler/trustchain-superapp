@@ -56,7 +56,7 @@ The benchmarks page displays various statistics related to the application. At t
 
 The core of the application is the CommunityAdapter.kt file. Here all communication over the TrustChainCommunity is handled. The following functions are all public and can be used by anyone that wants to use our implementation:
 
-_sendTokens_: This function takes an integer and a peer as arguments. It then sends a number of tokens equal to that integer to the specified peer.
+```sendTokens(amount: Int, peer: Peer)```: This function takes an integer and a peer as arguments. It then sends a number of tokens equal to that integer to the specified peer.
 
 _injectTokens_: This function takes a list of tokens as an argument and adds a new token to it. In other words, this function handles token generation.
 
