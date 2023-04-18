@@ -1,13 +1,9 @@
-package nl.tudelft.trustchain.debug
+package nl.tudelft.trustchain.debug.community
 
-import android.util.Log
-import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.trustchain.detoks.community.RecommendedVideosPayload
-import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
-import org.junit.Assert
 import org.junit.Test
 
-class RecommendedVideoPayloadTest {
+class RecommendedVideosPayloadTest {
     @Test
     fun serialize_deserialize_test() {
         val inputList: List<String> = listOf("VideoID_1", "VideoID_2", "VideoID_3")
