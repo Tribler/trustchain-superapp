@@ -53,7 +53,7 @@ class Profile(
     fun updateEntryLikes(key: String, likes: Int, myUpdate: Boolean) {
         addProfile(key)
         if(myUpdate) {
-            profiles[key]!!.likes += (likes / NetworkSizeGossiper.networkSizeEstimate)
+            profiles[key]!!.likes += (1 / NetworkSizeGossiper.networkSizeEstimate)
         } else {
             profiles[key]!!.likes += likes
             profiles[key]!!.likes /= 2
