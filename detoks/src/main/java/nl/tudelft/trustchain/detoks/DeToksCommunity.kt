@@ -9,6 +9,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.trustchain.detoks.gossiper.*
+import kotlin.math.max
 
 
 class DeToksCommunity(private val context: Context) : Community() {
@@ -19,7 +20,7 @@ class DeToksCommunity(private val context: Context) : Community() {
     init {
         messageHandlers[MESSAGE_TORRENT_ID] = ::onTorrentGossip
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
-        messageHandlers[MESSAGE_WATCH_TIME_ID] = :: onWatchTimeGossip
+        messageHandlers[MESSAGE_PROFILE_ENTRY_ID] = :: onProfileEntryGossip
         messageHandlers[MESSAGE_NETWORK_SIZE_ID] = :: onNetworkSizeGossip
         messageHandlers[MESSAGE_BOOT_REQUEST] = :: onBootRequestGossip
         messageHandlers[MESSAGE_BOOT_RESPONSE] = :: onBootResponseGossip
@@ -29,7 +30,7 @@ class DeToksCommunity(private val context: Context) : Community() {
         const val LOGGING_TAG = "DeToksCommunity"
         const val MESSAGE_TORRENT_ID = 1
         const val MESSAGE_TRANSACTION_ID = 2
-        const val MESSAGE_WATCH_TIME_ID = 3
+        const val MESSAGE_PROFILE_ENTRY_ID = 3
         const val MESSAGE_NETWORK_SIZE_ID = 4
         const val MESSAGE_BOOT_REQUEST = 5
         const val MESSAGE_BOOT_RESPONSE = 6
@@ -108,16 +109,23 @@ class DeToksCommunity(private val context: Context) : Community() {
         }
     }
 
-    private fun onWatchTimeGossip(packet: Packet) {
-        val (_, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
-        val torrentManager = TorrentManager.getInstance(context)
-
-        payload.data.forEach {
-            torrentManager.profile.updateEntryWatchTime(
-                it.first,
-                it.second,
-                false
-            )
+    private fun onProfileEntryGossip(packet: Packet) {
+        val (_, payload) = packet.getAuthPayload(ProfileEntryMessage.Deserializer)
+        val data = payload.data
+        if(data[0].first != "Key") {
+            Log.d(LOGGING_TAG, "Received data in profile entry message that wasn't recognized")
+            return
+        }
+        val key = data[0].second
+        val profile = TorrentManager.getInstance(context).profile
+        data.drop(0).forEach {
+            when(it.first) {
+                "WatchTime" -> profile.updateEntryWatchTime(key, it.second.toLong(), false)
+                "Likes" -> profile.updateEntryLikes(key, it.second.toInt(), false)
+                "Duration" -> profile.profiles[key]!!.duration = max(profile.profiles[key]!!.duration, it.second.toLong())
+                "UploadDate" -> profile.profiles[key]!!.uploadDate = max(profile.profiles[key]!!.uploadDate, it.second.toLong())
+                else -> Log.d(LOGGING_TAG, "Received data in profile entry message that wasn't recognized")
+            }
         }
     }
 
