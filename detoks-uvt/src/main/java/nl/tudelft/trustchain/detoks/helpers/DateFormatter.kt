@@ -4,9 +4,8 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 
-class DateFormatter {
+object DateFormatter {
 
-    companion object {
         private val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
 
         init {
@@ -18,11 +17,14 @@ class DateFormatter {
             val parsedDate: Date = try {
                 formatter.parse(date) as Date
             } catch (e: ParseException) {
-                // TODO Error handling
                 Date()
             }
 
             return parsedDate
+        }
+
+        fun dateToString(date: Date): String {
+            return formatter.format(date)
         }
 
         fun todayAsString() : String {
@@ -40,16 +42,12 @@ class DateFormatter {
             try {
                 val date = Date(time)
                 val strDate = formatter.format(date)
-                //            System.out.println("Local Millis * " + date.getTime() + "  ---UTC time  " + strDate);//correct
-                val utcDate = formatter.parse(strDate)
-                //            System.out.println("UTC Millis * " + utcDate.getTime() + " ------  " + dateFormatLocal.format(utcDate));
-                return utcDate!!
+                val gmtDate = formatter.parse(strDate)
+                return gmtDate!!
             } catch (e: Exception) {
                 e.printStackTrace()
             }
             return Date(time)
         }
 
-
-    }
 }
