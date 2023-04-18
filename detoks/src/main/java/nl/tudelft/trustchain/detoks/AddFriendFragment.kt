@@ -22,6 +22,9 @@ import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.detoks.db.DbHelper
@@ -75,11 +78,15 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
         val buttonShow = view.findViewById<Button>(R.id.button_show)
         buttonShow.setOnClickListener {
             buttonScan.visibility = View.INVISIBLE
-            val myPublicKey = getIpv8().myPeer.publicKey.keyToBin().toString()
+
+            val myPublicKey = getIpv8().myPeer.publicKey.keyToBin()
+            val gsonObject = GsonBuilder().create()
+            val result = gsonObject.toJson(myPublicKey)
+
             lifecycleScope.launch {
                 var bitmap = withContext(Dispatchers.Default) {
                     // qrCodeUtils.createQR(payload.serialize().toHex())
-                    qrCodeUtils.createQR(myPublicKey)
+                    qrCodeUtils.createQR(result)
                 }
                 My_QR.visibility = View.VISIBLE
                 My_QR.setImageBitmap(bitmap)
@@ -104,21 +111,32 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
            if(nameFriend?.text == null){
                Toast.makeText(this.context,"Enter friend's name!", Toast.LENGTH_LONG).show()
            } else {
-               val myPublicKey = getIpv8().myPeer.publicKey
-               val wallet = Wallet.getInstance(this.requireContext(), myPublicKey, getIpv8().myPeer.key as PrivateKey)
-               val newRowId = wallet.addFriend(
-                   OfflineFriend(username.toString(), content.toString().toByteArray()))
-               if(newRowId != -1L){
-                   Toast.makeText(this.context,"Added Friend!", Toast.LENGTH_LONG).show()
-               } else {
-                   Toast.makeText(this.context,"Duplicate Entry!", Toast.LENGTH_LONG).show()
-               }
-               //save call to db
+               if(content != null) {
+                   val myPublicKey = getIpv8().myPeer.publicKey
+                   val wallet = Wallet.getInstance(
+                       this.requireContext(),
+                       myPublicKey,
+                       getIpv8().myPeer.key as PrivateKey
+                   )
+                   var map = object :  TypeToken<ByteArray>() {}.type
+                   val result: ByteArray = Gson().fromJson(content, map)
+                   val newRowId = wallet.addFriend(
+                       OfflineFriend(username.toString(), result)
+                   )
+                   if (newRowId != -1L) {
+                       Toast.makeText(this.context, "Added Friend!", Toast.LENGTH_LONG).show()
+                   } else {
+                       Toast.makeText(this.context, "Duplicate Entry!", Toast.LENGTH_LONG).show()
+                   }
+                   //save call to db
 //               Log.v("newRowID", newRowId.toString())
-               Log.v("Save pub key", content.toString())
-               Log.v("Name ", username.toString())
-               val navController = this.findNavController()
-               navController.navigate(R.id.offlineTransferFragment)
+                   Log.v("Save pub key", content.toString())
+                   Log.v("Name ", username.toString())
+                   val navController = this.findNavController()
+                   navController.navigate(R.id.offlineTransferFragment)
+               } else {
+                   Toast.makeText(this.context, "Scanning failed!", Toast.LENGTH_LONG).show()
+               }
            }
         }
 
