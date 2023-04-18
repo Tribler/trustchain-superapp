@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.musicdao.recommender
 
+import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeSongEdge
@@ -97,6 +98,20 @@ e 1 4 0.4 1
         network.addNodeOrSong(anotherSongRecommendation)
         val edgeBetweenSongsAdded = network.addEdge(someSongRecommendation, anotherSongRecommendation, anotherNodeSongEdge)
         Assert.assertFalse(edgeBetweenSongsAdded)
+    }
+
+    @Test
+    fun canRemoveEdgesFromNodeToSongNetwork() {
+        network = NodeToSongNetwork()
+        network.addNodeOrSong(someNode)
+        network.addNodeOrSong(someSongRecommendation)
+        val edgeAdded = network.addEdge(someNode, someSongRecommendation, someNodeSongEdge)
+        Assert.assertTrue(edgeAdded)
+        val edgeRemoved = network.removeEdge(someNodeSongEdge)
+        Assert.assertTrue(edgeRemoved)
+        val edges = network.getAllEdges()
+        Assert.assertEquals(0, edges.size)
+        Assert.assertEquals(0.0, network.graph.getEdgeWeight(someNodeSongEdge), 0.001)
     }
 
     @Test
