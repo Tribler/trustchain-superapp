@@ -22,7 +22,19 @@ The project and the code can be found in the current folder, the ```trustchain-s
 
 ## The transaction protocol
 
-## Limitations
+## Design
+
+When opening the application, you see a page with two buttons. These buttons both bring you to a different page. Manage tokens, where you can send and generate tokens, and benchmarks, where you can also see some statistics.
+
+[SCREENSHOT]
+
+On the manage tokens page, you will find a list of all your tokens at the top, followed by a list of currently available peers. To create a new token, you can click on the "gen token" button located at the bottom of the page. Once you have accumulated enough tokens, you can send them to a selected peer by clicking on either the "send", "send 2", or "send 5" buttons, which will respectively send 1, 2, or 5 tokens. The application operates on the FIFO principle, meaning that the tokens generated first will be sent first. Lastly, you can refresh the page by clicking on the refresh button.
+
+[SCREENSHOT]
+
+The benchmarks page displays various statistics related to the application. At the top, you can view the number of tokens that you currently possess. Following that, you can find the percentage of sent packets that have successfully reached the designated peer. The throughput, measured in tokens per second, is displayed below the percentage. At the end of the statistics, you see the latency. After the statistics, a list of the currently available peers is displayed. At the bottom of the screen, you can find buttons specifically meant for generating or sending a large number of tokens.
+
+[SCREENSHOT]
 
 ### Do you want to add your own app?
 
