@@ -23,8 +23,8 @@ class DeToksTransactionEngine (
 
     override val serviceId = "12313685c1912a191279f8248fc8db5899c5df6a"
 
-    private val SINGLE_BLOCK = "SingleBlock"
-    private val GROUPED_BLOCK = "GroupedBlock"
+    private val SINGLE_BLOCK = "SingleBlock2"
+    private val GROUPED_BLOCK = "GroupedBlock2"
 
     private val LOGTAG = "DeToksTransactionEngine"
 
@@ -54,19 +54,25 @@ class DeToksTransactionEngine (
 
         addListener(GROUPED_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                var startBenchmark = System.nanoTime()
-                // If the block is actually addressed to me, or if I'm sending to myself, process the block
-                if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
-                    if (block.isProposal) {
-                        receiveGroupedTokenProposal(block)
-                        totalTimeTracker += (System.nanoTime() - startBenchmark)
-                        Log.d(LOGTAG, "Received GROUPED proposal block, time added: ${System.nanoTime() - startBenchmark}")
-                    } else if (block.isAgreement) {
-                        receiveGroupedTokenAgreement(block)
-                        totalTimeTracker += (System.nanoTime() - startBenchmark)
-                        Log.d(LOGTAG, "Received GROUPED agreement block, time added: ${System.nanoTime() - startBenchmark}")
+                    var startBenchmark = System.nanoTime()
+                    // If the block is actually addressed to me, or if I'm sending to myself, process the block
+                    if (sendingToSelf || AndroidCryptoProvider.keyFromPublicBin(block.linkPublicKey) == selfPeer.publicKey) {
+                        if (block.isProposal) {
+                            receiveGroupedTokenProposal(block)
+                            totalTimeTracker += (System.nanoTime() - startBenchmark)
+                            Log.d(
+                                LOGTAG,
+                                "Received GROUPED proposal block, time added: ${System.nanoTime() - startBenchmark}"
+                            )
+                        } else if (block.isAgreement) {
+                            receiveGroupedTokenAgreement(block)
+                            totalTimeTracker += (System.nanoTime() - startBenchmark)
+                            Log.d(
+                                LOGTAG,
+                                "Received GROUPED agreement block, time added: ${System.nanoTime() - startBenchmark}"
+                            )
+                        }
                     }
-                }
             }
         })
     }
@@ -100,7 +106,8 @@ class DeToksTransactionEngine (
         if (sendingToSelf) {
             newID = UUID.randomUUID().toString()
         }
-        tokenStore.addToken((newID), intId.toLong())
+        Log.d(LOGTAG, "Adding UID: ${newID} to database")
+        tokenStore.addToken(newID, intId.toLong(), true)
 //        if(!(tokenStore.checkToken(newID))){
 //            tokenStore.addToken((newID), intId.toLong())
 //        }
@@ -125,7 +132,7 @@ class DeToksTransactionEngine (
      * @param transactions: List of lists of tokens to be sent
      * @param peer: Peer to send the tokens to
      */
-    fun sendTokenGrouped(transactions: List<List<Token>>, peer: Peer): TrustChainBlock {
+    fun sendTokenGrouped(transactions: List<List<Token>>, peer: Peer, resend: Boolean): TrustChainBlock {
         val groupedTransactions = mutableListOf<List<String>>()
         for (transaction in transactions) {
             val tokenList: MutableList<String> = mutableListOf()
@@ -134,7 +141,7 @@ class DeToksTransactionEngine (
             }
             groupedTransactions.add(tokenList)
         }
-        val transaction = mapOf("transactions" to groupedTransactions)
+        val transaction = mapOf("transactions" to groupedTransactions, "resend" to resend)
 
         return createProposalBlock(
             GROUPED_BLOCK,
@@ -150,6 +157,7 @@ class DeToksTransactionEngine (
     @Suppress("UNCHECKED_CAST")
     private fun receiveGroupedTokenProposal(block: TrustChainBlock) {
         val transactions = block.transaction["transactions"] as List<List<String>>
+        val resend = block.transaction["resend"] as Boolean
 
         // Extract tokens from transactions field, create grouped agreement block as response
         val grouped_agreement_uids = mutableListOf<List<String>>()
@@ -169,11 +177,18 @@ class DeToksTransactionEngine (
                 }
 
                 // Add token to personal database
+                Log.d(LOGTAG, "Adding UID: ${newID} to database")
                 tokensToAdd.add(Token(newID, intId.toInt()))
             }
             grouped_agreement_uids.add(tokenList.toList())
         }
-        tokenStore.addTokenList(tokensToAdd)
+        // If we resend we need to check first that token is not in the database so we don't add it again
+        if(resend){
+            Log.d(LOGTAG, "RESEND PACKET")
+            tokenStore.addTokenList(tokensToAdd, true)
+        } else{
+            tokenStore.addTokenList(tokensToAdd, false)
+        }
         val transaction = mapOf("tokensSent" to grouped_agreement_uids.toList())
         createAgreementBlock(block, transaction)
     }

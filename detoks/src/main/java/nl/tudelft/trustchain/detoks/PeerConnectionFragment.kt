@@ -31,7 +31,7 @@ class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
     private val handler = Handler(Looper.getMainLooper())
     private val runnable = object : Runnable {
         override fun run() {
-            binding.peerListview.adapter = PeerAdapter(requireActivity(), getPeers())
+            binding.peerListview.adapter = PeerAdapter(requireActivity(), getPeers(), ipv8.myPeer)
             handler.postDelayed(this, 1000)
         }
     }
@@ -43,9 +43,9 @@ class PeerConnectionFragment : BaseFragment(R.layout.fragment_peer_connection) {
         trustchainCommunity = ipv8.getOverlay()!!
 
         // Set the list adapter for the ListView and add on click listeners
-        adapter = PeerAdapter(requireActivity(), getPeers())
+        adapter = PeerAdapter(requireActivity(), getPeers(), ipv8.myPeer)
         binding.peerlistUpdate.setOnClickListener {
-            binding.peerListview.adapter = PeerAdapter(requireActivity(), getPeers())
+            binding.peerListview.adapter = PeerAdapter(requireActivity(), getPeers(), ipv8.myPeer)
         }
 
         binding.peerListview.isClickable = true

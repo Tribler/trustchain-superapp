@@ -31,7 +31,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     var startBenchmark = 0L
     var benchMarking = ""
     private var totalTransactions = 1000
-    private var groupSize = 20
+    private var groupSize = 10
 
     // Looper for updating the list of tokens
     private val handler = Handler(Looper.getMainLooper())
@@ -70,11 +70,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private fun singleBenchmark() {
         this.startBenchmark = System.nanoTime()
         this.benchMarking = "SingleBatch"
-//        for (tok in transactionEngine.tokenStore.getAllTokens()){
-//            transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
-//        }
-        repeat(totalTransactions){
-            sendSingleToken()
+        for (tok in transactionEngine.tokenStore.getAllTokens()){
+            transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
         }
         val sendingTime = (System.nanoTime() - this.startBenchmark) / MILLISECOND
         Log.d(
@@ -88,7 +85,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
      * Start benchmark for grouped transactions
      * @param totalTransactions The total number of transactions to be sent
      */
-    private fun groupedBenchmark() {
+    private suspend fun groupedBenchmark() {
         this.startBenchmark = System.nanoTime()
         this.benchMarking = "GroupedBatch"
 
@@ -96,7 +93,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             .chunked(groupSize)) {
             transactionEngine.sendTokenGrouped(
                 listOf(transactionGroup),
-                transactionEngine.getSelectedPeer()
+                transactionEngine.getSelectedPeer(),
+                resend = false
             )
         }
         val sendingTime = (System.nanoTime() - this.startBenchmark) / MILLISECOND
@@ -104,6 +102,27 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             "DeToksTransactionEngine",
             "Batch of groups has been sent. Execution time: ${sendingTime} ms"
         )
+
+//        for (transactionGroup in transactionEngine.tokenStore.getAllTokens()
+//            .chunked(groupSize)) {
+//            transactionEngine.sendTokenGrouped(
+//                listOf(transactionGroup),
+//                transactionEngine.getSelectedPeer(),
+//                resend = true
+//            )
+//        }
+
+        delay(5000L)
+        while(transactionEngine.tokenStore.getAllTokens().isNotEmpty()){
+            for (transactionGroup in transactionEngine.tokenStore.getAllTokens()
+                .chunked(groupSize)) {
+                transactionEngine.sendTokenGrouped(
+                    listOf(transactionGroup),
+                    transactionEngine.getSelectedPeer(),
+                    resend = true
+                )
+            }
+        }
         return
     }
 
@@ -226,10 +245,16 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
      * @param totalTransactions the amount of tokens to generate
      */
     private fun generateTokens() {
+        var uuidList = mutableListOf<String>()
         for (i in 1..totalTransactions) {
             // Add Token to the token store
-            transactionEngine.tokenStore.addToken(UUID.randomUUID().toString(), i.toLong())
+            val uuid = UUID.randomUUID().toString()
+            uuidList.add(uuid)
+            transactionEngine.tokenStore.addToken(uuid, i.toLong())
         }
+
+        Log.d(LOGTAG, (uuidList.groupingBy { it }.eachCount().count { it.value > 1 }).toString())
+
     }
 
     /**
