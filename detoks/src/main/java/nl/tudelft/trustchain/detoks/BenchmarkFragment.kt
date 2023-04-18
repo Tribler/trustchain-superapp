@@ -143,6 +143,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             updateList()
         }
 
+        initializeSelectors()
+
         binding.startTransactionsButton.setOnClickListener {
             var totalExecutionTime = 0L
             lifecycleScope.launch{totalExecutionTime = groupedBenchmark()}
@@ -195,6 +197,31 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             updateList()
         }
         Debug.stopMethodTracing()
+    }
+
+    /**
+     * Initializes the transaction & grouping amount selectors and submit button.
+     */
+    private fun initializeSelectors() {
+        val transactionAmountSelector = binding.transactionAmountSelector
+        val groupingAmountSelector = binding.groupingAmountSelector
+
+        val submitButton = binding.submitSettings
+        submitButton.setOnClickListener {
+            val transactionAmount = transactionAmountSelector.text.toString().toInt()
+            val groupingAmount = groupingAmountSelector.text.toString().toInt()
+            // Both values should be positive and the grouping amount should be lower than the transaction amount
+            if (transactionAmount > 0 && groupingAmount > 0 && groupingAmount < transactionAmount) {
+                totalTransactions = transactionAmount
+                groupSize = groupingAmount
+            } else {
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle("Invalid settings")
+                builder.setMessage("Please make sure that the grouping amount is smaller than the transaction amount and that both amounts are larger than 0.")
+                val dialog= builder.create()
+                dialog.show()
+            }
+        }
     }
 
     /**
