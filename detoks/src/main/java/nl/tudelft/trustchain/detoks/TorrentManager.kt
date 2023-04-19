@@ -112,14 +112,15 @@ class TorrentManager constructor (
             val b = a[i].transaction
 
             i += 1
-            val c = torrentFiles.filter { !it.watched }
+            val c = torrentFiles.sortedBy { !it.watched }
             for (t in c) {
-                if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String) {
+                if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String && t.isDownloaded()) {
 //                    t.watched = true
                     return t.asMediaInfo()
                 }
             }
         }
+        //if(getNumberOfTorrents()==0) return TorrentMediaInfo("","","","","")
         val content = torrentFiles.gett(index % getNumberOfTorrents())
 //        val content = torrentFiles.gett(0)
 
