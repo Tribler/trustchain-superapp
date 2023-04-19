@@ -4,11 +4,20 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.navigation.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
+import kotlinx.android.synthetic.main.item_video.*
+import kotlinx.android.synthetic.main.item_video.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
+import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.R
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.VideosAdapter
@@ -16,7 +25,9 @@ import java.io.File
 import java.io.FileOutputStream
 
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
+    private lateinit var networkLabel: TextView
     private lateinit var torrentManager: TorrentManager
+    private lateinit var adapter: VideosAdapter
     private val logger = KotlinLogging.logger {}
     private var previousVideoAdapterIndex = 0
 
@@ -24,6 +35,42 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         get() = "${requireActivity().cacheDir.absolutePath}/torrent"
     private val mediaCacheDir: String
         get() = "${requireActivity().cacheDir.absolutePath}/media"
+
+    private fun updateNetworkLabel(size: Int) {
+        try {
+            networkLabel.text = "Network: " + size.toString()
+        } catch (_: NumberFormatException) {
+            Log.d("DeToks", "Could not update the network label.")
+        }
+    }
+
+    fun update() {
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+        updateNetworkLabel(community.getPeers().size)
+
+        if (this::adapter.isInitialized) {
+            val position = viewPagerVideos.currentItem
+
+            CoroutineScope(Dispatchers.Main).launch {
+                val content = adapter.mVideoItems[position].content(position, 10000)
+                try {
+                    if (viewPagerVideos != null) viewPagerVideos.like_count.text = community.getLikes(content.fileName, content.torrentName).size.toString()
+                } catch (_: NumberFormatException) {
+                    Log.d("DeToks", "Could not update the like counter.")
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        update()
+    }
+
+    fun refresh() {
+        adapter.refresh()
+        viewPagerVideos.setCurrentItem(0, false)
+    }
 
     private fun cacheDefaultTorrent() {
         try {
@@ -60,9 +107,19 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewPagerVideos.adapter = VideosAdapter(torrentManager)
-        viewPagerVideos.currentItem = 0
+        adapter = VideosAdapter(torrentManager)
+        viewPagerVideos.adapter = adapter
+        viewPagerVideos.setCurrentItem(lastIndex, false)
         onPageChangeCallback()
+
+        networkLabel = view.findViewById(R.id.networkLabel)
+        networkLabel.setOnClickListener {
+            it.findNavController().navigate(TabBarFragmentDirections.actionTabBarFragmentToNetworkFragment())
+        }
+        networkLabel.setOnLongClickListener {
+            it.findNavController().navigate(TabBarFragmentDirections.actionTabBarFragmentToDiscoveryFragment())
+            true
+        }
     }
 
     /**
@@ -74,6 +131,8 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
                 super.onPageScrollStateChanged(state)
 
                 if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                    lastIndex = viewPagerVideos.currentItem
+
                     when (viewPagerVideos.currentItem - previousVideoAdapterIndex) {
                         1 -> torrentManager.notifyIncrease()
                         -1 -> torrentManager.notifyDecrease()
@@ -83,14 +142,17 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
                         }
                     }
                     previousVideoAdapterIndex = viewPagerVideos.currentItem
+
+                    val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+                    updateNetworkLabel(community.getPeers().size)
                 }
             }
         })
     }
 
-    companion object SingleTM{
+    companion object SingleTM {
         const val DEFAULT_CACHING_AMOUNT = 2
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"
-//        public lateinit var torrentManager: TorrentManager
+        var lastIndex: Int = 0
     }
 }

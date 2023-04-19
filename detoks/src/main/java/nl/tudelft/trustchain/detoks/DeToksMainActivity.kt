@@ -26,16 +26,10 @@ class DeToksActivity : BaseActivity() {
         defaultCryptoProvider = AndroidCryptoProvider
         actionBar!!.hide()
 
-        Intent(this, GossiperService::class.java).also { intent ->
-            startService(intent)
-            bindService(intent, gossipConnection, Context.BIND_AUTO_CREATE)
-        }
-
-        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-        val peers = community.getPeers()
-        for (peer in peers) {
-            Log.d("DeToks", peer.mid)
-        }
+//        Intent(this, GossiperService::class.java).also { intent ->
+//            startService(intent)
+//            bindService(intent, gossipConnection, Context.BIND_AUTO_CREATE)
+//        }
     }
 
     private val gossipConnection = object : ServiceConnection {

@@ -4,26 +4,74 @@ Detoks is a decentralized version of TikTok implemented using [IPv8](https://git
 
 TODO: add screenshots of each of the screens
 
-## Liking videos
-All communication in Detoks is done through a single message type, a "like".
-Like message fields:
-- Liker
-- Video name
-- Torrent
-- Author
-- Timestamp
-
 Each like message is encoded as a trustchain block and shared with the network.
 When users receive a like, they retrieve the torrent link from the like message to achieve content discovery.
 Furthermore, the user can count the number of likes for each video and use that to recommend new videos based on what is currently trending.
 The user can also see how many likes they have received themselves.
 
 ## Recommender
+
 The recommender recommends videos based on which ones are the most liked at the moment, on ties, the most recent video is shown.
 
-TODO: add screenshots of the statistics page
+## Like Token
+
+The like token has the following format:
+
+| Field     |      Description   |
+|-----------|:----------|
+| liker     | The public key of the person who liked the video |
+| video     | The name of the video liked (since a torrent can have multiple files) |
+| torrent   | The name of the torrent (its hash info) |
+| author    | The public key of the creator of the video  |
+| torrentMagnet | A magnet link for the torrent video (since we can have different magnet links for the same torrent) |
+| timestamp   | a simple timestamp indicating the time of the like |
+
 
 ## Torrenting
-The torrenting is handled by the TorrentManager class (located in TorrentManager.kt). A single instance needs to exist for it for the entire duration of the app, as different fragments and classes interact with it. Hence why to get access to it, one needs to use TorrentManager.getInstance() method.
 
-Since the user uploads their own videos, clearing the cache is not recommended (as then the app can no longer seed).
+The torrenting is handled by the TorrentManager class (located in TorrentManager.kt). A single instance needs to exist for it for the entire duration of the app, as different fragments and classes interact with it. Hence why to get access to it, one needs to use TorrentManager.getInstance() method. Example of getting an instance of the current TorrentManager:
+
+```kotlin
+torrentManager = TorrentManager.getInstance(requireActivity().applicationContext)
+```
+
+
+Since the user uploads their own videos, clearing the cache is not recommended (as then the app can no longer seed). Thus, currently, all downloaded videos are kept in the cache.
+
+To create a new torrent, one simply needs to call:
+
+```kotlin
+// uri is the android media uri of the file to be added to the torrent. This can be received from a call to ActivityResultContracts.GetContent()
+torrentManager.createTorrentInfo(uri, context)
+```
+
+When a new torrent is created it will automatically be "downloaded", which will result in the device seeding the new video. A new like is broadcasted, since new video announcements are equivalent to sending out the first like. Thus the user will automatically like their own video. The torrent name is set to the name of the video included in it. The author/creator of it is the public key of the node.
+
+Currently, we rely on trackers for the distribution of torrent information (since nodes can be arbitrally on or off). Hence, a custom tracker is also provided. We recommend for redundancy to also use some other public tracker, as this can result in better download speed. As a second tracker we currently use http://opensharing.org:2710/announce
+
+To download a new torrent with a specified magnet link, simply call:
+```kotlin
+
+torrentManager.addMagnet(magnet)
+```
+
+It will automatically download the video (and start seeding). Torrent files are created in the torrent folder in cache and the contents of the torrents are saved to the media folder in the cache.
+
+## Tracker
+
+As part of the project we provide an http tracker, which will automatically seed all the torrents it receives. It is located in the directory tracker
+
+To start the tracker, first launch the python backend with:
+```
+python tor.py
+```
+
+It will run on localhost and listen on port 8082. It receives a torrent hash and upon receipt will start downlaoding it (thus also seeding it).
+
+Then start the actual tracker server with:
+```
+
+node index.js
+```
+
+This will start a new tracker server, listening on port 8080. To announce a new torrent, simply to a call to /announce endpoint.
