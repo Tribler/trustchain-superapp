@@ -84,15 +84,13 @@ class VideosAdapter(
             likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
 
             val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-
+            val author = community.getAuthorOfMagnet(content.torrentMagnet)
+            community.broadcastLike(content.fileName, content.torrentName, author, content.torrentMagnet)
             try {
                 likeCount.text = community.getLikes(content.fileName, content.torrentName).size.toString()
             } catch (_: NumberFormatException) {
                 Log.d("DeToks", "Could not update the like counter.")
             }
-
-            val author = community.getAuthorOfMagnet(content.torrentMagnet)
-            community.broadcastLike(content.fileName, content.torrentName, author, content.torrentMagnet)
         }
 
         init {

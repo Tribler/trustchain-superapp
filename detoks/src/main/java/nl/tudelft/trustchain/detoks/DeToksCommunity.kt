@@ -159,10 +159,10 @@ class DeToksCommunity(
         }
     }
 
-    fun broadcastLike(vid: String, torrent: String, creator: String, magnet: String) {
+    fun broadcastLike(vid: String, torrent: String, creator: String, magnet: String, flag: Boolean = false) {
         if (userLikedVideo(vid, torrent, myPeer.publicKey.toString())) return
         val timestamp = System.currentTimeMillis().toString()
-        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator, timestamp, magnet)
+        val like = Like(if (flag) creator else myPeer.publicKey.toString(), vid, torrent, creator, timestamp, magnet)
         createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
     }
 

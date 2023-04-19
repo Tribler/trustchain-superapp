@@ -257,7 +257,7 @@ class TorrentManager constructor (
                         val fileName = torrentInfo.files().fileName(it)
                         if (fileName.endsWith(".mp4")) {
                             if (community.duplicates(fileName, torrentInfo.name()) == 0) {
-                                community.broadcastLike(fileName, torrentInfo.name(), torrentInfo.creator(), torrentInfo.makeMagnetUri())
+                                community.broadcastLike(fileName, torrentInfo.name(), torrentInfo.creator(), torrentInfo.makeMagnetUri(), flag=true)
                             }
                         }
                     }
