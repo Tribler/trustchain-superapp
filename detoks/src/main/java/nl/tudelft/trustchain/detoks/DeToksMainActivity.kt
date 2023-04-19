@@ -26,10 +26,10 @@ class DeToksActivity : BaseActivity() {
         defaultCryptoProvider = AndroidCryptoProvider
         actionBar!!.hide()
 
-        Intent(this, GossiperService::class.java).also { intent ->
-            startService(intent)
-            bindService(intent, gossipConnection, Context.BIND_AUTO_CREATE)
-        }
+//        Intent(this, GossiperService::class.java).also { intent ->
+//            startService(intent)
+//            bindService(intent, gossipConnection, Context.BIND_AUTO_CREATE)
+//        }
     }
 
     private val gossipConnection = object : ServiceConnection {

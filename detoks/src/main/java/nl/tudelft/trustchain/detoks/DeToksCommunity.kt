@@ -30,8 +30,8 @@ class DeToksCommunity(
     private val visitedPeers  = mutableListOf<Peer>()
 
     init {
-        messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
-        messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
+//        messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
+//        messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
         registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
                 //if(userLikedVideo(block.transaction["video"] as String,block.transaction["torrent"] as String, block.transaction["liker"] as String)) return

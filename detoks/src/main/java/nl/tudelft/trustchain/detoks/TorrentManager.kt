@@ -194,9 +194,9 @@ class TorrentManager constructor (
      */
     @RequiresApi(Build.VERSION_CODES.O)
     fun addMagnet(magnet: String){
+        Log.wtf("Detoks", "in add magnet for $magnet")
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-//        Log.wtf("detoks", community.getAllUniqueVideos().toString())
-        val res = sessionManager.fetchMagnet(magnet, 10) ?: return
+        val res = sessionManager.fetchMagnet(magnet, 1000) ?: return
 
         val torrentInfo = TorrentInfo(res)
         if(torrentsList.get(torrentInfo.infoHash().toString()) != null) return
@@ -214,12 +214,11 @@ class TorrentManager constructor (
         handle.pause()
 
         val author = community.getAuthorOfMagnet(magnet)
-        Log.wtf("Detoks", "addMagnet: creator = ${torrentInfo.creator()}, author = $author")
-
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
                 torrentsList.put(torrentInfo.infoHash().toString(), fileName)
+                Log.wtf("Detoks", "addMagnet: author = $author, filename=$fileName")
                 torrentFiles.add(
                     TorrentHandler(
                         cacheDir,
