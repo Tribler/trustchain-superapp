@@ -11,6 +11,7 @@ import android.widget.TextView
  */
 class TokenAdapter(private val context: Activity, private val tokenArray: ArrayList<Token>) : ArrayAdapter<Token>(context, R.layout.list_item, tokenArray){
 
+    private var groupAmount = 10
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val inflater = context.layoutInflater
         val rowView = inflater.inflate(R.layout.list_item, null, true)
@@ -19,7 +20,7 @@ class TokenAdapter(private val context: Activity, private val tokenArray: ArrayL
         val record = rowView.findViewById(R.id.item_number) as TextView
         val token_id = rowView.findViewById(R.id.item_id) as TextView
 
-        record.text = "Group:" + (token.tokenIntId / 10) + " Token ID: " + token.tokenIntId
+        record.text = "Group:" + (token.tokenIntId / groupAmount) + " Token ID: " + token.tokenIntId
         token_id.text = "ID: " + token.unique_id
         return rowView
     }
@@ -30,5 +31,9 @@ class TokenAdapter(private val context: Activity, private val tokenArray: ArrayL
      */
     override fun getItem(position: Int): Token {
         return tokenArray[position]
+    }
+
+    fun setGroupSize(groupAmount : Int){
+        this.groupAmount = groupAmount
     }
 }
