@@ -26,6 +26,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private lateinit var trustchainCommunity: TrustChainCommunity
     private lateinit var adapter: TokenAdapter
     private val LOGTAG = "DeToksTransactionEngine"
+    private val BENCHMARKTAG = "BenchmarkTransactions"
     private val MILLISECOND = 1000000
     private val SECOND = 1000000000
     var startBenchmark = 0L
@@ -51,15 +52,9 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         transactionEngine.sendTokenSingle(
             transactionEngine.tokenStore.getSingleToken(),
-            transactionEngine.getSelectedPeer()
+            transactionEngine.getSelectedPeer(),
+            false
         )
-
-        val sendingTime = (System.nanoTime() - this.startBenchmark) / MILLISECOND
-        Log.d(
-            "DeToksTransactionEngine",
-            "Single token sent. Sending time: ${sendingTime} ms"
-        )
-
         return
     }
 
@@ -71,13 +66,14 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         this.startBenchmark = System.nanoTime()
         this.benchMarking = "SingleBatch"
         for (tok in transactionEngine.tokenStore.getAllTokens()){
-            transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer())
+            transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer(), resend=false)
         }
-        val sendingTime = (System.nanoTime() - this.startBenchmark) / MILLISECOND
-        Log.d(
-            "DeToksTransactionEngine",
-            "Batch of singles has been sent. Sending time: ${sendingTime} s"
-        )
+
+        while(transactionEngine.tokenStore.getAllTokens().isNotEmpty()){
+            for (tok in transactionEngine.tokenStore.getAllTokens()){
+                transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer(), resend=true)
+            }
+        }
         return
     }
 
@@ -97,14 +93,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
                 resend = false
             )
         }
-        val sendingTime = (System.nanoTime() - this.startBenchmark) / MILLISECOND
-        Log.d(
-            "DeToksTransactionEngine",
-            "Batch of groups has been sent. Execution time: ${sendingTime} ms"
-        )
-
+        Log.d(BENCHMARKTAG, "Finished sending first batch, now resending=true")
         while(transactionEngine.tokenStore.getAllTokens().isNotEmpty()){
-            delay(3000L)
             for (transactionGroup in transactionEngine.tokenStore.getAllTokens()
                 .chunked(groupSize)) {
                 transactionEngine.sendTokenGrouped(
@@ -210,18 +200,28 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
         }
         else {
 
-            val endTime = (System.nanoTime() - this.startBenchmark) / SECOND
+            val endTime = (System.nanoTime() - this.startBenchmark) / MILLISECOND
             if (benchMarking == "SingleBatch"){
-                binding.singleTextField.text = "${endTime} s"
+                binding.singleTextField.text = "${endTime} ms"
                 Log.d(
-                    LOGTAG,
-                    "TokenList is empty, totalTime: ${transactionEngine.totalTimeTracker / MILLISECOND} ms"                )
+                    BENCHMARKTAG,
+                    "SingleBatch processing time: ${transactionEngine.totalTimeTracker / MILLISECOND} ms"
+                )
+                Log.d(
+                    BENCHMARKTAG,
+                    "SingleBatch execution time: ${endTime} ms"
+                )
 
             } else if (benchMarking == "GroupedBatch"){
-                binding.transactionsPerSecondField.text = "${endTime} s"
+                binding.transactionsPerSecondField.text = "${endTime} ms"
                 Log.d(
-                    LOGTAG,
-                    "TokenList is empty, totalTime: ${transactionEngine.totalTimeTracker / MILLISECOND} ms"                )
+                    BENCHMARKTAG,
+                    "GroupedBatch processing time: ${transactionEngine.totalTimeTracker / MILLISECOND} ms"
+                )
+                Log.d(
+                    BENCHMARKTAG,
+                    "GroupedBatch execution time: ${endTime} ms"
+                )
 
             }
             benchMarking = ""
@@ -243,9 +243,6 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             uuidList.add(uuid)
             transactionEngine.tokenStore.addToken(uuid, i.toLong())
         }
-
-        Log.d(LOGTAG, (uuidList.groupingBy { it }.eachCount().count { it.value > 1 }).toString())
-
     }
 
     /**
@@ -262,13 +259,11 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
     override fun onResume() {
         super.onResume()
-        Log.d("UPDATE_VIEWS", "Handler set")
         handler.postDelayed(runnable, 1000)
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d("UPDATE_VIEWS", "Handler stopped")
         handler.removeCallbacks(runnable)
     }
 }
