@@ -4,16 +4,12 @@ Detoks is a decentralized version of TikTok implemented using [IPv8](https://git
 
 TODO: add screenshots of each of the screens
 
+## Like Token
+
 Each like message is encoded as a trustchain block and shared with the network.
 When users receive a like, they retrieve the torrent link from the like message to achieve content discovery.
 Furthermore, the user can count the number of likes for each video and use that to recommend new videos based on what is currently trending.
 The user can also see how many likes they have received themselves.
-
-## Recommender
-
-The recommender recommends videos based on which ones are the most liked at the moment, on ties, the most recent video is shown.
-
-## Like Token
 
 The like token has the following format:
 
@@ -26,6 +22,10 @@ The like token has the following format:
 | torrentMagnet | A magnet link for the torrent video (since we can have different magnet links for the same torrent) |
 | timestamp   | a simple timestamp indicating the time of the like |
 
+## Recommendation system
+
+The recommender decides which videos the user sees based on the current trends.
+The recommender prioritizes videos that the user has not watched yet, it then sorts all the videos that are available to the user by descending number of likes and on ties it selects the more recent one next.
 
 ## Torrenting
 
@@ -34,7 +34,6 @@ The torrenting is handled by the TorrentManager class (located in TorrentManager
 ```kotlin
 torrentManager = TorrentManager.getInstance(requireActivity().applicationContext)
 ```
-
 
 Since the user uploads their own videos, clearing the cache is not recommended (as then the app can no longer seed). Thus, currently, all downloaded videos are kept in the cache.
 
@@ -66,7 +65,7 @@ To start the tracker, first launch the python backend with:
 python tor.py
 ```
 
-It will run on localhost and listen on port 8082. It receives a torrent hash and upon receipt will start downlaoding it (thus also seeding it).
+It will run on localhost and listen on port 8082. It receives a torrent hash and upon receipt will start downloading it (thus also seeding it).
 
 Then start the actual tracker server with:
 ```
