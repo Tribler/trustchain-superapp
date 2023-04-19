@@ -74,7 +74,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
         val balanceText = view.findViewById<TextView>(R.id.balance)
         balanceText.text = wallet.balance.toString()
 
-        var tokenList = getCurrentCoins(wallet.getTokens()).map { token: Token -> TokenItem(token) }
+        var tokenList = getCoins(wallet.getTokens(), false).map { token: Token -> TokenItem(token) }
         updateTokenList(tokenList, recyclerView, view)
 
         createCoinButton.setOnClickListener {
@@ -108,7 +108,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
             expiredTokens.setTextColor(resources.getColor(R.color.black, context?.theme));
 
             // Update Recycler View with current tokens
-            val currentTokens = getCurrentCoins(wallet.getTokens())
+            val currentTokens = getCoins(wallet.getTokens(), false)
 
             tokenList = currentTokens.map { token: Token -> TokenItem(token) }
             updateTokenList(tokenList, recyclerView, view)
@@ -129,7 +129,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
             buttonTokenList.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.light_gray, context?.theme));
             buttonTokenList.setTextColor(resources.getColor(R.color.black, context?.theme));
 
-            val expiredTokensList = getExpiredCoins(wallet.getTokens())
+            val expiredTokensList = getCoins(wallet.getTokens(), true)
 
             tokenList = expiredTokensList.map { token: Token -> TokenItem(token) }
             updateTokenList(tokenList, recyclerView, view)
@@ -155,28 +155,47 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun getCurrentCoins(tokens: MutableList<Token>): MutableList<Token> {
-        val currentTokens = mutableListOf<Token>()
-        for (i in tokens) {
-            if (LocalDateTime.now().minute - i.timestamp.minute < 3) {
-                print("Current: " + LocalDateTime.now().minute.toString() + " , Token: " + i.timestamp.minute.toString())
-                currentTokens.add(i)
-            }
-        }
-        return currentTokens
+    private fun checkForExpiry(t : Token): Boolean{
+        return t.timestamp.dayOfMonth >= LocalDateTime.now().dayOfMonth &&
+                    t.timestamp.hour >= LocalDateTime.now().hour &&
+                        LocalDateTime.now().minute - t.timestamp.minute < 3
     }
 
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    private fun getCurrentCoins(tokens: MutableList<Token>): MutableList<Token> {
+//        val currentTokens = mutableListOf<Token>()
+//        for (i in tokens) {
+//            if (checkForExpiry(i)) {
+//                print("Current: " + LocalDateTime.now().minute.toString() + " , Token: " + i.timestamp.minute.toString())
+//                currentTokens.add(i)
+//            }
+//        }
+//        return currentTokens
+//    }
+
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun getExpiredCoins(tokens: MutableList<Token>): MutableList<Token> {
-        val expiredTokens = mutableListOf<Token>()
+    private fun getCoins(tokens: MutableList<Token>, isExpired : Boolean): MutableList<Token> {
+        val selectedTokens = mutableListOf<Token>()
         for (i in tokens) {
-            if (LocalDateTime.now().minute - i.timestamp.minute >= 3) {
+            if ((checkForExpiry(i) && isExpired) || (!isExpired && !checkForExpiry(i))) {
                 print("Current: " + LocalDateTime.now().minute.toString() + " , Token: " + i.timestamp.minute.toString())
-                expiredTokens.add(i)
+                selectedTokens.add(i)
             }
         }
-        return expiredTokens
+        return selectedTokens
     }
+
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    private fun getExpiredCoins(tokens: MutableList<Token>): MutableList<Token> {
+//        val expiredTokens = mutableListOf<Token>()
+//        for (i in tokens) {
+//            if (!checkForExpiry(i)) {
+//                print("Current: " + LocalDateTime.now().minute.toString() + " , Token: " + i.timestamp.minute.toString())
+//                expiredTokens.add(i)
+//            }
+//        }
+//        return expiredTokens
+//    }
     /**
      * Create a new token and add it to the wallet!
      */
