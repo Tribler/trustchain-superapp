@@ -38,15 +38,15 @@ Lastly, the buttons on the bottom allow you to not only generate the tokens on a
 
 When opening the application, you see a page with two buttons. These buttons both bring you to a different page. Manage tokens, where you can send and generate tokens, and benchmarks, where you can also see some statistics.
 
-<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/Screenshot_20230417_182253.png" width="400">
+<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/Screenshot_20230417_182253.png" width="180">
 
 On the manage tokens page, you will find a list of all your tokens at the top, followed by a list of currently available peers. To create a new token, you can click on the "gen token" button located at the bottom of the page. Once you have accumulated enough tokens, you can send them to a selected peer by clicking on either the "send", "send 2", or "send 5" buttons, which will respectively send 1, 2, or 5 tokens. The application operates on the FIFO principle, meaning that the tokens generated first will be sent first. Lastly, you can refresh the page by clicking on the refresh button.
 
-<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/Screenshot_20230418_135848.png" width="180">          <img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/token%20manager.gif" width="400">
+<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/Screenshot_20230418_135848.png" width="180">          <img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/token%20manager.gif" width="180">
 
 The benchmarks page displays various statistics related to the application. At the top, you can view the number of tokens that you currently possess. Following that, you can find the percentage of sent packets that have successfully reached the designated peer. The throughput, measured in tokens per second, is displayed below the percentage. At the end of the statistics, you see the latency. After the statistics, a list of the currently available peers is displayed. At the bottom of the screen, you can find buttons specifically meant for generating or sending a large number of tokens.
 
-<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/Screenshot_20230418_145945.png" width="180">          <img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/benchmark.gif" width="400">
+<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/Screenshot_20230418_145945.png" width="180">          <img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/benchmark.gif" width="180">
 
 ### Do you want to add your own app?
 
@@ -59,17 +59,17 @@ The statistics are all calculated for three different group sizes. These sizes a
 ### Latency
 Below, the average latency plotted over time is displayed. Here it is clear what the optimal group size is. The latency for groups of size 10 never rises above the latency of other group sizes. Groups of size 100 start with a latency that is better than the latency for groups of size 1 but rises above it for a while at the end. Finally, the latency for groups of size 1 starts high but spikes at the end.
 
-<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/latency.png" width="180">
+<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/latency.png" width="400">
 
 ### Received packages
 Below, you see the percentage of sent packets that have been received by a chosen peer over time. Depending on what you are looking for, there are two optimal sizes. The percentage of received packages for groups of size 1 gradually increases over time but only reaches 100% after significantly more time than the other sizes. For groups of size 100, the percentage of received packages does decrease for a while but reaches 100% the fastest out of all group sizes.
 
-<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/packetsreceived.png" width="180">
+<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/packetsreceived.png" width="400">
 
 ### Throughput
 Lastly, you see the throughput plotted over time. The optimal group size, in this case, is 100, as it results in a throughput that stays the highest out of all groups. Next is group size 10, and last is group size 1.
 
-<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/Throughput.png" width="180">
+<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/Throughput.png" width="400">
 
 ## Implementation
 
