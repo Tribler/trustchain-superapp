@@ -31,9 +31,8 @@ class ProposalToken {
         val videoIDTimestamp = DateFormatter.localTimeToGMTDate(Date().time)
         val ownPublicKeyString = myPeer.publicKey.toString()
         val transaction = mapOf(
-            "videoID" to "TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
             "magnetURI" to magnetURI,
-            "videoID" to "$ownPublicKeyString $videoIDTimestamp TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
+            "videoID" to "$ownPublicKeyString $videoIDTimestamp",
             "heartTokenGivenBy" to ANY_COUNTERPARTY_PK.toHex(),
             "heartTokenGivenTo" to myPeer.publicKey.keyToBin().toHex()
         )
