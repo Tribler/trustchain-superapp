@@ -21,11 +21,11 @@ class VideosAdapter(
     private val videoScaling: Boolean = false
 ) :
     RecyclerView.Adapter<VideosAdapter.VideoViewHolder?>() {
-    private val mVideoItems: List<VideoItem> =
+    val mVideoItems: List<VideoItem> =
         List(100) { VideoItem(torrentManager::provideContent) }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
-        return VideoViewHolder(
+        return VideoViewHolder(torrentManager,
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_video, parent, false),
             videoScaling,
@@ -33,7 +33,7 @@ class VideosAdapter(
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
-        Log.i("DeToks", "onBindViewHolder: $position")
+//        Log.i("DeToks", "onBindViewHolder: $position")
         holder.setVideoData(mVideoItems[position], position, onPlaybackError)
     }
 
@@ -62,17 +62,16 @@ class VideosAdapter(
         }
     }
 
-    class VideoViewHolder(itemView: View, private val videoScaling: Boolean = false) :
+    class VideoViewHolder(torrentManager: TorrentManager,itemView: View, private val videoScaling: Boolean = false) :
         RecyclerView.ViewHolder(itemView) {
         var mVideoView: VideoView
         var txtTitle: TextView
         var txtDesc: TextView
-        var peerCount: TextView
         var mProgressBar: ProgressBar
         var likeButton: ImageButton
         var likeCount: TextView
         var isLiked: Boolean = false
-
+        var tm = torrentManager
         private fun likeVideo(content: TorrentMediaInfo) {
             if (isLiked) return
 
@@ -86,14 +85,14 @@ class VideosAdapter(
             }
 
             val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-            community.broadcastLike(content.fileName, content.torrentName, content.creator, content.torrentMagnet)
+            val author = community.getAuthorOfMagnet(content.torrentMagnet)
+            community.broadcastLike(content.fileName, content.torrentName, author, content.torrentMagnet)
         }
 
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             txtDesc = itemView.findViewById(R.id.txtDesc)
-            peerCount = itemView.findViewById(R.id.peerCount)
             mProgressBar = itemView.findViewById(R.id.progressBar)
             likeButton = itemView.findViewById(R.id.like_button)
             likeCount = itemView.findViewById(R.id.like_count)
@@ -103,14 +102,17 @@ class VideosAdapter(
 
             // Disable the click sound effects.
             mVideoView.isSoundEffectsEnabled = false
-            likeButton.isSoundEffectsEnabled = false
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {
             CoroutineScope(Dispatchers.Main).launch {
                 val content = item.content(position, 10000)
                 val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-
+                for (t in tm.torrentFiles){
+                    if(content.fileName == t.fileName && content.torrentName == t.torrentName){
+                        t.watched = true
+                    }
+                }
                 likeCount.text = community.getLikes(content.fileName, content.torrentName).size.toString()
 
                 isLiked = community.userLikedVideo(
@@ -118,7 +120,6 @@ class VideosAdapter(
                     content.torrentName,
                     community.myPeer.publicKey.toString()
                 )
-
                 if (isLiked)
                     likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
                 else
@@ -127,7 +128,7 @@ class VideosAdapter(
                 // Show the like button.
                 likeButton.visibility = View.VISIBLE
 
-                likeButton.setOnClickListener{
+                likeButton.setOnClickListener {
                     likeVideo(content)
                 }
 
@@ -137,10 +138,12 @@ class VideosAdapter(
                     }
                 })
 
-                txtTitle.text = content.creator
-                txtDesc.text = content.torrentName
-                peerCount.text = "Peers: " + community.getPeers().size.toString()
-                Log.d("DeToks", content.fileURI)
+                mVideoView.setOnFocusChangeListener { view, isFocused ->
+                    if (isFocused) view.performClick()
+                }
+
+                txtTitle.text = content.fileName
+                txtDesc.text = content.creator
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
 
