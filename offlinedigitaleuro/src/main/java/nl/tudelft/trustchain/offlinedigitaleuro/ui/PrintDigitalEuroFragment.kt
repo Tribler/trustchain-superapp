@@ -25,47 +25,55 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
         binding.printNumberPicker1.value = 0
         binding.printNumberPicker2.value = 0
         binding.printNumberPicker5.value = 0
+        binding.printNumberPicker10.value = 0
 
         fun generateRandomString(length:Int):ByteArray{
-            val chararray: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-            return (1..length).map {chararray.random()}.joinToString("").toByteArray()
+            val charArray = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            return (1..length).map {charArray.random()}.joinToString("").toByteArray()
         }
 
-        fun createTokens(token1_count:Int, token2_count:Int, token5_count:Int): Array<Token> {
-            var tokenpackage:Array<Token> = arrayOf<Token>()
+        fun createTokens(token1_count:Int, token2_count:Int, token5_count:Int, token10_count:Int): Array<Token> {
+            var tokenPackage:Array<Token> = arrayOf()
 
-            var resp = RecipientPair(Wallet.CentralAuthority.publicKey.keyToBin(), Wallet.CentralAuthority.privateKey.sign("random signature".toByteArray()))
+            val resp = RecipientPair(Wallet.CentralAuthority.publicKey.keyToBin(), Wallet.CentralAuthority.privateKey.sign("random signature".toByteArray()))
 
             for(i in 1..token1_count){
-                tokenpackage+=Token(
-                    id=generateRandomString(8),
-                    value=1,
+                tokenPackage+=Token(
+                    id = generateRandomString(8),
+                    value = 1,
                     verifier = generateRandomString(74),
                     genesisHash = generateRandomString(64),
-                    recipients= mutableListOf<RecipientPair>(resp))
+                    recipients= mutableListOf(resp))
             }
             for(i in 1..token2_count) {
-
-                    tokenpackage += Token(
-                        id = generateRandomString(8),
-                        value = 2,
-                        verifier = generateRandomString(74),
-                        genesisHash = generateRandomString(64),
-                        recipients = mutableListOf<RecipientPair>(resp)
-                    )
+                tokenPackage += Token(
+                    id = generateRandomString(8),
+                    value = 2,
+                    verifier = generateRandomString(74),
+                    genesisHash = generateRandomString(64),
+                    recipients = mutableListOf(resp)
+                )
 
             }
             for(i in 1..token5_count){
-
-                    tokenpackage+=Token(
-                        id=generateRandomString(8),
-                        value=5,
-                        verifier = generateRandomString(74),
-                        genesisHash = generateRandomString(64),
-                        recipients= mutableListOf<RecipientPair>(resp))
-
+                tokenPackage+=Token(
+                    id=generateRandomString(8),
+                    value=5,
+                    verifier = generateRandomString(74),
+                    genesisHash = generateRandomString(64),
+                    recipients= mutableListOf(resp)
+                )
             }
-            return tokenpackage
+            for(i in 1..token10_count){
+                tokenPackage+=Token(
+                    id = generateRandomString(8),
+                    value = 10,
+                    verifier = generateRandomString(74),
+                    genesisHash = generateRandomString(64),
+                    recipients= mutableListOf(resp)
+                )
+            }
+            return tokenPackage
         }
         binding.btnCancel.setOnClickListener {
             findNavController().navigate(R.id.action_printMoneyFragment_to_transferFragment)
@@ -73,20 +81,20 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
 
         binding.btnPrint.setOnClickListener {
             //This create an array with tokens of values 1,2,5
-            val token_package: Array<Token> = createTokens(
+            val tokenPackage: Array<Token> = createTokens(
                 token1_count = binding.printNumberPicker1.value,
                 token2_count = binding.printNumberPicker2.value,
-                token5_count = binding.printNumberPicker5.value
+                token5_count = binding.printNumberPicker5.value,
+                token10_count = binding.printNumberPicker10.value
             )
 
             lifecycleScope.launch(Dispatchers.IO) {
-                for (token in token_package) {
+                for (token in tokenPackage) {
                     db.tokensDao().insertToken(DBToken(token.id.toHex(), token.value.toDouble(), Token.serialize(mutableSetOf(token))))
                     for (token_data in Token.deserialize(Token.serialize(mutableSetOf(token)))) {
                         Log.i("db_token", "Token_ID: ${token.id.toHex()} \t Token value: ${token.value} \t Token_serialize function: ${token_data.id.toHex()}")
                         break
                     }
-//                    Log.i("db_token", "Token_ID: ${token.id} \t Token value: ${token.value} \t Token_serialize function: ${Token.deserialize(Token.serialize(mutableSetOf(token)))}")
                 }
             }
 

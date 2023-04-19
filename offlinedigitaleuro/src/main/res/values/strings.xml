@@ -1,5 +1,5 @@
 <resources>
-    <string name="title_activity_main_offline_money">Offline Money</string>
+    <string name="title_activity_main_offline_money">Offline Digital Euro</string>
     <string name="transfer">Transfer</string>
     <string name="transaction_history">Transaction History</string>
     <string name="your_balance">Your balance</string>

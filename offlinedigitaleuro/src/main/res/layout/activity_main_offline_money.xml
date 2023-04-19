@@ -60,91 +60,122 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipToPadding="false"
             android:orientation="vertical"
             android:padding="16dp">
 
-            <LinearLayout
-                android:id="@+id/firstEuro"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" >
+            <TableRow
+                android:id="@+id/firstLine"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/txt5Euro"
+                <LinearLayout
+                    android:id="@+id/firstCell"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:textSize="30sp"
-                    android:text="5€:"
-                    android:layout_gravity="center"/>
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center">
 
-                <TextView
-                    android:id="@+id/edt5Euro"
+                    <TextView
+                        android:id="@+id/edt10Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="30sp"
+                        android:text="16"
+                        android:layout_gravity="center" />
+
+                    <ImageView
+                        android:id="@+id/txt10Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/euro_10"
+                        android:scaleType="center"
+                        android:layout_gravity="center"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/secondCell"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:textSize="30sp"
-                    android:text="16"
-                    android:layout_gravity="bottom" />
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center">
 
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/edt5Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="30sp"
+                        android:text="16"
+                        android:layout_gravity="center" />
 
-            <LinearLayout
-                android:id="@+id/secondEuro"
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/firstEuro">
+                    <ImageView
+                        android:id="@+id/txt5Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/euro_5"
+                        android:scaleType="center"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
 
-                <TextView
-                    android:id="@+id/txt2Euro"
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/secondLine"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:id="@+id/thirdCell"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:textSize="30sp"
-                    android:text="2€:"
-                    android:layout_gravity="center"/>
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center">
 
-                <TextView
-                    android:id="@+id/edt2Euro"
+                    <TextView
+                        android:id="@+id/edt2Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="30sp"
+                        android:text="22"
+                        android:layout_gravity="center" />
+
+                    <ImageView
+                        android:id="@+id/txt2Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/euro_2"
+                        android:scaleType="center"
+                        android:layout_gravity="center"/>
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/fourthCell"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:textSize="30sp"
-                    android:text="22"
-                    android:layout_gravity="bottom" />
-            </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center">
 
-            <LinearLayout
-                android:id="@+id/thirdEuro"
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/secondEuro">
+                    <TextView
+                        android:id="@+id/edt1Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="30sp"
+                        android:text="20"
+                        android:layout_gravity="center" />
 
-                <TextView
-                    android:id="@+id/txt1Euro"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:textSize="30sp"
-                    android:text="1€:"
-                    android:layout_gravity="center"/>
-
-                <TextView
-                    android:id="@+id/edt1Euro"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:textSize="30sp"
-                    android:text="20"
-                    android:layout_gravity="bottom" />
-            </LinearLayout>
+                    <ImageView
+                        android:id="@+id/txt1Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/euro_1"
+                        android:scaleType="center"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
+            </TableRow>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGet"
@@ -156,7 +187,7 @@
                 app:icon="@drawable/ic_baseline_photo_camera_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/thirdEuro" />
+                app:layout_constraintTop_toBottomOf="@id/thirdLine" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSend"
@@ -169,7 +200,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnGet" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </TableLayout>
     </ScrollView>
 
 </LinearLayout>

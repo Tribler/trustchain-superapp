@@ -24,7 +24,7 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
     private val binding by viewBinding(SendMoneyFragmentBinding::bind)
 
     // load just enough tokens to transfer
-    private fun loadTokensToSend(oneCount: Int, twoCount: Int, fiveCount: Int): MutableSet<Token> {
+    private fun loadTokensToSend(oneCount: Int, twoCount: Int, fiveCount: Int, tenCount: Int): MutableSet<Token> {
         val ret: MutableSet<Token> = mutableSetOf();
 
         ret.addAll(
@@ -36,16 +36,19 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
         ret.addAll(
             dbTokens2Tokens(db.tokensDao().getAllTokensOfValue(5.0), fiveCount)
         );
+        ret.addAll(
+            dbTokens2Tokens(db.tokensDao().getAllTokensOfValue(10.0), tenCount)
+        );
 
         return ret;
     }
 
     private fun dbTokens2Tokens(dbTokens: Array<nl.tudelft.trustchain.offlinedigitaleuro.db.Token>, count: Int): MutableList<Token> {
-        var ret: MutableList<Token> = mutableListOf()
+        val ret: MutableList<Token> = mutableListOf()
 
         for (i in 0 until count) {
-            var dbToken = dbTokens[i];
-            var setOfToken = Token.deserialize(dbToken.token_data);
+            val dbToken = dbTokens[i];
+            val setOfToken = Token.deserialize(dbToken.token_data);
             for (t in setOfToken) {
                 Log.i("TOKEN", "token_id ${t.id}")
                 ret.add(t);
@@ -67,7 +70,8 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
             tokensToSend.addAll(loadTokensToSend(
                 coinCounts.getInt(SendAmountFragment.ARG_1EURO_COUNT),
                 coinCounts.getInt(SendAmountFragment.ARG_2EURO_COUNT),
-                coinCounts.getInt(SendAmountFragment.ARG_5EURO_COUNT)
+                coinCounts.getInt(SendAmountFragment.ARG_5EURO_COUNT),
+                coinCounts.getInt(SendAmountFragment.ARG_10EURO_COUNT)
             ));
 
         }
@@ -85,7 +89,7 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
         }
 
         binding.btnContinue.setOnClickListener {
-//            remove tokens that were transferred from database
+            //remove tokens that were transferred from database
             runBlocking(Dispatchers.IO) {
                 for (token in tokensToSend) {
                     db.tokensDao().deleteToken(

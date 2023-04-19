@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.offlinedigitaleuro.src
 
-import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
@@ -10,7 +9,7 @@ class Wallet {
     val publicKey: PublicKey = privateKey.pub()
 
     object CentralAuthority {
-        internal val privateKey: PrivateKey = JavaCryptoProvider.keyFromPrivateBin(
+        internal val privateKey: PrivateKey = defaultCryptoProvider.keyFromPrivateBin(
             byteArrayOf(
                 76, 105, 98, 78, 97, 67, 76, 83, 75, 58, -29, -114, 126, -47, -39, -5, 22, 89,
                 94, 71, -1, 118, -30, 120, -8, -75, 2, 102, 99, -21, 57, -95, 124, 126, -30, 33,
