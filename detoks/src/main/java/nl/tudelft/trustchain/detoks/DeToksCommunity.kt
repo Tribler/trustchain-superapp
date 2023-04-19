@@ -54,8 +54,7 @@ class DeToksCommunity(private val context: Context,
 
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
 
-
-    fun sendTokens(amount: Int, recipientMid: String) {
+    fun sendTokens(amount: Float, recipientMid: String) {
         val senderWallet = walletManager.getOrCreateWallet(myPeer.mid)
 
         Log.d(LOGGING_TAG, "my wallet ${senderWallet.balance}")
@@ -81,7 +80,11 @@ class DeToksCommunity(private val context: Context,
         }
 
     }
-    fun requestTokens(amount: Int, recipientMid: String) {
+    fun increaseTokens(amount: Float) {
+        val x = walletManager.getOrCreateWallet(myPeer.mid)
+        walletManager.setWalletBalance(myPeer.mid, x.balance + amount)
+    }
+    fun requestTokens(amount: Float, recipientMid: String) {
         if (myPeer.mid == recipientMid) {
             Log.d(LOGGING_TAG, "Cannot request tokens from yourself.")
             return
@@ -182,7 +185,7 @@ class DeToksCommunity(private val context: Context,
             // Check if the received port matches the libtorrent port
             if (payload.port == libtorrentPort) {
                 // If the port matches, you can call the sendTokens function or perform any other action
-                sendTokens(1, payload.senderMid)
+                sendTokens(1.0f, payload.senderMid)
             } else {
                 Log.d(
                     LOGGING_TAG,
@@ -256,6 +259,9 @@ class DeToksCommunity(private val context: Context,
         }
 
 
+    }
+    fun findPeerByIps(ip: String): List<Peer?> {
+        return getPeers().filter { it.address.ip == ip  }
     }
     fun getBalance(): Float {
         return walletManager.getOrCreateWallet(myPeer.mid).balance
