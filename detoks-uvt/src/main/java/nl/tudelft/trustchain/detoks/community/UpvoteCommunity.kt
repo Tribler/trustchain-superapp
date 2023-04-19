@@ -184,12 +184,12 @@ class UpvoteCommunity(
         val validTokens: ArrayList<UpvoteToken> = upvoteService.getValidUpvoteTokens(payload.upvoteTokens)
 
         // Check if we should reward the seeder
-        if (validTokens[0].publicKeySeeder != myPeer.publicKey.toString()) {
+        //if (validTokens[0].publicKeySeeder != myPeer.publicKey.toString()) {
             val rewardTokens: ArrayList<UpvoteToken> = upvoteService.getRewardTokens(validTokens)
             sendSeedReward(rewardTokens, peer)
             Log.i("Detoks", "Sending seed reward")
-        }
-
+        // }
+        Log.i("Detoks", "Received ${validTokens.size} tokens!")
         upvoteService.persistTokens(validTokens)
 
         // Send recommendations back to the peer that upvoted the video
