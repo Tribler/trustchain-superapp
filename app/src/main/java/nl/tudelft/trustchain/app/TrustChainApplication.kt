@@ -451,7 +451,6 @@ class TrustChainApplication : Application() {
 
     private fun createOurCommunity(): OverlayConfiguration<DeToksTransactionEngine> {
 
-        // tims store
         val ourStore = TokenStore.getInstance(this)
 
         val settings = TrustChainSettings()
@@ -462,7 +461,6 @@ class TrustChainApplication : Application() {
             DeToksTransactionEngine.Factory(ourStore, this, settings, store),
             listOf(randomWalk)
         )
-
     }
 
     private fun createDeToksCommunity(): OverlayConfiguration<DeToksCommunity> {
