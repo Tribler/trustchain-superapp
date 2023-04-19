@@ -11,6 +11,8 @@
         android:label="DeToks">
         <action android:id="@+id/action_toStrategyFragment"
             app:destination="@id/strategyFragment"/>
+        <action android:id="@+id/action_toTorrentFragment"
+            app:destination="@id/torrentFragment"/>
     </fragment>
 
     <fragment

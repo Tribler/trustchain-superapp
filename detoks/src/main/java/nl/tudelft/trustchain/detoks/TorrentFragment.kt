@@ -37,12 +37,23 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
         val errorTV = view.findViewById<TextView>(R.id.errorTextView)
 
         val args = arguments
-        val passedName = args?.getString("torrent_name")
-
+        var passedName = args?.getString("video_name")
+        if (passedName == null) {
+            passedName = args?.getString("torrent_name")
+        }
         var torrent: TorrentHandle? = null
         for (torrentHandle in torrentManager.getListOfTorrents()) {
             if (torrentHandle.name().equals(passedName)) {
                 torrent = torrentHandle
+                break
+            }
+            val torrentInfo = torrentHandle.torrentFile()
+            val fileStorage = torrentInfo.files()
+            for (i in 0 until fileStorage.numFiles()-1) {
+                if (fileStorage.fileName(i).equals(passedName)) {
+                    torrent = torrentHandle
+                    break
+                }
             }
         }
 
@@ -91,6 +102,18 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
                 errorTV.visibility = View.VISIBLE
                 val errorText = "Torrent $passedName not found"
                 errorTV.text = errorText
+
+                infoHashTV.visibility = View.GONE
+                magnetLinkTV.visibility = View.GONE
+                downloadedBytesTV.visibility = View.GONE
+                filesTV.visibility = View.GONE
+                watchTimeTV.visibility = View.GONE
+                hopCountTV.visibility = View.GONE
+                watchedTV.visibility = View.GONE
+                durationTV.visibility = View.GONE
+                likesTV.visibility = View.GONE
+                timesSeenTV.visibility = View.GONE
+                uploadDateTV.visibility = View.GONE
             }
         }
 
