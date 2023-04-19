@@ -7,6 +7,7 @@ import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import java.security.SecureRandom
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class Token(
     internal val id: ByteArray,
@@ -127,6 +128,7 @@ class Token(
             secureRandom.nextBytes(idBytes)
             secureRandom.nextBytes(signatureBytes)
 
+
             val current = LocalDateTime.now()
 
             return Token(
@@ -194,7 +196,7 @@ class Token(
          * number of recipients.
          */
         @RequiresApi(Build.VERSION_CODES.O)
-        internal fun deserialize(data: ByteArray): MutableSet<Token> {
+        internal fun deserialize(data: ByteArray, timestamp: LocalDateTime): MutableSet<Token> {
             if (data.isEmpty()) {
                 logger.info { "Received an empty token set!" }
                 return mutableSetOf()
@@ -250,9 +252,7 @@ class Token(
                     recipients.add(RecipientPair(publicKey, proof))
                 }
 
-                val current = LocalDateTime.now()
-
-                tokens.add(Token(id, current, value, verifier, genesisHash, recipients))
+                tokens.add(Token(id, timestamp, value, verifier, genesisHash, recipients))
             }
 
             return tokens

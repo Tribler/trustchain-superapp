@@ -184,7 +184,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             val proba = ungzip(content)
 
             val dateJsonDeserializer = object : JsonDeserializer<LocalDateTime> {
-                val  formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("d::MMM::uuuu HH::mm::ss")
+                val  formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
                 override fun deserialize(json: JsonElement?, typeOfT: Type?,
                     context: JsonDeserializationContext?): LocalDateTime {
@@ -235,7 +235,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         // encode newToken
 
         val dateJsonSerializer = object : JsonSerializer<LocalDateTime> {
-            val  formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("d::MMM::uuuu HH::mm::ss")
+            val  formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
             override fun serialize(localDateTime: LocalDateTime?, typeOfSrc: Type?,
                 context: JsonSerializationContext?): JsonElement {
