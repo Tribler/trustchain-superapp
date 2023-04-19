@@ -44,3 +44,22 @@ torrentManager.addMagnet(magnet)
 ```
 
 It will automatically download the video (and start seeding). Torrent files are created in the torrent folder in cache and the contents of the torrents are saved to the media folder in the cache.
+
+## Tracker
+
+As part of the project we provide an http tracker, which will automatically seed all the torrents it receives. It is located in the directory tracker
+
+To start the tracker, first launch the python backend with:
+```
+python tor.py
+```
+
+It will run on localhost and listen on port 8082. It receives a torrent hash and upon receipt will start downlaoding it (thus also seeding it).
+
+Then start the actual tracker server with:
+```
+
+node index.js
+```
+
+This will start a new tracker server, listening on port 8080. To announce a new torrent, simply to a call to /announce endpoint.
