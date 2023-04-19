@@ -120,7 +120,8 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
         val handler = Handler((Looper.getMainLooper()))
         val runnable : Runnable = object : Runnable {
             override fun run() {
-                updateDebugPage()
+                if (isAdded)
+                    updateDebugPage()
                 handler.postDelayed(this, 2000)
             }
         }
