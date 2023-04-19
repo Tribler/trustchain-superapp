@@ -184,6 +184,9 @@ class UpvoteCommunity(
         val validTokens: ArrayList<UpvoteToken> = upvoteService.getValidUpvoteTokens(payload.upvoteTokens)
 
         // Check if we should reward the seeder
+        if (validTokens[0].publicKeySeeder == myPeer.publicKey.toString()) {
+            validTokens[0].publicKeySeeder = peer.publicKey.keyToBin().toHex()
+        }
         //if (validTokens[0].publicKeySeeder != myPeer.publicKey.toString()) {
             val rewardTokens: ArrayList<UpvoteToken> = upvoteService.getRewardTokens(validTokens)
             sendSeedReward(rewardTokens, peer)

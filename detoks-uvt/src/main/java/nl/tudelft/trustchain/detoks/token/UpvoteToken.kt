@@ -24,7 +24,7 @@ class UpvoteToken constructor(
     val date: String,
     val publicKeyMinter: String,
     var videoID: String,
-    val publicKeySeeder: String
+    var publicKeySeeder: String
 ) {
 
     constructor() : this(-1, "", "", "", "")
