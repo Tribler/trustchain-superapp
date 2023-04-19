@@ -81,14 +81,13 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
             // Create a new coin and add it to the wallet!
             creatNewCoin(wallet)
             balanceText.text = wallet.balance.toString()
-        }
 
-//        val buttonShow = view.findViewById<Button>(R.id.button_show)
-//        buttonShow.setOnClickListener {
-//            createCoinButton.visibility = View.INVISIBLE
-//            val textBalance = view.findViewById<TextView>(R.id.balance)
-//            textBalance.text = "Your balance is: " + wallet.balance
-//        }
+            // Update Coins after creating a new one
+            val currentTokens = getCoins(wallet.getTokens(), false)
+
+            tokenList = currentTokens.map { token: Token -> TokenItem(token) }
+            updateTokenList(tokenList, recyclerView, view)
+        }
 
         val buttonAdminPage = view.findViewById<Button>(R.id.button_admin_page)
         buttonAdminPage.setOnClickListener {
@@ -143,7 +142,6 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
         }
 
     }
-
     private fun updateTokenList(
         tokenList: List<TokenItem>,
         recyclerView: RecyclerView,
@@ -154,24 +152,11 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
         recyclerView.adapter = adapter
     }
 
+    // Returns true if coin is older than 3 minutes
     @RequiresApi(Build.VERSION_CODES.O)
     private fun checkForExpiry(t : Token): Boolean{
-        return t.timestamp.dayOfMonth >= LocalDateTime.now().dayOfMonth &&
-                    t.timestamp.hour >= LocalDateTime.now().hour &&
-                        LocalDateTime.now().minute - t.timestamp.minute < 3
+        return t.timestamp.isBefore(LocalDateTime.now().minusMinutes(3))
     }
-
-//    @RequiresApi(Build.VERSION_CODES.O)
-//    private fun getCurrentCoins(tokens: MutableList<Token>): MutableList<Token> {
-//        val currentTokens = mutableListOf<Token>()
-//        for (i in tokens) {
-//            if (checkForExpiry(i)) {
-//                print("Current: " + LocalDateTime.now().minute.toString() + " , Token: " + i.timestamp.minute.toString())
-//                currentTokens.add(i)
-//            }
-//        }
-//        return currentTokens
-//    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getCoins(tokens: MutableList<Token>, isExpired : Boolean): MutableList<Token> {
@@ -185,17 +170,6 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
         return selectedTokens
     }
 
-//    @RequiresApi(Build.VERSION_CODES.O)
-//    private fun getExpiredCoins(tokens: MutableList<Token>): MutableList<Token> {
-//        val expiredTokens = mutableListOf<Token>()
-//        for (i in tokens) {
-//            if (!checkForExpiry(i)) {
-//                print("Current: " + LocalDateTime.now().minute.toString() + " , Token: " + i.timestamp.minute.toString())
-//                expiredTokens.add(i)
-//            }
-//        }
-//        return expiredTokens
-//    }
     /**
      * Create a new token and add it to the wallet!
      */
