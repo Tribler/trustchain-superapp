@@ -43,6 +43,7 @@ class TorrentManager constructor (
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
 
+    private val videoList = mutableListOf<TorrentHandler>()
     val torrentFiles = mutableListOf<TorrentHandler>()
 
     // maps torrent to videos acquired from them. Can help with preventing duplicate torrents.
@@ -93,6 +94,24 @@ class TorrentManager constructor (
      * If the video is not downloaded after the timeout, it will return the video anyway.
      */
     suspend fun provideContent(index: Int = currentIndex, timeout: Long = 10000): TorrentMediaInfo {
+        if (videoList.isEmpty()) updateVideoList()
+        val content = videoList.gett(index % videoList.size)
+        return try {
+            withTimeout(timeout) {
+                Log.i("DeToks", "Waiting for content ... $index")
+                while (!content.isDownloaded()) {
+                    delay(100)
+                }
+            }
+            content.asMediaInfo()
+        } catch (e: TimeoutCancellationException) {
+            Log.i("DeToks", "Timeout for content ... $index")
+            content.asMediaInfo()
+        }
+    }
+
+    fun updateVideoList() {
+        videoList.clear()
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val comparator = compareByDescending<TrustChainBlock>
         {
@@ -106,43 +125,21 @@ class TorrentManager constructor (
                 it.transaction["torrent"] as String
             )
         }
-        val a = community.database.getBlocksWithType(LIKE_BLOCK).sortedWith(comparator)
-        var i = 0
-        // we only recommend videos that are not watched yet
-        while(i < a.size) {
-            val b = a[i].transaction
-            i += 1
-            val c = torrentFiles.filter { !it.watched }
-            for (t in c) {
+        val blocks = community.database.getBlocksWithType(LIKE_BLOCK).sortedWith(comparator).map { it.transaction }
+        val torrents = torrentFiles.filter { !it.watched }
+        for (b in blocks) {
+            for (t in torrents) {
                 if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String) {
-                    return try {
-                        withTimeout(timeout) {
-                            Log.i("DeToks", "Waiting for content ... $index")
-                            while (!t.isDownloaded()) {
-                                delay(100)
-                            }
-                        }
-                        t.asMediaInfo()
-                    } catch (e: TimeoutCancellationException) {
-                        Log.i("DeToks", "Timeout for content ... $index")
-                        t.asMediaInfo()
-                    }
+                    videoList.add(t)
                 }
             }
         }
-        // default implementation when all videos are watched
-        val content = torrentFiles.gett(index % getNumberOfTorrents())
-        return try {
-            withTimeout(timeout) {
-                Log.i("DeToks", "Waiting for content ... $index")
-                while (!content.isDownloaded()) {
-                    delay(100)
+        for (b in blocks) {
+            for (t in torrentFiles) {
+                if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String) {
+                    videoList.add(t)
                 }
             }
-            content.asMediaInfo()
-        } catch (e: TimeoutCancellationException) {
-            Log.i("DeToks", "Timeout for content ... $index")
-            content.asMediaInfo()
         }
     }
 
@@ -241,17 +238,30 @@ class TorrentManager constructor (
                 )
             }
         }
+        updateVideoList()
     }
     /**
      * This function builds the torrent index. It adds all the torrent files in the torrent
      * directory to Libtorrent and selects all .mp4 files for download.
      */
     private fun buildTorrentIndex() {
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val files = torrentDir.listFiles()
         if (files != null) {
             for (file in files) {
                 if (file.extension == "torrent") {
                     val torrentInfo = TorrentInfo(file)
+
+                    // generate trustchain blocks for each torrent
+                    for (it in 0 until torrentInfo.numFiles()) {
+                        val fileName = torrentInfo.files().fileName(it)
+                        if (fileName.endsWith(".mp4")) {
+                            if (community.duplicates(fileName, torrentInfo.name()) == 0) {
+                                community.broadcastLike(fileName, torrentInfo.name(), torrentInfo.creator(), torrentInfo.makeMagnetUri())
+                            }
+                        }
+                    }
+
                     sessionManager.download(torrentInfo, cacheDir )
                     val res = sessionManager.fetchMagnet(torrentInfo.makeMagnetUri(), 10)
                     if (res == null) {
@@ -261,24 +271,20 @@ class TorrentManager constructor (
                     val handle = sessionManager.find(torrentInfo.infoHash())
 
                     handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
-                    val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
                     val myPublicKey = community.myPeer.publicKey.toString()
 
                     if (torrentInfo.creator() == myPublicKey){
-//                        Log.wtf("Detoks", "Creator is me: ${torrentInfo.creator()}")
                         val priorities = Array(torrentInfo.numFiles()) { Priority.SEVEN }
                         handle.prioritizeFiles(priorities)
                         handle.pause()
                         handle.resume()
-                    }else{
-//                        Log.wtf("Detoks", "Creator: ${torrentInfo.creator()} is not me: $myPublicKey")
+                    } else {
                         val priorities = Array(torrentInfo.numFiles()) { Priority.NORMAL }
                         handle.prioritizeFiles(priorities)
                         handle.pause()
                     }
                     for (it in 0 until torrentInfo.numFiles()) {
                         val fileName = torrentInfo.files().fileName(it)
-//                        Log.d("DeToks", "file ${fileName} in $it")
                         val author = community.getAuthorOfMagnet(torrentInfo.makeMagnetUri())
                         Log.wtf("Detoks", "Author of $fileName is $author")
                         if (fileName.endsWith(".mp4")) {
@@ -370,6 +376,7 @@ class TorrentManager constructor (
                 )
             }
         }
+        updateVideoList()
         return Pair(torrentPath, torrentInfo)
     }
 
