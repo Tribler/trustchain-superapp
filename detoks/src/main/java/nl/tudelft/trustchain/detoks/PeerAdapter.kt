@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import android.app.Activity
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -10,7 +11,9 @@ import nl.tudelft.ipv8.Peer
 /**
  * Adapter class to create list items for the peer list
  */
-class PeerAdapter (private val context: Activity, private val peerArray: ArrayList<Peer>) : ArrayAdapter<Peer>(context, R.layout.list_item, peerArray){
+class PeerAdapter (private val context: Activity,
+                   private val peerArray: ArrayList<Peer>,
+                   private val defaultPeer : Peer) : ArrayAdapter<Peer>(context, R.layout.list_item, peerArray) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val inflater = context.layoutInflater
@@ -23,7 +26,7 @@ class PeerAdapter (private val context: Activity, private val peerArray: ArrayLi
         val address = rowView.findViewById(R.id.item_field1) as TextView
 
         item.text = "Peer: " + position.toString()
-        peerId.text = "PK: "+ peer.publicKey.toString()
+        peerId.text = "PK: " + peer.publicKey.toString()
         address.text = "Address: " + peer.address.toString()
         return rowView
     }
@@ -33,6 +36,14 @@ class PeerAdapter (private val context: Activity, private val peerArray: ArrayLi
      * @param position: position of item
      */
     override fun getItem(position: Int): Peer {
-        return peerArray[position]
+        return try {
+            peerArray[position]
+        } catch (e: java.lang.IndexOutOfBoundsException) {
+            Log.d(
+                "DeToksTransactionEngine",
+                "Index out of bound for peerArray"
+            )
+            defaultPeer
+        }
     }
 }
