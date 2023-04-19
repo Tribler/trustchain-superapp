@@ -67,6 +67,11 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         update()
     }
 
+    fun refresh() {
+        adapter.refresh()
+        viewPagerVideos.setCurrentItem(0, false)
+    }
+
     private fun cacheDefaultTorrent() {
         try {
             val dir1 = File(mediaCacheDir)

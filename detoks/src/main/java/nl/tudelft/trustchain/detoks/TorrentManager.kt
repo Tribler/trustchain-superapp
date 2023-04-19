@@ -114,8 +114,19 @@ class TorrentManager constructor (
             i += 1
             val c = torrentFiles.filter { !it.watched }
             for (t in c) {
-                if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String && t.isDownloaded()) {
-                    return t.asMediaInfo()
+                if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String) {
+                    return try {
+                        withTimeout(timeout) {
+                            Log.i("DeToks", "Waiting for content ... $index")
+                            while (!t.isDownloaded()) {
+                                delay(100)
+                            }
+                        }
+                        t.asMediaInfo()
+                    } catch (e: TimeoutCancellationException) {
+                        Log.i("DeToks", "Timeout for content ... $index")
+                        t.asMediaInfo()
+                    }
                 }
             }
         }

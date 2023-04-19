@@ -48,6 +48,8 @@ class TabBarFragment : Fragment() {
                 // Video selected -> seed it
                 torrentManager.createTorrentInfo(uri, requireContext())
                 Toast.makeText(requireContext(), "Successfully uploaded.", Toast.LENGTH_LONG).show()
+
+                detoksFragment.refresh()
             }
         }
         // On the fly request for permissions
@@ -90,7 +92,7 @@ class TabBarFragment : Fragment() {
                 tabLayout.getTabAt(UPLOAD_VIDEO_INDEX)?.icon?.setTint(Color.RED)
 
                 if (tab.position == HOME_INDEX) {
-                    detoksFragment.update()
+                    detoksFragment.refresh()
                 } else if (tab.position == PROFILE_INDEX) {
                     profileFragment.update()
                 }

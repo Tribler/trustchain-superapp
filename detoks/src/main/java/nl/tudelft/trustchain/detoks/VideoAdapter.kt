@@ -21,8 +21,13 @@ class VideosAdapter(
     private val videoScaling: Boolean = false
 ) :
     RecyclerView.Adapter<VideosAdapter.VideoViewHolder?>() {
-    val mVideoItems: List<VideoItem> =
+    var mVideoItems: List<VideoItem> =
         List(100) { VideoItem(torrentManager::provideContent) }
+
+    fun refresh() {
+        mVideoItems = List(100) { VideoItem(torrentManager::provideContent) }
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
         return VideoViewHolder(torrentManager,
@@ -78,13 +83,14 @@ class VideosAdapter(
             isLiked = true
             likeButton.setImageResource(R.drawable.baseline_favorite_24_red)
 
+            val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+
             try {
-                likeCount.text = ((likeCount.text as String).toInt() + 1).toString()
+                likeCount.text = community.getLikes(content.fileName, content.torrentName).size.toString()
             } catch (_: NumberFormatException) {
                 Log.d("DeToks", "Could not update the like counter.")
             }
 
-            val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
             val author = community.getAuthorOfMagnet(content.torrentMagnet)
             community.broadcastLike(content.fileName, content.torrentName, author, content.torrentMagnet)
         }
