@@ -95,6 +95,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
                 resend = false
             )
         }
+        delay(1000L)
         Log.d(BENCHMARKTAG, "Finished sending first batch, now resending=true")
         while(transactionEngine.tokenStore.getAllTokens().isNotEmpty()){
             for (transactionGroup in transactionEngine.tokenStore.getAllTokens()
@@ -110,7 +111,7 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Debug.startMethodTracing("benchMark2", 1024*128*128);
+        Debug.startMethodTracing("benchMarkFinal1", 1024*128*128);
 
         // Get communities and services
         ipv8 = getIpv8()
