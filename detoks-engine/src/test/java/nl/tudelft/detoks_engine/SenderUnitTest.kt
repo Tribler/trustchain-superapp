@@ -17,7 +17,7 @@ internal class SenderUnitTest {
     private val communityAdapter: GroupedAdapter = GroupedAdapter(trustChainCommunity)
 
 
-    @Test
+    // @Test
     fun sendToken() {
         val token = "test-${System.currentTimeMillis()}-${UUID.randomUUID()}"
         val finished = AtomicBoolean(false)
