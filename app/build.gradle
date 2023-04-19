@@ -93,6 +93,10 @@ android {
 
     ndkVersion '21.4.7075529'
     namespace 'nl.tudelft.trustchain.app'
+
+    lintOptions {
+        lintConfig = file("$rootDir/app/Android13Notifications.xml")
+    }
 }
 
 repositories {
