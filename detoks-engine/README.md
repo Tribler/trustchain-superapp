@@ -52,7 +52,7 @@ The benchmarks page displays various statistics related to the application. At t
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
 
-## Statistics
+## Performance
 
 The statistics are all calculated for three different group sizes. These sizes are 1, 10 and 100.
 
@@ -70,6 +70,10 @@ Below, you see the percentage of sent packets that have been received by a chose
 Lastly, you see the throughput plotted over time. The optimal group size, in this case, is 100, as it results in a throughput that stays the highest out of all groups. Next is group size 10, and last is group size 1.
 
 <img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/Throughput.png" width="400">
+
+### Flame chart
+This flame chart shows the performance during sending 5000 tokens at a rate of 1000 tokens per second.
+<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/flamechart.jpeg" width="1200">
 
 ## Implementation
 
