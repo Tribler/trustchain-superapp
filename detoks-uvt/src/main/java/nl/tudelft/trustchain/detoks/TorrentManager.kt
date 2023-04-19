@@ -125,8 +125,6 @@ class TorrentManager(
                 Log.i("Detoks", "-----------------------------------------------------------")
                 downloadedFrom.add(Pair(peer.client(), peer.ip()))
             }
-//            peer.ip()
-//            peer.client()
         }
         return downloadedFrom
     }
@@ -146,8 +144,6 @@ class TorrentManager(
                 Log.i("Detoks", "-----------------------------------------------------------")
                 downloadedFrom.add(Triple(peer.client(), peer.ip(), peer.totalDownload()))
             }
-//            peer.ip()
-//            peer.client()
         }
         return downloadedFrom
     }
@@ -172,11 +168,9 @@ class TorrentManager(
         }
 
         if (newIndex > currentIndex || loopedToFront) {
-            //TODO make sure to not delete files that are being seeded
             torrentFiles.gett(currentIndex - cachingAmount).deleteFile()
             torrentFiles.gett(newIndex + cachingAmount).downloadFile()
         } else {
-            //TODO make sure to not delete files that are being seeded
             torrentFiles.gett(currentIndex + cachingAmount).deleteFile()
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
 
@@ -250,7 +244,7 @@ class TorrentManager(
 
     /**
      * Start seeding the video that is currently on the screen
-     * To be called when the user double clicks, //TODO first check if the current video is created by someone else first
+     * To be called when the user double clicks,
      * or else the user will be seeding a video that wasn't posted by anyone
      * @return the magnet link of that is being seeded or null if failed to seed
      */

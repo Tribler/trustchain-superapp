@@ -73,8 +73,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             } else {
                 dir3.delete()
             }
-            // currently I only know how to add seedable torrents manually and one by one T_T
-            // TODO: figure out how to add all seedable torrents all in one swoop and not one by one
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.sintel)
 //            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.tears_of_steel)
             addFile(seedableTorrentsDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
@@ -163,7 +161,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         const val LAUNDROMAT = "cosmos_laundromat.torrent"
         const val BIGBUCKBUNNY = "big_buck_bunny.torrent"
         const val DEFAULT_POST_VIDEO = "sintel.torrent"
-        const val DEFAULT_POST_VIDEO2 = "tears_of_steel.torrent"
 //        const val DEFAULT_POST_VIDEO3 = "arcane.torrent"
 //        const val DEFAULT_POST_VIDEO = "chicken_20230326_archive.torrent"
 //        const val DEFAULT_POST_VIDEO2 = "file_20230326_archive.torrent"

@@ -79,8 +79,6 @@ class UpvoteToken constructor(
 
         val seedingMagnetUri = upvoteCommunity.torrentManager?.seedLikedVideo()
 
-        upvoteCommunity.torrentManager?.mvpSeeder()
-
         if (seedingMagnetUri != null)
             createToastMessage("Upvoted, now seeding this video: $seedingMagnetUri", context)
         else
