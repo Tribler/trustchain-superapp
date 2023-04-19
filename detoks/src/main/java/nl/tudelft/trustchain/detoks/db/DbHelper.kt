@@ -79,8 +79,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         }
 
         val db = this.writableDatabase
-//        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME_TOKEN WHERE $COLUMN_TOKEN_ID=? OR $COLUMN_VALUE=?",
-//            arrayOf(token_id, value.toString()))
+
         val newRowId = db.insert(table, null, new_row) // null?
         db.close()
         return newRowId
