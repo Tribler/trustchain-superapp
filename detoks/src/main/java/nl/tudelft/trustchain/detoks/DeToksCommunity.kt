@@ -30,7 +30,6 @@ class DeToksCommunity(
     companion object {
         const val LOGGING_TAG = "DeToksCommunity"
         const val MESSAGE_TORRENT_ID = 1
-        const val MESSAGE_TRANSACTION_ID = 2
         const val MESSAGE_WATCH_TIME_ID = 3
         const val MESSAGE_NETWORK_SIZE_ID = 4
         const val MESSAGE_BOOT_REQUEST = 5
@@ -51,13 +50,7 @@ class DeToksCommunity(
             recipientWallet.balance += amount
             walletManager.setWalletBalance(recipientMid, recipientWallet.balance)
 
-            for (peer in getPeers()) {
-                val packet = serializePacket(
-                    MESSAGE_TRANSACTION_ID,
-                    TransactionMessage(amount, myPeer.mid, recipientMid)
-                )
-                send(peer.address, packet)
-            }
+            broadcastTokenTransaction(amount, myPeer.mid, recipientMid)
         } else {
             Log.d(LOGGING_TAG, "Insufficient funds!")
         }
