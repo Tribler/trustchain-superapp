@@ -6,11 +6,49 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockPayload
+import nl.tudelft.ipv8.messaging.Address
 import nl.tudelft.ipv8.messaging.Packet
 import java.util.*
 
 
 open class TransactionEngine (override val serviceId: String): Community() {
+
+    companion object {
+        const val MESSAGE_TRANSACTION_ID = 2
+    }
+
+    /**
+     * Broadcasts a token transaction to all known peers.
+     * @param amount the amount of tokens to send
+     * @param senderMid the member ID of the peer that sends the amount of tokens
+     * @param recipientMid the member ID of the peer that will receive the amount of tokens
+     */
+    fun broadcastTokenTransaction(amount: Int,
+                                  senderMid: String,
+                                  recipientMid: String) {
+        for (peer in getPeers()) {
+            sendTokenTransaction(amount, senderMid, recipientMid, peer.address)
+        }
+    }
+
+    /**
+     * Sends a token transaction to a peer.
+     * @param amount the amount of tokens to be sent
+     * @param senderMid the member ID of the peer that sends the amount of tokens
+     * @param recipientMid the member ID of the peer that will receive the amount of tokens
+     * @param receiverAddress the address of the peer that receives the transaction. That
+     * peer may be different than the recipient of the amount of tokens in the transaction
+     */
+    fun sendTokenTransaction(amount: Int,
+                             senderMid: String,
+                             recipientMid: String,
+                             receiverAddress: Address) {
+        val packet = serializePacket(
+            MESSAGE_TRANSACTION_ID,
+            TransactionMessage(amount, senderMid, recipientMid)
+        )
+        send(receiverAddress, packet)
+    }
 
     fun sendTransaction(block: TrustChainBlock,
                         peer: Peer,
