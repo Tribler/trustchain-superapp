@@ -2,7 +2,12 @@
 
 Detoks is a decentralized version of TikTok implemented using [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md).
 
-TODO: add screenshots of each of the screens
+![image](https://user-images.githubusercontent.com/38362353/233190970-2f559f87-f3b4-44d3-a913-a2892f433bf7.png)
+![image](https://user-images.githubusercontent.com/38362353/233191027-0648698a-f1c2-4820-ada7-9de8bb77dfe7.png)
+![image](https://user-images.githubusercontent.com/38362353/233191066-e90a032c-1e9e-4ecc-b341-826196046b5f.png)
+![image](https://user-images.githubusercontent.com/38362353/233191093-05012641-3cf7-4447-b254-4646d780d7f9.png)
+![image](https://user-images.githubusercontent.com/38362353/233191136-e9d8730f-f38c-48e0-b2e3-eb732a487808.png)
+![image](https://user-images.githubusercontent.com/38362353/233190331-45f80e65-018b-4d9d-b2c3-7cb8e1a1324a.png)
 
 ## Like Token
 
