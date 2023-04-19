@@ -30,7 +30,6 @@ class DeToksCommunity(
     private val visitedPeers  = mutableListOf<Peer>()
 
     init {
-
         messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
         messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
         registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
@@ -49,9 +48,9 @@ class DeToksCommunity(
                 val torrent = block.transaction.get("torrent") as String
                 val magnet = block.transaction.get("torrentMagnet") as String
                 val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-                val new_likes = community.getLikes(video, torrent).size
+                val newLikes = community.getLikes(video, torrent).size
                 Log.d("Detoks", "Received like for $video, $torrent")
-                Log.d("Detoks", "new number of likes: $new_likes")
+                Log.d("Detoks", "new number of likes: $newLikes")
                 // 1 block is always in the DB since we just received it
                 if (duplicates(video, torrent) > 1) {
                     Log.wtf("Detoks", "Ignoring magnet for duplicate video: $video, $torrent")
@@ -68,7 +67,7 @@ class DeToksCommunity(
 
     }
 
-    override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
+    override val serviceId = "d86a7db45eb3563ae047639817baec4db2bc7c25"
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
     val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
 

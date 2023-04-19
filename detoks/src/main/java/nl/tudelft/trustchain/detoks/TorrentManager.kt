@@ -227,7 +227,7 @@ class TorrentManager constructor (
                         torrentInfo.name(),
                         fileName,
                         it,
-                        torrentInfo.creator(),
+                        author,
                         torrentInfo.makeMagnetUri(),
                         false
                     )
