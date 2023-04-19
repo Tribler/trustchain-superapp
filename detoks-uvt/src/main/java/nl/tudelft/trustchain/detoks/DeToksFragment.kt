@@ -32,33 +32,22 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     private fun cacheDefaultTorrent() {
         try {
-            val dir1 = File(mediaCacheDir)
-            if (!dir1.exists()) {
-                dir1.mkdirs()
+            val mediaCacheDirectory = File(mediaCacheDir)
+            if (!mediaCacheDirectory.exists()) {
+                mediaCacheDirectory.mkdirs()
             }
-            val dir2 = File(torrentDir)
-            if (!dir2.exists()) {
-                dir2.mkdirs()
+            val torrentDirectory = File(torrentDir)
+            if (!torrentDirectory.exists()) {
+                torrentDirectory.mkdirs()
             } else {
-                dir2.delete()
+                torrentDirectory.delete()
             }
-            val file = File("$torrentDir/$DEFAULT_TORRENT_FILE")
-            if (file.exists())  {
-                file.delete()
+            val defaultTorrentFile = File("$torrentDir/$DEFAULT_TORRENT_FILE")
+            if (defaultTorrentFile.exists())  {
+                defaultTorrentFile.delete()
             }
-            deleteFile(torrentDir, DEFAULT_POST_VIDEO)
-//            deleteFile(torrentDir, BIGBUCKBUNNY)
-            deleteFile(torrentDir, LAUNDROMAT)
             addFile(torrentDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
-//            addFile(torrentDir, LAUNDROMAT, R.raw.cosmos_laundromat)
             addFile(torrentDir, DEFAULT_POST_VIDEO, R.raw.sintel)
-//            if (!file.exists()) {
-//                val outputStream = FileOutputStream(file)
-//                val ins = requireActivity().resources.openRawResource(R.raw.detoks)
-//                outputStream.write(ins.readBytes())
-//                ins.close()
-//                outputStream.close()
-//            }
         } catch (e: Exception) {
             Log.e("DeToks", "Failed to cache default torrent: $e")
         }
@@ -66,20 +55,16 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     private fun makeSeedableTorrentDirAndPopulate(){
         try{
-            val dir3 = File(seedableTorrentsDir)
+            val seedableTorrentsDirectory = File(seedableTorrentsDir)
 
-            if (!dir3.exists()) {
-                dir3.mkdirs()
+            if (!seedableTorrentsDirectory.exists()) {
+                seedableTorrentsDirectory.mkdirs()
             } else {
-                dir3.delete()
+                seedableTorrentsDirectory.delete()
             }
-//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO, R.raw.sintel)
-//            addFile(seedableTorrentsDir, DEFAULT_POST_VIDEO2, R.raw.tears_of_steel)
             addFile(seedableTorrentsDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
-//            addFile(seedableTorrentsDir, LAUNDROMAT, R.raw.cosmos_laundromat)
             deleteFile(seedableTorrentsDir, DEFAULT_POST_VIDEO)
             deleteFile(seedableTorrentsDir, LAUNDROMAT)
-//            deleteFile(seedableTorrentsDir, BIGBUCKBUNNY)
         } catch (e: Exception) {
             Log.e("Detoks", "Failed to make a cache for seedable torrents")
         }
@@ -161,10 +146,5 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         const val LAUNDROMAT = "cosmos_laundromat.torrent"
         const val BIGBUCKBUNNY = "big_buck_bunny.torrent"
         const val DEFAULT_POST_VIDEO = "sintel.torrent"
-//        const val DEFAULT_POST_VIDEO3 = "arcane.torrent"
-//        const val DEFAULT_POST_VIDEO = "chicken_20230326_archive.torrent"
-//        const val DEFAULT_POST_VIDEO2 = "file_20230326_archive.torrent"
-//        const val DEFAULT_POST_VIDEO3 = "parrot_202303_archive.torrent"
-
     }
 }
