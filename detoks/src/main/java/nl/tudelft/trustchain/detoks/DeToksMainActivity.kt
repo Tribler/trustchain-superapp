@@ -23,47 +23,9 @@ class DeToksActivity : BaseActivity() {
     var gossipService: GossiperService? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val trustchain = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         super.onCreate(savedInstanceState)
         val actionBar = supportActionBar
         actionBar!!.hide()
-
-        trustchain.registerTransactionValidator(DeToksCommunity.BLOCK_TYPE,
-            object : TransactionValidator {
-                override fun validate(
-                    block: TrustChainBlock,
-                    database: TrustChainStore
-                ): ValidationResult {
-                    Log.d(DeToksCommunity.LOGGING_TAG, "validator request ${block.transaction}, proposal: ${block.isProposal}")
-                    return ValidationResult.Valid
-
-                }
-            }
-        )
-
-        trustchain.registerBlockSigner(
-            DeToksCommunity.BLOCK_TYPE,
-            object : BlockSigner {
-                override fun onSignatureRequest(block: TrustChainBlock) {
-                    Log.d(DeToksCommunity.LOGGING_TAG, "here?")
-                    Log.d(DeToksCommunity.LOGGING_TAG, "sig request ${block.transaction}")
-
-                    trustchain.sendBlock(
-                        trustchain.createAgreementBlock(
-                            block,
-                            block.transaction
-                        )
-                    )
-                }
-            }
-        )
-
-        trustchain.addListener(DeToksCommunity.BLOCK_TYPE, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d(DeToksCommunity.LOGGING_TAG, "onBlockReceived: ${block.blockId} ${block.transaction}")
-            }
-        })
-
 
         Intent(this, GossiperService::class.java).also { intent ->
             startService(intent)

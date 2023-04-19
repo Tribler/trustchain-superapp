@@ -18,11 +18,11 @@ import java.io.File
  * It is responsible for downloading the torrent files and caching the videos.
  * It also provides the videos to the video adapter.
  */
-class TorrentManager private constructor (
+class TorrentManager private constructor(
     private val cacheDir: File,
     private val torrentDir: File,
     private val cachingAmount: Int = 1,
-) {
+)  {
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
     private val torrentFiles = mutableListOf<TorrentHandler>()
@@ -236,13 +236,29 @@ class TorrentManager private constructor (
                         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
                         community.saveLibTorrentPort(port.toString())
                     }
+                    AlertType.PIECE_FINISHED -> {
+                        val a = alert as PieceFinishedAlert
+                        val torrentHandle = a.handle()
+                        val allPeers = torrentHandle.peerInfo().filter { peer ->
+                            peer.upSpeed() > 0 }
+                        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+
+                        for (peer in allPeers) {
+                            val ip = peer.ip().split(":")[0]
+                            val foundPeers = community.findPeerByIps(ip)
+                            for (seederPeer in foundPeers) {
+                                if (seederPeer != null) {
+                                    community.sendTokens(1.0f, seederPeer.mid)
+                                }
+                            }
+                        }
+                    }
                     else -> {}
                 }
             }
         })
 
         sessionManager.start()
-        Log.d(DeToksCommunity.LOGGING_TAG, sessionManager.listenEndpoints().toString())
     }
 
     private fun clearMediaCache() {
@@ -361,8 +377,6 @@ class TorrentManager private constructor (
         }
     }
     fun startMonitoringLeechers(handler: TorrentHandler) {
-       // val pastLeechers = mutableSetOf<String>()
-
         job = CoroutineScope(Dispatchers.Main).launch {
             while (isActive) {
                 val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
@@ -381,17 +395,42 @@ class TorrentManager private constructor (
                         Log.d(DeToksCommunity.LOGGING_TAG, "ip address: ${peer.address.ip} port: ${peer.address.port}" )
                     }
                     community.findPeerByAddress(ip, port)
-//                    if (peer != null && !pastLeechers.contains(peer.mid)) {
-//                        community.requestTokens(1, peer.mid)
-//                        pastLeechers.add(peer.mid)
-//                    }
-
                 }
 
-                delay(3000) // Check for connected leechers every second
+                delay(3000)
             }
         }
     }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun startMonitoringUploaders(handler: TorrentHandler) {
+        val previousUploadMap = mutableMapOf<String, Long>()
+
+        GlobalScope.launch(Dispatchers.IO) {
+            while (handler.handle.isValid) {
+                val peersInfo = handler.handle.peerInfo()
+                val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+
+                for (peerInfo in peersInfo) {
+                    val ip = peerInfo.ip().split(":")[0]
+                    val currentTotalUpload = peerInfo.totalUpload()
+                    val previousTotalUpload = previousUploadMap[ip] ?: 0
+
+                    if (currentTotalUpload > previousTotalUpload) {
+                        val uploadedBytes = currentTotalUpload - previousTotalUpload
+                        val tokens = uploadedBytes / 1048576
+                        previousUploadMap[ip] = currentTotalUpload
+                        community.increaseTokens(tokens.toFloat())
+                    }
+                }
+
+                delay(2000)
+            }
+        }
+    }
+
+
+
     private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 400000) : Boolean {
         if (!handler.handle.isValid) return false
         handler.downloadFile()
@@ -413,8 +452,7 @@ class TorrentManager private constructor (
         handler.handle.setFlags(handler.handle.flags().and_(TorrentFlags.SEED_MODE))
         handler.handle.pause()
         handler.handle.resume()
-
-        startMonitoringLeechers(handler)
+        startMonitoringUploaders(handler)
 
         return true
     }
@@ -424,7 +462,6 @@ class TorrentManager private constructor (
         seedingTorrents.forEach {
             stopSeedingTorrent(it)
         }
-        job.cancel()
     }
 
     private fun stopSeedingTorrent(handler: TorrentHandler) {
@@ -437,7 +474,6 @@ class TorrentManager private constructor (
                 return
         }
         handler.deleteFile()
-        job.cancel()
     }
 
 

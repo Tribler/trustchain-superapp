@@ -8,7 +8,7 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
 data class TransactionMessage(
-    val amount: Int,
+    val amount: Float,
     val senderMID: String,
     val recipientMID: String
 ) : Serializable {
@@ -16,7 +16,7 @@ data class TransactionMessage(
     override fun serialize(): ByteArray {
         val stream = ByteArrayOutputStream()
         val oos = ObjectOutputStream(stream)
-        oos.writeInt(amount)
+        oos.writeFloat(amount)
         oos.writeUTF(senderMID)
         oos.writeUTF(recipientMID)
         oos.flush()
@@ -27,7 +27,7 @@ data class TransactionMessage(
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<TransactionMessage, Int> {
             val stream = ByteArrayInputStream(buffer, offset, buffer.size - offset)
             val ois = ObjectInputStream(stream)
-            val amount = ois.readInt()
+            val amount = ois.readFloat()
             val senderMID = ois.readUTF()
             val recipientMID = ois.readUTF()
             val message = TransactionMessage(amount, senderMID, recipientMID)
@@ -38,7 +38,7 @@ data class TransactionMessage(
 }
 
 data class TokenRequestMessage(
-    val amount: Int,
+    val amount: Float,
     val senderMid: String,
     val recipientMid: String
 ) : Serializable {
@@ -63,7 +63,7 @@ data class TokenRequestMessage(
             val objectInputStream = ObjectInputStream(byteArrayInputStream)
             val data = objectInputStream.readObject() as HashMap<*, *>
             val tokenRequestMessage = TokenRequestMessage(
-                data["amount"] as Int,
+                data["amount"] as Float,
                 data["sender_mid"] as String,
                 data["recipient_mid"] as String
             )
