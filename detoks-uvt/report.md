@@ -20,7 +20,7 @@ DeToks is a decentralized TikTok skeleton application where several different gr
   * [Known Issues and Limitations](#known-issues-and-limitations)
   * [Future Work](#future-work)
 
-This document will contain the project structure, design choices we made for our upvote token economy,
+This document contains the project structure, design choices we made for our upvote token economy,
 the underlying protocol used for our upvoting token, and the known issues and limitations. Furthermore, we will also discuss the most important challenges we faced during the project and we will describe the solutions we found. Finally, we will also discuss the potential future work of the upvote token implementation.
 
 ## Project Structure
