@@ -139,7 +139,7 @@ The functions **receiveSingleTransactionAgreement(block: TrustChainBlock)** and 
 //TODO
 ### Benchmark Grouped Transaction
 in order to assess the performance of our app and to find the bottlenecks we generated flame graphs. Finding these bottlenecks are very helpful when trying to reduce execution time. The resulting flamegraph can be seen here:
-<img src="detoks/finaTrace.svg" width="200px"/>
+<img src="finaTrace.svg" width="200px"/>
 
 ## Limitations encountered
 The development of the transaction engine following our implementation choices and design choices resulted in limitations that we had to deal with, such as the already developed frameworks we relied on in order to realize a working engine.
