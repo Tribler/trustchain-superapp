@@ -9,23 +9,5 @@
         android:id="@+id/viewPagerVideos"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="487dp"/>
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="1300px"/>
-        <Button
-            android:text="Button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/button2" android:onClick="doStuff"
-        />
-        <TextView
-            android:text="No messages received yet"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/textView" android:textSize="24sp"
-            android:textAlignment="center"/>
-    </LinearLayout>
+        android:layout_height="match_parent"/>
 </FrameLayout>
