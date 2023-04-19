@@ -108,26 +108,22 @@ class TorrentManager constructor (
         }
         val a = community.database.getBlocksWithType(LIKE_BLOCK).sortedWith(comparator)
         var i = 0
+        // we only recommend videos that are not watched yet
         while(i < a.size) {
             val b = a[i].transaction
-
             i += 1
-            val c = torrentFiles.sortedBy { !it.watched }
+            val c = torrentFiles.filter { !it.watched }
             for (t in c) {
                 if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String && t.isDownloaded()) {
-//                    t.watched = true
                     return t.asMediaInfo()
                 }
             }
         }
-        //if(getNumberOfTorrents()==0) return TorrentMediaInfo("","","","","")
+        // default implementation when all videos are watched
         val content = torrentFiles.gett(index % getNumberOfTorrents())
-//        val content = torrentFiles.gett(0)
-
-
         return try {
             withTimeout(timeout) {
-//                Log.i("DeToks", "Waiting for content ... $index")
+                Log.i("DeToks", "Waiting for content ... $index")
                 while (!content.isDownloaded()) {
                     delay(100)
                 }
