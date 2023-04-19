@@ -119,7 +119,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         )
         Recommender.initialize()
 
-        upvoteToken = UpvoteToken(-100, "", "", "", "") //TODO: make constructor with no parameters for initialisation
+        upvoteToken = UpvoteToken()
         proposalToken = ProposalToken()
         balance = Balance()
     }

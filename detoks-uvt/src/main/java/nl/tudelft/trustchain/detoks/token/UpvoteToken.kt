@@ -26,6 +26,8 @@ class UpvoteToken constructor(
     val publicKeySeeder: String
 ) {
 
+    constructor() : this(-1, "", "", "", "")
+
     fun toByteArray(): ByteArray {
         return serializeVarLen(tokenID.toString().toByteArray()) +
             serializeVarLen(date.toByteArray()) +
