@@ -22,7 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.trustchain.detoks.fragments.DeToksFragment
 import java.io.File
 import java.nio.file.Files
@@ -43,7 +43,7 @@ class TorrentManager constructor (
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
 
-    private val videoList = mutableListOf<TorrentHandler>()
+    val videoList = mutableListOf<TorrentHandler>()
     val torrentFiles = mutableListOf<TorrentHandler>()
 
     // maps torrent to videos acquired from them. Can help with preventing duplicate torrents.
@@ -113,29 +113,29 @@ class TorrentManager constructor (
     fun updateVideoList() {
         videoList.clear()
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-        val comparator = compareByDescending<TrustChainBlock>
+        val comparator = compareByDescending<TrustChainTransaction>
         {
             community.getLikes(
-                it.transaction["video"] as String,
-                it.transaction["torrent"] as String
+                it["video"] as String,
+                it["torrent"] as String
             ).size
         }.thenByDescending {
             community.getEarliestDate(
-                it.transaction["video"] as String,
-                it.transaction["torrent"] as String
+                it["video"] as String,
+                it["torrent"] as String
             )
         }
-        val blocks = community.database.getBlocksWithType(LIKE_BLOCK).sortedWith(comparator).map { it.transaction }
-        val torrents = torrentFiles.filter { !it.watched }
+        val blocks = community.database.getBlocksWithType(LIKE_BLOCK).map { it.transaction }.distinctBy { it["video"] }.sortedWith(comparator)
+        val torrents = torrentFiles.partition { !it.watched }
         for (b in blocks) {
-            for (t in torrents) {
+            for (t in torrents.first) {
                 if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String) {
                     videoList.add(t)
                 }
             }
         }
         for (b in blocks) {
-            for (t in torrentFiles) {
+            for (t in torrents.second) {
                 if (t.fileName == b["video"] as String && t.torrentName == b["torrent"] as String) {
                     videoList.add(t)
                 }

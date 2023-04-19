@@ -25,6 +25,7 @@ class VideosAdapter(
         List(100) { VideoItem(torrentManager::provideContent) }
 
     fun refresh() {
+        torrentManager.updateVideoList()
         mVideoItems = List(100) { VideoItem(torrentManager::provideContent) }
         notifyDataSetChanged()
     }
