@@ -1,6 +1,8 @@
 package nl.tudelft.trustchain.detoks
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.*
 import com.frostwire.jlibtorrent.FileStorage
@@ -16,7 +18,6 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         torrentManager = TorrentManager.getInstance(requireActivity())
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -45,53 +46,62 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
             }
         }
 
-        if (torrent != null) {
-            val infoHash = torrent.infoHash().toString()
-            infoHashTV.text = getString(R.string.info_hash, infoHash)
+        fun updateDebugPage() {
+            if (torrent != null) {
+                val infoHash = torrent.infoHash().toString()
+                infoHashTV.text = getString(R.string.info_hash, infoHash)
 
-            val magnetLink = torrent.makeMagnetUri()
-            magnetLinkTV.text = getString(R.string.magnet_link, magnetLink)
+                val magnetLink = torrent.makeMagnetUri()
+                magnetLinkTV.text = getString(R.string.magnet_link, magnetLink)
 
-            val downloadedBytes = torrent.status().totalDone()
-            downloadedBytesTV.text = getString(R.string.downloaded_bytes, downloadedBytes)
+                val downloadedBytes = torrent.status().totalDone()
+                downloadedBytesTV.text = getString(R.string.downloaded_bytes, downloadedBytes)
 
-            val torrentInfo = torrent.torrentFile()
-            val fileStorage = torrentInfo.files()
-            var fileStrings = ""
-            for (i in 0 until fileStorage.numFiles()-1) {
-                fileStrings += "\n" + fileStorage.fileName(i)
+                val torrentInfo = torrent.torrentFile()
+                val fileStorage = torrentInfo.files()
+                var fileStrings = ""
+                for (i in 0 until fileStorage.numFiles()-1) {
+                    fileStrings += "\n" + fileStorage.fileName(i)
+                }
+                filesTV.text = getString(R.string.files, fileStrings)
+
+                val watchTime = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.watchTime
+                watchTimeTV.text = getString(R.string.watch_time, watchTime)
+
+                val hopCount = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.hopCount
+                hopCountTV.text = getString(R.string.hop_count, hopCount)
+
+                val watched = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.watched
+                watchedTV.text = getString(R.string.watched, watched)
+
+                val duration = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.duration
+                durationTV.text = getString(R.string.duration, duration)
+
+                val likes = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.likes
+                likesTV.text = getString(R.string.likes, likes)
+
+                val timesSeen = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.timesSeen
+                timesSeenTV.text = getString(R.string.times_seen, timesSeen)
+
+                val uploadDate = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.uploadDate
+                uploadDateTV.text = getString(R.string.upload_date, uploadDate)
+
             }
-            filesTV.text = getString(R.string.files, fileStrings)
-
-            val watchTime = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.watchTime
-            watchTimeTV.text = getString(R.string.watch_time, watchTime)
-
-            val hopCount = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.hopCount
-            hopCountTV.text = getString(R.string.hop_count, hopCount)
-
-            val watched = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.watched
-            watchedTV.text = getString(R.string.watched, watched)
-
-            val duration = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.duration
-            durationTV.text = getString(R.string.duration, duration)
-
-            val likes = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.likes
-            likesTV.text = getString(R.string.likes, likes)
-
-            val timesSeen = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.timesSeen
-            timesSeenTV.text = getString(R.string.times_seen, timesSeen)
-
-            val uploadDate = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.uploadDate
-            uploadDateTV.text = getString(R.string.upload_date, uploadDate)
-
-        }
-        else {
-            errorTV.visibility = View.VISIBLE
-            val errorText = "Torrent $passedName not found"
-            errorTV.text = errorText
+            else {
+                errorTV.visibility = View.VISIBLE
+                val errorText = "Torrent $passedName not found"
+                errorTV.text = errorText
+            }
         }
 
-
+        val handler = Handler((Looper.getMainLooper()))
+        val runnable : Runnable = object : Runnable {
+            override fun run() {
+                updateDebugPage()
+                handler.postDelayed(this, 2000)
+            }
+        }
+        handler.postDelayed(runnable,2000)
 
 
     }
