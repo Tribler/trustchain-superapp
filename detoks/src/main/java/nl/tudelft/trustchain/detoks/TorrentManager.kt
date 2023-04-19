@@ -3,6 +3,8 @@ package nl.tudelft.trustchain.detoks
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.frostwire.jlibtorrent.*
@@ -11,6 +13,8 @@ import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
 import java.io.File
+import java.lang.Math.abs
+import kotlin.reflect.jvm.internal.impl.types.TypeCheckerState.SupertypesPolicy.None
 
 
 /**
@@ -27,7 +31,6 @@ class TorrentManager private constructor(
     private val logger = KotlinLogging.logger {}
     private val torrentFiles = mutableListOf<TorrentHandler>()
 
-    private var unwatchedVideos = mutableListOf<TorrentHandler>()
     var seedingTorrents = mutableListOf<TorrentHandler>()
         private set
 
@@ -36,6 +39,7 @@ class TorrentManager private constructor(
 
     private var lastTimeStamp: Long
     private var currentIndex = 0
+    private var unwatchedIndex = 0
 
     private lateinit var job: Job
     init {
@@ -44,7 +48,6 @@ class TorrentManager private constructor(
         buildTorrentIndex()
         initializeVideoPool()
         lastTimeStamp = System.currentTimeMillis()
-        unwatchedVideos = torrentFiles
     }
 
     companion object {
@@ -79,8 +82,9 @@ class TorrentManager private constructor(
      * If the video is not downloaded after the timeout, it will return the video anyway.
      */
     suspend fun provideContent(index: Int = currentIndex, timeout: Long = 10000): TorrentMediaInfo {
-        Log.i("DeToks", "Providing content ... $index, ${index % getNumberOfTorrents()}")
-        val content = torrentFiles.gett(index % getNumberOfTorrents())
+        val indexNumber = index % Math.max(getNumberOfTorrents(), 1)
+        Log.i("DeToks", "Providing content ... $index, ${indexNumber}")
+        val content = torrentFiles.gett(indexNumber)
 
         return try {
             withTimeout(timeout) {
@@ -122,6 +126,10 @@ class TorrentManager private constructor(
         if (newIndex == currentIndex) {
             return
         }
+
+        if (loopedToFront && newIndex == 0) unwatchedIndex = torrentFiles.size
+        else if (unwatchedIndex < newIndex) unwatchedIndex = newIndex
+
         if (cachingAmount * 2 + 1 >= getNumberOfTorrents()) {
             // TODO: This could potentially lead to issues, since what happens if the user locks
             //        their screen or switches to another app for a while? Maybe this could be
@@ -140,7 +148,6 @@ class TorrentManager private constructor(
         } else {
             torrentFiles.gett(currentIndex + cachingAmount).deleteFile()
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
-
         }
         val key = MagnetLink.hashFromMagnet(torrentFiles.gett(currentIndex).handle.makeMagnetUri())
         profile.updateEntryDuration(key, torrentFiles.gett(currentIndex).getVideoDuration())
@@ -287,6 +294,7 @@ class TorrentManager private constructor(
         handle.prioritizeFiles(arrayOf(Priority.IGNORE))
         handle.pause()
 
+        var insertIndex = -1
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
@@ -297,7 +305,20 @@ class TorrentManager private constructor(
                     fileName,
                     it
                 )
-                torrentFiles.add(torrent)
+
+                if (insertIndex == -1) {
+                    insertIndex = if (unwatchedIndex == torrentFiles.size) torrentFiles.size
+                    else {
+                        strategies.findLeechingIndex(
+                            torrentFiles,
+                            profile.profiles,
+                            torrent,
+                            unwatchedIndex
+                        )
+                    }
+                }
+
+                torrentFiles.add(insertIndex, torrent)
                 getInfoFromMagnet(magnet)?.let { it2 ->
                     profile.updateEntryUploadDate(
                         magnet,
@@ -310,11 +331,41 @@ class TorrentManager private constructor(
 
     fun updateLeechingStrategy(strategyId: Int) {
         if (strategies.leechingStrategy == strategyId) return
-
         strategies.leechingStrategy = strategyId
 
-        currentIndex = 0
-        unwatchedVideos = strategies.applyStrategy(strategyId, unwatchedVideos, profile.profiles)
+        val sortedTorrents: MutableList<TorrentHandler>
+
+        if (unwatchedIndex == torrentFiles.size) {
+            currentIndex = 0
+            sortedTorrents = strategies.applyStrategy(
+                strategyId,
+                torrentFiles,
+                profile.profiles
+            )
+        } else {
+            sortedTorrents = strategies.applyStrategy(
+                strategyId,
+                torrentFiles.subList(unwatchedIndex, torrentFiles.size),
+                profile.profiles
+            )
+        }
+
+        // Preserve cached if again in cache
+        val cacheEnd = currentIndex + cachingAmount
+        val newCache = sortedTorrents.subList(0, Math.min(cachingAmount, sortedTorrents.size -1))
+
+        for (i in currentIndex .. cacheEnd) {
+            if (!newCache.contains(torrentFiles.gett(i)))
+                torrentFiles.gett(i).deleteFile()
+            torrentFiles.set(i.mod(torrentFiles.size), sortedTorrents.gett(i - currentIndex))
+        }
+
+        for (i in cacheEnd + 1 until torrentFiles.size) {
+            torrentFiles.gett(i).deleteFile()
+            torrentFiles.set(i.mod(torrentFiles.size), sortedTorrents.gett(i - currentIndex))
+        }
+
+        initializeVideoPool()
     }
 
     fun updateSeedingStrategy(
@@ -449,7 +500,7 @@ class TorrentManager private constructor(
             return false
         }
 
-        handler.handle.setFlags(handler.handle.flags().and_(TorrentFlags.SEED_MODE))
+        handler.handle.setFlags(handler.handle.flags().and_(TorrentFlags.SHARE_MODE))
         handler.handle.pause()
         handler.handle.resume()
         startMonitoringUploaders(handler)
@@ -466,7 +517,7 @@ class TorrentManager private constructor(
 
     private fun stopSeedingTorrent(handler: TorrentHandler) {
         seedingTorrents.remove(handler)
-        handler.handle.unsetFlags(TorrentFlags.SEED_MODE)
+        handler.handle.unsetFlags(TorrentFlags.SHARE_MODE)
         handler.handle.pause()
         handler.handle.resume()
         for (i in 0 until cachingAmount) {
@@ -531,6 +582,7 @@ class TorrentManager private constructor(
                 file.delete()
             }
             isDownloading = false
+            handle.status()
         }
 
         fun downloadWithMaxPriority() {

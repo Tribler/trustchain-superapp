@@ -2,21 +2,19 @@ package nl.tudelft.trustchain.detoks
 
 import com.frostwire.jlibtorrent.TorrentInfo
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
-import java.lang.Long.min
+import kotlin.math.min
+import kotlin.math.max
 
 
 class ProfileEntry(
-    val firstSeen:  Long = System.currentTimeMillis(),
     var watched:    Boolean = false,    // True if the video was watched
     var watchTime:  Long = 0,           // Average watch time
     var duration:   Long = 0,           // Video duration
     var uploadDate: Long = 0,           // This is the torrent creation date
     var hopCount:   Int  = 0,           // Amount of other nodes visited
-    var timesSeen:  Int  = 1,           // Count of times we received it
+    var timesSeen:  Int  = 0,           // Count of times we received it
     var likes:      Int  = 0,           // TODO: Dependent on other team
-) {
-
-}
+)
 
 class Profile(
     val profiles: HashMap<String, ProfileEntry> = HashMap()
@@ -24,7 +22,7 @@ class Profile(
     object ProfileConfig { const val MAX_DURATION_FACTOR  = 10 }
 
     fun addProfile(key: String) {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
+        if(!profiles.contains(key)) profiles[key] = ProfileEntry(timesSeen = 1)
     }
 
     fun hasWatched(key: String): Boolean {
@@ -39,6 +37,16 @@ class Profile(
     fun updateEntryHopCount(key: String, hopCount: Int) {
         addProfile(key)
         profiles[key]!!.hopCount = hopCount
+    }
+
+    fun updateEntryLikes(key: String, likes: Int, myUpdate: Boolean) {
+        addProfile(key)
+        if(myUpdate) {
+            profiles[key]!!.likes += (1 / NetworkSizeGossiper.networkSizeEstimate)
+        } else {
+            profiles[key]!!.likes += likes
+            profiles[key]!!.likes /= 2
+        }
     }
 
     fun updateEntryWatchTime(key: String, time: Long, myUpdate: Boolean) {
@@ -58,8 +66,12 @@ class Profile(
         profiles[key]!!.uploadDate = info.creationDate()
     }
 
+    fun incrementLikes(key: String) {
+        updateEntryLikes(key, likes = 1, myUpdate = true)
+    }
+
     fun incrementTimesSeen(key: String) {
-        if(!profiles.contains(key)) profiles[key] = ProfileEntry(timesSeen = 0)
+        if(!profiles.contains(key)) profiles[key] = ProfileEntry()
         profiles[key]!!.timesSeen += 1
     }
 }
