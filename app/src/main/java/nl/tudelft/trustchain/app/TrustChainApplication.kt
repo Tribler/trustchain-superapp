@@ -113,7 +113,18 @@ class TrustChainApplication : Application() {
                 createIdentityCommunity(),
                 createDeToksCommunity(),
                 createTransactionCommunity(),
-                createTrustChainTransactionCommunity()
+                createTrustChainTransactionCommunity(),
+                createDemoCommunity(),
+                createWalletCommunity(),
+                createAtomicSwapCommunity(),
+                createMarketCommunity(),
+                createCoinCommunity(),
+                createDaoCommunity(),
+                createVotingCommunity(),
+                createMusicCommunity(),
+                createLiteratureCommunity(),
+                createRecommenderCommunity(),
+                createFOCCommunity(),
             ),
             walkerInterval = 5.0
         )
