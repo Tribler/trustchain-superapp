@@ -87,6 +87,8 @@ The core of the application is the CommunityAdapter.kt file. Here all communicat
 
 ```getTokens()```: This function returns a list of all your available tokens.
 
+```getTokenCount()```: Returns the amount of tokens available
+
 ## Build
 
 If you want to build an APK, run the following command:
