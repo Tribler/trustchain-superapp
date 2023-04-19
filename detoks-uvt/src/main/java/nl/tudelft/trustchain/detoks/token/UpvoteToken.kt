@@ -62,60 +62,61 @@ class UpvoteToken constructor(
             return
         }
 
-//        val currentVideoHash = upvoteCommunity.torrentManager?.getHashOfCurrentVideo()!!.hexToBytes()
-//        val proposalBlock = upvoteCommunity.database.getBlockWithHash(currentVideoHash)
-//
-//        if (proposalBlock == null) {
-//            createToastMessage("Attempted to find a proposal Block with hash: \n ${currentVideoHash.toHex()}, \nThis video does not have a proposal block attached to it \n and is thus not posted by anyone", context)
-//            return
-//        }
-//
+        val currentVideoHash = upvoteCommunity.torrentManager?.getHashOfCurrentVideo()!!.hexToBytes()
+        val proposalBlock = upvoteCommunity.database.getBlockWithHash(currentVideoHash)
+
+        if (proposalBlock == null) {
+            createToastMessage("Attempted to find a proposal Block with hash: \n ${currentVideoHash.toHex()}, \nThis video does not have a proposal block attached to it \n and is thus not posted by anyone", context)
+            return
+        }
+
             val myPubKey = upvoteCommunity.myPeer.publicKey.keyToBin().toHex()
-//        if (isAlreadySigned(upvoteCommunity, proposalBlock, myPubKey)) {
-//            Log.i("DeToks", "You already liked this video, cannot like again")
-//            createToastMessage("Cannot like a video more than once!", context)
-//            return
-//        }
-//
-//        val seedingMagnetUri = upvoteCommunity.torrentManager?.seedLikedVideo()
-//
-//        if (seedingMagnetUri != null)
-//            createToastMessage("Upvoted, now seeding this video: $seedingMagnetUri", context)
-//        else
-//            createToastMessage("Upvoted, but failed to seed this video", context)
-//
-//        var publicKeySeeder = getPublicKeyOfSeeder(upvoteCommunity)
-//
-//        if (publicKeySeeder == null) {
-//            // Could not find the seeder, all rewards go to the peer who posted the video
-//            Log.i("Detoks", "Could not find the seeder of this video you liked, all minted tokens will go the peer who posted this video you upvoted")
-//            publicKeySeeder = proposalBlock.publicKey.toHex()
-//        }
+            if (isAlreadySigned(upvoteCommunity, proposalBlock, myPubKey)) {
+                Log.i("DeToks", "You already liked this video, cannot like again")
+                createToastMessage("Cannot like a video more than once!", context)
+                return
+            }
+
+            val seedingMagnetUri = upvoteCommunity.torrentManager?.seedLikedVideo()
+
+            if (seedingMagnetUri != null)
+                createToastMessage("Upvoted, now seeding this video: $seedingMagnetUri", context)
+            else
+                createToastMessage("Upvoted, but failed to seed this video", context)
+
+        var publicKeySeeder = getPublicKeyOfSeeder(upvoteCommunity)
+
+        if (publicKeySeeder == null) {
+            // Could not find the seeder, all rewards go to the peer who posted the video
+            Log.i("Detoks", "Could not find the seeder of this video you liked, all minted tokens will go the peer who posted this video you upvoted")
+            publicKeySeeder = proposalBlock.publicKey.toHex()
+        }
 
         createToastMessage("reward seeder with this pub key: \n $publicKeySeeder", context)
 
-        val upvoteTokenList = mintTokens(context, "test", myPubKey, publicKeySeeder)
+        // TODO replace with seeder key
+        val upvoteTokenList = mintTokens(context, "test", myPubKey, myPubKey)
 
         if (upvoteTokenList.isEmpty()) {
             createToastMessage("Could not mint tokens to upvote the video", context)
             return
         }
 
-//        val transaction = mapOf(
-//            "videoID" to "test",
-//            "upvoteTokenGivenBy" to myPubKey,
-//            "upvoteTokenGivenTo" to myPubKey,
-//            "seedingRewardGivenTo" to publicKeySeeder
-//        )
-//
-//        upvoteCommunity.createAgreementBlock(proposalBlock, transaction)
+        val transaction = mapOf(
+            "videoID" to "test",
+            "upvoteTokenGivenBy" to myPubKey,
+            "upvoteTokenGivenTo" to myPubKey,
+            "seedingRewardGivenTo" to publicKeySeeder
+        )
+
+        upvoteCommunity.createAgreementBlock(proposalBlock, transaction)
         Log.i("DeToks", "Agreement block created!")
 
         val randomPeer = upvoteCommunity.pickRandomPeer()
 
         if (randomPeer == null) return
 
-        val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList, randomPeer.publicKey.keyToBin())
+        val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList, proposalBlock.publicKey)
         if (sendSuccess) {
             createToastMessage("Successfully sent the tokens to the creator of", context)
         } else {

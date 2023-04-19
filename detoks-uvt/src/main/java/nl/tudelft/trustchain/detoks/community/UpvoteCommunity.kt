@@ -184,14 +184,11 @@ class UpvoteCommunity(
         val validTokens: ArrayList<UpvoteToken> = upvoteService.getValidUpvoteTokens(payload.upvoteTokens)
 
         // Check if we should reward the seeder
-        if (validTokens[0].publicKeySeeder == myPeer.publicKey.toString()) {
-            validTokens[0].publicKeySeeder = peer.publicKey.keyToBin().toHex()
-        }
-        //if (validTokens[0].publicKeySeeder != myPeer.publicKey.toString()) {
+        if (validTokens[0].publicKeySeeder != myPeer.publicKey.toString()) {
             val rewardTokens: ArrayList<UpvoteToken> = upvoteService.getRewardTokens(validTokens)
             sendSeedReward(rewardTokens, peer)
             Log.i("Detoks", "Sending seed reward")
-        // }
+        }
         Log.i("Detoks", "Received ${validTokens.size} tokens!")
         upvoteService.persistTokens(validTokens)
 
@@ -223,7 +220,7 @@ class UpvoteCommunity(
         }
 
         val agreementBlock = createAgreementBlock(rewardBlock, rewardBlock.transaction)
-        Log.i("Detoks", "Signed Agreement block $agreementBlock")
+        Log.i("Detoks", "Signed Seed Reward Agreement block $agreementBlock")
 
     }
 
