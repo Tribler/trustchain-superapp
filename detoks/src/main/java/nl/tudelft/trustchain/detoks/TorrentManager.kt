@@ -325,18 +325,18 @@ class TorrentManager private constructor (
         }
 
         // Preserve cached if again in cache
-        val cacheEnd = Math.min(torrentFiles.size - 1, currentIndex + cachingAmount)
-        val newCache = sortedTorrents.subList(0, cachingAmount)
+        val cacheEnd = currentIndex + cachingAmount
+        val newCache = sortedTorrents.subList(0, Math.min(cachingAmount, sortedTorrents.size -1))
 
         for (i in currentIndex .. cacheEnd) {
-            if (!newCache.contains(torrentFiles[i]))
-                torrentFiles[i].deleteFile()
-            torrentFiles[i] = sortedTorrents[i - currentIndex]
+            if (!newCache.contains(torrentFiles.gett(i)))
+                torrentFiles.gett(i).deleteFile()
+            torrentFiles.set(i.mod(torrentFiles.size), sortedTorrents.gett(i - currentIndex))
         }
 
         for (i in cacheEnd + 1 until torrentFiles.size) {
-            torrentFiles[i].deleteFile()
-            torrentFiles[i] = sortedTorrents[i - currentIndex]
+            torrentFiles.gett(i).deleteFile()
+            torrentFiles.set(i.mod(torrentFiles.size), sortedTorrents.gett(i - currentIndex))
         }
 
         initializeVideoPool()
