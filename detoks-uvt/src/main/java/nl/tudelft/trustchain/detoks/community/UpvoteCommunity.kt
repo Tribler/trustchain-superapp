@@ -78,8 +78,7 @@ class UpvoteCommunity(
     }
 
     fun getContentToSeed() {
-        // randomly select peers
-        // if a random set is not good, we can change that
+
         val listOfPostsAndUpvotes = database.getBlocksWithType(UpvoteTrustChainConstants.GIVE_UPVOTE_TOKEN)
         val otherPeersProposalBlocks = listOfPostsAndUpvotes.filter { it.isProposal
             && it.publicKey.toHex() != myPeer.publicKey.keyToBin().toHex()
@@ -106,7 +105,6 @@ class UpvoteCommunity(
             }
         }
         for (pair in seedVideoIDs) {
-            // greedily sending seeded content to all other peers
             // greedily sending seeded content to all other peers
             sendVideoData(pair.second, pair.first)
         }
@@ -147,7 +145,7 @@ class UpvoteCommunity(
         val block = this.database.getBlockWithHash(payload.proposal_token_hash.hexToBytes())
         if (block != null) {
             torrentManager?.addTorrent(payload.magnet_uri, payload.proposal_token_hash, block.timestamp.toString(), block.blockId)
-            Log.i("Detoks", "[Detoks] -> SUCESSSSSSSSSSSSSSSSSS! received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}")
+            Log.i("Detoks", "[Detoks] -> Success! received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}")
         } else {
             Log.i("Detoks", "failed to add torrent to video feed because block is null \n attempted to get block with hash: ${payload.proposal_token_hash}")
         }
@@ -240,7 +238,6 @@ class UpvoteCommunity(
         val peers = getPeers()
         if (peers.isEmpty()) {
             Log.i("Detoks", "No peers are online at this moment, you/peer with mid :${myPeer.mid} cannot sent (hash,magnetUri) = (${proposalTokenHash},${magnetURI}) to anyone")
-//            throw PeerNotFoundException("Could not find a peer")
         }
         for (peer in peers) {
             Log.i("Detoks", "This peer with peer mid is online: ${peer.mid}")
@@ -250,8 +247,6 @@ class UpvoteCommunity(
             send(peer, packet)
         }
         send(myPeer, packet)
-//        Log.i("Detoks", "Sending this magnetLink to self :$magnetURI")
-//        onMagnetURI(myPeer, payload)
         return true
     }
 

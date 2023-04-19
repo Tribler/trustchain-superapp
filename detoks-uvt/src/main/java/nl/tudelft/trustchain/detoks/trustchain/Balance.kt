@@ -16,7 +16,7 @@ class Balance {
         val myPublicKey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
         val latestBalanceCheckpoint = upvoteCommunity.database.getLatest(myPublicKey, CommunityConstants.BALANCE_CHECKPOINT)
         if (latestBalanceCheckpoint != null) {
-            //if date is today then don't do anything because there is already a block for today
+            // If date is today then don't do anything because there is already a block for today
             if (DateUtils.isToday(latestBalanceCheckpoint.timestamp.time)) return
             val blocksToProcess = upvoteCommunity.database.crawl(myPublicKey, latestBalanceCheckpoint.sequenceNumber.toLong(), upvoteCommunity.database.getBlockCount(myPublicKey))
             var sent = latestBalanceCheckpoint.transaction.get("sent")!!.toString().toInt();

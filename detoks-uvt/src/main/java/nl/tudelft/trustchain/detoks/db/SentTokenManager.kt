@@ -9,7 +9,7 @@ class SentTokenManager (context: Context) {
     private val database = Database(driver)
 
     /**
-     * Maps the keys and accompanying trust scores out of the database into a kotlin [UpvoteToken] object.
+     * Maps the keys and accompanying [UpvoteToken]s out of the database into a kotlin [UpvoteToken] object.
      */
     private val sentTokenMapper = {
             token_id : Long,
