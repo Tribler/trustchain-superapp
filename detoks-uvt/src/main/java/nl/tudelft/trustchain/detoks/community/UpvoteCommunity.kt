@@ -253,6 +253,16 @@ class UpvoteCommunity(
         return true
     }
 
+    fun pickRandomPeer(): Peer? {
+        val peers = getPeers()
+        for (peer in peers) {
+            Log.i("Detoks", "This peer with peer mid is online: ${peer.mid}")
+        }
+        if (peers.isEmpty()) return null
+        return peers.random()
+    }
+
+
     /**
      * Send tokens to the peer that posted the video that the user upvoted by double tapping
      */
