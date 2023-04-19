@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.core.view.isVisible
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -85,6 +87,9 @@ class VideosAdapter(
                         true
                     }
                 }
+                val bundle = Bundle()
+                bundle.putString("video_name", txtTitle.text.toString())
+                txtTitle.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toTorrentFragment, bundle) }
             }
         }
     }
