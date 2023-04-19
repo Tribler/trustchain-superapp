@@ -26,7 +26,7 @@ import java.io.FileOutputStream
 
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var networkLabel: TextView
-    private lateinit var torrentManager: TorrentManager
+    lateinit var torrentManager: TorrentManager
     private lateinit var adapter: VideosAdapter
     private val logger = KotlinLogging.logger {}
     private var previousVideoAdapterIndex = 0

@@ -41,12 +41,12 @@ class TabBarFragment : Fragment() {
         viewPager.isUserInputEnabled = false
         viewPager.adapter = TabBarAdapter(this, listOf(detoksFragment, Fragment(), profileFragment))
 
-        val torrentManager = TorrentManager.getInstance(requireActivity().applicationContext)
+        //val torrentManager = TorrentManager.getInstance(requireActivity().applicationContext)
         // Request Android content selection for video
         val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
                 // Video selected -> seed it
-                torrentManager.createTorrentInfo(uri, requireContext())
+                detoksFragment.torrentManager.createTorrentInfo(uri, requireContext())
                 Toast.makeText(requireContext(), "Successfully uploaded.", Toast.LENGTH_LONG).show()
 
                 detoksFragment.refresh()
