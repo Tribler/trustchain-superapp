@@ -64,13 +64,13 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
      * Start benchmark for single token transactions
      * @param totalTransactions The total number of transactions to be sent
      */
-    private fun singleBenchmark() {
+    private suspend fun singleBenchmark() {
         this.startBenchmark = System.nanoTime()
         this.benchMarking = "SingleBatch"
         for (tok in transactionEngine.tokenStore.getAllTokens()){
             transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer(), resend=false)
         }
-
+        delay(5000L)
         while(transactionEngine.tokenStore.getAllTokens().isNotEmpty()){
             for (tok in transactionEngine.tokenStore.getAllTokens()){
                 transactionEngine.sendTokenSingle(tok, transactionEngine.getSelectedPeer(), resend=true)
@@ -125,6 +125,8 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
 
         // Set button onclick listeners
         binding.generateTokensButton.setOnClickListener {
+            saveSettings()
+            adapter.setGroupSize(this.groupSize)
             generateTokens()
             updateList()
         }
@@ -187,24 +189,27 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
      * Initializes the transaction & grouping amount selectors and submit button.
      */
     private fun initializeSelectors() {
-        val transactionAmountSelector = binding.transactionAmountSelector
-        val groupingAmountSelector = binding.groupingAmountSelector
-
         val submitButton = binding.submitSettings
         submitButton.setOnClickListener {
-            val transactionAmount = transactionAmountSelector.text.toString().toInt()
-            val groupingAmount = groupingAmountSelector.text.toString().toInt()
-            // Both values should be positive and the grouping amount should be lower than the transaction amount
-            if (transactionAmount > 0 && groupingAmount > 0 && groupingAmount < transactionAmount) {
-                totalTransactions = transactionAmount
-                groupSize = groupingAmount
-            } else {
-                val builder = AlertDialog.Builder(requireContext())
-                builder.setTitle("Invalid settings")
-                builder.setMessage("Please make sure that the grouping amount is smaller than the transaction amount and that both amounts are larger than 0.")
-                val dialog= builder.create()
-                dialog.show()
-            }
+            saveSettings()
+        }
+    }
+
+    private fun saveSettings(){
+        val transactionAmountSelector = binding.transactionAmountSelector
+        val groupingAmountSelector = binding.groupingAmountSelector
+        val transactionAmount = transactionAmountSelector.text.toString().toInt()
+        val groupingAmount = groupingAmountSelector.text.toString().toInt()
+        // Both values should be positive and the grouping amount should be lower than the transaction amount
+        if (transactionAmount > 0 && groupingAmount > 0 && groupingAmount < transactionAmount) {
+            totalTransactions = transactionAmount
+            groupSize = groupingAmount
+        } else {
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("Invalid settings")
+            builder.setMessage("Please make sure that the grouping amount is smaller than the transaction amount and that both amounts are larger than 0.")
+            val dialog= builder.create()
+            dialog.show()
         }
     }
 
@@ -214,7 +219,10 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
     private fun updateList() {
         adapter.clear()
         var tokenList = transactionEngine.tokenStore.getAllTokens() as ArrayList<Token>
-
+        Log.d(
+            LOGTAG,
+            "groupSize: ${this.groupSize}"
+        )
         if (benchMarking == "SingleToken"){
             val endTime = (System.nanoTime() - this.startBenchmark) / MILLISECOND
             binding.singleTokenText.text = "${endTime} ms"
