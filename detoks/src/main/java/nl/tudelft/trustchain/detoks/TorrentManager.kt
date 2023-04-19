@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.detoks
 
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -29,6 +30,9 @@ class TorrentManager private constructor (
     private val logger = KotlinLogging.logger {}
     private val torrentFiles = mutableListOf<TorrentHandler>()
 
+    val profile = Profile(HashMap())
+
+    private var lastTimeStamp: Long
     private var currentIndex = 0
 
     init {
@@ -36,6 +40,7 @@ class TorrentManager private constructor (
         initializeSessionManager()
         buildTorrentIndex()
         initializeVideoPool()
+        lastTimeStamp = System.currentTimeMillis()
     }
 
     companion object {
@@ -77,6 +82,9 @@ class TorrentManager private constructor (
                 while (!content.isDownloaded()) {
                     delay(100)
                 }
+                profile.updateEntryDuration(
+                    MagnetLink.hashFromMagnet(content.handle.makeMagnetUri()),
+                    content.getVideoDuration())
             }
             content.asMediaInfo()
         } catch (e: TimeoutCancellationException) {
@@ -90,7 +98,16 @@ class TorrentManager private constructor (
     }
 
     /**
-     * This functions updates the current index of the cache.
+     * Update the time and return the difference
+     */
+    private fun updateTime() : Long {
+        val oldTimeStamp = lastTimeStamp
+        lastTimeStamp = System.currentTimeMillis()
+        return lastTimeStamp - oldTimeStamp
+    }
+
+    /**
+     * This function updates the current index of the cache.
      */
     private fun notifyChange(
         newIndex: Int,
@@ -100,6 +117,14 @@ class TorrentManager private constructor (
             return
         }
         if (cachingAmount * 2 + 1 >= getNumberOfTorrents()) {
+            val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
+            profile.updateEntryWatchTime(
+                MagnetLink.hashFromMagnet(uri),
+                updateTime(),
+                true)
+            profile.updateEntryDuration(
+                MagnetLink.hashFromMagnet(uri),
+                torrentFiles.gett(currentIndex).getVideoDuration())
             currentIndex = newIndex
             return
         }
@@ -112,6 +137,14 @@ class TorrentManager private constructor (
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
 
         }
+        val uri = torrentFiles.gett(currentIndex).handle.makeMagnetUri()
+        profile.updateEntryWatchTime(
+            MagnetLink.hashFromMagnet(uri),
+            updateTime(),
+        true)
+        profile.updateEntryDuration(
+            MagnetLink.hashFromMagnet(uri),
+            torrentFiles.gett(currentIndex).getVideoDuration())
         currentIndex = newIndex
     }
 
@@ -149,15 +182,15 @@ class TorrentManager private constructor (
                     for (it in 0 until torrentInfo.numFiles()) {
                         val fileName = torrentInfo.files().fileName(it)
                         if (fileName.endsWith(".mp4")) {
-                            torrentFiles.add(
-                                TorrentHandler(
-                                    cacheDir,
-                                    handle,
-                                    torrentInfo.name(),
-                                    fileName,
-                                    it
-                                )
+                            val torrent = TorrentHandler(
+                                cacheDir,
+                                handle,
+                                torrentInfo.name(),
+                                fileName,
+                                it
                             )
+                            torrentFiles.add(torrent)
+                            profile.torrents[torrent.handle.makeMagnetUri()] = ProfileEntry()
                         }
                     }
                 }
@@ -206,12 +239,12 @@ class TorrentManager private constructor (
         fileOrDirectory.delete()
     }
 
-    fun addTorrent(magnet: String) {
-        val torrentInfo = getInfoFromMagnet(magnet)?:return
-        val hash = torrentInfo.infoHash()
+    fun addTorrent(hash: Sha1Hash, magnet: String) {
+        if (sessionManager.find(hash) != null) return
 
-        if(sessionManager.find(hash) != null) return
-        Log.d("DeToksCommunity","Is a new torrent: ${torrentInfo.name()}")
+        val torrentInfo = getInfoFromMagnet(magnet)?:return
+
+        Log.d(DeToksCommunity.LOGGING_TAG,"Adding new torrent: ${torrentInfo.name()}")
 
         sessionManager.download(torrentInfo, cacheDir)
         val handle = sessionManager.find(hash)
@@ -222,15 +255,15 @@ class TorrentManager private constructor (
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
             if (fileName.endsWith(".mp4")) {
-                torrentFiles.add(
-                    TorrentHandler(
-                        cacheDir,
-                        handle,
-                        torrentInfo.name(),
-                        fileName,
-                        it
-                    )
+                val torrent = TorrentHandler(
+                    cacheDir,
+                    handle,
+                    torrentInfo.name(),
+                    fileName,
+                    it
                 )
+                torrentFiles.add(torrent)
+                profile.torrents[torrent.handle.makeMagnetUri()] = ProfileEntry()
             }
         }
     }
@@ -242,6 +275,14 @@ class TorrentManager private constructor (
 
     fun getListOfTorrents(): List<TorrentHandle> {
         return torrentFiles.map {it.handle}.distinct()
+    }
+
+    fun getWatchedTorrents(): List<String> {
+        return (profile.torrents.keys).toList()
+    }
+
+    fun getUnwatchedTorrents(): List<String> {
+        return (torrentFiles.map { it.handle.makeMagnetUri() } subtract profile.torrents.keys).toList()
     }
 
     class TorrentHandler(
@@ -256,6 +297,13 @@ class TorrentManager private constructor (
 
         fun getPath(): String {
             return "$cacheDir/$torrentName/$fileName"
+        }
+
+        fun getVideoDuration() : Long {
+            if(!isDownloaded()) return 0
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(getPath())
+            return retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
         }
 
         fun isPlayable(): Boolean {
@@ -319,3 +367,13 @@ class TorrentMediaInfo(
     val fileName: String,
     val fileURI: String,
 )
+
+class MagnetLink {
+    companion object {
+        fun hashFromMagnet(magnet: String) : String {
+            return magnet
+                .substringAfter("xt=urn:btih:")
+                .substringBefore("&")
+        }
+    }
+}
