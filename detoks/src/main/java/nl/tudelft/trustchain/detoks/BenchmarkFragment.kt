@@ -54,8 +54,10 @@ class BenchmarkFragment : BaseFragment(R.layout.fragment_benchmark) {
             transactionEngine.getSelectedPeer()
         )
 
+
+
         val sendingTime = (System.nanoTime() - this.startBenchmark) / MILLISECOND
-        Log.d(
+         Log.d(
             "DeToksTransactionEngine",
             "Single token sent. Sending time: ${sendingTime} ms"
         )
