@@ -76,7 +76,8 @@ The Benchmark Fragment, or the 'DeToks Transaction Hub', functions as a central 
   
 This fragment scans the network for peers connected to the DeToksTransactionEngine, and automatically updates the list of available peers.  Upon pressing a listed peer, the user is prompted to confirm that they want to connect to this peer, returning the app to the Benchmark Fragment upon confirmation.  
   
-<img src="docs/images/mainscreen.jpeg" width="200px"/><img src="docs/images/tokenzoom.jpeg" width="200px"/><img src="docs/images/peerscreen.jpeg" width="200px"/><img src="docs/images/peerzoom.jpg" width="200px"/>  
+<img src="docs/images/BenchMarkView.jpeg" width="200px"/><img src="docs/images/SelectedToken.jpeg" width="200px"/>
+<img src="docs/images/PeerSelectionView.jpeg" width="200px"/><img src="docs/images/SelectedPeer.jpeg" width="200px"/>  
   
   
 Once returned in the Benchmark  Fragment, the connected peer field will be updated, making us ready to send tokens. The list on the bottom of the screen denotes your current token wallet, showing each token found in your local database. This token list is automatically updated once a change to your wallet happens and can be interacted with by pressing on a single item.  
