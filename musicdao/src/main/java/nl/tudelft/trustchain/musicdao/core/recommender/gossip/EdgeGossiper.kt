@@ -1,25 +1,9 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.gossip
 
-import android.widget.Toast
 import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.AlertType
-import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import kotlinx.coroutines.*
 import mu.KotlinLogging
-import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.messaging.Packet
-import nl.tudelft.ipv8.messaging.eva.PeerBusyException
-import nl.tudelft.ipv8.messaging.eva.TimeoutException
-import nl.tudelft.ipv8.messaging.eva.TransferType
-import nl.tudelft.trustchain.common.freedomOfComputing.AppPayload
-import java.io.File
-import java.util.*
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.Pair
+import nl.tudelft.trustchain.musicdao.core.recommender.graph.TrustNetwork
 
 /**
  * Gossips edges in the network to keep graphs synced
@@ -36,7 +20,8 @@ private val logger = KotlinLogging.logger {}
 class EdgeGossiper(
     private val sessionManager: SessionManager,
     private val recommenderCommunityBase: RecommenderCommunityBase,
-    private val toastingEnabled: Boolean
+    private val toastingEnabled: Boolean,
+    private val trustNetwork: TrustNetwork
 ) {
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -44,10 +29,11 @@ class EdgeGossiper(
         fun getInstance(
             sessionManager: SessionManager,
             recommenderCommunity: RecommenderCommunityBase,
-            toastingEnabled: Boolean = true
+            toastingEnabled: Boolean = true,
+            trustNetwork: TrustNetwork
         ): EdgeGossiper {
             if (!::edgeGossiperInstance.isInitialized) {
-                edgeGossiperInstance = EdgeGossiper(sessionManager, recommenderCommunity, toastingEnabled)
+                edgeGossiperInstance = EdgeGossiper(sessionManager, recommenderCommunity, toastingEnabled, trustNetwork)
             }
             return edgeGossiperInstance
         }
@@ -55,10 +41,18 @@ class EdgeGossiper(
 
     fun start() {
         scope.launch {
-            //gossip node to node edges
+            gossipNodeToNodeEdges()
         }
         scope.launch {
-            // gossip node to song edges
+            gossipNodeToSongEdges()
         }
+    }
+
+    private suspend fun gossipNodeToSongEdges() {
+        TODO("Not yet implemented")
+    }
+
+    private suspend fun gossipNodeToNodeEdges() {
+        TODO("Not yet implemented")
     }
 }

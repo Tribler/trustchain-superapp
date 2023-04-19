@@ -44,14 +44,12 @@ class NodeToSongNetwork {
         if (source is Node && target is Node || source is SongRecommendation && target is SongRecommendation)
             return false
         if (!graph.containsVertex(source)) {
-            if (!addNodeOrSong(source)) {
+                logger.error { "Couldn't add edge $nodeSongEdge because source node doesn't exist" }
                 return false
-            }
         }
         if (!graph.containsVertex(target)) {
-            if (!addNodeOrSong(target)) {
+            logger.error { "Couldn't add edge $nodeSongEdge because target song doesn't exist" }
                 return false
-            }
         }
         if (graph.containsEdge(source, target)) {
             logger.info { "Overwriting edge from $source to $target" }

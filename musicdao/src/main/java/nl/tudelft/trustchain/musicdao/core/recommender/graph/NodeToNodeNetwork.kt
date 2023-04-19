@@ -43,16 +43,12 @@ class NodeToNodeNetwork {
 
     fun addEdge(source: Node, target: Node, nodeEdge: NodeTrustEdge): Boolean {
         if (!graph.containsVertex(source)) {
-            if (!addNode(source)) {
                 logger.error { "Couldn't add edge $nodeEdge because source node couldn't be added" }
                 return false
-            }
         }
         if (!graph.containsVertex(target)) {
-            if (!addNode(target)) {
                 logger.error { "Couldn't add edge $nodeEdge because target node couldn't be added" }
                 return false
-            }
         }
         if (graph.containsEdge(source, target)) {
             logger.info { "Overwriting edge from ${source} to ${target}" }
