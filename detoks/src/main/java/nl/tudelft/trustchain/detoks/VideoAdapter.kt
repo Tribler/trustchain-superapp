@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.detoks.fragments.DeToksFragment
 
 
 class VideosAdapter(
@@ -114,7 +115,7 @@ class VideosAdapter(
                 val content = item.content(position, 10000)
                 val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
                 for (t in tm.torrentFiles){
-                    if(content.fileName == t.fileName && content.torrentName == t.torrentName){
+                    if(position == DeToksFragment.lastIndex && content.fileName == t.fileName && content.torrentName == t.torrentName){
                         t.watched = true
                     }
                 }

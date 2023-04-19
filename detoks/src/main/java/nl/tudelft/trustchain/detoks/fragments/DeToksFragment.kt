@@ -114,11 +114,9 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
         networkLabel = view.findViewById(R.id.networkLabel)
         networkLabel.setOnClickListener {
-            lastIndex = viewPagerVideos.currentItem
             it.findNavController().navigate(TabBarFragmentDirections.actionTabBarFragmentToNetworkFragment())
         }
         networkLabel.setOnLongClickListener {
-            lastIndex = viewPagerVideos.currentItem
             it.findNavController().navigate(TabBarFragmentDirections.actionTabBarFragmentToDiscoveryFragment())
             true
         }
@@ -133,6 +131,8 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
                 super.onPageScrollStateChanged(state)
 
                 if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                    lastIndex = viewPagerVideos.currentItem
+
                     when (viewPagerVideos.currentItem - previousVideoAdapterIndex) {
                         1 -> torrentManager.notifyIncrease()
                         -1 -> torrentManager.notifyDecrease()
@@ -153,8 +153,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     companion object SingleTM {
         const val DEFAULT_CACHING_AMOUNT = 2
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"
-
         var lastIndex: Int = 0
-//        public lateinit var torrentManager: TorrentManager
     }
 }
