@@ -1,5 +1,18 @@
 # DeToks
 
+Detoks is a decentralized version of TikTok implemented using [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md).
+
+TODO: add screenshots of each of the screens
+
+Each like message is encoded as a trustchain block and shared with the network.
+When users receive a like, they retrieve the torrent link from the like message to achieve content discovery.
+Furthermore, the user can count the number of likes for each video and use that to recommend new videos based on what is currently trending.
+The user can also see how many likes they have received themselves.
+
+## Recommender
+
+The recommender recommends videos based on which ones are the most liked at the moment, on ties, the most recent video is shown.
+
 ## Like Token
 
 The like token has the following format:
@@ -11,8 +24,7 @@ The like token has the following format:
 | torrent   | The name of the torrent (its hash info) |
 | author    | The public key of the creator of the video  |
 | torrentMagnet | A magnet link for the torrent video (since we can have different magnet links for the same torrent) |
-| timestamp   | a simple timestamp indicating the time of the like | 
-
+| timestamp   | a simple timestamp indicating the time of the like |
 
 
 ## Torrenting

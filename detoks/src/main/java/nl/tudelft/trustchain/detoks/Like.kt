@@ -31,8 +31,8 @@ class Like(val liker: String, val video: String, val torrent: String, val author
             localOffset += videoSize
             val (torrent, torrentSize) = deserializeVarLen(buffer, offset + localOffset)
             localOffset += torrentSize
-            val (creator_name, cretorSize) = deserializeVarLen(buffer, offset + localOffset)
-            localOffset += cretorSize
+            val (creator_name, creatorSize) = deserializeVarLen(buffer, offset + localOffset)
+            localOffset += creatorSize
             val (timestamp, timestampSize) = deserializeVarLen(buffer, offset + localOffset)
             localOffset += timestampSize
             val (torrentMagnet, torrentMagnetSize) = deserializeVarLen(buffer, offset + localOffset)

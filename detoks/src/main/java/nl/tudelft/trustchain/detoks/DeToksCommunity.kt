@@ -26,15 +26,14 @@ class DeToksCommunity(
     crawler: TrustChainCrawler = TrustChainCrawler()
 ) : TrustChainCommunity(settings, database, crawler) {
 
+    override val serviceId = "d86a7db45eb3563ae047639817baec4db2bc7c21"
     private val walletManager = WalletManager(context)
     private val visitedPeers  = mutableListOf<Peer>()
+    private val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
 
     init {
-//        messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
-//        messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
         registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
-                //if(userLikedVideo(block.transaction["video"] as String,block.transaction["torrent"] as String, block.transaction["liker"] as String)) return
                 Log.wtf("detoks","liker is "+block.transaction["liker"] as String )
                 Log.wtf("detoks","video is "+block.transaction["video"] as String)
                 createAgreementBlock(block, block.transaction)
@@ -44,7 +43,7 @@ class DeToksCommunity(
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Detoks", "onBlockReceived: ${block.blockId} ${block.transaction}")
-                val video = block.transaction.get("video") as String
+                val video = block.transaction["video"] as String
                 val torrent = block.transaction.get("torrent") as String
                 val magnet = block.transaction.get("torrentMagnet") as String
                 val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
@@ -66,11 +65,6 @@ class DeToksCommunity(
         const val MESSAGE_TRANSACTION_ID = 2
 
     }
-
-    override val serviceId = "d86a7db45eb3563ae047639817baec4db2bc7c21"
-    val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
-    val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
-
     fun sendTokens(amount: Int, recipientMid: String) {
         val senderWallet = walletManager.getOrCreateWallet(myPeer.mid)
 
@@ -191,13 +185,14 @@ class DeToksCommunity(
         if(authorsBlocks.isEmpty()) return authorsBlocks
         return authorsBlocks.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()})
     }
+
     fun getNotifications(author: String): List<TrustChainBlock> {
         return getBlocksByAuthor(author).filter { it.transaction["liker"] != author }
     }
 
     fun getEarliestDate(vid: String, torrent: String): Long {
         if(duplicates(vid,torrent) == 0) return Long.MAX_VALUE
-        return (getLikes(vid,torrent).sortedBy{(it.transaction["timestamp"] as String).toLong()}.get(0).transaction["timestamp"] as String).toLong()
+        return (getLikes(vid,torrent).sortedBy{(it.transaction["timestamp"] as String).toLong()}[0].transaction["timestamp"] as String).toLong()
     }
 
     fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
@@ -218,17 +213,17 @@ class DeToksCommunity(
     }
 
     fun listOfLikedVideosAndTorrents(person: String): List<Pair<String,String>> {
-        var iterato = database.getBlocksWithType(LIKE_BLOCK).filter {
+        val iterato = database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["liker"] == person
         }
         if(iterato.isEmpty()) return emptyList()
-        var iterator= iterato.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()}).listIterator()
-        var likedVideos = ArrayList<Pair<String,String>>()
+        val iterator= iterato.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()}).listIterator()
+        val likedVideos = ArrayList<Pair<String,String>>()
         while(iterator.hasNext()) {
             val block = iterator.next()
-            likedVideos.add(Pair(block.transaction.get("video") as String, block.transaction.get("torrentMagnet") as String))
+            likedVideos.add(Pair(block.transaction["video"] as String, block.transaction["torrentMagnet"] as String))
         }
-        return likedVideos;
+        return likedVideos
     }
 
     class Factory(
