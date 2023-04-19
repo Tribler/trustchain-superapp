@@ -52,6 +52,25 @@ The benchmarks page displays various statistics related to the application. At t
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
 
+## Statistics
+
+The statistics are all calculated for three different group sizes. These sizes are 1, 10 and 100.
+
+### Latency
+Below, the average latency plotted over time is displayed. Here it is clear what the optimal group size is. The latency for groups of size 10 never rises above the latency of other group sizes. Groups of size 100 start with a latency that is better than the latency for groups of size 1 but rises above it for a while at the end. Finally, the latency for groups of size 1 starts high but spikes at the end.
+
+<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/latency.png" width="180">
+
+### Received packages
+Below, you see the percentage of sent packets that have been received by a chosen peer over time. Depending on what you are looking for, there are two optimal sizes. The percentage of received packages for groups of size 1 gradually increases over time but only reaches 100% after significantly more time than the other sizes. For groups of size 100, the percentage of received packages does decrease for a while but reaches 100% the fastest out of all group sizes.
+
+<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/packetsreceived.png" width="180">
+
+### Throughput
+Lastly, you see the throughput plotted over time. The optimal group size, in this case, is 100, as it results in a throughput that stays the highest out of all groups. Next is group size 10, and last is group size 1.
+
+<img src="https://github.com/bbrockbernd/trustchain-superapp/blob/Documentation/detoks-engine/Throughput.png" width="180">
+
 ## Implementation
 
 The core of the application is the CommunityAdapter.kt file. Here all communication over the TrustChainCommunity is handled. The following functions are all public and can be used by anyone that wants to use our implementation:
