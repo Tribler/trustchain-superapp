@@ -28,6 +28,8 @@ the underlying protocol used for our upvoting token, and the known issues and li
 The project has been forked from the original DeToks application to avoid compilation issues later when the project is finished. Then all other groups merge their project into the main DeToks application. The project is composed of a few packages and files; the most important ones are:
 
 - ``community`` - This package contains the ``UpvoteCommunity``, which handles the Trustchain part of the protocol and calls relevant recommendations and upvoting code. Furthermore, it also contains the serializer and deserializer of the ``MagnetURIPayload``, ``RecommendedVideoPayload``, and ``UpvoteTokenPayload. ``
+- ``recommendation`` - This package contains the ``Recommender``, which gets new recommendations for videos to get next.
+- ``services`` - This package contains two services used to handle incoming packages from other peers.
 - ``token`` - This package contains the ``ProposalToken`` and ``UpvoteToken``. These contain the most important block creation logic for upvoting content (minting tokens) and the proposal block, created every time a peer posts a video.
 - ``trustchain`` - This package contains the logic ``Balance`` to check for the daily balance of each network peer without going through the entire TrustChain blockchain. It also contains a way to check a user's token balance.
 - ``TorrentManager`` - This file contains the logic to manage the torrent files and the video pool. It is responsible for downloading torrent files and caching videos. It also provides the logic for seeding the videos to the network when upvoting. More on this will be in the [Design Choices](#design-choices) section.
