@@ -120,8 +120,8 @@ class TorrentManager constructor (
                 }
             }
         }
-        //val content = torrentFiles.gett(index % getNumberOfTorrents())
-        val content = torrentFiles.gett(0)
+        val content = torrentFiles.gett(index % getNumberOfTorrents())
+//        val content = torrentFiles.gett(0)
 
 
         return try {
@@ -195,7 +195,7 @@ class TorrentManager constructor (
     @RequiresApi(Build.VERSION_CODES.O)
     fun addMagnet(magnet: String){
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-        Log.wtf("detoks", community.getAllUniqueVideos().toString())
+//        Log.wtf("detoks", community.getAllUniqueVideos().toString())
         val res = sessionManager.fetchMagnet(magnet, 10) ?: return
 
         val torrentInfo = TorrentInfo(res)
@@ -214,7 +214,7 @@ class TorrentManager constructor (
         handle.pause()
 
         val author = community.getAuthorOfMagnet(magnet)
-        Log.d("Detoks", "$author | ${torrentInfo.creator()}")
+        Log.wtf("Detoks", "addMagnet: creator = ${torrentInfo.creator()}, author = $author")
 
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
@@ -227,7 +227,7 @@ class TorrentManager constructor (
                         torrentInfo.name(),
                         fileName,
                         it,
-                        author,
+                        torrentInfo.creator(),
                         torrentInfo.makeMagnetUri(),
                         false
                     )
@@ -240,7 +240,6 @@ class TorrentManager constructor (
      * directory to Libtorrent and selects all .mp4 files for download.
      */
     private fun buildTorrentIndex() {
-        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val files = torrentDir.listFiles()
         if (files != null) {
             for (file in files) {
@@ -255,21 +254,27 @@ class TorrentManager constructor (
                     val handle = sessionManager.find(torrentInfo.infoHash())
 
                     handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+                    val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+                    val myPublicKey = community.myPeer.publicKey.toString()
 
-                    if (torrentInfo.creator() == IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!.myPeer.publicKey.toString()){
+                    if (torrentInfo.creator() == myPublicKey){
+//                        Log.wtf("Detoks", "Creator is me: ${torrentInfo.creator()}")
                         val priorities = Array(torrentInfo.numFiles()) { Priority.SEVEN }
                         handle.prioritizeFiles(priorities)
                         handle.pause()
                         handle.resume()
                     }else{
+//                        Log.wtf("Detoks", "Creator: ${torrentInfo.creator()} is not me: $myPublicKey")
                         val priorities = Array(torrentInfo.numFiles()) { Priority.NORMAL }
                         handle.prioritizeFiles(priorities)
                         handle.pause()
                     }
                     for (it in 0 until torrentInfo.numFiles()) {
                         val fileName = torrentInfo.files().fileName(it)
-                        Log.d("DeToks", "file ${fileName} in $it")
-                        if (fileName.endsWith(".mp4") && community.getAuthorOfMagnet(torrentInfo.makeMagnetUri())!="") {
+//                        Log.d("DeToks", "file ${fileName} in $it")
+                        val author = community.getAuthorOfMagnet(torrentInfo.makeMagnetUri())
+                        Log.wtf("Detoks", "Author of $fileName is $author")
+                        if (fileName.endsWith(".mp4")) {
                             torrentsList.put(torrentInfo.infoHash().toString(), fileName)
                             torrentFiles.add(
                                 TorrentHandler(
@@ -278,21 +283,7 @@ class TorrentManager constructor (
                                     torrentInfo.name(),
                                     fileName,
                                     it,
-                                    community.getAuthorOfMagnet(torrentInfo.makeMagnetUri()),
-                                    torrentInfo.makeMagnetUri(),
-                                    false
-                                )
-                            )
-                        }else if (fileName.endsWith(".mp4")) {
-                            torrentsList.put(torrentInfo.infoHash().toString(), fileName)
-                            torrentFiles.add(
-                                TorrentHandler(
-                                    cacheDir,
-                                    handle,
-                                    torrentInfo.name(),
-                                    fileName,
-                                    it,
-                                    torrentInfo.creator(),
+                                    author,
                                     torrentInfo.makeMagnetUri(),
                                     false
                                 )
@@ -349,12 +340,14 @@ class TorrentManager constructor (
         handle.resume()
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         val magnUri = torrentInfo.makeMagnetUri()
+        Log.wtf("Detoks", "createTorrentInfo, creator: ${torrentInfo.creator()}")
         Log.d("DeToks", "THIS HAS ${torrentInfo.numFiles()} : ${torrentInfo.creator()}  from ${torrentInfo.name()}")
         for (it in 0..torrentInfo.numFiles()-1) {
             val fileName = torrentInfo.files().fileName(it)
             Log.d("DeToks", "file ${fileName} in $it")
             if (fileName.endsWith(".mp4")) {
                 torrentsList.put(torrentInfo.infoHash().toString(), fileName)
+                Log.d("Detoks", "Liking video uploaded by self: ${torrentInfo.creator()}")
                 community.broadcastLike(fileName, torrentInfo.name(), torrentInfo.creator(), magnUri)
                 torrentFiles.add(
                     TorrentHandler(
@@ -515,6 +508,8 @@ class TorrentManager constructor (
         handle.prioritizeFiles(arrayOf(Priority.IGNORE))
         handle.pause()
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+        val author = community.getAuthorOfMagnet(magnet)
+        Log.wtf("Detoks", "addTorrent: author = $author, creator = ${torrentInfo.creator()}")
 
         for (it in 0 until torrentInfo.numFiles()) {
             val fileName = torrentInfo.files().fileName(it)
@@ -526,7 +521,7 @@ class TorrentManager constructor (
                         torrentInfo.name(),
                         fileName,
                         it,
-                        community.myPeer.publicKey.toString(),
+                        author,
                         magnet,
                         false
                     )

@@ -85,9 +85,8 @@ class VideosAdapter(
             }
 
             val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-            // content.creator is not correct!!! its just your publickey for some reason
-            Log.d("Detoks", "liking video by ${content.creator}")
-            community.broadcastLike(content.fileName, content.torrentName, content.creator, content.torrentMagnet)
+            val author = community.getAuthorOfMagnet(content.torrentMagnet)
+            community.broadcastLike(content.fileName, content.torrentName, author, content.torrentMagnet)
         }
 
         init {
@@ -143,8 +142,8 @@ class VideosAdapter(
                     if (isFocused) view.performClick()
                 }
 
-                txtTitle.text = content.creator
-                txtDesc.text = content.torrentName
+                txtTitle.text = content.fileName
+                txtDesc.text = content.creator
                 mVideoView.setVideoPath(content.fileURI)
                 Log.i("DeToks", "Received content: ${content.fileURI}")
 

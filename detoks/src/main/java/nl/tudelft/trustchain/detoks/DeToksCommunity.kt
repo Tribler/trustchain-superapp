@@ -52,8 +52,11 @@ class DeToksCommunity(
                 val new_likes = community.getLikes(video, torrent).size
                 Log.d("Detoks", "Received like for $video, $torrent")
                 Log.d("Detoks", "new number of likes: $new_likes")
-                // don't add duplicate videos
-                //if (!firstInstance(video, torrent)) return
+                // 1 block is always in the DB since we just received it
+                if (duplicates(video, torrent) > 1) {
+                    Log.wtf("Detoks", "Ignoring magnet for duplicate video: $video, $torrent")
+                    return
+                }
                 TorrentManager.getInstance(context).addMagnet(magnet)
             }
         })
@@ -158,8 +161,7 @@ class DeToksCommunity(
     }
 
     fun broadcastLike(vid: String, torrent: String, creator: String, magnet: String) {
-        if(userLikedVideo(vid,torrent,myPeer.publicKey.toString())) return
-        Log.d("DeToks", "Liking: $vid")
+        if (userLikedVideo(vid, torrent, myPeer.publicKey.toString())) return
         val timestamp = System.currentTimeMillis().toString()
         val like = Like(myPeer.publicKey.toString(), vid, torrent, creator, timestamp, magnet)
         createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
@@ -194,18 +196,16 @@ class DeToksCommunity(
         return getBlocksByAuthor(author).filter { it.transaction["liker"] != author }
     }
 
-    fun getEarliestDate(vid: String, torrent: String):Long {
-        if(firstInstance(vid,torrent)) return Long.MAX_VALUE
+    fun getEarliestDate(vid: String, torrent: String): Long {
+        if(duplicates(vid,torrent) == 0) return Long.MAX_VALUE
         return (getLikes(vid,torrent).sortedBy{(it.transaction["timestamp"] as String).toLong()}.get(0).transaction["timestamp"] as String).toLong()
     }
 
     fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
         return getLikes(vid, torrent).any { it.transaction["liker"] == liker }
     }
-    fun firstInstance(vid: String, torrent: String): Boolean {
-        val exists = database.getBlocksWithType(LIKE_BLOCK).filter { it.transaction["video"] == vid && it.transaction["torrent"] == torrent }.size
-        if(exists == 0) return true
-        return false
+    fun duplicates(vid: String, torrent: String): Int {
+        return database.getBlocksWithType(LIKE_BLOCK).filter { it.transaction["video"] == vid && it.transaction["torrent"] == torrent }.size
     }
 
     fun getPostedVideos(author: String): List<Pair<String, Int>> {
@@ -213,11 +213,6 @@ class DeToksCommunity(
         data class Key(val video: String, val torrent: String)
         fun TrustChainBlock.toKey() = Key(transaction["video"] as String, transaction["torrent"] as String)
             val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
-        // no need to sort here as getblocksbyauthor already sorts
-        for (block in getBlocksByAuthor(author)) {
-            Log.d("Detoks", block.transaction["author"] as String)
-            Log.d("Detoks", getLikes(block.transaction["video"] as String, block.transaction["torrent"] as String).size.toString())
-        }
         return likes.entries.map {
             Pair(it.key.video, it.value.size)
         }
