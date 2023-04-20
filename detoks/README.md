@@ -39,12 +39,6 @@ This project presents a token transaction engine API built on top of the [TrustC
       - [Multiple blocks broadcasted at once](#Multiple-blocks-broadcasted-at-once)  
       - [Remediation for lost packets](#Remediation-for-lost-packets)  
   
-## Project Structure  
-The project and code is split into the following three parts:  
-- `transactionEngine`: The transaction engine itself, which is a modular transaction engine that can be used in other projects or communities.  
-- `UI`: The UI of the transaction engine, consisting of the benchmark fragment and the peer connection fragment  
-- `util`: Utility classes and functions used in the transaction engine and the UI  
-- `test`: Unit tests for the transaction engine  
   
   
 ## Transaction Engine  
