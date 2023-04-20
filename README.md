@@ -214,10 +214,9 @@ The videos are shown according to the leeching strategy that the user can select
 
 <img src="https://user-images.githubusercontent.com/45147538/233306964-447be422-655d-46dd-9867-90ed514e69c8.jpg" alt="leeching" width="30%">
 
- 
 The user can also turn on seeding, in which case videos are downloaded according to the seeding strategy so that they can then be seeded:
 
-`TODO insert picture`
+<img src="https://user-images.githubusercontent.com/45147538/233315296-4e932ab7-9255-48c8-8b0f-649fe9264de1.jpeg" alt="seeding screen", width="30%">
 
 More documentation on the DeToks app can be found [here](https://github.com/ChrisSBras/trustchain-superapp/blob/master/detoks/README.md).
 
