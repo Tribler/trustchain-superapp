@@ -129,7 +129,7 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
                        Toast.makeText(this.context, "Duplicate Entry!", Toast.LENGTH_LONG).show()
                    }
                    //save call to db
-//               Log.v("newRowID", newRowId.toString())
+
                    Log.v("Save pub key", content.toString())
                    Log.v("Name ", username.toString())
                    val navController = this.findNavController()
