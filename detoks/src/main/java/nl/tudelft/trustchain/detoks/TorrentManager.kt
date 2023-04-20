@@ -199,7 +199,7 @@ class TorrentManager private constructor (
                             )
                             torrentFiles.add(torrent)
                             val magnet = torrent.handle.makeMagnetUri()
-                            profile.addProfile(magnet)
+                            profile.addProfile(torrentInfo.infoHash().toString())
                             getInfoFromMagnet(magnet)?.let { it2 ->
                                 profile.updateEntryUploadDate(
                                     magnet,
