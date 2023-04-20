@@ -197,6 +197,29 @@ Sharing, storing, and searching of scientific publications through the p2p ipv8 
 
 [More about literature dao app](literaturedao/README.md)
 
+### DeToks
+
+The aim of DeToks is to be the decentralised version of the famous TikTok app. When leeching users pay tokens, and when seeding they gain tokens.
+
+The user can watch videos on the main screen:
+
+`TODO insert picture`
+
+The user can swipe up or down, going forwards or backwards in the videos.
+The statistics of the video can be viewed in the video statistics screen:
+
+`TODO insert picture`
+
+The videos are shown according to the leeching strategy that the user can select in the settings screen:
+
+`TODO insert picture`
+
+The user can also turn on seeding, in which case videos are downloaded according to the seeding strategy so that they can then be seeded:
+
+`TODO insert picture`
+
+More documentation on the DeToks app can be found [here]().
+
 ### Do you want to add your own app?
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
