@@ -189,7 +189,7 @@ class UpvoteCommunity(
             sendSeedReward(rewardTokens, peer)
             Log.i("Detoks", "Sending seed reward")
         }
-
+        Log.i("Detoks", "Received ${validTokens.size} tokens!")
         upvoteService.persistTokens(validTokens)
 
         // Send recommendations back to the peer that upvoted the video
@@ -220,7 +220,7 @@ class UpvoteCommunity(
         }
 
         val agreementBlock = createAgreementBlock(rewardBlock, rewardBlock.transaction)
-        Log.i("Detoks", "Signed Agreement block $agreementBlock")
+        Log.i("Detoks", "Signed Seed Reward Agreement block $agreementBlock")
 
     }
 

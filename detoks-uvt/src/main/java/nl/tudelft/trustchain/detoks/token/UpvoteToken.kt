@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.messaging.serializeVarLen
 import nl.tudelft.ipv8.util.hexToBytes
@@ -76,9 +77,6 @@ class UpvoteToken constructor(
             return
         }
 
-        upvoteCommunity.createAgreementBlock(proposalBlock, proposalBlock.transaction)
-        Log.i("DeToks", "Agreement block created!")
-
         val seedingMagnetUri = upvoteCommunity.torrentManager?.seedLikedVideo()
 
         if (seedingMagnetUri != null)
@@ -102,6 +100,16 @@ class UpvoteToken constructor(
             createToastMessage("Could not mint tokens to upvote the video", context)
             return
         }
+
+        val transaction = mapOf(
+            "videoID" to proposalBlock.blockId,
+            "upvoteTokenGivenBy" to myPubKey,
+            "upvoteTokenGivenTo" to myPubKey,
+            "seedingRewardGivenTo" to publicKeySeeder
+        )
+
+        upvoteCommunity.createAgreementBlock(proposalBlock, transaction)
+        Log.i("DeToks", "Agreement block created!")
 
         val sendSuccess = upvoteCommunity.sendUpvoteToken(upvoteTokenList, proposalBlock.publicKey)
         if (sendSuccess) {

@@ -74,8 +74,17 @@ class TorrentManager(
         val recommendedVideo: List<String>? = Recommender.getNextRecommendation()
         if (recommendedVideo != null && recommendedVideo.size == 4) {
             Log.i("DeToks", "Now adding this recommended video ID: $recommendedVideo to peers video feed")
-            addTorrent(recommendedVideo[0], recommendedVideo[1], recommendedVideo[2], recommendedVideo[3])
-        } else {
+            try {
+                addTorrent(
+                    recommendedVideo[0],
+                    recommendedVideo[1],
+                    recommendedVideo[2],
+                    recommendedVideo[3]
+                )
+            } catch(e: IllegalArgumentException) {
+                e.printStackTrace()
+            }
+            } else {
             Log.i("DeToks", "Could not get recommended video")
         }
     }
