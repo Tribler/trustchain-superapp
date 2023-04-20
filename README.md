@@ -212,7 +212,7 @@ The statistics of the video can be viewed in the video statistics screen:
  
 The videos are shown according to the leeching strategy that the user can select in the settings screen:
 
-![leeching strategies](https://user-images.githubusercontent.com/45147538/233304978-301b0cc2-17dd-4a8f-a8d3-9750d0eaf9c5.jpg)
+![leeching](https://user-images.githubusercontent.com/45147538/233306964-447be422-655d-46dd-9867-90ed514e69c8.jpg)
  
 The user can also turn on seeding, in which case videos are downloaded according to the seeding strategy so that they can then be seeded:
 
