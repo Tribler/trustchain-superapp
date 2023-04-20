@@ -123,10 +123,10 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
         if (access != "admin") {
             return false
         }
-        val passVerification = token.verifyRecipients(token.verifier)
-        if(passVerification)
-            return true
-        return false
+//        val passVerification = token.verifyRecipients(token.verifier)
+//        if(passVerification)
+        return true
+//        return false
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
