@@ -26,7 +26,7 @@ class DeToksCommunity(
     crawler: TrustChainCrawler = TrustChainCrawler()
 ) : TrustChainCommunity(settings, database, crawler) {
 
-    override val serviceId = "d86a7db45eb3563ae047639817baec4db2bc7c21"
+    override val serviceId = "426a7db45eb3563ae047639817baec4db2bc7c42"
     private val walletManager = WalletManager(context)
     private val visitedPeers  = mutableListOf<Peer>()
     private val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
