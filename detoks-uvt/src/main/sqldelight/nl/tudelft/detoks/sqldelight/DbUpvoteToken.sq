@@ -1,0 +1,40 @@
+--region Sent UpvoteTokens
+createSentUpvoteTokensTable:
+CREATE TABLE IF NOT EXISTS sent_upvote_tokens (
+    token_id INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    public_key TEXT NOT NULL,
+    video_id TEXT NOT NULL,
+    public_key_seeder TEXT NOT NULL,
+    PRIMARY KEY (token_id, date, public_key)
+);
+getAllSentTokens:
+SELECT * FROM sent_upvote_tokens;
+
+addSentToken:
+INSERT INTO sent_upvote_tokens (token_id, date, public_key, video_id, public_key_seeder)
+VALUES(?, ?, ?, ?, ?);
+
+getLastSentToken:
+SELECT * FROM sent_upvote_tokens ORDER BY date DESC, token_id DESC LIMIT 1;
+
+getFiveLatestUpvotedVideos:
+SELECT video_id FROM sent_upvote_tokens ORDER BY date DESC LIMIT 5;
+
+createOwnedUpvoteTokensTable:
+CREATE TABLE IF NOT EXISTS owned_upvote_tokens (
+    token_id INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    public_key TEXT NOT NULL,
+    video_id TEXT NOT NULL,
+    public_key_seeder TEXT NOT NULL,
+    PRIMARY KEY (token_id, date, public_key)
+);
+
+addOwnedUpvoteToken:
+INSERT INTO owned_upvote_tokens (token_id, date, public_key, video_id, public_key_seeder)
+VALUES(?, ?, ?, ?, ?);
+
+getLatestThreeUpvotedVideos:
+SELECT video_id FROM owned_upvote_tokens ORDER BY date DESC LIMIT 3;
+

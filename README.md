@@ -25,9 +25,6 @@ An online indicator and the last message is shown for each contact. Users can ex
 
  <img src="https://user-images.githubusercontent.com/1122874/82873643-1a353880-9f35-11ea-8da3-24ce189c939d.png" width="180"> <img src="https://user-images.githubusercontent.com/1122874/82873661-1f928300-9f35-11ea-9955-6a7488936b02.png" width="180">
 
-### DeToks
-**Decentralised TikTok** skeleton app for the CS4160 Blockchain Engineering (2022/23) course.
-
 ### Digital Euro
 
 The Superapp is connected to the European IBAN Euro system.
@@ -196,6 +193,18 @@ Sharing, storing, and searching of scientific publications through the p2p ipv8 
 
 
 [More about literature dao app](literaturedao/README.md)
+
+### DeToks
+DeToks is a decentralized TikTok skeleton application where several different groups implemented parts of the application. The application will utilize a peer-to-peer network consisting strictly of smartphones only. Currently, the application only works on Android-powered smartphones. The focus of this application will be the token economy, Torrent-based streaming videos, and basic app logic.
+Sprint highlights discussed in this Tribler issue: https://github.com/Tribler/tribler/issues/7305
+
+DeToks downloads videos, in the form of torrents, of content creators in the background and will display them to the end-user. The following GIFs demonstrate the loading screen, a user posting a video, and a user liking a video.
+
+![loading_screen](https://user-images.githubusercontent.com/56682985/232781937-76e2c81c-8ec7-4fa5-b800-143e25645ca8.gif)
+![post_video](https://user-images.githubusercontent.com/56682985/232781925-8a003a16-e808-4e75-b208-63045d98ad7e.gif)
+![like_2_times](https://user-images.githubusercontent.com/56682985/232781848-884e9a6b-62bb-492e-b1a8-94a2fa4bd525.gif)
+
+[More information about the design decisions made for the Detoks app](detoks-uvt/report.md)
 
 ### Do you want to add your own app?
 

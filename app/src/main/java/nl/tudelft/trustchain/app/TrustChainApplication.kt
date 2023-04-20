@@ -62,7 +62,8 @@ import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.detoks.DeToksCommunity
+
+import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.gossipML.RecommenderCommunity
@@ -119,7 +120,7 @@ class TrustChainApplication : Application() {
                 createRecommenderCommunity(),
                 createIdentityCommunity(),
                 createFOCCommunity(),
-                createDeToksCommunity()
+                createUpvoteCommunity()
             ),
             walkerInterval = 5.0
         )
@@ -448,11 +449,13 @@ class TrustChainApplication : Application() {
             listOf(randomWalk)
         )
     }
-
-    private fun createDeToksCommunity(): OverlayConfiguration<DeToksCommunity> {
+    private fun createUpvoteCommunity(): OverlayConfiguration<UpvoteCommunity> {
+        val settings = TrustChainSettings()
+        val driver = AndroidSqliteDriver(Database.Schema, this, "upvote.db")
+        val store = TrustChainSQLiteStore(Database(driver))
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
-            DeToksCommunity.Factory(this),
+            UpvoteCommunity.Factory(this, settings, store),
             listOf(randomWalk)
         )
     }
