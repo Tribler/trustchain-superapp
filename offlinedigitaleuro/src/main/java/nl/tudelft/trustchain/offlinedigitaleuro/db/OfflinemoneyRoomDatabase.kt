@@ -14,11 +14,12 @@ import androidx.room.RoomDatabase
 //    abstract fun transactionsDao(): TransactionsDao
 //    abstract fun tokensDao(): TokensDao
 //}
-@Database(entities = [UserData::class, Transactions::class, Token::class], version = 1)
+@Database(entities = [UserData::class, Transactions::class, Token::class, WebOfTrust::class], version = 1)
 abstract class OfflineMoneyRoomDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun transactionsDao(): TransactionsDao
     abstract fun tokensDao(): TokensDao
+    abstract fun webOfTrustDao(): WebOfTrustDAO
 
     companion object {
         @Volatile
