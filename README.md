@@ -204,15 +204,19 @@ The aim of DeToks is to be the decentralised version of the famous TikTok app. W
 The user can watch videos on the main screen:
 
 ![main_screen](https://user-images.githubusercontent.com/45147538/233304865-fae6b0bc-a0e6-46fc-9a77-48ae1095a97f.jpg)
+<img src="https://user-images.githubusercontent.com/45147538/233304865-fae6b0bc-a0e6-46fc-9a77-48ae1095a97f.jpg" alt="main_screen" width="25%">
 
 The user can swipe up or down, going forwards or backwards in the videos.
 The statistics of the video can be viewed in the video statistics screen:
  
 ![statistics](https://user-images.githubusercontent.com/45147538/233305397-9b228c29-23d1-4264-b47e-6739b4d9f3d0.jpg)
- 
+<img src="https://user-images.githubusercontent.com/45147538/233305397-9b228c29-23d1-4264-b47e-6739b4d9f3d0.jpg" alt="statistics" width="25%">
+
 The videos are shown according to the leeching strategy that the user can select in the settings screen:
 
 ![leeching](https://user-images.githubusercontent.com/45147538/233306964-447be422-655d-46dd-9867-90ed514e69c8.jpg)
+<img src="https://user-images.githubusercontent.com/45147538/233306964-447be422-655d-46dd-9867-90ed514e69c8.jpg" alt="leeching" width="25%">
+
  
 The user can also turn on seeding, in which case videos are downloaded according to the seeding strategy so that they can then be seeded:
 
