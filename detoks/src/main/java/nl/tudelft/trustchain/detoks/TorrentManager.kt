@@ -486,6 +486,8 @@ class TorrentManager private constructor (
         fun getVideoDuration() : Long {
             if(!isDownloaded()) return 0
             val retriever = MediaMetadataRetriever()
+            if(!File(getPath()).exists())
+                return 0
             retriever.setDataSource(getPath())
             return retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
         }
