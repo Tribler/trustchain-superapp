@@ -66,7 +66,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     private fun topFirstStrategy(
         p0: Pair<TorrentHandler, ProfileEntry?>,
         p1: Pair<TorrentHandler, ProfileEntry?>
-    ) : Int = p0.second!!.likes compareTo p1.second!!.likes
+    ) : Int = p1.second!!.likes compareTo p0.second!!.likes
 
     /**
      * Returns the torrent handlers based on when they were first uploaded
@@ -74,7 +74,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     private fun newestFirstStrategy(
         p0: Pair<TorrentHandler, ProfileEntry?>,
         p1: Pair<TorrentHandler, ProfileEntry?>
-    ) : Int = p0.second!!.uploadDate compareTo p1.second!!.uploadDate
+    ) : Int = p1.second!!.uploadDate compareTo p0.second!!.uploadDate
 
     /**
      * Returns the torrent handlers based on hopcount
@@ -82,7 +82,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
     private fun hopCountStrategy(
         p0: Pair<TorrentHandler, ProfileEntry?>,
         p1: Pair<TorrentHandler, ProfileEntry?>
-    ) : Int = p0.second!!.hopCount compareTo p1.second!!.hopCount
+    ) : Int = p1.second!!.hopCount compareTo p0.second!!.hopCount
 
     /**
      * Determines if a torrent should be high in the list by checking the upload
