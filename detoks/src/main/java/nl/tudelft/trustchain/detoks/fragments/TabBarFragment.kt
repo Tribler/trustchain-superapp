@@ -9,14 +9,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import nl.tudelft.trustchain.detoks.R
-import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.adapters.TabBarAdapter
+import kotlin.system.exitProcess
 
 class TabBarFragment : Fragment() {
     private val HOME_INDEX = 0
@@ -41,7 +42,6 @@ class TabBarFragment : Fragment() {
         viewPager.isUserInputEnabled = false
         viewPager.adapter = TabBarAdapter(this, listOf(detoksFragment, Fragment(), profileFragment))
 
-        //val torrentManager = TorrentManager.getInstance(requireActivity().applicationContext)
         // Request Android content selection for video
         val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
@@ -98,6 +98,10 @@ class TabBarFragment : Fragment() {
                 }
             }
         })
+
+        requireActivity().onBackPressedDispatcher.addCallback {
+            exitProcess(0)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

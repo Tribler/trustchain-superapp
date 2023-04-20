@@ -1,5 +1,8 @@
 package nl.tudelft.trustchain.detoks.fragments
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -7,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ListView
+import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.navigation.findNavController
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.DeToksCommunity
@@ -21,7 +26,7 @@ class DiscoveryFragment : Fragment() {
         val torrentManager = TorrentManager.getInstance(requireContext())
         val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
 
-        adapter.clear()
+        if (!adapter.isEmpty) adapter.clear()
         adapter.addAll(torrentManager.videoList.map { x -> Pair(x.fileName, community.getLikes(x.fileName, x.torrentName).size) })
         adapter.notifyDataSetChanged()
     }
@@ -29,20 +34,29 @@ class DiscoveryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val backButton = view.findViewById<ImageButton>(R.id.backButton)
         val reloadButton = view.findViewById<ImageButton>(R.id.reloadButton)
-        val discoveryList = view.findViewById<ListView>(R.id.discoveryList)
+        reloadButton.setOnClickListener {
+            update()
+        }
 
         adapter = VideosListAdapter(requireActivity(), arrayListOf())
         update()
-        discoveryList.adapter = adapter
 
-        backButton.setOnClickListener {
-            it.findNavController().navigate(DiscoveryFragmentDirections.actionDiscoveryFragmentToTabBarFragment())
+        val discoveryList = view.findViewById<ListView>(R.id.discoveryList)
+        discoveryList.adapter = adapter
+        discoveryList.setOnItemLongClickListener { _, _, i,_ ->
+            val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val data = adapter.getItem(i)
+            if (data != null) {
+                val clipData = ClipData.newPlainText("text", data.first)
+                clipboardManager.setPrimaryClip(clipData)
+                Toast.makeText(this.requireContext(), "Text copied to clipboard.", Toast.LENGTH_LONG).show()
+            }
+            true
         }
 
-        reloadButton.setOnClickListener {
-            update()
+        requireActivity().onBackPressedDispatcher.addCallback {
+            view.findNavController().navigate(DiscoveryFragmentDirections.actionDiscoveryFragmentToTabBarFragment())
         }
     }
 

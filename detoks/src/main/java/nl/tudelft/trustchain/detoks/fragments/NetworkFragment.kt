@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.addCallback
 import androidx.navigation.findNavController
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.DeToksCommunity
@@ -17,10 +18,7 @@ import nl.tudelft.trustchain.detoks.adapters.NetworkAdapter
 
 class NetworkFragment : Fragment() {
     private lateinit var networkLabel: TextView
-    private lateinit var backButton: ImageButton
-    private lateinit var reloadButton: ImageButton
     private lateinit var adapter: ArrayAdapter<String>
-    private lateinit var peersList: ListView
 
     private fun update() {
         val peers = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!.getPeers().map { it.publicKey.toString() }
@@ -32,30 +30,21 @@ class NetworkFragment : Fragment() {
         adapter.notifyDataSetChanged()
     }
 
-    override fun onResume() {
-        super.onResume()
-        update()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         networkLabel = view.findViewById(R.id.networkLabel)
-        backButton = view.findViewById(R.id.backButton)
-        reloadButton = view.findViewById(R.id.reloadButton)
 
-        adapter = NetworkAdapter(requireActivity(), arrayListOf())
-        peersList = view.findViewById(R.id.peersList)
-        peersList.adapter = adapter
-
-        backButton.setOnClickListener {
-            it.findNavController().navigate(NetworkFragmentDirections.actionNetworkFragmentToTabBarFragment())
-        }
-
+        val reloadButton = view.findViewById<ImageButton>(R.id.reloadButton)
         reloadButton.setOnClickListener {
             update()
         }
 
+        adapter = NetworkAdapter(requireActivity(), arrayListOf())
+        update()
+
+        val peersList = view.findViewById<ListView>(R.id.peersList)
+        peersList.adapter = adapter
         peersList.setOnItemLongClickListener { _, _, i,_ ->
             val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val data = adapter.getItem(i)
@@ -65,6 +54,10 @@ class NetworkFragment : Fragment() {
                 Toast.makeText(this.requireContext(), "Text copied to clipboard.", Toast.LENGTH_LONG).show()
             }
             true
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback {
+            view.findNavController().navigate(NetworkFragmentDirections.actionNetworkFragmentToTabBarFragment())
         }
     }
 
