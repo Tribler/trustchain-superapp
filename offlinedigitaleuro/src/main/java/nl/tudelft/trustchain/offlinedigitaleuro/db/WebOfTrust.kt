@@ -14,7 +14,7 @@ class WebOfTrust(
 interface WebOfTrustDAO {
 
     @Query("SELECT trust_score FROM weboftrust_table WHERE public_key = :public_key")
-    fun getUserTrustScore(public_key: String): Int
+    fun getUserTrustScore(public_key: String): Int?
 
     @Query("SELECT * FROM weboftrust_table")
     fun getAllTrustScores(): Array<WebOfTrust>

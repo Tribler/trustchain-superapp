@@ -16,4 +16,12 @@
     <string name="verify_money">Verify Money</string>
     <string name="print">Print</string>
     <string name="list_of_user_from_web_of_trust">List of user from web of trust</string>
+    <string name="send_money_trustscore_warning_high">INFO: The public key you are sending to has a good trust score (%d%%)!</string>
+    <string name="send_money_trustscore_warning_low">WARNING: The public key you are sending to has a low trust score (%d%%).</string>
+    <string name="send_money_trustscore_warning_average">WARNING: The public key you are sending to has an average trust score (%d%%).</string>
+    <string name="send_money_trustscore_warning_no_score">WARNING: No trust score available for the public key you are sending to.</string>
+    <string name="accept">Accept</string>
+    <string name="refuse">Refuse</string>
+    <string name="from">From:</string>
+    <string name="receiving">Receiving:</string>
 </resources>

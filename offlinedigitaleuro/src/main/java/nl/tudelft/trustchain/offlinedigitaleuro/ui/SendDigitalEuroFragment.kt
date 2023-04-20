@@ -25,22 +25,22 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
 
     // load just enough tokens to transfer
     private fun loadTokensToSend(oneCount: Int, twoCount: Int, fiveCount: Int, tenCount: Int): MutableSet<Token> {
-        val ret: MutableSet<Token> = mutableSetOf();
+        val ret: MutableSet<Token> = mutableSetOf()
 
         ret.addAll(
             dbTokens2Tokens(db.tokensDao().getAllTokensOfValue(1.0), oneCount)
-        );
+        )
         ret.addAll(
             dbTokens2Tokens(db.tokensDao().getAllTokensOfValue(2.0), twoCount)
-        );
+        )
         ret.addAll(
             dbTokens2Tokens(db.tokensDao().getAllTokensOfValue(5.0), fiveCount)
-        );
+        )
         ret.addAll(
             dbTokens2Tokens(db.tokensDao().getAllTokensOfValue(10.0), tenCount)
-        );
+        )
 
-        return ret;
+        return ret
     }
 
     private fun dbTokens2Tokens(dbTokens: Array<nl.tudelft.trustchain.offlinedigitaleuro.db.Token>, count: Int): MutableList<Token> {
@@ -48,7 +48,7 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
 
         for (i in 0 until count) {
             val dbToken = dbTokens[i];
-            val setOfToken = Token.deserialize(dbToken.token_data);
+            val setOfToken = Token.deserialize(dbToken.token_data)
             for (t in setOfToken) {
                 Log.i("TOKEN", "token_id ${t.id}")
                 ret.add(t);
@@ -65,7 +65,7 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
         val tokensToSend: MutableSet<Token> = mutableSetOf();
 
         runBlocking(Dispatchers.IO) {
-            val coinCounts: JSONObject = JSONObject(requireArguments().getString(ARG_DATA)!!)
+            val coinCounts = JSONObject(requireArguments().getString(ARG_DATA)!!)
 
             tokensToSend.addAll(loadTokensToSend(
                 coinCounts.getInt(SendAmountFragment.ARG_1EURO_COUNT),
@@ -79,7 +79,7 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
         lifecycleScope.launch {
             val transferJson = TransferQR.createJson(Wallet().privateKey, tokensToSend);
 
-            binding.txtSendData.text = transferJson.toString();
+            binding.txtSendData.text = transferJson.toString()
 
             val bitmap = withContext(Dispatchers.Default) {
                 qrCodeUtils.createQR(transferJson.toString())
@@ -104,6 +104,10 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
                 }
             }
 
+            findNavController().navigate(R.id.action_sendMoneyFragment_to_transferFragment)
+        }
+
+        binding.btnCancel.setOnClickListener {
             findNavController().navigate(R.id.action_sendMoneyFragment_to_transferFragment);
         }
     }

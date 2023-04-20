@@ -22,7 +22,7 @@ class TransferQR(
         const val field_tokens: String = "tokens";
 
         fun createJson(pvk: PrivateKey, tokens: MutableSet<Token>): JSONObject {
-            val ret: JSONObject = JSONObject();
+            val ret = JSONObject();
 
             ret.put(field_pvk, pvk.keyToBin().toHex());
             ret.put(field_tokens, Token.serialize(tokens).toHex());
@@ -31,7 +31,7 @@ class TransferQR(
         }
 
         fun fromJson(json: JSONObject): TransferQR? {
-            var ret: TransferQR? = null;
+            var ret: TransferQR?
             try {
                 val pvk: PrivateKey = defaultCryptoProvider.keyFromPrivateBin(
                     json.getString(field_pvk).hexToBytes()

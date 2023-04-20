@@ -10,10 +10,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_trustscore.view.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import nl.tudelft.ipv8.util.toHex
+import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinedigitaleuro.R
 import nl.tudelft.trustchain.offlinedigitaleuro.databinding.TransactionsFragmentBinding
@@ -33,7 +32,7 @@ class TransactionsFragment : OfflineDigitalEuroBaseFragment(R.layout.transaction
 
         adapter.registerRenderer(TrustScoreItemRenderer())
 
-        lifecycleScope.launchWhenResumed {
+        lifecycleScope.launch(Dispatchers.IO) {
             val items = db.webOfTrustDao().getAllTrustScores().map { trustScore: WebOfTrust -> TrustScoreItem(trustScore) }
             adapter.updateItems(items)
             adapter.notifyDataSetChanged()

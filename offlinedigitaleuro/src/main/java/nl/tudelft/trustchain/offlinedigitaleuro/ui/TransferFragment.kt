@@ -4,9 +4,15 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import androidx.navigation.fragment.findNavController
 import android.widget.Toast
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,6 +53,29 @@ class TransferFragment : OfflineDigitalEuroBaseFragment(R.layout.activity_main_o
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val menuHost = requireActivity() as MenuHost
+
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                // Add menu items here
+                menuInflater.inflate(R.menu.offline_print_option, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                // Handle the menu selection
+                return when (menuItem.itemId) {
+                    R.id.printMoney -> {
+                        findNavController().navigate(R.id.action_transferFragment_to_printMoneyFragment)
+                        true
+                    }
+                    R.id.verifyMoney -> {
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
         lifecycleScope.launch(Dispatchers.IO) {
             updateBalance()
         }
@@ -66,23 +95,30 @@ class TransferFragment : OfflineDigitalEuroBaseFragment(R.layout.activity_main_o
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
-                val qr = TransferQR.fromJson(JSONObject(it))!!;
-                Log.d("DEBUG:", "pvk = " + qr.pvk.toString());
-                Log.d("DEBUG:", "tokens = " + qr.tokens.toString());
+                val qr = TransferQR.fromJson(JSONObject(it))!!
+                Log.d("DEBUG:", "pvk = " + qr.pvk.toString())
+                Log.d("DEBUG:", "tokens = " + qr.tokens.toString())
 
-                runBlocking(Dispatchers.IO) {
-                    for (token in qr.tokens) {
-                        db.tokensDao().insertToken(
-                            nl.tudelft.trustchain.offlinedigitaleuro.db.Token(
-                                token.id.toHex(),
-                                token.value.toDouble(),
-                                Token.serialize(mutableSetOf(token))
-                            )
-                        );
-                    }
+                val args = Bundle()
+                args.putString(AcceptEuroFragment.ARG_QR, qr.createJson().toString())
 
-                    updateBalance()
-                }
+                findNavController().navigate(
+                    R.id.action_sendAmountFragment_to_sendMoneyFragment,
+                    args
+                )
+//                runBlocking(Dispatchers.IO) {
+//                    for (token in qr.tokens) {
+//                        db.tokensDao().insertToken(
+//                            nl.tudelft.trustchain.offlinedigitaleuro.db.Token(
+//                                token.id.toHex(),
+//                                token.value.toDouble(),
+//                                Token.serialize(mutableSetOf(token))
+//                            )
+//                        );
+//                    }
+//
+//                    updateBalance()
+//                }
             } catch (e: JSONException) {
                 Toast.makeText(requireContext(), "Scan failed, try again", Toast.LENGTH_LONG).show()
             }
