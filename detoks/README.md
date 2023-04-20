@@ -89,10 +89,10 @@ The seeding strategy only sorts the torrents into a list of torrents that will b
 
 ## Tokens
 
-`TODO: add tokens`
+A simple token transaction implementation was added in order to test if transactions can be performed while seeding and downloading. Whenever an user finishes downloading a piece of the torrent they are downloading, they send a token to the peers which were seeding it. We check for that by using the alert `AlertType.PIECE_FINISHED`, and we identify the peers that were seeding the downloaded piece based on the information given by the current torrent handle. In addition, peers may also seed torrents to peers outside of the Detoks Community, by which they also get compsated by increasing their wallet balance.
 
 ## Debug Screen
-A user may access the debug screen for a torrent by clicking on its name (circled in orange) in the list of seeded torrents shown in [Seeding](#seeding). They can also access it through clicking the video title at the bottom of the video player.   
+A user may access the debug screen for a torrent by clicking on its name (circled in orange) in the list of seeded torrents shown in [Seeding](#seeding).   
 <img src="https://user-images.githubusercontent.com/57201085/232646069-cc0b9fcc-b5ee-49b0-8713-40cab2c4138a.jpg" alt="fu1" width="25%"> <img src="https://user-images.githubusercontent.com/57201085/232646748-47d9bdd4-c549-4c21-8c80-2499e2ee5b1e.jpg" alt="fu1" width="25%">
 
 It displays libtorrent metadata on the torrent such as:
