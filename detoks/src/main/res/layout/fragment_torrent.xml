@@ -28,14 +28,14 @@
 
     <TextView
         android:id="@+id/magnetLinkTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:textSize="14sp"
         android:text="@string/magnet_link"
-        app:layout_constraintTop_toBottomOf="@+id/infoHashTextView"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/infoHashTextView" />
 
     <TextView
         android:id="@+id/filesTextView"
