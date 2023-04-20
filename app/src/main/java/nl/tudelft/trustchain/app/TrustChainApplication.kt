@@ -62,7 +62,10 @@ import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.detoks_engine.TransactionCommunity
 import nl.tudelft.trustchain.detoks.DeToksCommunity
+import nl.tudelft.trustchain.detoks_engine.trustchain.CommunityAdapter
+import nl.tudelft.trustchain.detoks_engine.trustchain.TrustChainTransactionCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.gossipML.RecommenderCommunity
@@ -107,6 +110,10 @@ class TrustChainApplication : Application() {
                 createPeerChatCommunity(),
                 createEuroTokenCommunity(),
                 createTFTPCommunity(),
+                createIdentityCommunity(),
+                createDeToksCommunity(),
+                createTransactionCommunity(),
+                createTrustChainTransactionCommunity(),
                 createDemoCommunity(),
                 createWalletCommunity(),
                 createAtomicSwapCommunity(),
@@ -117,9 +124,7 @@ class TrustChainApplication : Application() {
                 createMusicCommunity(),
                 createLiteratureCommunity(),
                 createRecommenderCommunity(),
-                createIdentityCommunity(),
                 createFOCCommunity(),
-                createDeToksCommunity()
             ),
             walkerInterval = 5.0
         )
@@ -279,6 +284,27 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             Overlay.Factory(AtomicSwapCommunity::class.java),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createTransactionCommunity(): OverlayConfiguration<TransactionCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            Overlay.Factory(TransactionCommunity::class.java),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createTrustChainTransactionCommunity(): OverlayConfiguration<TrustChainTransactionCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        val blockTypesBcDisabled: Set<String> = setOf(CommunityAdapter.TOKEN_BLOCK_TYPE)
+        val settings = TrustChainSettings(blockTypesBcDisabled)
+        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchaindetoks.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+
+        return OverlayConfiguration(
+            TrustChainTransactionCommunity.Factory(settings, store),
             listOf(randomWalk)
         )
     }
