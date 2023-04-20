@@ -47,6 +47,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    var balanceText: TextView? = null
     var arrayAdapter: ArrayAdapter<String>? = null
     var wallet : Wallet? = null
     var spinnerFriends: Spinner? = null
@@ -98,8 +99,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val myPublicKey = getIpv8().myPeer.publicKey
         val myPrivateKey = getIpv8().myPeer.key as PrivateKey
         val amountText = view.findViewById<EditText>(R.id.amount)
-        val balanceText = view.findViewById<TextView>(R.id.txtBalance)
-        balanceText.text = wallet!!.balance.toString()
+        balanceText = view.findViewById<TextView>(R.id.txtBalance)
+        this.balanceText?.text = wallet!!.balance.toString()
 
         val buttonScan = view.findViewById<Button>(R.id.button_send)
         buttonScan.setOnClickListener {
@@ -138,7 +139,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
                             } else {
                                 showQR(view, chosenTokens, friendPublicKey)
                                 Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
-                                balanceText.text = wallet!!.balance.toString()
+                                this.balanceText?.text = wallet!!.balance.toString()
                             }
                         } else {
                             Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
@@ -211,6 +212,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             if(successful == -1L) {
                 Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
             } else {
+                this.balanceText?.text = wallet!!.balance.toString()
                 Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
             }
         } else {
