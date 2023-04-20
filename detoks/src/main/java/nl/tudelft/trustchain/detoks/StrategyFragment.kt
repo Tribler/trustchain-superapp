@@ -14,6 +14,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_strategy.*
+import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
 
@@ -167,7 +168,7 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val handler = strategyData[position]
         val convBtoMB = 1000000
         val status = handler.handle.status()
-
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         holder.hashTextView.text = strategyData[position].handle.name()
         val bundle = Bundle()
         bundle.putString("torrent_name", holder.hashTextView.text.toString())
@@ -179,10 +180,9 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         holder.uploadTextView.text = (status.allTimeUpload()
             / convBtoMB).toString()
 
-        //TODO: replace by actual token balance
         holder.balanceTextView.text = (
-            (status.allTimeUpload() - status.allTimeDownload())
-            / convBtoMB).toString()
+            community.getBalance().toString())
+
     }
 
     override fun getItemCount(): Int = strategyData.size
