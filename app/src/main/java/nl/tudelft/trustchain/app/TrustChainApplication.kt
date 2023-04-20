@@ -13,14 +13,9 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.preference.PreferenceManager
-import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
-import nl.tudelft.trustchain.musicdao.core.dao.DaoCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -62,12 +57,16 @@ import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.detoks.db.TokenStore
 import nl.tudelft.trustchain.detoks.DeToksCommunity
+import nl.tudelft.trustchain.detoks.DeToksTransactionEngine
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.gossipML.RecommenderCommunity
 import nl.tudelft.trustchain.gossipML.db.RecommenderStore
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
+import nl.tudelft.trustchain.musicdao.core.dao.DaoCommunity
+import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
@@ -119,6 +118,7 @@ class TrustChainApplication : Application() {
                 createRecommenderCommunity(),
                 createIdentityCommunity(),
                 createFOCCommunity(),
+                createOurCommunity(),
                 createDeToksCommunity()
             ),
             walkerInterval = 5.0
@@ -445,6 +445,20 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             FOCCommunity.Factory(this),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createOurCommunity(): OverlayConfiguration<DeToksTransactionEngine> {
+
+        val ourStore = TokenStore.getInstance(this)
+
+        val settings = TrustChainSettings()
+        val driver = AndroidSqliteDriver(Database.Schema, this, "detokstruststore.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            DeToksTransactionEngine.Factory(ourStore, this, settings, store),
             listOf(randomWalk)
         )
     }

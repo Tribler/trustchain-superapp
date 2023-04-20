@@ -71,7 +71,7 @@
 
         <activity
             android:name="nl.tudelft.trustchain.common.ui.QRCodeActivityPortrait"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:stateNotNeeded="true"
             android:windowSoftInputMode="stateAlwaysHidden" />
 
@@ -132,7 +132,7 @@
             android:exported="true"
             android:launchMode="singleTop"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/Theme.ValueTransfer">
             <tools:validation testUrl="http://trustchain.tudelft.nl/requestMoney?receiver=Tat&amp;amount=15.23&amp;message=party" />
             <intent-filter android:autoVerify="true">
@@ -151,7 +151,7 @@
         <activity
             android:name="nl.tudelft.trustchain.valuetransfer.passport.PassportCaptureActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:stateNotNeeded="true"
             android:windowSoftInputMode="stateAlwaysHidden" />
 
@@ -160,7 +160,7 @@
             android:exported="true"
             android:label="Music App"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/Theme.MusicDaoTheme"></activity>
 
         <activity
@@ -168,7 +168,7 @@
             android:exported="true"
             android:label="Literature sharing app"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="fullSensor">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
