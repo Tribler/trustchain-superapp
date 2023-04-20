@@ -10,13 +10,12 @@ import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.trustchain.detoks.DeToksCommunity
 import nl.tudelft.trustchain.detoks.TorrentManager
 
-class WatchTimeGossiper(
+class ProfileEntryGossiper(
     override val delay: Long,
     override val peers: Int,
     private val blocks: Int,
     private val context: Context
-
-    ) : Gossiper() {
+) : Gossiper() {
 
     override fun startGossip(coroutineScope: CoroutineScope) {
         coroutineScope.launch {
@@ -32,28 +31,37 @@ class WatchTimeGossiper(
 
         val randomPeers = pickRandomN(deToksCommunity.getPeers(), peers)
         val randomProfileEntries = pickRandomN(
-            TorrentManager.getInstance(context).profile.torrents.entries.map { Pair(it.key, it.value.watchTime) },
+            TorrentManager.getInstance(context).profile.profiles.entries.map { Pair(it.key, it.value) },
             blocks
         )
         if (randomPeers.isEmpty() || randomProfileEntries.isEmpty()) return
 
-        randomPeers.forEach {
-            deToksCommunity.gossipWith(
-                it,
-                WatchTimeMessage(randomProfileEntries),
-                DeToksCommunity.MESSAGE_WATCH_TIME_ID
+        randomProfileEntries.forEach { it1 ->
+            val data = listOf(
+                Pair("Key", it1.first),
+                Pair("WatchTime", it1.second.watchTime.toString()),
+                Pair("Likes", it1.second.likes.toString()),
+                Pair("Duration", it1.second.duration.toString()),
+                Pair("UploadDate", it1.second.uploadDate.toString())
             )
+            randomPeers.forEach { it2 ->
+                deToksCommunity.gossipWith(
+                    it2,
+                    ProfileEntryMessage(data),
+                    DeToksCommunity.MESSAGE_PROFILE_ENTRY_ID
+                )
+            }
         }
     }
 }
 
-class WatchTimeMessage(data: List<Pair<String, Long>>) : GossipMessage<Long>(data) {
-    companion object Deserializer : Deserializable<WatchTimeMessage> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<WatchTimeMessage, Int> {
+class ProfileEntryMessage(data: List<Pair<String, String>>) : GossipMessage<String>(data) {
+    companion object Deserializer : Deserializable<ProfileEntryMessage> {
+        override fun deserialize(buffer: ByteArray, offset: Int): Pair<ProfileEntryMessage, Int> {
             val msg = deserializeMessage(buffer, offset){
-                return@deserializeMessage Pair(it.getString(0), it.getLong(1))
+                return@deserializeMessage Pair(it.getString(0), it.getString(1))
             }
-            return Pair(WatchTimeMessage(msg.first), msg.second)
+            return Pair(ProfileEntryMessage(msg.first), msg.second)
         }
     }
 }

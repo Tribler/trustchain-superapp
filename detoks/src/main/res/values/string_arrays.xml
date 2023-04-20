@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="strategies_array">
+        <item>Random</item>
+        <item>Hot</item>
+        <item>Rising</item>
+        <item>New</item>
+        <item>Top</item>
+        <item>Hop Count</item>
+        <item>Highest watch time</item>
+        <item>Lowest watch time</item>
+    </string-array>
+</resources>

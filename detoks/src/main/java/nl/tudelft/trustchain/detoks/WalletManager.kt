@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.detoks
 import android.content.SharedPreferences
 import android.content.Context
 
-class WalletManager(private val context: Context) {
+class WalletManager(context: Context) {
     private val mWalletPrefs: SharedPreferences =
         context.getSharedPreferences(WALLET_PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -23,4 +23,4 @@ class WalletManager(private val context: Context) {
     }
 }
 
-data class Wallet(var balance: Float = 10.0f)
+data class Wallet(var balance: Float = 100.0f)

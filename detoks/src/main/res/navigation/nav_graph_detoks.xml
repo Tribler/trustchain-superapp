@@ -9,5 +9,23 @@
         android:id="@+id/detoksFragment"
         android:name="nl.tudelft.trustchain.detoks.DeToksFragment"
         android:label="DeToks">
+        <action android:id="@+id/action_toStrategyFragment"
+            app:destination="@id/strategyFragment"/>
+        <action android:id="@+id/action_toTorrentFragment"
+            app:destination="@id/torrentFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/strategyFragment"
+        android:name="nl.tudelft.trustchain.detoks.StrategyFragment"
+        android:label="Strategy">
+        <action android:id="@+id/action_toTorrentFragment"
+            app:destination="@id/torrentFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/torrentFragment"
+        android:name="nl.tudelft.trustchain.detoks.TorrentFragment"
+        android:label="Torrent">
     </fragment>
 </navigation>
