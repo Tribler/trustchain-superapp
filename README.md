@@ -216,7 +216,7 @@ The videos are shown according to the leeching strategy that the user can select
 
 The user can also turn on seeding, in which case videos are downloaded according to the seeding strategy so that they can then be seeded:
  
-<img src="https://user-images.githubusercontent.com/45147538/233315296-4e932ab7-9255-48c8-8b0f-649fe9264de1.jpg" alt="seeding screen", width="30%">
+![seeding](https://user-images.githubusercontent.com/45147538/233316135-1aa7f197-7f3c-4534-9d57-e20eed2ba72c.jpeg)
 
 More documentation on the DeToks app can be found [here](https://github.com/ChrisSBras/trustchain-superapp/blob/master/detoks/README.md).
 
