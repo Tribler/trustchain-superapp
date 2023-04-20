@@ -109,14 +109,13 @@ class DeToksCommunity(private val context: Context,
     }
 
     fun gossipWith(peer: Peer, message: Serializable, id: Int) {
-        // Log.d(LOGGING_TAG, "Gossiping with ${peer.mid}, msg id: $id")
+        Log.d(LOGGING_TAG, "Gossiping with ${peer.mid}, msg id: $id")
 
         val packet = serializePacket(id, message)
 
         // Send a token only to a new peer
         if (!visitedPeers.contains(peer)) {
             visitedPeers.add(peer)
-            //sendTokens(1, peer.mid)
             val transaction = mapOf("amount" to 1)
             createProposalBlock(BLOCK_TYPE, transaction, peer.publicKey.keyToBin())
             Log.d(LOGGING_TAG, "Created proposal block")
@@ -218,7 +217,6 @@ class DeToksCommunity(private val context: Context,
             )
             send(recipientPeer.address, packet)
             Log.d(LOGGING_TAG, "sent message")
-            //gossipWith(recipientPeer, requestMessage, MESSAGE_PORT_REQUEST_ID)
         } else {
             Log.d(LOGGING_TAG, "Peer not found: $recipientMid")
         }
