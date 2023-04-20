@@ -76,7 +76,7 @@ As previously mentioned, the leeching strategy determines which videos are playe
 
 A user can seed torrents to earn tokens on the DeToks community network. This option can be turned on in the Settings view:
 
-`TODO: insert image when branch is finalized`
+![Seeding](https://user-images.githubusercontent.com/45147538/233316385-3843a31b-cbd1-4cb9-bdb8-ba62f5d35724.jpeg)
 
 The user has to specify:
 * Maximum bandwidth per day (in MB): sets the maximum upload rate.
