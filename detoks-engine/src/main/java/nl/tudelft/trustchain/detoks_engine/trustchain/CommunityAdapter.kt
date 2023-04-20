@@ -319,6 +319,9 @@ class CommunityAdapter private constructor(
             }
             return instance as CommunityAdapter
         }
+        fun destroy() {
+            instance = null
+        }
     }
 
     private fun <E> ConcurrentLinkedQueue<E>.pollN(n: Int): List<E> {
@@ -332,8 +335,8 @@ class CommunityAdapter private constructor(
 
     private fun TrustChainBlock.summarize(): String = StringBuilder().let {
         it.append("TrustChainBlock||: ")
-        it.append("fromID: ${publicKey.toString().substring(0, 8)}.$sequenceNumber, ")
-        it.append("toID: ${linkPublicKey.toString().substring(0, 8)}.$linkSequenceNumber, ")
+        it.append("fromID: ${publicKey.toString().substring(0, 8)}, ")
+        it.append("toID: ${linkPublicKey.toString().substring(0, 8)}, ")
         it.append("isProposal/Agreement: $isProposal/$isAgreement, ")
         it.append("transaction: $transaction ")
         it.append(":||")
