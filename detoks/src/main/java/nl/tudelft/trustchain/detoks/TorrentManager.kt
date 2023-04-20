@@ -362,8 +362,7 @@ class TorrentManager private constructor (
 
         val jobs = mutableListOf<Job>()
 
-        val toStopSeeding = seedingTorrents.toMutableList()
-        seedingTorrents.clear()
+        val toStopSeeding = getAndClearSeedingTorrents()
 
         for (i in seedingTorrentsSorted.indices) {
             seedingTorrentsSorted[i].handle.scrapeTracker()
@@ -380,13 +379,13 @@ class TorrentManager private constructor (
             if (toStopSeeding.contains(seedingTorrentsSorted[i])) {
                 if (status.lastUpload() - System.currentTimeMillis() > SEEDING_LOOP_TIME) continue
                 toStopSeeding.remove(seedingTorrentsSorted[i])
-                seedingTorrents.add(seedingTorrentsSorted[i])
+                addSeedingTorrent(seedingTorrentsSorted[i])
                 continue
             }
 
             jobs.add(CoroutineScope(Job() + Dispatchers.Default).launch {
                 if (downloadAndSeed(seedingTorrentsSorted[i])) {
-                    seedingTorrents.add(seedingTorrentsSorted[i])
+                    addSeedingTorrent(seedingTorrentsSorted[i])
                 }
             })
         }
@@ -401,6 +400,16 @@ class TorrentManager private constructor (
                 && strategies.storageLimit == storageLimit)
                 updateSeedingStrategy(strategyId, storageLimit)
         }
+    }
+
+    @Synchronized private fun addSeedingTorrent(seedTorrent: TorrentHandler) {
+        seedingTorrents.add(seedTorrent)
+    }
+
+    @Synchronized private fun getAndClearSeedingTorrents(): MutableList<TorrentHandler> {
+        val toStop = seedingTorrents.toMutableList()
+        seedingTorrents.clear()
+        return toStop
     }
 
     private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 400000) : Boolean {
