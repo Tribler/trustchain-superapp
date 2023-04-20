@@ -387,8 +387,7 @@ class TorrentManager private constructor(
 
         val jobs = mutableListOf<Job>()
 
-        val toStopSeeding = seedingTorrents.toMutableList()
-        seedingTorrents.clear()
+        val toStopSeeding = getAndClearSeedingTorrents()
 
         for (i in seedingTorrentsSorted.indices) {
             seedingTorrentsSorted[i].handle.scrapeTracker()
@@ -405,13 +404,13 @@ class TorrentManager private constructor(
             if (toStopSeeding.contains(seedingTorrentsSorted[i])) {
                 if (status.lastUpload() - System.currentTimeMillis() > SEEDING_LOOP_TIME) continue
                 toStopSeeding.remove(seedingTorrentsSorted[i])
-                seedingTorrents.add(seedingTorrentsSorted[i])
+                addSeedingTorrent(seedingTorrentsSorted[i])
                 continue
             }
 
             jobs.add(CoroutineScope(Job() + Dispatchers.Default).launch {
                 if (downloadAndSeed(seedingTorrentsSorted[i])) {
-                    seedingTorrents.add(seedingTorrentsSorted[i])
+                    addSeedingTorrent(seedingTorrentsSorted[i])
                 }
             })
         }
@@ -481,6 +480,16 @@ class TorrentManager private constructor(
     }
 
 
+
+    @Synchronized private fun addSeedingTorrent(seedTorrent: TorrentHandler) {
+        seedingTorrents.add(seedTorrent)
+    }
+
+    @Synchronized private fun getAndClearSeedingTorrents(): MutableList<TorrentHandler> {
+        val toStop = seedingTorrents.toMutableList()
+        seedingTorrents.clear()
+        return toStop
+    }
 
     private suspend fun downloadAndSeed(handler: TorrentHandler, timeout: Long = 400000) : Boolean {
         if (!handler.handle.isValid) return false
@@ -561,6 +570,8 @@ class TorrentManager private constructor(
         fun getVideoDuration() : Long {
             if(!isDownloaded()) return 0
             val retriever = MediaMetadataRetriever()
+            if(!File(getPath()).exists())
+                return 0
             retriever.setDataSource(getPath())
             return retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
         }
