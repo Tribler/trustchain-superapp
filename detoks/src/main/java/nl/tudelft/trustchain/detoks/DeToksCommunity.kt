@@ -163,7 +163,7 @@ class DeToksCommunity(
     fun getLikes(vid: String, torrent: String): List<TrustChainBlock> {
         return database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["video"] == vid && it.transaction["torrent"] == torrent
-        }
+        }.distinctBy { it.transaction["liker"] }
     }
     fun getAllUniqueVideos(): List<Pair<String,String>> {
         val videos = database.getBlocksWithType(LIKE_BLOCK)
