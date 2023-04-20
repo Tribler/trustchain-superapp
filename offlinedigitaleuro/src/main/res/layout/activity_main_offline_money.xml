@@ -89,6 +89,8 @@
 
                     <ImageView
                         android:id="@+id/txt10Euro"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="0dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:srcCompat="@drawable/euro_10"
@@ -114,6 +116,8 @@
 
                     <ImageView
                         android:id="@+id/txt5Euro"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="0dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:srcCompat="@drawable/euro_5"
@@ -145,6 +149,8 @@
 
                     <ImageView
                         android:id="@+id/txt2Euro"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="0dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/euro_2"
@@ -169,6 +175,8 @@
 
                     <ImageView
                         android:id="@+id/txt1Euro"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="0dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/euro_1"
@@ -187,7 +195,7 @@
                 app:icon="@drawable/ic_baseline_photo_camera_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/thirdLine" />
+                app:layout_constraintTop_toBottomOf="@id/secondLine" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSend"
