@@ -32,7 +32,7 @@ public class CustomHybridRandomWalkRandomNodeResetIterator<E>
     private final Random rng;
     private final Graph<NodeOrSong, E> graph;
     private final Map<Node, Double> outEdgesTotalWeight;
-    private final Map<SongRecommendation, Double> personalizedPageRankTotalWeight;
+    private Map<SongRecommendation, Double> personalizedPageRankTotalWeight;
     private List<Node> nodesSortedByPageRank;
     private final long maxHops;
     private double pageRankSum;
@@ -125,20 +125,12 @@ public class CustomHybridRandomWalkRandomNodeResetIterator<E>
         return value;
     }
 
-    public void modifyPersonalizedPageRanks(Set<SongRecommendation> affectedSongs) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            for (SongRecommendation changedSongRec : affectedSongs) {
-                personalizedPageRankTotalWeight.put(changedSongRec, graph.outgoingEdgesOf(changedSongRec).stream().mapToDouble(this::returnPageRankOfNeighbour).sum());
-            }
-        } else {
-            for (SongRecommendation changedSongRec : affectedSongs) {
-                double outEdgesTotalWeightSum = 0.0;
-                for (E edge : graph.outgoingEdgesOf(changedSongRec)) {
-                    outEdgesTotalWeightSum += returnPageRankOfNeighbour(edge);
-                }
-                personalizedPageRankTotalWeight.put(changedSongRec, outEdgesTotalWeightSum);
-            }
-        }
+    @SuppressLint("NewApi")
+    public void modifyPersonalizedPageRanks(List<Node> nodes) {
+        personalizedPageRankTotalWeight = new HashMap<>();
+        Comparator<Node> comparator = Comparator.comparingDouble(Node::getPersonalizedPageRankScore);
+        nodesSortedByPageRank = nodes.stream().sorted(comparator).collect(Collectors.toList());
+        pageRankSum = nodesSortedByPageRank.stream().mapToDouble(Node::getPersonalizedPageRankScore).sum();
     }
 
     public void modifyEdges(Set<Node> changedSourceNodes) {

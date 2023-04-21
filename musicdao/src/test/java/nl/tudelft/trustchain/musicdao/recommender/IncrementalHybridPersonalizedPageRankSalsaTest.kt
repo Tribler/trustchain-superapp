@@ -99,7 +99,7 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
         val oldNonRootSongScore = randomNonRootSong.rankingScore
         nodeToSongNetwork.removeEdge(randomRootSongEdge)
         nodeToSongNetwork.addEdge(rootNode, randomNonRootSong, NodeSongEdge(randomRootSongEdge.affinity))
-        incrementalHybrid.modifyNodesOrSongs(setOf(rootNode), setOf())
+        incrementalHybrid.modifyNodesOrSongs(setOf(rootNode), nodeToNodeNetwork.getAllNodes().toList())
         incrementalHybrid.calculateRankings()
         Assert.assertTrue(randomRootSong.rankingScore < oldRootSongRank)
         Assert.assertTrue(randomNonRootSong.rankingScore > oldNonRootSongScore)

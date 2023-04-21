@@ -56,7 +56,7 @@ class TrustNetwork(private val nodeToNodeNetwork: NodeToNodeNetwork,
                     updateNodeTrust(edge.songRec, edge.nodeSongEdge.affinity - existingAffinity)
                 }
                 incrementalPersonalizedPageRank.modifyEdges(setOf(rootNode))
-                incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(rootNode), setOf(edge.songRec))
+                incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(rootNode), nodeToNodeNetwork.getAllNodes().toList())
             }
         }
     }
@@ -101,7 +101,7 @@ class TrustNetwork(private val nodeToNodeNetwork: NodeToNodeNetwork,
             } else {
                 if(!newSourceNode) {
                     incrementalPersonalizedPageRank.modifyEdges(setOf(edge.sourceNode))
-                    incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(edge.sourceNode), setOf())
+                    incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(edge.sourceNode), nodeToNodeNetwork.getAllNodes().toList())
                 }
             }
         }

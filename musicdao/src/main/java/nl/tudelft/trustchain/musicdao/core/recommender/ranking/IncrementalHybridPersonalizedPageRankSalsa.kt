@@ -41,9 +41,9 @@ class IncrementalHybridPersonalizedPageRankSalsa (
         }
     }
 
-    fun modifyNodesOrSongs(changedNodes: Set<Node>, changedSongs: Set<SongRecommendation>) {
+    fun modifyNodesOrSongs(changedNodes: Set<Node>, newNodes: List<Node>) {
         iter.modifyEdges(changedNodes)
-        iter.modifyPersonalizedPageRanks(changedSongs)
+        iter.modifyPersonalizedPageRanks(newNodes)
         initiateRandomWalks()
     }
 
