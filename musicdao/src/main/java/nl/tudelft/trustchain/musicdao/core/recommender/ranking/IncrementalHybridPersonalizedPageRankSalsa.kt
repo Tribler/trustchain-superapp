@@ -2,7 +2,7 @@ package nl.tudelft.trustchain.musicdao.core.recommender.ranking
 
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkIterator
+import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkRandomNodeResetIterator
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
 import java.util.*
 
@@ -14,35 +14,21 @@ class IncrementalHybridPersonalizedPageRankSalsa (
     graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>
 ): IncrementalRandomWalkedBasedRankingAlgo<DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>, NodeOrSong, NodeSongEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}
-    private val iter = CustomHybridRandomWalkIterator(graph, rootNode, maxWalkLength.toLong(), resetProbability, Random())
+    private val iter = CustomHybridRandomWalkRandomNodeResetIterator(graph, rootNode, maxWalkLength.toLong(), resetProbability, 0.5f, Random(), graph.vertexSet().filterIsInstance<Node>()
+        .toList() )
     private lateinit var randomWalks: MutableList<MutableList<NodeOrSong>>
 
     init {
         initiateRandomWalks()
     }
 
-    private fun completeExistingRandomWalk(existingWalk: MutableList<NodeOrSong>) {
-        if(existingWalk.size == 0) {
-            existingWalk.add(rootNode)
-        }
+    private fun performRandomWalk(existingWalk: MutableList<NodeOrSong>) {
         if(existingWalk.size >= maxWalkLength) {
             logger.info { "Random walk requested for already complete or overfull random walk" }
             return
         }
-        iter.nextVertex = existingWalk.last()
-        if(existingWalk.last() is SongRecommendation) {
-            if(existingWalk.size < 2) {
-                throw RuntimeException("Random Walk started with song recommendation")
-            }
-            val lastNode = existingWalk[existingWalk.size - 2]
-            if(lastNode is Node) {
-                iter.setLastNode(lastNode)
-            } else {
-                throw RuntimeException("Item in Random Walk before song recommendation isn't a node")
-            }
-        }
-        iter.hops = existingWalk.size.toLong() - 1
-        iter.next()
+        iter.nextVertex = rootNode
+        existingWalk.add(iter.next())
         while(iter.hasNext()) {
             existingWalk.add(iter.next())
         }
@@ -58,21 +44,12 @@ class IncrementalHybridPersonalizedPageRankSalsa (
     fun modifyNodesOrSongs(changedNodes: Set<Node>, changedSongs: Set<SongRecommendation>) {
         iter.modifyEdges(changedNodes)
         iter.modifyPersonalizedPageRanks(changedSongs)
-        for(i in 0 until randomWalks.size) {
-            val walk = randomWalks[i]
-            for(j in 0 until walk.size) {
-                if(changedNodes.contains(walk[j]) || changedSongs.contains(walk[j])) {
-                    randomWalks[i] = walk.slice(0..j).toMutableList()
-                    completeExistingRandomWalk(randomWalks[i])
-                }
-            }
-        }
+        initiateRandomWalks()
     }
 
     private fun performNewRandomWalk(): MutableList<NodeOrSong> {
         val randomWalk: MutableList<NodeOrSong> = mutableListOf()
-        randomWalk.add(rootNode)
-        completeExistingRandomWalk(randomWalk)
+        performRandomWalk(randomWalk)
         return randomWalk
     }
 

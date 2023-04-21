@@ -6,9 +6,9 @@ import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybrid
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRank
 import java.sql.Timestamp
 
-class TrustNetwork(serializedGraphs: SerializedGraphs, sourceNodeAddress: String) {
-    private val nodeToNodeNetwork: NodeToNodeNetwork
-    private val nodeToSongNetwork: NodeToSongNetwork
+class TrustNetwork(private val nodeToNodeNetwork: NodeToNodeNetwork,
+                   private val nodeToSongNetwork: NodeToSongNetwork,
+                   sourceNodeAddress: String) {
     private val incrementalPersonalizedPageRank: IncrementalPersonalizedPageRank
     private val incrementalHybridPersonalizedPageRankSalsa: IncrementalHybridPersonalizedPageRankSalsa
     private val allNodes: MutableList<Node>
@@ -19,20 +19,14 @@ class TrustNetwork(serializedGraphs: SerializedGraphs, sourceNodeAddress: String
         const val MAX_WALK_LENGTH = 1000
         const val REPETITIONS = 10000
         const val RESET_PROBABILITY = 0.01f
-
     }
 
     init {
-        nodeToNodeNetwork = NodeToNodeNetwork(serializedGraphs.nodeToNodeNetwork)
-        nodeToSongNetwork = NodeToSongNetwork(serializedGraphs.nodeToSongNetwork)
         val allNodesList = nodeToNodeNetwork.getAllNodes()
         allNodes = allNodesList.toMutableList()
         rootNode = allNodes.first { it.getIpv8() == sourceNodeAddress}
         incrementalPersonalizedPageRank = IncrementalPersonalizedPageRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, nodeToNodeNetwork.graph)
         incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsa(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, nodeToSongNetwork.graph)
-    }
-    private fun getEdgeTimestamp(source: Node, target: NodeOrSong): Timestamp {
-        TODO("Not yet implemented")
     }
 
     fun addNodeToSongEdge(edge: NodeSongEdgeWithNodeAndSongRec): Boolean {
@@ -71,12 +65,15 @@ class TrustNetwork(serializedGraphs: SerializedGraphs, sourceNodeAddress: String
         val recommenderNodeEdges = nodeToSongNetwork.graph.outgoingEdgesOf(songRec)
         val rootNeighborEdges = nodeToNodeNetwork.graph.outgoingEdgesOf(rootNode)
         for(recommenderNodeEdge in recommenderNodeEdges) {
-            val trustDelta = recommenderNodeEdge.affinity * affinityDelta
-            val recommenderNode = nodeToSongNetwork.graph.getEdgeTarget(recommenderNodeEdge) as Node
-            val existingTrustEdgeToNode = rootNeighborEdges.find { nodeToNodeNetwork.graph.getEdgeTarget(it) == recommenderNode }
-            val existingTrust = existingTrustEdgeToNode?.trust ?: 0.0
-            val newTrust = existingTrust + trustDelta
-            addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(newTrust), rootNode, recommenderNode))
+            val recommenderNode = nodeToSongNetwork.graph.getEdgeSource(recommenderNodeEdge) as Node
+            if(recommenderNode != rootNode) {
+                val trustDelta = recommenderNodeEdge.affinity * affinityDelta
+                val existingTrustEdgeToNode =
+                    rootNeighborEdges.find { nodeToNodeNetwork.graph.getEdgeTarget(it) == recommenderNode }
+                val existingTrust = existingTrustEdgeToNode?.trust ?: 0.0
+                val newTrust = existingTrust + trustDelta
+                addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(newTrust), rootNode, recommenderNode))
+            }
         }
     }
 
@@ -87,7 +84,8 @@ class TrustNetwork(serializedGraphs: SerializedGraphs, sourceNodeAddress: String
                 return false
             }
         }
-        if (!containsNode(edge.sourceNode)) {
+        val newSourceNode = !containsNode(edge.sourceNode)
+        if (newSourceNode) {
             if (!addNode(edge.sourceNode)) {
                 return false
             }
@@ -97,7 +95,24 @@ class TrustNetwork(serializedGraphs: SerializedGraphs, sourceNodeAddress: String
                 return false
             }
         }
-        return nodeToNodeNetwork.addEdge(edge.sourceNode, edge.targetNode, edge.nodeTrustEdge)
+        return nodeToNodeNetwork.addEdge(edge.sourceNode, edge.targetNode, edge.nodeTrustEdge).also {
+            if(!it) {
+                logger.error { "Couldn't add edge from ${edge.sourceNode} to ${edge.targetNode}" }
+            } else {
+                if(!newSourceNode) {
+                    incrementalPersonalizedPageRank.modifyEdges(setOf(edge.sourceNode))
+                    incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(edge.sourceNode), setOf())
+                }
+            }
+        }
+    }
+
+    fun getAllNodeToNodeEdges(): List<NodeTrustEdge> {
+        return nodeToNodeNetwork.getAllEdges().toList()
+    }
+
+    fun getAllNodeToSongEdges(): List<NodeSongEdge> {
+        return nodeToSongNetwork.getAllEdges().toList()
     }
 
     private fun containsEdge(source: Node, target: NodeOrSong): Boolean {

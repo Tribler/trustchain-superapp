@@ -117,12 +117,14 @@ public class CustomRandomWalkVertexIterator<V, E>
     {
         if (hops >= maxHops || (rng.nextFloat() < resetProbability)) {
             nextVertex = null;
+            hops = 0;
             return;
         }
 
         hops++;
         if (graph.outDegreeOf(nextVertex) == 0) {
             nextVertex = null;
+            hops = 0;
             return;
         }
 

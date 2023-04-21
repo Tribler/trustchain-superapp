@@ -23,13 +23,15 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
     private val nNodes = 5000
     private val nSongs = nNodes / 10
     private val nEdges = 10
-    private val repetitions = 10000
-    private val maxWalkLength = 10000
+    private val repetitions = 40000
+    private val maxWalkLength = 1000
 
     @Before
     fun setUp() {
         for(node in 0 until nNodes) {
-            nodeToSongNetwork.addNodeOrSong(Node(node.toString()))
+            val nodeToAdd = Node(node.toString())
+            nodeToNodeNetwork.addNode(nodeToAdd)
+            nodeToSongNetwork.addNodeOrSong(nodeToAdd)
         }
         for(song in 0 until nSongs) {
             nodeToSongNetwork.addNodeOrSong(SongRecommendation(song.toString()))
@@ -67,17 +69,17 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
 
     @Test
     fun scoreForSongsReflectsTrustInNeighbors() {
-        val pageRank = IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.01f, nodeToNodeNetwork.graph)
+        val pageRank = IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.05f, nodeToNodeNetwork.graph)
         pageRank.calculateRankings()
-        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.01f, nodeToSongNetwork.graph)
+        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.05f, nodeToSongNetwork.graph)
         incrementalHybrid.calculateRankings()
         val allNodeToNodeEdges = nodeToNodeNetwork.getAllEdges()
         val allNeighborsSortedByTrust = allNodeToNodeEdges.filter { nodeToNodeNetwork.graph.getEdgeSource(it) == rootNode }.map { nodeToNodeNetwork.graph.getEdgeTarget(it) }.sortedBy { it.getPersonalizedPageRankScore() }
         val leastTrustedNeighbor = allNeighborsSortedByTrust.first()
         val mostTrustedNeighbor = allNeighborsSortedByTrust.last()
         val allSongEdges = nodeToSongNetwork.getAllEdges()
-        val leastTrustedNeighborSongsWeight = allSongEdges.filter { nodeToSongNetwork.graph.getEdgeSource(it) == leastTrustedNeighbor }.sortedBy { it.affinity }.map { nodeToSongNetwork.graph.getEdgeTarget(it).rankingScore }.last()
-        val mostTrustedNeighborSongsWeight = allSongEdges.filter { nodeToSongNetwork.graph.getEdgeSource(it) == mostTrustedNeighbor }.sortedBy { it.affinity }.map { nodeToSongNetwork.graph.getEdgeTarget(it).rankingScore }.last()
+        val leastTrustedNeighborSongsWeight = allSongEdges.filter { nodeToSongNetwork.graph.getEdgeSource(it) == leastTrustedNeighbor }.sortedBy { it.affinity }.map { nodeToSongNetwork.graph.getEdgeTarget(it).rankingScore }.sum()
+        val mostTrustedNeighborSongsWeight = allSongEdges.filter { nodeToSongNetwork.graph.getEdgeSource(it) == mostTrustedNeighbor }.sortedBy { it.affinity }.map { nodeToSongNetwork.graph.getEdgeTarget(it).rankingScore }.sum()
         Assert.assertTrue(leastTrustedNeighborSongsWeight < mostTrustedNeighborSongsWeight)
     }
 

@@ -7,7 +7,7 @@ import org.junit.Assert
 import org.junit.Test
 import java.sql.Timestamp
 
-class GraphSerialization {
+class GraphSerializationTest {
     val nodeToNodeTrust = 5.2
     val someNodeTrustEdge = NodeTrustEdge(nodeToNodeTrust, Timestamp(343434))
     val sourceNode = Node("someSourceIp")

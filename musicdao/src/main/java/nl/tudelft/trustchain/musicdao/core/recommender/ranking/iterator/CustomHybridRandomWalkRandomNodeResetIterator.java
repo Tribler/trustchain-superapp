@@ -5,6 +5,7 @@
  */
 package nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator;
 
+import android.annotation.SuppressLint;
 import android.os.Build;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeOrSong;
@@ -13,8 +14,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 
-import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A hybrid personalized PageRank/SALSA random walk iterator for undirected bipartite graphs.
@@ -25,14 +26,16 @@ import java.util.*;
  *
  * @param <E> the graph edge type
  */
-public class CustomHybridRandomWalkIterator<E>
+public class CustomHybridRandomWalkRandomNodeResetIterator<E>
         implements
         Iterator<NodeOrSong> {
     private final Random rng;
     private final Graph<NodeOrSong, E> graph;
     private final Map<Node, Double> outEdgesTotalWeight;
     private final Map<SongRecommendation, Double> personalizedPageRankTotalWeight;
+    private List<Node> nodesSortedByPageRank;
     private final long maxHops;
+    private double pageRankSum;
 
     public NodeOrSong getNextVertex() {
         return nextVertex;
@@ -60,6 +63,7 @@ public class CustomHybridRandomWalkIterator<E>
 
     private Node lastNode;
     private final float resetProbability;
+    private final float randomNodeProbability;
 
     /**
      * Create a new iterator
@@ -68,10 +72,12 @@ public class CustomHybridRandomWalkIterator<E>
      * @param vertex           the starting vertex
      * @param maxHops          maximum hops to perform during the walk
      * @param resetProbability probability between 0 and 1 with which to reset the random walk
+     * @param randomNodeProbability probability between 0 and 1 to reset to a new node instead of roodNode
      * @param rng              the random number generator
      */
-    public CustomHybridRandomWalkIterator(
-            Graph<NodeOrSong, E> graph, Node vertex, long maxHops, float resetProbability, Random rng) {
+    @SuppressLint("NewApi")
+    public CustomHybridRandomWalkRandomNodeResetIterator(
+            Graph<NodeOrSong, E> graph, Node vertex, long maxHops, float resetProbability, float randomNodeProbability, Random rng, List<Node> nodes) {
         this.graph = Objects.requireNonNull(graph);
         this.outEdgesTotalWeight = new HashMap<>();
         this.personalizedPageRankTotalWeight = new HashMap<>();
@@ -82,7 +88,11 @@ public class CustomHybridRandomWalkIterator<E>
         }
         this.maxHops = maxHops;
         this.resetProbability = resetProbability;
+        this.randomNodeProbability = randomNodeProbability;
         this.rng = rng;
+        Comparator<Node> comparator = Comparator.comparingDouble(Node::getPersonalizedPageRankScore);
+        nodesSortedByPageRank = nodes.stream().sorted(comparator).collect(Collectors.toList());
+        pageRankSum = nodesSortedByPageRank.stream().mapToDouble(Node::getPersonalizedPageRankScore).sum();
     }
 
     @Override
@@ -94,6 +104,17 @@ public class CustomHybridRandomWalkIterator<E>
     public NodeOrSong next() {
         if (nextVertex == null) {
             throw new NoSuchElementException();
+        }
+        if(hops == 0 && rng.nextDouble() < randomNodeProbability) {
+            double p = pageRankSum * rng.nextDouble();
+            double cumulativeP = 0d;
+            for (Node node : nodesSortedByPageRank) {
+                cumulativeP += node.getPersonalizedPageRankScore();
+                if (p <= cumulativeP) {
+                    nextVertex = node;
+                    break;
+                }
+            }
         }
         NodeOrSong value = nextVertex;
         if (value instanceof Node) {
@@ -140,12 +161,14 @@ public class CustomHybridRandomWalkIterator<E>
     private void computeNextSong() {
         if (hops >= maxHops || (rng.nextFloat() < resetProbability)) {
             nextVertex = null;
+            hops = 0;
             return;
         }
 
         hops++;
         if (graph.outDegreeOf(nextVertex) == 0) {
             nextVertex = null;
+            hops = 0;
             return;
         }
 
@@ -168,12 +191,14 @@ public class CustomHybridRandomWalkIterator<E>
     private void computeNextNode() {
         if (hops >= maxHops || (rng.nextFloat() < resetProbability)) {
             nextVertex = null;
+            hops = 0;
             return;
         }
 
         hops++;
         if (graph.outDegreeOf(nextVertex) == 0 || graph.outDegreeOf(nextVertex) == 1 && graph.getEdgeSource(graph.outgoingEdgesOf(nextVertex).iterator().next()) == lastNode) {
             nextVertex = null;
+            hops = 0;
             return;
         }
 
