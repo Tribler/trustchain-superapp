@@ -27,6 +27,32 @@ An online indicator and the last message is shown for each contact. Users can ex
 
 ### DeToks
 **Decentralised TikTok** skeleton app for the CS4160 Blockchain Engineering (2022/23) course.
+# Detoks - Offline Token 2
+An easy payment application that makes sending and receiving tokens easy.
+A user can choose the amount to be received and create a request which can be paid by a preadded contact.
+The payment can then be done by scanning the generated QR code and a transaction is then made.
+A Eurotoken is minted and verified by a central authority.
+
+### Use case
+The application can be used for the following use cases:
+- Create and store EuroToken
+  (add screenshot)
+- Encode and create QR for EuroToken
+  (screenshot)
+- Send and receive EuroToken between contacts
+- Add new contact
+
+### Double spending
+To mitigate double spending, contacts are to be added before users can send or receive EuroTokens.
+This makes it easier for admins to track double-spend EuroToken and give users warnings when trying to add malicious users.
+Another important concept is used to make sure that the detection of double spending is relatively on time.
+After receiving a new token, the token is valid for a limited amount of time (a month).
+After that month a token must be verified before being able to re-spend it. The token will be restamped with a new timestamp which makes it a valid euro token.
+
+### Future work
+To detect the double spending, two ideas were discussed which can be implemented in the future:
+1. Using the verifivation mechanism, double spending can be easily detected when two users try to verify the same token. The authority will be able to direcly detect the double spender.
+2. To prevent double spending in offline transactions, a given precentage of the user tokens is preserved and cannot be used to make payments until the user comes online.
 
 ### Digital Euro
 

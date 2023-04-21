@@ -205,16 +205,23 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             val t = result
 //            for(t in obtainedTokens ){
 //                var t = value?.get(0)
-            Log.v("Tokennnnn", t.toString())
-            println("New tokensss: ${wallet!!.balance}")
-            println("Tokennnnn $t.toString()")
-            val successful = wallet!!.addToken(t)
-            if(successful == -1L) {
-                Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
+            val tokenPublicKey = t.recipients.last().publicKey
+            val pubKey = getIpv8().myPeer.publicKey.keyToBin()
+            if(tokenPublicKey.contentEquals(pubKey)){
+                Log.v("Tokennnnn", t.toString())
+                println("New tokensss: ${wallet!!.balance}")
+                println("Tokennnnn $t.toString()")
+                val successful = wallet!!.addToken(t)
+                if(successful == -1L) {
+                    Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
+                } else {
+                    this.balanceText?.text = wallet!!.balance.toString()
+                    Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
+                }
             } else {
-                this.balanceText?.text = wallet!!.balance.toString()
-                Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this.context, "This token is not for you!", Toast.LENGTH_LONG).show()
             }
+
         } else {
             Toast.makeText(this.context, "Scanning failed!", Toast.LENGTH_LONG).show()
         }
