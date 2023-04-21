@@ -3,12 +3,28 @@ package nl.tudelft.trustchain.detoks
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.core.graphics.get
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
+import kotlinx.android.synthetic.main.fragment_detoks.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import mu.KotlinLogging
+import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
+import nl.tudelft.ipv8.attestation.trustchain.EMPTY_SIG
+import nl.tudelft.ipv8.attestation.trustchain.GENESIS_HASH
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockPayload
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
 import java.io.FileOutputStream
+
+import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.util.QRCodeUtils
+import java.util.*
+import kotlin.reflect.typeOf
 
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var torrentManager: TorrentManager
@@ -19,6 +35,10 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         get() = "${requireActivity().cacheDir.absolutePath}/torrent"
     private val mediaCacheDir: String
         get() = "${requireActivity().cacheDir.absolutePath}/media"
+
+    private val qrCodeUtils by lazy {
+        QRCodeUtils(requireContext())
+    }
 
     private fun cacheDefaultTorrent() {
         try {
@@ -52,9 +72,37 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewPagerVideos.adapter = VideosAdapter(torrentManager)
-        viewPagerVideos.currentItem = 0
-        onPageChangeCallback()
+        val myPublicKey = getIpv8().myPeer.publicKey.keyToBin()
+
+        val block = TrustChainBlock(
+            "custom",
+            "hello".toByteArray(Charsets.US_ASCII),
+            myPublicKey,
+            0u,
+            ANY_COUNTERPARTY_PK,
+            0u,
+            GENESIS_HASH,
+            EMPTY_SIG,
+            Date()
+        )
+
+        val payload = HalfBlockPayload.fromHalfBlock(block)
+
+        lifecycleScope.launch {
+            var bitmap = withContext(Dispatchers.Default) {
+                qrCodeUtils.createQR(payload.serialize().toHex())
+            }
+
+            QR.setImageBitmap(bitmap)
+        }
+
+//        othersQR.setOnClickListener {
+//            qrCodeUtils.startQRScanner(this)
+//        }
+
+//        viewPagerVideos.adapter = VideosAdapter(torrentManager)
+//        viewPagerVideos.currentItem = 0
+//        onPageChangeCallback()
     }
 
     /**
