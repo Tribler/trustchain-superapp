@@ -15,7 +15,7 @@ import androidx.room.RoomDatabase
 //    abstract fun tokensDao(): TokensDao
 //}
 @Database(entities = [UserData::class, Transactions::class, Token::class, WebOfTrust::class], version = 1)
-abstract class OfflineMoneyRoomDatabase : RoomDatabase() {
+abstract class OfflineDigitalEuroRoomDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun transactionsDao(): TransactionsDao
     abstract fun tokensDao(): TokensDao
@@ -23,12 +23,12 @@ abstract class OfflineMoneyRoomDatabase : RoomDatabase() {
 
     companion object {
         @Volatile
-        private var INSTANCE: OfflineMoneyRoomDatabase? = null
-        fun getDatabase(context: Context): OfflineMoneyRoomDatabase {
+        private var INSTANCE: OfflineDigitalEuroRoomDatabase? = null
+        fun getDatabase(context: Context): OfflineDigitalEuroRoomDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    OfflineMoneyRoomDatabase::class.java,
+                    OfflineDigitalEuroRoomDatabase::class.java,
                     "item_database"
                 )
                     .fallbackToDestructiveMigration()
