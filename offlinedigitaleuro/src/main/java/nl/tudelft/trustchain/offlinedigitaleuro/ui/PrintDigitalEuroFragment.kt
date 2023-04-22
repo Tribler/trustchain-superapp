@@ -1,21 +1,17 @@
 package nl.tudelft.trustchain.offlinedigitaleuro.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.offlinedigitaleuro.MainActivityOfflineDigitalEuro
 import nl.tudelft.trustchain.offlinedigitaleuro.src.RecipientPair
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
 import nl.tudelft.trustchain.offlinedigitaleuro.R
 import nl.tudelft.trustchain.offlinedigitaleuro.databinding.PrintMoneyFragmentBinding
-import nl.tudelft.trustchain.offlinedigitaleuro.db.Token as DBToken
 
 class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_money_fragment) {
     private val binding by viewBinding(PrintMoneyFragmentBinding::bind)
@@ -26,6 +22,7 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
             token.recipients.add(recip)
         }
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -82,6 +79,7 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
             }
             return tokenPackage
         }
+
         binding.btnCancel.setOnClickListener {
             findNavController().navigate(R.id.action_printMoneyFragment_to_transferFragment)
         }
@@ -105,7 +103,7 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
 
             lifecycleScope.launch(Dispatchers.IO) {
                 for (token in tokenPackage) {
-                    dbUtility.recieve(token, requireContext())
+                    dbUtility.receive(token, requireContext())
                 }
             }
 

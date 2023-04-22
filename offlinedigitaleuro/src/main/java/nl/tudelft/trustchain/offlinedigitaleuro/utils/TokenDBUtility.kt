@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.offlinedigitaleuro.utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineMoneyRoomDatabase
+import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineDigitalEuroRoomDatabase
 import nl.tudelft.trustchain.offlinedigitaleuro.db.Token as DbToken
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token as Token
 
@@ -28,7 +28,7 @@ companion object {
 //    if a token with the same id is in the DB we return it as Pair<ERR_COLLISION, [Token, ...]>
 //    OR if conversion to DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
 //    OR if some other error we return Pair<ERR_MISC, []>
-    fun insertToken(tokens: List<Token>, db: OfflineMoneyRoomDatabase) : Pair<Codes, MutableList<Token>> {
+    fun insertToken(tokens: List<Token>, db: OfflineDigitalEuroRoomDatabase) : Pair<Codes, MutableList<Token>> {
         val ret: MutableList<Token> = mutableListOf()
 
         for (t in tokens) {
@@ -62,7 +62,7 @@ companion object {
     }
 
 //    finds a token in the DB and returns it or null
-    private fun findToken(t: DbToken, db: OfflineMoneyRoomDatabase) : Pair<Codes, Token?> {
+    private fun findToken(t: DbToken, db: OfflineDigitalEuroRoomDatabase) : Pair<Codes, Token?> {
         var queryResult: Array<DbToken>
 
         runBlocking(Dispatchers.IO) {
@@ -89,7 +89,7 @@ companion object {
 //    if not enough tokens are in the DB to satisfy the request we return Pair<ERR_NOT_ENOUGH, []>
 //    OR if conversion from DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
 //    TODO: extract from DB only how many are needed, not all as it happens currently
-    fun getTokens(value: Double, count: Int, db: OfflineMoneyRoomDatabase) : Pair<Codes, MutableList<Token>> {
+    fun getTokens(value: Double, count: Int, db: OfflineDigitalEuroRoomDatabase) : Pair<Codes, MutableList<Token>> {
         val dbTokens: Array<DbToken>
 
         runBlocking(Dispatchers.IO) {
@@ -117,7 +117,7 @@ companion object {
 //    if a token is not found to be deleted we return Pair<ERR_COLLISION, [Token, ...]>
 //    OR if conversion to DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
 //    OR if some other error we return Pair<ERR_MISC, []>
-    fun deleteTokens(tokens: List<Token>, db: OfflineMoneyRoomDatabase) : Pair<Codes, MutableList<Token>> {
+    fun deleteTokens(tokens: List<Token>, db: OfflineDigitalEuroRoomDatabase) : Pair<Codes, MutableList<Token>> {
         val ret: MutableList<Token> = mutableListOf()
 
         for (t in tokens) {

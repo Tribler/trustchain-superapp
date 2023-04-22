@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.offlinedigitaleuro.utils
 import android.util.Log
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
-import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineMoneyRoomDatabase
+import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineDigitalEuroRoomDatabase
 import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
@@ -22,7 +22,7 @@ companion object {
 
 //    completes a transaction and inserts the tokens in the DB
 //    returns if the operation succeeded and on failure also returns the message
-    fun receiveTransaction(transaction: JSONObject, db: OfflineMoneyRoomDatabase, my_pbk: PublicKey): Pair<Boolean, String> {
+    fun receiveTransaction(transaction: JSONObject, db: OfflineDigitalEuroRoomDatabase, my_pbk: PublicKey): Pair<Boolean, String> {
         val tq: TransferQR = TransferQR.fromJson(transaction) ?: return Pair(false, "Received transaction JSON wrongly formatted")
 
         val nowOwnedTokens: MutableSet<Token> = cedeTokens(my_pbk, tq.pvk, tq.tokens.toMutableList())
@@ -40,7 +40,7 @@ companion object {
 //    completes the transaction by deleting the transferred tokens from the DB and some other stuff
 //    returns true if everything went fine
 //    otherwise returns false and the error message
-    fun completeSendTransaction(sendTransaction: JSONObject, db: OfflineMoneyRoomDatabase) : Pair<Boolean, String> {
+    fun completeSendTransaction(sendTransaction: JSONObject, db: OfflineDigitalEuroRoomDatabase) : Pair<Boolean, String> {
         val tq: TransferQR = TransferQR.fromJson(sendTransaction) ?: return Pair(false, "Transaction JSON wrongly formatted")
 
         val result: Pair<TokenDBUtility.Codes, MutableList<Token>> = TokenDBUtility.deleteTokens(tq.tokens.toList(), db)
@@ -55,7 +55,7 @@ companion object {
 
 //    get a JSON object which represents a transaction with the required tokens signed and the
 //    intermediary wallet or get null and an error message
-    fun getSendTransaction(req: SendRequest, db: OfflineMoneyRoomDatabase, my_pvk: PrivateKey): Pair<JSONObject?, String> {
+    fun getSendTransaction(req: SendRequest, db: OfflineDigitalEuroRoomDatabase, my_pvk: PrivateKey): Pair<JSONObject?, String> {
         val tokenExtractTransaction = getTokensToSend(req, db)
 
 
@@ -73,7 +73,7 @@ companion object {
 
 //    extracts the required number of tokens of certain values from the DB
 //    returns null and an error message on failure
-    private fun getTokensToSend(req: SendRequest, db: OfflineMoneyRoomDatabase): Pair<MutableList<Token>?, String> {
+    private fun getTokensToSend(req: SendRequest, db: OfflineDigitalEuroRoomDatabase): Pair<MutableList<Token>?, String> {
         val coinAndCount: List<Pair<Double, Int>> = listOf(
             Pair(1.0, req.oneEuroCount),  Pair(2.0, req.twoEuroCount),
             Pair(5.0, req.fiveEuroCount), Pair(10.0, req.tenEuroCount)
