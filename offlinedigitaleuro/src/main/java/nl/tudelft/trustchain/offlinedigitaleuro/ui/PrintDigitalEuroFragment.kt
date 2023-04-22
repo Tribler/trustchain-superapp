@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.offlinedigitaleuro.MainActivityOfflineDigitalEuro
 import nl.tudelft.trustchain.offlinedigitaleuro.src.RecipientPair
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
@@ -19,6 +20,12 @@ import nl.tudelft.trustchain.offlinedigitaleuro.db.Token as DBToken
 class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_money_fragment) {
     private val binding by viewBinding(PrintMoneyFragmentBinding::bind)
 
+    private fun transferTokensToRecepient(tokens: Array<Token>, recipient: ByteArray){
+        for (token in tokens){
+            val recip = RecipientPair(recipient, Wallet.CentralAuthority.privateKey.sign("first signature".toByteArray()))
+            token.recipients.add(recip)
+        }
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -87,6 +94,14 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
                 token5_count = binding.printNumberPicker5.value,
                 token10_count = binding.printNumberPicker10.value
             )
+
+            //When the tokens are printed, first set the recipients of these tokens as "Government". The ByteArray below is the government bytearray.
+            transferTokensToRecepient(tokenPackage, byteArrayOf(
+                76, 105, 98, 78, 97, 67, 76, 83, 75, 58, -29, -114, 126, -47, -39, -5, 22, 89,
+                94, 71, -1, 118, -30, 120, -8, -75, 2, 102, 99, -21, 57, -95, 124, 126, -30, 33,
+                -99, 37, -125, -105, 20, -45, 94, 2, -109, 125, 98, -52, 84, -54, -47, 13, 15, 75,
+                73, 11, -128, 5, -4, -101, 102, -1, -95, 33, -107, -77, -41, 89, 102, 44, 71, 107, 1, 107
+            ))
 
             lifecycleScope.launch(Dispatchers.IO) {
                 for (token in tokenPackage) {
