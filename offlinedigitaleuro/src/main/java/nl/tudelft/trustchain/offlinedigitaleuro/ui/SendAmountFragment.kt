@@ -9,6 +9,7 @@ import com.travijuu.numberpicker.library.Enums.ActionEnum
 import com.travijuu.numberpicker.library.Interface.ValueChangedListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinedigitaleuro.R
 import nl.tudelft.trustchain.offlinedigitaleuro.databinding.SendAmountFragmentBinding
@@ -43,7 +44,7 @@ class SendAmountFragment : OfflineDigitalEuroBaseFragment(R.layout.send_amount_f
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        runBlocking(Dispatchers.IO) {
             binding.numberPicker1.max = db.tokensDao().getCountTokensOfValue(1.0)
             binding.numberPicker2.max = db.tokensDao().getCountTokensOfValue(2.0)
             binding.numberPicker5.max = db.tokensDao().getCountTokensOfValue(5.0)

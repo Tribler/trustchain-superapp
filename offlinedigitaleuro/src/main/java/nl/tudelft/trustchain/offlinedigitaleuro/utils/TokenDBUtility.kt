@@ -36,7 +36,7 @@ companion object {
                 ?: return Pair(Codes.ERR_DB_TOKEN_CONV, mutableListOf())
 
 //            check if the token is already in the DB
-            val result = findToken(dbToken, db)
+            val result = findDbToken(dbToken, db)
             val code = result.first
             if (code == Codes.OK) {
 //                the token is already in the DB
@@ -61,8 +61,14 @@ companion object {
         }
     }
 
+//    find a token in the DB and return the one in the database if it exists or error codes
+    fun findToken(t: Token, db: OfflineMoneyRoomDatabase) : Pair<Codes, Token?> {
+
+        return Pair(Codes.OK, null)
+    }
+
 //    finds a token in the DB and returns it or null
-    private fun findToken(t: DbToken, db: OfflineMoneyRoomDatabase) : Pair<Codes, Token?> {
+    private fun findDbToken(t: DbToken, db: OfflineMoneyRoomDatabase) : Pair<Codes, Token?> {
         var queryResult: Array<DbToken>
 
         runBlocking(Dispatchers.IO) {
@@ -125,8 +131,7 @@ companion object {
                 ?: return Pair(Codes.ERR_DB_TOKEN_CONV, mutableListOf())
 
 //            check if token is inside before deleting
-//            if (false) { ret.add(t) }
-            val result = findToken(dbToken, db)
+            val result = findDbToken(dbToken, db)
             val code = result.first
             if (code == Codes.ERR_NOT_FOUND) {
                 ret.add(t)

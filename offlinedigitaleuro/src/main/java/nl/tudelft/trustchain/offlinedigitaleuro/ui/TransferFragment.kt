@@ -26,6 +26,7 @@ import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
 import nl.tudelft.trustchain.offlinedigitaleuro.R
 import nl.tudelft.trustchain.offlinedigitaleuro.databinding.ActivityMainOfflineMoneyBinding
+import nl.tudelft.trustchain.offlinedigitaleuro.utils.TransactionUtility
 
 class TransferFragment : OfflineDigitalEuroBaseFragment(R.layout.activity_main_offline_money) {
     private val binding by viewBinding(ActivityMainOfflineMoneyBinding::bind)
@@ -76,7 +77,7 @@ class TransferFragment : OfflineDigitalEuroBaseFragment(R.layout.activity_main_o
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        runBlocking(Dispatchers.IO) {
             updateBalance()
         }
 
@@ -95,30 +96,15 @@ class TransferFragment : OfflineDigitalEuroBaseFragment(R.layout.activity_main_o
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
-                val qr = TransferQR.fromJson(JSONObject(it))!!
-                Log.d("DEBUG:", "pvk = " + qr.pvk.toString())
-                Log.d("DEBUG:", "tokens = " + qr.tokens.toString())
+                val transaction = JSONObject(it)
 
                 val args = Bundle()
-                args.putString(AcceptEuroFragment.ARG_QR, qr.createJson().toString())
+                args.putString(AcceptEuroFragment.ARG_QR, transaction.toString())
 
                 findNavController().navigate(
-                    R.id.action_sendAmountFragment_to_sendMoneyFragment,
+                    R.id.action_transferFragment_to_acceptMoneyFragment,
                     args
                 )
-//                runBlocking(Dispatchers.IO) {
-//                    for (token in qr.tokens) {
-//                        db.tokensDao().insertToken(
-//                            nl.tudelft.trustchain.offlinedigitaleuro.db.Token(
-//                                token.id.toHex(),
-//                                token.value.toDouble(),
-//                                Token.serialize(mutableSetOf(token))
-//                            )
-//                        );
-//                    }
-//
-//                    updateBalance()
-//                }
             } catch (e: JSONException) {
                 Toast.makeText(requireContext(), "Scan failed, try again", Toast.LENGTH_LONG).show()
             }

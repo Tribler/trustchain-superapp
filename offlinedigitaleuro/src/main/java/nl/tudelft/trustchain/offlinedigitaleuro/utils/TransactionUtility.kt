@@ -16,37 +16,59 @@ class TransactionUtility {
         val twoEuroCount: Int = 0,
         val fiveEuroCount: Int = 0,
         val tenEuroCount: Int = 0,
-    ){}
+    ) {}
+
+    class DuplicatedTokens(
+        val incomingToken: Token,
+        val storedToken: Token,
+    ) {
+        fun getDoubleSpenders() {
+//            TODO: some LCC algo to find who double spent and be careful to not blame the central authority
+        }
+
+    }
 
 companion object {
 
 //    completes a transaction and inserts the tokens in the DB
-//    returns if the operation succeeded and on failure also returns the message
-    fun receiveTransaction(transaction: JSONObject, db: OfflineMoneyRoomDatabase, my_pbk: PublicKey): Pair<Boolean, String> {
-        val tq: TransferQR = TransferQR.fromJson(transaction) ?: return Pair(false, "Received transaction JSON wrongly formatted")
-
+//    returns true if the operation succeeded and on failure also returns the message
+    fun receiveTransaction(tq: TransferQR, db: OfflineMoneyRoomDatabase, my_pbk: PublicKey): Pair<Boolean, String> {
         val nowOwnedTokens: MutableSet<Token> = cedeTokens(my_pbk, tq.pvk, tq.tokens.toMutableList())
 
         val result = TokenDBUtility.insertToken(nowOwnedTokens.toList(), db)
         val code: TokenDBUtility.Codes = result.first
         if (code != TokenDBUtility.Codes.OK) {
-            Log.d("ODE", "Error: failed to insert received tokens into the DB, reason: $code")
+            Log.e("ODE", "Error: failed to insert received tokens into the DB, reason: $code")
             return Pair(false, "Error: failed to insert received tokens into the DB, reason: $code")
         }
 
         return Pair(true, "")
     }
 
+//    Gets the tokens from the transfer qr and checks if they are already stored in the DB. If true,
+//    then return the tokens for later to check who double spent
+    fun getDuplicateTokens(tq: TransferQR) : MutableList<DuplicatedTokens> {
+
+
+        return mutableListOf()
+    }
+
 //    completes the transaction by deleting the transferred tokens from the DB and some other stuff
 //    returns true if everything went fine
 //    otherwise returns false and the error message
     fun completeSendTransaction(sendTransaction: JSONObject, db: OfflineMoneyRoomDatabase) : Pair<Boolean, String> {
-        val tq: TransferQR = TransferQR.fromJson(sendTransaction) ?: return Pair(false, "Transaction JSON wrongly formatted")
+        val (maybeTq, errMsg) = TransferQR.fromJson(sendTransaction)
+
+        if (maybeTq == null) {
+            val newErrMsg = "Error: Transaction JSON wrongly formatted, reason: $errMsg"
+            return Pair(false, newErrMsg)
+        }
+        val tq: TransferQR = maybeTq
 
         val result: Pair<TokenDBUtility.Codes, MutableList<Token>> = TokenDBUtility.deleteTokens(tq.tokens.toList(), db)
         val code: TokenDBUtility.Codes = result.first
         if (code != TokenDBUtility.Codes.OK) {
-            Log.d("ODE", "Error: failed to delete tokens from DB, reason: $code")
+            Log.e("ODE", "Error: failed to delete tokens from DB, reason: $code")
             return Pair(false, "Error: failed to delete tokens from DB, reason: $code")
         }
 
@@ -89,7 +111,7 @@ companion object {
 
             val code = result.first
             if (code != TokenDBUtility.Codes.OK) {
-                Log.d("ODE", "Error: failed to prepare to send tokens, reason: $code")
+                Log.e("ODE", "Error: failed to prepare to send tokens, reason: $code")
                 return Pair(null, "Error: failed to prepare to send tokens, reason: $code")
             }
 

@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.offlinedigitaleuro.ui
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +15,7 @@ import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
 import nl.tudelft.trustchain.offlinedigitaleuro.R
 import nl.tudelft.trustchain.offlinedigitaleuro.databinding.PrintMoneyFragmentBinding
+import nl.tudelft.trustchain.offlinedigitaleuro.utils.TokenDBUtility
 import nl.tudelft.trustchain.offlinedigitaleuro.db.Token as DBToken
 
 class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_money_fragment) {
@@ -88,10 +90,18 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
                 token10_count = binding.printNumberPicker10.value
             )
 
-            lifecycleScope.launch(Dispatchers.IO) {
-                for (token in tokenPackage) {
-                    dbUtility.recieve(token, requireContext())
-                }
+//            TODO: give tokens from central authority to owner
+
+            val result = TokenDBUtility.insertToken(tokenPackage.toList(), db)
+            val code = result.first
+            if (code != TokenDBUtility.Codes.OK) {
+                val errMsg: String = "Error: failure to print money, reason: $code"
+                Log.d("ODE", errMsg)
+//                TODO: print error message in text box for user to see
+//                temp
+                Toast.makeText(requireContext(), errMsg, Toast.LENGTH_LONG).show()
+
+                return@setOnClickListener
             }
 
             findNavController().navigate(R.id.action_printMoneyFragment_to_transferFragment)
