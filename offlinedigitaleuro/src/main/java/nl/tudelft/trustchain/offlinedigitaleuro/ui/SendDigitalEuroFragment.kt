@@ -91,17 +91,7 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
         binding.btnContinue.setOnClickListener {
             //remove tokens that were transferred from database
             runBlocking(Dispatchers.IO) {
-                for (token in tokensToSend) {
-                    db.tokensDao().deleteToken(
-                            token.id.toHex()
-                    );
-                    Log.d("TOKEN", "delete token ${token.id.toHex()}")
-                }
-
-                val allTokens = db.tokensDao().getAllTokens()
-                for (token in allTokens) {
-                    Log.i("db_token", "Token_ID: ${token.token_id} \t Token value: ${token.token_value}")
-                }
+                dbUtility.delete(tokensToSend, requireContext())
             }
 
             findNavController().navigate(R.id.action_sendMoneyFragment_to_transferFragment)

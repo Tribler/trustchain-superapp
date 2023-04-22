@@ -90,11 +90,7 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
 
             lifecycleScope.launch(Dispatchers.IO) {
                 for (token in tokenPackage) {
-                    db.tokensDao().insertToken(DBToken(token.id.toHex(), token.value.toDouble(), Token.serialize(mutableSetOf(token))))
-                    for (token_data in Token.deserialize(Token.serialize(mutableSetOf(token)))) {
-                        Log.i("db_token", "Token_ID: ${token.id.toHex()} \t Token value: ${token.value} \t Token_serialize function: ${token_data.id.toHex()}")
-                        break
-                    }
+                    dbUtility.recieve(token, requireContext())
                 }
             }
 
