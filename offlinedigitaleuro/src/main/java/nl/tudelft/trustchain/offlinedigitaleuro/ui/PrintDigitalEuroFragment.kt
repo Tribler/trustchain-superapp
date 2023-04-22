@@ -20,7 +20,7 @@ import nl.tudelft.trustchain.offlinedigitaleuro.db.Token as DBToken
 class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_money_fragment) {
     private val binding by viewBinding(PrintMoneyFragmentBinding::bind)
 
-    private fun transferTokensToRecepient(tokens: Array<Token>, recipient: ByteArray){
+    private fun setFirstRecipient(tokens: Array<Token>, recipient: ByteArray){
         for (token in tokens){
             val recip = RecipientPair(recipient, Wallet.CentralAuthority.privateKey.sign("first signature".toByteArray()))
             token.recipients.add(recip)
@@ -96,7 +96,7 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
             )
 
             //When the tokens are printed, first set the recipients of these tokens as "Government". The ByteArray below is the government bytearray.
-            transferTokensToRecepient(tokenPackage, byteArrayOf(
+            setFirstRecipient(tokenPackage, byteArrayOf(
                 76, 105, 98, 78, 97, 67, 76, 83, 75, 58, -29, -114, 126, -47, -39, -5, 22, 89,
                 94, 71, -1, 118, -30, 120, -8, -75, 2, 102, 99, -21, 57, -95, 124, 126, -30, 33,
                 -99, 37, -125, -105, 20, -45, 94, 2, -109, 125, 98, -52, 84, -54, -47, 13, 15, 75,
