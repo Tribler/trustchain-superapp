@@ -7,6 +7,7 @@ import nl.tudelft.trustchain.offlinedigitaleuro.db.*
 open class OfflineDigitalEuroBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 
     val db by lazy { OfflineMoneyRoomDatabase.getDatabase(requireContext()) }
+    val dbUtility = DBUtility()
 
     protected val logger = KotlinLogging.logger {}
 }
