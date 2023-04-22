@@ -11,6 +11,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinemoney.R
 import nl.tudelft.trustchain.offlinemoney.databinding.PrintMoneyFragmentBinding
+import nl.tudelft.trustchain.offlinemoney.db.DBUtility
 import nl.tudelft.trustchain.offlinemoney.src.RecipientPair
 import nl.tudelft.trustchain.offlinemoney.src.Token
 import nl.tudelft.trustchain.offlinemoney.src.Wallet
@@ -81,12 +82,7 @@ class PrintMoneyFragment : OfflineMoneyBaseFragment(R.layout.print_money_fragmen
 
             lifecycleScope.launch(Dispatchers.IO) {
                 for (token in token_package) {
-                    db.tokensDao().insertToken(DBToken(token.id.toHex(), token.value.toDouble(), Token.serialize(mutableSetOf(token))))
-                    for (token_data in Token.deserialize(Token.serialize(mutableSetOf(token)))) {
-                        Log.i("db_token", "Token_ID: ${token.id.toHex()} \t Token value: ${token.value} \t Token_serialize function: ${token_data.id.toHex()}")
-                        break
-                    }
-//                    Log.i("db_token", "Token_ID: ${token.id} \t Token value: ${token.value} \t Token_serialize function: ${Token.deserialize(Token.serialize(mutableSetOf(token)))}")
+                    dbUtility.recieve(token, requireContext())
                 }
             }
 

@@ -19,6 +19,7 @@ import kotlin.random.Random
 
 open class OfflineMoneyBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 
+    val dbUtility = DBUtility()
     val db by lazy { OfflineMoneyRoomDatabase.getDatabase(requireContext()) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
