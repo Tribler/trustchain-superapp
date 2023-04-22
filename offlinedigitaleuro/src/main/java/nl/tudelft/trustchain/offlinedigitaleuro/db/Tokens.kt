@@ -24,6 +24,9 @@ interface TokensDao {
     @Query("SELECT COUNT(*) FROM tokens_table WHERE token_value = :token_value")
     fun getCountTokensOfValue(token_value: Double) : Int
 
+    @Query("SELECT * FROM tokens_table WHERE token_id = :token_id")
+    fun getSpecificToken(token_id: String) : Array<Token>
+
     // Insert transactions into the database
     @Insert
     suspend fun insertToken(tokens: Token)
