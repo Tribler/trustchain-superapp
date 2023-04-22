@@ -20,6 +20,10 @@ interface TransactionsDao {
     @Query("SELECT * FROM transactions_table")
     fun getTransactionData(): List<Transactions>
 
+    // Get limited amount of transactions from database
+    @Query("SELECT * FROM transactions_table ORDER BY id DESC LIMIT :limit_value")
+    fun getLimitedTransactionsData(limit_value: Int): List<Transactions>
+
     // Insert transactions into the database
     @Insert
     suspend fun insertTransaction(transactions: Transactions)
