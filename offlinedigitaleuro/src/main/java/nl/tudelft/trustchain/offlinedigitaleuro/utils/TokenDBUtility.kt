@@ -14,8 +14,9 @@ class TokenDBUtility {
         OK,                // all is good
         ERR_COLLISION,     // the token already is in the DB
         ERR_DB_TOKEN_CONV, // the token could not be converted to DB format or reversed
-        ERR_NOT_FOUND,     // the token does not exist in the DB
+        ERR_NOT_FOUND,     // the token does not exist in the DB,
         ERR_NOT_ENOUGH,    // not enough tokens in the DB to suffice request
+        ERR_MISC,          // miscellaneous error
     }
 
 companion object {
@@ -26,6 +27,7 @@ companion object {
 //    on failure returns Pair<err_code, [*]]>
 //    if a token with the same id is in the DB we return it as Pair<ERR_COLLISION, [Token, ...]>
 //    OR if conversion to DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
+//    OR if some other error we return Pair<ERR_MISC, []>
     fun insertToken(tokens: List<Token>, db: OfflineMoneyRoomDatabase) : Pair<Codes, MutableList<Token>> {
         val ret: MutableList<Token> = mutableListOf()
 
@@ -33,9 +35,21 @@ companion object {
             val dbToken: DbToken = tokenToDbToken(t)
                 ?: return Pair(Codes.ERR_DB_TOKEN_CONV, mutableListOf())
 
-            runBlocking(Dispatchers.IO) {
-                //        TODO: check if the token is already in the DB
+//            check if the token is already in the DB
+            val result = findToken(dbToken, db)
+            val code = result.first
+            if (code == Codes.OK) {
+//                the token is already in the DB
+                ret.add(t)
+                continue
+            }
+            if (code != Codes.ERR_NOT_FOUND) {
+//                other kind of error
+                return Pair(code, mutableListOf())
+            }
 
+//            if we did not find the token we insert it
+            runBlocking(Dispatchers.IO) {
                 db.tokensDao().insertToken(dbToken)
             }
         }
@@ -48,8 +62,25 @@ companion object {
     }
 
 //    finds a token in the DB and returns it or null
-    fun findToken(t: Token, db: OfflineMoneyRoomDatabase) : Token? {
-        return null
+    private fun findToken(t: DbToken, db: OfflineMoneyRoomDatabase) : Pair<Codes, Token?> {
+        var queryResult: Array<DbToken>
+
+        runBlocking(Dispatchers.IO) {
+            queryResult = db.tokensDao().getSpecificToken(t.token_id)
+        }
+
+
+        if (queryResult.isEmpty()) {
+            return Pair(Codes.ERR_NOT_FOUND, null)
+        }
+
+        if (queryResult.size > 1) {
+            return Pair(Codes.ERR_MISC, null) // unexpected to find multiple tokens with the same ID
+        }
+
+        val retToken: Token = dbTokenToToken(queryResult[0]) ?: return Pair(Codes.ERR_DB_TOKEN_CONV, null)
+
+        return Pair(Codes.OK, retToken)
     }
 
 //    gets how many tokens were requested out of the database
@@ -85,17 +116,27 @@ companion object {
 //    on failure returns Pair<err_code, [*]>
 //    if a token is not found to be deleted we return Pair<ERR_COLLISION, [Token, ...]>
 //    OR if conversion to DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
+//    OR if some other error we return Pair<ERR_MISC, []>
     fun deleteTokens(tokens: List<Token>, db: OfflineMoneyRoomDatabase) : Pair<Codes, MutableList<Token>> {
         val ret: MutableList<Token> = mutableListOf()
 
         for (t in tokens) {
-            val dbToken: nl.tudelft.trustchain.offlinedigitaleuro.db.Token = tokenToDbToken(t)
+            val dbToken: DbToken = tokenToDbToken(t)
                 ?: return Pair(Codes.ERR_DB_TOKEN_CONV, mutableListOf())
 
-            runBlocking(Dispatchers.IO) {
-//                TODO: check if token is inside before deleting
-//                if (false) { ret.add(t) }
+//            check if token is inside before deleting
+//            if (false) { ret.add(t) }
+            val result = findToken(dbToken, db)
+            val code = result.first
+            if (code == Codes.ERR_NOT_FOUND) {
+                ret.add(t)
+                continue
+            }
+            if (code != Codes.OK) {
+                return Pair(code, mutableListOf())
+            }
 
+            runBlocking(Dispatchers.IO) {
                 db.tokensDao().deleteToken(dbToken.token_id)
             }
         }

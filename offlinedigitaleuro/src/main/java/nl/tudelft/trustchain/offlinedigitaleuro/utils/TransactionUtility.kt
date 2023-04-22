@@ -27,10 +27,15 @@ companion object {
 
         val nowOwnedTokens: MutableSet<Token> = cedeTokens(my_pbk, tq.pvk, tq.tokens.toMutableList())
 
+        val result = TokenDBUtility.insertToken(nowOwnedTokens.toList(), db)
+        val code: TokenDBUtility.Codes = result.first
+        if (code != TokenDBUtility.Codes.OK) {
+            Log.d("ODE", "Error: failed to insert received tokens into the DB, reason: $code")
+            return Pair(false, "Error: failed to insert received tokens into the DB, reason: $code")
+        }
+
         return Pair(true, "")
     }
-
-
 
 //    completes the transaction by deleting the transferred tokens from the DB and some other stuff
 //    returns true if everything went fine
@@ -41,8 +46,8 @@ companion object {
         val result: Pair<TokenDBUtility.Codes, MutableList<Token>> = TokenDBUtility.deleteTokens(tq.tokens.toList(), db)
         val code: TokenDBUtility.Codes = result.first
         if (code != TokenDBUtility.Codes.OK) {
-            Log.d("ODE", "Failed to delete tokens from DB, reason: $code")
-            return Pair(false, "Failed to delete tokens from DB, reason: $code")
+            Log.d("ODE", "Error: failed to delete tokens from DB, reason: $code")
+            return Pair(false, "Error: failed to delete tokens from DB, reason: $code")
         }
 
         return Pair(true, "")
