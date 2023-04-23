@@ -3,12 +3,10 @@ package nl.tudelft.trustchain.offlinedigitaleuro.ui
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.travijuu.numberpicker.library.Enums.ActionEnum
 import com.travijuu.numberpicker.library.Interface.ValueChangedListener
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinedigitaleuro.R
@@ -97,7 +95,6 @@ class SendAmountFragment : OfflineDigitalEuroBaseFragment(R.layout.send_amount_f
     }
 
     companion object {
-        const val ARG_RECEIVER = "public_key"
         const val ARG_10EURO_COUNT = "10euro"
         const val ARG_5EURO_COUNT = "5euro"
         const val ARG_2EURO_COUNT = "2euro"

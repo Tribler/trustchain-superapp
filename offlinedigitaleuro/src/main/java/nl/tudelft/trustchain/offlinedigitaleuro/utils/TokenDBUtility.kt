@@ -22,12 +22,12 @@ class TokenDBUtility {
 companion object {
 
 
-//    inserts tokens into the DB
-//    on success returns Pair<OK, []>
-//    on failure returns Pair<err_code, [*]]>
-//    if a token with the same id is in the DB we return it as Pair<ERR_COLLISION, [Token, ...]>
-//    OR if conversion to DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
-//    OR if some other error we return Pair<ERR_MISC, []>
+    // inserts tokens into the DB
+    // on success returns Pair<OK, []>
+    // on failure returns Pair<err_code, [*]]>
+    // if a token with the same id is in the DB we return it as Pair<ERR_COLLISION, [Token, ...]>
+    // OR if conversion to DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
+    // OR if some other error we return Pair<ERR_MISC, []>
     fun insertToken(tokens: List<Token>, db: OfflineMoneyRoomDatabase) : Pair<Codes, MutableList<Token>> {
         val ret: MutableList<Token> = mutableListOf()
 
@@ -35,20 +35,20 @@ companion object {
             val dbToken: DbToken = tokenToDbToken(t)
                 ?: return Pair(Codes.ERR_DB_TOKEN_CONV, mutableListOf())
 
-//            check if the token is already in the DB
+            // check if the token is already in the DB
             val result = findDbToken(dbToken, db)
             val code = result.first
             if (code == Codes.OK) {
-//                the token is already in the DB
+                // the token is already in the DB
                 ret.add(t)
                 continue
             }
             if (code != Codes.ERR_NOT_FOUND) {
-//                other kind of error
+                // other kind of error
                 return Pair(code, mutableListOf())
             }
 
-//            if we did not find the token we insert it
+            // if we did not find the token we insert it
             runBlocking(Dispatchers.IO) {
                 db.tokensDao().insertToken(dbToken)
             }
@@ -61,7 +61,7 @@ companion object {
         }
     }
 
-//    find a token in the DB and return the one in the database if it exists or error codes
+    // find a token in the DB and return the one in the database if it exists or error codes
     fun findToken(t: Token, db: OfflineMoneyRoomDatabase) : Pair<Codes, Token?> {
         val dbToken: DbToken = tokenToDbToken(t)
             ?: return Pair(Codes.ERR_DB_TOKEN_CONV, null)
@@ -69,7 +69,7 @@ companion object {
         return findDbToken(dbToken, db)
     }
 
-//    finds a token in the DB and returns it or null
+    // finds a token in the DB and returns it or null
     private fun findDbToken(t: DbToken, db: OfflineMoneyRoomDatabase) : Pair<Codes, Token?> {
         var queryResult: Array<DbToken>
 
@@ -91,17 +91,16 @@ companion object {
         return Pair(Codes.OK, retToken)
     }
 
-//    gets how many tokens were requested out of the database
-//    on success returns Pair<OK, [*]>
-//    on failure returns Pair<err_code, []>
-//    if not enough tokens are in the DB to satisfy the request we return Pair<ERR_NOT_ENOUGH, []>
-//    OR if conversion from DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
-//    TODO: extract from DB only how many are needed, not all as it happens currently
+    // gets how many tokens were requested out of the database
+    // on success returns Pair<OK, [*]>
+    // on failure returns Pair<err_code, []>
+    // if not enough tokens are in the DB to satisfy the request we return Pair<ERR_NOT_ENOUGH, []>
+    // OR if conversion from DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
     fun getTokens(value: Double, count: Int, db: OfflineMoneyRoomDatabase) : Pair<Codes, MutableList<Token>> {
         val dbTokens: Array<DbToken>
 
         runBlocking(Dispatchers.IO) {
-            dbTokens = db.tokensDao().getAllTokensOfValue(value)
+            dbTokens = db.tokensDao().getCountOfTokensOfValue(value, count)
         }
 
         if (count > dbTokens.size) {
@@ -119,12 +118,12 @@ companion object {
         return Pair(Codes.OK, ret)
     }
 
-//    deletes the tokens that were passed from the DB
-//    on success returns Pair<OK, []>
-//    on failure returns Pair<err_code, [*]>
-//    if a token is not found to be deleted we return Pair<ERR_COLLISION, [Token, ...]>
-//    OR if conversion to DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
-//    OR if some other error we return Pair<ERR_MISC, []>
+    // deletes the tokens that were passed from the DB
+    // on success returns Pair<OK, []>
+    // on failure returns Pair<err_code, [*]>
+    // if a token is not found to be deleted we return Pair<ERR_COLLISION, [Token, ...]>
+    // OR if conversion to DbToken fails we return Pair<ERR_DB_TOKEN_CONV, []>
+    // OR if some other error we return Pair<ERR_MISC, []>
     fun deleteTokens(tokens: List<Token>, db: OfflineMoneyRoomDatabase) : Pair<Codes, MutableList<Token>> {
         val ret: MutableList<Token> = mutableListOf()
 
@@ -132,7 +131,7 @@ companion object {
             val dbToken: DbToken = tokenToDbToken(t)
                 ?: return Pair(Codes.ERR_DB_TOKEN_CONV, mutableListOf())
 
-//            check if token is inside before deleting
+            // check if token is inside before deleting
             val result = findDbToken(dbToken, db)
             val code = result.first
             if (code == Codes.ERR_NOT_FOUND) {
