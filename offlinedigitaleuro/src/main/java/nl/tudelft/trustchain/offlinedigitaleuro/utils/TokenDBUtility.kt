@@ -63,8 +63,10 @@ companion object {
 
 //    find a token in the DB and return the one in the database if it exists or error codes
     fun findToken(t: Token, db: OfflineMoneyRoomDatabase) : Pair<Codes, Token?> {
+        val dbToken: DbToken = tokenToDbToken(t)
+            ?: return Pair(Codes.ERR_DB_TOKEN_CONV, null)
 
-        return Pair(Codes.OK, null)
+        return findDbToken(dbToken, db)
     }
 
 //    finds a token in the DB and returns it or null

@@ -69,14 +69,16 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
                 return@setOnClickListener
             }
 
+//            TODO: add the transaction in the transaction DB
+
 //            add the user or update its trust
             if (maybeTrustScore == null) {
-                val (resultWOT, errMsgWOT) = WebOfTrustUtility.addNewPeer(prevOwner, 10, db)
+                val (resultWOT, errMsgWOT) = WebOfTrustUtility.addNewPeer(prevOwner, WebOfTrustUtility.TRUST_INCREASE, db)
                 if (!resultWOT) {
                     Toast.makeText(requireContext(), errMsgWOT, Toast.LENGTH_LONG).show()
                 }
             } else {
-                val (resultWOT, errMsgWOT) = WebOfTrustUtility.updateUserTrust(prevOwner, +10, db)
+                val (resultWOT, errMsgWOT) = WebOfTrustUtility.updateUserTrust(prevOwner, +WebOfTrustUtility.TRUST_INCREASE, db)
                 if (!resultWOT) {
                     Toast.makeText(requireContext(), errMsgWOT, Toast.LENGTH_LONG).show()
                 }
@@ -130,7 +132,62 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
 //    Checks if transaction tokens are already in the DB. If true, then search for the double
 //    spender and store his public key with a very small score
     private fun checkForDuplicateTokens() {
+        if (maybeTransaction == null || maybePrevOwner == null) {
+            return
+        }
 
+        val transaction: TransferQR = maybeTransaction!!
+        val prevOwner: PublicKey = maybePrevOwner!!
+
+        val (maybeDups, errMsgFindDup) = TransactionUtility.getDuplicateTokens(transaction, db)
+        if (maybeDups == null) {
+            maybeTransaction = null
+            maybePrevOwner = null
+
+            binding.txtContactPublicKey.text = errMsgFindDup
+            return
+        }
+
+        val dups: MutableList<TransactionUtility.DuplicatedTokens> = maybeDups
+
+        if (dups.size == 0) {
+            return
+        }
+
+        val doubleSpentErrMsg = "Warning: tokens are double spent and transaction will fail"
+        binding.txtContactPublicKey.text = doubleSpentErrMsg
+//        now try to find who double spent and store those public keys as double spenders
+        val doubleSpenders: MutableMap<ByteArray, PublicKey> = mutableMapOf()
+        for (duplicate in dups) {
+            val (maybeDoubleSpender, errMsgDoubleSpender) = duplicate.getDoubleSpender()
+            if (maybeDoubleSpender == null) {
+                val prevMsg = binding.txtContactPublicKey.text
+                val newMsg = "$prevMsg\n$errMsgDoubleSpender"
+                binding.txtContactPublicKey.text = newMsg
+                continue
+            }
+            val doubleSpender: PublicKey = maybeDoubleSpender
+            doubleSpenders[doubleSpender.keyToBin()] = doubleSpender
+        }
+
+        for (ds in doubleSpenders) {
+            if (ds == prevOwner) {
+                val prevOwnerDoubleSpenderMsg = "WARNING: sender double spent"
+                binding.trustScoreWarning.text = prevOwnerDoubleSpenderMsg
+            }
+
+            val (result, errMsg) = WebOfTrustUtility.addOrUpdatePeer(ds.value, WebOfTrustUtility.TRUST_MIN, db)
+            if (result == null) {
+//                something strange happened
+                val prevMsg = binding.txtContactPublicKey.text
+                val newMsg = "$prevMsg\n$errMsg"
+                binding.txtContactPublicKey.text = newMsg
+                continue
+            }
+        }
+
+        maybeTransaction = null
+        maybePrevOwner = null
     }
 
     private fun setTrustScoreAndMessage() {

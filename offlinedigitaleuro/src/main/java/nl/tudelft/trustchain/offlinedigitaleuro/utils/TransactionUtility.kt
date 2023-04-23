@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.offlinedigitaleuro.utils
 import android.util.Log
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineMoneyRoomDatabase
 import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
@@ -19,13 +20,25 @@ class TransactionUtility {
     ) {}
 
     class DuplicatedTokens(
-        val incomingToken: Token,
-        val storedToken: Token,
+        private val incomingToken: Token,
+        private val storedToken: Token,
     ) {
-        fun getDoubleSpenders() {
+        fun getDoubleSpender() : Pair<PublicKey?, String> {
 //            TODO: some LCC algo to find who double spent and be careful to not blame the central authority
-        }
 
+//            from 1 to jump over intermediary wallet and until < size - 1 to not check the central authority
+            for (i in 1 until incomingToken.numRecipients - 1) {
+                for (j in 1 until storedToken.numRecipients - 1) {
+                    val ithOwner: ByteArray = incomingToken.recipients[i].publicKey
+                    val jthOwner: ByteArray = storedToken.recipients[j].publicKey
+                    if (ithOwner contentEquals jthOwner) {
+                        return Pair(defaultCryptoProvider.keyFromPublicBin(ithOwner), "")
+                    }
+                }
+            }
+
+            return Pair(null, "Error: token already in DB but no double spender was found")
+        }
     }
 
 companion object {
@@ -38,19 +51,33 @@ companion object {
         val result = TokenDBUtility.insertToken(nowOwnedTokens.toList(), db)
         val code: TokenDBUtility.Codes = result.first
         if (code != TokenDBUtility.Codes.OK) {
-            Log.e("ODE", "Error: failed to insert received tokens into the DB, reason: $code")
-            return Pair(false, "Error: failed to insert received tokens into the DB, reason: $code")
+            val errMsg = "Error: failed to insert received tokens into the DB, reason: $code"
+            Log.e("ODE", errMsg)
+            return Pair(false, errMsg)
         }
 
         return Pair(true, "")
     }
 
-//    Gets the tokens from the transfer qr and checks if they are already stored in the DB. If true,
-//    then return the tokens for later to check who double spent
-    fun getDuplicateTokens(tq: TransferQR) : MutableList<DuplicatedTokens> {
+//    Gets the tokens from the transfer qr and checks if they are already stored in the DB
+//    if NO error, returns Pair<[*], ""> -> an empty list means no duplicates
+//    else, returns Pair<null, "*">
+    fun getDuplicateTokens(tq: TransferQR, db: OfflineMoneyRoomDatabase) : Pair<MutableList<DuplicatedTokens>?, String> {
+        val ret: MutableList<DuplicatedTokens> = mutableListOf()
 
+        for (t in tq.tokens) {
+            val (code, tokenFromDb) = TokenDBUtility.findToken(t, db)
+            if (code == TokenDBUtility.Codes.OK) {
+                ret.add(DuplicatedTokens(t, tokenFromDb!!))
+                continue
+            } else if (code != TokenDBUtility.Codes.ERR_NOT_FOUND) {
+                val errMsg = "Error: failed to check if token is in DB, reason: $code"
+                Log.e("ODE", errMsg)
+                return Pair(null, errMsg)
+            }
+        }
 
-        return mutableListOf()
+        return Pair(ret, "")
     }
 
 //    completes the transaction by deleting the transferred tokens from the DB and some other stuff
