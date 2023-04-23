@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.offlinedigitaleuro.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -22,6 +23,8 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
     private var maybePrevOwner: PublicKey? = null
     private var maybeTrustScore: Int? = null
 
+    private var doubleSpendExists: Boolean = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -33,9 +36,11 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
 //        get the previous owner
         setPrevOwner()
 
-        binding.txtTo.text = "txtTo"
+        val txtToMsg = "Error messages:"
+        binding.txtTo.text = txtToMsg
+        binding.trustScoreWarning.text = ""
 
-//        TODO: check tokens for double spending, if double spent then store the user and destroy the transaction
+//        check tokens for double spending, if double spent then store the user and destroy the transaction
         checkForDuplicateTokens()
 
         setTrustScoreAndMessage()
@@ -170,10 +175,17 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
             doubleSpenders[doubleSpender.keyToBin()] = doubleSpender
         }
 
+        if (doubleSpenders.size > 0) {
+            Log.d("ODE", "${doubleSpenders.size} double spenders present")
+        } else {
+            Log.d("ODE", "no double spenders found")
+        }
+
         for (ds in doubleSpenders) {
             if (ds == prevOwner) {
                 val prevOwnerDoubleSpenderMsg = "WARNING: sender double spent"
                 binding.trustScoreWarning.text = prevOwnerDoubleSpenderMsg
+                binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
             }
 
             val (result, errMsg) = WebOfTrustUtility.addOrUpdatePeer(ds.value, WebOfTrustUtility.TRUST_MIN, db)
@@ -186,12 +198,30 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
             }
         }
 
+        doubleSpendExists = true
+
         maybeTransaction = null
         maybePrevOwner = null
     }
 
     private fun setTrustScoreAndMessage() {
-        if (maybePrevOwner == null) {
+        if (doubleSpendExists) {
+            val prevMsg = binding.trustScoreWarning.text
+            val invalidTransactionMsg = "WARNING: the transaction contains double spending, so it is invalid"
+            val newMsg = if (!prevMsg.equals("")) {
+                "$prevMsg\n$invalidTransactionMsg"
+            } else {
+                invalidTransactionMsg
+            }
+            binding.trustScoreWarning.text = newMsg
+            binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
+            return
+        }
+
+        if (maybeTransaction == null || maybePrevOwner == null) {
+            val invalidTransactionMsg = "WARNING: the transaction is invalid"
+            binding.trustScoreWarning.text = invalidTransactionMsg
+            binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
             return
         }
 

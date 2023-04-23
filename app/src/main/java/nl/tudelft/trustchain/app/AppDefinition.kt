@@ -39,7 +39,7 @@ enum class AppDefinition(
     ),
     OFFLINE_MONEY(
         R.drawable.ic_offline_money,
-        "offline money",
+        "Offline Digital Euro",
         R.color.black,
         MainActivityOfflineDigitalEuro::class.java,
         true,
