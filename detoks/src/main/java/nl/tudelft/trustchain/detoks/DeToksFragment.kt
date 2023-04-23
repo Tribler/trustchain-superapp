@@ -12,7 +12,6 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
 import java.io.FileOutputStream
 
-
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var torrentManager: TorrentManager
     private val logger = KotlinLogging.logger {}
@@ -56,7 +55,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         super.onViewCreated(view, savedInstanceState)
 
         viewPagerVideos.adapter = VideosAdapter(torrentManager)
-            viewPagerVideos.currentItem = 0
+        viewPagerVideos.currentItem = 0
         onPageChangeCallback()
 
         val settingsButton = view.findViewById<Button>(R.id.strategyButton)

@@ -551,6 +551,14 @@ class TorrentManager private constructor(
         return torrentFiles.map {it.handle}.distinct()
     }
 
+    fun getCurrentHandler(): TorrentHandler {
+        return torrentFiles.gett(currentIndex)
+    }
+
+    fun getDHTSize(): Long {
+        return sessionManager.dhtNodes()
+    }
+
     class TorrentHandler(
         private val cacheDir: File,
         val handle: TorrentHandle,
@@ -623,6 +631,10 @@ class TorrentManager private constructor(
 
         fun asMediaInfo(): TorrentMediaInfo {
             return TorrentMediaInfo(torrentName, fileName, getPath())
+        }
+
+        fun getFileSize(): Long {
+            return handle.torrentFile().files().fileSize(fileIndex)
         }
     }
 
