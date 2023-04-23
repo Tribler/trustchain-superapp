@@ -30,17 +30,17 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
 
         setupListeners()
 
-//        get the transaction from the passed data
+        // get the transaction from the passed data
         setTransaction(JSONObject(requireArguments().getString(ARG_QR)!!))
 
-//        get the previous owner
+        // get the previous owner
         setPrevOwner()
 
         val txtToMsg = "Error messages:"
         binding.txtTo.text = txtToMsg
         binding.trustScoreWarning.text = ""
 
-//        check tokens for double spending, if double spent then store the user and destroy the transaction
+        // check tokens for double spending, if double spent then store the user and destroy the transaction
         checkForDuplicateTokens()
 
         setTrustScoreAndMessage()
@@ -49,12 +49,12 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
     private fun setupListeners() {
         binding.btnAccept.setOnClickListener {
             if (maybeTransaction == null || maybePrevOwner == null) {
-                val prevMsg: String = binding.txtContactPublicKey.text.toString()
+                val prevMsg: String = binding.txtError.text.toString()
                 val newErrMsg = "Error: transaction is not good. Reject instead"
 //            to display the error message only once
                 if (!prevMsg.contains(newErrMsg)) {
                     val newMsg = "$prevMsg\n$newErrMsg"
-                    binding.txtContactPublicKey.text = newMsg
+                    binding.txtError.text = newMsg
                 }
                 return@setOnClickListener
             }
@@ -64,12 +64,12 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
             val prevOwner: PublicKey = maybePrevOwner!!
 
 //            add the tokens to us
-            val (result, errMsgRecvTrans) = TransactionUtility.receiveTransaction(transaction, db, getTrustChainCommunity().myPeer.publicKey)
+            val (result, errMsgReceiveTrans) = TransactionUtility.receiveTransaction(transaction, db, getTrustChainCommunity().myPeer.publicKey)
             if (!result) {
                 maybeTransaction = null
                 maybePrevOwner = null
 
-                binding.txtContactPublicKey.text = errMsgRecvTrans
+                binding.txtError.text = errMsgReceiveTrans
 
                 return@setOnClickListener
             }
@@ -100,13 +100,13 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
     private fun setTransaction(transactionArg: JSONObject) {
         val (maybeTransaction, errMsgTransfer) = TransferQR.fromJson(transactionArg)
         if (maybeTransaction == null) {
-            binding.txtContactPublicKey.text = errMsgTransfer
+            binding.txtError.text = errMsgTransfer
             return
         }
 
         this.maybeTransaction = maybeTransaction
 
-//        get the amount to be transferred
+        // get the amount to be transferred
         val amountMsg = "€ ${maybeTransaction.getValue()}"
         binding.txtAmount.text = amountMsg
     }
@@ -121,9 +121,9 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
 
         val (maybePrevOwner, errMsgGetPrevOwner) = tqr.getPreviousOwner()
         if (maybePrevOwner == null) {
-            val prevMsg = binding.txtContactPublicKey.text.toString()
+            val prevMsg = binding.txtError.text.toString()
             val newMsg = "$prevMsg\n$errMsgGetPrevOwner"
-            binding.txtContactPublicKey.text = newMsg
+            binding.txtError.text = newMsg
 
             titleMsg += "Unknown"
         } else {
@@ -134,8 +134,8 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
         binding.txtTitle.text = titleMsg
     }
 
-//    Checks if transaction tokens are already in the DB. If true, then search for the double
-//    spender and store his public key with a very small score
+    //    Checks if transaction tokens are already in the DB. If true, then search for the double
+    // spender and store his public key with a very small score
     private fun checkForDuplicateTokens() {
         if (maybeTransaction == null || maybePrevOwner == null) {
             return
@@ -149,7 +149,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
             maybeTransaction = null
             maybePrevOwner = null
 
-            binding.txtContactPublicKey.text = errMsgFindDup
+            binding.txtError.text = errMsgFindDup
             return
         }
 
@@ -160,22 +160,22 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
         }
 
         val doubleSpentErrMsg = "Warning: tokens are double spent and transaction will fail"
-        binding.txtContactPublicKey.text = doubleSpentErrMsg
-//        now try to find who double spent and store those public keys as double spenders
+        binding.txtError.text = doubleSpentErrMsg
+        // now try to find who double spent and store those public keys as double spenders
         val doubleSpenders: MutableMap<ByteArray, PublicKey> = mutableMapOf()
         for (duplicate in dups) {
             val (maybeDoubleSpender, errMsgDoubleSpender) = duplicate.getDoubleSpender()
             if (maybeDoubleSpender == null) {
-                val prevMsg = binding.txtContactPublicKey.text
+                val prevMsg = binding.txtError.text
                 val newMsg = "$prevMsg\n$errMsgDoubleSpender"
-                binding.txtContactPublicKey.text = newMsg
+                binding.txtError.text = newMsg
                 continue
             }
             val doubleSpender: PublicKey = maybeDoubleSpender
             doubleSpenders[doubleSpender.keyToBin()] = doubleSpender
         }
 
-        if (doubleSpenders.size > 0) {
+        if (doubleSpenders.isNotEmpty()) {
             Log.d("ODE", "${doubleSpenders.size} double spenders present")
         } else {
             Log.d("ODE", "no double spenders found")
@@ -190,10 +190,10 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
 
             val (result, errMsg) = WebOfTrustUtility.addOrUpdatePeer(ds.value, WebOfTrustUtility.TRUST_MIN, db)
             if (result == null) {
-//                something strange happened
-                val prevMsg = binding.txtContactPublicKey.text
+            // something strange happened
+                val prevMsg = binding.txtError.text
                 val newMsg = "$prevMsg\n$errMsg"
-                binding.txtContactPublicKey.text = newMsg
+                binding.txtError.text = newMsg
                 continue
             }
         }

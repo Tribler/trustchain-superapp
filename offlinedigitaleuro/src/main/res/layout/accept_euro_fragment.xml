@@ -23,7 +23,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="@string/receiving"
+                android:text=""
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -46,24 +46,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="@string/from"
+                android:text=""
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/txtAmount" />
 
             <TextView
-                android:id="@+id/txtContactPublicKey"
+                android:id="@+id/txtError"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:lines="1"
                 android:textColor="@color/text_primary"
                 android:typeface="monospace"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/txtTo"
-                tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
+                tools:text="" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
