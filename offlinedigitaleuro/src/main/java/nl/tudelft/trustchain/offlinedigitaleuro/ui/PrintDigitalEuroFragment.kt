@@ -24,6 +24,7 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.errorText.visibility = View.INVISIBLE
         binding.printNumberPicker1.value = 0
         binding.printNumberPicker2.value = 0
         binding.printNumberPicker5.value = 0
@@ -95,11 +96,14 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
             val result = TokenDBUtility.insertToken(tokenPackage.toList(), db)
             val code = result.first
             if (code != TokenDBUtility.Codes.OK) {
-                val errMsg: String = "Error: failure to print money, reason: $code"
-                Log.d("ODE", errMsg)
-//                TODO: print error message in text box for user to see
-//                temp
-                Toast.makeText(requireContext(), errMsg, Toast.LENGTH_LONG).show()
+                val prevMsg = binding.errorText.text
+                val newErrMsg = "Error: failure to print money, reason: $code"
+                Log.d("ODE", newErrMsg)
+                if (!prevMsg.contains(newErrMsg)) {
+                    val errMsg = "$prevMsg\n$newErrMsg"
+                    binding.errorText.text = errMsg
+                    binding.errorText.visibility = View.VISIBLE
+                }
 
                 return@setOnClickListener
             }
