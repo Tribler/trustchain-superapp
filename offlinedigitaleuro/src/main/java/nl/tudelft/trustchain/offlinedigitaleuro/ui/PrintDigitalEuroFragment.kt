@@ -73,6 +73,11 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
 //            TODO: give tokens from central authority to owner
             for (token in tokenPackage) {
                 signByVerifier(token, token.genesisHash, getTrustChainCommunity().myPeer.publicKey.keyToBin())
+                var debugMsg = ""
+                for (i in 0 until token.numRecipients) {
+                    debugMsg += "$i: ${token.recipients[i].publicKey.toHex()}"
+                }
+                Log.d("ODE", "Debug print: $debugMsg")
             }
 
             val result = TokenDBUtility.insertToken(tokenPackage.toList(), db)
