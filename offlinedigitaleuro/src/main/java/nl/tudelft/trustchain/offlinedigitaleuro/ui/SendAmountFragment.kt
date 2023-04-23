@@ -71,26 +71,26 @@ class SendAmountFragment : OfflineDigitalEuroBaseFragment(R.layout.send_amount_f
         }
 
         binding.btnSend.setOnClickListener{
-                val amount = binding.txtAmount.text.toString().toDouble()
+            val amount = binding.txtAmount.text.toString().toDouble()
 
-                if (amount > 0) {
-                    val connectionData = JSONObject()
-                    connectionData.put(ARG_10EURO_COUNT, binding.numberPicker10.value)
-                    connectionData.put(ARG_5EURO_COUNT, binding.numberPicker5.value)
-                    connectionData.put(ARG_2EURO_COUNT, binding.numberPicker2.value)
-                    connectionData.put(ARG_1EURO_COUNT, binding.numberPicker1.value)
+            if (amount > 0) {
+                val connectionData = JSONObject()
+                connectionData.put(ARG_10EURO_COUNT, binding.numberPicker10.value)
+                connectionData.put(ARG_5EURO_COUNT, binding.numberPicker5.value)
+                connectionData.put(ARG_2EURO_COUNT, binding.numberPicker2.value)
+                connectionData.put(ARG_1EURO_COUNT, binding.numberPicker1.value)
 
-                    val args = Bundle()
+                val args = Bundle()
 
-                    args.putString(SendDigitalEuroFragment.ARG_DATA, connectionData.toString())
+                args.putString(SendDigitalEuroFragment.ARG_DATA, connectionData.toString())
 
-                    findNavController().navigate(
-                        R.id.action_sendAmountFragment_to_sendMoneyFragment,
-                        args
-                    )
-                } else {
-                    Toast.makeText(requireContext(), "You need to send an amount bigger than 0", Toast.LENGTH_LONG).show()
-                }
+                findNavController().navigate(
+                    R.id.action_sendAmountFragment_to_sendMoneyFragment,
+                    args
+                )
+            } else {
+                Toast.makeText(requireContext(), "You need to send an amount bigger than 0", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
