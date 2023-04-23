@@ -12,6 +12,7 @@ import kotlin.math.min
 class WebOfTrustUtility {
 
 companion object {
+    const val TRUST_NEUTRAL: Int = 0
     const val TRUST_INCREASE: Int = +10
     const val TRUST_MAX: Int = +100
     const val TRUST_MIN: Int = -100
@@ -26,17 +27,14 @@ companion object {
         return trustScore
     }
 
-//    Adds the peer in the web of trust DB if does not exist and sets the trust to the absolute value passed
-//    OR if exists updates the trust score with the given trust with the modifier value passed
+//    Adds the peer in the web of trust DB if does not exist and depending on the absolute field,
+//    setting the score to the passed value (absolute true) or modifying by it (absolute false)
 //    returns on NO error Pair<Boolean, ""> -> true if added a new peer or false if updated a peer
 //    returns on error Pair<null, errorMessage>
-    fun addOrUpdatePeer(peer: PublicKey, trust: Int = 0, db: OfflineMoneyRoomDatabase): Pair<Boolean?, String> {
-        val (resultAdd, _) = addNewPeer(peer, trust, db)
-        if (resultAdd) {
-            return Pair(true, "")
-        }
+    fun addOrUpdatePeer(peer: PublicKey, trust: Int = 0, db: OfflineMoneyRoomDatabase, absolute: Boolean = false): Pair<Boolean?, String> {
+        val (_, _) = addNewPeer(peer, 0, db)
 
-        val (resultUpdate, errMsg) = updateUserTrust(peer, trust, db)
+        val (resultUpdate, errMsg) = updateUserTrust(peer, trust, db, absolute)
         if (resultUpdate) {
             return Pair(false, "")
         }
@@ -64,7 +62,7 @@ companion object {
 
 //    returns Pair<true, ""> on success
 //    returns Pair<false, errorMessage> on failure to update
-    fun updateUserTrust(peer: PublicKey, trustModifier: Int, db: OfflineMoneyRoomDatabase) : Pair<Boolean, String> {
+    fun updateUserTrust(peer: PublicKey, trust: Int, db: OfflineMoneyRoomDatabase, absolute: Boolean = false) : Pair<Boolean, String> {
         val maybePrevTrust: Int? = getTrustOfPeer(peer, db)
         if (maybePrevTrust == null) {
             val errMsg = "Error: user not in the database"
@@ -72,10 +70,11 @@ companion object {
         }
 
         val prevTrust: Int = maybePrevTrust
-        val newTrust: Int = max(TRUST_MIN, min(TRUST_MAX, prevTrust + trustModifier))
+        var newTrust: Int = if (absolute) { trust } else { prevTrust + trust }
+        newTrust = max(TRUST_MIN, min(TRUST_MAX, newTrust))
 
         runBlocking(Dispatchers.IO) {
-            db.webOfTrustDao().updateUserScore(peer.keyToBin().toHex(), newTrust)
+            db.webOfTrustDao().setUserScore(peer.keyToBin().toHex(), newTrust)
         }
 
         return Pair(true, "")

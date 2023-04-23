@@ -10,6 +10,7 @@ import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
 import org.json.JSONObject
+import java.lang.Integer.min
 
 class TransactionUtility {
 
@@ -25,32 +26,32 @@ class TransactionUtility {
         private val storedToken: Token,
     ) {
         fun getDoubleSpender() : Pair<PublicKey?, String> {
-//            TODO: some LCC algo to find who double spent and be careful to not blame the central authority
+//            general check that does not include the owner before we owned the token
+//            incoming - 1 because of intermediary wallet and stored - 2 because we already own it and intermediary wallet
+            val minSize: Int = min(incomingToken.numRecipients - 1, storedToken.numRecipients - 2)
+            for (i in 0 until minSize step 2) {
+                val incomingOwner = incomingToken.recipients[i].publicKey
+                val storedOwner = storedToken.recipients[i].publicKey
 
-            var debugMsgIncoming = ""
-            for (i in 0 until incomingToken.numRecipients) {
-                debugMsgIncoming += "$i: ${incomingToken.recipients[i].publicKey.toHex()}"
-            }
-            var debugMsgStored = ""
-            for (i in 0 until storedToken.numRecipients) {
-                debugMsgStored += "$i: ${storedToken.recipients[i].publicKey.toHex()}"
-            }
+                if (!(incomingOwner contentEquals storedOwner)) {
+                   if (i == 0) {
+                       val errMsg = "Error: token with same ID but different initial owners found"
+                       return Pair(null, errMsg)
+                   }
 
-            Log.d("ODE", "Debug incoming: $debugMsgIncoming")
-            Log.d("ODE", "Debug stored: $debugMsgStored")
-
-//            from 1 to jump over intermediary wallet and until < size - 1 to not check the central authority
-            for (i in 1 until incomingToken.numRecipients - 1) {
-                for (j in 1 until storedToken.numRecipients - 1) {
-                    val ithOwner: ByteArray = incomingToken.recipients[i].publicKey
-                    val jthOwner: ByteArray = storedToken.recipients[j].publicKey
-                    if (ithOwner contentEquals jthOwner) {
-                        return Pair(defaultCryptoProvider.keyFromPublicBin(ithOwner), "")
-                    }
+                    val doubleSpender = incomingToken.recipients[i - 2].publicKey
+                    return Pair(defaultCryptoProvider.keyFromPublicBin(doubleSpender), "")
                 }
+
             }
 
-            return Pair(null, "Error: token already in DB but no double spender was found")
+//            the owner right before us is the double spender if we reached this point
+            val doubleSpender = incomingToken.recipients[incomingToken.numRecipients - 2].publicKey
+            return Pair(defaultCryptoProvider.keyFromPublicBin(doubleSpender), "")
+
+//            no longer needed/possible to do a mistake? TODO: decide
+//            val errMsg = "Error: token already in DB but no double spender was found"
+//            return Pair(null, errMsg)
         }
     }
 

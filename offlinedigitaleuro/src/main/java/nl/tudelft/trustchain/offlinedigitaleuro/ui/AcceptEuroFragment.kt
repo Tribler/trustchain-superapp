@@ -175,12 +175,6 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
             doubleSpenders[doubleSpender.keyToBin()] = doubleSpender
         }
 
-        if (doubleSpenders.isNotEmpty()) {
-            Log.d("ODE", "${doubleSpenders.size} double spenders present")
-        } else {
-            Log.d("ODE", "no double spenders found")
-        }
-
         for (ds in doubleSpenders) {
             if (ds == prevOwner) {
                 val prevOwnerDoubleSpenderMsg = "WARNING: sender double spent"
@@ -188,7 +182,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
                 binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
             }
 
-            val (result, errMsg) = WebOfTrustUtility.addOrUpdatePeer(ds.value, WebOfTrustUtility.TRUST_MIN, db)
+            val (result, errMsg) = WebOfTrustUtility.addOrUpdatePeer(ds.value, WebOfTrustUtility.TRUST_MIN, db, absolute = true)
             if (result == null) {
             // something strange happened
                 val prevMsg = binding.txtError.text
