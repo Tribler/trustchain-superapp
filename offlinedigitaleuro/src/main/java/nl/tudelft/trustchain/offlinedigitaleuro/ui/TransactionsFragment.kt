@@ -24,7 +24,7 @@ class TransactionsFragment : OfflineDigitalEuroBaseFragment(R.layout.transaction
     private val adapter = ItemAdapter()
 
     private val items: LiveData<List<Item>> by lazy {
-        liveData { emit(listOf<Item>()) }
+        liveData { emit(listOf()) }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -4,19 +4,14 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
 import org.json.JSONObject
-
-import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
 import nl.tudelft.trustchain.offlinedigitaleuro.R
 import nl.tudelft.trustchain.offlinedigitaleuro.databinding.SendMoneyFragmentBinding
@@ -72,7 +67,7 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
         }
 
         binding.btnContinue.setOnClickListener {
-            //remove tokens that were transferred from database
+            // remove tokens that were transferred from database
             if (!tryRemoveTokensSent(sendTransaction)) {
                 return@setOnClickListener
             }
@@ -132,7 +127,7 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
         if (maybeSendTransaction == null) {
             val prevMsg: String = binding.txtSendData.text.toString()
             val newErrMsg = "Error: transaction preparation failed, can not continue. Cancel instead"
-//            to display the error message only once
+            // to display the error message only once
             if (!prevMsg.contains(newErrMsg)) {
                 val newMsg = "$prevMsg\n$newErrMsg"
                 binding.txtSendData.text = newMsg

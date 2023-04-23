@@ -21,6 +21,11 @@ interface TokensDao {
     @Query("SELECT * FROM tokens_table WHERE token_value = :token_value")
     fun getAllTokensOfValue(token_value: Double) : Array<Token>
 
+    // Get an amount of token_types from from database
+    @Query("SELECT * FROM tokens_table WHERE token_value = :token_value LIMIT :count")
+    fun getCountOfTokensOfValue(token_value: Double, count: Int) : Array<Token>
+
+    // get how many tokens are of a certain value from database
     @Query("SELECT COUNT(*) FROM tokens_table WHERE token_value = :token_value")
     fun getCountTokensOfValue(token_value: Double) : Int
 
