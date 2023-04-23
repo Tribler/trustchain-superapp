@@ -175,12 +175,6 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
             doubleSpenders[doubleSpender.keyToBin()] = doubleSpender
         }
 
-        if (doubleSpenders.isNotEmpty()) {
-            Log.d("ODE", "${doubleSpenders.size} double spenders present")
-        } else {
-            Log.d("ODE", "no double spenders found")
-        }
-
         for (ds in doubleSpenders) {
             if (ds == prevOwner) {
                 val prevOwnerDoubleSpenderMsg = "WARNING: sender double spent"

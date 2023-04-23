@@ -26,20 +26,6 @@ class TransactionUtility {
         private val storedToken: Token,
     ) {
         fun getDoubleSpender() : Pair<PublicKey?, String> {
-//            TODO: some LCC algo to find who double spent and be careful to not blame the central authority
-
-            var debugMsgIncoming = ""
-            for (i in 0 until incomingToken.numRecipients) {
-                debugMsgIncoming += " | $i: ${incomingToken.recipients[i].publicKey.toHex()}"
-            }
-            var debugMsgStored = ""
-            for (i in 0 until storedToken.numRecipients) {
-                debugMsgStored += " | $i: ${storedToken.recipients[i].publicKey.toHex()}"
-            }
-
-            Log.d("ODE", "Debug incoming: $debugMsgIncoming")
-            Log.d("ODE", "Debug stored: $debugMsgStored")
-
 //            general check that does not include the owner before we owned the token
 //            incoming - 1 because of intermediary wallet and stored - 2 because we already own it and intermediary wallet
             val minSize: Int = min(incomingToken.numRecipients - 1, storedToken.numRecipients - 2)
