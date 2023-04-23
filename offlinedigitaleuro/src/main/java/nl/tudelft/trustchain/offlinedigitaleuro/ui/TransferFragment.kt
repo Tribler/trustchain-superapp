@@ -68,9 +68,6 @@ class TransferFragment : OfflineDigitalEuroBaseFragment(R.layout.activity_main_o
                         findNavController().navigate(R.id.action_transferFragment_to_printMoneyFragment)
                         true
                     }
-                    R.id.verifyMoney -> {
-                        true
-                    }
                     else -> false
                 }
             }

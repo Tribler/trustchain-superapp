@@ -3,7 +3,4 @@
     <item
         android:id="@+id/printMoney"
         android:title="@string/print_money" />
-    <item
-        android:id="@+id/verifyMoney"
-        android:title="@string/verify_money" />
 </menu>
