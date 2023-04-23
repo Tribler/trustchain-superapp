@@ -4,6 +4,7 @@ import android.util.Log
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineMoneyRoomDatabase
 import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
@@ -25,6 +26,18 @@ class TransactionUtility {
     ) {
         fun getDoubleSpender() : Pair<PublicKey?, String> {
 //            TODO: some LCC algo to find who double spent and be careful to not blame the central authority
+
+            var debugMsgIncoming = ""
+            for (i in 0 until incomingToken.numRecipients) {
+                debugMsgIncoming += "$i: ${incomingToken.recipients[i].publicKey.toHex()}"
+            }
+            var debugMsgStored = ""
+            for (i in 0 until storedToken.numRecipients) {
+                debugMsgStored += "$i: ${storedToken.recipients[i].publicKey.toHex()}"
+            }
+
+            Log.d("ODE", "Debug incoming: $debugMsgIncoming")
+            Log.d("ODE", "Debug stored: $debugMsgStored")
 
 //            from 1 to jump over intermediary wallet and until < size - 1 to not check the central authority
             for (i in 1 until incomingToken.numRecipients - 1) {

@@ -35,46 +35,26 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
             return (1..length).map {charArray.random()}.joinToString("").toByteArray()
         }
 
-        fun createTokens(token1_count:Int, token2_count:Int, token5_count:Int, token10_count:Int): Array<Token> {
-            var tokenPackage:Array<Token> = arrayOf()
+        fun createTokens(token1_count:Int, token2_count:Int, token5_count:Int, token10_count:Int): MutableSet<Token> {
+            var tokenPackage: MutableSet<Token> = mutableSetOf()
 
             val resp = RecipientPair(Wallet.CentralAuthority.publicKey.keyToBin(), Wallet.CentralAuthority.privateKey.sign("random signature".toByteArray()))
 
             for(i in 1..token1_count){
-                tokenPackage+=Token(
-                    id = generateRandomString(8),
-                    value = 1,
-                    verifier = generateRandomString(74),
-                    genesisHash = generateRandomString(64),
-                    recipients= mutableListOf(resp))
+                val token = Token.create(1, Wallet.CentralAuthority.publicKey.keyToBin())
+                tokenPackage.add(token)
             }
             for(i in 1..token2_count) {
-                tokenPackage += Token(
-                    id = generateRandomString(8),
-                    value = 2,
-                    verifier = generateRandomString(74),
-                    genesisHash = generateRandomString(64),
-                    recipients = mutableListOf(resp)
-                )
-
+                val token = Token.create(2, Wallet.CentralAuthority.publicKey.keyToBin())
+                tokenPackage.add(token)
             }
             for(i in 1..token5_count){
-                tokenPackage+=Token(
-                    id=generateRandomString(8),
-                    value=5,
-                    verifier = generateRandomString(74),
-                    genesisHash = generateRandomString(64),
-                    recipients= mutableListOf(resp)
-                )
+                val token = Token.create(5, Wallet.CentralAuthority.publicKey.keyToBin())
+                tokenPackage.add(token)
             }
             for(i in 1..token10_count){
-                tokenPackage+=Token(
-                    id = generateRandomString(8),
-                    value = 10,
-                    verifier = generateRandomString(74),
-                    genesisHash = generateRandomString(64),
-                    recipients= mutableListOf(resp)
-                )
+                val token = Token.create(10, Wallet.CentralAuthority.publicKey.keyToBin())
+                tokenPackage.add(token)
             }
             return tokenPackage
         }
@@ -84,7 +64,7 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
 
         binding.btnPrint.setOnClickListener {
             //This create an array with tokens of values 1,2,5
-            val tokenPackage: Array<Token> = createTokens(
+            val tokenPackage: MutableSet<Token> = createTokens(
                 token1_count = binding.printNumberPicker1.value,
                 token2_count = binding.printNumberPicker2.value,
                 token5_count = binding.printNumberPicker5.value,
@@ -92,6 +72,14 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
             )
 
 //            TODO: give tokens from central authority to owner
+            for (token in tokenPackage) {
+                signByVerifier(token, token.genesisHash, getTrustChainCommunity().myPeer.publicKey.keyToBin())
+                var debugMsg = ""
+                for (i in 0 until token.numRecipients) {
+                    debugMsg += "$i: ${token.recipients[i].publicKey.toHex()}"
+                }
+                Log.d("ODE", "Debug print: $debugMsg")
+            }
 
             val result = TokenDBUtility.insertToken(tokenPackage.toList(), db)
             val code = result.first
@@ -111,5 +99,18 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
             findNavController().navigate(R.id.action_printMoneyFragment_to_transferFragment)
         }
 
+    }
+
+    private fun signByVerifier(token: Token, lastVerifiedProof: ByteArray, recipient: ByteArray): RecipientPair {
+        val newRecipientPair = RecipientPair(
+            recipient,
+            Wallet.CentralAuthority.privateKey.sign(token.id + token.value + lastVerifiedProof + recipient)
+        )
+
+        token.genesisHash = lastVerifiedProof
+        token.recipients.clear()
+        token.recipients.add(newRecipientPair)
+
+        return newRecipientPair
     }
 }

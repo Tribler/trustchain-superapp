@@ -54,7 +54,7 @@
 
             <TextView
                 android:id="@+id/txtContactPublicKey"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:lines="1"
