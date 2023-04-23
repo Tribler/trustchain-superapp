@@ -2,7 +2,7 @@ package nl.tudelft.trustchain.musicdao.core.recommender.ranking
 
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkRandomNodeResetIterator
+import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkWithExplorationIterator
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
 import java.util.*
 
@@ -11,11 +11,21 @@ class IncrementalHybridPersonalizedPageRankSalsa (
     repetitions: Int,
     rootNode: Node,
     resetProbability: Float,
+    explorationProbability: Float,
     graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>
 ): IncrementalRandomWalkedBasedRankingAlgo<DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>, NodeOrSong, NodeSongEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}
-    private val iter = CustomHybridRandomWalkRandomNodeResetIterator(graph, rootNode, maxWalkLength.toLong(), resetProbability, 0.5f, Random(), graph.vertexSet().filterIsInstance<Node>()
-        .toList() )
+    private val iter =
+        CustomHybridRandomWalkWithExplorationIterator(
+            graph,
+            rootNode,
+            maxWalkLength.toLong(),
+            resetProbability,
+            explorationProbability,
+            Random(),
+            graph.vertexSet().filterIsInstance<Node>()
+                .toList()
+        )
     private lateinit var randomWalks: MutableList<MutableList<NodeOrSong>>
 
     init {

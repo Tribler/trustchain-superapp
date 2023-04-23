@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  *
  * @param <E> the graph edge type
  */
-public class CustomHybridRandomWalkRandomNodeResetIterator<E>
+public class CustomHybridRandomWalkWithExplorationIterator<E>
         implements
         Iterator<NodeOrSong> {
     private final Random rng;
@@ -72,12 +72,12 @@ public class CustomHybridRandomWalkRandomNodeResetIterator<E>
      * @param vertex           the starting vertex
      * @param maxHops          maximum hops to perform during the walk
      * @param resetProbability probability between 0 and 1 with which to reset the random walk
-     * @param randomNodeProbability probability between 0 and 1 to reset to a new node instead of roodNode
+     * @param explorationProbability probability between 0 and 1 to start the random walk from a non-root node
      * @param rng              the random number generator
      */
     @SuppressLint("NewApi")
-    public CustomHybridRandomWalkRandomNodeResetIterator(
-            Graph<NodeOrSong, E> graph, Node vertex, long maxHops, float resetProbability, float randomNodeProbability, Random rng, List<Node> nodes) {
+    public CustomHybridRandomWalkWithExplorationIterator(
+            Graph<NodeOrSong, E> graph, Node vertex, long maxHops, float resetProbability, float explorationProbability, Random rng, List<Node> nodes) {
         this.graph = Objects.requireNonNull(graph);
         this.outEdgesTotalWeight = new HashMap<>();
         this.personalizedPageRankTotalWeight = new HashMap<>();
@@ -88,7 +88,7 @@ public class CustomHybridRandomWalkRandomNodeResetIterator<E>
         }
         this.maxHops = maxHops;
         this.resetProbability = resetProbability;
-        this.randomNodeProbability = randomNodeProbability;
+        this.randomNodeProbability = explorationProbability;
         this.rng = rng;
         Comparator<Node> comparator = Comparator.comparingDouble(Node::getPersonalizedPageRankScore);
         nodesSortedByPageRank = nodes.stream().sorted(comparator).collect(Collectors.toList());

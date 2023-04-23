@@ -1,14 +1,11 @@
 package nl.tudelft.trustchain.musicdao.recommender
 
 import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiper
-import nl.tudelft.trustchain.musicdao.core.recommender.gossip.NodeToNodeEdgeGossip
-import nl.tudelft.trustchain.musicdao.core.recommender.gossip.NodeToSongEdgeGossip
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.TrustNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsa
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.sql.Timestamp

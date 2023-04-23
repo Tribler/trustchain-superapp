@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.musicdao.recommender
 import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiper
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
+import nl.tudelft.trustchain.musicdao.core.recommender.graph.SubNetworks
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.TrustNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import org.junit.Assert
@@ -51,9 +52,9 @@ class TrustNetworkTest {
     }
 
     @Test
-    fun canCreateATrustNetworkFromUnderlyingNetworksAndAddEdgesAndNodesInIt() {
+    fun canCreateATrustNetworkFromSubnetworks() {
         setUp()
-        trustNetwork = TrustNetwork(nodeToNodeNetwork, nodeToSongNetwork, 0.toString())
+        trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), 0.toString())
         // redundancy can lead to less than nNodes*nEdges edges i.e. if we add the same node trust edge twice
         val initialNodeToNodeEdgeSize = trustNetwork.getAllNodeToNodeEdges().size
         val initialNodeToSongEdgeSize = trustNetwork.getAllNodeToSongEdges().size

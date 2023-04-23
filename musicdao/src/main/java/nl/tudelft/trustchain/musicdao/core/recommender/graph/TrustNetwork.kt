@@ -4,11 +4,11 @@ import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsa
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRank
-import java.sql.Timestamp
 
-class TrustNetwork(private val nodeToNodeNetwork: NodeToNodeNetwork,
-                   private val nodeToSongNetwork: NodeToSongNetwork,
+class TrustNetwork(subNetworks: SubNetworks,
                    sourceNodeAddress: String) {
+    private val nodeToNodeNetwork = subNetworks.nodeToNodeNetwork
+    private val nodeToSongNetwork = subNetworks.nodeToSongNetwork
     private val incrementalPersonalizedPageRank: IncrementalPersonalizedPageRank
     private val incrementalHybridPersonalizedPageRankSalsa: IncrementalHybridPersonalizedPageRankSalsa
     private val allNodes: MutableList<Node>
@@ -19,6 +19,7 @@ class TrustNetwork(private val nodeToNodeNetwork: NodeToNodeNetwork,
         const val MAX_WALK_LENGTH = 1000
         const val REPETITIONS = 10000
         const val RESET_PROBABILITY = 0.01f
+        const val EXPLORATION_PROBABILITY = 0.05f
     }
 
     init {
@@ -26,7 +27,7 @@ class TrustNetwork(private val nodeToNodeNetwork: NodeToNodeNetwork,
         allNodes = allNodesList.toMutableList()
         rootNode = allNodes.first { it.getIpv8() == sourceNodeAddress}
         incrementalPersonalizedPageRank = IncrementalPersonalizedPageRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, nodeToNodeNetwork.graph)
-        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsa(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, nodeToSongNetwork.graph)
+        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsa(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, EXPLORATION_PROBABILITY, nodeToSongNetwork.graph)
     }
 
     fun addNodeToSongEdge(edge: NodeSongEdgeWithNodeAndSongRec): Boolean {

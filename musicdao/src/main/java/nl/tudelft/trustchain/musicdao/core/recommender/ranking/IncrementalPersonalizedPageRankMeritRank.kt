@@ -1,23 +1,23 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.ranking
 
-import androidx.annotation.VisibleForTesting
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomRandomWalkVertexIterator
 import org.jgrapht.graph.SimpleDirectedWeightedGraph
 import java.util.*
-import kotlin.collections.HashMap
 
-class IncrementalPersonalizedPageRank (
+class IncrementalPersonalizedPageRankMeritRank (
     maxWalkLength: Int,
     repetitions: Int,
     rootNode: Node,
-    resetProbability: Float,
+    alphaDecay: Float,
+    val betaDecayThreshold: Float,
+    val betaDecay: Float,
     graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>
 ): IncrementalRandomWalkedBasedRankingAlgo<SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, Node, NodeTrustEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}
-    private val iter = CustomRandomWalkVertexIterator(graph, rootNode, maxWalkLength.toLong(), resetProbability, Random())
+    private val iter = CustomRandomWalkVertexIterator(graph, rootNode, maxWalkLength.toLong(), alphaDecay, Random())
     lateinit var randomWalks: MutableList<MutableList<Node>>
 
     init {
@@ -68,11 +68,36 @@ class IncrementalPersonalizedPageRank (
     }
 
     override fun calculateRankings() {
+        val betaDecays = calculateBetaDecays()
         val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it != rootNode }
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
-            node.setPersonalizedPageRankScore(occ.toDouble() / totalOccs)
+            val betaDecayedScore = (occ.toDouble() / totalOccs) * ( betaDecays[node]?.let { (1 - betaDecay).toDouble() } ?: 1.0)
+            node.setPersonalizedPageRankScore(betaDecayedScore)
         }
+    }
+
+    private fun calculateBetaDecays(): Map<Node, Boolean> {
+        val shouldBetaDecay = mutableMapOf<Node, Boolean>()
+        val totalVisitsToNode = mutableMapOf<Node, Int>()
+        val visitToNodeThroughOtherNode = mutableMapOf<Node, MutableMap<Node, Int>>()
+        for(walk in randomWalks) {
+            val uniqueNodes = mutableSetOf<Node>()
+            for(node in walk) {
+                totalVisitsToNode[node] = (totalVisitsToNode[node] ?: 0) + 1
+                for(visitedNode in uniqueNodes) {
+                    val existingMap = visitToNodeThroughOtherNode[node] ?: mutableMapOf()
+                    existingMap[visitedNode] = (existingMap[visitedNode] ?: 0) + 1
+                }
+                uniqueNodes.add(node)
+            }
+        }
+        for(node in totalVisitsToNode.keys) {
+            val maxVisitsFromAnotherNode = visitToNodeThroughOtherNode[node]?.values?.sum() ?: 0
+            val score = maxVisitsFromAnotherNode / totalVisitsToNode[node]!!
+            shouldBetaDecay[node] = score > betaDecayThreshold
+        }
+        return shouldBetaDecay
     }
 
 }
