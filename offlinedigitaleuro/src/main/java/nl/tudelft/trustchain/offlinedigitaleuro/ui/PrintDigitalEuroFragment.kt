@@ -3,12 +3,7 @@ package nl.tudelft.trustchain.offlinedigitaleuro.ui
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinedigitaleuro.src.RecipientPair
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
@@ -16,7 +11,6 @@ import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
 import nl.tudelft.trustchain.offlinedigitaleuro.R
 import nl.tudelft.trustchain.offlinedigitaleuro.databinding.PrintMoneyFragmentBinding
 import nl.tudelft.trustchain.offlinedigitaleuro.utils.TokenDBUtility
-import nl.tudelft.trustchain.offlinedigitaleuro.db.Token as DBToken
 
 class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_money_fragment) {
     private val binding by viewBinding(PrintMoneyFragmentBinding::bind)
@@ -30,15 +24,8 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
         binding.printNumberPicker5.value = 0
         binding.printNumberPicker10.value = 0
 
-        fun generateRandomString(length:Int):ByteArray{
-            val charArray = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-            return (1..length).map {charArray.random()}.joinToString("").toByteArray()
-        }
-
         fun createTokens(token1_count:Int, token2_count:Int, token5_count:Int, token10_count:Int): MutableSet<Token> {
-            var tokenPackage: MutableSet<Token> = mutableSetOf()
-
-            val resp = RecipientPair(Wallet.CentralAuthority.publicKey.keyToBin(), Wallet.CentralAuthority.privateKey.sign("random signature".toByteArray()))
+            val tokenPackage: MutableSet<Token> = mutableSetOf()
 
             for(i in 1..token1_count){
                 val token = Token.create(1, Wallet.CentralAuthority.publicKey.keyToBin())

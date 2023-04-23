@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.offlinedigitaleuro.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -20,11 +20,14 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
     private val binding by viewBinding(AcceptEuroFragmentBinding::bind)
 
     private var maybeTransaction: TransferQR? = null
+
     private var maybePrevOwner: PublicKey? = null
+
     private var maybeTrustScore: Int? = null
 
     private var doubleSpendExists: Boolean = false
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -36,8 +39,6 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
         // get the previous owner
         setPrevOwner()
 
-        val txtToMsg = "Error messages:"
-        binding.txtTo.text = txtToMsg
         binding.trustScoreWarning.text = ""
 
         // check tokens for double spending, if double spent then store the user and destroy the transaction
@@ -51,7 +52,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
             if (maybeTransaction == null || maybePrevOwner == null) {
                 val prevMsg: String = binding.txtError.text.toString()
                 val newErrMsg = "Error: transaction is not good. Reject instead"
-//            to display the error message only once
+                // to display the error message only once
                 if (!prevMsg.contains(newErrMsg)) {
                     val newMsg = "$prevMsg\n$newErrMsg"
                     binding.txtError.text = newMsg
@@ -59,11 +60,11 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
                 return@setOnClickListener
             }
 
-//            store the tokens and insert the user in the web of trust db
+            // store the tokens and insert the user in the web of trust db
             val transaction: TransferQR = maybeTransaction!!
             val prevOwner: PublicKey = maybePrevOwner!!
 
-//            add the tokens to us
+            // add the tokens to us
             val (result, errMsgReceiveTrans) = TransactionUtility.receiveTransaction(transaction, db, getTrustChainCommunity().myPeer.publicKey)
             if (!result) {
                 maybeTransaction = null
@@ -76,7 +77,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
 
 //            TODO: add the transaction in the transaction DB
 
-//            add the user or update its trust
+            // add the user or update its trust
             if (maybeTrustScore == null) {
                 val (resultWOT, errMsgWOT) = WebOfTrustUtility.addNewPeer(prevOwner, WebOfTrustUtility.TRUST_INCREASE, db)
                 if (!resultWOT) {
@@ -99,6 +100,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
 
     private fun setTransaction(transactionArg: JSONObject) {
         val (maybeTransaction, errMsgTransfer) = TransferQR.fromJson(transactionArg)
+
         if (maybeTransaction == null) {
             binding.txtError.text = errMsgTransfer
             return
@@ -144,8 +146,8 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
         val transaction: TransferQR = maybeTransaction!!
         val prevOwner: PublicKey = maybePrevOwner!!
 
-        val (maybeDups, errMsgFindDup) = TransactionUtility.getDuplicateTokens(transaction, db)
-        if (maybeDups == null) {
+        val (maybeDuplicates, errMsgFindDup) = TransactionUtility.getDuplicateTokens(transaction, db)
+        if (maybeDuplicates == null) {
             maybeTransaction = null
             maybePrevOwner = null
 
@@ -153,9 +155,9 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
             return
         }
 
-        val dups: MutableList<TransactionUtility.DuplicatedTokens> = maybeDups
+        val duplicates: MutableList<TransactionUtility.DuplicatedTokens> = maybeDuplicates
 
-        if (dups.size == 0) {
+        if (duplicates.size == 0) {
             return
         }
 
@@ -163,7 +165,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
         binding.txtError.text = doubleSpentErrMsg
         // now try to find who double spent and store those public keys as double spenders
         val doubleSpenders: MutableMap<ByteArray, PublicKey> = mutableMapOf()
-        for (duplicate in dups) {
+        for (duplicate in duplicates) {
             val (maybeDoubleSpender, errMsgDoubleSpender) = duplicate.getDoubleSpender()
             if (maybeDoubleSpender == null) {
                 val prevMsg = binding.txtError.text
@@ -184,7 +186,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
 
             val (result, errMsg) = WebOfTrustUtility.addOrUpdatePeer(ds.value, WebOfTrustUtility.TRUST_MIN, db, absolute = true)
             if (result == null) {
-            // something strange happened
+                // something strange happened
                 val prevMsg = binding.txtError.text
                 val newMsg = "$prevMsg\n$errMsg"
                 binding.txtError.text = newMsg
@@ -193,7 +195,6 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
         }
 
         doubleSpendExists = true
-
         maybeTransaction = null
         maybePrevOwner = null
     }

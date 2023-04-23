@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.offlinedigitaleuro.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +11,6 @@ import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import org.json.JSONObject
-import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
 import nl.tudelft.trustchain.offlinedigitaleuro.R
 import nl.tudelft.trustchain.offlinedigitaleuro.databinding.SendMoneyFragmentBinding
 import nl.tudelft.trustchain.offlinedigitaleuro.utils.TransactionUtility
@@ -20,46 +18,10 @@ import nl.tudelft.trustchain.offlinedigitaleuro.utils.TransactionUtility
 class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_money_fragment)  {
     private val binding by viewBinding(SendMoneyFragmentBinding::bind)
 
-    // load just enough tokens to transfer
-    private fun loadTokensToSend(oneCount: Int, twoCount: Int, fiveCount: Int, tenCount: Int): MutableSet<Token> {
-        val ret: MutableSet<Token> = mutableSetOf()
-
-        ret.addAll(
-            dbTokens2Tokens(db.tokensDao().getAllTokensOfValue(1.0), oneCount)
-        )
-        ret.addAll(
-            dbTokens2Tokens(db.tokensDao().getAllTokensOfValue(2.0), twoCount)
-        )
-        ret.addAll(
-            dbTokens2Tokens(db.tokensDao().getAllTokensOfValue(5.0), fiveCount)
-        )
-        ret.addAll(
-            dbTokens2Tokens(db.tokensDao().getAllTokensOfValue(10.0), tenCount)
-        )
-
-        return ret
-    }
-
-    private fun dbTokens2Tokens(dbTokens: Array<nl.tudelft.trustchain.offlinedigitaleuro.db.Token>, count: Int): MutableList<Token> {
-        val ret: MutableList<Token> = mutableListOf()
-
-        for (i in 0 until count) {
-            val dbToken = dbTokens[i];
-            val setOfToken = Token.deserialize(dbToken.token_data)
-            for (t in setOfToken) {
-                Log.i("TOKEN", "token_id ${t.id}")
-                ret.add(t);
-                break;
-            }
-        }
-
-        return ret
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        var sendTransaction: JSONObject? = null
+        var sendTransaction: JSONObject?
         val coinCounts = JSONObject(requireArguments().getString(ARG_DATA)!!)
 
         runBlocking {
@@ -76,7 +38,7 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
         }
 
         binding.btnCancel.setOnClickListener {
-            findNavController().navigate(R.id.action_sendMoneyFragment_to_transferFragment);
+            findNavController().navigate(R.id.action_sendMoneyFragment_to_transferFragment)
         }
     }
 

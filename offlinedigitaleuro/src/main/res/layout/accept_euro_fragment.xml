@@ -34,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="20.00"
+                android:text="0.0"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -42,11 +42,11 @@
                 app:layout_constraintTop_toBottomOf="@id/txtTitle" />
 
             <TextView
-                android:id="@+id/txtTo"
+                android:id="@+id/titleError"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text=""
+                android:text="@string/error_messages"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -61,7 +61,7 @@
                 android:typeface="monospace"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtTo"
+                app:layout_constraintTop_toBottomOf="@id/titleError"
                 tools:text="" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

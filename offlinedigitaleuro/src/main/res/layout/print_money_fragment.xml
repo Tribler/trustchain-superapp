@@ -26,7 +26,7 @@
                 android:id="@+id/txtPrint10Euro"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="Print 10€:"
+                android:text="@string/print_10"
                 android:textSize="25sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
@@ -57,7 +57,7 @@
                 android:id="@+id/txtPrint5Euro"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="Print 5€:"
+                android:text="@string/print_5"
                 android:textSize="25sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
@@ -88,7 +88,7 @@
                 android:id="@+id/txtPrint2Euro"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="Print 2€:"
+                android:text="@string/print_2"
                 android:textSize="25sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
@@ -119,7 +119,7 @@
                 android:id="@+id/txtPrint1Euro"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="Print 1€:"
+                android:text="@string/print_1"
                 android:textSize="25sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>

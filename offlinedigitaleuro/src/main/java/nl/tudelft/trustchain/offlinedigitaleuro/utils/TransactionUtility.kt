@@ -4,7 +4,6 @@ import android.util.Log
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineMoneyRoomDatabase
 import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
@@ -19,15 +18,15 @@ class TransactionUtility {
         val twoEuroCount: Int = 0,
         val fiveEuroCount: Int = 0,
         val tenEuroCount: Int = 0,
-    ) {}
+    )
 
     class DuplicatedTokens(
         private val incomingToken: Token,
         private val storedToken: Token,
     ) {
         fun getDoubleSpender() : Pair<PublicKey?, String> {
-//            general check that does not include the owner before we owned the token
-//            incoming - 1 because of intermediary wallet and stored - 2 because we already own it and intermediary wallet
+            // general check that does not include the owner before we owned the token
+            // incoming - 1 because of intermediary wallet and stored - 2 because we already own it and intermediary wallet
             val minSize: Int = min(incomingToken.numRecipients - 1, storedToken.numRecipients - 2)
             for (i in 0 until minSize step 2) {
                 val incomingOwner = incomingToken.recipients[i].publicKey
@@ -45,7 +44,7 @@ class TransactionUtility {
 
             }
 
-//            the owner right before us is the double spender if we reached this point
+            // the owner right before us is the double spender if we reached this point
             val doubleSpender = incomingToken.recipients[incomingToken.numRecipients - 2].publicKey
             return Pair(defaultCryptoProvider.keyFromPublicBin(doubleSpender), "")
 
@@ -57,8 +56,8 @@ class TransactionUtility {
 
 companion object {
 
-//    completes a transaction and inserts the tokens in the DB
-//    returns true if the operation succeeded and on failure also returns the message
+    // completes a transaction and inserts the tokens in the DB
+    // returns true if the operation succeeded and on failure also returns the message
     fun receiveTransaction(tq: TransferQR, db: OfflineMoneyRoomDatabase, my_pbk: PublicKey): Pair<Boolean, String> {
         val nowOwnedTokens: MutableSet<Token> = cedeTokens(my_pbk, tq.pvk, tq.tokens.toMutableList())
 
@@ -73,9 +72,9 @@ companion object {
         return Pair(true, "")
     }
 
-//    Gets the tokens from the transfer qr and checks if they are already stored in the DB
-//    if NO error, returns Pair<[*], ""> -> an empty list means no duplicates
-//    else, returns Pair<null, "*">
+    // Gets the tokens from the transfer qr and checks if they are already stored in the DB
+    // if NO error, returns Pair<[*], ""> -> an empty list means no duplicates
+    // else, returns Pair<null, "*">
     fun getDuplicateTokens(tq: TransferQR, db: OfflineMoneyRoomDatabase) : Pair<MutableList<DuplicatedTokens>?, String> {
         val ret: MutableList<DuplicatedTokens> = mutableListOf()
 
@@ -94,9 +93,9 @@ companion object {
         return Pair(ret, "")
     }
 
-//    completes the transaction by deleting the transferred tokens from the DB and some other stuff
-//    returns true if everything went fine
-//    otherwise returns false and the error message
+    // completes the transaction by deleting the transferred tokens from the DB and some other stuff
+    // returns true if everything went fine
+    // otherwise returns false and the error message
     fun completeSendTransaction(sendTransaction: JSONObject, db: OfflineMoneyRoomDatabase) : Pair<Boolean, String> {
         val (maybeTq, errMsg) = TransferQR.fromJson(sendTransaction)
 
@@ -116,8 +115,8 @@ companion object {
         return Pair(true, "")
     }
 
-//    get a JSON object which represents a transaction with the required tokens signed and the
-//    intermediary wallet or get null and an error message
+    // get a JSON object which represents a transaction with the required tokens signed and the
+    // intermediary wallet or get null and an error message
     fun getSendTransaction(req: SendRequest, db: OfflineMoneyRoomDatabase, my_pvk: PrivateKey): Pair<JSONObject?, String> {
         val tokenExtractTransaction = getTokensToSend(req, db)
 
@@ -125,7 +124,7 @@ companion object {
 
         val tokens: MutableList<Token> = tokenExtractTransaction.first ?: return Pair(null, tokenExtractTransaction.second)
 
-        val intermediaryWallet: Wallet = Wallet()
+        val intermediaryWallet = Wallet()
 
         val cededTokens: MutableSet<Token> = cedeTokens(intermediaryWallet.publicKey, my_pvk, tokens)
 
@@ -134,8 +133,8 @@ companion object {
         return Pair(ret, "")
     }
 
-//    extracts the required number of tokens of certain values from the DB
-//    returns null and an error message on failure
+    // extracts the required number of tokens of certain values from the DB
+    // returns null and an error message on failure
     private fun getTokensToSend(req: SendRequest, db: OfflineMoneyRoomDatabase): Pair<MutableList<Token>?, String> {
         val coinAndCount: List<Pair<Double, Int>> = listOf(
             Pair(1.0, req.oneEuroCount),  Pair(2.0, req.twoEuroCount),
@@ -162,7 +161,7 @@ companion object {
         return Pair(ret, "")
     }
 
-//    change the owner of the tokens to the public key given
+    // change the owner of the tokens to the public key given
     private fun cedeTokens(other_pbk: PublicKey, my_pvk: PrivateKey, tokens: MutableList<Token>) : MutableSet<Token> {
         val ret: MutableSet<Token> = mutableSetOf()
 

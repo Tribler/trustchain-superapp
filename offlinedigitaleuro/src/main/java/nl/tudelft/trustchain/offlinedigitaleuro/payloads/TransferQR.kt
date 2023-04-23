@@ -15,10 +15,6 @@ class TransferQR(
     private var validity: Boolean = false
 ) {
 
-    fun createJson() : JSONObject {
-        return TransferQR.createJson(pvk, tokens);
-    }
-
     fun getPreviousOwner() : Pair<PublicKey?, String> {
         if (!validity) {
             val (check, errMsg) = checkValidity()
@@ -35,7 +31,7 @@ class TransferQR(
     }
 
     fun getValue() : Double {
-        var sum: Double = 0.0
+        var sum = 0.0
 
         for (t in tokens) {
             sum += t.value.toDouble()
@@ -44,21 +40,21 @@ class TransferQR(
         return sum
     }
 
-//    checks if all the tokens are owned by the private key and if all the tokens have the same
-//    previous owner
+    // checks if all the tokens are owned by the private key and if all the tokens have
+    // the same previous owner
     private fun checkValidity() : Pair<Boolean, String> {
         var prevOwner: PublicKey? = null // the sender of the tokens that also created the intermediary wallet
         val lastRecipientPbk: PublicKey = pvk.pub()
 
         for (t in tokens) {
-//            check that the intermediary wallet is the owner
+            // check that the intermediary wallet is the owner
             if (!(t.lastRecipient contentEquals lastRecipientPbk.keyToBin())) {
                 val errMsg = "Error: not all tokens are owned by intermediary wallet"
                 Log.d("ODE", errMsg)
                 return Pair(false, errMsg)
             }
 
-//            check that the tokens are all owned bt the same previous owner
+            // check that the tokens are all owned bt the same previous owner
             if (prevOwner == null) {
                 val result = getPreviousOwnerOfToken(t)
                 if (result.first == null) {
@@ -87,7 +83,7 @@ class TransferQR(
     }
 
     private fun getPreviousOwnerOfToken(t: Token): Pair<PublicKey?, String> {
-        var prevOwner: PublicKey? = null
+        val prevOwner: PublicKey?
 
         try {
             val prevOwnerBytePubKey = t.recipients[t.recipients.size - 2].publicKey
@@ -102,25 +98,25 @@ class TransferQR(
     }
 
     companion object {
-        const val field_pvk: String = "pvk";
-        const val field_tokens: String = "tokens";
+        private const val field_pvk: String = "pvk"
+        private const val field_tokens: String = "tokens"
 
         fun createJson(pvk: PrivateKey, tokens: MutableSet<Token>): JSONObject {
-            val ret = JSONObject();
+            val ret = JSONObject()
 
-            ret.put(field_pvk, pvk.keyToBin().toHex());
-            ret.put(field_tokens, Token.serialize(tokens).toHex());
+            ret.put(field_pvk, pvk.keyToBin().toHex())
+            ret.put(field_tokens, Token.serialize(tokens).toHex())
 
-            return ret;
+            return ret
         }
 
         fun fromJson(json: JSONObject): Pair<TransferQR?, String> {
             try {
                 val pvk: PrivateKey = defaultCryptoProvider.keyFromPrivateBin(
                     json.getString(field_pvk).hexToBytes()
-                );
+                )
 
-                val tokens: MutableSet<Token> = Token.deserialize(json.getString(field_tokens).hexToBytes());
+                val tokens: MutableSet<Token> = Token.deserialize(json.getString(field_tokens).hexToBytes())
 
                 val ret = TransferQR(pvk, tokens)
 

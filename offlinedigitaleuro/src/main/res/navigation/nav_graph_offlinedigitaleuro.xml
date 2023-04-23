@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph_offlinemoney"
+    android:id="@+id/nav_graph_offline_digital_euro"
     app:startDestination="@id/transferFragment">
     <fragment
         android:id="@+id/transferFragment"
@@ -50,10 +50,10 @@
     </fragment>
 
     <fragment
-        android:id="@+id/transactionsFragment"
-        android:name="nl.tudelft.trustchain.offlinedigitaleuro.ui.TransactionsFragment"
+        android:id="@+id/webOfTrustFragment"
+        android:name="nl.tudelft.trustchain.offlinedigitaleuro.ui.WebOfTrustFragment"
         android:label="Web of Trust"
-        tools:layout="@layout/transactions_fragment">
+        tools:layout="@layout/web_of_trust_fragment">
     </fragment>
 
     <fragment

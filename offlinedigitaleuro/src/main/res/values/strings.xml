@@ -26,4 +26,10 @@
     <string name="refuse">Refuse</string>
     <string name="from">From:</string>
     <string name="receiving">Receiving:</string>
+    <string name="web_of_trust">Web Of Trust</string>
+    <string name="error_messages">Error messages:</string>
+    <string name="print_10">Print 10€:</string>
+    <string name="print_5">Print 5€:</string>
+    <string name="print_2">Print 2€:</string>
+    <string name="print_1">Print 1€:</string>
 </resources>

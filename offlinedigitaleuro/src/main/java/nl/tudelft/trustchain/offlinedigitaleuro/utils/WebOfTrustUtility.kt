@@ -27,24 +27,24 @@ companion object {
         return trustScore
     }
 
-//    Adds the peer in the web of trust DB if does not exist and depending on the absolute field,
-//    setting the score to the passed value (absolute true) or modifying by it (absolute false)
-//    returns on NO error Pair<Boolean, ""> -> true if added a new peer or false if updated a peer
-//    returns on error Pair<null, errorMessage>
+    //    Adds the peer in the web of trust DB if does not exist and depending on the absolute field,
+    // setting the score to the passed value (absolute true) or modifying by it (absolute false)
+    // returns on NO error Pair<Boolean, ""> -> true if added a new peer or false if updated a peer
+    // returns on error Pair<null, errorMessage>
     fun addOrUpdatePeer(peer: PublicKey, trust: Int = 0, db: OfflineMoneyRoomDatabase, absolute: Boolean = false): Pair<Boolean?, String> {
         val (_, _) = addNewPeer(peer, 0, db)
 
-        val (resultUpdate, errMsg) = updateUserTrust(peer, trust, db, absolute)
+        val (resultUpdate, _) = updateUserTrust(peer, trust, db, absolute)
         if (resultUpdate) {
             return Pair(false, "")
         }
 
-//        should have not reached here, there is a BUG
+        // should have not reached here, there is a BUG
         return Pair(null, "BUG: peer is and is not at the same time in the DB")
     }
 
-//    returns Pair<true, ""> on success
-//    returns Pair<false, errorMessage> on failure to add
+    // returns Pair<true, ""> on success
+    // returns Pair<false, errorMessage> on failure to add
     fun addNewPeer(peer: PublicKey, trust: Int = 0, db: OfflineMoneyRoomDatabase) : Pair<Boolean, String> {
         if (getTrustOfPeer(peer, db) != null) {
             val errMsg = "Error, user already in the database"
@@ -60,8 +60,8 @@ companion object {
         return Pair(true, "")
     }
 
-//    returns Pair<true, ""> on success
-//    returns Pair<false, errorMessage> on failure to update
+    // returns Pair<true, ""> on success
+    // returns Pair<false, errorMessage> on failure to update
     fun updateUserTrust(peer: PublicKey, trust: Int, db: OfflineMoneyRoomDatabase, absolute: Boolean = false) : Pair<Boolean, String> {
         val maybePrevTrust: Int? = getTrustOfPeer(peer, db)
         if (maybePrevTrust == null) {
