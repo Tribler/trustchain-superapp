@@ -25,4 +25,6 @@ interface WebOfTrustDAO {
     @Query("UPDATE weboftrust_table SET trust_score = trust_score + :update_score_value WHERE public_key = :public_key")
     fun updateUserScore(public_key: String, update_score_value: Int)
 
+    @Query("UPDATE weboftrust_table SET trust_score = :score_value WHERE public_key = :public_key")
+    fun setUserScore(public_key: String, score_value: Int)
 }

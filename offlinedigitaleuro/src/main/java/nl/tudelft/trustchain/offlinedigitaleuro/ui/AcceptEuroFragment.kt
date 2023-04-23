@@ -188,7 +188,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
                 binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
             }
 
-            val (result, errMsg) = WebOfTrustUtility.addOrUpdatePeer(ds.value, WebOfTrustUtility.TRUST_MIN, db)
+            val (result, errMsg) = WebOfTrustUtility.addOrUpdatePeer(ds.value, WebOfTrustUtility.TRUST_MIN, db, absolute = true)
             if (result == null) {
             // something strange happened
                 val prevMsg = binding.txtError.text
