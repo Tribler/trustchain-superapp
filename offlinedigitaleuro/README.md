@@ -1,248 +1,287 @@
-# TrustChain Super App [![Build Status](https://github.com/Tribler/trustchain-superapp/workflows/build/badge.svg)](https://github.com/Tribler/trustchain-superapp/actions)
+# Project: Offline Digital Euro application
 
-This repository contains a collection of Android apps built on top of [IPv8](https://github.com/MattSkala/kotlin-ipv8) (our P2P networking stack) and [TrustChain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md) (a scalable, distributed, pair-wise ledger). All applications are built into a single APK, following the concept of [super apps](https://home.kpmg/xx/en/home/insights/2019/06/super-app-or-super-disruption.html) – an emerging trend that allows to provide an ecosystem for multiple services within a single all-in-one app experience.
+This is the repository for the Blockchain Engineering course (CS4160). Our task was to create an easy payment platform using tokens that is able to transfer euros, without Internet. Giving and receiving tokens should be easy and effortless. 
 
-## Apps
+## Abstract
+The Offline Digital Euro application is prototype application that implements a way to exchange token-based euros digitally while not being connected to the internet. 
 
-### TrustChain Explorer
+Key features include:
+- Simple user-friendly design
+- Data persistance when restarting the application
+- Local faucet that can print money for demonstrative purposes
+- Duplicate token detection combined with web-of-trust implementation
+- View transaction history
 
-**TrustChain Explorer** allows to browse the TrustChain blocks stored locally on the device and crawl chains of other connected peers. It also demonstrates how to interact with `TrustChainCommunity`. It defines its own `DemoCommunity` to ensure that all users using the app are able to discover each other easily. The content of the app is split into several tabs:
+<img src="./offlinedigitaleuro/images/offlinedigitaleuro_trustchain_app.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/main_balance_page.png" width="250"/>
 
-- **Peers:** A list of discovered peers in `DemoCommunity`. For each peer, there is a time since the last sent and received message, and an average ping latency. After clicking on the peer item, a list of mutual blocks in TrustChain is shown. It is possible to create and send a new proposal block by clicking on the plus icon. A crawl request send be sent by clicking on the refresh button.
-- **Chains:** A list of discovered chains in `TrustChainCommunity`, ordered by their length. After clicking on the item, the list of stored blocks is shown.
-- **All Blocks:** A stream of all received blocks, updated in real-time as new blocks are received from the network.
-- **My Chain:** A list of blocks in which the current user is participating either as a sender or a receiver. It is possible to create a new self-signed block by clicking on the plus icon. It is posible to sign received blocks if they are not defined to be signed automatically.
 
-<img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android.png" width="180"> <img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android-trustchain.png" width="180">
+ 
 
-### PeerChat
+# User-Guide
+The information listed below shows the steps needed to take to accomplish the desired goal when using the Offline Digital Euro application.
 
-PeerChat implements a fully functional prototype of a distributed messaging app. First, the users have to exchange the public keys by scanning each other's QR code, or by copy-pasting the hexadecimal public keys. This guarantees authenticity of all messages which are signed by their author. It prevents man-in-the-middle and impersonation attacks.
+Steps to print digital euro tokens:
+1. Open up the application.
+2. Print euros via the top right menu.
+3. Select the euro tokens to add the wallet.
+4. Click on the Continue button. The euro tokens are generated and will be displayed in the user's wallet.
 
-An online indicator and the last message is shown for each contact. Users can exchange text messages and get acknowledgments when a message is delivered.
+<img src="./offlinedigitaleuro/images/print_money.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/print_money.gif" width="250" style="margin-right:80px"/> 
 
-<img src="https://user-images.githubusercontent.com/1122874/82873653-1c979280-9f35-11ea-9d47-cea4e134a5b4.png" width="180"> <img src="https://user-images.githubusercontent.com/1122874/82873656-1dc8bf80-9f35-11ea-84b7-7139401560a4.png" width="180"> <img src="https://user-images.githubusercontent.com/1122874/82873659-1ef9ec80-9f35-11ea-95f6-99cbbc0510c9.png" width="180">
 
- <img src="https://user-images.githubusercontent.com/1122874/82873643-1a353880-9f35-11ea-8da3-24ce189c939d.png" width="180"> <img src="https://user-images.githubusercontent.com/1122874/82873661-1f928300-9f35-11ea-9955-6a7488936b02.png" width="180">
+Steps to send euro tokens:
+1. Open the application.
+2. Click on the Send button.
+3. Select the amount of euro tokens to send.
+4. When clicking the Select button, a QR-code gets generated for the receiver to scan.
+5. Have the receiving party scan the QR-code 
 
-### DeToks
-**Decentralised TikTok** skeleton app for the CS4160 Blockchain Engineering (2022/23) course.
+<img src="./offlinedigitaleuro/images/send_money1.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/send_money2.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/send_money.gif" width="250" style="margin-right:80px"/> 
 
-### Digital Euro
+Steps to receive euro tokens:
+1. Open the application
+2. Click on the Get button. This opens up a camera with scanning capabilities.
+3. Now have the sending party generate a QR code with the agreed number of tokens.
+4. Scan the generated QR-code. Confirmation sound will play once transaction is complete.
+5. Check in balance and transaction history whether transaction has been completed.
 
-The Superapp is connected to the European IBAN Euro system.
-You can send and receive digital Euros using QR-codes or build-in chat. **Experimental**.
-Sending Euros is as easy as sending a smiley.
-We did a test with native implementation of Trustchain and [a digital Euro last week](https://twitter.com/TriblerTeam/status/1367526077422256128).
-Field test date: 4 March 2021 at 10:30am.
-The native Android implementation in Kotlin is slowly getting mature.
-Location: the bar Doerak (with a liquor license! This is a special place, therefore selected as the site for our trail.
-Shops which sell coffee or closed canisters of alcohol are "essential shops" and therefore open in Corona times.) Loading real money on your phone requires an operational an open source [gateway](https://github.com/rwblokzijl/stablecoin-exchange) of Euros to digital Euros.
-Discussed in this master thesis issue: https://github.com/Tribler/tribler/issues/4629
+<img src="./offlinedigitaleuro/images/scanning_qrcode.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/receiving_money_initial.jpeg" width="250" style="margin-right:80px"/> 
 
-#### Double Spending mitigation
-Double spending in EuroToken occurs when a malicious user sends a transaction to a wallet, and then sends the same transaction to another wallet whilst the second receiver is not aware of the first transaction.
-This has been mitigated by introducing a web-of-trust, read more about this in the [EuroToken README.MD](eurotoken/README.MD)
+# Solution
+The special requirement was that it should work in an emergency: when the Internet is down. When starting the project, we were advised to implement QR-code scanning to move euros between devices since that was the easiest to implement. Additionally, we had to come up with a mitigating measure that allows for the detection of any malicious users or cheaters that try to double spend.
 
-Creative Commons CC0 license - share freely:
+## Intermediate Wallet
+The solution involves the use of a temporary wallet and a QR code. Person A initiates the transaction by placing their money into a temporary wallet. They then create a QR code that contains the private key for the wallet. This QR code is then scanned by Person B, who can then access the funds in the temporary wallet and transfer the tokens to their own wallet.
 
-<IMG src="https://user-images.githubusercontent.com/325224/110597367-c1135a00-8180-11eb-9a75-207f4630ebb4.jpg" width=300>
+To better understand how this solution works, let us consider an example. Person A wants to send money to Person B, but they are in a location without internet access. They both have a smartphone, and Person A has tokens they would like to send. Person A creates a temporary wallet and deposits the funds into it. They then create a QR code that contains the private key for the wallet. Person B scans the QR code with their smartphone, which allows them to access the funds in the temporary wallet. They can then transfer the tokens to their own wallet.
 
-Zooming into the actual mechanism of QR-Codes (Creative Commons CC0 license - share freely)
+It is important to note that the temporary wallet is only used for the purpose of the transaction and should not be used for long-term storage of the tokens.
 
-<IMG src="https://user-images.githubusercontent.com/325224/110597621-15b6d500-8181-11eb-828a-0f3409b6608c.jpg" width=150>
-<img src="https://user-images.githubusercontent.com/446634/107397810-47e00300-6aff-11eb-8abe-5d345a096ade.jpeg" width=200>
+<img src="./offlinedigitaleuro/images/intermediate_wallet_illustration.jpeg" width="600" style="margin-right:80px"/>
 
-![Demo](eurotoken/images/demo.gif)
+## Web of Trust
+In an offline money transfer scenario where internet connectivity is limited, the trustworthiness of users becomes crucial. To address this issue, a web of trust algorithm has been developed that determines whether a user is trustworthy or not. This essay will delve into how the algorithm works and its potential benefits.
 
-### Debug
+The web of trust algorithm works by using the history of the token to determine transactions between users. When a duplicate token is received, the algorithm computes where the duplication occurred and re-evaluates the trust scores of the people involved in the chain. The trust scores are updated based on the number of successful transactions a user has completed, and users with a high score are deemed trustworthy. This system helps to prevent fraudulent activity and ensures that only legitimate transactions are completed.
 
-**Debug** shows various information related to connectivity, including:
+One issue that arose during the development of the web of trust algorithm was that users could spoof double-spending on their temporary wallets, resulting in a bad trust score. However, the wallets will be signed by government wallets in the future, ensuring that only real human wallet trust scores are updated. This future implementation will help to improve the accuracy of the trust scores and prevent fraudulent activity.
 
-- The list of bootstrap servers and their health. The server is considered to be alive if we received a response from it within the last 120 seconds.
-- The number of connected peers in the loaded overlays.
-- The LAN address estimated from the network interface and the WAN address estimated from the packets received from peers outside of our LAN.
-- The public key and member ID (SHA-1 hash of the public key)
-- TrustChain statistics (the number of stored blocks and the length of our own chain)
+Another issue that arose during the implementation of the algorithm was the limited space in the QR code. The trust scores were meant to be passed along with the token in the QR code, but the limited space made it impossible to pass all the necessary information.
 
-<img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android-debug.png" width="180">
+The web of trust algorithm has the potential to improve the security and efficiency of offline money transfers. By assessing the trustworthiness of users based on their transaction history, fraudulent activity can be prevented, and legitimate transactions can be completed quickly and efficiently. The algorithm can also be extended to other scenarios where trust is crucial, such as online marketplaces, where it can be used to assess the trustworthiness of sellers.
 
-### AI trading bot
-The AI trading bot is a zero-server AI, which ultimately can understand markets, limit orderbooks, bid/ask pairs and global stock patterns using only smartphones for computing power and connection.
-Built on top of Trustchain, the app provides a small decentralized market for trading, providing safe and verifiable transaction for any arbitrary change of goods.
+In conclusion, the web of trust algorithm is a valuable tool in offline money transfer scenarios where internet connectivity is limited. By using transaction history to assess the trustworthiness of users, fraudulent activity can be prevented, and legitimate transactions can be completed quickly and efficiently. Although there are still some issues to be addressed, such as the limited space in the QR code and the potential for double-spending, the algorithm has great potential for improving the security and efficiency of offline money transfers.
 
-**AI trading bot** consist of two parts.
-1. An AI trading bot using a Naive Bayes Classifier which buys or sells Bitcoins in a decentralized market.
-2. Sending and receiving money to and from other peers.
+<img src="./offlinedigitaleuro/images/receiving_money_initial.jpeg" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/receiving_money_good.jpeg" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/receiving_money_bad.jpeg" width="250" style="margin-right:80px"/> 
 
-**Trading**
-The AI trading bot app is visible upon opening the superapp. It receives bids and asks from other peers that want to buy or sell Bitcoins for Dymbe Dollars.
-Upon receiving a bid or ask, it decides to either execute the offer or not.
-The bot can be toggled on and off using the toggle on the home screen.
 
-**Send/Receive**
-In the sending/receiving money tab one can send money to, or receive money from a different peer.
-There are two ways to find a public key:
-1. The receiving peer presses the send/receive toggle. His public key will be shown as a QR-code. Now pressing the "scan" button on the sender's device allows you can scan the QR code of the receiver.
-2. As a sender, go to the "Peers" fragment in the app, and press the public key of the receiver.
 
-<img src="trustchain-trader/TraderImages/live_trading.gif" width="180"><br />
-[More about AI trading bot](trustchain-trader/readme.md)
+## Double Spending Mitigation
+The hard scientific task is to come up with a measure to mitigate the double spending risk. This refers to the risk that a user may spend the same tokens more than once. Since offline transactions cannot be immediately verified by the network or a central authority, it is possible for a user to spend a tokens and then quickly initiate another transaction using the same tokens, before the network/authority has a chance to process the first transaction. This can result in a situation where the user has spent more tokens than they actually own, which undermines the integrity and security of the whole network.
 
-### Market Bot
+### Prevention
+The first measure in double spending mitigation is the prevention of it. Unfortunately, we could not solve the prevention of double spending in its entirety, but we came up with (theoretical) solutions that can detect it and to enforce good behavior. One way to prevent double spending is to ask for some kind of collateral to insure that if a person double spends, the damage will be deducted from the collateral.
 
-The market bot app can generate bids and asks which are received by the peers in the market community.
-The bid and asks can either be generated automatically or manually. Those bids and asks will be sent as IPv8 messages.
+### Detection
+While prevention measures in the design can make it more difficult to double spend. It does not completely migitate the risk. Therefore, it becomes important to detect when it in fact does occur. We came up with a duplicate token detection measure which in combination with a web-of-trust can detect double spending. Additionally, we came up with the following theoretical solutions to detect double spending on the online chain. 
 
-<img src="trustchain-payloadgenerator/GeneratorImages/PayloadFragment.png" width="180"><br />
-[More about Market Bot](trustchain-payloadgenerator/readme.md)
+- Debt accumulation: If one party comes back online again and uploads their transactions to the chain, the other party's balance accumulated debt. If the debt exceeds a threshold, it could be used to detect something bad is going on.
+- Another detection measure is the time between spending offline and not coming back online in XX days when 1 party uploaded transaction.
 
-### Luxury Socialism
-{_recent events have turned this into_ **really bad naming**} We build a DAO for a better world. Luxury socialism is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). It is a proof-of-concept implementation of a DAO system using Trustchain and Bitcoin. Trustchain is used for communication and bookkeeping while the Bitcoin blockchain is used to have collective multi-signature wallets for each DAO. The content of the app is split up in several tabs:
-* **First Time Launch**: The first time the app is launched, the user must setup his bitcoin wallet. Afterwhich the chain will sync and he is routed to the main screens.
-* **My DAO's**: A list of all DAO's that the user participates in. Selecting a DAO will allow a user to create a transfer proposal from that DAO.
-* **All DAO's**: A list of all discovered DAO's in the network which the user can propose to join.
-* **Proposals**: A list of all proposals that the user can vote on. This can either be join proposals or proposals from someone else to transfer funds from one of the DAO's.
-* **My Wallet**: Overview of the used Bitcoin wallet and the ability to chain this to another.
-* **Duplicate Wallet**: In case the user has wallet files for TestNet, Production or Regtest, the user is allowed to select which one to keep. After the user selected either one, the files belonging to other network type are backed up. This, thus, ensures that the wallet is not lost.
+### Enforcement
+Whenever double spending is detected, it should first be investigated whether it was done on purpose or whether something went wrong in the process. This can be done in similar fashion to what commericial banks are doing when they see strange transactions on one's creditcard.
+However, when done on purpose and maliciously, the people in question should be held accountable. Our solution to this is that wallets are tied to real-world identities, when double spending is detected. It becomes a matter of the law to track down these malicious users and procecute them.
 
-Currently, the Luxury Socialism app only allows Regtest, since it uses a future update of Bitcoin called Taproot. Once Taproot is officially released, the app can support TestNet or Production again. Taproot allows the DAO to scale to thousands or even millions of users. The beauty of Taproot is that it uses Schnorr signatures for each transaction. This enables transaction sizes that are equal independent of the number of users in a DAO, since each user combines their signature collaberatively into one for the whole DAO. This also ensures privacy, since it is no longer possible to tell if a transaction's is from a single person, or a million of persons.
+Whenever a person whom has spend money in an offline environment comes back online again, the token, transactions and web-of-trust information gets uploaded to the central authority's servers where the information gets processed accordingly to update the chain about who is trustworthy or is not.
 
-<img src="currencyii/docs/images/screenshot_7.png" width="200px"> <img src="currencyii/docs/images/screenshot_6.png" width="200px"> <img src="currencyii/docs/images/screenshot_10.png" width="200px">
-<br />
 
-<p float="left">
-<img src="https://user-images.githubusercontent.com/23526224/111478102-0c54dc00-8730-11eb-9fbb-3cd65e2ee7ad.gif" width="200"/>
-<img src="https://user-images.githubusercontent.com/23526224/111478323-42925b80-8730-11eb-9bb9-d90b703385a3.jpeg" width="200"/>
-<img src="https://user-images.githubusercontent.com/23526224/111479002-e2e88000-8730-11eb-9246-dc487e5268b4.jpeg" width="200"/>
-</p>
-<br />
+# Limitations
+During the development of our solution, we encountered various limitations. The main issues are related to the implementation of the QR code.
 
-https://user-images.githubusercontent.com/23526224/116259903-85efd900-a776-11eb-93b1-384936d215c4.mp4
+## QR code limitations
+1. QR codes can only contain max 3KB of information, sending more than 3 tokens will not be possible.
+2. When sending a large number of tokens, the QR code gets very cluttered. This makes it difficult for the receiving party to accurately scan the code.
+3. Exchange of information and data is only done one-way. 
 
+## Data Storage
 
-[More about Luxury Socialism](currencyii/README.md)
+Since we are storing the tokens and transactions locally, in theory it would possible to come across a storage limitiation where there is no more space left on the device to store information. It especially poses a risk when a user's device also has information from other apps like photos, audio or videos. 
 
-### TrustChain Voter
-The TrustChain Voter can be used to create a proposal on which the community can vote. The functionality has been split up in two parts: a Voting API, which provides the core voting functionality, and a TrustChain Voter submodule, which serves to demonstrate the capabilities of the voting API. Below, the process of creating a proposal (left) and casting a vote (right) can be seen.
 
-- [More about the Voting API](common/README.md#votinghelper)
-- [More about the TrustChain Voter submodule](trustchain-voter/README.md)
+## Vulnerabilities
+When creating our implementation of the Offline Digital Euro token, we came across several vulnerabilities that need to be address in future research when improving on the application.
 
-<img src="doc/trustchain-voter/create-proposal.gif" width="280"> <img src="doc/trustchain-voter/cast-vote-process.gif" width="280">
+- Everyone can scan the QR-code, so if somebody leaks or gets a copy of the QR and scans it as well, it will save that transaction and the coins will be duplicated. 
+- Instead of confirming the transaction on the sender's side after generating the QR code the sender can still go back even though the QR code got scanned by the receiving side. This way the receiver receives the tokens, but the sender gets to keep the tokens as well.
+- Vulnerable to copying/migrating the OfflineDigitalEuro database that contains the tokens to a different device. 
 
-### Freedom-of-Computing App
 
-Freedom-of-Computing provides users with the ability to freely distribute and execute code in the form of APK applications on the trustchain superapp. In order to facilitate the sharing of applications, Freedom-of-Computing contains a gossiping mechanism which periodically shares local applications to other users and downloads unseen applications from other users. This sharing is conducted through a torrent peer-to-peer (P2P) network and uses the EVA Protocol as a fallback. Once the application has been downloaded by the users, they can dynamically load and execute it. The application, apart from being an .APK file, needs to have a specific format for the execution to work, the requirements/constraints are listed inside [the documentation](freedomOfComputing/README.md).
+# Future Research 
 
-The left demo shows the upload procedure, while the right demo shows the download and code execution procedure.
+- One solution would be to try and implement Near Field Communication (NFC) instead of using a QR-code implementation. This solves many of the mentioned limitations since it allows for private two-way communication between two devices and the exchange of more information. 
+    - No size limitation of 3KB
+    - No hijacking of the session by scanning other people's QR codes.
+    - Both parties are able to exchange information to one another this improves the bookkeeping and administration of transactions. 
+- A solution for the data storage problem would be to keep a blacklist of malicous users issued by the Central Authority instead of keeping track of every individual token in your posession. 
 
-<img src="doc/freedomOfComputing/create_torrent.gif" width="280"> <img src="doc/freedomOfComputing/download_seeded_apk.gif" width="280">
 
-[More about Freedom-of-Computing App](freedomOfComputing/README.md)
+# API Documentation
 
-### Distributed AI app
-The distributed AI app is a proof-of-concept of distributed, server less, machine learning.
+## Sending Euro Tokens
+We adopt the existing EuroToken as our token. On the main page, when a user wants to send tokens, click *"SEND"* button and choose the amount of tokens of each value to send. 
 
-- [More about the Distributed AI app](distributedai/docs/README.md)
+- Fragment Name: SendDigitalEuroFragment
 
-<img src="distributedai/docs/data_picture.png" width="280">
+**loadTokensToSend(oneCount: Int, twoCount: Int, fiveCount: Int, tenCount: Int): MutableSet<Token>**
+Loads the specified number of tokens of each denomination (1, 2, 5, and 10) from the database to be sent to the recipient.
+ 
+- Parameters:
+  - oneCount - The number of 1 Euro tokens to be sent.
+  - twoCount - The number of 2 Euro tokens to be sent.
+  - fiveCount - The number of 5 Euro tokens to be sent.
+  - tenCount - The number of 10 Euro tokens to be sent.
+ 
+- Returns: A mutable set containing the selected tokens to be sent.
+ 
+**dbTokens2Tokens(dbTokens: Array<DBToken>, count: Int): MutableList<Token>**
+Converts an array of DBToken objects into a list of Token objects.
+ 
+- Parameters:
+  - dbTokens - An array of DBToken objects to be converted.
+  - count - The number of tokens to convert.
+- Returns: A mutable list containing the converted Token objects.
 
-### MusicDAO
-In short, the MusicDAO  is an IPv8 app where users can share and discover tracks on the trustchain. Track streaming, downloading, and seeking interactions are done using JLibtorrent.
+**Usage**
+1. When a user wants to send tokens, navigate to the main page.
+2. The user choose the amount of tokens of each value to be sent.
+3. The fragment will display a QR code containing the transfer data.
+4. The recipient scans the QR code to receive the tokens.
+5. The sender can either cancel the transfer or confirm it by clicking the corresponding buttons. If confirmed, the tokens will be removed from the sender's database.
+ 
+ 
+## Receiving Euro Tokens
+On the main page, the user could also use the *GET* button to get tokens from other users. Click the *GET* button to scan other user's QR Code. This QR code is generated by another user. 
+ 
+- Usage
+  - The user clicked the *GET* button, and scan other users' QR Code.
+  - The user can scan the QR code to obtain the transfer information.
+  - The trust score of the sender is displayed, along with a color-coded warning message based on the trust score value.
+  - The user can either accept the transfer or refuse it by clicking the corresponding buttons. If accepted, the tokens will be added to the user's database.
+  - If refused, no action will be taken and the user will be redirected back to the transfer fragment.
 
-A user can publish a Release (which is an album/EP/single/...), after which the app creates a magnet link referring to these audio tracks. Then, the app creates a proposal block for the trustchain which contains some metadata (release date, title, ...) this metadata is submitted by the user with a dialog. When a signed block is discovered (currently are self-signed), the app tries to obtain the file list using JLibtorrent. Each file can be streamed independently on clicking the play button.
+ 
+## Print Money
+The print money function is for testing purpose, allowing users to have some tokens to test the send and get functions.
 
-<img src="doc/musicdao/screen2.png" width="280"> <img src="doc/musicdao/screen1.png" width="280"> <img src="doc/musicdao/screen3.png" width="280">
+*Methods*
+- private fun setFirstRecipient(tokens: Array<Token>, recipient: ByteArray)
+This method sets the initial recipient for the provided tokens array. The recipient parameter represents the recipient's public key in ByteArray format.
 
+- private fun generateRandomString(length: Int): ByteArray
+This method generates a random alphanumeric string of the specified length and returns it as a ByteArray. This is for getting a unique ByteArray for the verification and identification.
 
-**Videos**
+- private fun createTokens(token1_count: Int, token2_count: Int, token5_count: Int, token10_count: Int): Array<Token>
+This method creates an array of Token objects based on the provided counts for each denomination (1, 2, 5, and 10). It returns an array of created tokens of different values.
 
-Video 1: <a href="doc/musicdao/thesis2.mp4">Load example.</a> This uses a default magnet link for an album that has a decent amount of peers. The user submits the metadata and the block gets proposed and signed. Then playback.
+*Usage*
+1. The user set the amount of tokens of each value.
+2. The user click the *Print* button, and then the user has the corresponding value of money in their account, and this money is also saved in the database.
 
-Video 2: <a href="doc/musicdao/thesis3.mp4">Share track.</a> Note: as a fresh magnet link is generated in this video, there is only 1 peer. For this reason it will be difficult to obtain the metadata of the magnet link (cold start issue, write about this in thesis) so the video stops there.
+*3. The printed money is set to be owned by the central authority at creation.*
 
-### Federated, privacy-preserving music recommendations via gossiping
 
-This is a demonstration of machine learning which relies exclusively on edge computing. Music recommendation inside the MusicDAO is used to demonstrate gossip-based machine learning.
 
-Every time a user opens MusicDAO, they are asked to reload the page in order to get recommendations. The recommendation engine yields two recommendations made by two different models: a musical feature-based model and a collaborative filtering model. The collaborative filtering model is based on federated matrix factorization as introduced in [this paper](https://dmle.iais.fraunhofer.de/papers/hegedus2019decentralized.pdf). The feature-based models are from this [paper](https://arxiv.org/pdf/1109.1396.pdf), called Adaline and Pegasos. These models are trained on audio features extracted from music files with the [Essentia library](https://essentia.upf.edu/).
-<img src="gossipML/docs/imgs/overview.png" height="400px">
+# Database Design
 
-The feature-based models are gossiped along random walks through the network. At each peer they are merged and re-trained on peer's local data. The matrix factorization model seeks to learn a factorization of the user-song matrix. This means that one of the two factors contains only information on how users generally rate each song. This matrix can then be gossiped around the network while a user's personal vector as well as their listening history are kept private.
- - [More about federated machine learning using gossiping for music recommendations](gossipML/README.md)
+In order for our offline money token application to be usable we need to be able to save and store information that is entered and exchanged from another device. This information needs to be there every time the user starts the application again. To achieve this, we need to store information permanently onto the device. 
+One method to store and retrieve persistent variables throughout your application is through the use of SharedPreferences. However, SharedPreferences is intended for storing small amounts of data, such as user preferences and settings. Since we need to store more complex data structures, such as lists or objects, we choose to use a database using Room library. Room is built on top of SQLite and provides a set of annotations that allow you to define the database schema, as well as the relationships between entities, and access them through DAO (Data Access Object) classes. It also provides built-in support for common database operations such as insert, update, and delete.
 
-### Atomic Swap
+### Room Database Design
 
-AtomicSwap app allows two users to exchange different cryptocurrencies without the involvement of a third party and without having to trust each other. This is achieved by implementing the Atomic Swap protocol.
+DB name: *OfflineDigitalEuroRoomDatabase*
 
-User can create trade offers by sending Ipv8 messages indicating that they wish to trade to the Swap community. Others can then accept the offer by sending another Ipv8 message. The swap procedure starts when the initiator receives an accept message for their trade offer.
+The following entities (tables) will be stored in the database along with their respective columns:
+In the userdata_table all information regarding the user will be stored. This table will only consist of one row that will be updated whenever information regarding the user changes.
 
-Below is a video demo that shows the steps to do an atomic swap.
+-	userdata_table
+    - user_id : Int
+    - username : String
+    - public_key : String
+    - private_key : String
 
-<a href="https://user-images.githubusercontent.com/21971137/164297537-e8b4ff5f-a999-4e6d-b1e8-17135399848e.mp4" title="Swap Demo"><img src="https://user-images.githubusercontent.com/21971137/164298818-a152b7ca-6ebe-4038-a449-e6a246c7f1ab.png" alt="Alternate Text" /></a>
+The transactions_table will contain transactions that took place for the user that is logged into the device. 
 
-[More about The Atomic Swap app](atomic-swap/README.md)
+-	transactions_table
+    - transaction_id : Int
+    - transaction_datetime : String
+    - pubk_sender : String
+    - pubk_receiver : String
+    - amount : Double 
+    - verified : Boolean
 
-### Literature Dao
+The tokens_table stores all tokens that the logged in user owns. Currently owned tokens are stored in this table, but also transferred incoming tokens will be inserted into the table.
 
-LiteratureDao app aims to be a decentralized scientific literature repository, proving:
-Sharing, storing, and searching of scientific publications through the p2p ipv8 network.
+-	tokens_table
+    - token_id : String
+    - token_value : Double
+    - token_data : ByteArray/String
 
-![local_upload](https://user-images.githubusercontent.com/33283063/167591620-a9547f63-e778-4ea9-a594-a7d1d9a4f169.gif)
-![peers](https://user-images.githubusercontent.com/33283063/167591634-6e0b8aaf-11c8-4ee7-b36d-616255fa5347.PNG)
-![search_in_keywords](https://user-images.githubusercontent.com/33283063/167591635-a68c0d2c-16de-4a44-ba73-fc52688252eb.gif)
-![url_upload](https://user-images.githubusercontent.com/33283063/167591643-75a305ae-2098-4138-9f60-14818f63000e.gif)
+The weboftrust_table will keep track of the reputations of other people that the device’s user interacted with. It stores the public key of those users and a score value that is associated with that user. 
 
+-	weboftrust _table
+    - public_key : String
+    - trust_score: Int
 
-[More about literature dao app](literaturedao/README.md)
 
-### Do you want to add your own app?
+We can interact with the data in the database through the use of DAOs where each table will have its own DAO with functions that send instructions to the database.
 
-- [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
+Userdata_table : UserDao 
 
-## Build
+```getUserData()```
 
-If you want to build an APK, run the following command:
+```insertUser()```
 
-```
-./gradlew :app:buildDebug
-```
+```deleteUserData()```
+ 
+ 
 
-The resulting APK will be stored in `app/build/outputs/apk/debug/app-debug.apk`.
+transactions_table : TransactionsDao
 
-## Install
+```getTransactionData()```
 
-You can also build and automatically install the app on all connected Android devices with a single command:
+```getLimitedTransactionsData(limit_value)```
 
-```
-./gradlew :app:installDebug
-```
+```insertTransaction(transactions)```
 
-*Note: It is required to have an Android device connected with USB debugging enabled before running this command.*
+```deleteTransactionData(transactions)```
 
-## Tests
 
-Run unit tests:
-```
-./gradlew test
-```
 
-Run instrumented tests:
-```
-./gradlew connectedAndroidTest
-```
+tokens_table : TokensDao
 
-## Code style
+```getAllTokens ()```
 
-[Ktlint](https://ktlint.github.io/) is used to enforce a consistent code style across the whole project.
+```getAllTokensOfType(token_type)```
 
-Check code style:
-```
-./gradlew ktlintCheck
-```
+```getAllTokensOfValue(token_value)```
 
-Run code formatter:
-```
-./gradlew ktlintFormat
-```
+```getCountTokensOfValue(token_value)```
+
+```getSpecificToken(token_id)```
+
+```insertToken()```
+
+```deleteToken(token_id)```
+
+
+ 
+weboftrust_table : WebOfTrustDAO
+
+```getUserTrustScore(public_key)```
+
+```getAllTrustScores()```
+
+```insertUserTrustScore(user)```
+
+```updateUserScore(public_key, update_score_value)```
+
