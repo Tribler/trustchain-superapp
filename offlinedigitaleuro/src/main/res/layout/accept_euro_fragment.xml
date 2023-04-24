@@ -79,7 +79,7 @@
         android:paddingTop="2dp"
         android:paddingRight="5dp"
         android:paddingBottom="2dp"
-        android:text="@string/send_money_trustscore_warning_low"
+        android:text=""
         android:textAlignment="textStart"
         android:textColor="@color/white"
         android:textStyle="bold"

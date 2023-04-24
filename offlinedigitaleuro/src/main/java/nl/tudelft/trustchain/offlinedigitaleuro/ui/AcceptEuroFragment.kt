@@ -39,8 +39,6 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
         // get the previous owner
         setPrevOwner()
 
-        binding.trustScoreWarning.text = ""
-
         // check tokens for double spending, if double spent then store the user and destroy the transaction
         checkForDuplicateTokens()
 
