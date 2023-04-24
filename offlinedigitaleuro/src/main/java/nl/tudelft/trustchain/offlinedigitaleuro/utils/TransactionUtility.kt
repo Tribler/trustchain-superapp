@@ -6,7 +6,7 @@ import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineMoneyRoomDatabase
+import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineDigitalEuroRoomDatabase
 import nl.tudelft.trustchain.offlinedigitaleuro.db.Transactions
 import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
@@ -63,7 +63,7 @@ companion object {
 
     // completes a transaction and inserts the tokens in the DB
     // returns true if the operation succeeded and on failure also returns the message
-    fun receiveTransaction(tq: TransferQR, db: OfflineMoneyRoomDatabase, my_pbk: PublicKey): Pair<Boolean, String> {
+    fun receiveTransaction(tq: TransferQR, db: OfflineDigitalEuroRoomDatabase, my_pbk: PublicKey): Pair<Boolean, String> {
         val nowOwnedTokens: MutableSet<Token> = cedeTokens(my_pbk, tq.pvk, tq.tokens.toMutableList())
 
         val result = TokenDBUtility.insertToken(nowOwnedTokens.toList(), db)
@@ -92,7 +92,7 @@ companion object {
     // Gets the tokens from the transfer qr and checks if they are already stored in the DB
     // if NO error, returns Pair<[*], ""> -> an empty list means no duplicates
     // else, returns Pair<null, "*">
-    fun getDuplicateTokens(tq: TransferQR, db: OfflineMoneyRoomDatabase) : Pair<MutableList<DuplicatedTokens>?, String> {
+    fun getDuplicateTokens(tq: TransferQR, db: OfflineDigitalEuroRoomDatabase) : Pair<MutableList<DuplicatedTokens>?, String> {
         val ret: MutableList<DuplicatedTokens> = mutableListOf()
 
         for (t in tq.tokens) {
@@ -113,7 +113,7 @@ companion object {
     // completes the transaction by deleting the transferred tokens from the DB and some other stuff
     // returns true if everything went fine
     // otherwise returns false and the error message
-    fun completeSendTransaction(sendTransaction: JSONObject, db: OfflineMoneyRoomDatabase) : Pair<Boolean, String> {
+    fun completeSendTransaction(sendTransaction: JSONObject, db: OfflineDigitalEuroRoomDatabase) : Pair<Boolean, String> {
         val (maybeTq, errMsg) = TransferQR.fromJson(sendTransaction)
 
         if (maybeTq == null) {
@@ -146,7 +146,7 @@ companion object {
 
     // get a JSON object which represents a transaction with the required tokens signed and the
     // intermediary wallet or get null and an error message
-    fun getSendTransaction(req: SendRequest, db: OfflineMoneyRoomDatabase, my_pvk: PrivateKey): Pair<JSONObject?, String> {
+    fun getSendTransaction(req: SendRequest, db: OfflineDigitalEuroRoomDatabase, my_pvk: PrivateKey): Pair<JSONObject?, String> {
         val tokenExtractTransaction = getTokensToSend(req, db)
 
         val tokens: MutableList<Token> = tokenExtractTransaction.first ?: return Pair(null, tokenExtractTransaction.second)
@@ -162,7 +162,7 @@ companion object {
 
     // extracts the required number of tokens of certain values from the DB
     // returns null and an error message on failure
-    private fun getTokensToSend(req: SendRequest, db: OfflineMoneyRoomDatabase): Pair<MutableList<Token>?, String> {
+    private fun getTokensToSend(req: SendRequest, db: OfflineDigitalEuroRoomDatabase): Pair<MutableList<Token>?, String> {
         val coinAndCount: List<Pair<Double, Int>> = listOf(
             Pair(1.0, req.oneEuroCount),  Pair(2.0, req.twoEuroCount),
             Pair(5.0, req.fiveEuroCount), Pair(10.0, req.tenEuroCount)

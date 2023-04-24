@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineMoneyRoomDatabase
+import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineDigitalEuroRoomDatabase
 import nl.tudelft.trustchain.offlinedigitaleuro.db.WebOfTrust
 import kotlin.math.max
 import kotlin.math.min
@@ -17,7 +17,7 @@ companion object {
     const val TRUST_MAX: Int = +100
     const val TRUST_MIN: Int = -100
 
-    fun getTrustOfPeer(peer: PublicKey, db: OfflineMoneyRoomDatabase) : Int? {
+    fun getTrustOfPeer(peer: PublicKey, db: OfflineDigitalEuroRoomDatabase) : Int? {
         val trustScore: Int?
 
         runBlocking(Dispatchers.IO) {
@@ -31,7 +31,7 @@ companion object {
     // setting the score to the passed value (absolute true) or modifying by it (absolute false)
     // returns on NO error Pair<Boolean, ""> -> true if added a new peer or false if updated a peer
     // returns on error Pair<null, errorMessage>
-    fun addOrUpdatePeer(peer: PublicKey, trust: Int = 0, db: OfflineMoneyRoomDatabase, absolute: Boolean = false): Pair<Boolean?, String> {
+    fun addOrUpdatePeer(peer: PublicKey, trust: Int = 0, db: OfflineDigitalEuroRoomDatabase, absolute: Boolean = false): Pair<Boolean?, String> {
         val (_, _) = addNewPeer(peer, 0, db)
 
         val (resultUpdate, _) = updateUserTrust(peer, trust, db, absolute)
@@ -45,7 +45,7 @@ companion object {
 
     // returns Pair<true, ""> on success
     // returns Pair<false, errorMessage> on failure to add
-    fun addNewPeer(peer: PublicKey, trust: Int = 0, db: OfflineMoneyRoomDatabase) : Pair<Boolean, String> {
+    fun addNewPeer(peer: PublicKey, trust: Int = 0, db: OfflineDigitalEuroRoomDatabase) : Pair<Boolean, String> {
         if (getTrustOfPeer(peer, db) != null) {
             val errMsg = "Error, user already in the database"
             return Pair(false, errMsg)
@@ -62,7 +62,7 @@ companion object {
 
     // returns Pair<true, ""> on success
     // returns Pair<false, errorMessage> on failure to update
-    fun updateUserTrust(peer: PublicKey, trust: Int, db: OfflineMoneyRoomDatabase, absolute: Boolean = false) : Pair<Boolean, String> {
+    fun updateUserTrust(peer: PublicKey, trust: Int, db: OfflineDigitalEuroRoomDatabase, absolute: Boolean = false) : Pair<Boolean, String> {
         val maybePrevTrust: Int? = getTrustOfPeer(peer, db)
         if (maybePrevTrust == null) {
             val errMsg = "Error: user not in the database"
