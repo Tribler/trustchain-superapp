@@ -7,7 +7,7 @@
     <fragment
         android:id="@+id/transferFragment"
         android:name="nl.tudelft.trustchain.offlinedigitaleuro.ui.TransferFragment"
-        android:label="Offline Euro"
+        android:label="Offline Digital Euro"
         tools:layout="@layout/activity_main_offline_money">
         <action
             android:id="@+id/action_transferFragment_to_sendAmountFragment"
@@ -57,9 +57,16 @@
     </fragment>
 
     <fragment
+        android:id="@+id/Fragment"
+        android:name="nl.tudelft.trustchain.offlinedigitaleuro.ui.transactions.TransactionsFragment"
+        android:label="Transactions history"
+        tools:layout="@layout/transactions_fragment">
+    </fragment>
+
+    <fragment
         android:id="@+id/printMoneyFragment"
         android:name="nl.tudelft.trustchain.offlinedigitaleuro.ui.PrintDigitalEuroFragment"
-        android:label="Print Money"
+        android:label="Print Euro"
         tools:layout="@layout/print_money_fragment">
         <action
             android:id="@+id/action_printMoneyFragment_to_transferFragment"
