@@ -107,6 +107,9 @@ During the development of our solution, we encountered various limitations. The 
 
 Since we are storing the tokens and transactions locally, in theory it would possible to come across a storage limitiation where there is no more space left on the device to store information. It especially poses a risk when a user's device also has information from other apps like photos, audio or videos.
 
+## Token Growth
+When exchanging tokens the owners of the tokens get added to the token information. However this leads to a significant growth of the QR code since it has to send more information about the token. NFC should be better to handle this kind of larger size information. The history of the token could also be deleted once the token get synchronized on the network again and the exchange gets verified by both parties
+
 
 ## Vulnerabilities
 When creating our implementation of the Offline Digital Euro token, we came across several vulnerabilities that need to be address in future research when improving on the application.
