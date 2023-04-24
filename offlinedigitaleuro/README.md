@@ -12,7 +12,7 @@ Key features include:
 - Duplicate token detection combined with web-of-trust implementation
 - View transaction history
 
-<img src="./images/offlinedigitaleuro_trustchain_app.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/main_balance_page.png" width="250"/>
+<img src="./images/offlinedigitaleuro_trustchain_app.png" width="250" style="margin-right:80px"/> <img src="./images/main_balance_page.png" width="250"/>
 
 
 
