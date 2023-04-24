@@ -57,7 +57,7 @@
     </fragment>
 
     <fragment
-        android:id="@+id/Fragment"
+        android:id="@+id/transactionsFragment"
         android:name="nl.tudelft.trustchain.offlinedigitaleuro.ui.transactions.TransactionsFragment"
         android:label="Transactions history"
         tools:layout="@layout/transactions_fragment">

@@ -8,8 +8,6 @@ class WebOfTrust(
     @ColumnInfo(name = "trust_score") var trust_score: Int,
 )
 
-
-
 @Dao
 interface WebOfTrustDAO {
 
@@ -17,7 +15,7 @@ interface WebOfTrustDAO {
     fun getUserTrustScore(public_key: String): Int?
 
     @Query("SELECT * FROM weboftrust_table")
-    fun getAllTrustScores(): Array<WebOfTrust>
+    fun getAllTrustScores(): List<WebOfTrust>
 
     @Insert
     suspend fun insertUserTrustScore(user: WebOfTrust)

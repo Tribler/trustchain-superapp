@@ -8,8 +8,8 @@
         android:id="@+id/webOfTrustFragment"
         android:icon="@drawable/ic_device_hub_24dp"
         android:title="@string/web_of_trust" />
-    <item
-        android:id="@+id/transactionsFragment"
-        android:icon="@drawable/ic_baseline_trans_hist_alt_24"
-        android:title="@string/transaction_history" />
+<!--    <item-->
+<!--        android:id="@+id/transactionsFragment"-->
+<!--        android:icon="@drawable/ic_baseline_trans_hist_alt_24"-->
+<!--        android:title="@string/transaction_history" />-->
 </menu>
