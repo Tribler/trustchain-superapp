@@ -34,12 +34,12 @@ class TransferFragment : OfflineDigitalEuroBaseFragment(R.layout.activity_main_o
         binding.edt5Euro.text = db.tokensDao().getCountTokensOfValue(5.0).toString()
         binding.edt10Euro.text = db.tokensDao().getCountTokensOfValue(10.0).toString()
 
-        var sum = 0.0
+        var sum = 0
 
-        sum += binding.edt1Euro.text.toString().toFloat() * 1 +
-            binding.edt2Euro.text.toString().toFloat() * 2 +
-            binding.edt5Euro.text.toString().toFloat() * 5 +
-            binding.edt10Euro.text.toString().toFloat() * 10
+        sum += binding.edt1Euro.text.toString().toInt() * 1 +
+            binding.edt2Euro.text.toString().toInt() * 2 +
+            binding.edt5Euro.text.toString().toInt() * 5 +
+            binding.edt10Euro.text.toString().toInt() * 10
 
         binding.txtBalance.text = sum.toString()
     }

@@ -7,8 +7,7 @@ import androidx.room.*
 class Transactions(
     @PrimaryKey(autoGenerate = true) var id: Int = 0,
     @ColumnInfo(name = "transaction_datetime") var transaction_datetime: String,
-    @ColumnInfo(name = "pubk_sender") var pubk_sender: String,
-    @ColumnInfo(name = "pubk_receiver") var pubk_receiver: String,
+    @ColumnInfo(name = "public_key") var public_key: String,
     @ColumnInfo(name = "amount") var amount: Double,
     @ColumnInfo(name = "verified") var verified: Boolean,
 )

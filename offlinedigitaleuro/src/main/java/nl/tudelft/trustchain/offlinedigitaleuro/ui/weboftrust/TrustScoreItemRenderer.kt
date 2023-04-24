@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinedigitaleuro.ui
+package nl.tudelft.trustchain.offlinedigitaleuro.ui.weboftrust
 
 import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer

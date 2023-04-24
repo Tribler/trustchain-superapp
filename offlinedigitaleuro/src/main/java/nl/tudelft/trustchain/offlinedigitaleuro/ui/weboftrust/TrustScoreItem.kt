@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinedigitaleuro.ui
+package nl.tudelft.trustchain.offlinedigitaleuro.ui.weboftrust
 
 import com.mattskala.itemadapter.Item
 import nl.tudelft.trustchain.offlinedigitaleuro.db.WebOfTrust

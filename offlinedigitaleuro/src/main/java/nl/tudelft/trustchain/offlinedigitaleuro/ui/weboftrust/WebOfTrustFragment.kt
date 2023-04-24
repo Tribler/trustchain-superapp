@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.offlinedigitaleuro.ui
+package nl.tudelft.trustchain.offlinedigitaleuro.ui.weboftrust
 
 import android.os.Bundle
 import android.view.View
@@ -17,6 +17,7 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinedigitaleuro.R
 import nl.tudelft.trustchain.offlinedigitaleuro.databinding.WebOfTrustFragmentBinding
 import nl.tudelft.trustchain.offlinedigitaleuro.db.WebOfTrust
+import nl.tudelft.trustchain.offlinedigitaleuro.ui.OfflineDigitalEuroBaseFragment
 
 class WebOfTrustFragment : OfflineDigitalEuroBaseFragment(R.layout.web_of_trust_fragment) {
     private val binding by viewBinding(WebOfTrustFragmentBinding::bind)

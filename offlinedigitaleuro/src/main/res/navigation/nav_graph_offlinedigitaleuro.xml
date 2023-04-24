@@ -51,7 +51,7 @@
 
     <fragment
         android:id="@+id/webOfTrustFragment"
-        android:name="nl.tudelft.trustchain.offlinedigitaleuro.ui.WebOfTrustFragment"
+        android:name="nl.tudelft.trustchain.offlinedigitaleuro.ui.weboftrust.WebOfTrustFragment"
         android:label="Web of Trust"
         tools:layout="@layout/web_of_trust_fragment">
     </fragment>

@@ -120,8 +120,6 @@ companion object {
     fun getSendTransaction(req: SendRequest, db: OfflineMoneyRoomDatabase, my_pvk: PrivateKey): Pair<JSONObject?, String> {
         val tokenExtractTransaction = getTokensToSend(req, db)
 
-
-
         val tokens: MutableList<Token> = tokenExtractTransaction.first ?: return Pair(null, tokenExtractTransaction.second)
 
         val intermediaryWallet = Wallet()

@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="green_190">#FF00BE00</color>
     <color name="green_dark">#FF008100</color>
+    <color name="errorColor">#f00</color>
 </resources>

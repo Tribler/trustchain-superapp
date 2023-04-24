@@ -18,7 +18,7 @@ class SendAmountFragment : OfflineDigitalEuroBaseFragment(R.layout.send_amount_f
     private val binding by viewBinding(SendAmountFragmentBinding::bind)
 
     private fun updateSendAmount() {
-        var sum = 0.0
+        var sum = 0
 
         sum += binding.numberPicker1.value * 1 +
             binding.numberPicker2.value * 2 +
@@ -29,7 +29,7 @@ class SendAmountFragment : OfflineDigitalEuroBaseFragment(R.layout.send_amount_f
     }
 
     private fun updateBalance() {
-        var sum = 0.0
+        var sum = 0
 
         sum += binding.numberPicker1.max * 1 +
             binding.numberPicker2.max * 2 +

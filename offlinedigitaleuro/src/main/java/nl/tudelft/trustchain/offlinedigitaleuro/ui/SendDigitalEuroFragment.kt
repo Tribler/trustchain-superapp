@@ -101,6 +101,8 @@ class SendDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.send_mon
         val sendTransaction: JSONObject = maybeSendTransaction
         val result = TransactionUtility.completeSendTransaction(sendTransaction, db)
 
+        //            TODO: add the transaction in the transaction DB
+
         if (!result.first) {
             binding.txtSendData.text = result.second
             return false

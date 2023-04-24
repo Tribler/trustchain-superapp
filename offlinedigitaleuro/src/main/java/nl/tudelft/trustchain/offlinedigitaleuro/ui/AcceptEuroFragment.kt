@@ -11,10 +11,12 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinedigitaleuro.R
 import nl.tudelft.trustchain.offlinedigitaleuro.databinding.AcceptEuroFragmentBinding
+import nl.tudelft.trustchain.offlinedigitaleuro.db.Transactions
 import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
 import nl.tudelft.trustchain.offlinedigitaleuro.utils.TransactionUtility
 import nl.tudelft.trustchain.offlinedigitaleuro.utils.WebOfTrustUtility
 import org.json.JSONObject
+import java.util.Date
 
 class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_fragment) {
     private val binding by viewBinding(AcceptEuroFragmentBinding::bind)
@@ -76,6 +78,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
             }
 
 //            TODO: add the transaction in the transaction DB
+//            db.transactionsDao().insertTransaction(Transactions(id ,Date().toString(), prevOwner.toString(), this.maybeTransaction!!.getValue(), true))
 
             // add the user or update its trust
             if (maybeTrustScore == null) {
