@@ -1,9 +1,9 @@
 # Project: Offline Digital Euro application
 
-This is the repository for the Blockchain Engineering course (CS4160). Our task was to create an easy payment platform using tokens that is able to transfer euros, without Internet. Giving and receiving tokens should be easy and effortless. 
+This is the repository for the Blockchain Engineering course (CS4160). Our task was to create an easy payment platform using tokens that is able to transfer euros, without Internet. Giving and receiving tokens should be easy and effortless.
 
 ## Abstract
-The Offline Digital Euro application is prototype application that implements a way to exchange token-based euros digitally while not being connected to the internet. 
+The Offline Digital Euro application is prototype application that implements a way to exchange token-based euros digitally while not being connected to the internet.
 
 Key features include:
 - Simple user-friendly design
@@ -15,7 +15,7 @@ Key features include:
 <img src="./offlinedigitaleuro/images/offlinedigitaleuro_trustchain_app.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/main_balance_page.png" width="250"/>
 
 
- 
+
 
 # User-Guide
 The information listed below shows the steps needed to take to accomplish the desired goal when using the Offline Digital Euro application.
@@ -26,7 +26,7 @@ Steps to print digital euro tokens:
 3. Select the euro tokens to add the wallet.
 4. Click on the Continue button. The euro tokens are generated and will be displayed in the user's wallet.
 
-<img src="./offlinedigitaleuro/images/print_money.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/print_money.gif" width="250" style="margin-right:80px"/> 
+<img src="./offlinedigitaleuro/images/print_money.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/print_money.gif" width="250" style="margin-right:80px"/>
 
 
 Steps to send euro tokens:
@@ -34,9 +34,9 @@ Steps to send euro tokens:
 2. Click on the Send button.
 3. Select the amount of euro tokens to send.
 4. When clicking the Select button, a QR-code gets generated for the receiver to scan.
-5. Have the receiving party scan the QR-code 
+5. Have the receiving party scan the QR-code
 
-<img src="./offlinedigitaleuro/images/send_money1.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/send_money2.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/send_money.gif" width="250" style="margin-right:80px"/> 
+<img src="./offlinedigitaleuro/images/send_money1.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/send_money2.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/send_money.gif" width="250" style="margin-right:80px"/>
 
 Steps to receive euro tokens:
 1. Open the application
@@ -45,7 +45,7 @@ Steps to receive euro tokens:
 4. Scan the generated QR-code. Confirmation sound will play once transaction is complete.
 5. Check in balance and transaction history whether transaction has been completed.
 
-<img src="./offlinedigitaleuro/images/scanning_qrcode.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/receiving_money_initial.jpeg" width="250" style="margin-right:80px"/> 
+<img src="./offlinedigitaleuro/images/scanning_qrcode.png" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/receiving_money_initial.jpeg" width="250" style="margin-right:80px"/>
 
 # Solution
 The special requirement was that it should work in an emergency: when the Internet is down. When starting the project, we were advised to implement QR-code scanning to move euros between devices since that was the easiest to implement. Additionally, we had to come up with a mitigating measure that allows for the detection of any malicious users or cheaters that try to double spend.
@@ -72,7 +72,7 @@ The web of trust algorithm has the potential to improve the security and efficie
 
 In conclusion, the web of trust algorithm is a valuable tool in offline money transfer scenarios where internet connectivity is limited. By using transaction history to assess the trustworthiness of users, fraudulent activity can be prevented, and legitimate transactions can be completed quickly and efficiently. Although there are still some issues to be addressed, such as the limited space in the QR code and the potential for double-spending, the algorithm has great potential for improving the security and efficiency of offline money transfers.
 
-<img src="./offlinedigitaleuro/images/receiving_money_initial.jpeg" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/receiving_money_good.jpeg" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/receiving_money_bad.jpeg" width="250" style="margin-right:80px"/> 
+<img src="./offlinedigitaleuro/images/receiving_money_initial.jpeg" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/receiving_money_good.jpeg" width="250" style="margin-right:80px"/> <img src="./offlinedigitaleuro/images/receiving_money_bad.jpeg" width="250" style="margin-right:80px"/>
 
 
 
@@ -83,7 +83,7 @@ The hard scientific task is to come up with a measure to mitigate the double spe
 The first measure in double spending mitigation is the prevention of it. Unfortunately, we could not solve the prevention of double spending in its entirety, but we came up with (theoretical) solutions that can detect it and to enforce good behavior. One way to prevent double spending is to ask for some kind of collateral to insure that if a person double spends, the damage will be deducted from the collateral.
 
 ### Detection
-While prevention measures in the design can make it more difficult to double spend. It does not completely migitate the risk. Therefore, it becomes important to detect when it in fact does occur. We came up with a duplicate token detection measure which in combination with a web-of-trust can detect double spending. Additionally, we came up with the following theoretical solutions to detect double spending on the online chain. 
+While prevention measures in the design can make it more difficult to double spend. It does not completely migitate the risk. Therefore, it becomes important to detect when it in fact does occur. We came up with a duplicate token detection measure which in combination with a web-of-trust can detect double spending. Additionally, we came up with the following theoretical solutions to detect double spending on the online chain.
 
 - Debt accumulation: If one party comes back online again and uploads their transactions to the chain, the other party's balance accumulated debt. If the debt exceeds a threshold, it could be used to detect something bad is going on.
 - Another detection measure is the time between spending offline and not coming back online in XX days when 1 party uploaded transaction.
@@ -101,51 +101,51 @@ During the development of our solution, we encountered various limitations. The 
 ## QR code limitations
 1. QR codes can only contain max 3KB of information, sending more than 3 tokens will not be possible.
 2. When sending a large number of tokens, the QR code gets very cluttered. This makes it difficult for the receiving party to accurately scan the code.
-3. Exchange of information and data is only done one-way. 
+3. Exchange of information and data is only done one-way.
 
 ## Data Storage
 
-Since we are storing the tokens and transactions locally, in theory it would possible to come across a storage limitiation where there is no more space left on the device to store information. It especially poses a risk when a user's device also has information from other apps like photos, audio or videos. 
+Since we are storing the tokens and transactions locally, in theory it would possible to come across a storage limitiation where there is no more space left on the device to store information. It especially poses a risk when a user's device also has information from other apps like photos, audio or videos.
 
 
 ## Vulnerabilities
 When creating our implementation of the Offline Digital Euro token, we came across several vulnerabilities that need to be address in future research when improving on the application.
 
-- Everyone can scan the QR-code, so if somebody leaks or gets a copy of the QR and scans it as well, it will save that transaction and the coins will be duplicated. 
+- Everyone can scan the QR-code, so if somebody leaks or gets a copy of the QR and scans it as well, it will save that transaction and the coins will be duplicated. Practically the recipient can double spend in the name of the sender because of the one way transaction scheme.
 - Instead of confirming the transaction on the sender's side after generating the QR code the sender can still go back even though the QR code got scanned by the receiving side. This way the receiver receives the tokens, but the sender gets to keep the tokens as well.
-- Vulnerable to copying/migrating the OfflineDigitalEuro database that contains the tokens to a different device. 
+- Vulnerable to copying/migrating the OfflineDigitalEuro database that contains the tokens to a different device.
 
 
-# Future Research 
+# Future Research
 
-- One solution would be to try and implement Near Field Communication (NFC) instead of using a QR-code implementation. This solves many of the mentioned limitations since it allows for private two-way communication between two devices and the exchange of more information. 
+- One solution would be to try and implement Near Field Communication (NFC) instead of using a QR-code implementation. This solves many of the mentioned limitations since it allows for private two-way communication between two devices and the exchange of more information.
     - No size limitation of 3KB
     - No hijacking of the session by scanning other people's QR codes.
-    - Both parties are able to exchange information to one another this improves the bookkeeping and administration of transactions. 
-- A solution for the data storage problem would be to keep a blacklist of malicous users issued by the Central Authority instead of keeping track of every individual token in your posession. 
+    - Both parties are able to exchange information to one another this improves the bookkeeping and administration of transactions.
+- A solution for the data storage problem would be to keep a blacklist of malicous users issued by the Central Authority instead of keeping track of every individual token in your posession.
 
 
 # API Documentation
 
 ## Sending Euro Tokens
-We adopt the existing EuroToken as our token. On the main page, when a user wants to send tokens, click *"SEND"* button and choose the amount of tokens of each value to send. 
+We adopt the existing EuroToken as our token. On the main page, when a user wants to send tokens, click *"SEND"* button and choose the amount of tokens of each value to send.
 
 - Fragment Name: SendDigitalEuroFragment
 
 **loadTokensToSend(oneCount: Int, twoCount: Int, fiveCount: Int, tenCount: Int): MutableSet<Token>**
 Loads the specified number of tokens of each denomination (1, 2, 5, and 10) from the database to be sent to the recipient.
- 
+
 - Parameters:
   - oneCount - The number of 1 Euro tokens to be sent.
   - twoCount - The number of 2 Euro tokens to be sent.
   - fiveCount - The number of 5 Euro tokens to be sent.
   - tenCount - The number of 10 Euro tokens to be sent.
- 
+
 - Returns: A mutable set containing the selected tokens to be sent.
- 
+
 **dbTokens2Tokens(dbTokens: Array<DBToken>, count: Int): MutableList<Token>**
 Converts an array of DBToken objects into a list of Token objects.
- 
+
 - Parameters:
   - dbTokens - An array of DBToken objects to be converted.
   - count - The number of tokens to convert.
@@ -157,11 +157,11 @@ Converts an array of DBToken objects into a list of Token objects.
 3. The fragment will display a QR code containing the transfer data.
 4. The recipient scans the QR code to receive the tokens.
 5. The sender can either cancel the transfer or confirm it by clicking the corresponding buttons. If confirmed, the tokens will be removed from the sender's database.
- 
- 
+
+
 ## Receiving Euro Tokens
-On the main page, the user could also use the *GET* button to get tokens from other users. Click the *GET* button to scan other user's QR Code. This QR code is generated by another user. 
- 
+On the main page, the user could also use the *GET* button to get tokens from other users. Click the *GET* button to scan other user's QR Code. This QR code is generated by another user.
+
 - Usage
   - The user clicked the *GET* button, and scan other users' QR Code.
   - The user can scan the QR code to obtain the transfer information.
@@ -169,7 +169,7 @@ On the main page, the user could also use the *GET* button to get tokens from ot
   - The user can either accept the transfer or refuse it by clicking the corresponding buttons. If accepted, the tokens will be added to the user's database.
   - If refused, no action will be taken and the user will be redirected back to the transfer fragment.
 
- 
+
 ## Print Money
 The print money function is for testing purpose, allowing users to have some tokens to test the send and get functions.
 
@@ -193,7 +193,7 @@ This method creates an array of Token objects based on the provided counts for e
 
 # Database Design
 
-In order for our offline money token application to be usable we need to be able to save and store information that is entered and exchanged from another device. This information needs to be there every time the user starts the application again. To achieve this, we need to store information permanently onto the device. 
+In order for our offline money token application to be usable we need to be able to save and store information that is entered and exchanged from another device. This information needs to be there every time the user starts the application again. To achieve this, we need to store information permanently onto the device.
 One method to store and retrieve persistent variables throughout your application is through the use of SharedPreferences. However, SharedPreferences is intended for storing small amounts of data, such as user preferences and settings. Since we need to store more complex data structures, such as lists or objects, we choose to use a database using Room library. Room is built on top of SQLite and provides a set of annotations that allow you to define the database schema, as well as the relationships between entities, and access them through DAO (Data Access Object) classes. It also provides built-in support for common database operations such as insert, update, and delete.
 
 ### Room Database Design
@@ -209,14 +209,14 @@ In the userdata_table all information regarding the user will be stored. This ta
     - public_key : String
     - private_key : String
 
-The transactions_table will contain transactions that took place for the user that is logged into the device. 
+The transactions_table will contain transactions that took place for the user that is logged into the device.
 
 -	transactions_table
     - transaction_id : Int
     - transaction_datetime : String
     - pubk_sender : String
     - pubk_receiver : String
-    - amount : Double 
+    - amount : Double
     - verified : Boolean
 
 The tokens_table stores all tokens that the logged in user owns. Currently owned tokens are stored in this table, but also transferred incoming tokens will be inserted into the table.
@@ -226,7 +226,7 @@ The tokens_table stores all tokens that the logged in user owns. Currently owned
     - token_value : Double
     - token_data : ByteArray/String
 
-The weboftrust_table will keep track of the reputations of other people that the device’s user interacted with. It stores the public key of those users and a score value that is associated with that user. 
+The weboftrust_table will keep track of the reputations of other people that the device’s user interacted with. It stores the public key of those users and a score value that is associated with that user.
 
 -	weboftrust _table
     - public_key : String
@@ -235,15 +235,15 @@ The weboftrust_table will keep track of the reputations of other people that the
 
 We can interact with the data in the database through the use of DAOs where each table will have its own DAO with functions that send instructions to the database.
 
-Userdata_table : UserDao 
+Userdata_table : UserDao
 
 ```getUserData()```
 
 ```insertUser()```
 
 ```deleteUserData()```
- 
- 
+
+
 
 transactions_table : TransactionsDao
 
@@ -274,7 +274,7 @@ tokens_table : TokensDao
 ```deleteToken(token_id)```
 
 
- 
+
 weboftrust_table : WebOfTrustDAO
 
 ```getUserTrustScore(public_key)```
