@@ -1,15 +1,20 @@
 package nl.tudelft.trustchain.offlinedigitaleuro.utils
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.offlinedigitaleuro.db.OfflineMoneyRoomDatabase
+import nl.tudelft.trustchain.offlinedigitaleuro.db.Transactions
 import nl.tudelft.trustchain.offlinedigitaleuro.payloads.TransferQR
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Token
 import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
 import org.json.JSONObject
 import java.lang.Integer.min
+import java.util.Date
+import kotlin.random.Random
 
 class TransactionUtility {
 
@@ -69,6 +74,18 @@ companion object {
             return Pair(false, errMsg)
         }
 
+        runBlocking(Dispatchers.IO) {
+            db.transactionsDao().insertTransaction(
+                Transactions(
+                    Random.nextInt(0, 10000),
+                    Date().toString(),
+                    tq.getPreviousOwner().toString(),
+                    tq.getValue(),
+                    true
+                )
+            )
+        }
+
         return Pair(true, "")
     }
 
@@ -112,6 +129,18 @@ companion object {
             return Pair(false, "Error: failed to delete tokens from DB, reason: $code")
         }
 
+        runBlocking(Dispatchers.IO) {
+            db.transactionsDao().insertTransaction(
+                Transactions(
+                    Random.nextInt(0, 10000),
+                    Date().toString(),
+                    tq.getPreviousOwner().toString(),
+                    tq.getValue(),
+                    true
+                )
+            )
+        }
+
         return Pair(true, "")
     }
 
@@ -126,7 +155,7 @@ companion object {
 
         val cededTokens: MutableSet<Token> = cedeTokens(intermediaryWallet.publicKey, my_pvk, tokens)
 
-        val ret: JSONObject =  TransferQR.createJson(intermediaryWallet.privateKey, cededTokens)
+        val ret: JSONObject = TransferQR.createJson(intermediaryWallet.privateKey, cededTokens)
 
         return Pair(ret, "")
     }
