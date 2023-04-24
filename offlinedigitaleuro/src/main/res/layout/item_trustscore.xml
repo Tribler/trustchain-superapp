@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?selectableItemBackground"
     android:orientation="vertical"
     android:paddingStart="16dp"
     android:paddingTop="8dp"
@@ -35,6 +34,6 @@
         android:typeface="monospace"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="62%" />
+        tools:text="" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,6 +12,7 @@ import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.offlinedigitaleuro.R
@@ -33,11 +34,14 @@ class WebOfTrustFragment : OfflineDigitalEuroBaseFragment(R.layout.web_of_trust_
 
         adapter.registerRenderer(TrustScoreItemRenderer())
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            val items = db.webOfTrustDao().getAllTrustScores().map { trustScore: WebOfTrust -> TrustScoreItem(trustScore) }
-            adapter.updateItems(items)
-            adapter.notifyDataSetChanged()
-            delay(1000L)
+        lifecycleScope.launchWhenResumed {
+            while(isActive) {
+                val items = db.webOfTrustDao().getAllTrustScores()
+                    .map { trustScore: WebOfTrust -> TrustScoreItem(trustScore) }
+                adapter.updateItems(items)
+                adapter.notifyDataSetChanged()
+                delay(1000L)
+            }
         }
     }
 

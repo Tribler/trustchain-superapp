@@ -25,6 +25,7 @@ abstract class OfflineDigitalEuroRoomDatabase : RoomDatabase() {
                     "item_database"
                 )
                     .fallbackToDestructiveMigration()
+                    .allowMainThreadQueries()
                     .build()
                 INSTANCE = instance
                 return instance

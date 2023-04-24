@@ -242,7 +242,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
                 binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
             }
         } else {
-            binding.trustScoreWarning.text = "WARNING: No trust score available for the public key you are receiving from."
+            binding.trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_no_score)
             binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
             binding.trustScoreWarning.visibility = View.VISIBLE
         }
