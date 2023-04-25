@@ -59,7 +59,6 @@
         app:layout_constraintBottom_toTopOf="@+id/button_create_coin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/missingNameLayout"
         app:layout_constraintVertical_bias="0.96"
         android:hint="Choose token value">
 
