@@ -23,8 +23,9 @@ class Profile(
 ) {
     object ProfileConfig { const val MAX_DURATION_FACTOR  = 10 }
 
-    fun addProfile(key: String) {
+    fun addProfile(key: String): ProfileEntry {
         if(!profiles.contains(key)) profiles[key] = ProfileEntry(timesSeen = 1)
+        return profiles[key]!!
     }
 
     fun hasWatched(key: String): Boolean {
