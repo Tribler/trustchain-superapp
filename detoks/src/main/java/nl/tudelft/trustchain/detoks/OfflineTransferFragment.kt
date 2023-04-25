@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import kotlin.collections.ArrayList
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -195,31 +196,32 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             }
             val gsonObject = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, dateJsonDeserializer).create()
 
-            var map = object :  TypeToken<Token>() {}.type
-            val result: Token = gsonObject.fromJson(proba, map)
+            var map = object :  TypeToken<ArrayList<Token>>() {}.type
+            val result: ArrayList<Token> = gsonObject.fromJson(proba, map)
 
             //TODO:check whether tokens are sent, but not sth else
             //TODO:check whether the tokens are not empty list
 //            val obtainedTokens =  result //?: return  //Token.deserialize(content.toByteArray()) //
 
-            val t = result
-//            for(t in obtainedTokens ){
-//                var t = value?.get(0)
-            val tokenPublicKey = t.recipients.last().publicKey
-            val pubKey = getIpv8().myPeer.publicKey.keyToBin()
-            if(tokenPublicKey.contentEquals(pubKey)){
-                Log.v("Tokennnnn", t.toString())
-                println("New tokensss: ${wallet!!.balance}")
-                println("Tokennnnn $t.toString()")
-                val successful = wallet!!.addToken(t)
-                if(successful == -1L) {
-                    Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
+            val obtainedTokens  = result
+            for(t in obtainedTokens) {
+                val tokenPublicKey = t.recipients.last().publicKey
+                val pubKey = getIpv8().myPeer.publicKey.keyToBin()
+                if (tokenPublicKey.contentEquals(pubKey)) {
+                    Log.v("Tokennnnn", t.toString())
+                    println("New tokensss: ${wallet!!.balance}")
+                    println("Tokennnnn $t.toString()")
+                    val successful = wallet!!.addToken(t)
+                    if (successful == -1L) {
+                        Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
+                    } else {
+                        this.balanceText?.text = wallet!!.balance.toString()
+                        Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
+                    }
                 } else {
-                    this.balanceText?.text = wallet!!.balance.toString()
-                    Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this.context, "This token is not for you!", Toast.LENGTH_LONG)
+                        .show()
                 }
-            } else {
-                Toast.makeText(this.context, "This token is not for you!", Toast.LENGTH_LONG).show()
             }
 
         } else {
@@ -240,7 +242,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun showQR(view: View, token: ArrayList<Token>, friendPublicKey: ByteArray) {
-        val newToken = createNextOwner(token, friendPublicKey)
+        val newTokens = createNextOwner(token, friendPublicKey)
         // encode newToken
 
         val dateJsonSerializer = object : JsonSerializer<LocalDateTime> {
@@ -253,7 +255,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         }
         val gsonObject = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, dateJsonSerializer).create()
 
-        val result = gsonObject.toJson(newToken.get(0))
+        val result = gsonObject.toJson(newTokens)
         val compressedJSONString = gzip(result)
         hideKeyboard()
         lifecycleScope.launch {
