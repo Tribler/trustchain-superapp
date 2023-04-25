@@ -13,6 +13,7 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.exoplayer2.util.Log
 import kotlinx.android.synthetic.main.fragment_strategy.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -103,7 +104,7 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
                 torrentManager.updateSeedingStrategy(storageLimit = newStorageLimit)
             }
         }
-
+        torrentManager.updateSeedingStrategy(isSeeding = true)
         seedingSwitch.setOnCheckedChangeListener { _, p1 ->
             torrentManager.strategies.isSeeding = p1
             seedingStrategySpinner.isEnabled = p1
@@ -157,6 +158,7 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         }
     }
 
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.strategy_recycle_view, parent, false)
@@ -164,6 +166,16 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         return ViewHolder(view)
     }
 
+    fun updateViewHolder(holder: ViewHolder, position: Int) {
+        val handler = Handler(Looper.getMainLooper())
+        val runnable = object : Runnable {
+            override fun run() {
+                onBindViewHolder(holder, position)
+                handler.postDelayed(this, 2000)
+            }
+        }
+        handler.postDelayed(runnable, 2000)
+    }
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val handler = strategyData[position]
         val convBtoMB = 1000000
@@ -174,8 +186,9 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         bundle.putString("torrent_name", holder.hashTextView.text.toString())
         holder.hashTextView.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toTorrentFragment, bundle) }
 
-        holder.downloadTextView.text = (status.allTimeDownload()
-            / convBtoMB).toString()
+        holder.downloadTextView.text = status.state().name
+        Log.d(DeToksCommunity.LOGGING_TAG, holder.downloadTextView.text as String)
+        Log.d(DeToksCommunity.LOGGING_TAG, status.state().name)
 
         holder.uploadTextView.text = (status.allTimeUpload()
             / convBtoMB).toString()
@@ -183,6 +196,7 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         holder.balanceTextView.text = (
             community.getBalance().toString())
 
+        updateViewHolder(holder, position)
     }
 
     override fun getItemCount(): Int = strategyData.size
