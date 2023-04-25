@@ -8,4 +8,15 @@
     <string name="download">Download</string>
     <string name="detoks_balance">Balance</string>
     <string name="upload">Upload</string>
+    <string name="info_hash">Info Hash: %1$s</string>
+    <string name="magnet_link">Magnet link: %1$s</string>
+    <string name="downloaded_bytes">Downloaded bytes: %1$d</string>
+    <string name="files">Files: %1$s</string>
+    <string name="watch_time">Total watch time: %1$d</string>
+    <string name="hop_count">Hop count: %1$d</string>
+    <string name="watched">Watched: %b</string>
+    <string name="duration">Duration: %1$d</string>
+    <string name="likes">Likes: %1$d</string>
+    <string name="times_seen">Times seen: %1$d</string>
+    <string name="upload_date">Upload date: %1$d</string>
 </resources>

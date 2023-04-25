@@ -56,7 +56,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         super.onViewCreated(view, savedInstanceState)
 
         viewPagerVideos.adapter = VideosAdapter(torrentManager)
-        viewPagerVideos.currentItem = 0
+            viewPagerVideos.currentItem = 0
         onPageChangeCallback()
 
         val settingsButton = view.findViewById<Button>(R.id.strategyButton)

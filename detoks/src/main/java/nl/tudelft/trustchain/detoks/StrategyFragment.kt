@@ -10,10 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.frostwire.jlibtorrent.TorrentHandle
 import kotlinx.android.synthetic.main.fragment_strategy.*
+import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
 
@@ -59,7 +60,7 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
             leechingStrategySpinner.setSelection(torrentManager.strategies.leechingStrategy)
         }
         setSpinnerActions(leechingStrategySpinner) {
-            if (it != torrentManager.strategies.leechingStrategy) {
+            if (it == torrentManager.strategies.leechingStrategy) {
                 return@setSpinnerActions
             }
             torrentManager.updateLeechingStrategy(it)
@@ -75,7 +76,7 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
             seedingStrategySpinner.setSelection(torrentManager.strategies.seedingStrategy)
         }
         setSpinnerActions(seedingStrategySpinner) {
-            if (it != torrentManager.strategies.seedingStrategy) {
+            if (it == torrentManager.strategies.seedingStrategy) {
                 return@setSpinnerActions
             }
             torrentManager.updateSeedingStrategy(strategyId = it)
@@ -167,8 +168,11 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val handler = strategyData[position]
         val convBtoMB = 1000000
         val status = handler.handle.status()
-
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         holder.hashTextView.text = strategyData[position].handle.name()
+        val bundle = Bundle()
+        bundle.putString("torrent_name", holder.hashTextView.text.toString())
+        holder.hashTextView.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toTorrentFragment, bundle) }
 
         holder.downloadTextView.text = (status.allTimeDownload()
             / convBtoMB).toString()
@@ -176,10 +180,9 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         holder.uploadTextView.text = (status.allTimeUpload()
             / convBtoMB).toString()
 
-        //TODO: replace by actual token balance
         holder.balanceTextView.text = (
-            (status.allTimeUpload() - status.allTimeDownload())
-            / convBtoMB).toString()
+            community.getBalance().toString())
+
     }
 
     override fun getItemCount(): Int = strategyData.size
