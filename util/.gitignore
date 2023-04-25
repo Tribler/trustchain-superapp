@@ -3,3 +3,4 @@ keys
 *.pem
 __pycache__
 .env
+nodes.json
