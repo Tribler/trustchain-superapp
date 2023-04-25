@@ -51,6 +51,37 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/menu"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="230dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/button_create_coin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/missingNameLayout"
+        app:layout_constraintVertical_bias="0.96"
+        android:hint="Choose token value">
+
+        <AutoCompleteTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="none" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+<!--    <Spinner-->
+<!--        android:id="@+id/spinner_value_token"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:spinnerMode="dropdown"-->
+<!--        android:label="Hello"-->
+<!--        style="@style/Base.Widget.AppCompat.Spinner.Underlined"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/button_create_coin"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent" />-->
+
     <com.google.android.material.button.MaterialButton
         android:text="Create new coin"
         style="@style/Button"
@@ -90,6 +121,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/tokens"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="100dp"

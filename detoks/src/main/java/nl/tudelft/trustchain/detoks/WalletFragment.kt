@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.RequiresApi
@@ -18,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
+import kotlinx.android.synthetic.main.wallet_fragment.*
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.time.LocalDateTime
@@ -70,6 +73,12 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
 
         val recyclerView: RecyclerView = view.findViewById(R.id.listView)
 
+        //Inflate spinner
+//        val spinnerAmounts: EditText = view.findViewById(R.id.menu)
+        val items = listOf("Choose token value","0.05 EUR", "0.5 EUR", "1 EUR", "2 EUR", "5 EUR")
+        val adapter = ArrayAdapter(requireContext(), R.layout.amount_dropdown, items)
+        (menu.editText as? AutoCompleteTextView)?.setAdapter(adapter)
+
         // Set Balance
         val balanceText = view.findViewById<TextView>(R.id.balance)
         balanceText.text = wallet.balance.toString()
@@ -89,11 +98,16 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
             updateTokenList(tokenList, recyclerView, view)
         }
 
+        //Admin button
         val buttonAdminPage = view.findViewById<Button>(R.id.button_admin_page)
         buttonAdminPage.setOnClickListener {
             val navController = view.findNavController()
-            navController.navigate(R.id.adminFragment)
+            val bundle = Bundle().apply {
+                putString("access", "admin")
+            }
+            navController.navigate(R.id.tokenListAdmin, bundle)
         }
+
 
         val expiredTokens = view.findViewById<Button>(R.id.expiredCoins)
         val buttonTokenList = view.findViewById<Button>(R.id.button_show)
