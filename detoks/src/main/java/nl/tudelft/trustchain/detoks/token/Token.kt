@@ -7,6 +7,7 @@ import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import java.security.SecureRandom
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class Token(
     internal val id: ByteArray,
@@ -103,6 +104,11 @@ class Token(
         )
     }
 
+    override fun toString(): String {
+        return "Token(id=${id.contentToString()}, timestamp=$timestamp, value=$value, verifier=${verifier.contentToString()}, genesisHash=${genesisHash.contentToString()}, recipients=$recipients)"
+    }
+
+
     companion object {
         private val logger = KotlinLogging.logger {}
         private val secureRandom = SecureRandom()
@@ -121,6 +127,7 @@ class Token(
 
             secureRandom.nextBytes(idBytes)
             secureRandom.nextBytes(signatureBytes)
+
 
             val current = LocalDateTime.now()
 
@@ -189,7 +196,7 @@ class Token(
          * number of recipients.
          */
         @RequiresApi(Build.VERSION_CODES.O)
-        internal fun deserialize(data: ByteArray): MutableSet<Token> {
+        internal fun deserialize(data: ByteArray, timestamp: LocalDateTime): MutableSet<Token> {
             if (data.isEmpty()) {
                 logger.info { "Received an empty token set!" }
                 return mutableSetOf()
@@ -203,6 +210,7 @@ class Token(
             while (i < dataSize) {
                 if (i + 2 > dataSize) {
                     logger.info { "Received a wrongly formatted list of tokens!" }
+                    logger.info {"DataSize too big???"}
                     return mutableSetOf()
                 }
 
@@ -211,6 +219,7 @@ class Token(
 
                 if (numRecipients < 1 || i + TOKEN_CREATION_SIZE + numRecipients * RECIPIENT_PAIR_SIZE > dataSize) {
                     logger.info { "Received a wrongly formatted list of tokens!" }
+                    logger.info { "Number of recipients ${numRecipients} " }
                     return mutableSetOf()
                 }
 
@@ -243,9 +252,7 @@ class Token(
                     recipients.add(RecipientPair(publicKey, proof))
                 }
 
-                val current = LocalDateTime.now()
-
-                tokens.add(Token(id, current, value, verifier, genesisHash, recipients))
+                tokens.add(Token(id, timestamp, value, verifier, genesisHash, recipients))
             }
 
             return tokens

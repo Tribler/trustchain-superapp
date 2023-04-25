@@ -66,6 +66,7 @@ class Wallet(
         return result!!
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     public fun addToken(token : Token) : Long {
         val result = dbHelper!!.addToken(token)
         if(result != -1L) {

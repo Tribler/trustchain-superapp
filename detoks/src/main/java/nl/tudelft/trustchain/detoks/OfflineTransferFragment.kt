@@ -15,7 +15,8 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
-import com.google.common.primitives.UnsignedBytes.toInt
+import com.google.gson.*
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_offline_transfer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,9 +25,13 @@ import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.detoks.db.DbHelper
-import org.json.JSONObject
+import java.io.ByteArrayOutputStream
+import java.lang.reflect.Type
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.collections.ArrayList
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -42,6 +47,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    var balanceText: TextView? = null
     var arrayAdapter: ArrayAdapter<String>? = null
     var wallet : Wallet? = null
     var spinnerFriends: Spinner? = null
@@ -93,7 +99,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val myPublicKey = getIpv8().myPeer.publicKey
         val myPrivateKey = getIpv8().myPeer.key as PrivateKey
         val amountText = view.findViewById<EditText>(R.id.amount)
-
+        balanceText = view.findViewById<TextView>(R.id.txtBalance)
+        this.balanceText?.text = wallet!!.balance.toString()
 
         val buttonScan = view.findViewById<Button>(R.id.button_send)
         buttonScan.setOnClickListener {
@@ -111,13 +118,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val proof = myPrivateKey.sign(token.id + token.value + token.genesisHash + myPublicKey.keyToBin())
         token.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
 
-//        val result = wallet!!.addToken(token)
-//        if (result != -1L) {
-            Toast.makeText(this.context, "Balance " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
-//        } else {
-//            Toast.makeText(this.context, "Duplicate token!", Toast.LENGTH_LONG)
-//                .show()
-//        }
+
+        Toast.makeText(this.context, "Balance " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
 
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
         val dbHelper = DbHelper(view.context)
@@ -137,7 +139,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
                             } else {
                                 showQR(view, chosenTokens, friendPublicKey)
                                 Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
-
+                                this.balanceText?.text = wallet!!.balance.toString()
                             }
                         } else {
                             Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
@@ -178,11 +180,48 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val content = qrCodeUtils.parseActivityResult(requestCode, resultCode, data)
         Log.v("Transfer data ", content.toString())
 
+
         if (content != null) {
-            // deserialize the content
-            val obtainedTokens = Token.deserialize(content.toByteArray())
-            for(t in obtainedTokens)
-                wallet!!.addToken(t)
+            val proba = ungzip(content)
+
+            val dateJsonDeserializer = object : JsonDeserializer<LocalDateTime> {
+                val  formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+                override fun deserialize(json: JsonElement?, typeOfT: Type?,
+                    context: JsonDeserializationContext?): LocalDateTime {
+                    return LocalDateTime.parse(json?.getAsString(),
+                        formatter)
+                }
+            }
+            val gsonObject = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, dateJsonDeserializer).create()
+
+            var map = object :  TypeToken<Token>() {}.type
+            val result: Token = gsonObject.fromJson(proba, map)
+
+            //TODO:check whether tokens are sent, but not sth else
+            //TODO:check whether the tokens are not empty list
+//            val obtainedTokens =  result //?: return  //Token.deserialize(content.toByteArray()) //
+
+            val t = result
+//            for(t in obtainedTokens ){
+//                var t = value?.get(0)
+            val tokenPublicKey = t.recipients.last().publicKey
+            val pubKey = getIpv8().myPeer.publicKey.keyToBin()
+            if(tokenPublicKey.contentEquals(pubKey)){
+                Log.v("Tokennnnn", t.toString())
+                println("New tokensss: ${wallet!!.balance}")
+                println("Tokennnnn $t.toString()")
+                val successful = wallet!!.addToken(t)
+                if(successful == -1L) {
+                    Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
+                } else {
+                    this.balanceText?.text = wallet!!.balance.toString()
+                    Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
+                }
+            } else {
+                Toast.makeText(this.context, "This token is not for you!", Toast.LENGTH_LONG).show()
+            }
+
         } else {
             Toast.makeText(this.context, "Scanning failed!", Toast.LENGTH_LONG).show()
         }
@@ -199,17 +238,27 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun showQR(view: View, token: ArrayList<Token>, friendPublicKey: ByteArray) {
         val newToken = createNextOwner(token, friendPublicKey)
         // encode newToken
 
-        val jsonObject = JSONObject()
-        jsonObject.put("token", newToken)
-        val jsonString = jsonObject.toString()
+        val dateJsonSerializer = object : JsonSerializer<LocalDateTime> {
+            val  formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+            override fun serialize(localDateTime: LocalDateTime?, typeOfSrc: Type?,
+                context: JsonSerializationContext?): JsonElement {
+                return JsonPrimitive(formatter.format(localDateTime));
+            }
+        }
+        val gsonObject = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, dateJsonSerializer).create()
+
+        val result = gsonObject.toJson(newToken.get(0))
+        val compressedJSONString = gzip(result)
         hideKeyboard()
         lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.Default) {
-                qrCodeUtils.createQR(jsonString)
+                qrCodeUtils.createQR(compressedJSONString)
             }
             val qrCodeImage = view.findViewById<ImageView>(R.id.QR)
             qrCodeImage.setImageBitmap(bitmap)
@@ -218,6 +267,18 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 //        amountText.clearFocus()
         button_send.visibility = View.INVISIBLE
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun gzip(content: String): String {
+        val bos = ByteArrayOutputStream()
+        GZIPOutputStream(bos).bufferedWriter().use { it.write(content) }
+        val test = bos.toByteArray()
+        return  String(Base64.getEncoder().encode(test))
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun ungzip(content: String): String =
+        GZIPInputStream(Base64.getDecoder().decode(content).inputStream()).bufferedReader().use { it.readText() }
 
     private fun hideKeyboard() {
         val inputManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

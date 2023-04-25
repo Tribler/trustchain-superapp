@@ -6,10 +6,11 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.google.common.primitives.Ints
 import nl.tudelft.trustchain.detoks.Token
 import nl.tudelft.trustchain.detoks.Token.Companion.serialize
 import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -25,14 +26,9 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
         const val TABLE_TOKEN = "tokens"
         const val COLUMN_TOKEN_ID = "token_id"
-        const val COLUMN_VALUE = "token_value"
-        const val COLUMN_VERIFIER = "verifier"
-        const val COLUMN_GEN_HASH = "genesis_block"
+        const val COLUMN_TIMESTAMP = "timestamp"
         const val COLUMN_SER_TOKEN = "serialized_token"
 
-        const val TABLE_RECIPIENTS = "recipients"
-        const val COLUMN_RECIPIENT = "rec_publicKey"
-        const val COLUMN_PROOF = "proof"
 
     }
 
@@ -47,20 +43,17 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db?.execSQL(
             "CREATE TABLE IF NOT EXISTS $TABLE_TOKEN (" +
                 "$COLUMN_TOKEN_ID BLOB PRIMARY KEY, " +
-                "$COLUMN_VALUE BLOB NOT NULL, " +
-                "$COLUMN_VERIFIER BLOB NOT NULL, " +
-                "$COLUMN_GEN_HASH BLOB NOT NULL, " +
+                "$COLUMN_TIMESTAMP TEXT NOT NULL, " +
                 "$COLUMN_SER_TOKEN BLOB NOT NULL UNIQUE); ",
             )
 
         db?.execSQL("DROP TABLE IF EXISTS $TABLE_ADMIN_TOKEN")
         db?.execSQL(
             "CREATE TABLE IF NOT EXISTS $TABLE_ADMIN_TOKEN (" +
-                "$COLUMN_TOKEN_ID BLOB PRIMARY KEY, " +
-                "$COLUMN_VALUE BLOB NOT NULL, " +
-                "$COLUMN_VERIFIER BLOB NOT NULL, " +
-                "$COLUMN_GEN_HASH BLOB NOT NULL, " +
-                "$COLUMN_SER_TOKEN BLOB NOT NULL UNIQUE); ",
+                "$COLUMN_TOKEN_ID BLOB NOT NULL, " +
+                "$COLUMN_TIMESTAMP TEXT NOT NULL, " +
+                "$COLUMN_SER_TOKEN BLOB NOT NULL UNIQUE," +
+                "PRIMARY KEY ($COLUMN_TOKEN_ID, $COLUMN_TIMESTAMP)); ",
         )
     }
 
@@ -68,12 +61,15 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         // Handle database schema upgrades here if needed
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun addToken(token: Token, admin: Boolean = false) : Long {
+
+        val  formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val formattedTimestamp: String = token.timestamp.format(formatter)
+
         val new_row = ContentValues()
         new_row.put(COLUMN_TOKEN_ID, token.id)
-        new_row.put(COLUMN_VALUE, token.value)
-        new_row.put(COLUMN_VERIFIER, token.verifier)
-        new_row.put(COLUMN_GEN_HASH, token.genesisHash)
+        new_row.put(COLUMN_TIMESTAMP, formattedTimestamp)
         val collection = mutableListOf<Token>(token)
         new_row.put(COLUMN_SER_TOKEN, serialize(collection))
 
@@ -83,8 +79,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         }
 
         val db = this.writableDatabase
-//        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME_TOKEN WHERE $COLUMN_TOKEN_ID=? OR $COLUMN_VALUE=?",
-//            arrayOf(token_id, value.toString()))
+
         val newRowId = db.insert(table, null, new_row) // null?
         db.close()
         return newRowId
@@ -93,15 +88,15 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     /**
      * Removes the specified token from the DB
      */
-    fun removeToken(token: Token) {
+    fun removeToken(token: Token, admin: Boolean = false) {
         var table = TABLE_TOKEN
+        if (admin) {
+            table = TABLE_ADMIN_TOKEN
+        }
 
         val db = this.writableDatabase
-        db.delete(
-            table,
-            COLUMN_TOKEN_ID + " = ?",
-            arrayOf<String>(java.lang.String.valueOf(token.id)),
-        )
+        db.execSQL("DELETE FROM " + table +" WHERE "+ COLUMN_TOKEN_ID +"=?",
+            arrayOf<ByteArray>(token.id))
         db.close()
     }
 
@@ -114,25 +109,31 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         }
 
         val tokenList = arrayListOf<Token>()
-        val selectQueryId = "SELECT $COLUMN_SER_TOKEN FROM $table"
+        val selectQueryId = "SELECT $COLUMN_TIMESTAMP, $COLUMN_SER_TOKEN FROM $table"
+
 
         val db = this.readableDatabase
-        val cursorId = db.rawQuery(selectQueryId, null)
+        val cursor = db.rawQuery(selectQueryId, null)
 
-        if (cursorId.moveToFirst()) {
-            val columnIdIndex = cursorId.getColumnIndex(COLUMN_SER_TOKEN)
-
-            if (columnIdIndex >= 0) {
+        if (cursor.moveToFirst()) {
+            val columnIdIndex = cursor.getColumnIndexOrThrow(COLUMN_SER_TOKEN)
+            val columnTimeIndex = cursor.getColumnIndexOrThrow(COLUMN_TIMESTAMP)
+            if (columnIdIndex >= 0 && columnTimeIndex >= 0) {
                 do {
-                    val token = cursorId.getBlob(columnIdIndex)
-                    val tokens = Token.deserialize(token)
+                    val token = cursor.getBlob(columnIdIndex)
+                    val timestamp = cursor.getString(columnTimeIndex)
+                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                    val dateTime: LocalDateTime = LocalDateTime.parse(timestamp, formatter)
+
+                    val tokens = Token.deserialize(token, dateTime)
                     if(tokens.size == 1)
                         tokenList.add(tokens.elementAt(0))
+
 //                    else error ?
-                } while (cursorId.moveToNext())
+                } while (cursor.moveToNext())
             }
         }
-        cursorId.close()
+        cursor.close()
         db.close()
         return tokenList
     }
