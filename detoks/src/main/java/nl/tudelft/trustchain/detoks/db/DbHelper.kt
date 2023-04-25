@@ -88,11 +88,8 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     /**
      * Removes the specified token from the DB
      */
-    fun removeToken(token: Token, admin: Boolean = false) {
+    fun removeToken(token: Token) {
         var table = TABLE_TOKEN
-        if (admin) {
-            table = TABLE_ADMIN_TOKEN
-        }
 
         val db = this.writableDatabase
         db.execSQL("DELETE FROM " + table +" WHERE "+ COLUMN_TOKEN_ID +"=?",
