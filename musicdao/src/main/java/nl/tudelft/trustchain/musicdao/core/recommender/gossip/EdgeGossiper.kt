@@ -23,25 +23,27 @@ private val logger = KotlinLogging.logger {}
 class EdgeGossiper(
     private val recommenderCommunityBase: RecommenderCommunityBase,
     private val toastingEnabled: Boolean,
-    private val trustNetwork: TrustNetwork
+    private val trustNetwork: TrustNetwork,
+    private val timeWindow: Int = TIME_WINDOW
 ) {
     private val scope = CoroutineScope(Dispatchers.IO)
-    private var sortedNodeToNodeEdges: List<NodeTrustEdge> = trustNetwork.getAllNodeToNodeEdges().sortedBy { it.timestamp }
-    private var sortedNodeToSongEdges: List<NodeSongEdge> = trustNetwork.getAllNodeToSongEdges().sortedBy { it.timestamp }
+    private var sortedNodeToNodeEdges: List<NodeTrustEdge> = trustNetwork.getAllNodeToNodeEdges().sortedBy { it.timestamp }.takeLast(timeWindow)
+    private var sortedNodeToSongEdges: List<NodeSongEdge> = trustNetwork.getAllNodeToSongEdges().sortedBy { it.timestamp }.takeLast(timeWindow)
     @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
     var nodeToNodeEdgeDeltas = listOf<Int>()
     @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
     var nodeToSongEdgeDeltas = listOf<Int>()
     @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
-    var nodeToNodeEdgeWeights = listOf<Float>()
+    var nodeToNodeEdgeWeights = listOf<Double>()
     @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
-    var nodeToSongEdgeWeights = listOf<Float>()
+    var nodeToSongEdgeWeights = listOf<Double>()
 
     init {
         updateDeltasAndWeights()
     }
 
     companion object {
+        const val TIME_WINDOW: Int = 10000
         fun getInstance(
             sessionManager: SessionManager,
             recommenderCommunity: RecommenderCommunityBase,
@@ -65,7 +67,7 @@ class EdgeGossiper(
     private fun updateNodeToNodeDeltas() {
         val oldestNodeToNodeEdgeTimestamp = sortedNodeToNodeEdges.first().timestamp.time
         val deltas = mutableListOf<Int>()
-        for(edge in sortedNodeToSongEdges) {
+        for(edge in sortedNodeToNodeEdges) {
             deltas.add((edge.timestamp.time - oldestNodeToNodeEdgeTimestamp).toInt())
         }
         nodeToNodeEdgeDeltas = deltas
@@ -88,9 +90,9 @@ class EdgeGossiper(
         nodeToSongEdgeWeights = softmax(nodeToSongEdgeDeltas)
     }
 
-    private fun softmax(nums: List<Int>): List<Float> {
+    private fun softmax(nums: List<Int>): List<Double> {
         val sum = nums.sum()
-        return nums.map { it.toFloat() / sum }
+        return nums.map { it.toDouble() / sum }
     }
 
 

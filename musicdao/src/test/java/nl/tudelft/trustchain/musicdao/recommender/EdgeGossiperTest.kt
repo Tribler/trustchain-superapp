@@ -24,31 +24,40 @@ class EdgeGossiperTest {
     private val nNodes = 5000
     private val nSongs = nNodes / 10
     private val nEdges = 10
+    private val doubleDelta = 0.0000001
     private val maxTimestamp = System.currentTimeMillis() + 10000
     private val minTimestamp = System.currentTimeMillis()
     private lateinit var edgeGossiper: EdgeGossiper
 
     @Before
     fun setUp() {
-        for(node in 0 until nNodes) {
+        for (node in 0 until nNodes) {
             val nodeToAdd = Node(node.toString())
             nodeToNodeNetwork.addNode(nodeToAdd)
             nodeToSongNetwork.addNodeOrSong(nodeToAdd)
         }
-        for(song in 0 until nSongs) {
+        for (song in 0 until nSongs) {
             nodeToSongNetwork.addNodeOrSong(SongRecommendation(song.toString()))
         }
         // Create 10 edges from each node to 10 random songs
         val allNodes = nodeToSongNetwork.getAllNodes().toList()
         rootNode = allNodes[0]
         val allSongs = nodeToSongNetwork.getAllSongs().toList()
-        for(node in allNodes) {
-            for(i in 0 until nEdges) {
+        for (node in allNodes) {
+            for (i in 0 until nEdges) {
                 var randomNum = (0 until nSongs - 1).random(rng)
-                nodeToSongNetwork.addEdge(node, allSongs[randomNum], NodeSongEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp))))
+                nodeToSongNetwork.addEdge(
+                    node,
+                    allSongs[randomNum],
+                    NodeSongEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp)))
+                )
                 randomNum = (0 until nNodes - 1).random(rng)
-                val randomNode = if(randomNum < node.getIpv8().toInt()) randomNum else randomNum + 1
-                nodeToNodeNetwork.addEdge(node, allNodes[randomNode], NodeTrustEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp))))
+                val randomNode = if (randomNum < node.getIpv8().toInt()) randomNum else randomNum + 1
+                nodeToNodeNetwork.addEdge(
+                    node,
+                    allNodes[randomNode],
+                    NodeTrustEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp)))
+                )
             }
         }
     }
@@ -60,15 +69,20 @@ class EdgeGossiperTest {
         val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
         val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas
 
-        val oldestNodeToNodeEdge = nodeToNodeNetwork.getAllEdges().minBy { it.timestamp }
-        val newestNodeToNodeEdge = nodeToNodeNetwork.getAllEdges().maxBy { it.timestamp }
+        val sortedNtNEdgesInWindow = nodeToNodeNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(EdgeGossiper.TIME_WINDOW)
+        val oldestNodeToNodeEdge = sortedNtNEdgesInWindow.first()
+        val newestNodeToNodeEdge = sortedNtNEdgesInWindow.last()
         val deltaOldestAndNewestNtNEdge = (newestNodeToNodeEdge.timestamp.time - oldestNodeToNodeEdge.timestamp.time).toInt()
         Assert.assertEquals(deltaOldestAndNewestNtNEdge, nodeToNodeDeltas.max())
+        Assert.assertEquals(0, nodeToNodeDeltas.min())
 
-        val oldestNodeToSongEdge = nodeToSongNetwork.getAllEdges().minBy { it.timestamp }
-        val newestNodeToSongEdge = nodeToSongNetwork.getAllEdges().maxBy { it.timestamp }
+        val sortedNtSEdgesInWindow = nodeToSongNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(EdgeGossiper.TIME_WINDOW)
+        val oldestNodeToSongEdge = sortedNtSEdgesInWindow.first()
+        val newestNodeToSongEdge = sortedNtSEdgesInWindow.last()
         val deltaOldestAndNewestNtSEdge = (newestNodeToSongEdge.timestamp.time - oldestNodeToSongEdge.timestamp.time).toInt()
         Assert.assertEquals(deltaOldestAndNewestNtSEdge, nodeToSongDeltas.max())
+        Assert.assertEquals(0, nodeToSongDeltas.min())
+
     }
 
     @Test
@@ -80,23 +94,41 @@ class EdgeGossiperTest {
         val nodeToNodeWeights = edgeGossiper.nodeToNodeEdgeWeights
         val nodeToSongWeights = edgeGossiper.nodeToSongEdgeWeights
 
-        val oldestNodeToNodeEdge = nodeToNodeNetwork.getAllEdges().minBy { it.timestamp }
-        val newestNodeToNodeEdge = nodeToNodeNetwork.getAllEdges().maxBy { it.timestamp }
+        val sortedNtNEdgesInWindow = nodeToNodeNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(EdgeGossiper.TIME_WINDOW)
+        val oldestNodeToNodeEdge = sortedNtNEdgesInWindow.minBy { it.timestamp }
+        val newestNodeToNodeEdge = sortedNtNEdgesInWindow.maxBy { it.timestamp }
         val sumNtNDeltas = nodeToNodeDeltas.sum()
-        val expectedWeightOldestNtNEdge = 0.0f
-        val expectedWeightNewestNtNEdge = ((newestNodeToNodeEdge.timestamp.time - oldestNodeToNodeEdge.timestamp.time) / sumNtNDeltas).toFloat()
-        Assert.assertEquals(expectedWeightOldestNtNEdge, nodeToNodeWeights.first(), 0.001f)
-        Assert.assertEquals(expectedWeightNewestNtNEdge, nodeToNodeWeights.last(), 0.001f)
+        val expectedWeightOldestNtNEdge = 0.0
+        val expectedWeightNewestNtNEdge = ((newestNodeToNodeEdge.timestamp.time - oldestNodeToNodeEdge.timestamp.time).toDouble() / sumNtNDeltas)
+        Assert.assertEquals(expectedWeightOldestNtNEdge, nodeToNodeWeights.first(), doubleDelta)
+        Assert.assertEquals(expectedWeightNewestNtNEdge, nodeToNodeWeights.last(), doubleDelta)
 
-        val oldestNodeToSongEdge = nodeToSongNetwork.getAllEdges().minBy { it.timestamp }
-        val newestNodeToSongEdge = nodeToSongNetwork.getAllEdges().maxBy { it.timestamp }
+        val sortedNtSEdgesInWindow = nodeToSongNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(EdgeGossiper.TIME_WINDOW)
+        val oldestNodeToSongEdge = sortedNtSEdgesInWindow.first()
+        val newestNodeToSongEdge = sortedNtSEdgesInWindow.last()
         val sumNtSDeltas = nodeToSongDeltas.sum()
-        val expectedWeightOldestNtSEdge = 0.0f
-        val expectedWeightNewestNtSEdge = ((newestNodeToSongEdge.timestamp.time - oldestNodeToSongEdge.timestamp.time) / sumNtSDeltas).toFloat()
-        Assert.assertEquals(expectedWeightOldestNtSEdge, nodeToSongWeights.first(), 0.001f)
-        Assert.assertEquals(expectedWeightNewestNtSEdge, nodeToSongWeights.last(), 0.001f)
+        val expectedWeightOldestNtSEdge = 0.0
+        val expectedWeightNewestNtSEdge = ((newestNodeToSongEdge.timestamp.time - oldestNodeToSongEdge.timestamp.time).toDouble() / sumNtSDeltas)
+        Assert.assertEquals(expectedWeightOldestNtSEdge, nodeToSongWeights.first(), doubleDelta)
+        Assert.assertEquals(expectedWeightNewestNtSEdge, nodeToSongWeights.last(), doubleDelta)
 
-        Assert.assertEquals(1.0f, nodeToNodeWeights.sum(), 0.001f)
-        Assert.assertEquals(1.0f, nodeToSongWeights.sum(), 0.001f)
+        Assert.assertEquals(1.0, nodeToNodeWeights.sum(), doubleDelta)
+        Assert.assertEquals(1.0, nodeToSongWeights.sum(), doubleDelta)
+    }
+
+    @Test
+    fun usesTimeWindowToConstructDeltasAndWeights() {
+        val someTimeWindow = Random.nextInt(1, EdgeGossiper.TIME_WINDOW)
+        trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getIpv8())
+        edgeGossiper = EdgeGossiper(RecommenderCommunityMock("someServiceId"), false, trustNetwork, someTimeWindow)
+        val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
+        val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas
+        val nodeToNodeWeights = edgeGossiper.nodeToNodeEdgeWeights
+        val nodeToSongWeights = edgeGossiper.nodeToSongEdgeWeights
+
+        Assert.assertEquals(someTimeWindow, nodeToNodeDeltas.size)
+        Assert.assertEquals(someTimeWindow, nodeToSongDeltas.size)
+        Assert.assertEquals(someTimeWindow, nodeToNodeWeights.size)
+        Assert.assertEquals(someTimeWindow, nodeToSongWeights.size)
     }
 }
