@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.gossip
 
+import androidx.annotation.VisibleForTesting
 import com.frostwire.jlibtorrent.*
 import kotlinx.coroutines.*
 import mu.KotlinLogging
@@ -20,7 +21,6 @@ const val EVA_RETRIES = 10
 private val logger = KotlinLogging.logger {}
 
 class EdgeGossiper(
-    private val sessionManager: SessionManager,
     private val recommenderCommunityBase: RecommenderCommunityBase,
     private val toastingEnabled: Boolean,
     private val trustNetwork: TrustNetwork
@@ -28,10 +28,14 @@ class EdgeGossiper(
     private val scope = CoroutineScope(Dispatchers.IO)
     private var sortedNodeToNodeEdges: List<NodeTrustEdge> = trustNetwork.getAllNodeToNodeEdges().sortedBy { it.timestamp }
     private var sortedNodeToSongEdges: List<NodeSongEdge> = trustNetwork.getAllNodeToSongEdges().sortedBy { it.timestamp }
-    private var nodeToNodeEdgeDeltas = listOf<Int>()
-    private var nodeToSongEdgeDeltas = listOf<Int>()
-    private var nodeToNodeEdgeWeights = listOf<Float>()
-    private var nodeToSongEdgeWeights = listOf<Float>()
+    @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
+    var nodeToNodeEdgeDeltas = listOf<Int>()
+    @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
+    var nodeToSongEdgeDeltas = listOf<Int>()
+    @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
+    var nodeToNodeEdgeWeights = listOf<Float>()
+    @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
+    var nodeToSongEdgeWeights = listOf<Float>()
 
     init {
         updateDeltasAndWeights()
@@ -45,7 +49,7 @@ class EdgeGossiper(
             trustNetwork: TrustNetwork
         ): EdgeGossiper {
             if (!::edgeGossiperInstance.isInitialized) {
-                edgeGossiperInstance = EdgeGossiper(sessionManager, recommenderCommunity, toastingEnabled, trustNetwork)
+                edgeGossiperInstance = EdgeGossiper(recommenderCommunity, toastingEnabled, trustNetwork)
             }
             return edgeGossiperInstance
         }
