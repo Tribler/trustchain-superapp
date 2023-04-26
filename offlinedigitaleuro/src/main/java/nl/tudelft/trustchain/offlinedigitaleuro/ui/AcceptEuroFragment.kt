@@ -27,7 +27,6 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
 
     private var doubleSpendExists: Boolean = false
 
-    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -72,8 +71,6 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
 
                 return@setOnClickListener
             }
-
-//            TODO: add the transaction in the transaction DB
 
             // add the user or update its trust
             if (maybeTrustScore == null) {

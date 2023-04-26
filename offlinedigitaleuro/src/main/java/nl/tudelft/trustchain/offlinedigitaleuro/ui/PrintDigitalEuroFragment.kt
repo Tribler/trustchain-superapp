@@ -19,10 +19,10 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
         super.onViewCreated(view, savedInstanceState)
 
         binding.errorText.visibility = View.INVISIBLE
-        binding.printNumberPicker1.value = 0
-        binding.printNumberPicker2.value = 0
-        binding.printNumberPicker5.value = 0
-        binding.printNumberPicker10.value = 0
+        binding.printNumberPicker1Euro.value = 0
+        binding.printNumberPicker2Euro.value = 0
+        binding.printNumberPicker5Euro.value = 0
+        binding.printNumberPicker10Euro.value = 0
 
         fun createTokens(token1_count:Int, token2_count:Int, token5_count:Int, token10_count:Int): MutableSet<Token> {
             val tokenPackage: MutableSet<Token> = mutableSetOf()
@@ -52,10 +52,10 @@ class PrintDigitalEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.print_m
         binding.btnPrint.setOnClickListener {
             //This create an array with tokens of values 1,2,5
             val tokenPackage: MutableSet<Token> = createTokens(
-                token1_count = binding.printNumberPicker1.value,
-                token2_count = binding.printNumberPicker2.value,
-                token5_count = binding.printNumberPicker5.value,
-                token10_count = binding.printNumberPicker10.value
+                token1_count = binding.printNumberPicker1Euro.value,
+                token2_count = binding.printNumberPicker2Euro.value,
+                token5_count = binding.printNumberPicker5Euro.value,
+                token10_count = binding.printNumberPicker10Euro.value
             )
 
             for (token in tokenPackage) {

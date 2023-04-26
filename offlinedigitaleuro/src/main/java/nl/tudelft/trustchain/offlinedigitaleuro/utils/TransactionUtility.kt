@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.offlinedigitaleuro.utils
 
-import android.annotation.SuppressLint
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -16,7 +15,7 @@ import nl.tudelft.trustchain.offlinedigitaleuro.src.Wallet
 import org.json.JSONObject
 import java.lang.Integer.min
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.*
 import kotlin.random.Random
 
 class TransactionUtility {
@@ -66,7 +65,6 @@ companion object {
 
     // completes a transaction and inserts the tokens in the DB
     // returns true if the operation succeeded and on failure also returns the message
-    @SuppressLint("SimpleDateFormat")
     fun receiveTransaction(tq: TransferQR, db: OfflineDigitalEuroRoomDatabase, my_pbk: PublicKey): Pair<Boolean, String> {
         val nowOwnedTokens: MutableSet<Token> = cedeTokens(my_pbk, tq.pvk, tq.tokens.toMutableList())
 
@@ -82,7 +80,7 @@ companion object {
             db.transactionsDao().insertTransaction(
                 Transactions(
                     Random.nextInt(0, 10000),
-                    SimpleDateFormat("dd MMM yyyy HH:mm:ss z").format(Date()),
+                    SimpleDateFormat("dd MMM yyyy HH:mm:ss z", Locale.getDefault()).format(Date()),
                     tq.getPreviousOwner().first?.keyToBin()!!.toHex(),
                     tq.getValue(),
                     true
@@ -117,7 +115,6 @@ companion object {
     // completes the transaction by deleting the transferred tokens from the DB and some other stuff
     // returns true if everything went fine
     // otherwise returns false and the error message
-    @SuppressLint("SimpleDateFormat")
     fun completeSendTransaction(sendTransaction: JSONObject, db: OfflineDigitalEuroRoomDatabase) : Pair<Boolean, String> {
         val (maybeTq, errMsg) = TransferQR.fromJson(sendTransaction)
 
@@ -138,7 +135,7 @@ companion object {
             db.transactionsDao().insertTransaction(
                 Transactions(
                     Random.nextInt(0, 10000),
-                    SimpleDateFormat("dd MMM yyyy HH:mm:ss z").format(Date()),
+                    SimpleDateFormat("dd MMM yyyy HH:mm:ss z", Locale.getDefault()).format(Date()),
                     tq.getPreviousOwner().first?.keyToBin()!!.toHex(),
                     -(tq.getValue()),
                     true

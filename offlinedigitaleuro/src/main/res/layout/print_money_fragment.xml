@@ -14,7 +14,7 @@
         android:padding="16dp">
 
         <LinearLayout
-            android:id="@+id/TenEuroPrintEdit"
+            android:id="@+id/TenEuroPrintLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -32,7 +32,7 @@
                 app:layout_constraintStart_toStartOf="parent"/>
 
             <com.travijuu.numberpicker.library.NumberPicker
-                android:id="@+id/print_number_picker_10"
+                android:id="@+id/print_number_picker_10_euro"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 numberpicker:min="0"
@@ -45,13 +45,13 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/firstEuroPrintEdit"
+            android:id="@+id/FiveEuroPrintLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/TenEuroPrintEdit" >
+            app:layout_constraintTop_toBottomOf="@id/TenEuroPrintLayout" >
 
             <TextView
                 android:id="@+id/txtPrint5Euro"
@@ -63,7 +63,7 @@
                 app:layout_constraintStart_toStartOf="parent"/>
 
             <com.travijuu.numberpicker.library.NumberPicker
-                android:id="@+id/print_number_picker_5"
+                android:id="@+id/print_number_picker_5_euro"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 numberpicker:min="0"
@@ -76,13 +76,13 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/secondEuroPrintEdit"
+            android:id="@+id/TwoEuroPrintLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/firstEuroPrintEdit" >
+            app:layout_constraintTop_toBottomOf="@id/FiveEuroPrintLayout" >
 
             <TextView
                 android:id="@+id/txtPrint2Euro"
@@ -94,7 +94,7 @@
                 app:layout_constraintStart_toStartOf="parent"/>
 
             <com.travijuu.numberpicker.library.NumberPicker
-                android:id="@+id/print_number_picker_2"
+                android:id="@+id/print_number_picker_2_euro"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 numberpicker:min="0"
@@ -107,13 +107,13 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/thirdEuroPrintEdit"
+            android:id="@+id/OneEuroPrintLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/secondEuroPrintEdit" >
+            app:layout_constraintTop_toBottomOf="@id/TwoEuroPrintLayout" >
 
             <TextView
                 android:id="@+id/txtPrint1Euro"
@@ -125,7 +125,7 @@
                 app:layout_constraintStart_toStartOf="parent"/>
 
             <com.travijuu.numberpicker.library.NumberPicker
-                android:id="@+id/print_number_picker_1"
+                android:id="@+id/print_number_picker_1_euro"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 numberpicker:min="0"
@@ -138,17 +138,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/fourthEuroPrintEdit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/thirdEuroPrintEdit" >
-
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/buttonLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -156,7 +145,7 @@
             android:layout_margin="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/thirdEuroPrintEdit"
+            app:layout_constraintTop_toBottomOf="@id/OneEuroPrintLayout"
             >
 
             <com.google.android.material.button.MaterialButton

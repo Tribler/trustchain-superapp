@@ -6,6 +6,8 @@
     <string name="get_or_transfer_token">Get or transfer token:</string>
     <string name="get">Get</string>
     <string name="send">Send</string>
+    <string name="sent">Sent</string>
+    <string name="received">Received</string>
     <string name="your_public_key">Your public key:</string>
     <string name="transfer_amount">Transfer amount:</string>
     <string name="cancel">Cancel</string>

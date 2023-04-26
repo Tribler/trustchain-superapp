@@ -10,8 +10,6 @@ data class UserData(
     @ColumnInfo(name = "private_key") val private_key: String,
 )
 
-
-
 @Dao
 interface UserDao {
 
@@ -26,8 +24,4 @@ interface UserDao {
 
     @Delete
     suspend fun deleteUserData(userData: UserData)
-
-//    @Query("DELETE FROM userdata_table")
-//    suspend fun deleteUserData()
-
 }

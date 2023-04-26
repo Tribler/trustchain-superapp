@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.offlinedigitaleuro.ui.transactions
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -27,7 +26,6 @@ class TransactionsFragment : OfflineDigitalEuroBaseFragment(R.layout.transaction
         liveData { emit(listOf()) }
     }
 
-    @SuppressLint("SetTextI18n")
     private fun updateBalance() {
         val euro1 = db.tokensDao().getCountTokensOfValue(1.0)
         val euro2 = db.tokensDao().getCountTokensOfValue(2.0)
