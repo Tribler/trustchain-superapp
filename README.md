@@ -41,20 +41,25 @@ APK - https://drive.google.com/file/d/1MH3qiH1NXBtPdBbfjCnsNqvs3r8FT5Wg/view?usp
 The application can be used for the following use cases:
 - Create and store EuroToken
 <img src="https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif" width="250">
-  
-- Encode and create QR for EuroToken
-  (screenshot)
-  
-- Send and receive EuroToken between contacts
+Creating eurotokens can be performed currently from both the wallet page and admin page by first specifying
+the value of the token and then pressing the "Create new coin" button. The new token can then be seen on the screen.
 
- - Send Money
+- Send and receive EuroToken between contacts (by encoding and creating QR for EuroToken)
+-- Send Money
  <img src="https://user-images.githubusercontent.com/51911288/234988501-b7d9c9e7-196b-44a3-af13-0b1f256bfded.gif" width="250">
- - Receive Money
+-- Receive Money
  <img src="https://user-images.githubusercontent.com/51911288/234988273-5d7c7dd7-cc49-4ff0-9dc9-05f2d4d6be33.gif" width="250">
- 
+
+To send money, you need to press the "Send" button on the screen with the video.
+After that, the recipient of the token and positive amount needs to be specified.
+If the balance is enough and the specified amount could be created exactly then the QR code is displayed and the receiver can scan it by clicking on the "Scan" button.
+
 - Add new contact
 <img src="https://user-images.githubusercontent.com/51911288/234988799-410dbeba-405b-4a30-97a1-aee00c5b5a39.gif" width="250">
-
+To add a new contact, first press on the "Send" button on the top right of the screen with the displayed video. After that to navigate to the contact page, press on the top right the button "Add Friend". You should now see a screen with two big buttons "Show My Public Key" and "Scan Recipient's Key" the QR code that encodes the public key is shown. Depending on whether you want to add a contact or another user wants to save your contact you should press on one of the buttons.
+Pressing on "Show My Public Key" a QR code that encodes your public key is shown.
+"Scan Recipient's Key" triggers the scanner and the QR code of the new contact can be scanned.
+After that the name should be specified and pressing "Save" will save the new entry.
 
 ### Double spending
 To mitigate double spending, contacts are to be added before users can send or receive EuroTokens.
@@ -65,7 +70,23 @@ After that month a token must be verified before being able to re-spend it. The 
 
 ### Preventing Double Spending
 <img src="https://user-images.githubusercontent.com/51911288/234989059-bcbc8d96-9500-4d31-8120-56175909178f.gif" width="250">
+Before sending the token, the public key of the receiver is encoded in the recipients of the token.
+Once the token is scanned, prior to adding it to the wallet, the public key of the receiver and the encoded public key of the recipient are compared.
+In case they match, the transaction is successful, otherwise, a message for the user is displayed - "This token is not for you!".
+Since the public key is unique, this token has a unique receiver.
 
+### QR codes explanation
+#### Contact QR Code:
+In order to be able to send tokens, first the receiver contact needs to be saved as a friend. This could be performed by pressing the button "Add Friend" and then "Show My Public Key" and the QR code that encodes the public key is shown. The sender of the money can then scan it and save it as a contact for later use.
+First, the public key is serialized to a JSON object and then it is encoded to bitmap and the QR code is created and shown on the screen of the user.
+
+
+#### Token QR Code:
+This QR code is shown once a positive amount less or equal to the balance of the user is specified and the receiver is also chosen from the dropdown menu.
+The QR code contains all tokens whose value sums exactly to the specified amount by the user. In case the specified amount can not be formed by the existent tokens then the following message is shown to the user - "Not Successful (not enough money or could get amount)". In case however, the amount can be made by the existing tokens, then those tokens are first serialized to JSON objects, then compressed and the compression is encoded as a bitmap and displayed to the user.
+After this, a message -"Successful " with the new balance is shown.
+
+### Limitations
 
 ### Future work
 To detect the double spending, two ideas were discussed which can be implemented in the future:
