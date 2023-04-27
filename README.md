@@ -46,6 +46,9 @@ The application can be used for the following use cases:
 - Send and receive EuroToken between contacts
 - Add new contact
 
+- Create Contact
+![createToken](https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif)
+
 ### Double spending
 To mitigate double spending, contacts are to be added before users can send or receive EuroTokens.
 This makes it easier for admins to track double-spend EuroToken and give users warnings when trying to add malicious users.
