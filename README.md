@@ -33,24 +33,27 @@ A user can choose the amount to be received and create a request which can be pa
 The payment can then be done by scanning the generated QR code and a transaction is then made.
 A Eurotoken is minted and verified by a central authority.
 
+GIF - https://drive.google.com/file/d/1Om2BhDseR2K3bHnyacP2KV7krysMa7cg/view?usp=sharing
+
 APK - https://drive.google.com/file/d/1MH3qiH1NXBtPdBbfjCnsNqvs3r8FT5Wg/view?usp=sharing
 
 ### Use case
 The application can be used for the following use cases:
 - Create and store EuroToken
-  <img src="https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif" width="250">
+<img src="https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif" width="250">
   
 - Encode and create QR for EuroToken
   (screenshot)
   
 - Send and receive EuroToken between contacts
+
  - Send Money
-   <img src="https://user-images.githubusercontent.com/51911288/234988501-b7d9c9e7-196b-44a3-af13-0b1f256bfded.gif" width="250">
+ <img src="https://user-images.githubusercontent.com/51911288/234988501-b7d9c9e7-196b-44a3-af13-0b1f256bfded.gif" width="250">
  - Receive Money
-   <img src="https://user-images.githubusercontent.com/51911288/234988273-5d7c7dd7-cc49-4ff0-9dc9-05f2d4d6be33.gif" width="250">
+ <img src="https://user-images.githubusercontent.com/51911288/234988273-5d7c7dd7-cc49-4ff0-9dc9-05f2d4d6be33.gif" width="250">
  
 - Add new contact
-  <img src="https://user-images.githubusercontent.com/51911288/234988799-410dbeba-405b-4a30-97a1-aee00c5b5a39.gif" width="250">
+<img src="https://user-images.githubusercontent.com/51911288/234988799-410dbeba-405b-4a30-97a1-aee00c5b5a39.gif" width="250">
 
 
 ### Double spending
