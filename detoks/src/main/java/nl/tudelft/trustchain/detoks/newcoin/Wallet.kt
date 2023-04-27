@@ -4,9 +4,6 @@ import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.detoks.Token
 import nl.tudelft.trustchain.detoks.db.DbHelper
 import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
-import java.security.KeyPairGenerator
-import java.security.PrivateKey
-import java.security.PublicKey
 import kotlin.math.roundToInt
 
 class Wallet(
@@ -47,6 +44,16 @@ class Wallet(
 
     fun getListOfFriends(): MutableList<OfflineFriend> {
         return listOfFriends!!
+    }
+
+    fun getFriend(publicKey: ByteArray): String? {
+        if(publicKey.contentEquals(this.publicKey.keyToBin()))
+            return "  You"
+        for (friend in listOfFriends!!){
+            if(friend.publicKey.equals(publicKey))
+                return friend.username
+        }
+        return null //if no friend has the given public key
     }
 
 //    fun setListOfFriends(inputListOfFriends : MutableList<OfflineFriend>) {

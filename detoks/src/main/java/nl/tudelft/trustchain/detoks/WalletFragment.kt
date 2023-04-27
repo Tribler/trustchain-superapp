@@ -82,7 +82,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
         val balanceText = view.findViewById<TextView>(R.id.balance)
         balanceText.text = wallet.balance.toString()
 
-        var tokenList = getCoins(wallet.getTokens(), false).map { token: Token -> TokenItem(token) }
+        var tokenList = getCoins(wallet.getTokens(), false).map { token: Token -> TokenItem(token, wallet.getFriend(token.lastRecipient)) }
         updateTokenList(tokenList, recyclerView, view)
 
         createCoinButton.setOnClickListener {
@@ -98,7 +98,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
                 // Update Coins after creating a new one
                 val currentTokens = getCoins(wallet.getTokens(), false)
 
-                tokenList = currentTokens.map { token: Token -> TokenItem(token) }
+                tokenList = currentTokens.map { token: Token -> TokenItem(token, wallet.getFriend(token.lastRecipient)) }
                 updateTokenList(tokenList, recyclerView, view)
             } else {
                 Toast.makeText(this.context, "Specify the token value!", Toast.LENGTH_LONG).show()
@@ -129,7 +129,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
             // Update Recycler View with current tokens
             val currentTokens = getCoins(wallet.getTokens(), false)
 
-            tokenList = currentTokens.map { token: Token -> TokenItem(token) }
+            tokenList = currentTokens.map { token: Token -> TokenItem(token, wallet.getFriend(token.lastRecipient)) }
             updateTokenList(tokenList, recyclerView, view)
 
         }
@@ -144,7 +144,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
 
             val expiredTokensList = getCoins(wallet.getTokens(), true)
 
-            tokenList = expiredTokensList.map { token: Token -> TokenItem(token) }
+            tokenList = expiredTokensList.map { token: Token -> TokenItem(token, wallet.getFriend(token.lastRecipient)) }
             updateTokenList(tokenList, recyclerView, view)
 
         }

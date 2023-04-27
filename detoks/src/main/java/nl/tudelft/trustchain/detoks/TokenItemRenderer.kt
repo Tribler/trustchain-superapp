@@ -1,11 +1,13 @@
 package nl.tudelft.trustchain.detoks
 
+import Wallet
 import android.os.Build
 import android.view.View
 import androidx.annotation.RequiresApi
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_token.view.*
 import java.time.format.DateTimeFormatter
+import nl.tudelft.trustchain.common.ui.*
 
 interface TokenButtonListener {
     fun onVerifyClick(token: Token, access: String)
@@ -25,7 +27,14 @@ class TokenAdminItemRenderer(
         println("tokenview")
         valueToken.text = values.get(item.token.value.toInt())
         latestTimestamp.text = item.token.timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-        currentOwner.text = item.token.firstRecipient.toString()
+        if(displayAs == "admin")
+            currentOwner.text = "   Admin"
+        else
+            if(item.previousOwner == null){
+                currentOwner.text = "   Unknown"
+            } else {
+                currentOwner.text = "  " + item.previousOwner
+            }
 //        if (displayAs == "user") {
         verifyButton.visibility = View.INVISIBLE
         historyButton.visibility = View.INVISIBLE

@@ -2,16 +2,12 @@ package nl.tudelft.trustchain.detoks
 
 import AdminWallet
 import Wallet
-import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.Toast
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -19,15 +15,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.textfield.TextInputLayout
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
+import kotlinx.android.synthetic.main.fragment_offline_transfer.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.Transaction
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.detoks.databinding.FragmentTokenListBinding
@@ -55,8 +49,6 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
         print("viewInit")
         adapter.registerRenderer(TokenAdminItemRenderer(access!!, this))
 
-
-
         lifecycleScope.launchWhenResumed {
             while (isActive) {
                 if (userWallet != null && adminWallet != null) {
@@ -64,12 +56,12 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
                     if (access == "admin") {
                         print("adminbranch")
                         print(adminWallet!!.getTokens())
-                        val items = adminWallet!!.getTokens().map { token: Token -> TokenItem(token) }
+                        val items = adminWallet!!.getTokens().map { token: Token -> TokenItem(token, userWallet!!.getFriend(token.lastRecipient))}
                         adapter.updateItems(items)
                     } else if (access == "user") {
                         print("Userbranch")
                         print(userWallet!!.getTokens())
-                        val items = userWallet!!.getTokens().map { token: Token -> TokenItem(token) }
+                        val items = userWallet!!.getTokens().map { token: Token -> TokenItem(token, userWallet!!.getFriend(token.lastRecipient)) }
                         print(items)
                         adapter.updateItems(items)
                     }
@@ -108,19 +100,32 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
 //                TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         })
 
+        //inflate dropdown menu
+        val spinnerAmounts: EditText? = (view.findViewById<TextInputLayout?>(R.id.menu)).editText
+        val items = listOf("Choose token value","0.05 EUR", "0.5 EUR", "1 EUR", "2 EUR", "5 EUR")
+        val adapter = ArrayAdapter(requireContext(), R.layout.amount_dropdown, items)
+        (spinnerAmounts as? AutoCompleteTextView)?.setAdapter(adapter)
+
+
         val createAdminTokenButton = view.findViewById<Button>(R.id.buttonTokenCreate)
         createAdminTokenButton?.setOnClickListener {
-            // Create a new coin and add it to both wallets!
-            createNewCoin(adminWallet!!, userWallet!!)
-//            val items = adminWallet!!.getTokens().map { token: Token -> TokenItem(token) }
-//            adapter.updateItems(items)
+            val amount : String = (spinnerAmounts as AutoCompleteTextView).text.toString()
+
+            if (!amount.equals("Choose token value") && !amount.equals("")) {
+                val indexSelection = items.indexOf(amount) - 1
+                // Create a new coin and add it to both wallets!
+                createNewCoin(adminWallet!!, userWallet!!, indexSelection.toByte())
+                spinnerAmounts.clearListSelection()
+            } else {
+                Toast.makeText(this.context, "Specify the token value!", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun createNewCoin(adminWallet: AdminWallet, userWallet: Wallet) {
+    fun createNewCoin(adminWallet: AdminWallet, userWallet: Wallet, value : Byte) {
         val myPrivateKey = getIpv8().myPeer.key as PrivateKey
-        val token = Token.create(1, myPublicKey.keyToBin())
+        val token = Token.create(value, myPublicKey.keyToBin())
         val proof = myPrivateKey.sign(token.id + token.value + token.genesisHash + myPublicKey.keyToBin())
         token.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
 
