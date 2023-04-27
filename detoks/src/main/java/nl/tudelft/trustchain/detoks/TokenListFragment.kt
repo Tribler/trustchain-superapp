@@ -86,7 +86,7 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
      override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adminWallet = AdminWallet.getInstance(view.context)
+        adminWallet = AdminWallet.getInstance(view.context, myPublicKey)
         userWallet = Wallet.getInstance(view.context, myPublicKey, getIpv8().myPeer.key as PrivateKey)
 
         binding.list.adapter = adapter
@@ -102,7 +102,7 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
 
         //inflate dropdown menu
         val spinnerAmounts: EditText? = (view.findViewById<TextInputLayout?>(R.id.menu)).editText
-        val items = listOf("Choose token value","0.05 EUR", "0.5 EUR", "1 EUR", "2 EUR", "5 EUR")
+        val items = listOf("0.05 EUR", "0.5 EUR", "1 EUR", "2 EUR", "5 EUR")
         val adapter = ArrayAdapter(requireContext(), R.layout.amount_dropdown, items)
         (spinnerAmounts as? AutoCompleteTextView)?.setAdapter(adapter)
 

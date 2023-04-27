@@ -138,11 +138,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             //friend selected
             val friendUsername = (spinnerFriends as AutoCompleteTextView).text.toString()
             val amount = amountText.text
-
-            spinnerOuter?.visibility = View.INVISIBLE
-            amountText?.visibility = View.INVISIBLE
-            buttonRequest.visibility = View.INVISIBLE
-
+            
 //            amountText.clearFocus()
             //get the friends public key from the db
             val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername)
@@ -150,7 +146,12 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
             try {
                 //if(amount.toString().toInt() >= 0) {
-                        if (wallet!!.balance > 0) {
+                        if (wallet!!.balance > 0 && friendUsername != "") {
+
+                            spinnerOuter?.visibility = View.INVISIBLE
+                            amountText?.visibility = View.INVISIBLE
+                            buttonRequest.visibility = View.INVISIBLE
+
                             val chosenTokens = wallet!!.getPayment(amount.toString().toDouble(),
                              0.0, ArrayList<Token>())
                             if(chosenTokens == null){
@@ -164,7 +165,11 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 //                                this.balanceText?.text = wallet!!.balance.toString()
                             }
                         } else {
-                            Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
+                            if(friendUsername == ""){
+                                Toast.makeText(this.context, "Specify receiver!", Toast.LENGTH_LONG).show()
+                            } else {
+                                Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
+                            }
                         }
                 //TODO: disappear text field, button, spinner
                 // write some message you are sending blaabla

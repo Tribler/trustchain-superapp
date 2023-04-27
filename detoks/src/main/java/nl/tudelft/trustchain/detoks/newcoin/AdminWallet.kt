@@ -5,7 +5,7 @@ import nl.tudelft.trustchain.detoks.Token
 import nl.tudelft.trustchain.detoks.db.DbHelper
 
 data class AdminWallet(
-    val publicKey: String
+    val publicKey: nl.tudelft.ipv8.keyvault.PublicKey
 ) {
 
     companion object {
@@ -13,20 +13,20 @@ data class AdminWallet(
         private var tokens : MutableList<Token>? = null
         private var dbHelper: DbHelper? = null
         @RequiresApi(Build.VERSION_CODES.O)
-        private fun create(context: Context): AdminWallet {
+        private fun create(context: Context, publicKey : nl.tudelft.ipv8.keyvault.PublicKey): AdminWallet {
 //            val generator = KeyPairGenerator.getInstance("RSA")
 //            generator.initialize(2048)
 //            val keyPair = generator.generateKeyPair()
 
             dbHelper = DbHelper(context)
             tokens = dbHelper!!.getAllTokens(admin = true)
-            wallet = AdminWallet("s")
+            wallet = AdminWallet(publicKey)
 
             return wallet!!
         }
         @RequiresApi(Build.VERSION_CODES.O)
-        fun getInstance(context: Context): AdminWallet {
-            return this.wallet ?: create(context)
+        fun getInstance(context: Context, pubKey: nl.tudelft.ipv8.keyvault.PublicKey): AdminWallet {
+            return this.wallet ?: create(context, pubKey)
         }
     }
 
