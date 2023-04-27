@@ -40,7 +40,7 @@ APK - https://drive.google.com/file/d/1MH3qiH1NXBtPdBbfjCnsNqvs3r8FT5Wg/view?usp
 ### Use case
 The application can be used for the following use cases:
 - Create and store EuroToken
-  <img src="https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif" width="250">
+<img src="https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif" width="250">
   
 - Encode and create QR for EuroToken
   (screenshot)
