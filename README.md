@@ -33,14 +33,13 @@ A user can choose the amount to be received and create a request which can be pa
 The payment can then be done by scanning the generated QR code and a transaction is then made.
 A Eurotoken is minted and verified by a central authority.
 
-GIF - https://drive.google.com/file/d/1Om2BhDseR2K3bHnyacP2KV7krysMa7cg/view?usp=sharing
 
-APK - https://drive.google.com/file/d/1MH3qiH1NXBtPdBbfjCnsNqvs3r8FT5Wg/view?usp=sharing
+APK - https://drive.google.com/file/d/1zxzoBY8qajuBgrMbMmRIugr_gUV28PUf/view?usp=sharing
 
 ### Use case
 The application can be used for the following use cases:
 
-1. Create and store EuroToken
+**1. Create and store EuroToken**
 
 Creating eurotokens can be performed currently from both the wallet page and admin page by first specifying
 the value of the token and then pressing the "Create new coin" button. The new token can then be seen on the screen.
@@ -48,20 +47,20 @@ the value of the token and then pressing the "Create new coin" button. The new t
 <img src="https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif" width="250">
 
 
-2. Send and receive EuroToken between contacts (by encoding and creating QR for EuroToken)
+**2. Send and receive EuroToken between contacts** (by encoding and creating QR for EuroToken)
 
 To send money, you need to press the "Send" button on the screen with the video.
 After that, the recipient of the token and positive amount needs to be specified.
 If the balance is enough and the specified amount could be created exactly then the QR code is displayed and the receiver can scan it by clicking on the "Scan" button.
 
-  1. Send Money
+  **1. Send Money**
   <img src="https://user-images.githubusercontent.com/51911288/234988501-b7d9c9e7-196b-44a3-af13-0b1f256bfded.gif" width="250">
 
-  2. Receive Money
+  **2. Receive Money**
   <img src="https://user-images.githubusercontent.com/51911288/234988273-5d7c7dd7-cc49-4ff0-9dc9-05f2d4d6be33.gif" width="250">
 
 
-3. Add new contact
+**3. Add new contact**
 
 To add a new contact, first press on the "Send" button on the top right of the screen with the displayed video. After that to navigate to the contact page, press on the top right the button "Add Friend". You should now see a screen with two big buttons "Show My Public Key" and "Scan Recipient's Key" the QR code that encodes the public key is shown. Depending on whether you want to add a contact or another user wants to save your contact you should press on one of the buttons.
 
