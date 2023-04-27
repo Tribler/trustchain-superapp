@@ -68,14 +68,17 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val pubKey = view.findViewById<TextView>(R.id.myKey)
+        var detail = "Scan Public Key of the Recipient to add in your Addressbook"
 
+        pubKey.text = detail
         val buttonScan = view.findViewById<Button>(R.id.button_scan_public_key)
         buttonScan.setOnClickListener {
             qrCodeUtils.startQRScanner(this, null, true)
         }
 
         val My_QR = view.findViewById<ImageView>(R.id.My_QR)
-        val pubKey = view.findViewById<TextView>(R.id.myKey)
+
 
         val buttonShow = view.findViewById<Button>(R.id.button_show)
         buttonShow.setOnClickListener {

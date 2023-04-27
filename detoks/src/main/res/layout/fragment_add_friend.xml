@@ -6,21 +6,23 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.button.MaterialButton
-        android:text="Scan public key"
+        android:text="Scan Recipient's Key"
         style="@style/Button"
         app:icon="@drawable/ic_baseline_photo_camera_24"
-        android:layout_width="wrap_content"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:id="@+id/button_scan_public_key"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/button_show"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintVertical_bias="0.707" />
 
     <com.google.android.material.button.MaterialButton
-        android:text="Show public key"
+        android:text="Show My Public Key"
         style="@style/Button"
-        android:layout_width="wrap_content"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:id="@+id/button_show"
         app:layout_constraintEnd_toEndOf="parent"
@@ -30,7 +32,7 @@
 
     <EditText
         android:id="@+id/name"
-        android:layout_width="150dp"
+        android:layout_width="230dp"
         android:layout_height="40dp"
         android:layout_centerInParent="true"
         android:layout_marginLeft="70dp"
@@ -78,6 +80,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/myKey"
         android:textSize="18dp"
+        android:textAlignment="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/My_QR"

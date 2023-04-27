@@ -197,7 +197,7 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        
+
         <TextView
             android:text="Transfer Amount"
             android:layout_width="match_parent"
