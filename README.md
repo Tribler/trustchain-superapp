@@ -34,7 +34,7 @@ The payment can then be done by scanning the generated QR code and a transaction
 A Eurotoken is minted and verified by a central authority.
 
 
-APK - https://drive.google.com/file/d/1zxzoBY8qajuBgrMbMmRIugr_gUV28PUf/view?usp=sharing
+APK - https://drive.google.com/file/d/1zX2H6pXw0-m7BALr1bNTG4UwaQS0FcIo/view?usp=sharing
 
 ### Use case
 The application can be used for the following use cases:
