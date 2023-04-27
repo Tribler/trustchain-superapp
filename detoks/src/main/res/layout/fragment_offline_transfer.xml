@@ -29,15 +29,67 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your Balance:"
+                android:id="@+id/totalBalance"
+                android:text="Total Balance: 0"
+                android:textSize="17dp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/txtBalance"
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/txtBalance"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:text="5 EUR: 0"
+                    android:textSize="15dp"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/txtBalance05"
+                    android:layout_weight="2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="0.5 EUR: 0"
+                    android:textSize="15dp"
+                    android:ellipsize="end" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/txtBalance2"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="2 EUR: 0"
+                    android:textSize="15dp"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/txtBalance005"
+                    android:layout_weight="2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="0.05 EUR: 0"
+                    android:textSize="15dp"
+                    android:ellipsize="end" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txtBalance1"
+                android:layout_width="91dp"
                 android:layout_height="wrap_content"
-                android:text="0.00"
-                android:textSize="20dp"
+                android:text="1 EUR: 0"
+                android:textSize="15dp"
                 android:ellipsize="end" />
 
         </LinearLayout>
@@ -56,7 +108,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:clipToPadding="false"
         android:orientation="vertical"
         android:padding="16dp">
@@ -65,7 +117,7 @@
             android:id="@+id/button_send"
             style="@style/Button"
             app:icon="@drawable/ic_baseline_photo_camera_24"
-            android:layout_width="wrap_content"
+            android:layout_width="210dp"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:text="@string/scan"
@@ -74,7 +126,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintVertical_bias="0.056" />
+            app:layout_constraintVertical_bias="0.012" />
+
 
         <EditText
             android:id="@+id/amount"
@@ -94,43 +147,71 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/button_send"
             app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintVertical_bias="0.122"
+            app:layout_constraintVertical_bias="0.345"
             android:autofillHints="EUR0" />
-
 
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_request"
             style="@style/Button"
-            android:layout_width="wrap_content"
+            android:layout_width="210dp"
             android:layout_height="wrap_content"
             android:text="@string/send_money"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/amount"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintVertical_bias="0.064" />
+            app:layout_constraintHorizontal_bias="0.502"
+            app:layout_constraintVertical_bias="0.164" />
 
         <ImageView
             android:id="@+id/QR"
-            android:layout_width="302dp"
+            android:layout_width="303dp"
             android:layout_height="303dp"
-            android:layout_margin="16dp"
+            android:layout_centerVertical="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/button_request" />
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Spinner
             android:id="@+id/spinner"
+            android:autofillHints="Choose Recipient"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:spinnerMode="dropdown"
             app:layout_constraintBottom_toTopOf="@+id/amount"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button_send" />
+            app:layout_constraintTop_toBottomOf="@+id/button_send"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintVertical_bias="0.861" />
+
+        <TextView
+            android:text="Transfer Amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/transferDetails"
+            android:textAlignment="center"
+            android:textSize="18dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/QR"
+            app:layout_constraintVertical_bias="0.705" />
+
+        <!--        <TextView-->
+        <!--            android:text="Use the Scanner to receive money"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:id="@+id/textView3"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="parent"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintHorizontal_bias="0.073"-->
+        <!--            app:layout_constraintVertical_bias="0.001" />-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

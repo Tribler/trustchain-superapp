@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -74,11 +75,12 @@ class AddFriendFragment : BaseFragment(R.layout.fragment_add_friend) {
         }
 
         val My_QR = view.findViewById<ImageView>(R.id.My_QR)
+        val pubKey = view.findViewById<TextView>(R.id.myKey)
 
         val buttonShow = view.findViewById<Button>(R.id.button_show)
         buttonShow.setOnClickListener {
             buttonScan.visibility = View.INVISIBLE
-
+            pubKey.text = "Scan the QR Code to add me as a friend!"
             val myPublicKey = getIpv8().myPeer.publicKey.keyToBin()
             val gsonObject = GsonBuilder().create()
             val result = gsonObject.toJson(myPublicKey)

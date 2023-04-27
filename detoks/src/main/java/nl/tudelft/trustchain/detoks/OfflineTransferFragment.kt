@@ -49,6 +49,11 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     private var param1: String? = null
     private var param2: String? = null
     var balanceText: TextView? = null
+    var totalBalanceText: TextView? = null
+    var balanceText2: TextView? = null
+    var balanceText1: TextView? = null
+    var balanceText05: TextView? = null
+    var balanceText005: TextView? = null
     var arrayAdapter: ArrayAdapter<String>? = null
     var wallet : Wallet? = null
     var spinnerFriends: Spinner? = null
@@ -100,8 +105,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val myPublicKey = getIpv8().myPeer.publicKey
         val myPrivateKey = getIpv8().myPeer.key as PrivateKey
         val amountText = view.findViewById<EditText>(R.id.amount)
-        balanceText = view.findViewById<TextView>(R.id.txtBalance)
-        this.balanceText?.text = wallet!!.balance.toString()
+
+        updateBalance(view)
 
         val buttonScan = view.findViewById<Button>(R.id.button_send)
         buttonScan.setOnClickListener {
@@ -123,28 +128,39 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         Toast.makeText(this.context, "Balance " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
 
         val buttonRequest = view.findViewById<Button>(R.id.button_request)
+        val transferAmountDetails = view.findViewById<TextView>(R.id.transferDetails)
         val dbHelper = DbHelper(view.context)
         buttonRequest.setOnClickListener {
             //friend selected
-            val friendUsername = spinnerFriends?.selectedItem
+            val friendUsername = spinnerFriends?.selectedItem.toString()
             val amount = amountText.text
 
+            spinnerFriends?.visibility = View.INVISIBLE
+            amountText?.visibility = View.INVISIBLE
+            buttonRequest.visibility = View.INVISIBLE
+//            amountText.text.clear()
+//            amountText.clearFocus()
             //get the friends public key from the db
-            val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername.toString())
+            val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername)
+
+            var details = "Sending $amount Euros to $friendUsername. Scan the QR Code to Receive Money!!"
+            transferAmountDetails.text = details
+            transferAmountDetails.textAlignment = View.TEXT_ALIGNMENT_CENTER
+
             try {
                 //if(amount.toString().toInt() >= 0) {
-                        if (wallet!!.balance > 0) {
-                            val chosenTokens = wallet!!.getPayment(amount.toString().toInt())
-                            if(chosenTokens == null){
-                                Toast.makeText(this.context, "Not Successful (not enough money or could get amount)", Toast.LENGTH_LONG).show()
-                            } else {
-                                showQR(view, chosenTokens, friendPublicKey)
-                                Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
-                                this.balanceText?.text = wallet!!.balance.toString()
-                            }
-                        } else {
-                            Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
-                        }
+                if (wallet!!.balance > 0) {
+                    val chosenTokens = wallet!!.getPayment(amount.toString().toInt())
+                    if(chosenTokens == null){
+                        Toast.makeText(this.context, "Not Successful (not enough money or could get amount)", Toast.LENGTH_LONG).show()
+                    } else {
+                        showQR(view, chosenTokens, friendPublicKey)
+                        Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
+                        updateBalance(view)
+                    }
+                } else {
+                    Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
+                }
                 //TODO: disappear text field, button, spinner
                 // write some message you are sending blaabla
                 // check amount more than 0
@@ -175,6 +191,33 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 //    }
     }
 
+    private fun updateBalance(view: View) {
+        totalBalanceText = view.findViewById(R.id.totalBalance)
+        balanceText = view.findViewById(R.id.txtBalance)
+        balanceText2 = view.findViewById(R.id.txtBalance2)
+        balanceText1 = view.findViewById(R.id.txtBalance1)
+        balanceText05 = view.findViewById(R.id.txtBalance05)
+        balanceText005 = view.findViewById(R.id.txtBalance005)
+
+        var balance = "Total Balance: " + wallet!!.balance.toString()
+        this.totalBalanceText?.text = balance
+
+        balance = "5 EUR: " + wallet!!.balance.toString()
+        this.balanceText?.text = balance
+
+        balance = "2 EUR: " + wallet!!.balance.toString()
+        this.balanceText2?.text = balance
+
+        balance = "1 EUR: " + wallet!!.balance.toString()
+        this.balanceText1?.text = balance
+
+        balance = "0.5 EUR: " + wallet!!.balance.toString()
+        this.balanceText05?.text = balance
+
+        balance = "0.05 EUR: " + wallet!!.balance.toString()
+        this.balanceText005?.text = balance
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 //        super.onActivityResult(requestCode, resultCode, data)
@@ -186,25 +229,31 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             val proba = ungzip(content)
 
             val dateJsonDeserializer = object : JsonDeserializer<LocalDateTime> {
-                val  formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                val formatter: DateTimeFormatter =
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-                override fun deserialize(json: JsonElement?, typeOfT: Type?,
-                    context: JsonDeserializationContext?): LocalDateTime {
-                    return LocalDateTime.parse(json?.getAsString(),
-                        formatter)
+                override fun deserialize(
+                    json: JsonElement?, typeOfT: Type?,
+                    context: JsonDeserializationContext?
+                ): LocalDateTime {
+                    return LocalDateTime.parse(
+                        json?.getAsString(),
+                        formatter
+                    )
                 }
             }
-            val gsonObject = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, dateJsonDeserializer).create()
+            val gsonObject =
+                GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, dateJsonDeserializer)
+                    .create()
 
-            var map = object :  TypeToken<ArrayList<Token>>() {}.type
+            var map = object : TypeToken<ArrayList<Token>>() {}.type
             val result: ArrayList<Token> = gsonObject.fromJson(proba, map)
 
             //TODO:check whether tokens are sent, but not sth else
             //TODO:check whether the tokens are not empty list
 //            val obtainedTokens =  result //?: return  //Token.deserialize(content.toByteArray()) //
 
-            val obtainedTokens  = result
-            for(t in obtainedTokens) {
+            for (t in result) {
                 val tokenPublicKey = t.recipients.last().publicKey
                 val pubKey = getIpv8().myPeer.publicKey.keyToBin()
                 if (tokenPublicKey.contentEquals(pubKey)) {
@@ -216,6 +265,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
                         Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
                     } else {
                         this.balanceText?.text = wallet!!.balance.toString()
+                        updateBalance(this.requireView())
                         Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
                     }
                 } else {
@@ -265,8 +315,6 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             val qrCodeImage = view.findViewById<ImageView>(R.id.QR)
             qrCodeImage.setImageBitmap(bitmap)
         }
-//        amountText.text.clear()
-//        amountText.clearFocus()
         button_send.visibility = View.INVISIBLE
     }
 

@@ -60,15 +60,27 @@
         app:layout_constraintHorizontal_bias="0.919"
         app:layout_constraintVertical_bias="0.976" />
 
+
     <ImageView
         android:id="@+id/My_QR"
         android:layout_width="320dp"
-        android:layout_height="313dp"
+        android:layout_height="320dp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        android:layout_marginTop="172dp" />
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <TextView
+        android:text=""
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/myKey"
+        android:textSize="18dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/My_QR"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
