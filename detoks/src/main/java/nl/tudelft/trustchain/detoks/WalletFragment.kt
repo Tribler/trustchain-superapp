@@ -160,10 +160,10 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
         recyclerView.adapter = adapter
     }
 
-    // Returns true if coin is older than 3 minutes
+    // Returns true if coin is older than 10 minutes
     @RequiresApi(Build.VERSION_CODES.O)
     private fun checkForExpiry(t : Token): Boolean{
-        return t.timestamp.isBefore(LocalDateTime.now().minusMinutes(3))
+        return t.timestamp.isBefore(LocalDateTime.now().minusMinutes(10))
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

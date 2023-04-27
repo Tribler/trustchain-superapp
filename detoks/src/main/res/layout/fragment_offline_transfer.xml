@@ -176,6 +176,27 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.636" />
 
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:id="@+id/spinner"-->
+<!--            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"-->
+<!--            android:layout_width="230dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_constraintBottom_toTopOf="@+id/amount"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            android:hint="Choose Recipient"-->
+<!--            android:layout_marginBottom="28dp"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/button_send"-->
+<!--            app:layout_constraintHorizontal_bias="0.498"-->
+<!--            app:layout_constraintVertical_bias="0.861">-->
+
+<!--            <AutoCompleteTextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:inputType="none" />-->
+
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
         <Spinner
             android:id="@+id/spinner"
             android:autofillHints="Choose Recipient"

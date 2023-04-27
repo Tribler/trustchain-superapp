@@ -156,7 +156,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
                                 transferAmountDetails.textAlignment = View.TEXT_ALIGNMENT_CENTER
                                 showQR(view, chosenTokens, friendPublicKey)
                                 Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
-                                this.balanceText?.text = wallet!!.balance.toString()
+                                updateBalance(view)
+//                                this.balanceText?.text = wallet!!.balance.toString()
                             }
                         } else {
                             Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
@@ -202,19 +203,19 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         var balance = "Total Balance: " + wallet!!.balance.toString()
         this.totalBalanceText?.text = balance
 
-        balance = "5 EUR: " + wallet!!.balance.toString()
+        balance = "5 EUR: " + wallet!!.getTokensPerValue(5.0).toString()
         this.balanceText?.text = balance
 
-        balance = "2 EUR: " + wallet!!.balance.toString()
+        balance = "2 EUR: " + wallet!!.getTokensPerValue(2.0).toString()
         this.balanceText2?.text = balance
 
-        balance = "1 EUR: " + wallet!!.balance.toString()
+        balance = "1 EUR: " + wallet!!.getTokensPerValue(1.0).toString()
         this.balanceText1?.text = balance
 
-        balance = "0.5 EUR: " + wallet!!.balance.toString()
+        balance = "0.5 EUR: " + wallet!!.getTokensPerValue(0.5).toString()
         this.balanceText05?.text = balance
 
-        balance = "0.05 EUR: " + wallet!!.balance.toString()
+        balance = "0.05 EUR: " + wallet!!.getTokensPerValue(0.05).toString()
         this.balanceText005?.text = balance
     }
 
@@ -264,7 +265,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
                     if (successful == -1L) {
                         Toast.makeText(this.context, "Unsuccessful!", Toast.LENGTH_LONG).show()
                     } else {
-                        this.balanceText?.text = wallet!!.balance.toString()
+//                        this.balanceText?.text = wallet!!.balance.toString()
                         updateBalance(this.requireView())
                         Toast.makeText(this.context, "Added tokens!", Toast.LENGTH_LONG).show()
                     }
