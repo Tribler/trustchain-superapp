@@ -134,7 +134,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             try {
                 //if(amount.toString().toInt() >= 0) {
                         if (wallet!!.balance > 0) {
-                            val chosenTokens = wallet!!.getPayment(amount.toString().toInt())
+                            val chosenTokens = wallet!!.getPayment(amount.toString().toDouble())
+//                                , 0.0, ArrayList<Token>())
                             if(chosenTokens == null){
                                 Toast.makeText(this.context, "Not Successful (not enough money or could get amount)", Toast.LENGTH_LONG).show()
                             } else {

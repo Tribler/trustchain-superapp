@@ -18,11 +18,12 @@ class TokenAdminItemRenderer(
 ) : ItemLayoutRenderer<TokenItem, View>(
     TokenItem::class.java
 ){
+    val values = listOf("0.05", "0.5", "1", "2", "5")
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun bindView(item: TokenItem, view: View) = with(view) {
         println("tokenview")
-        valueToken.text = item.token.value.toString()
+        valueToken.text = values.get(item.token.value.toInt())
         latestTimestamp.text = item.token.timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         currentOwner.text = item.token.firstRecipient.toString()
 //        if (displayAs == "user") {

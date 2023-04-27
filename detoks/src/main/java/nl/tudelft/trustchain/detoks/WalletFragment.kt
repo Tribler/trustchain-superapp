@@ -4,26 +4,25 @@ import Wallet
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.Button
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.textfield.TextInputLayout
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.wallet_fragment.*
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.time.LocalDateTime
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -74,10 +73,10 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
         val recyclerView: RecyclerView = view.findViewById(R.id.listView)
 
         //Inflate spinner
-//        val spinnerAmounts: EditText = view.findViewById(R.id.menu)
+        val spinnerAmounts: EditText? = (view.findViewById<TextInputLayout?>(R.id.menu)).editText
         val items = listOf("Choose token value","0.05 EUR", "0.5 EUR", "1 EUR", "2 EUR", "5 EUR")
         val adapter = ArrayAdapter(requireContext(), R.layout.amount_dropdown, items)
-        (menu.editText as? AutoCompleteTextView)?.setAdapter(adapter)
+        (spinnerAmounts as? AutoCompleteTextView)?.setAdapter(adapter)
 
         // Set Balance
         val balanceText = view.findViewById<TextView>(R.id.balance)
@@ -87,15 +86,23 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
         updateTokenList(tokenList, recyclerView, view)
 
         createCoinButton.setOnClickListener {
-            // Create a new coin and add it to the wallet!
-            creatNewCoin(wallet)
-            balanceText.text = wallet.balance.toString()
+            val amount : String = (spinnerAmounts as AutoCompleteTextView).text.toString()
 
-            // Update Coins after creating a new one
-            val currentTokens = getCoins(wallet.getTokens(), false)
+            if (!amount.equals("Choose token value") && !amount.equals("")) {
+                val indexSelection = items.indexOf(amount) - 1
+                // Create a new coin and add it to the wallet!
+                creatNewCoin(wallet, indexSelection.toByte())
+                balanceText.text = wallet.balance.toString()
+                spinnerAmounts.clearListSelection()
 
-            tokenList = currentTokens.map { token: Token -> TokenItem(token) }
-            updateTokenList(tokenList, recyclerView, view)
+                // Update Coins after creating a new one
+                val currentTokens = getCoins(wallet.getTokens(), false)
+
+                tokenList = currentTokens.map { token: Token -> TokenItem(token) }
+                updateTokenList(tokenList, recyclerView, view)
+            } else {
+                Toast.makeText(this.context, "Specify the token value!", Toast.LENGTH_LONG).show()
+            }
         }
 
         //Admin button
@@ -107,7 +114,6 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
             }
             navController.navigate(R.id.tokenListAdmin, bundle)
         }
-
 
         val expiredTokens = view.findViewById<Button>(R.id.expiredCoins)
         val buttonTokenList = view.findViewById<Button>(R.id.button_show)
@@ -126,12 +132,6 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
             tokenList = currentTokens.map { token: Token -> TokenItem(token) }
             updateTokenList(tokenList, recyclerView, view)
 
-//            val navController = view.findNavController()
-//            val bundle = Bundle().apply {
-//                putString("access", "user")
-//            }
-//            val items = wallet.getTokens().map { token: Token -> TokenItem(token) }
-//            navController.navigate(R.id.tokenListAdmin, bundle)
         }
 
         expiredTokens.setOnClickListener {
@@ -147,12 +147,6 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
             tokenList = expiredTokensList.map { token: Token -> TokenItem(token) }
             updateTokenList(tokenList, recyclerView, view)
 
-//            val navController = view.findNavController()
-//            val bundle = Bundle().apply {
-//                putString("access", "user")
-//            }
-//            val items = wallet.getTokens().map { token: Token -> TokenItem(token) }
-//            navController.navigate(R.id.tokenListAdmin, bundle)
         }
 
     }
@@ -188,9 +182,9 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
      * Create a new token and add it to the wallet!
      */
     @RequiresApi(Build.VERSION_CODES.O)
-    fun creatNewCoin(wallet: Wallet) {
+    fun creatNewCoin(wallet: Wallet, value: Byte) {
         val myPrivateKey = getIpv8().myPeer.key as PrivateKey
-        val token = Token.create(1, myPublicKey.keyToBin())
+        val token = Token.create(value, myPublicKey.keyToBin())
         val proof = myPrivateKey.sign(token.id + token.value + token.genesisHash + myPublicKey.keyToBin())
         token.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
         wallet.addToken(token)
