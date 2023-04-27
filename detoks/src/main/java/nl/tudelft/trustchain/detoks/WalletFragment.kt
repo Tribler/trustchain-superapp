@@ -74,7 +74,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
 
         //Inflate spinner
         val spinnerAmounts: EditText? = (view.findViewById<TextInputLayout?>(R.id.menu)).editText
-        val items = listOf("Choose token value","0.05 EUR", "0.5 EUR", "1 EUR", "2 EUR", "5 EUR")
+        val items = listOf("0.05 EUR", "0.5 EUR", "1 EUR", "2 EUR", "5 EUR")
         val adapter = ArrayAdapter(requireContext(), R.layout.amount_dropdown, items)
         (spinnerAmounts as? AutoCompleteTextView)?.setAdapter(adapter)
 
