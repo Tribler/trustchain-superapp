@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_offline_transfer.*
@@ -56,7 +57,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
     var balanceText005: TextView? = null
     var arrayAdapter: ArrayAdapter<String>? = null
     var wallet : Wallet? = null
-    var spinnerFriends: Spinner? = null
+    var spinnerFriends: EditText? = null
+    var spinnerOuter: TextInputLayout? = null
 
     private val qrCodeUtils by lazy {
         QRCodeUtils(requireContext())
@@ -85,14 +87,16 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             friendUsernames.add(f.username)
         }
 
-        spinnerFriends = view.findViewById(R.id.spinner)
+        spinnerOuter = view.findViewById(R.id.spinner)
+        spinnerFriends = (view.findViewById<TextInputLayout?>(R.id.spinner)).editText
         // create an array adapter and pass the required parameter
         // in our case pass the context, drop down layout, and array.
-        arrayAdapter = ArrayAdapter(view.context, R.layout.dropdown_friends, friendUsernames)
+        arrayAdapter = ArrayAdapter(view.context, R.layout.amount_dropdown, friendUsernames)
+        (spinnerFriends as? AutoCompleteTextView)?.setAdapter(arrayAdapter)
         // set adapter to the spinner
-        spinnerFriends?.adapter = arrayAdapter
-        arrayAdapter?.notifyDataSetChanged()
-        spinnerFriends?.refreshDrawableState()
+//        spinnerFriends?.adapter = arrayAdapter
+//        arrayAdapter?.notifyDataSetChanged()
+//        spinnerFriends?.refreshDrawableState()
 
         // Inflate the layout for this fragment
         return view
@@ -132,13 +136,13 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
         val dbHelper = DbHelper(view.context)
         buttonRequest.setOnClickListener {
             //friend selected
-            val friendUsername = spinnerFriends?.selectedItem.toString()
+            val friendUsername = (spinnerFriends as AutoCompleteTextView).text.toString()
             val amount = amountText.text
 
-            spinnerFriends?.visibility = View.INVISIBLE
+            spinnerOuter?.visibility = View.INVISIBLE
             amountText?.visibility = View.INVISIBLE
             buttonRequest.visibility = View.INVISIBLE
-//            amountText.text.clear()
+
 //            amountText.clearFocus()
             //get the friends public key from the db
             val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername)
