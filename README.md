@@ -54,9 +54,11 @@ After that, the recipient of the token and positive amount needs to be specified
 If the balance is enough and the specified amount could be created exactly then the QR code is displayed and the receiver can scan it by clicking on the "Scan" button.
 
   **1. Send Money**
+  
   <img src="https://user-images.githubusercontent.com/51911288/234988501-b7d9c9e7-196b-44a3-af13-0b1f256bfded.gif" width="250">
 
   **2. Receive Money**
+  
   <img src="https://user-images.githubusercontent.com/51911288/234988273-5d7c7dd7-cc49-4ff0-9dc9-05f2d4d6be33.gif" width="250">
 
 
