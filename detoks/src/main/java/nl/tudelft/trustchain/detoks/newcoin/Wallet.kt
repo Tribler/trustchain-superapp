@@ -7,6 +7,7 @@ import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.PublicKey
+import kotlin.math.roundToInt
 
 class Wallet(
     val publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
@@ -58,7 +59,7 @@ class Wallet(
         for(t in tokens!!){
             sum += values.get(t.value.toInt())
         }
-        return sum
+        return (sum * 100.0).roundToInt() / 100.0
     }
 
     fun getTokensPerValue(tokenValue: Double) : Int {
@@ -106,7 +107,7 @@ class Wallet(
     // This means we need to return either two 1 euro tokens or 4x0.50 cents tokens
 //    TODO: This method will not manage to get the right tokens always
     @Synchronized
-    fun getPayment(value: Double): ArrayList<Token>? {
+    fun getPaymentSecond(value: Double): ArrayList<Token>? {
         val tokensToPay = arrayListOf<Token>()
         var tempValue = 0.0
 
@@ -134,23 +135,34 @@ class Wallet(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getPaymentSecond(value: Double, currentValue: Double,
+    fun getPayment(value: Double, currentValue: Double,
                    currentTokens: ArrayList<Token>): ArrayList<Token>?{
-        if(value == currentValue)
+        if(value == 0.0)
             return currentTokens
-//        val availableTokens = tokens!!.map{ it.copy()}
-        for(t in tokens!!){
+        if(value < 0.0)
+            return null
+        val availableTokens = copyArray()
+        for(t in availableTokens){
             val valueToken = values.get(t.value.toInt())
 //            var newCurrentTokens = currentTokens.map { it.copy()}
             currentTokens.add(t)
             removeToken(t)
-            getPaymentSecond(value - valueToken, currentValue + valueToken,
+            val resultTokens = getPayment(value - valueToken, currentValue + valueToken,
                 currentTokens)
+            if(resultTokens != null)
+                return resultTokens
+
             addToken(t)
             currentTokens.remove(t)
         }
         return null //if it could not find tokens that sum up to the required value
     }
 
-
+   fun copyArray(): ArrayList<Token> {
+       val copiedTokens = ArrayList<Token>()
+       for(t in tokens!!){
+           copiedTokens.add(t)
+       }
+       return copiedTokens
+   }
 }
