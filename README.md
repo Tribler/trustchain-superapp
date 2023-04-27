@@ -97,7 +97,7 @@ Since the public key is unique, this token has a unique receiver.
 In order to be able to send tokens, first the receiver contact needs to be saved as a friend. This could be performed by pressing the button "Add Friend" and then "Show My Public Key" and the QR code that encodes the public key is shown. The sender of the money can then scan it and save it as a contact for later use.
 First, the public key is serialized to a JSON object and then it is encoded to bitmap and the QR code is created and shown on the screen of the user.
 
-<!-- <img src="https://user-images.githubusercontent.com/51911288/234989059-bcbc8d96-9500-4d31-8120-56175909178f.gif" width="250"> -->
+<img src="https://user-images.githubusercontent.com/51911288/234995696-dfe0f268-b0be-4f5a-be69-f61e5d6ea270.jpg" width="250">
 
 
 #### Token QR Code:
@@ -105,10 +105,12 @@ This QR code is shown once a positive amount less or equal to the balance of the
 The QR code contains all tokens whose value sums exactly to the specified amount by the user. In case the specified amount can not be formed by the existent tokens then the following message is shown to the user - "Not Successful (not enough money or could get amount)". In case however, the amount can be made by the existing tokens, then those tokens are first serialized to JSON objects, then compressed and the compression is encoded as a bitmap and displayed to the user.
 After this, a message -"Successful " with the new balance is shown.
 
-<!-- <img src="https://user-images.githubusercontent.com/51911288/234989059-bcbc8d96-9500-4d31-8120-56175909178f.gif" width="250"> -->
+<img src="https://user-images.githubusercontent.com/51911288/234995712-3321eaf0-a533-4309-863b-aedf662573f6.jpg" width="250">
 
 
 ### Limitations
+1. Even though we compress and uncompress the QR code, the QR code gets very cluttered while encoding large number of tokens and makes it difficult for the recipient receiving money to scan the QR Code.
+2. Cannot do more transactions due to the limited size of QR Code.
 
 ### Future work
 To detect the double spending, two ideas were discussed which can be implemented in the future:
