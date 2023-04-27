@@ -7,12 +7,13 @@ import nl.tudelft.trustchain.detoks.newcoin.OfflineFriend
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.PublicKey
+import kotlin.math.roundToInt
 
 class Wallet(
     val publicKey: nl.tudelft.ipv8.keyvault.PublicKey,
     val privateKey: nl.tudelft.ipv8.keyvault.PrivateKey,
 ) {
-
+    val values: ArrayList<Double> = arrayListOf<Double>(0.05, 0.5, 1.0, 2.0, 5.0)
     companion object{
         private var wallet :Wallet? = null
         private var dbHelper: DbHelper? = null
@@ -53,10 +54,24 @@ class Wallet(
 //    }
 
 
-    val balance: Int get() {
-        return tokens!!.size
+    val balance: Double get() {
+        var sum : Double = 0.0
+        for(t in tokens!!){
+            sum += values.get(t.value.toInt())
+        }
+        return (sum * 100.0).roundToInt() / 100.0
     }
 
+    fun getTokensPerValue(tokenValue: Double) : Int {
+        val index = values.indexOf(tokenValue)
+        var counter = 0
+        for(t in tokens!!){
+            if(t.value.toInt() == index){
+                counter += 1
+            }
+        }
+        return counter
+    }
 
     public fun addFriend(friend: OfflineFriend): Long{
         val result = dbHelper?.addFriend(friend.username, friend.publicKey)
@@ -92,13 +107,14 @@ class Wallet(
     // This means we need to return either two 1 euro tokens or 4x0.50 cents tokens
 //    TODO: This method will not manage to get the right tokens always
     @Synchronized
-    fun getPayment(value: Int): ArrayList<Token>? {
+    fun getPaymentSecond(value: Double): ArrayList<Token>? {
         val tokensToPay = arrayListOf<Token>()
-        var tempValue = 0
+        var tempValue = 0.0
 
         for(t in tokens!!) {
-            if(tempValue + t.value <= value){
-                tempValue = tempValue + t.value
+            val valueToken = values.get(t.value.toInt())
+            if(tempValue + valueToken <= value){
+                tempValue = tempValue + valueToken
 
                 tokensToPay.add(t)
 
@@ -118,29 +134,35 @@ class Wallet(
         return null
     }
 
-//    fun sendFundsTo(recipient: PublicKey, amountToSend: Int) : Transaction {
-//
-//        if (amountToSend > balance) {
-//            throw IllegalArgumentException("Insufficient funds")
-//        }
-//
-//        val tx = Transaction.create(sender = publicKey, recipient = publicKey, amount = amountToSend)
-//        tx.outputs.add(TransactionOutput(recipient = recipient, amount = amountToSend, transactionHash = tx.hash))
-//
-//        var collectedAmount = 0
-//        for (myTx in getMyTransactions()) {
-//            collectedAmount += myTx.amount
-//            tx.inputs.add(myTx)
-//
-//            if (collectedAmount > amountToSend) {
-//                val change = collectedAmount - amountToSend
-//                tx.outputs.add(TransactionOutput(recipient = publicKey, amount = change, transactionHash = tx.hash))
-//            }
-//
-//            if (collectedAmount >= amountToSend) {
-//                break
-//            }
-//        }
-//        return tx.sign(privateKey)
-//    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getPayment(value: Double, currentValue: Double,
+                   currentTokens: ArrayList<Token>): ArrayList<Token>?{
+        if(value == 0.0)
+            return currentTokens
+        if(value < 0.0)
+            return null
+        val availableTokens = copyArray()
+        for(t in availableTokens){
+            val valueToken = values.get(t.value.toInt())
+//            var newCurrentTokens = currentTokens.map { it.copy()}
+            currentTokens.add(t)
+            removeToken(t)
+            val resultTokens = getPayment(value - valueToken, currentValue + valueToken,
+                currentTokens)
+            if(resultTokens != null)
+                return resultTokens
+
+            addToken(t)
+            currentTokens.remove(t)
+        }
+        return null //if it could not find tokens that sum up to the required value
+    }
+
+   fun copyArray(): ArrayList<Token> {
+       val copiedTokens = ArrayList<Token>()
+       for(t in tokens!!){
+           copiedTokens.add(t)
+       }
+       return copiedTokens
+   }
 }

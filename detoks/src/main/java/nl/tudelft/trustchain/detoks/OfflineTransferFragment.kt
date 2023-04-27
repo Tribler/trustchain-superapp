@@ -149,18 +149,19 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 
             try {
                 //if(amount.toString().toInt() >= 0) {
-                if (wallet!!.balance > 0) {
-                    val chosenTokens = wallet!!.getPayment(amount.toString().toInt())
-                    if(chosenTokens == null){
-                        Toast.makeText(this.context, "Not Successful (not enough money or could get amount)", Toast.LENGTH_LONG).show()
-                    } else {
-                        showQR(view, chosenTokens, friendPublicKey)
-                        Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
-                        updateBalance(view)
-                    }
-                } else {
-                    Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
-                }
+                        if (wallet!!.balance > 0) {
+                            val chosenTokens = wallet!!.getPayment(amount.toString().toDouble(),
+                             0.0, ArrayList<Token>())
+                            if(chosenTokens == null){
+                                Toast.makeText(this.context, "Not Successful (not enough money or could get amount)", Toast.LENGTH_LONG).show()
+                            } else {
+                                showQR(view, chosenTokens, friendPublicKey)
+                                Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
+                                this.balanceText?.text = wallet!!.balance.toString()
+                            }
+                        } else {
+                            Toast.makeText(this.context, "No money - balance is 0", Toast.LENGTH_LONG).show()
+                        }
                 //TODO: disappear text field, button, spinner
                 // write some message you are sending blaabla
                 // check amount more than 0

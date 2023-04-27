@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -46,12 +47,15 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
         liveData { emit(listOf<Item>()) }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val access = requireArguments().getString("access")
         print("viewInit")
         adapter.registerRenderer(TokenAdminItemRenderer(access!!, this))
+
+
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
@@ -103,8 +107,29 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
 //            binding.txtBalance.text =
 //                TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         })
+
+        val createAdminTokenButton = view.findViewById<Button>(R.id.buttonTokenCreate)
+        createAdminTokenButton?.setOnClickListener {
+            // Create a new coin and add it to both wallets!
+            createNewCoin(adminWallet!!, userWallet!!)
+//            val items = adminWallet!!.getTokens().map { token: Token -> TokenItem(token) }
+//            adapter.updateItems(items)
+        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createNewCoin(adminWallet: AdminWallet, userWallet: Wallet) {
+        val myPrivateKey = getIpv8().myPeer.key as PrivateKey
+        val token = Token.create(1, myPublicKey.keyToBin())
+        val proof = myPrivateKey.sign(token.id + token.value + token.genesisHash + myPublicKey.keyToBin())
+        token.recipients.add(RecipientPair(myPublicKey.keyToBin(), proof))
+
+        adminWallet.addToken(token)
+        userWallet.addToken(token)
+
+        println("Wallet A balance: ${adminWallet.balance}")
+        println("Wallet B balance: ${userWallet.balance}")
+    }
     override fun onHistoryClick(token: Token, access: String) {
         TODO("Not yet implemented")
     }

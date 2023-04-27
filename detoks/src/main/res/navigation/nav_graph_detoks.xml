@@ -25,9 +25,6 @@
         tools:layout="@layout/wallet_fragment"
         >
         <action
-            android:id="@+id/action_walletFragment_to_adminFragment"
-            app:destination="@id/adminFragment" />
-        <action
             android:id="@+id/action_walletFragment_to_tokenListAdmin"
             app:destination="@id/tokenListAdmin" />
     </fragment>
