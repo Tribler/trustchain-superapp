@@ -47,7 +47,7 @@ The application can be used for the following use cases:
 - Add new contact
 
 - Create Contact
-![createToken](https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif)
+- <img src="[https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android-trustchain.png](https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif)" width="180">
 
 ### Double spending
 To mitigate double spending, contacts are to be added before users can send or receive EuroTokens.
