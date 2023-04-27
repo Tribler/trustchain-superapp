@@ -40,14 +40,21 @@ APK - https://drive.google.com/file/d/1MH3qiH1NXBtPdBbfjCnsNqvs3r8FT5Wg/view?usp
 ### Use case
 The application can be used for the following use cases:
 - Create and store EuroToken
-  (add screenshot)
+  <img src="https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif" width="250">
+  
 - Encode and create QR for EuroToken
   (screenshot)
+  
 - Send and receive EuroToken between contacts
-- Add new contact
 
-- Create Contact
-- <img src="https://user-images.githubusercontent.com/51911288/234987435-1e243fc7-2fb0-48b9-b92b-15b700237178.gif" width="180">
+ - Send Money
+ <img src="https://user-images.githubusercontent.com/51911288/234988501-b7d9c9e7-196b-44a3-af13-0b1f256bfded.gif" width="250">
+ - Receive Money
+ <img src="https://user-images.githubusercontent.com/51911288/234988273-5d7c7dd7-cc49-4ff0-9dc9-05f2d4d6be33.gif" width="250">
+ 
+- Add new contact
+<img src="https://user-images.githubusercontent.com/51911288/234988799-410dbeba-405b-4a30-97a1-aee00c5b5a39.gif" width="250">
+
 
 ### Double spending
 To mitigate double spending, contacts are to be added before users can send or receive EuroTokens.
@@ -55,6 +62,10 @@ This makes it easier for admins to track double-spend EuroToken and give users w
 Another important concept is used to make sure that the detection of double spending is relatively on time.
 After receiving a new token, the token is valid for a limited amount of time (a month).
 After that month a token must be verified before being able to re-spend it. The token will be restamped with a new timestamp which makes it a valid euro token.
+
+### Preventing Double Spending
+<img src="https://user-images.githubusercontent.com/51911288/234989059-bcbc8d96-9500-4d31-8120-56175909178f.gif" width="250">
+
 
 ### Future work
 To detect the double spending, two ideas were discussed which can be implemented in the future:
