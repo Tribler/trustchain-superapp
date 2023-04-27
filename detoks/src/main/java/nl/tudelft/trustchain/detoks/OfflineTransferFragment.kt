@@ -142,10 +142,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
 //            amountText.clearFocus()
             //get the friends public key from the db
             val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername)
-
-            var details = "Sending $amount Euros to $friendUsername. Scan the QR Code to Receive Money!!"
-            transferAmountDetails.text = details
-            transferAmountDetails.textAlignment = View.TEXT_ALIGNMENT_CENTER
+            var details = "Scan the QR Code to Receive Money!!\nSending $amount Euros to $friendUsername."
 
             try {
                 //if(amount.toString().toInt() >= 0) {
@@ -155,6 +152,8 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
                             if(chosenTokens == null){
                                 Toast.makeText(this.context, "Not Successful (not enough money or could get amount)", Toast.LENGTH_LONG).show()
                             } else {
+                                transferAmountDetails.text = details
+                                transferAmountDetails.textAlignment = View.TEXT_ALIGNMENT_CENTER
                                 showQR(view, chosenTokens, friendPublicKey)
                                 Toast.makeText(this.context, "Successful " + wallet!!.balance.toString(), Toast.LENGTH_LONG).show()
                                 this.balanceText?.text = wallet!!.balance.toString()

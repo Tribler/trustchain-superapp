@@ -89,7 +89,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
             val amount : String = (spinnerAmounts as AutoCompleteTextView).text.toString()
 
             if (!amount.equals("Choose token value") && !amount.equals("")) {
-                val indexSelection = items.indexOf(amount) - 1
+                val indexSelection = items.indexOf(amount)
                 // Create a new coin and add it to the wallet!
                 creatNewCoin(wallet, indexSelection.toByte())
                 balanceText.text = wallet.balance.toString()
