@@ -138,7 +138,7 @@ class OfflineTransferFragment : BaseFragment(R.layout.fragment_offline_transfer)
             //friend selected
             val friendUsername = (spinnerFriends as AutoCompleteTextView).text.toString()
             val amount = amountText.text
-            
+
 //            amountText.clearFocus()
             //get the friends public key from the db
             val friendPublicKey = dbHelper.getFriendsPublicKey(friendUsername)

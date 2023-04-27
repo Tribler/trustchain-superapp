@@ -82,7 +82,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
         val balanceText = view.findViewById<TextView>(R.id.balance)
         balanceText.text = wallet.balance.toString()
 
-        var tokenList = getCoins(wallet.getTokens(), false).map { token: Token -> TokenItem(token, wallet.getFriend(token.lastRecipient)) }
+        var tokenList = getCoins(wallet.getTokens(), false).map { token: Token -> getPreviousOwner(token, wallet) }
         updateTokenList(tokenList, recyclerView, view)
 
         createCoinButton.setOnClickListener {
@@ -98,7 +98,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
                 // Update Coins after creating a new one
                 val currentTokens = getCoins(wallet.getTokens(), false)
 
-                tokenList = currentTokens.map { token: Token -> TokenItem(token, wallet.getFriend(token.lastRecipient)) }
+                tokenList = currentTokens.map { token: Token -> getPreviousOwner(token, wallet) }
                 updateTokenList(tokenList, recyclerView, view)
             } else {
                 Toast.makeText(this.context, "Specify the token value!", Toast.LENGTH_LONG).show()
@@ -129,7 +129,7 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
             // Update Recycler View with current tokens
             val currentTokens = getCoins(wallet.getTokens(), false)
 
-            tokenList = currentTokens.map { token: Token -> TokenItem(token, wallet.getFriend(token.lastRecipient)) }
+            tokenList = currentTokens.map { token: Token -> getPreviousOwner(token, wallet) }
             updateTokenList(tokenList, recyclerView, view)
 
         }
@@ -144,11 +144,18 @@ class WalletFragment : BaseFragment(R.layout.wallet_fragment), TokenButtonListen
 
             val expiredTokensList = getCoins(wallet.getTokens(), true)
 
-            tokenList = expiredTokensList.map { token: Token -> TokenItem(token, wallet.getFriend(token.lastRecipient)) }
+            tokenList = expiredTokensList.map { token: Token -> getPreviousOwner(token, wallet) }
             updateTokenList(tokenList, recyclerView, view)
 
         }
 
+    }
+    private fun getPreviousOwner(token : Token, wallet: Wallet): TokenItem{
+        if(token.recipients.size > 1){
+            return TokenItem(token, wallet.getFriend(token.recipients.get(token.recipients.size - 2).publicKey))
+        } else {
+            return TokenItem(token, wallet.getFriend(token.lastRecipient))
+        }
     }
     private fun updateTokenList(
         tokenList: List<TokenItem>,

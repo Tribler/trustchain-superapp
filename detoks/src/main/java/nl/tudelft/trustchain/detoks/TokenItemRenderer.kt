@@ -28,7 +28,7 @@ class TokenAdminItemRenderer(
         valueToken.text = values.get(item.token.value.toInt())
         latestTimestamp.text = item.token.timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         if(displayAs == "admin")
-            currentOwner.text = "   Admin"
+            currentOwner.text = "      Admin"
         else
             if(item.previousOwner == null){
                 currentOwner.text = "   Unknown"
@@ -47,6 +47,7 @@ class TokenAdminItemRenderer(
 //            }
 //        }
     }
+
 
     override fun getLayoutResourceId(): Int {
         return R.layout.item_token

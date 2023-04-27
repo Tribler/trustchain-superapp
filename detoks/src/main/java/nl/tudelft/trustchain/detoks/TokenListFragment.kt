@@ -56,12 +56,12 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
                     if (access == "admin") {
                         print("adminbranch")
                         print(adminWallet!!.getTokens())
-                        val items = adminWallet!!.getTokens().map { token: Token -> TokenItem(token, userWallet!!.getFriend(token.lastRecipient))}
+                        val items = adminWallet!!.getTokens().map { token: Token -> getPreviousOwner(token, userWallet!!)}
                         adapter.updateItems(items)
                     } else if (access == "user") {
                         print("Userbranch")
                         print(userWallet!!.getTokens())
-                        val items = userWallet!!.getTokens().map { token: Token -> TokenItem(token, userWallet!!.getFriend(token.lastRecipient)) }
+                        val items = userWallet!!.getTokens().map { token: Token -> getPreviousOwner(token, userWallet!!) }
                         print(items)
                         adapter.updateItems(items)
                     }
@@ -72,6 +72,13 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
             }
         }
 
+    }
+    private fun getPreviousOwner(token : Token, wallet: Wallet): TokenItem{
+        if(token.recipients.size > 1){
+            return TokenItem(token, wallet.getFriend(token.recipients.get(token.recipients.size - 2).publicKey))
+        } else {
+            return TokenItem(token, wallet.getFriend(token.lastRecipient))
+        }
     }
 
     override fun onCreateView(
@@ -112,7 +119,7 @@ class TokenListFragment : BaseFragment(R.layout.fragment_token_list), TokenButto
             val amount : String = (spinnerAmounts as AutoCompleteTextView).text.toString()
 
             if (!amount.equals("Choose token value") && !amount.equals("")) {
-                val indexSelection = items.indexOf(amount) - 1
+                val indexSelection = items.indexOf(amount)
                 // Create a new coin and add it to both wallets!
                 createNewCoin(adminWallet!!, userWallet!!, indexSelection.toByte())
                 spinnerAmounts.clearListSelection()
