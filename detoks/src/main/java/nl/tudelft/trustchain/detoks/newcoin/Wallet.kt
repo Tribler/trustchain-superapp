@@ -50,7 +50,7 @@ class Wallet(
         if(publicKey.contentEquals(this.publicKey.keyToBin()))
             return "  You"
         for (friend in listOfFriends!!){
-            if(friend.publicKey.equals(publicKey))
+            if(friend.publicKey.contentEquals(publicKey))
                 return friend.username
         }
         return null //if no friend has the given public key
