@@ -27,13 +27,13 @@ An online indicator and the last message is shown for each contact. Users can ex
 
 ### DeToks
 **Decentralised TikTok** skeleton app for the CS4160 Blockchain Engineering (2022/23) course.
-# Detoks - Offline Token 2
+### Detoks - Offline Token 2
 An offline payment application that makes sending and receiving tokens easily.
 A user can choose the amount to be received and create a request which can be paid by a preadded contact.
 The payment can then be done by scanning the generated QR code and a transaction is then made.
 A Eurotoken is minted and verified by a central authority.
 
-
+Code Link - https://github.com/Ne184/trustchain-superapp/
 APK - https://drive.google.com/file/d/1r2p7AvBQ-pumPTApD-cKcR0m7v0g8q1D/view?usp=share_link
 
 ### Use case
