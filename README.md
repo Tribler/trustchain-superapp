@@ -34,6 +34,7 @@ The payment can then be done by scanning the generated QR code and a transaction
 A Eurotoken is minted and verified by a central authority.
 
 Code Link - https://github.com/Ne184/trustchain-superapp/
+
 APK - https://drive.google.com/file/d/1r2p7AvBQ-pumPTApD-cKcR0m7v0g8q1D/view?usp=share_link
 
 ### Use case
