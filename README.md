@@ -34,7 +34,7 @@ The payment can then be done by scanning the generated QR code and a transaction
 A Eurotoken is minted and verified by a central authority.
 
 
-APK - https://drive.google.com/file/d/1zX2H6pXw0-m7BALr1bNTG4UwaQS0FcIo/view?usp=sharing
+APK - https://drive.google.com/file/d/1r2p7AvBQ-pumPTApD-cKcR0m7v0g8q1D/view?usp=share_link
 
 ### Use case
 The application can be used for the following use cases:
@@ -54,11 +54,11 @@ After that, the recipient of the token and positive amount needs to be specified
 If the balance is enough and the specified amount could be created exactly then the QR code is displayed and the receiver can scan it by clicking on the "Scan" button.
 
   **1. Send Money**
-  
+
   <img src="https://user-images.githubusercontent.com/51911288/234988501-b7d9c9e7-196b-44a3-af13-0b1f256bfded.gif" width="250">
 
   **2. Receive Money**
-  
+
   <img src="https://user-images.githubusercontent.com/51911288/234988273-5d7c7dd7-cc49-4ff0-9dc9-05f2d4d6be33.gif" width="250">
 
 
