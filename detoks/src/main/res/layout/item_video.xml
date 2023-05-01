@@ -36,6 +36,46 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
+            <TextView
+                android:id="@+id/textView13"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/torrent_name_t"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/torrentName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/file_name"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/fileNameTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:paddingTop="16dp">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -89,7 +129,7 @@
                     android:id="@+id/textView17"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/dht_peers"
+                    android:text="@string/remaining_mb"
                     android:textColor="#FFFFFF" />
 
                 <TextView
@@ -206,6 +246,16 @@
             android:progressBackgroundTint="#9C8E8E"
             android:progressTint="#FFFFFF"
             android:scaleY="4" />
+
+        <TextView
+            android:id="@+id/doneDownloading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="32dp"
+            android:text="@string/done_downloading_will_play_video_now"
+            android:textColor="#69F66F"
+            android:visibility="invisible" />
 
     </LinearLayout>
 

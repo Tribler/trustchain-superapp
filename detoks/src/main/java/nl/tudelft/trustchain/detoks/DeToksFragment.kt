@@ -85,6 +85,12 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         })
     }
 
+    fun onVideoError() {
+        viewPagerVideos.scrollTo(100, 100)
+    }
+
+
+
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 2
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"

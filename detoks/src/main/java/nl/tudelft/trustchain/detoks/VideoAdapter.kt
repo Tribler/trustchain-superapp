@@ -48,6 +48,12 @@ class VideosAdapter(
     }
 
     private fun createLoadingView(handler: TorrentManager.TorrentHandler, view: View) {
+        val torrentNameTV: TextView = view.findViewById(R.id.torrentName)
+        torrentNameTV.text = handler.torrentName
+
+        val fileNameTV: TextView = view.findViewById(R.id.fileNameTV)
+        fileNameTV.text = handler.fileName
+
         val fileSeedsTV: TextView = view.findViewById(R.id.fileSeedsTV)
         val filePeersTV: TextView = view.findViewById(R.id.filePeersTV)
         val downloadRateTV: TextView = view.findViewById(R.id.downloadRateTV)
@@ -55,11 +61,13 @@ class VideosAdapter(
         val startTimeTV: TextView = view.findViewById(R.id.elapsedTimeTV)
         val progress1MBTV: ProgressBar = view.findViewById(R.id.progress1MBTV)
         val progressTotalTV: ProgressBar = view.findViewById(R.id.progressTotalTV)
-        val dhtPeersTV: TextView = view.findViewById(R.id.dhtPeersTV)
+        val remainingSizeTV: TextView = view.findViewById(R.id.dhtPeersTV)
+        val doneDownloadingTV: TextView = view.findViewById(R.id.doneDownloading)
 
         val currentTime = System.currentTimeMillis()
-        val total = handler.getFileSize()
+        val fileSize = handler.getFileSize()
         val toKb = 1000
+        val firstMB = 10000000.0
 
         val handlerMain = Handler((Looper.getMainLooper()))
         val loadingUpdate: Runnable = object: Runnable {
@@ -68,18 +76,22 @@ class VideosAdapter(
                 val status = handler.handle.status(TorrentHandle.QUERY_ACCURATE_DOWNLOAD_COUNTERS)
                 fileSeedsTV.text = status.numSeeds().toString()
                 filePeersTV.text = status.numPeers().toString()
-                downloadRateTV.text = (status.downloadRate() / toKb).toString()
-                fileSizeTV.text = "%.2f".format(handler.getFileSize() / (toKb*toKb.toDouble()))
+
+                downloadRateTV.text = "%.2f".format(status.downloadRate() / toKb.toDouble())
+                fileSizeTV.text = "%.2f".format(fileSize / firstMB)
                 startTimeTV.text = ((System.currentTimeMillis() - currentTime) / toKb).toString()
 
-                val progressDone = handler.handle.fileProgress()[handler.fileIndex]
-                if (progressDone > (toKb*toKb)) progress1MBTV.progress = 100
-                else progress1MBTV.progress = ((progressDone/(toKb*toKb.toDouble())) * 100).toInt()
+                val downloaded = handler.handle.fileProgress()[handler.fileIndex]
+                if (downloaded > firstMB) progress1MBTV.progress = 100
+                else progress1MBTV.progress = ((downloaded/ firstMB) * 100).toInt()
 
-                progressTotalTV.progress = ((progressDone/total.toDouble()) * 100).toInt()
-                dhtPeersTV.text = (torrentManager.getDHTSize()).toString()
+                progressTotalTV.progress = ((downloaded/fileSize.toDouble()) * 100).toInt()
+                remainingSizeTV.text = ((fileSize - downloaded) / toKb).toString()
 
-                if (handler.isDownloaded()) return
+                if (handler.isDownloaded()) {
+                    doneDownloadingTV.visibility = View.VISIBLE
+                    return
+                }
                 handlerMain.postDelayed(this, 10L)
             }
         }

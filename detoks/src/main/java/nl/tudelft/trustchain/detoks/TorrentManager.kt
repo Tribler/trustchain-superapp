@@ -98,7 +98,6 @@ class TorrentManager private constructor(
             }
             content.asMediaInfo()
         } catch (e: TimeoutCancellationException) {
-            Log.i("DeToks", "Timeout for content ... $index")
             content.asMediaInfo()
         }
     }
