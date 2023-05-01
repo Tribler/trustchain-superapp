@@ -42,7 +42,7 @@ class TorrentGossiper(
         val randomMagnets = handlers.random(max).map { it.makeMagnetUri() }
 
         randomMagnets.forEach { it1 ->
-            val key = MagnetLink.hashFromMagnet(it1)
+            val key = torrentManager.createKey(MagnetLink.hashFromMagnet(it1), "?filename=FIXME")
             val entry = torrentManager.profile.addProfile(key)
             val data = listOf(
                 Pair("Key", key),
@@ -88,7 +88,6 @@ class TorrentGossiper(
                     "HopCount" -> profile.updateEntryHopCount(key, it.second.toInt())
                     else -> Log.d(DeToksCommunity.LOGGING_TAG, "Received data in torrent message that was not recognized")
                 }
-                // FIXME: Log.d(DeToksCommunity.LOGGING_TAG, "Updated ${it.first} using value ${it.second}") // remove later
             }
         }
     }

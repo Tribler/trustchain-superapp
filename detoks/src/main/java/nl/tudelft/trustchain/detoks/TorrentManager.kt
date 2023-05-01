@@ -3,8 +3,6 @@ package nl.tudelft.trustchain.detoks
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.frostwire.jlibtorrent.*
@@ -13,8 +11,6 @@ import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
 import java.io.File
-import java.lang.Math.abs
-import kotlin.reflect.jvm.internal.impl.types.TypeCheckerState.SupertypesPolicy.None
 
 
 /**
@@ -107,6 +103,11 @@ class TorrentManager private constructor(
         return torrentFiles.size
     }
 
+    fun createKey(magnet: String, fileName: String): String {
+        val torrent = torrentFiles.filter { magnet == MagnetLink.hashFromMagnet(it.handle.makeMagnetUri()) }
+        return if(torrent.isEmpty()) "" else "$magnet?file=$fileName"
+    }
+
     /**
      * Update the time and return the difference
      */
@@ -135,8 +136,13 @@ class TorrentManager private constructor(
             //        their screen or switches to another app for a while? Maybe this could be
             //        changed to a place in the video adapter as well, if we can detect maybe when
             //        a video is done playing and starts again, then update the duration if possible
-            val key = MagnetLink.hashFromMagnet(torrentFiles.gett(currentIndex).handle.makeMagnetUri())    // TODO: make torrentFiles into unwatched videos
-            profile.updateEntryDuration(key, torrentFiles.gett(currentIndex).getVideoDuration())
+            val torrent = torrentFiles.gett(currentIndex) // TODO: make torrentFiles into unwatched videos
+            val magnet = torrent.handle.makeMagnetUri()
+            val torrentInfo = getInfoFromMagnet(magnet)?:return
+
+            // FIXME: make this update each video in the torrent
+            val key = createKey(MagnetLink.hashFromMagnet(magnet), torrentInfo.files().fileName(0))
+            profile.updateEntryDuration(key, torrent.getVideoDuration())
             profile.updateEntryWatchTime(key, updateTime(), true)
             currentIndex = newIndex
             return
@@ -149,8 +155,13 @@ class TorrentManager private constructor(
             torrentFiles.gett(currentIndex + cachingAmount).deleteFile()
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
         }
-        val key = MagnetLink.hashFromMagnet(torrentFiles.gett(currentIndex).handle.makeMagnetUri())
-        profile.updateEntryDuration(key, torrentFiles.gett(currentIndex).getVideoDuration())
+        val torrent = torrentFiles.gett(currentIndex)
+        val magnet = torrent.handle.makeMagnetUri()
+        val torrentInfo = getInfoFromMagnet(magnet)?:return
+
+        // FIXME: make this update each video in the torrent
+        val key = createKey(MagnetLink.hashFromMagnet(magnet), torrentInfo.files().fileName(0))
+        profile.updateEntryDuration(key, torrent.getVideoDuration())
         profile.updateEntryWatchTime(key, updateTime(), true)
         currentIndex = newIndex
     }
@@ -199,10 +210,9 @@ class TorrentManager private constructor(
                             )
                             torrentFiles.add(torrent)
                             val magnet = torrent.handle.makeMagnetUri()
-                            profile.addProfile(torrentInfo.infoHash().toString())
                             getInfoFromMagnet(magnet)?.let { it2 ->
                                 profile.updateEntryUploadDate(
-                                    magnet,
+                                    createKey(MagnetLink.hashFromMagnet(magnet), fileName),
                                     it2
                                 )
                             }
@@ -321,7 +331,7 @@ class TorrentManager private constructor(
                 torrentFiles.add(insertIndex, torrent)
                 getInfoFromMagnet(magnet)?.let { it2 ->
                     profile.updateEntryUploadDate(
-                        magnet,
+                        createKey(MagnetLink.hashFromMagnet(magnet), fileName),
                         it2
                     )
                 }

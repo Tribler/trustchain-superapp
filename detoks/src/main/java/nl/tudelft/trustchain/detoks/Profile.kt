@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import android.util.Log
 import com.frostwire.jlibtorrent.TorrentInfo
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 import kotlin.math.min
@@ -22,6 +23,7 @@ class Profile(
     object ProfileConfig { const val MAX_DURATION_FACTOR  = 10 }
 
     fun addProfile(key: String): ProfileEntry {
+        Log.d(DeToksCommunity.LOGGING_TAG, "Added profile $key") // remove later
         if(!profiles.contains(key)) profiles[key] = ProfileEntry(timesSeen = 1)
         return profiles[key]!!
     }
