@@ -7,7 +7,6 @@ services:
     image: detoks_community_sim
     container_name: detoks_community_sim
     environment:
-      NUM_NODES: ${NUM_NODES:-1}
       TIMEOUT: ${TIMEOUT:-20}
       MAX_NUM_PEERS: ${MAX_NUM_PEERS:-3}
       COMMUNITY_ID: ${COMMUNITY_ID:-c86a7db45eb3563ae047639817baec4db2bc7c25}
@@ -17,3 +16,4 @@ services:
       - ./detoks_community.py:/detoks_community.py
       - ./gossiper:/gossiper
       - ./messages.py:/messages.py
+      - ./nodes.json:/nodes.json

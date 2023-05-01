@@ -6,12 +6,13 @@ from messages import TorrentPayload, MESSAGE_TORRENT_ID
 
 
 class TorrentGossiper(Gossiper):
-    def __init__(self, delay, peers, community, signed=True):
+    def __init__(self, delay, peers, community, signed=True, profiles=[]):
         self.delay = delay
         self.peers = peers
         self.community = community
         self.torrent_list = os.listdir("torrents/")
         self.signed = signed
+        self.profiles = profiles
 
     # sends random torrents to a set of peers
     def gossip(self):
