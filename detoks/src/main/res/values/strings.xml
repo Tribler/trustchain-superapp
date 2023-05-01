@@ -8,6 +8,7 @@
     <string name="download">Download</string>
     <string name="detoks_balance">Balance</string>
     <string name="upload">Upload</string>
+    <string name="seeding_rank">Seeding Rank</string>
     <string name="info_hash">Info Hash: %1$s</string>
     <string name="magnet_link">Magnet link: %1$s</string>
     <string name="downloaded_bytes">Downloaded bytes: %1$d</string>

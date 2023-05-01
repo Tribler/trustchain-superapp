@@ -158,6 +158,14 @@
             android:gravity="center_horizontal"
             android:text="@string/detoks_balance" />
 
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:text="@string/seeding_rank" />
+
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

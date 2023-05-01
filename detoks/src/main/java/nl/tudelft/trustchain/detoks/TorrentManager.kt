@@ -255,6 +255,7 @@ class TorrentManager private constructor(
                             val foundPeers = community.findPeerByIps(ip)
                             for (seederPeer in foundPeers) {
                                 if (seederPeer != null) {
+                                    Log.d(DeToksCommunity.LOGGING_TAG, "Found seeder from Detoks Community: ${seederPeer.mid}")
                                     community.sendTokens(1.0f, seederPeer.mid)
                                 }
                             }
@@ -470,6 +471,7 @@ class TorrentManager private constructor(
                         val uploadedBytes = currentTotalUpload - previousTotalUpload
                         val tokens = uploadedBytes / 1048576
                         previousUploadMap[ip] = currentTotalUpload
+                        Log.d(DeToksCommunity.LOGGING_TAG, "Increased token based on money received")
                         community.increaseTokens(tokens.toFloat())
                     }
                 }

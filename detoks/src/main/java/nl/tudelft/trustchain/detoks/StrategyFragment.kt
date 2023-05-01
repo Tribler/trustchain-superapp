@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.fragment_strategy.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
+import org.w3c.dom.Text
 
 class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
 
@@ -149,12 +150,14 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val downloadTextView: TextView
         val uploadTextView: TextView
         val balanceTextView: TextView
+        val seedRankTextView: TextView
 
         init {
             hashTextView = view.findViewById(R.id.name)
             downloadTextView = view.findViewById(R.id.download)
             uploadTextView = view.findViewById(R.id.upload)
             balanceTextView = view.findViewById(R.id.balance)
+            seedRankTextView = view.findViewById(R.id.seedRank)
         }
     }
 
@@ -166,16 +169,6 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         return ViewHolder(view)
     }
 
-    fun updateViewHolder(holder: ViewHolder, position: Int) {
-        val handler = Handler(Looper.getMainLooper())
-        val runnable = object : Runnable {
-            override fun run() {
-                onBindViewHolder(holder, position)
-                handler.postDelayed(this, 2000)
-            }
-        }
-        handler.postDelayed(runnable, 2000)
-    }
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val handler = strategyData[position]
         val convBtoMB = 1000000
@@ -187,16 +180,16 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         holder.hashTextView.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toTorrentFragment, bundle) }
 
         holder.downloadTextView.text = status.state().name
-        Log.d(DeToksCommunity.LOGGING_TAG, holder.downloadTextView.text as String)
-        Log.d(DeToksCommunity.LOGGING_TAG, status.state().name)
-
         holder.uploadTextView.text = (status.allTimeUpload()
             / convBtoMB).toString()
 
         holder.balanceTextView.text = (
             community.getBalance().toString())
+        holder.seedRankTextView.text = ( status.seedRank().toString())
 
-        updateViewHolder(holder, position)
+        Log.d(DeToksCommunity.LOGGING_TAG, "Download stat: ${status.state().name}, Upload statL ${
+            (status.allTimeUpload()
+                / convBtoMB)}, Seed Rank stat: ${status.seedRank()} ")
     }
 
     override fun getItemCount(): Int = strategyData.size
