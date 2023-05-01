@@ -14,7 +14,7 @@
         <action android:id="@+id/action_toTorrentFragment"
             app:destination="@id/torrentFragment"/>
         <action android:id="@+id/action_toDebugFragment"
-            app:destination="@id/debugFragment"/>
+            app:destination="@id/detoksDebugFragment"/>
     </fragment>
 
     <fragment
@@ -32,8 +32,8 @@
     </fragment>
 
     <fragment
-        android:id="@+id/debugFragment"
-        android:name="nl.tudelft.trustchain.detoks.DebugFragment"
+        android:id="@+id/detoksDebugFragment"
+        android:name="nl.tudelft.trustchain.detoks.DetoksDebugFragment"
         android:label="Debug">
     </fragment>
 </navigation>

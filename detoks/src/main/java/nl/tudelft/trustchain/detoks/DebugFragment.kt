@@ -10,7 +10,7 @@ import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
 
-class DebugFragment : BaseFragment(R.layout.fragment_debug) {
+class DetoksDebugFragment : BaseFragment(R.layout.fragment_detoks_debug) {
 
     private val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
 
@@ -23,6 +23,11 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
         val estimatedNetworkSizeTV = view.findViewById<TextView>(R.id.estimatedNetworkSizeTextView)
         val nbConnectedPeersTV = view.findViewById<TextView>(R.id.nbConnectedPeersTextView)
         val listConnectedPeersTV = view.findViewById<TextView>(R.id.listConnectedPeersTextView)
+//        val top3LeechingTorrentsTV = view.findViewById<TextView>(R.id.top3LeechingTorrentsTextView)
+//        val top3SeedingTorrentsTV = view.findViewById<TextView>(R.id.top3SeedingTorrentsTextView)
+//        val seedingStatusTV = view.findViewById<TextView>(R.id.seedingStatusTextView)
+//        val walletTokensTV = view.findViewById<TextView>(R.id.walletTokensTextView)
+        val peerIdTV = view.findViewById<TextView>(R.id.peerIdTextView)
 
         fun updateDebugPage() {
             val estimatedNetworkSize = NetworkSizeGossiper.networkSizeEstimate
@@ -37,6 +42,9 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
                 listConnectedPeers += "\n" + peer.mid
             }
             listConnectedPeersTV.text = getString(R.string.list_connected_peers, listConnectedPeers)
+
+            val peerId = deToksCommunity.myPeer.mid
+            peerIdTV.text = getString(R.string.peer_id, peerId)
         }
 
         val handler = Handler((Looper.getMainLooper()))
