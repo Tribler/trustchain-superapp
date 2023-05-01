@@ -70,7 +70,7 @@ async def start_nodes(timeout: int, max_peers: int):
         f.close()
 
     print(
-        f"Starting community with {len(json_data)} nodes, {timeout}s timeout and {max_peers} max peers."
+        f"Starting community with {len(json_data['nodes'])} nodes, {timeout}s timeout and {max_peers} max peers."
     )
 
     if not os.path.exists("keys/"):

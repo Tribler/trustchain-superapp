@@ -15,7 +15,7 @@ class TorrentGossiper(Gossiper):
         self.signed = signed
         self.profiles = profiles
 
-    def get_magnet_hash(magnet: str) -> str:
+    def get_magnet_hash(self, magnet: str) -> str:
         """
         Extracts the has from a magnetlink
         """
