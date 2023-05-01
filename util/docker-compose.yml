@@ -6,6 +6,7 @@ services:
       dockerfile: ./Dockerfile
     image: detoks_community_sim
     container_name: detoks_community_sim
+    network_mode: "host"
     environment:
       TIMEOUT: ${TIMEOUT:-20}
       MAX_NUM_PEERS: ${MAX_NUM_PEERS:-3}

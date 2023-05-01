@@ -17,7 +17,7 @@ class DetoksCommunity(Community):
     should_print = False
 
     def started(self, node): 
-        self.should_print = False
+        self.should_print = True
 
         self.logger.disabled = True
         self.torrent_gossiper = TorrentGossiper(
