@@ -19,4 +19,7 @@
     <string name="likes">Likes: %1$d</string>
     <string name="times_seen">Times seen: %1$d</string>
     <string name="upload_date">Upload date: %1$d</string>
+    <string name="estimated_network_size">Estimated network size: %1$d</string>
+    <string name="nb_connected_peers">Number of connected peers: %1$d</string>
+    <string name="list_connected_peers">List of connected peers: %1$s</string>
 </resources>

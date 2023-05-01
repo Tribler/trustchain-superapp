@@ -61,6 +61,9 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
         val settingsButton = view.findViewById<Button>(R.id.strategyButton)
         settingsButton.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toStrategyFragment) }
+
+        val debugButton = view.findViewById<Button>(R.id.debugButton)
+        debugButton.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toDebugFragment) }
     }
 
     /**
