@@ -41,24 +41,32 @@ class TorrentGossiper(
         val max = if (handlers.size < blocks) handlers.size else blocks
         val randomMagnets = handlers.random(max).map { it.makeMagnetUri() }
 
-        randomMagnets.forEach { it1 ->
-            val key = torrentManager.createKey(MagnetLink.hashFromMagnet(it1), "?filename=FIXME")
-            val entry = torrentManager.profile.addProfile(key)
-            val data = listOf(
-                Pair("Key", key),
-                Pair("WatchTime", entry.watchTime.toString()),
-                Pair("Likes", entry.likes.toString()),
-                Pair("Duration", entry.duration.toString()),
-                Pair("UploadDate",entry.uploadDate.toString()),
-                Pair("HopCount", (entry.hopCount + 1).toString())
-            )
+        randomMagnets.forEach { magnet ->
+            val torrentInfo = torrentManager.getInfoFromMagnet(magnet)?:return@forEach
+            for (it in 0 until torrentInfo.numFiles()) {
+                val fileName = torrentInfo.files().fileName(it)
+                if (!fileName.endsWith(".mp4")) continue
 
-            randomPeers.forEach { it2 ->
-                deToksCommunity.gossipWith(
-                    it2,
-                    TorrentMessage(data),
-                    DeToksCommunity.MESSAGE_TORRENT_ID
+                // Create the unique video key and compose the profile contents into a list of data
+                val key = torrentManager.createKey(MagnetLink.hashFromMagnet(magnet), fileName)
+                val entry = torrentManager.profile.addProfile(key)
+                val data = listOf(
+                    Pair("Key", key),
+                    Pair("WatchTime", entry.watchTime.toString()),
+                    Pair("Likes", entry.likes.toString()),
+                    Pair("Duration", entry.duration.toString()),
+                    Pair("UploadDate",entry.uploadDate.toString()),
+                    Pair("HopCount", (entry.hopCount + 1).toString())
                 )
+
+                // Gossip the profile of the video with peers
+                randomPeers.forEach { peer ->
+                    deToksCommunity.gossipWith(
+                        peer,
+                        TorrentMessage(data),
+                        DeToksCommunity.MESSAGE_TORRENT_ID
+                    )
+                }
             }
         }
     }

@@ -132,18 +132,7 @@ class TorrentManager private constructor(
         else if (unwatchedIndex < newIndex) unwatchedIndex = newIndex
 
         if (cachingAmount * 2 + 1 >= getNumberOfTorrents()) {
-            // TODO: This could potentially lead to issues, since what happens if the user locks
-            //        their screen or switches to another app for a while? Maybe this could be
-            //        changed to a place in the video adapter as well, if we can detect maybe when
-            //        a video is done playing and starts again, then update the duration if possible
-            val torrent = torrentFiles.gett(currentIndex) // TODO: make torrentFiles into unwatched videos
-            val magnet = torrent.handle.makeMagnetUri()
-            val torrentInfo = getInfoFromMagnet(magnet)?:return
-
-            // FIXME: make this update each video in the torrent
-            val key = createKey(MagnetLink.hashFromMagnet(magnet), torrentInfo.files().fileName(0))
-            profile.updateEntryDuration(key, torrent.getVideoDuration())
-            profile.updateEntryWatchTime(key, updateTime(), true)
+            notifyChangeUpdate()
             currentIndex = newIndex
             return
         }
@@ -155,15 +144,20 @@ class TorrentManager private constructor(
             torrentFiles.gett(currentIndex + cachingAmount).deleteFile()
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
         }
-        val torrent = torrentFiles.gett(currentIndex)
-        val magnet = torrent.handle.makeMagnetUri()
-        val torrentInfo = getInfoFromMagnet(magnet)?:return
+        notifyChangeUpdate()
+        currentIndex = newIndex
+    }
 
-        // FIXME: make this update each video in the torrent
-        val key = createKey(MagnetLink.hashFromMagnet(magnet), torrentInfo.files().fileName(0))
+    // TODO: This could potentially lead to issues, since what happens if the user locks
+    //        their screen or switches to another app for a while? Maybe this could be
+    //        changed to a place in the video adapter as well, if we can detect maybe when
+    //        a video is done playing and starts again, then update the duration if possible
+    private fun notifyChangeUpdate() {
+        val torrent = torrentFiles.gett(currentIndex) // TODO: make torrentFiles into unwatched videos
+        val magnet = torrent.handle.makeMagnetUri()
+        val key = createKey(MagnetLink.hashFromMagnet(magnet), torrent.fileName)
         profile.updateEntryDuration(key, torrent.getVideoDuration())
         profile.updateEntryWatchTime(key, updateTime(), true)
-        currentIndex = newIndex
     }
 
     private fun initializeVideoPool() {
@@ -552,7 +546,7 @@ class TorrentManager private constructor(
         sessionManager.uploadRateLimit(bandwidth)
     }
 
-    private fun getInfoFromMagnet(magnet: String): TorrentInfo? {
+    fun getInfoFromMagnet(magnet: String): TorrentInfo? {
         val bytes = sessionManager.fetchMagnet(magnet, 10)?:return null
         return TorrentInfo.bdecode(bytes)
     }
