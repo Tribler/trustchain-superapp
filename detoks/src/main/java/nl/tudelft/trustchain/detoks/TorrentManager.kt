@@ -71,6 +71,10 @@ class TorrentManager private constructor(
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
     }
 
+    fun getTorrentFiles(): MutableList<TorrentHandler> {
+        return torrentFiles
+    }
+
     fun notifyDecrease() {
         Log.i("DeToks", "Decreasing index ... ${(currentIndex - 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex - 1) % getNumberOfTorrents())

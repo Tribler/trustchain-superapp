@@ -20,4 +20,6 @@
     <string name="likes">Likes: %1$d</string>
     <string name="times_seen">Times seen: %1$d</string>
     <string name="upload_date">Upload date: %1$d</string>
+    <string name="status">Torrent Status </string>
+    <string name="seeding">Seeding </string>
 </resources>

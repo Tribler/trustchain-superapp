@@ -168,6 +168,7 @@
 
     </LinearLayout>
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/strategyBalanceView"
         android:layout_width="match_parent"
@@ -176,5 +177,20 @@
         android:background="@color/light_gray">
 
     </androidx.recyclerview.widget.RecyclerView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/debugButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="Debug" />
+
+    </FrameLayout>
 
 </LinearLayout>

@@ -18,7 +18,6 @@ import kotlinx.android.synthetic.main.fragment_strategy.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
-import org.w3c.dom.Text
 
 class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
 
@@ -32,18 +31,24 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
         torrentManager = TorrentManager.getInstance(requireActivity())
         strategyRecyclerViewAdapter = StrategyAdapter(torrentManager.seedingTorrents)
 
+
+
         val handler = Handler((Looper.getMainLooper()))
-        val runnable : Runnable = object : Runnable {
+        val runnable: Runnable = object : Runnable {
             override fun run() {
                 strategyRecyclerViewAdapter.updateView()
                 handler.postDelayed(this, 2000)
             }
         }
-        handler.postDelayed(runnable,2000)
+        handler.postDelayed(runnable, 2000)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.findViewById<Button>(R.id.debugButton)?.setOnClickListener { p0 ->
+            p0!!.findNavController().navigate(R.id.action_strategyFragment_to_DebugSeedingFragment)
+        }
 
         val strategyRecycleView = view.findViewById<RecyclerView>(R.id.strategyBalanceView)
         strategyRecycleView.adapter = strategyRecyclerViewAdapter
@@ -170,6 +175,7 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+
         val handler = strategyData[position]
         val convBtoMB = 1000000
         val status = handler.handle.status()
@@ -178,8 +184,13 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val bundle = Bundle()
         bundle.putString("torrent_name", holder.hashTextView.text.toString())
         holder.hashTextView.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toTorrentFragment, bundle) }
+        if (!handler.isPlayable()) {
+            holder.downloadTextView.text = status.state().name
+        }
+        else {
+            holder.downloadTextView.text = (status.allTimeDownload() / convBtoMB).toString()
+        }
 
-        holder.downloadTextView.text = status.state().name
         holder.uploadTextView.text = (status.allTimeUpload()
             / convBtoMB).toString()
 
