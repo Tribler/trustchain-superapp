@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.*
+import com.frostwire.jlibtorrent.TorrentHandle
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -13,9 +14,11 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 class DetoksDebugFragment : BaseFragment(R.layout.fragment_detoks_debug) {
 
     private val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+    private lateinit var torrentManager: TorrentManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        torrentManager = TorrentManager.getInstance(requireActivity())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -23,10 +26,10 @@ class DetoksDebugFragment : BaseFragment(R.layout.fragment_detoks_debug) {
         val estimatedNetworkSizeTV = view.findViewById<TextView>(R.id.estimatedNetworkSizeTextView)
         val nbConnectedPeersTV = view.findViewById<TextView>(R.id.nbConnectedPeersTextView)
         val listConnectedPeersTV = view.findViewById<TextView>(R.id.listConnectedPeersTextView)
-//        val top3LeechingTorrentsTV = view.findViewById<TextView>(R.id.top3LeechingTorrentsTextView)
-//        val top3SeedingTorrentsTV = view.findViewById<TextView>(R.id.top3SeedingTorrentsTextView)
-//        val seedingStatusTV = view.findViewById<TextView>(R.id.seedingStatusTextView)
-//        val walletTokensTV = view.findViewById<TextView>(R.id.walletTokensTextView)
+        val top3LeechingTorrentsTV = view.findViewById<TextView>(R.id.top3LeechingTorrentsTextView)
+        val top3SeedingTorrentsTV = view.findViewById<TextView>(R.id.top3SeedingTorrentsTextView)
+        val seedingStatusTV = view.findViewById<TextView>(R.id.seedingStatusTextView)
+        val walletTokensTV = view.findViewById<TextView>(R.id.walletTokensTextView)
         val peerIdTV = view.findViewById<TextView>(R.id.peerIdTextView)
 
         fun updateDebugPage() {
@@ -42,6 +45,32 @@ class DetoksDebugFragment : BaseFragment(R.layout.fragment_detoks_debug) {
                 listConnectedPeers += "\n" + peer.mid
             }
             listConnectedPeersTV.text = getString(R.string.list_connected_peers, listConnectedPeers)
+
+            val torrentsList = torrentManager.getListOfTorrents()
+            val currentIndex = torrentManager.getCurrentIndex()
+            var top3LeechingTorrentsString = ""
+            for (i in currentIndex until (currentIndex+3).coerceAtMost(torrentsList.size)) {
+                top3LeechingTorrentsString += "\n" + torrentsList[i].name()
+            }
+            top3LeechingTorrentsTV.text = getString(R.string.top_3_leeching_torrents, top3LeechingTorrentsString)
+
+            val seedingTorrentsList = torrentManager.getListOfSeedingTorrents()
+            var top3SeedingTorrentsString = ""
+            if (seedingTorrentsList.isEmpty()) {
+                top3SeedingTorrentsString = "No seeding torrents yet."
+            }
+            else {
+                for (i in 0 until 3.coerceAtMost(torrentsList.size)) {
+                    top3SeedingTorrentsString += "\n" + seedingTorrentsList[i].name()
+                }
+            }
+            top3SeedingTorrentsTV.text = getString(R.string.top_3_seeding_torrents, top3SeedingTorrentsString)
+
+            val seedingStatus = torrentManager.strategies.isSeeding
+            seedingStatusTV.text = getString(R.string.seeding_status, seedingStatus)
+
+            val walletTokens = deToksCommunity.getBalance()
+            walletTokensTV.text = getString(R.string.wallet_tokens, walletTokens)
 
             val peerId = deToksCommunity.myPeer.mid
             peerIdTV.text = getString(R.string.peer_id, peerId)
