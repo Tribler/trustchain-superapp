@@ -197,8 +197,9 @@ public class CustomHybridRandomWalkWithExplorationIterator<E>
         E e = null;
         double outEdgesWeight = getOutEdgesWeight((SongRecommendation) nextVertex) - lastNode.getPersonalizedPageRankScore();
         if (outEdgesWeight == 0) {
+            //TODO : FIGURE OUT HOW TO DEAL WITH SONGS WITH SINGLE LISTENER
             List<E> outEdges = new ArrayList<>(graph.outgoingEdgesOf(nextVertex));
-            int randIndex = rng.nextInt(outEdges.size() - 1);
+            int randIndex = outEdges.size() == 1 ? 0 : rng.nextInt(outEdges.size() - 1);
             E randEdge = outEdges.get(randIndex);
             Node randomNode = (Node) Graphs.getOppositeVertex(graph, randEdge, nextVertex);
             nextVertex = randomNode == lastNode ? (Node) Graphs.getOppositeVertex(graph, outEdges.get(randIndex + 1), nextVertex) : randomNode;

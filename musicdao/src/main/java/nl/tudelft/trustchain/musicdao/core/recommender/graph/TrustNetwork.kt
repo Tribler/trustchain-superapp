@@ -5,10 +5,9 @@ import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsa
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRank
 
-class TrustNetwork(subNetworks: SubNetworks,
-                   sourceNodeAddress: String) {
-    private val nodeToNodeNetwork = subNetworks.nodeToNodeNetwork
-    private val nodeToSongNetwork = subNetworks.nodeToSongNetwork
+open class TrustNetwork {
+    protected val nodeToNodeNetwork: NodeToNodeNetwork
+    protected val nodeToSongNetwork: NodeToSongNetwork
     private val incrementalPersonalizedPageRank: IncrementalPersonalizedPageRank
     private val incrementalHybridPersonalizedPageRankSalsa: IncrementalHybridPersonalizedPageRankSalsa
     private val allNodes: MutableList<Node>
@@ -22,13 +21,66 @@ class TrustNetwork(subNetworks: SubNetworks,
         const val EXPLORATION_PROBABILITY = 0.05f
     }
 
-    init {
+    constructor(subNetworks: SubNetworks, sourceNodeAddress: String) {
+        nodeToNodeNetwork = subNetworks.nodeToNodeNetwork
+        nodeToSongNetwork = subNetworks.nodeToSongNetwork
         val allNodesList = nodeToNodeNetwork.getAllNodes()
         allNodes = allNodesList.toMutableList()
         rootNode = allNodes.first { it.getIpv8() == sourceNodeAddress}
         incrementalPersonalizedPageRank = IncrementalPersonalizedPageRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, nodeToNodeNetwork.graph)
         incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsa(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, EXPLORATION_PROBABILITY, nodeToSongNetwork.graph)
     }
+
+    constructor(sourceNodeAddress: String) {
+        nodeToNodeNetwork = NodeToNodeNetwork()
+        rootNode = Node(sourceNodeAddress)
+        nodeToNodeNetwork.addNode(rootNode)
+        allNodes = mutableListOf(rootNode)
+        nodeToSongNetwork = NodeToSongNetwork()
+        nodeToSongNetwork.addNodeOrSong(rootNode)
+        incrementalPersonalizedPageRank = IncrementalPersonalizedPageRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, nodeToNodeNetwork.graph)
+        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsa(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, EXPLORATION_PROBABILITY, nodeToSongNetwork.graph)
+    }
+
+    fun bulkAddNodeToSongEdgesForNode(edges: List<NodeSongEdgeWithNodeAndSongRec>, sourceNode: Node): Boolean {
+        var edgeAdditionFailure = false
+        if(edges.any { it.node != sourceNode })
+            return false
+        for(edge in edges) {
+            var existingAffinity = 0.0
+            if (containsEdge(edge.node, edge.songRec)) {
+                val existingEdgeTimestamp = nodeToSongNetwork.graph.getEdge(edge.node, edge.songRec).timestamp
+                existingAffinity = nodeToSongNetwork.graph.getEdge(edge.node, edge.songRec).affinity
+                if (existingEdgeTimestamp >= edge.nodeSongEdge.timestamp) {
+                    return false
+                }
+            }
+            if (!containsNode(edge.node)) {
+                if (!addNode(edge.node)) {
+                    return false
+                }
+            }
+            if (!containsSongRec(edge.songRec)) {
+                if (!addSongRec(edge.songRec)) {
+                    return false
+                }
+            }
+            nodeToSongNetwork.addEdge(edge.node, edge.songRec, edge.nodeSongEdge).also {
+                if(!it) {
+                    logger.error { "Couldn't add edge from ${edge.node} to ${edge.songRec}" }
+                    edgeAdditionFailure = true
+                } else {
+                    if(edge.node == rootNode) {
+                        updateNodeTrust(edge.songRec, edge.nodeSongEdge.affinity - existingAffinity)
+                    }
+                }
+            }
+        }
+        incrementalPersonalizedPageRank.modifyEdges(setOf(sourceNode))
+        incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(sourceNode), nodeToNodeNetwork.getAllNodes().toList())
+        return edgeAdditionFailure
+    }
+
 
     fun addNodeToSongEdge(edge: NodeSongEdgeWithNodeAndSongRec): Boolean {
         var existingAffinity = 0.0
@@ -56,8 +108,8 @@ class TrustNetwork(subNetworks: SubNetworks,
                 if(edge.node == rootNode) {
                     updateNodeTrust(edge.songRec, edge.nodeSongEdge.affinity - existingAffinity)
                 }
-                incrementalPersonalizedPageRank.modifyEdges(setOf(rootNode))
-                incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(rootNode), nodeToNodeNetwork.getAllNodes().toList())
+                incrementalPersonalizedPageRank.modifyEdges(setOf(edge.node))
+                incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(edge.node), nodeToNodeNetwork.getAllNodes().toList())
             }
         }
     }
