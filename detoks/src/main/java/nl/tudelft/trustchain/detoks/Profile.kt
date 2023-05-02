@@ -23,7 +23,6 @@ class Profile(
     object ProfileConfig { const val MAX_DURATION_FACTOR  = 10 }
 
     fun addProfile(key: String): ProfileEntry {
-        Log.d(DeToksCommunity.LOGGING_TAG, "Added profile $key") // remove later
         if(!profiles.contains(key)) profiles[key] = ProfileEntry(timesSeen = 1)
         return profiles[key]!!
     }
