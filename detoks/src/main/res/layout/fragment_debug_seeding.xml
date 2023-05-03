@@ -22,7 +22,7 @@
 
         <TextView
             android:id="@+id/textView5"
-            android:layout_width="81dp"
+            android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal"
@@ -35,6 +35,22 @@
             android:layout_weight="1"
             android:gravity="center_horizontal"
             android:text="@string/seeding" />
+
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:text="@string/nrSeeders" />
+
+        <TextView
+            android:id="@+id/textView8"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:text="@string/nrLeechers" />
 
     </LinearLayout>
 

@@ -4,20 +4,15 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.widget.SwitchCompat
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.exoplayer2.util.Log
+import com.frostwire.jlibtorrent.TorrentHandle
 import kotlinx.android.synthetic.main.fragment_strategy.*
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
 
 
 class SeedingDebugFragment :  BaseFragment(R.layout.fragment_debug_seeding) {
@@ -30,7 +25,7 @@ class SeedingDebugFragment :  BaseFragment(R.layout.fragment_debug_seeding) {
         super.onCreate(savedInstanceState)
 
         torrentManager = TorrentManager.getInstance(requireActivity())
-        seedingDebugAdapter = SeedingDebugAdapter(torrentManager.getTorrentFiles())
+        seedingDebugAdapter = SeedingDebugAdapter(torrentManager.getListOfTorrents())
 
         val handler = Handler((Looper.getMainLooper()))
         val runnable : Runnable = object : Runnable {
@@ -53,18 +48,21 @@ class SeedingDebugFragment :  BaseFragment(R.layout.fragment_debug_seeding) {
     }
 }
 
-class SeedingDebugAdapter(private val strategyData: List<TorrentHandler>) : RecyclerView.Adapter<SeedingDebugAdapter.ViewHolder>() {
+class SeedingDebugAdapter(private val strategyData: List<TorrentHandle>) : RecyclerView.Adapter<SeedingDebugAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val hashTextView: TextView
         val downloadTextView: TextView
         val uploadTextView: TextView
-
+        val seederTextView: TextView
+        val leecherTextView: TextView
 
         init {
             hashTextView = view.findViewById(R.id.hash)
             downloadTextView = view.findViewById(R.id.status)
             uploadTextView = view.findViewById(R.id.seeding)
+            seederTextView = view.findViewById(R.id.nrSeeds)
+            leecherTextView = view.findViewById(R.id.nrLeechers)
         }
     }
 
@@ -79,8 +77,8 @@ class SeedingDebugAdapter(private val strategyData: List<TorrentHandler>) : Recy
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         val handler = strategyData[position]
-        val status = handler.handle.status()
-        holder.hashTextView.text = strategyData[position].handle.name()
+        val status = handler.status()
+        holder.hashTextView.text = strategyData[position].name()
         val bundle = Bundle()
         bundle.putString("torrent_name", holder.hashTextView.text.toString())
 
@@ -88,6 +86,10 @@ class SeedingDebugAdapter(private val strategyData: List<TorrentHandler>) : Recy
         holder.downloadTextView.text = status.state().name
 
         holder.uploadTextView.text = status.isSeeding.toString()
+
+        holder.seederTextView.text = status.listSeeds().toString()
+
+        holder.leecherTextView.text = status.listPeers().toString()
 
     }
 

@@ -191,6 +191,15 @@
             android:layout_marginBottom="8dp"
             android:text="Debug" />
 
+        <TextView
+            android:id="@+id/balanceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="Balance: 0" />
+
     </FrameLayout>
 
 </LinearLayout>

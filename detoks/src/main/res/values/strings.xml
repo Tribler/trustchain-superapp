@@ -6,7 +6,7 @@
     <string name="bandwidth_day_mb">Bandwidth per day (MB)</string>
     <string name="torrent_name">Torrent Name</string>
     <string name="download">Download</string>
-    <string name="detoks_balance">Balance</string>
+    <string name="detoks_balance">Profit</string>
     <string name="upload">Upload</string>
     <string name="seeding_rank">Seeding Rank</string>
     <string name="info_hash">Info Hash: %1$s</string>
@@ -20,6 +20,8 @@
     <string name="likes">Likes: %1$d</string>
     <string name="times_seen">Times seen: %1$d</string>
     <string name="upload_date">Upload date: %1$d</string>
-    <string name="status">Torrent Status </string>
+    <string name="status">Status</string>
     <string name="seeding">Seeding </string>
+    <string name="nrSeeders">Seeders</string>
+    <string name="nrLeechers">Peers</string>
 </resources>

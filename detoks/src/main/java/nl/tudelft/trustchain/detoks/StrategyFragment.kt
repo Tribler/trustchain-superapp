@@ -25,11 +25,18 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
 
     private lateinit var strategyRecyclerViewAdapter: StrategyAdapter
 
+    private lateinit var balanceTextView: TextView
+
+
+    fun updateBalanceTextView() {
+        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+        balanceTextView.text = "Balance: ${community.getBalance()}"
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         torrentManager = TorrentManager.getInstance(requireActivity())
-        strategyRecyclerViewAdapter = StrategyAdapter(torrentManager.seedingTorrents)
+        strategyRecyclerViewAdapter = StrategyAdapter(torrentManager.seedingTorrents, torrentManager.profitMap)
 
 
 
@@ -37,6 +44,7 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
         val runnable: Runnable = object : Runnable {
             override fun run() {
                 strategyRecyclerViewAdapter.updateView()
+                updateBalanceTextView()
                 handler.postDelayed(this, 2000)
             }
         }
@@ -49,7 +57,7 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
         view.findViewById<Button>(R.id.debugButton)?.setOnClickListener { p0 ->
             p0!!.findNavController().navigate(R.id.action_strategyFragment_to_DebugSeedingFragment)
         }
-
+        balanceTextView = view.findViewById(R.id.balanceTextView)
         val strategyRecycleView = view.findViewById<RecyclerView>(R.id.strategyBalanceView)
         strategyRecycleView.adapter = strategyRecyclerViewAdapter
         strategyRecycleView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -148,7 +156,7 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
     }
 }
 
-class StrategyAdapter(private val strategyData: List<TorrentHandler>) : RecyclerView.Adapter<StrategyAdapter.ViewHolder>() {
+class StrategyAdapter(private val strategyData: List<TorrentHandler>, private val profitMap: HashMap<String, Float>) : RecyclerView.Adapter<StrategyAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val hashTextView: TextView
@@ -157,15 +165,18 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val balanceTextView: TextView
         val seedRankTextView: TextView
 
+
         init {
             hashTextView = view.findViewById(R.id.name)
             downloadTextView = view.findViewById(R.id.download)
             uploadTextView = view.findViewById(R.id.upload)
             balanceTextView = view.findViewById(R.id.balance)
             seedRankTextView = view.findViewById(R.id.seedRank)
+
         }
     }
 
+    val community: DeToksCommunity = IPv8Android.getInstance().getOverlay()!!
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -179,7 +190,6 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
         val handler = strategyData[position]
         val convBtoMB = 1000000
         val status = handler.handle.status()
-        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
         holder.hashTextView.text = strategyData[position].handle.name()
         val bundle = Bundle()
         bundle.putString("torrent_name", holder.hashTextView.text.toString())
@@ -195,12 +205,9 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>) : Recycler
             / convBtoMB).toString()
 
         holder.balanceTextView.text = (
-            community.getBalance().toString())
+            profitMap[handler.handle.name()].toString())
         holder.seedRankTextView.text = ( status.seedRank().toString())
 
-        Log.d(DeToksCommunity.LOGGING_TAG, "Download stat: ${status.state().name}, Upload statL ${
-            (status.allTimeUpload()
-                / convBtoMB)}, Seed Rank stat: ${status.seedRank()} ")
     }
 
     override fun getItemCount(): Int = strategyData.size
