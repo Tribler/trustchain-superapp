@@ -3,8 +3,6 @@ package nl.tudelft.trustchain.detoks
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.frostwire.jlibtorrent.*
@@ -13,8 +11,6 @@ import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
 import java.io.File
-import java.lang.Math.abs
-import kotlin.reflect.jvm.internal.impl.types.TypeCheckerState.SupertypesPolicy.None
 
 
 /**
@@ -93,7 +89,7 @@ class TorrentManager private constructor(
                     delay(100)
                 }
                 profile.updateEntryDuration(
-                    MagnetLink.hashFromMagnet(content.handle.makeMagnetUri()),
+                    createKey(content.handle.infoHash(), content.fileIndex),
                     content.getVideoDuration())
             }
             content.asMediaInfo()
@@ -104,6 +100,11 @@ class TorrentManager private constructor(
 
     fun getNumberOfTorrents(): Int {
         return torrentFiles.size
+    }
+
+    fun createKey(hash: Sha1Hash, index: Int): String {
+        val torrent = torrentFiles.filter { hash == it.handle.infoHash() }
+        return if(torrent.isEmpty()) "" else "$hash?index=$index"
     }
 
     /**
@@ -130,13 +131,7 @@ class TorrentManager private constructor(
         else if (unwatchedIndex < newIndex) unwatchedIndex = newIndex
 
         if (cachingAmount * 2 + 1 >= getNumberOfTorrents()) {
-            // TODO: This could potentially lead to issues, since what happens if the user locks
-            //        their screen or switches to another app for a while? Maybe this could be
-            //        changed to a place in the video adapter as well, if we can detect maybe when
-            //        a video is done playing and starts again, then update the duration if possible
-            val key = MagnetLink.hashFromMagnet(torrentFiles.gett(currentIndex).handle.makeMagnetUri())    // TODO: make torrentFiles into unwatched videos
-            profile.updateEntryDuration(key, torrentFiles.gett(currentIndex).getVideoDuration())
-            profile.updateEntryWatchTime(key, updateTime(), true)
+            notifyChangeUpdate()
             currentIndex = newIndex
             return
         }
@@ -148,10 +143,19 @@ class TorrentManager private constructor(
             torrentFiles.gett(currentIndex + cachingAmount).deleteFile()
             torrentFiles.gett(newIndex - cachingAmount).downloadFile()
         }
-        val key = MagnetLink.hashFromMagnet(torrentFiles.gett(currentIndex).handle.makeMagnetUri())
-        profile.updateEntryDuration(key, torrentFiles.gett(currentIndex).getVideoDuration())
-        profile.updateEntryWatchTime(key, updateTime(), true)
+        notifyChangeUpdate()
         currentIndex = newIndex
+    }
+
+    // TODO: This could potentially lead to issues, since what happens if the user locks
+    //        their screen or switches to another app for a while? Maybe this could be
+    //        changed to a place in the video adapter as well, if we can detect maybe when
+    //        a video is done playing and starts again, then update the duration if possible
+    private fun notifyChangeUpdate() {
+        val torrent = torrentFiles.gett(currentIndex) // TODO: make torrentFiles into unwatched videos
+        val key = createKey(torrent.handle.infoHash(), torrent.fileIndex)
+        profile.updateEntryDuration(key, torrent.getVideoDuration())
+        profile.updateEntryWatchTime(key, updateTime(), true)
     }
 
     private fun initializeVideoPool() {
@@ -197,11 +201,9 @@ class TorrentManager private constructor(
                                 it
                             )
                             torrentFiles.add(torrent)
-                            val magnet = torrent.handle.makeMagnetUri()
-                            profile.addProfile(torrentInfo.infoHash().toString())
-                            getInfoFromMagnet(magnet)?.let { it2 ->
+                            getInfoFromMagnet(torrent.handle.makeMagnetUri())?.let { it2 ->
                                 profile.updateEntryUploadDate(
-                                    magnet,
+                                    createKey(torrent.handle.infoHash(), it),
                                     it2
                                 )
                             }
@@ -279,12 +281,15 @@ class TorrentManager private constructor(
     }
 
     fun addTorrent(hash: Sha1Hash, magnet: String) {
+        val torrentInfo = getInfoFromMagnet(magnet)?:return
         if (sessionManager.find(hash) != null) {
-            profile.incrementTimesSeen(MagnetLink.hashFromMagnet(magnet))
+            for (it in 0 until torrentInfo.numFiles()) {
+                if (!torrentInfo.files().fileName(it).endsWith(".mp4")) continue
+                profile.incrementTimesSeen(createKey(torrentInfo.infoHash(), it))
+            }
             return
         }
 
-        val torrentInfo = getInfoFromMagnet(magnet)?:return
         Log.d(DeToksCommunity.LOGGING_TAG,"Adding new torrent: ${torrentInfo.name()}")
 
         sessionManager.download(torrentInfo, cacheDir)
@@ -320,7 +325,7 @@ class TorrentManager private constructor(
                 torrentFiles.add(insertIndex, torrent)
                 getInfoFromMagnet(magnet)?.let { it2 ->
                     profile.updateEntryUploadDate(
-                        magnet,
+                        createKey(hash, it),
                         it2
                     )
                 }
@@ -541,7 +546,7 @@ class TorrentManager private constructor(
         sessionManager.uploadRateLimit(bandwidth)
     }
 
-    private fun getInfoFromMagnet(magnet: String): TorrentInfo? {
+    fun getInfoFromMagnet(magnet: String): TorrentInfo? {
         val bytes = sessionManager.fetchMagnet(magnet, 10)?:return null
         return TorrentInfo.bdecode(bytes)
     }

@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import android.util.Log
 import com.frostwire.jlibtorrent.TorrentInfo
 import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 import kotlin.math.min
