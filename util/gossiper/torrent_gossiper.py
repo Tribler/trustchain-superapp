@@ -28,21 +28,26 @@ class TorrentGossiper(Gossiper):
     def gossip(self):
         for p in self.community.get_peers():
             for profile in self.profiles:
-                data_to_send = json.dumps(
-                    [
-                        ["Key", self.get_magnet_hash(profile["magnet"])],
-                        ["WatchTime", str(profile["watchTime"])],
-                        ["Likes", str(profile["likes"])],
-                        ["Duration", "0"],
-                        ["UploadDate", str(profile["uploadDate"])],
-                        ["HopCount", str(profile["hopCount"])],
-                    ]
-                )
-
-                packet = self.community.ezr_pack(
-                    MESSAGE_TORRENT_ID, TorrentPayload(data_to_send), sig=self.signed
-                )
-                self.community.endpoint.send(p.address, packet)
+                for video in profile["videos"]:
+                    data_to_send = json.dumps(
+                        [
+                            [
+                                "Key",
+                                f'{self.get_magnet_hash(video["magnet"])}?index={video["index"]}',
+                            ],
+                            ["WatchTime", str(video["watchTime"])],
+                            ["Likes", str(video["likes"])],
+                            ["Duration", "0"],
+                            ["UploadDate", str(video["uploadDate"])],
+                            ["HopCount", str(video["hopCount"])],
+                        ]
+                    )
+                    packet = self.community.ezr_pack(
+                        MESSAGE_TORRENT_ID,
+                        TorrentPayload(data_to_send),
+                        sig=self.signed,
+                    )
+                    self.community.endpoint.send(p.address, packet)
 
     def received_response(self, _peer, payload: bytearray, data_offset=31) -> None:
         result = payload[data_offset:].decode()

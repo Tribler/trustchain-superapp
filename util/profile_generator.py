@@ -49,24 +49,32 @@ def main():
         torrents = get_random_torrents()
 
         for t in torrents:
-            hop_count = random.randint(1, 10000)
-            times_seen = random.randint(1, 1000)
-            likes = random.randint(0, 1000)
-            watched = random.randint(0, 1) == 1
-            watch_time = random.randint(0, 1000)
-            upload_date = int(
-                random_date(START_DATE, END_DATE).timestamp() * 1000
-            )  # date in ms
+            profile = {"videos": []}
+            for index, f in enumerate(t.files):
+                if not f.name.endswith(".mp4"):
+                    continue
+                hop_count = random.randint(1, 10000)
+                times_seen = random.randint(1, 1000)
+                likes = random.randint(0, 1000)
+                watched = random.randint(0, 1) == 1
+                watch_time = random.randint(0, 1000)
+                upload_date = int(
+                    random_date(START_DATE, END_DATE).timestamp() * 1000
+                )  # date in ms
 
-            profile = {
-                "magnet": t.magnet_link,
-                "watched": watched,
-                "watchTime": watch_time,
-                "uploadDate": upload_date,
-                "hopCount": hop_count,
-                "timesSeen": times_seen,
-                "likes": likes,
-            }
+                video = {
+                    "magnet": t.magnet_link,
+                    "index": index,
+                    "watched": watched,
+                    "watchTime": watch_time,
+                    "uploadDate": upload_date,
+                    "hopCount": hop_count,
+                    "timesSeen": times_seen,
+                    "likes": likes,
+                }
+
+                profile["videos"].append(video)
+
             node["profiles"].append(profile)
 
         output["nodes"].append(node)
