@@ -91,7 +91,9 @@ The seeding strategy only sorts the torrents into a list of torrents that will b
 
 A simple token transaction implementation was added in order to test if transactions can be performed while seeding and downloading. Whenever an user finishes downloading a piece of the torrent they are downloading, they send a token to the peers which were seeding it. We check for that by using the alert `AlertType.PIECE_FINISHED`, and we identify the peers that were seeding the downloaded piece based on the information given by the current torrent handle. In addition, peers may also seed torrents to peers outside of the DeToks Community, by which they also get compsated by increasing their wallet balance.
 
-## Torrent Debug Screen
+## Debug Screens
+
+### Torrent-Specific Debug Screen
 A user may access the debug screen for a specific torrent by clicking on the name of the video in the main DeToks screen or by clicking on its name in the list of seeded torrents shown in [Seeding](#seeding).   
 <img src="https://user-images.githubusercontent.com/57201085/235759097-03ef3860-8e74-47e2-85ab-82d11f67257c.jpg" width="25%">
 
@@ -113,17 +115,17 @@ and two extra profile metrics:
 * `watched`: whether or not the video was watched
 * `likes`: number of likes that the torrent has
 
-## General Debug Screen
+### Global Debug Screen
 A  user may access the general debug screen by clicking on the "Debug" button.
 
-<img src="https://user-images.githubusercontent.com/57201085/235759201-f79c1d7a-7961-496b-ba00-b1804dccb859.jpg" alt="general debug screen" width="25%">
+<img src="https://user-images.githubusercontent.com/57201085/235890803-b59bd7ad-ecd8-43bc-b570-c345e9474e9c.jpg" alt="general debug screen" width="25%">
 
 It displays information on  such as:
 * `Estimated networksize`: estimated number of peers in the network.
 * `Number of connected peers`: number of connected peers.
 * `List of connected peer`: peer IDs (mid) of the connected peers.
-* `Top 3 leeching torrents`: torrent names of the top 3 leeching torrents. 
-* `Top 3 seeding torrents with metrics from seeders`: torrent names of the top 3 seeding torrents.
+* `Top 3 leeching torrents`: torrent names of the top 3 leeching torrents with a description of the leeching strategy. 
+* `Top 3 seeding torrents with metrics from seeders`: torrent names of the top 3 seeding torrents with a description of the seeding strategy.
 * `Seeding status`: whether or not the peer is seeding.
 * `Wallet token amount`: amount of tokens in a peer's wallet.
 * `Peer ID`: mid of my peer.
