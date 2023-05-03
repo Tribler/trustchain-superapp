@@ -4,18 +4,16 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.widget.*
-import com.frostwire.jlibtorrent.TorrentHandle
+import android.widget.TextView
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 import nl.tudelft.trustchain.common.ui.BaseFragment
-
+import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 
 class DetoksDebugFragment : BaseFragment(R.layout.fragment_detoks_debug) {
 
     private val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
     private lateinit var torrentManager: TorrentManager
-    val strategyDescr = mapOf(0 to "Random (randomly chosen torrent)",
+    private val strategyDescr = mapOf(0 to "Random (randomly chosen torrent)",
         1 to "Hot (watchtime in descending order with time cut-off)",
         2 to "Rising (watchtime in descending order with lower time cut-off than hot)",
         3 to "New (upload date from newest to oldest)",

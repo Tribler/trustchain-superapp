@@ -25,7 +25,8 @@ class TorrentManager private constructor(
 )  {
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
-    private val torrentFiles = mutableListOf<TorrentHandler>()
+    val torrentFiles = mutableListOf<TorrentHandler>()
+
 
     var seedingTorrents = mutableListOf<TorrentHandler>()
         private set
@@ -66,6 +67,10 @@ class TorrentManager private constructor(
             }
             return instance
         }
+
+        fun createKey(hash: Sha1Hash, index: Int): String {
+            return "$hash?index=$index"
+        }
     }
 
     fun notifyIncrease() {
@@ -104,13 +109,8 @@ class TorrentManager private constructor(
         }
     }
 
-    fun getNumberOfTorrents(): Int {
+    private fun getNumberOfTorrents(): Int {
         return torrentFiles.size
-    }
-
-    fun createKey(hash: Sha1Hash, index: Int): String {
-        val torrent = torrentFiles.filter { hash == it.handle.infoHash() }
-        return if(torrent.isEmpty()) "" else "$hash?index=$index"
     }
 
     /**
@@ -153,12 +153,8 @@ class TorrentManager private constructor(
         currentIndex = newIndex
     }
 
-    // TODO: This could potentially lead to issues, since what happens if the user locks
-    //        their screen or switches to another app for a while? Maybe this could be
-    //        changed to a place in the video adapter as well, if we can detect maybe when
-    //        a video is done playing and starts again, then update the duration if possible
     private fun notifyChangeUpdate() {
-        val torrent = torrentFiles.gett(currentIndex) // TODO: make torrentFiles into unwatched videos
+        val torrent = torrentFiles.gett(currentIndex)
         val key = createKey(torrent.handle.infoHash(), torrent.fileIndex)
         profile.updateEntryDuration(key, torrent.getVideoDuration())
         profile.updateEntryWatchTime(key, updateTime(), true)
@@ -374,17 +370,19 @@ class TorrentManager private constructor(
 
         // Preserve cached if again in cache
         val cacheEnd = currentIndex + cachingAmount
-        val newCache = sortedTorrents.subList(0, Math.min(cachingAmount, sortedTorrents.size -1))
+        val newCache = sortedTorrents.subList(0,
+            cachingAmount.coerceAtMost(sortedTorrents.size - 1)
+        )
 
         for (i in currentIndex .. cacheEnd) {
             if (!newCache.contains(torrentFiles.gett(i)))
                 torrentFiles.gett(i).deleteFile()
-            torrentFiles.set(i.mod(torrentFiles.size), sortedTorrents.gett(i - currentIndex))
+            torrentFiles[i.mod(torrentFiles.size)] = sortedTorrents.gett(i - currentIndex)
         }
 
         for (i in cacheEnd + 1 until torrentFiles.size) {
             torrentFiles.gett(i).deleteFile()
-            torrentFiles.set(i.mod(torrentFiles.size), sortedTorrents.gett(i - currentIndex))
+            torrentFiles[i.mod(torrentFiles.size)] = sortedTorrents.gett(i - currentIndex)
         }
 
         initializeVideoPool()
@@ -583,13 +581,9 @@ class TorrentManager private constructor(
     fun getCurrentIndex(): Int {
         return currentIndex
     }
-    
+
     fun getCurrentHandler(): TorrentHandler {
         return torrentFiles.gett(currentIndex)
-    }
-
-    fun getDHTSize(): Long {
-        return sessionManager.dhtNodes()
     }
 
     class TorrentHandler(
@@ -655,7 +649,7 @@ class TorrentManager private constructor(
             handle.resume()
         }
 
-        fun setMaximumPriority() {
+        private fun setMaximumPriority() {
             handle.resume()
             handle.filePriority(fileIndex, Priority.SEVEN)
             handle.pause()

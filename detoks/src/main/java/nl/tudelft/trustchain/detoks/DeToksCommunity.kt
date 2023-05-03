@@ -2,18 +2,16 @@ package nl.tudelft.trustchain.detoks
 
 import android.content.Context
 import android.util.Log
-import com.frostwire.jlibtorrent.Sha1Hash
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
-import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
-import nl.tudelft.trustchain.detoks.gossiper.*
-import kotlin.math.max
+import nl.tudelft.trustchain.detoks.gossiper.BootGossiper
+import nl.tudelft.trustchain.detoks.gossiper.BootMessage
+import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
+import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeMessage
+import nl.tudelft.trustchain.detoks.gossiper.TorrentGossiper
+import nl.tudelft.trustchain.detoks.gossiper.TorrentMessage
 
 
 class DeToksCommunity(
@@ -37,7 +35,6 @@ class DeToksCommunity(
 
     companion object {
         const val LOGGING_TAG               = "DeToksCommunity"
-        const val BLOCK_TYPE                = "detoks_transaction"
         const val MESSAGE_TORRENT_ID        = 1
         const val MESSAGE_TRANSACTION_ID    = 2
         const val MESSAGE_NETWORK_SIZE_ID   = 3
@@ -72,32 +69,13 @@ class DeToksCommunity(
                 send(peer.address, packet)
             }
         } else {
-            Log.d(LOGGING_TAG, "Insufficient funds!")
+            Log.e(LOGGING_TAG, "Insufficient funds!")
         }
 
     }
     fun increaseTokens(amount: Float) {
         val x = walletManager.getOrCreateWallet(myPeer.mid)
         walletManager.setWalletBalance(myPeer.mid, x.balance + amount)
-    }
-    fun requestTokens(amount: Float, recipientMid: String) {
-        if (myPeer.mid == recipientMid) {
-            Log.d(LOGGING_TAG, "Cannot request tokens from yourself.")
-            return
-        }
-
-        Log.d(LOGGING_TAG, "Requesting $amount tokens from $recipientMid")
-
-        // Find the peer by its mid
-        val recipientPeer = getPeers().find { it.mid == recipientMid }
-
-        // If the peer is found, send a token request message
-        if (recipientPeer != null) {
-            val requestMessage = TokenRequestMessage(amount, myPeer.mid, recipientMid)
-            gossipWith(recipientPeer, requestMessage, MESSAGE_TOKEN_REQUEST_ID)
-        } else {
-            Log.d(LOGGING_TAG, "Peer not found: $recipientMid")
-        }
     }
 
     fun saveLibTorrentPort(port: String) {
@@ -233,10 +211,7 @@ class DeToksCommunity(
         return walletManager.getOrCreateWallet(myPeer.mid).balance
     }
     class Factory(
-        private val context: Context,
-        private val settings: TrustChainSettings,
-        private val database: TrustChainStore,
-        private val crawler: TrustChainCrawler = TrustChainCrawler()
+        private val context: Context
     ) : Overlay.Factory<DeToksCommunity>(DeToksCommunity::class.java) {
         override fun create(): DeToksCommunity {
             return DeToksCommunity(context)

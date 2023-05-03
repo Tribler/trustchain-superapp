@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
-import android.util.Log
 import nl.tudelft.trustchain.detoks.TorrentManager.TorrentHandler
-import java.nio.channels.Selector
 import kotlin.random.Random
 
 class Strategy {
@@ -19,7 +17,6 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
 
 
     companion object {
-
         const val STRATEGY_RANDOM = 0
         const val STRATEGY_HOT = 1
         const val STRATEGY_RISING = 2
@@ -123,21 +120,16 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         if (id == STRATEGY_RANDOM) return handlers.shuffled().toMutableList()
         if (!strategyComparators.contains(id)) return handlers
 
-        var handlerProfile = handlers.map {
-            val key = it.handle.infoHash().toString()
+        val handlerProfile = handlers.map {
+            val key = TorrentManager.createKey(it.handle.infoHash(), it.fileIndex)
             if (!profiles.contains(key)) return@map Pair(it, ProfileEntry())
             return@map Pair(it, profiles[key])
         }
 
-        var sortedHandlerProfile: MutableList<Pair<TorrentHandler, ProfileEntry?>>
-
-        if (id == STRATEGY_RISING){
-            sortedHandlerProfile = filteredSort(handlerProfile, id, RISING_CUTOFF_SECONDS)
-        } else if (id == STRATEGY_HOT) {
-            sortedHandlerProfile = filteredSort(handlerProfile, id, HOT_CUTOFF_SECONDS)
-        } else {
-            sortedHandlerProfile =
-                handlerProfile.sortedWith(strategyComparators[id]!!).toMutableList()
+        val sortedHandlerProfile: MutableList<Pair<TorrentHandler, ProfileEntry?>> = when (id) {
+            STRATEGY_RISING -> filteredSort(handlerProfile, id, RISING_CUTOFF_SECONDS)
+            STRATEGY_HOT -> filteredSort(handlerProfile, id, HOT_CUTOFF_SECONDS)
+            else -> handlerProfile.sortedWith(strategyComparators[id]!!).toMutableList()
         }
 
         return sortedHandlerProfile.map { it.first }.toMutableList()

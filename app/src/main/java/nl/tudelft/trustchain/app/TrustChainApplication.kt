@@ -452,12 +452,8 @@ class TrustChainApplication : Application() {
     private fun createDeToksCommunity(): OverlayConfiguration<DeToksCommunity> {
         val randomWalk = RandomWalk.Factory()
 
-        val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "detoks.db")
-        val store = TrustChainSQLiteStore(Database(driver))
-
         return OverlayConfiguration(
-            DeToksCommunity.Factory(this, settings, store),
+            DeToksCommunity.Factory(this),
             listOf(randomWalk)
         )
     }
