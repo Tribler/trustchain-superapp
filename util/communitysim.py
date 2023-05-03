@@ -13,6 +13,7 @@ from pyipv8.ipv8_service import IPv8
 
 from messages import TorrentPayload
 from detoks_community import DetoksCommunity
+import json
 
 bootstrap_config = {
     "class": "DispersyBootstrapper",
@@ -62,9 +63,14 @@ bootstrapper = [
 ]
 
 
-async def start_nodes(num_nodes: int, timeout: int, max_peers: int):
+async def start_nodes(timeout: int, max_peers: int):
+
+    with open("/nodes.json") as f:
+        json_data = json.load(f)
+        f.close()
+
     print(
-        f"Starting community with {num_nodes} nodes, {timeout}s timeout and {max_peers} max peers."
+        f"Starting community with {len(json_data['nodes'])} nodes, {timeout}s timeout and {max_peers} max peers."
     )
 
     if not os.path.exists("keys/"):
@@ -73,7 +79,7 @@ async def start_nodes(num_nodes: int, timeout: int, max_peers: int):
     if not os.path.exists("torrents/"):
         os.mkdir("torrents/")
 
-    for i in range(num_nodes):
+    for i, node in enumerate(json_data["nodes"]):
         node_name = f"dummy_peer_{i}"
         builder = ConfigBuilder()
         builder.set_log_level("ERROR")
@@ -84,7 +90,7 @@ async def start_nodes(num_nodes: int, timeout: int, max_peers: int):
             [WalkerDefinition(Strategy.RandomWalk, max_peers, {"timeout": timeout})],
             bootstrapper,
             {},
-            [("started",)],
+            [("started", node, )],
         )
         ipv8 = IPv8(
             builder.finalize(), extra_communities={"DeToksCommunity": DetoksCommunity}
@@ -93,9 +99,8 @@ async def start_nodes(num_nodes: int, timeout: int, max_peers: int):
 
 
 if __name__ == "__main__":
-    NUM_NODES = int(os.getenv("NUM_NODES"))
     TIMEOUT = int(os.getenv("TIMEOUT"))
     MAX_NUM_PEERS = int(os.getenv("MAX_NUM_PEERS"))
 
-    ensure_future(start_nodes(NUM_NODES, TIMEOUT, MAX_NUM_PEERS))
+    ensure_future(start_nodes(TIMEOUT, MAX_NUM_PEERS))
     get_event_loop().run_forever()
