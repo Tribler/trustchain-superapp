@@ -34,6 +34,11 @@ class TorrentManager private constructor(
     var seedingTorrents = mutableListOf<TorrentHandler>()
         private set
 
+    var profitMap = HashMap<String, Float>()
+
+    var balance = 0.0f
+    val community: DeToksCommunity = IPv8Android.getInstance().getOverlay()!!
+
     val profile = Profile(HashMap())
     val strategies = Strategy()
 
@@ -48,6 +53,7 @@ class TorrentManager private constructor(
         buildTorrentIndex()
         initializeVideoPool()
         lastTimeStamp = System.currentTimeMillis()
+        balance = community.getBalance()
     }
 
     companion object {
@@ -248,18 +254,30 @@ class TorrentManager private constructor(
                         val torrentHandle = a.handle()
                         val allPeers = torrentHandle.peerInfo().filter { peer ->
                             peer.upSpeed() > 0 }
-                        val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
 
+                        profitMap[torrentHandle.name()] = 0.0f - (a.handle().status().allTimeDownload()/1000000)
                         for (peer in allPeers) {
                             val ip = peer.ip().split(":")[0]
                             val foundPeers = community.findPeerByIps(ip)
                             for (seederPeer in foundPeers) {
                                 if (seederPeer != null) {
+                                    Log.d(DeToksCommunity.LOGGING_TAG, "Found seeder from Detoks Community: ${seederPeer.mid}")
                                     community.sendTokens(1.0f, seederPeer.mid)
+
+
                                 }
                             }
                         }
                     }
+                    AlertType.BLOCK_UPLOADED -> {
+                        val a = alert as BlockUploadedAlert
+                        val torrentHandle = a.handle()
+
+                        val newWallet = community.getBalance()
+                        profitMap[torrentHandle.name()] = newWallet - balance + profitMap[torrentHandle.name()]!!
+                        balance = newWallet
+                    }
+
                     else -> {}
                 }
             }
@@ -470,7 +488,10 @@ class TorrentManager private constructor(
                         val uploadedBytes = currentTotalUpload - previousTotalUpload
                         val tokens = uploadedBytes / 1048576
                         previousUploadMap[ip] = currentTotalUpload
+                        Log.d(DeToksCommunity.LOGGING_TAG, "Increased token based on money received")
                         community.increaseTokens(tokens.toFloat())
+                        profitMap[handler.handle.name()] = profitMap[handler.handle.name()]!! + tokens.toFloat()
+
                     }
                 }
 

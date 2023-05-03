@@ -9,13 +9,13 @@ class Strategy {
 
 private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, ProfileEntry?>, Pair<TorrentHandler, ProfileEntry?>) -> Int>()
 
-    var isSeeding = false
+    var isSeeding = true
 
     var leechingStrategy = STRATEGY_RANDOM
-    var seedingStrategy = STRATEGY_RANDOM
+    var seedingStrategy = STRATEGY_HOT
 
-    var seedingBandwidthLimit = 0
-    var storageLimit : Int = 0
+    var seedingBandwidthLimit = 10000
+    var storageLimit : Int = 10000
 
 
     companion object {
