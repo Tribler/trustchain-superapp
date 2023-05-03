@@ -8,7 +8,6 @@ import android.widget.*
 import com.frostwire.jlibtorrent.TorrentHandle
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
-
 class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
 
     private lateinit var torrentManager: TorrentManager

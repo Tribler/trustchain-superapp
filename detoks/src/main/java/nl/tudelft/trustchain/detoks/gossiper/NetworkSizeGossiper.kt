@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.detoks.gossiper
 
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -41,7 +40,6 @@ class NetworkSizeGossiper(
         awaitingResponse.clear()
 
         val chanceLeader = leaders / (networkSizeEstimate.toDouble())
-        Log.d(DeToksCommunity.LOGGING_TAG, "Chance to become leader: $chanceLeader, leaders: $leaders, networksize estimate: $networkSizeEstimate")
         leaderEstimates = if (nextDouble() < chanceLeader)
             listOf(Pair(deToksCommunity.myPeer.mid, 1.0))
         else listOf()

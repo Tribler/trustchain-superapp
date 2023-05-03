@@ -34,7 +34,6 @@ data class TransactionMessage(
             return Pair(message, stream.available())
         }
     }
-
 }
 
 data class TokenRequestMessage(

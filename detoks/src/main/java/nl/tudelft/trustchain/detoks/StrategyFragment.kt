@@ -13,7 +13,6 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.exoplayer2.util.Log
 import kotlinx.android.synthetic.main.fragment_strategy.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -37,8 +36,6 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
 
         torrentManager = TorrentManager.getInstance(requireActivity())
         strategyRecyclerViewAdapter = StrategyAdapter(torrentManager.seedingTorrents, torrentManager.profitMap)
-
-
 
         val handler = Handler((Looper.getMainLooper()))
         val runnable: Runnable = object : Runnable {
@@ -175,8 +172,6 @@ class StrategyAdapter(private val strategyData: List<TorrentHandler>, private va
 
         }
     }
-
-    val community: DeToksCommunity = IPv8Android.getInstance().getOverlay()!!
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)

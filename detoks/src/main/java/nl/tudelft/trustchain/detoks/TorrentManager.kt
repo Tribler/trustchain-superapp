@@ -104,7 +104,7 @@ class TorrentManager private constructor(
         }
     }
 
-    fun getNumberOfTorrents(): Int {
+    private fun getNumberOfTorrents(): Int {
         return torrentFiles.size
     }
 
@@ -153,12 +153,8 @@ class TorrentManager private constructor(
         currentIndex = newIndex
     }
 
-    // TODO: This could potentially lead to issues, since what happens if the user locks
-    //        their screen or switches to another app for a while? Maybe this could be
-    //        changed to a place in the video adapter as well, if we can detect maybe when
-    //        a video is done playing and starts again, then update the duration if possible
     private fun notifyChangeUpdate() {
-        val torrent = torrentFiles.gett(currentIndex) // TODO: make torrentFiles into unwatched videos
+        val torrent = torrentFiles.gett(currentIndex)
         val key = createKey(torrent.handle.infoHash(), torrent.fileIndex)
         profile.updateEntryDuration(key, torrent.getVideoDuration())
         profile.updateEntryWatchTime(key, updateTime(), true)
@@ -583,7 +579,7 @@ class TorrentManager private constructor(
     fun getCurrentIndex(): Int {
         return currentIndex
     }
-    
+
     fun getCurrentHandler(): TorrentHandler {
         return torrentFiles.gett(currentIndex)
     }
@@ -655,7 +651,7 @@ class TorrentManager private constructor(
             handle.resume()
         }
 
-        fun setMaximumPriority() {
+        private fun setMaximumPriority() {
             handle.resume()
             handle.filePriority(fileIndex, Priority.SEVEN)
             handle.pause()

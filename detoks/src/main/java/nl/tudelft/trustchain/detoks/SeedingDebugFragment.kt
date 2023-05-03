@@ -43,8 +43,6 @@ class SeedingDebugFragment :  BaseFragment(R.layout.fragment_debug_seeding) {
         val strategyRecycleView = view.findViewById<RecyclerView>(R.id.debugView)
         strategyRecycleView.adapter = seedingDebugAdapter
         strategyRecycleView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-
-
     }
 }
 
@@ -82,15 +80,10 @@ class SeedingDebugAdapter(private val strategyData: List<TorrentHandle>) : Recyc
         val bundle = Bundle()
         bundle.putString("torrent_name", holder.hashTextView.text.toString())
 
-
         holder.downloadTextView.text = status.state().name
-
         holder.uploadTextView.text = status.isSeeding.toString()
-
         holder.seederTextView.text = status.listSeeds().toString()
-
         holder.leecherTextView.text = status.listPeers().toString()
-
     }
 
     override fun getItemCount(): Int = strategyData.size

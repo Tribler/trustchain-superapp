@@ -4,11 +4,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.widget.*
-import com.frostwire.jlibtorrent.TorrentHandle
+import android.widget.TextView
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
 
 
 class DetoksDebugFragment : BaseFragment(R.layout.fragment_detoks_debug) {
