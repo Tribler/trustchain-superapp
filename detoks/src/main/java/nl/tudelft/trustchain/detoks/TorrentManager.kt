@@ -582,7 +582,8 @@ class TorrentManager private constructor(
 
     fun getCurrentIndex(): Int {
         return currentIndex
-        
+    }
+    
     fun getCurrentHandler(): TorrentHandler {
         return torrentFiles.gett(currentIndex)
     }
