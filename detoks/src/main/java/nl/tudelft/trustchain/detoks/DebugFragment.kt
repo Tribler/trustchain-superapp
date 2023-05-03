@@ -96,6 +96,6 @@ class DetoksDebugFragment : BaseFragment(R.layout.fragment_detoks_debug) {
                 handler.postDelayed(this, 2000)
             }
         }
-        handler.postDelayed(runnable,2000)
+        handler.post(runnable)
     }
 }

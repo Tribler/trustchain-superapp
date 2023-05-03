@@ -122,7 +122,7 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
                 handler.postDelayed(this, 2000)
             }
         }
-        handler.postDelayed(runnable,2000)
+        handler.post(runnable)
 
 
     }
