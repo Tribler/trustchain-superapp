@@ -555,6 +555,13 @@ class TorrentManager private constructor(
         return torrentFiles.map {it.handle}.distinct()
     }
 
+    fun getListOfSeedingTorrents(): List<TorrentHandle> {
+        return seedingTorrents.map {it.handle}.distinct()
+    }
+
+    fun getCurrentIndex(): Int {
+        return currentIndex
+        
     fun getCurrentHandler(): TorrentHandler {
         return torrentFiles.gett(currentIndex)
     }
