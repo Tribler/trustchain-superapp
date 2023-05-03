@@ -39,4 +39,9 @@
         android:name="nl.tudelft.trustchain.detoks.DetoksDebugFragment"
         android:label="Debug">
     </fragment>
+    <fragment
+        android:id="@+id/DebugSeedingFragment"
+        android:name="nl.tudelft.trustchain.detoks.SeedingDebugFragment"
+        android:label="Torrent">
+    </fragment>
 </navigation>

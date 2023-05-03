@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.detoks
 import android.content.Context
 import android.util.Log
 import com.frostwire.jlibtorrent.Sha1Hash
-import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -17,11 +16,9 @@ import nl.tudelft.trustchain.detoks.gossiper.*
 import kotlin.math.max
 
 
-class DeToksCommunity(private val context: Context,
-                      settings: TrustChainSettings,
-                      database: TrustChainStore,
-                      crawler: TrustChainCrawler = TrustChainCrawler()
-) : TrustChainCommunity(settings, database, crawler) {
+class DeToksCommunity(
+    private val context: Context
+    ) : TransactionEngine(DetoksConfig.DETOKS_SERVICE_ID) {
 
     private val walletManager = WalletManager(context)
     private val visitedPeers  = mutableListOf<Peer>()
@@ -115,9 +112,6 @@ class DeToksCommunity(private val context: Context,
         // Send a token only to a new peer
         if (!visitedPeers.contains(peer)) {
             visitedPeers.add(peer)
-            val transaction = mapOf("amount" to 1)
-            createProposalBlock(BLOCK_TYPE, transaction, peer.publicKey.keyToBin())
-            Log.d(LOGGING_TAG, "Created proposal block")
         }
 
         send(peer.address, packet)
@@ -245,7 +239,7 @@ class DeToksCommunity(private val context: Context,
         private val crawler: TrustChainCrawler = TrustChainCrawler()
     ) : Overlay.Factory<DeToksCommunity>(DeToksCommunity::class.java) {
         override fun create(): DeToksCommunity {
-            return DeToksCommunity(context, settings, database, crawler)
+            return DeToksCommunity(context)
         }
     }
 }
