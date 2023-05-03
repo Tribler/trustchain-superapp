@@ -86,7 +86,7 @@ class VideosAdapter(
                 else progress1MBTV.progress = ((downloaded/ firstMB) * 100).toInt()
 
                 progressTotalTV.progress = ((downloaded/fileSize.toDouble()) * 100).toInt()
-                remainingSizeTV.text = ((fileSize - downloaded) / toKb).toString()
+                remainingSizeTV.text = ((fileSize - downloaded) / firstMB).toString()
 
                 if (handler.isDownloaded()) {
                     doneDownloadingTV.visibility = View.VISIBLE
