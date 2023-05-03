@@ -6,7 +6,7 @@ from torrentool.api import Torrent
 
 from datetime import timedelta, datetime
 
-# dates for random uplaod time generation
+# dates for random upload time generation
 START_DATE = datetime.strptime("1/1/2023", "%d/%m/%Y")
 END_DATE = datetime.strptime("25/4/2023", "%d/%m/%Y")
 
