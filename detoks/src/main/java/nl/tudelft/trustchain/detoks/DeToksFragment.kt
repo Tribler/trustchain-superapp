@@ -12,7 +12,6 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
 import java.io.FileOutputStream
 
-
 class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var torrentManager: TorrentManager
     private val logger = KotlinLogging.logger {}
@@ -56,11 +55,14 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         super.onViewCreated(view, savedInstanceState)
 
         viewPagerVideos.adapter = VideosAdapter(torrentManager)
-            viewPagerVideos.currentItem = 0
+        viewPagerVideos.currentItem = 0
         onPageChangeCallback()
 
         val settingsButton = view.findViewById<Button>(R.id.strategyButton)
         settingsButton.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toStrategyFragment) }
+
+        val debugButton = view.findViewById<Button>(R.id.debugButton)
+        debugButton.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toDebugFragment) }
     }
 
     /**
@@ -85,6 +87,12 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             }
         })
     }
+
+    fun onVideoError() {
+        viewPagerVideos.scrollTo(100, 100)
+    }
+
+
 
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 2

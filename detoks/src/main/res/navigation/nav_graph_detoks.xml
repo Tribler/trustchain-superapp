@@ -13,6 +13,8 @@
             app:destination="@id/strategyFragment"/>
         <action android:id="@+id/action_toTorrentFragment"
             app:destination="@id/torrentFragment"/>
+        <action android:id="@+id/action_toDebugFragment"
+            app:destination="@id/detoksDebugFragment"/>
     </fragment>
 
     <fragment
@@ -33,8 +35,8 @@
     </fragment>
 
     <fragment
-        android:id="@+id/DebugSeedingFragment"
-        android:name="nl.tudelft.trustchain.detoks.SeedingDebugFragment"
-        android:label="Torrent">
+        android:id="@+id/detoksDebugFragment"
+        android:name="nl.tudelft.trustchain.detoks.DetoksDebugFragment"
+        android:label="Debug">
     </fragment>
 </navigation>

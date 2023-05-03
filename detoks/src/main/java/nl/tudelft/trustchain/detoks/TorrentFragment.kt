@@ -5,10 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.*
-import com.frostwire.jlibtorrent.FileStorage
 import com.frostwire.jlibtorrent.TorrentHandle
-import kotlinx.android.synthetic.main.fragment_torrent.*
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
 
@@ -70,11 +67,11 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
 
                 val torrentInfo = torrent.torrentFile()
                 val fileStorage = torrentInfo.files()
-                var fileStrings = ""
+                var filesString = ""
                 for (i in 0 until fileStorage.numFiles()-1) {
-                    fileStrings += "\n" + fileStorage.fileName(i)
+                    filesString += "\n" + fileStorage.fileName(i)
                 }
-                filesTV.text = getString(R.string.files, fileStrings)
+                filesTV.text = getString(R.string.files, filesString)
 
                 val watchTime = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.watchTime
                 watchTimeTV.text = getString(R.string.watch_time, watchTime)
@@ -125,7 +122,7 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
                 handler.postDelayed(this, 2000)
             }
         }
-        handler.postDelayed(runnable,2000)
+        handler.post(runnable)
 
 
     }

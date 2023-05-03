@@ -48,7 +48,7 @@ class StrategyFragment :  BaseFragment(R.layout.fragment_strategy) {
                 handler.postDelayed(this, 2000)
             }
         }
-        handler.postDelayed(runnable, 2000)
+        handler.post(runnable)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

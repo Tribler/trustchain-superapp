@@ -20,8 +20,23 @@
     <string name="likes">Likes: %1$d</string>
     <string name="times_seen">Times seen: %1$d</string>
     <string name="upload_date">Upload date: %1$d</string>
-    <string name="status">Status</string>
-    <string name="seeding">Seeding </string>
-    <string name="nrSeeders">Seeders</string>
-    <string name="nrLeechers">Peers</string>
+    <string name="estimated_network_size">Estimated network size: %1$d</string>
+    <string name="nb_connected_peers">Number of connected peers: %1$d</string>
+    <string name="list_connected_peers">List of connected peers: %1$s</string>
+    <string name="top_3_leeching_torrents">Top 3 leeching torrents: %1$s</string>
+    <string name="top_3_seeding_torrents">Top 3 seeding torrents: %1$s</string>
+    <string name="seeding_status">Seeding: %b</string>
+    <string name="wallet_tokens">Wallet tokens amount: %1$.2f</string>
+    <string name="peer_id">Peer ID: %1$s</string>
+    <string name="peers">Peers</string>
+    <string name="seeders">Seeders</string>
+    <string name="remaining_mb">Remaining (MB)</string>
+    <string name="download_rate_n_kb_s">Download rate \n (KB/s)</string>
+    <string name="file_size_n_mb">File size \n (MB)</string>
+    <string name="elapsed_time_n_seconds">Elapsed time \n (seconds)</string>
+    <string name="first_mb_progress">First MB progress:</string>
+    <string name="total_progress">Total progress:</string>
+    <string name="file_name">File name:\t</string>
+    <string name="done_downloading_will_play_video_now">DONE DOWNLOADING - will play video now</string>
+    <string name="torrent_name_t">Torrent name:\t</string>
 </resources>
