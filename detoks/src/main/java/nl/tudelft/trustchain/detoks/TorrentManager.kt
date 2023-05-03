@@ -25,7 +25,8 @@ class TorrentManager private constructor(
 )  {
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
-    private val torrentFiles = mutableListOf<TorrentHandler>()
+    val torrentFiles = mutableListOf<TorrentHandler>()
+
 
     var seedingTorrents = mutableListOf<TorrentHandler>()
         private set
@@ -369,17 +370,19 @@ class TorrentManager private constructor(
 
         // Preserve cached if again in cache
         val cacheEnd = currentIndex + cachingAmount
-        val newCache = sortedTorrents.subList(0, Math.min(cachingAmount, sortedTorrents.size -1))
+        val newCache = sortedTorrents.subList(0,
+            cachingAmount.coerceAtMost(sortedTorrents.size - 1)
+        )
 
         for (i in currentIndex .. cacheEnd) {
             if (!newCache.contains(torrentFiles.gett(i)))
                 torrentFiles.gett(i).deleteFile()
-            torrentFiles.set(i.mod(torrentFiles.size), sortedTorrents.gett(i - currentIndex))
+            torrentFiles[i.mod(torrentFiles.size)] = sortedTorrents.gett(i - currentIndex)
         }
 
         for (i in cacheEnd + 1 until torrentFiles.size) {
             torrentFiles.gett(i).deleteFile()
-            torrentFiles.set(i.mod(torrentFiles.size), sortedTorrents.gett(i - currentIndex))
+            torrentFiles[i.mod(torrentFiles.size)] = sortedTorrents.gett(i - currentIndex)
         }
 
         initializeVideoPool()
@@ -581,10 +584,6 @@ class TorrentManager private constructor(
 
     fun getCurrentHandler(): TorrentHandler {
         return torrentFiles.gett(currentIndex)
-    }
-
-    fun getDHTSize(): Long {
-        return sessionManager.dhtNodes()
     }
 
     class TorrentHandler(
