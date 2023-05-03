@@ -98,7 +98,6 @@ class TorrentManager private constructor(
             }
             content.asMediaInfo()
         } catch (e: TimeoutCancellationException) {
-            Log.i("DeToks", "Timeout for content ... $index")
             content.asMediaInfo()
         }
     }
@@ -557,6 +556,13 @@ class TorrentManager private constructor(
 
     fun getCurrentIndex(): Int {
         return currentIndex
+        
+    fun getCurrentHandler(): TorrentHandler {
+        return torrentFiles.gett(currentIndex)
+    }
+
+    fun getDHTSize(): Long {
+        return sessionManager.dhtNodes()
     }
 
     class TorrentHandler(
@@ -631,6 +637,10 @@ class TorrentManager private constructor(
 
         fun asMediaInfo(): TorrentMediaInfo {
             return TorrentMediaInfo(torrentName, fileName, getPath())
+        }
+
+        fun getFileSize(): Long {
+            return handle.torrentFile().files().fileSize(fileIndex)
         }
     }
 
