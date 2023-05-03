@@ -89,7 +89,7 @@ class TorrentManager private constructor(
                     delay(100)
                 }
                 profile.updateEntryDuration(
-                    createKey(MagnetLink.hashFromMagnet(content.handle.makeMagnetUri()), content.fileIndex),
+                    createKey(content.handle.infoHash(), content.fileIndex),
                     content.getVideoDuration())
             }
             content.asMediaInfo()
@@ -106,6 +106,10 @@ class TorrentManager private constructor(
     fun createKey(hash: String, index: Int): String {
         val torrent = torrentFiles.filter { hash == MagnetLink.hashFromMagnet(it.handle.makeMagnetUri()) }
         return if(torrent.isEmpty()) "" else "$hash?index=$index"
+    }
+
+    fun createKey(hash: Sha1Hash, index: Int): String {
+        return createKey(hash.toString(), index)
     }
 
     /**
@@ -154,8 +158,7 @@ class TorrentManager private constructor(
     //        a video is done playing and starts again, then update the duration if possible
     private fun notifyChangeUpdate() {
         val torrent = torrentFiles.gett(currentIndex) // TODO: make torrentFiles into unwatched videos
-        val magnet = torrent.handle.makeMagnetUri()
-        val key = createKey(MagnetLink.hashFromMagnet(magnet), torrent.fileIndex)
+        val key = createKey(torrent.handle.infoHash(), torrent.fileIndex)
         profile.updateEntryDuration(key, torrent.getVideoDuration())
         profile.updateEntryWatchTime(key, updateTime(), true)
     }
@@ -203,10 +206,9 @@ class TorrentManager private constructor(
                                 it
                             )
                             torrentFiles.add(torrent)
-                            val magnet = torrent.handle.makeMagnetUri()
-                            getInfoFromMagnet(magnet)?.let { it2 ->
+                            getInfoFromMagnet(torrent.handle.makeMagnetUri())?.let { it2 ->
                                 profile.updateEntryUploadDate(
-                                    createKey(MagnetLink.hashFromMagnet(magnet), it),
+                                    createKey(torrent.handle.infoHash(), it),
                                     it2
                                 )
                             }
@@ -288,7 +290,7 @@ class TorrentManager private constructor(
         if (sessionManager.find(hash) != null) {
             for (it in 0 until torrentInfo.numFiles()) {
                 if (!torrentInfo.files().fileName(it).endsWith(".mp4")) continue
-                profile.incrementTimesSeen(createKey(MagnetLink.hashFromMagnet(magnet), it))
+                profile.incrementTimesSeen(createKey(torrentInfo.infoHash(), it))
             }
             return
         }
@@ -328,7 +330,7 @@ class TorrentManager private constructor(
                 torrentFiles.add(insertIndex, torrent)
                 getInfoFromMagnet(magnet)?.let { it2 ->
                     profile.updateEntryUploadDate(
-                        createKey(MagnetLink.hashFromMagnet(magnet), it),
+                        createKey(hash, it),
                         it2
                     )
                 }
