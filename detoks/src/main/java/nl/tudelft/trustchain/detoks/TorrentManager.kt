@@ -103,13 +103,9 @@ class TorrentManager private constructor(
         return torrentFiles.size
     }
 
-    fun createKey(hash: String, index: Int): String {
-        val torrent = torrentFiles.filter { hash == MagnetLink.hashFromMagnet(it.handle.makeMagnetUri()) }
-        return if(torrent.isEmpty()) "" else "$hash?index=$index"
-    }
-
     fun createKey(hash: Sha1Hash, index: Int): String {
-        return createKey(hash.toString(), index)
+        val torrent = torrentFiles.filter { hash == it.handle.infoHash() }
+        return if(torrent.isEmpty()) "" else "$hash?index=$index"
     }
 
     /**
