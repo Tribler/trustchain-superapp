@@ -66,6 +66,10 @@ class TorrentManager private constructor(
             }
             return instance
         }
+
+        fun createKey(hash: Sha1Hash, index: Int): String {
+            return "$hash?index=$index"
+        }
     }
 
     fun notifyIncrease() {
@@ -106,11 +110,6 @@ class TorrentManager private constructor(
 
     private fun getNumberOfTorrents(): Int {
         return torrentFiles.size
-    }
-
-    fun createKey(hash: Sha1Hash, index: Int): String {
-        val torrent = torrentFiles.filter { hash == it.handle.infoHash() }
-        return if(torrent.isEmpty()) "" else "$hash?index=$index"
     }
 
     /**

@@ -48,7 +48,7 @@ class TorrentGossiper(
                 if (!fileName.endsWith(".mp4")) continue
 
                 // Create the unique video key and compose the profile contents into a list of data
-                val key = torrentManager.createKey(torrentInfo.infoHash(), it)
+                val key = TorrentManager.createKey(torrentInfo.infoHash(), it)
                 val entry = torrentManager.profile.addProfile(key)
                 val data = listOf(
                     Pair("Key", key),

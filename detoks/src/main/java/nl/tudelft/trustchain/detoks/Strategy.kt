@@ -121,7 +121,7 @@ private val strategyComparators = mutableMapOf<Int, (Pair<TorrentHandler, Profil
         if (!strategyComparators.contains(id)) return handlers
 
         val handlerProfile = handlers.map {
-            val key = it.handle.infoHash().toString()
+            val key = TorrentManager.createKey(it.handle.infoHash(), it.fileIndex)
             if (!profiles.contains(key)) return@map Pair(it, ProfileEntry())
             return@map Pair(it, profiles[key])
         }
