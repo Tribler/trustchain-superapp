@@ -79,14 +79,6 @@
             android:text=""
             android:textAlignment="center" />
 
-<!--        <View-->
-<!--            android:id="@+id/view"-->
-<!--            android:layout_width="1dp"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:background="#373737" />-->
-
-
-
     </LinearLayout>
 
 </LinearLayout>

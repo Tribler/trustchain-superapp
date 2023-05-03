@@ -255,15 +255,10 @@ class TorrentManager private constructor(
                         val allPeers = torrentHandle.peerInfo().filter { peer ->
                             peer.upSpeed() > 0 }
 
-                        //val currentProfit = profitMap.getOrDefault(torrentHandle.name(), 0.0f)
                         profitMap[torrentHandle.name()] = 0.0f - (a.handle().status().allTimeDownload()/1000000)
                         for (peer in allPeers) {
                             val ip = peer.ip().split(":")[0]
                             val foundPeers = community.findPeerByIps(ip)
-//                            if(foundPeers.isEmpty()) {
-//                                community.increaseTokens(-1.0f)
-//                                Log.d(DeToksCommunity.LOGGING_TAG, "Paying for download")
-//                            }
                             for (seederPeer in foundPeers) {
                                 if (seederPeer != null) {
                                     Log.d(DeToksCommunity.LOGGING_TAG, "Found seeder from Detoks Community: ${seederPeer.mid}")
