@@ -37,8 +37,10 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
         }
 
         val torrent: TorrentHandle?
-        val fileName: TorrentManager.TorrentHandler? = torrentManager.torrentFiles.find { it.fileName == passedName }
-        torrent = fileName?.handle ?: torrentManager.torrentFiles.find { it.torrentName == passedName }!!.handle
+        var fileName: TorrentManager.TorrentHandler? = torrentManager.torrentFiles.find { it.fileName == passedName }
+        if (fileName == null) fileName = torrentManager.torrentFiles.find { it.torrentName == passedName }
+        torrent = fileName!!.handle
+        val idx = fileName.fileIndex
 
         fun updateDebugPage() {
             val infoHash = torrent.infoHash().toString()
@@ -58,25 +60,26 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
             }
             filesTV.text = getString(R.string.files, filesString)
 
-            val watchTime = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.watchTime
+            val profile = torrentManager.profile.profiles[TorrentManager.createKey(torrent.infoHash(), idx)]
+            val watchTime = profile!!.watchTime
             watchTimeTV.text = getString(R.string.watch_time, watchTime)
 
-            val hopCount = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.hopCount
+            val hopCount = profile.hopCount
             hopCountTV.text = getString(R.string.hop_count, hopCount)
 
-            val watched = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.watched
+            val watched = profile.watched
             watchedTV.text = getString(R.string.watched, watched)
 
-            val duration = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.duration
+            val duration = profile.duration
             durationTV.text = getString(R.string.duration, duration)
 
-            val likes = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.likes
+            val likes = profile.likes
             likesTV.text = getString(R.string.likes, likes)
 
-            val timesSeen = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.timesSeen
+            val timesSeen = profile.timesSeen
             timesSeenTV.text = getString(R.string.times_seen, timesSeen)
 
-            val uploadDate = torrentManager.profile.profiles[torrent.infoHash().toString()]!!.uploadDate
+            val uploadDate = profile.uploadDate
             uploadDateTV.text = getString(R.string.upload_date, uploadDate)
         }
 

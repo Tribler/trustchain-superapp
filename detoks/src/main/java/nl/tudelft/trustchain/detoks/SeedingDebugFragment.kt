@@ -34,7 +34,7 @@ class SeedingDebugFragment :  BaseFragment(R.layout.fragment_debug_seeding) {
                 handler.postDelayed(this, 2000)
             }
         }
-        handler.postDelayed(runnable,2000)
+        handler.post(runnable)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
