@@ -55,7 +55,13 @@ class DetoksDebugFragment : BaseFragment(R.layout.fragment_detoks_debug) {
             val torrentsList = torrentManager.getListOfTorrents()
             val currentIndex = torrentManager.getCurrentIndex()
             var top3LeechingTorrentsString = ""
-            for (i in currentIndex until (currentIndex+3).coerceAtMost(torrentsList.size)) {
+
+            val lower = currentIndex%torrentsList.size
+            val upper = (currentIndex+3)%torrentsList.size
+            if (lower == upper) {
+                top3LeechingTorrentsString += "\n" + torrentsList[lower].name()
+            }
+            for (i in lower until upper) {
                 top3LeechingTorrentsString += "\n" + torrentsList[i].name()
             }
             val leechingStrategy = torrentManager.strategies.leechingStrategy
