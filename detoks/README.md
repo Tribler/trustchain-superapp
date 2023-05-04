@@ -6,6 +6,10 @@ This document describes the functionallity provided in DeToks. Currently it cont
 * Option to seed videos for token profit based on a selected seeding strategy, maximum storage size and maximum upload bandwidth.
 * View torrent information and statistics of seeded torrents.
 
+![core-functionality](https://user-images.githubusercontent.com/31625452/236310196-38465bbc-0471-4c91-9da3-ed5eda8492a2.gif)
+
+Click [here](https://twinkle.aaw.ooo/y73u8h7m55wap2tgy9rt.gif) for a higher definition GIF.
+
 ## Gossiping
 
 A Large part of the DeToks back-end depends on information being gossiped over the DeToks community network. Gossiping works by selecting a random subset of all known peers of a node and passing messages between them. Since different kinds of data is shared, several gossipers are used. Namely:
@@ -76,7 +80,7 @@ As previously mentioned, the leeching strategy determines which videos are playe
 
 A user can seed torrents to earn tokens on the DeToks community network. This option can be turned on in the Settings view:
 
-<img src="https://user-images.githubusercontent.com/45147538/233316385-3843a31b-cbd1-4cb9-bdb8-ba62f5d35724.jpeg" alt="seeding" width="25%">
+<img src="https://user-images.githubusercontent.com/57201085/236303160-d3001371-45de-4356-8a94-710b52e5469f.jpg" alt="seeding" width="25%">
 
 The user has to specify:
 * Maximum bandwidth per day (in MB): sets the maximum upload rate.
@@ -89,11 +93,13 @@ The seeding strategy only sorts the torrents into a list of torrents that will b
 
 ## Tokens
 
-A simple token transaction implementation was added in order to test if transactions can be performed while seeding and downloading. Whenever an user finishes downloading a piece of the torrent they are downloading, they send a token to the peers which were seeding it. We check for that by using the alert `AlertType.PIECE_FINISHED`, and we identify the peers that were seeding the downloaded piece based on the information given by the current torrent handle. In addition, peers may also seed torrents to peers outside of the Detoks Community, by which they also get compsated by increasing their wallet balance.
+A simple token transaction implementation was added in order to test if transactions can be performed while seeding and downloading. Whenever an user finishes downloading a piece of the torrent they are downloading, they send a token to the peers which were seeding it. We check for that by using the alert `AlertType.PIECE_FINISHED`, and we identify the peers that were seeding the downloaded piece based on the information given by the current torrent handle. In addition, peers may also seed torrents to peers outside of the DeToks Community, by which they also get compsated by increasing their wallet balance.
 
-## Debug Screen
-A user may access the debug screen for a torrent by clicking on its name (circled in orange) in the list of seeded torrents shown in [Seeding](#seeding).   
-<img src="https://user-images.githubusercontent.com/57201085/232646069-cc0b9fcc-b5ee-49b0-8713-40cab2c4138a.jpg" alt="fu1" width="25%"> <img src="https://user-images.githubusercontent.com/57201085/232646748-47d9bdd4-c549-4c21-8c80-2499e2ee5b1e.jpg" alt="fu1" width="25%">
+## Debug Screens
+
+### Torrent-Specific Debug Screen
+A user may access the debug screen for a specific torrent by clicking on the name of the video in the main DeToks screen or by clicking on its name in the list of seeded torrents shown in [Seeding](#seeding).   
+<img src="https://user-images.githubusercontent.com/57201085/236295625-a4113632-3393-46cc-994d-ffe079ba04cf.jpg" width="25%">
 
 It displays libtorrent metadata on the torrent such as:
 * `infoHash`: info hash of the torrent.
@@ -113,4 +119,22 @@ and two extra profile metrics:
 * `watched`: whether or not the video was watched
 * `likes`: number of likes that the torrent has
 
+### Global Debug Screen
+A  user may access the general debug screen by clicking on the "Debug" button.
+
+<img src="https://user-images.githubusercontent.com/57201085/236295401-33e4fa3b-4875-4221-b06b-fe57c58df32f.jpg" alt="general debug screen" width="25%">
+
+It displays information on  such as:
+* `Estimated networksize`: estimated number of peers in the network.
+* `Number of connected peers`: number of connected peers.
+* `List of connected peer`: peer IDs (mid) of the connected peers.
+* `Top 3 leeching torrents`: torrent names of the top 3 leeching torrents with a description of the leeching strategy. 
+* `Top 3 seeding torrents with metrics from seeders`: torrent names of the top 3 seeding torrents with a description of the seeding strategy.
+* `Seeding status`: whether or not the peer is seeding.
+* `Wallet token amount`: amount of tokens in a peer's wallet.
+* `Peer ID`: mid of my peer.
+
+### Seeding Debug Screens
+We also created a screen with more details on seeding torrents accessible by clicking the "Torrent Infos" button in Settings.
+<img src="https://user-images.githubusercontent.com/57201085/236297098-87829223-0a22-4c79-862c-9e729ec7d3a7.jpg" alt="seeding debug screen" width="25%">
 
