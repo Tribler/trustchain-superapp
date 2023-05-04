@@ -83,7 +83,7 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
             timesSeenTV.text = getString(R.string.times_seen, timesSeen)
 
             val uploadDate = Date(profile.uploadDate)
-            
+
             @SuppressLint("SimpleDateFormat")
             val format = SimpleDateFormat("yyyy.MM.dd HH:mm")
             val uploadDateStr = format.format(uploadDate)
@@ -99,7 +99,5 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
             }
         }
         handler.post(runnable)
-
-
     }
 }

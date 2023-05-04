@@ -95,6 +95,22 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 2
-        val DEFAULT_TORRENT_FILE = listOf("detoks.torrent", "_new.torrent", "hop.torrent", "hot.torrent", "rising.torrent", "t10_20230502_202305_archive")
+        val DEFAULT_TORRENT_FILE = listOf(
+            "_new.torrent",
+            "hop.torrent",
+            "hot.torrent",
+            "rising.torrent",
+            "t10_20230502_202305_archive.torrent",
+            "t9_20230502_20230502_archive.torrent",
+            "t8_20230502_archive.torrent",
+            "t7_20230502_archive.torrent",
+            "t6_20230502_archive.torrent",
+            "t5_20230502_archive.torrent",
+            "t4_20230502_archive.torrent",
+            "t3_20230502_202305_archive.torrent",
+            "t2_20230502_archive.torrent",
+            "t1_20230502_archive.torrent",
+            "top.torrent"
+        )
     }
 }
