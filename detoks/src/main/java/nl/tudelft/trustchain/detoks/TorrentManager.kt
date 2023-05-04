@@ -43,7 +43,8 @@ class TorrentManager private constructor(
     private var currentIndex = 0
     private var unwatchedIndex = 0
 
-    private lateinit var job: Job
+    private var seedingStrategyJobs = mutableListOf<Job>()
+
     init {
         clearMediaCache()
         initializeSessionManager()
@@ -394,6 +395,8 @@ class TorrentManager private constructor(
     ) {
         if (!isSeeding) return
 
+        seedingStrategyJobs.forEach{ it.cancel() }
+
         strategies.seedingStrategy = strategyId
         strategies.storageLimit = storageLimit
 
@@ -404,9 +407,8 @@ class TorrentManager private constructor(
         ).distinctBy { it.handle }
         var storage: Long = 0
 
-        val jobs = mutableListOf<Job>()
-
         val toStopSeeding = getAndClearSeedingTorrents()
+        val jobs = mutableListOf<Job>()
 
         for (i in seedingTorrentsSorted.indices) {
             seedingTorrentsSorted[i].handle.scrapeTracker()
@@ -429,10 +431,12 @@ class TorrentManager private constructor(
 
             jobs.add(CoroutineScope(Job() + Dispatchers.Default).launch {
                 if (downloadAndSeed(seedingTorrentsSorted[i])) {
+                    yield()
                     addSeedingTorrent(seedingTorrentsSorted[i])
                 }
             })
         }
+        seedingStrategyJobs = jobs
 
         CoroutineScope(Job() + Dispatchers.Default).launch {
             toStopSeeding.forEach { stopSeedingTorrent(it) }
@@ -445,6 +449,7 @@ class TorrentManager private constructor(
                 updateSeedingStrategy(strategyId, storageLimit)
         }
     }
+
     @OptIn(DelicateCoroutinesApi::class)
     private fun startMonitoringUploaders(handler: TorrentHandler) {
         val previousUploadMap = mutableMapOf<String, Long>()

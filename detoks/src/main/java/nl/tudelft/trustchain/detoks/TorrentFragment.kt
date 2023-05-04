@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -81,7 +82,9 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
             val timesSeen = profile.timesSeen
             timesSeenTV.text = getString(R.string.times_seen, timesSeen)
 
-            val uploadDate = Date(profile.uploadDate * 1000)
+            val uploadDate = Date(profile.uploadDate)
+            
+            @SuppressLint("SimpleDateFormat")
             val format = SimpleDateFormat("yyyy.MM.dd HH:mm")
             val uploadDateStr = format.format(uploadDate)
             uploadDateTV.text = getString(R.string.upload_date, uploadDateStr)
