@@ -6,7 +6,9 @@ This document describes the functionallity provided in DeToks. Currently it cont
 * Option to seed videos for token profit based on a selected seeding strategy, maximum storage size and maximum upload bandwidth.
 * View torrent information and statistics of seeded torrents.
 
-![core-functionality](https://twinkle.aaw.ooo/foylwynxqpqz0wrumj7e.gif)
+![core-functionality](https://user-images.githubusercontent.com/31625452/236310196-38465bbc-0471-4c91-9da3-ed5eda8492a2.gif)
+
+Click [here](https://twinkle.aaw.ooo/y73u8h7m55wap2tgy9rt.gif) for a higher definition GIF.
 
 ## Gossiping
 
