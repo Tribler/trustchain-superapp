@@ -32,13 +32,16 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             if (!dir2.exists()) {
                 dir2.mkdirs()
             }
-            val file = File("$torrentDir/$DEFAULT_TORRENT_FILE")
-            if (!file.exists()) {
-                val outputStream = FileOutputStream(file)
-                val ins = requireActivity().resources.openRawResource(R.raw.detoks)
-                outputStream.write(ins.readBytes())
-                ins.close()
-                outputStream.close()
+            for (files in DEFAULT_TORRENT_FILE) {
+                val file = File("$torrentDir/$files")
+                if (!file.exists()) {
+                    val outputStream = FileOutputStream(file)
+                    val resId = resources.getIdentifier(files.substring(0, files.length - 8), "raw", requireActivity().packageName)
+                    val ins = requireActivity().resources.openRawResource(resId)
+                    outputStream.write(ins.readBytes())
+                    ins.close()
+                    outputStream.close()
+                }
             }
         } catch (e: Exception) {
             Log.e("DeToks", "Failed to cache default torrent: $e")
@@ -90,6 +93,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 2
-        const val DEFAULT_TORRENT_FILE = "detoks.torrent"
+        val DEFAULT_TORRENT_FILE = listOf("__abstract.torrent", "_countdown7.torrent")
     }
 }

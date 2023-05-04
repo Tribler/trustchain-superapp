@@ -35,7 +35,7 @@ class NetworkSizeGossiper(
         val deToksCommunity = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
 
         if (leaderEstimates.isNotEmpty())
-            networkSizeEstimate = (1 / leaderEstimates.minOfOrNull { it.second }!!).toInt()
+            networkSizeEstimate = maxOf(1, (1 / leaderEstimates.minOfOrNull { it.second }!!).toInt())
 
         awaitingResponse.clear()
 
