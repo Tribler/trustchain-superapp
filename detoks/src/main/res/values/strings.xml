@@ -37,7 +37,7 @@
     <string name="first_mb_progress">First MB progress:</string>
     <string name="total_progress">Total progress:</string>
     <string name="file_name">File name:\t</string>
-    <string name="done_downloading_will_play_video_now">DONE DOWNLOADING - will play video now</string>
+    <string name="done_downloading_will_play_video_now">DONE DOWNLOADING - will play video soon</string>
     <string name="torrent_name_t">Torrent name:\t</string>
     <string name="status">Status</string>
     <string name="seeding">Seeding </string>
