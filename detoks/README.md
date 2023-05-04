@@ -117,6 +117,7 @@ and two extra profile metrics:
 
 ### Global Debug Screen
 A  user may access the general debug screen by clicking on the "Debug" button.
+
 <img src="https://user-images.githubusercontent.com/57201085/236295401-33e4fa3b-4875-4221-b06b-fe57c58df32f.jpg" alt="general debug screen" width="25%">
 
 It displays information on  such as:
