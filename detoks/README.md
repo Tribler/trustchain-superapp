@@ -6,6 +6,8 @@ This document describes the functionallity provided in DeToks. Currently it cont
 * Option to seed videos for token profit based on a selected seeding strategy, maximum storage size and maximum upload bandwidth.
 * View torrent information and statistics of seeded torrents.
 
+![core-functionality](https://twinkle.aaw.ooo/foylwynxqpqz0wrumj7e.gif)
+
 ## Gossiping
 
 A Large part of the DeToks back-end depends on information being gossiped over the DeToks community network. Gossiping works by selecting a random subset of all known peers of a node and passing messages between them. Since different kinds of data is shared, several gossipers are used. Namely:
