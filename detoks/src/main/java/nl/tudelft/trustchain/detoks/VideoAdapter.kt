@@ -44,7 +44,7 @@ class VideosAdapter(
      * Scroll limit
      */
     override fun getItemCount(): Int {
-        return 100
+        return VideoViewHolder.SCROLL_MAXIMUM
     }
 
     class VideoViewHolder(itemView: View, private val videoScaling: Boolean = false) :
@@ -155,12 +155,16 @@ class VideosAdapter(
                     else progress1MBTV.progress = ((downloaded/ firstMB) * 100).toInt()
 
                     progressTotalTV.progress = ((downloaded/fileSize.toDouble()) * 100).toInt()
-                    remainingSizeTV.text = ((fileSize - downloaded) / toKb).toString()
+                    remainingSizeTV.text = "%.2f".format((fileSize - downloaded) / firstMB)
 
                     delay(20)
                 }
                 doneDownloadingTV.visibility = View.VISIBLE
             }
+        }
+
+        companion object {
+            const val SCROLL_MAXIMUM = 100
         }
     }
 }
