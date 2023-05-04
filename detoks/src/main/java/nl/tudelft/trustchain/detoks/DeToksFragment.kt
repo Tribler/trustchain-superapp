@@ -23,7 +23,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private val mediaCacheDir: String
         get() = "${requireActivity().cacheDir.absolutePath}/media"
 
-    @SuppressLint("DiscouragedApi")
     private fun cacheDefaultTorrent() {
         try {
             val dir1 = File(mediaCacheDir)
@@ -34,16 +33,13 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             if (!dir2.exists()) {
                 dir2.mkdirs()
             }
-            for (files in DEFAULT_TORRENT_FILE) {
-                val file = File("$torrentDir/$files")
-                if (!file.exists()) {
-                    val outputStream = FileOutputStream(file)
-                    val resId = resources.getIdentifier(files.substring(0, files.length - 8), "raw", requireActivity().packageName)
-                    val ins = requireActivity().resources.openRawResource(resId)
-                    outputStream.write(ins.readBytes())
-                    ins.close()
-                    outputStream.close()
-                }
+            val file = File("$torrentDir/$DEFAULT_TORRENT_FILE")
+            if (!file.exists()) {
+                val outputStream = FileOutputStream(file)
+                val ins = requireActivity().resources.openRawResource(R.raw.detoks)
+                outputStream.write(ins.readBytes())
+                ins.close()
+                outputStream.close()
             }
         } catch (e: Exception) {
             Log.e("DeToks", "Failed to cache default torrent: $e")
@@ -95,22 +91,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 2
-        val DEFAULT_TORRENT_FILE = listOf(
-            "_new.torrent",
-            "hop.torrent",
-            "hot.torrent",
-            "rising.torrent",
-            "t10_20230502_202305_archive.torrent",
-            "t9_20230502_20230502_archive.torrent",
-            "t8_20230502_archive.torrent",
-            "t7_20230502_archive.torrent",
-            "t6_20230502_archive.torrent",
-            "t5_20230502_archive.torrent",
-            "t4_20230502_archive.torrent",
-            "t3_20230502_202305_archive.torrent",
-            "t2_20230502_archive.torrent",
-            "t1_20230502_archive.torrent",
-            "top.torrent"
-        )
+        val DEFAULT_TORRENT_FILE = "detoks.torrent"
     }
 }
