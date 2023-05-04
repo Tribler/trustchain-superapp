@@ -72,6 +72,7 @@ class IncrementalPersonalizedPageRankMeritRank (
         val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it != rootNode }
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
+            //effect on informativeness basd on decay using beta decay value
             val betaDecayedScore = (occ.toDouble() / totalOccs) * ( betaDecays[node]?.let { (1 - betaDecay).toDouble() } ?: 1.0)
             node.setPersonalizedPageRankScore(betaDecayedScore)
         }

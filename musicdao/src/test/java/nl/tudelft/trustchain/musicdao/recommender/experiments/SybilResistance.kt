@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.musicdao.recommender.experiments
 
+import nl.tudelft.trustchain.musicdao.core.recommender.collaborativefiltering.UserBasedTrustedCollaborativeFiltering
 import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiper
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.*
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
@@ -10,7 +11,6 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
-import java.sql.Timestamp
 import kotlin.random.Random
 
 class SybilResistance {
@@ -79,7 +79,7 @@ class SybilResistance {
                             val affinity = count.toDouble() / totalCount
                             nodeToSongEdges.add(NodeSongEdgeWithNodeAndSongRec(NodeSongEdge(affinity), lastNode, rec))
                         }
-                        trustNetwork.bulkAddNodeToSongEdgesForNode(nodeToSongEdges, lastNode)
+                        trustNetwork.bulkAddNodeToSongEdgesForExperiments(nodeToSongEdges, lastNode)
                         songRecAndListenCount = mutableMapOf()
                         lastNode = Node(words.first())
                     }
@@ -89,6 +89,24 @@ class SybilResistance {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        for(node in trustNetwork.nodeToNodeNetwork.getAllNodes()) {
+            val nTSGraph = trustNetwork.nodeToSongNetwork.graph
+            val nodeSongEdges = nTSGraph.outgoingEdgesOf(node).map { NodeSongEdgeWithNodeAndSongRec(it, node, nTSGraph.getEdgeTarget(it) as SongRecommendation) }
+            val nodeSongs = nodeSongEdges.map { it.songRec }
+            if(nodeSongs.isEmpty())
+                continue
+            val commonItemUsers = trustNetwork.nodeToNodeNetwork.getAllNodes().filter {
+                nTSGraph.outgoingEdgesOf(it).filter { nodeSongs.contains(nTSGraph.getEdgeTarget(it)) }.size > 1
+            }.filter { it != node }
+            if(commonItemUsers.isEmpty())
+                continue
+            val cf = UserBasedTrustedCollaborativeFiltering(commonItemUsers, trustNetwork, 0.0, 0.5)
+            val commonUsers = cf.similarNodes(nodeSongEdges, 5)
+            for((similarNode, score) in commonUsers) {
+                trustNetwork.addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(score), node, similarNode))
+            }
+        }
+        trustNetwork.resetRandomWalks()
     }
 
     @Test

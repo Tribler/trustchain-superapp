@@ -1,13 +1,14 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.graph
 
+import androidx.annotation.VisibleForTesting
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsa
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRank
 
 open class TrustNetwork {
-    protected val nodeToNodeNetwork: NodeToNodeNetwork
-    protected val nodeToSongNetwork: NodeToSongNetwork
+    val nodeToNodeNetwork: NodeToNodeNetwork
+    val nodeToSongNetwork: NodeToSongNetwork
     private val incrementalPersonalizedPageRank: IncrementalPersonalizedPageRank
     private val incrementalHybridPersonalizedPageRankSalsa: IncrementalHybridPersonalizedPageRankSalsa
     private val allNodes: MutableList<Node>
@@ -80,6 +81,25 @@ open class TrustNetwork {
         incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(sourceNode), nodeToNodeNetwork.getAllNodes().toList())
         return edgeAdditionFailure
     }
+    fun bulkAddNodeToSongEdgesForExperiments(edges: List<NodeSongEdgeWithNodeAndSongRec>, sourceNode: Node): Boolean {
+        var edgeAdditionFailure = false
+        if(edges.any { it.node != sourceNode })
+            return false
+        for(edge in edges) {
+            nodeToSongNetwork.addEdge(edge.node, edge.songRec, edge.nodeSongEdge).also {
+                if(!it) {
+                    logger.error { "Couldn't add edge from ${edge.node} to ${edge.songRec}" }
+                    edgeAdditionFailure = true
+                }
+            }
+        }
+        return edgeAdditionFailure
+    }
+
+    fun resetRandomWalks() {
+        incrementalPersonalizedPageRank.initiateRandomWalks()
+        incrementalHybridPersonalizedPageRankSalsa.initiateRandomWalks()
+    }
 
 
     fun addNodeToSongEdge(edge: NodeSongEdgeWithNodeAndSongRec): Boolean {
@@ -126,6 +146,22 @@ open class TrustNetwork {
                 val existingTrust = existingTrustEdgeToNode?.trust ?: 0.0
                 val newTrust = existingTrust + trustDelta
                 addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(newTrust), rootNode, recommenderNode))
+            }
+        }
+    }
+
+    private fun updateNodeTrustForExperiment(sourceNode: Node, songRec: SongRecommendation, affinityDelta: Double) {
+        val recommenderNodeEdges = nodeToSongNetwork.graph.outgoingEdgesOf(songRec)
+        val rootNeighborEdges = nodeToNodeNetwork.graph.outgoingEdgesOf(rootNode)
+        for(recommenderNodeEdge in recommenderNodeEdges) {
+            val recommenderNode = nodeToSongNetwork.graph.getEdgeSource(recommenderNodeEdge) as Node
+            if(recommenderNode != sourceNode) {
+                val trustDelta = recommenderNodeEdge.affinity * affinityDelta
+                val existingTrustEdgeToNode =
+                    rootNeighborEdges.find { nodeToNodeNetwork.graph.getEdgeTarget(it) == recommenderNode }
+                val existingTrust = existingTrustEdgeToNode?.trust ?: 0.0
+                val newTrust = existingTrust + trustDelta
+                addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(newTrust), sourceNode, recommenderNode))
             }
         }
     }
