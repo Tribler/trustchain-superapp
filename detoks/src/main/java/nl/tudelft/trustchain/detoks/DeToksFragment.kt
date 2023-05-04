@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -22,6 +23,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private val mediaCacheDir: String
         get() = "${requireActivity().cacheDir.absolutePath}/media"
 
+    @SuppressLint("DiscouragedApi")
     private fun cacheDefaultTorrent() {
         try {
             val dir1 = File(mediaCacheDir)
@@ -93,6 +95,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 2
-        val DEFAULT_TORRENT_FILE = listOf("__abstract.torrent", "_countdown7.torrent")
+        val DEFAULT_TORRENT_FILE = listOf("detoks.torrent")
     }
 }
