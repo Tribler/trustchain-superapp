@@ -95,7 +95,7 @@ A simple token transaction implementation was added in order to test if transact
 
 ### Torrent-Specific Debug Screen
 A user may access the debug screen for a specific torrent by clicking on the name of the video in the main DeToks screen or by clicking on its name in the list of seeded torrents shown in [Seeding](#seeding).   
-<img src="https://user-images.githubusercontent.com/57201085/235759097-03ef3860-8e74-47e2-85ab-82d11f67257c.jpg" width="25%">
+<img src="https://user-images.githubusercontent.com/57201085/236295625-a4113632-3393-46cc-994d-ffe079ba04cf.jpg" width="25%">
 
 It displays libtorrent metadata on the torrent such as:
 * `infoHash`: info hash of the torrent.
@@ -117,8 +117,7 @@ and two extra profile metrics:
 
 ### Global Debug Screen
 A  user may access the general debug screen by clicking on the "Debug" button.
-
-<img src="https://user-images.githubusercontent.com/57201085/235890803-b59bd7ad-ecd8-43bc-b570-c345e9474e9c.jpg" alt="general debug screen" width="25%">
+<img src="https://user-images.githubusercontent.com/57201085/236295401-33e4fa3b-4875-4221-b06b-fe57c58df32f.jpg" alt="general debug screen" width="25%">
 
 It displays information on  such as:
 * `Estimated networksize`: estimated number of peers in the network.
@@ -129,3 +128,8 @@ It displays information on  such as:
 * `Seeding status`: whether or not the peer is seeding.
 * `Wallet token amount`: amount of tokens in a peer's wallet.
 * `Peer ID`: mid of my peer.
+
+### Seeding Debug Screens
+We also created a screen with more details on seeding torrents accessible by clicking the "Torrent Infos" button in Settings.
+<img src="https://user-images.githubusercontent.com/57201085/236297098-87829223-0a22-4c79-862c-9e729ec7d3a7.jpg" alt="seeding debug screen" width="25%">
+
