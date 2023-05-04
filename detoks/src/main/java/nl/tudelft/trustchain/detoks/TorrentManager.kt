@@ -445,32 +445,6 @@ class TorrentManager private constructor(
                 updateSeedingStrategy(strategyId, storageLimit)
         }
     }
-    fun startMonitoringLeechers(handler: TorrentHandler) {
-        job = CoroutineScope(Dispatchers.Main).launch {
-            while (isActive) {
-                val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
-                val connectedLeechers = handler.handle.peerInfo().filter { peer ->
-                    peer.downSpeed() > 0
-
-                }
-                for (leecher in connectedLeechers) {
-
-                    Log.d(DeToksCommunity.LOGGING_TAG, "found a leecher ")
-                    Log.d(DeToksCommunity.LOGGING_TAG, leecher.ip())
-                    val ip = leecher.ip().split(":")[0]
-                    val port = leecher.ip().split(":")[1]
-
-                    for (peer in community.getPeers()) {
-                        Log.d(DeToksCommunity.LOGGING_TAG, "ip address: ${peer.address.ip} port: ${peer.address.port}" )
-                    }
-                    community.findPeerByAddress(ip, port)
-                }
-
-                delay(3000)
-            }
-        }
-    }
-
     @OptIn(DelicateCoroutinesApi::class)
     private fun startMonitoringUploaders(handler: TorrentHandler) {
         val previousUploadMap = mutableMapOf<String, Long>()
