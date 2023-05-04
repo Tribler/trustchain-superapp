@@ -7,6 +7,8 @@ import android.view.View
 import android.widget.*
 import com.frostwire.jlibtorrent.TorrentHandle
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import java.text.SimpleDateFormat
+import java.util.*
 
 class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
 
@@ -79,8 +81,10 @@ class TorrentFragment : BaseFragment(R.layout.fragment_torrent) {
             val timesSeen = profile.timesSeen
             timesSeenTV.text = getString(R.string.times_seen, timesSeen)
 
-            val uploadDate = profile.uploadDate
-            uploadDateTV.text = getString(R.string.upload_date, uploadDate)
+            val uploadDate = Date(profile.uploadDate * 1000)
+            val format = SimpleDateFormat("yyyy.MM.dd HH:mm")
+            val uploadDateStr = format.format(uploadDate)
+            uploadDateTV.text = getString(R.string.upload_date, uploadDateStr)
         }
 
         val handler = Handler((Looper.getMainLooper()))
