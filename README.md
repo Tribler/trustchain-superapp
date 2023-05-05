@@ -31,22 +31,9 @@ An online indicator and the last message is shown for each contact. Users can ex
 
 The aim of DeToks is to be the decentralised version of the famous TikTok app. When leeching users pay tokens, and when seeding they gain tokens.
 
-The user can watch videos on the main screen:
+The user can watch videos on the main screen and can swipe up or down, to go forwards or backwards in the videos. Whenever a video has not been downloaded yet, the user is presented with a loading screen displaying the download status and a loading bar. The videos are shown according to the leeching strategy that the user can select in the settings screen. The user can also enable seeding, in which case videos are downloaded according to the selected seeding strategy so that they can then be seeded. Additional torrenting statistics can be seen in the debug screen accessed through the settings. From the main screen displaying the video the statistics of the video can be viewed in the video statistics screen by pressing debug.
 
-<img src="https://user-images.githubusercontent.com/45147538/233304865-fae6b0bc-a0e6-46fc-9a77-48ae1095a97f.jpg" alt="main_screen" width="30%">
-
-The user can swipe up or down, going forwards or backwards in the videos.
-The statistics of the video can be viewed in the video statistics screen:
- 
-<img src="https://user-images.githubusercontent.com/45147538/233305397-9b228c29-23d1-4264-b47e-6739b4d9f3d0.jpg" alt="statistics" width="30%">
-
-The videos are shown according to the leeching strategy that the user can select in the settings screen:
-
-<img src="https://user-images.githubusercontent.com/45147538/233306964-447be422-655d-46dd-9867-90ed514e69c8.jpg" alt="leeching" width="30%">
-
-The user can also turn on seeding, in which case videos are downloaded according to the seeding strategy so that they can then be seeded:
- 
-<img src="https://user-images.githubusercontent.com/45147538/233316135-1aa7f197-7f3c-4534-9d57-e20eed2ba72c.jpeg" alt="seeding" width="30%">
+![demo-smallest](https://user-images.githubusercontent.com/31625452/236405398-5f2dcad4-1394-4929-afcd-ebb2204301a2.gif)
 
 More documentation on the DeToks app can be found [here](https://github.com/ChrisSBras/trustchain-superapp/blob/master/detoks/README.md).
 
