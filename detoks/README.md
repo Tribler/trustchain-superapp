@@ -15,8 +15,7 @@ Click [here](https://twinkle.aaw.ooo/y73u8h7m55wap2tgy9rt.gif) for a higher defi
 A Large part of the DeToks back-end depends on information being gossiped over the DeToks community network. Gossiping works by selecting a random subset of all known peers of a node and passing messages between them. Since different kinds of data is shared, several gossipers are used. Namely:
 * [BootGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/BootGossiper.kt): gossips boot related data.
 * [NetworkSizeGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/NetworkSizeGossiper.kt): estimates network size.
-* [TorrentGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/TorrentGossiper.kt): gossips torrents and corresponding hopcounts.
-* [ProfileEntryGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/ProfileEntryGossiper.kt): gossips the statistics in the profiles.
+* [TorrentGossiper](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/TorrentGossiper.kt): gossips torrents and corresponding profile metrics.
 
 All of these extend `Gossiper`. This section gives short descriptions of each of them.
 
@@ -34,12 +33,10 @@ The [NetworkSizeGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gos
 
 The [TorrentGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/TorrentGossiper.kt) is used to spread torrent files throughout the network. A random subset of torrents is selected and then sent to a random subset of peers. This happens every few seconds to ensure a good spread of torrents throughout the network.
 
-Next to the torrent it also shares the hopcount statistic. This statistic details how many hops a torrent was shared from its origin. This is a useful statistic for debugging, but it is also incorporated in one of the leeching and seeding strategies.
+Next to the torrent, this class also distributes profile statistics throughout the network. Some of these are incorporated in one of the leeching and seeding strategies. This is used to update peers on the profile data it has for a specific video. Furthermore, some of these statistics are also used for the for debugging.
 
-### ProfileEntryGossiper
-
-The [ProfileEntryGossiper Class](./src/main/java/nl/tudelft/trustchain/detoks/gossiper/ProfileEntryGossiper.kt) is used to spread profile metrics throughout the network. This is used to update peers on the profile data it has for a specific torrent. These statistics are used for the seeding and leeching strategies and/or for debugging.
-Together with the identifier of the profile the shared metrics are:
+Together with the key and associated magnet link of the profile the shared metrics are:
+* `hopCount`: incremented on sending, this statistic details how many hops a torrent was shared from its origin. 
 * `watchTime`: when received, update the average watch time of torrent on the network.
 * `duration`: when received, set duration of torrent if it was unknown.
 * `uploadDate`: when received, set upload date of torrent if it was unknown.
@@ -107,7 +104,7 @@ It displays libtorrent metadata on the torrent such as:
 * `files`: list of files that are contained in the torrent.
 * `downloadedBytes`: total number of bytes that have been downloaded from the torrent since it started.
 
-It also displays torrent profile metrics as mentioned in [ProfileGossiper](#profilegossiper):
+It also displays torrent profile metrics as mentioned in [TorrentGossiper](#torrentgossiper):
 * `watchTime`
 * `hopCount` 
 * `duration`
