@@ -1,11 +1,6 @@
 import os
 import sys
-import random
 from asyncio import ensure_future, get_event_loop
-from torrentool.api import Torrent
-
-from pyipv8.ipv8.community import Community
-from pyipv8.ipv8.messaging.serialization import Serializable
 from pyipv8.ipv8.configuration import (
     ConfigBuilder,
     Strategy,
@@ -14,10 +9,11 @@ from pyipv8.ipv8.configuration import (
     BootstrapperDefinition,
     Bootstrapper,
 )
-
 from pyipv8.ipv8_service import IPv8
 
-MESSAGE_TORRENT_ID = 1
+from messages import TorrentPayload
+from detoks_community import DetoksCommunity
+import json
 
 bootstrap_config = {
     "class": "DispersyBootstrapper",
@@ -67,60 +63,14 @@ bootstrapper = [
 ]
 
 
-class TorrentPayload(Serializable):
-    def __init__(self, message):
-        self.message = message
+async def start_nodes(timeout: int, max_peers: int):
 
-    def to_pack_list(self):
-        return [("Q", MESSAGE_TORRENT_ID), ("raw", self.message.encode("UTF-8"))]
+    with open("/nodes.json") as f:
+        json_data = json.load(f)
+        f.close()
 
-    @classmethod
-    def from_unpack_list(cls, *args):
-        return cls(*args)
-
-
-class DetoksCommunity(Community):
-    community_id = bytes.fromhex(os.getenv("COMMUNITY_ID"))
-
-    def started(self):
-        self.torrent_list = os.listdir("torrents/")
-
-        async def print_peers():
-            print(
-                "I am:", self.my_peer, "\nI know:", [str(p) for p in self.get_peers()]
-            )
-
-        async def gossip():
-            """
-            Function that runs the gossip message like the android app
-            """
-
-            for p in self.get_peers():
-                torrent_to_send = random.choice(self.torrent_list)
-                torrent = Torrent.from_file(f"torrents/{torrent_to_send}")
-
-                print(
-                    f"Sending torrent {torrent_to_send} with magnetlink: {torrent.magnet_link}"
-                )
-
-                packet = self.ezr_pack(
-                    MESSAGE_TORRENT_ID, TorrentPayload(torrent.magnet_link), sig=False
-                )
-                self.endpoint.send(p.address, packet)
-
-        self.register_task("print_peers", print_peers, interval=5.0, delay=0)
-        self.register_task("gossip", gossip, interval=5.0, delay=0)
-
-        self.add_message_handler(1, self.on_message)
-
-    def on_message(self, peer, payload):
-        print("Got a message from:", peer)
-        print("The message includes the first payload:\n", payload)
-
-
-async def start_nodes(num_nodes: int, timeout: int, max_peers: int):
     print(
-        f"Starting community with {num_nodes} nodes, {timeout}s timeout and {max_peers} max peers."
+        f"Starting community with {len(json_data['nodes'])} nodes, {timeout}s timeout and {max_peers} max peers."
     )
 
     if not os.path.exists("keys/"):
@@ -129,9 +79,10 @@ async def start_nodes(num_nodes: int, timeout: int, max_peers: int):
     if not os.path.exists("torrents/"):
         os.mkdir("torrents/")
 
-    for i in range(num_nodes):
+    for i, node in enumerate(json_data["nodes"]):
         node_name = f"dummy_peer_{i}"
         builder = ConfigBuilder()
+        builder.set_log_level("ERROR")
         builder.add_key(node_name, "medium", f"keys/ec{i}.pem")
         builder.add_overlay(
             "DeToksCommunity",
@@ -139,7 +90,7 @@ async def start_nodes(num_nodes: int, timeout: int, max_peers: int):
             [WalkerDefinition(Strategy.RandomWalk, max_peers, {"timeout": timeout})],
             bootstrapper,
             {},
-            [("started",)],
+            [("started", node, )],
         )
         ipv8 = IPv8(
             builder.finalize(), extra_communities={"DeToksCommunity": DetoksCommunity}
@@ -148,9 +99,8 @@ async def start_nodes(num_nodes: int, timeout: int, max_peers: int):
 
 
 if __name__ == "__main__":
-    NUM_NODES = int(os.getenv("NUM_NODES"))
     TIMEOUT = int(os.getenv("TIMEOUT"))
     MAX_NUM_PEERS = int(os.getenv("MAX_NUM_PEERS"))
 
-    ensure_future(start_nodes(NUM_NODES, TIMEOUT, MAX_NUM_PEERS))
+    ensure_future(start_nodes(TIMEOUT, MAX_NUM_PEERS))
     get_event_loop().run_forever()

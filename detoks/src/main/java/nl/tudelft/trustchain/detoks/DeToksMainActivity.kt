@@ -9,6 +9,7 @@ import android.os.IBinder
 import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.trustchain.detoks.gossiper.GossiperService
 
+
 class DeToksActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_detoks
     var gossipService: GossiperService? = null
@@ -22,6 +23,7 @@ class DeToksActivity : BaseActivity() {
             startService(intent)
             bindService(intent, gossipConnection, Context.BIND_AUTO_CREATE)
         }
+
     }
 
     private val gossipConnection = object : ServiceConnection {
@@ -29,9 +31,9 @@ class DeToksActivity : BaseActivity() {
             val binder = service as GossiperService.LocalBinder
             gossipService = binder.getService()
         }
-
         override fun onServiceDisconnected(p0: ComponentName?) {
             gossipService = null
         }
+
     }
 }

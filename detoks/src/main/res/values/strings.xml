@@ -1,4 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_activity_main_detoks">DeToks</string>
+    <string name="seeding_strategy">Seeding Strategy</string>
+    <string name="leeching_strategy">Leeching Strategy</string>
+    <string name="bandwidth_day_mb">Bandwidth per day (MB)</string>
+    <string name="torrent_name">Torrent Name</string>
+    <string name="download">Download</string>
+    <string name="detoks_balance">Profit</string>
+    <string name="upload">Upload</string>
+    <string name="seeding_rank">Seeding Rank</string>
+    <string name="info_hash">Info Hash: %1$s</string>
+    <string name="magnet_link">Magnet link: %1$s</string>
+    <string name="downloaded_bytes">Downloaded bytes: %1$d</string>
+    <string name="files">Files: %1$s</string>
+    <string name="watch_time">Total watch time: %1$d</string>
+    <string name="hop_count">Hop count: %1$d</string>
+    <string name="watched">Watched: %b</string>
+    <string name="duration">Duration: %1$d</string>
+    <string name="likes">Likes: %1$d</string>
+    <string name="times_seen">Times seen: %1$d</string>
+    <string name="upload_date">Upload date: %1$s</string>
+    <string name="estimated_network_size">Estimated network size: %1$d</string>
+    <string name="nb_connected_peers">Number of connected peers: %1$d</string>
+    <string name="list_connected_peers">List of connected peers: %1$s</string>
+    <string name="top_3_leeching_torrents">Top 3 leeching torrents: %1$s</string>
+    <string name="top_3_seeding_torrents">Top 3 seeding torrents: %1$s</string>
+    <string name="seeding_status">Seeding: %b</string>
+    <string name="wallet_tokens">Wallet tokens amount: %1$.2f</string>
+    <string name="peer_id">Peer ID: %1$s</string>
+    <string name="peers">Peers</string>
+    <string name="seeders">Seeders</string>
+    <string name="remaining_mb">Remaining (MB)</string>
+    <string name="download_rate_n_kb_s">Download rate \n (KB/s)</string>
+    <string name="file_size_n_mb">File size \n (MB)</string>
+    <string name="elapsed_time_n_seconds">Elapsed time \n (seconds)</string>
+    <string name="first_mb_progress">First MB progress:</string>
+    <string name="total_progress">Total progress:</string>
+    <string name="file_name">File name:\t</string>
+    <string name="done_downloading_will_play_video_now">DONE DOWNLOADING - will play video soon</string>
+    <string name="torrent_name_t">Torrent name:\t</string>
+    <string name="status">Status</string>
+    <string name="seeding">Seeding </string>
+    <string name="nrSeeders">Seeders</string>
+    <string name="nrLeechers">Peers</string>
 </resources>

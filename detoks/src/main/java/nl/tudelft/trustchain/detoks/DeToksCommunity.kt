@@ -2,12 +2,16 @@ package nl.tudelft.trustchain.detoks
 
 import android.content.Context
 import android.util.Log
-import com.frostwire.jlibtorrent.Sha1Hash
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
-import nl.tudelft.trustchain.detoks.gossiper.*
+import nl.tudelft.trustchain.detoks.gossiper.BootGossiper
+import nl.tudelft.trustchain.detoks.gossiper.BootMessage
+import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeGossiper
+import nl.tudelft.trustchain.detoks.gossiper.NetworkSizeMessage
+import nl.tudelft.trustchain.detoks.gossiper.TorrentGossiper
+import nl.tudelft.trustchain.detoks.gossiper.TorrentMessage
 
 
 class DeToksCommunity(
@@ -16,28 +20,34 @@ class DeToksCommunity(
 
     private val walletManager = WalletManager(context)
     private val visitedPeers  = mutableListOf<Peer>()
+    private lateinit var libtorrentPort: String
+
 
     init {
-        messageHandlers[MESSAGE_TORRENT_ID] = ::onTorrentGossip
-        messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
-        messageHandlers[MESSAGE_WATCH_TIME_ID] = :: onWatchTimeGossip
-        messageHandlers[MESSAGE_NETWORK_SIZE_ID] = :: onNetworkSizeGossip
-        messageHandlers[MESSAGE_BOOT_REQUEST] = :: onBootRequestGossip
-        messageHandlers[MESSAGE_BOOT_RESPONSE] = :: onBootResponseGossip
-
+        messageHandlers[MESSAGE_TORRENT_ID]       = ::onTorrentGossip
+        messageHandlers[MESSAGE_TRANSACTION_ID]   = ::onTransactionMessage
+        messageHandlers[MESSAGE_NETWORK_SIZE_ID]  = ::onNetworkSizeGossip
+        messageHandlers[MESSAGE_BOOT_REQUEST]     = ::onBootRequestGossip
+        messageHandlers[MESSAGE_BOOT_RESPONSE]    = ::onBootResponseGossip
+        messageHandlers[MESSAGE_TOKEN_REQUEST_ID] = ::onTokenRequestMessage
+        messageHandlers[MESSAGE_PORT_REQUEST_ID]  = ::onPortRequestMessage
     }
 
     companion object {
-        const val LOGGING_TAG = "DeToksCommunity"
-        const val MESSAGE_TORRENT_ID = 1
-        const val MESSAGE_TRANSACTION_ID = 2
-        const val MESSAGE_WATCH_TIME_ID = 3
-        const val MESSAGE_NETWORK_SIZE_ID = 4
-        const val MESSAGE_BOOT_REQUEST = 5
-        const val MESSAGE_BOOT_RESPONSE = 6
+        const val LOGGING_TAG               = "DeToksCommunity"
+        const val MESSAGE_TORRENT_ID        = 1
+        const val MESSAGE_TRANSACTION_ID    = 2
+        const val MESSAGE_NETWORK_SIZE_ID   = 3
+        const val MESSAGE_BOOT_REQUEST      = 4
+        const val MESSAGE_BOOT_RESPONSE     = 5
+        const val MESSAGE_TOKEN_REQUEST_ID  = 6
+        const val MESSAGE_PORT_REQUEST_ID   = 7
+
     }
 
-    fun sendTokens(amount: Int, recipientMid: String) {
+    override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
+
+    fun sendTokens(amount: Float, recipientMid: String) {
         val senderWallet = walletManager.getOrCreateWallet(myPeer.mid)
 
         Log.d(LOGGING_TAG, "my wallet ${senderWallet.balance}")
@@ -59,9 +69,17 @@ class DeToksCommunity(
                 send(peer.address, packet)
             }
         } else {
-            Log.d(LOGGING_TAG, "Insufficient funds!")
+            Log.e(LOGGING_TAG, "Insufficient funds!")
         }
 
+    }
+    fun increaseTokens(amount: Float) {
+        val x = walletManager.getOrCreateWallet(myPeer.mid)
+        walletManager.setWalletBalance(myPeer.mid, x.balance + amount)
+    }
+
+    fun saveLibTorrentPort(port: String) {
+        libtorrentPort = port
     }
 
     fun gossipWith(peer: Peer, message: Serializable, id: Int) {
@@ -72,7 +90,6 @@ class DeToksCommunity(
         // Send a token only to a new peer
         if (!visitedPeers.contains(peer)) {
             visitedPeers.add(peer)
-            sendTokens(1, peer.mid)
         }
 
         send(peer.address, packet)
@@ -98,24 +115,56 @@ class DeToksCommunity(
     }
 
     private fun onTorrentGossip(packet: Packet) {
-        val payload = packet.getPayload(TorrentMessage.Deserializer)
-        val torrentManager = TorrentManager.getInstance(context)
-        payload.data.forEach {
-            torrentManager.addTorrent(Sha1Hash(it.first), it.second)
+        val (_, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
+        TorrentGossiper.receivedResponse(payload.data, context)
+    }
+
+    private fun onPortRequestMessage(packet: Packet) {
+
+        Log.d(LOGGING_TAG, "here?")
+        try {
+            val (_, payload) = packet.getAuthPayload(PortRequestMessage.Deserializer)
+
+            Log.d(LOGGING_TAG, "Received port request from ${payload.senderMid}")
+
+            // Check if the received port matches the libtorrent port
+            if (payload.port == libtorrentPort) {
+                // If the port matches, you can call the sendTokens function or perform any other action
+                sendTokens(1.0f, payload.senderMid)
+            } else {
+                Log.d(
+                    LOGGING_TAG,
+                    "Received port ${payload.port} does not match libtorrent port $libtorrentPort"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(LOGGING_TAG, "Error deserializing PortRequestMessage payload: ${e.message}")
         }
     }
 
-    private fun onWatchTimeGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(WatchTimeMessage.Deserializer)
-        val torrentManager = TorrentManager.getInstance(context)
-        Log.d(LOGGING_TAG, "Received watch time entry from ${peer.mid}, payload: ${payload.data}")
 
-        payload.data.forEach {
-            torrentManager.profile.updateEntryWatchTime(
-                it.first,
-                it.second,
-                false
+    fun requestPeerLibtorrentPort(recipientMid: String, port: String) {
+        if (myPeer.mid == recipientMid) {
+            Log.d(LOGGING_TAG, "Cannot request port from yourself.")
+            return
+        }
+
+        Log.d(LOGGING_TAG, "Requesting libtorrent port from $recipientMid")
+
+        // Find the peer by its mid
+        val recipientPeer = getPeers().find { it.mid == recipientMid }
+
+        // If the peer is found, send a port request message
+        if (recipientPeer != null) {
+            val requestMessage = PortRequestMessage(myPeer.mid, port)
+            val packet = serializePacket(
+                MESSAGE_PORT_REQUEST_ID,
+                requestMessage
             )
+            send(recipientPeer.address, packet)
+            Log.d(LOGGING_TAG, "sent message")
+        } else {
+            Log.d(LOGGING_TAG, "Peer not found: $recipientMid")
         }
     }
 
@@ -134,6 +183,33 @@ class DeToksCommunity(
         BootGossiper.receivedResponse(payload.data)
     }
 
+    private fun onTokenRequestMessage(packet: Packet) {
+        val (_, payload) = packet.getAuthPayload(TokenRequestMessage.Deserializer)
+
+        Log.d(LOGGING_TAG, "Received token request from ${payload.senderMid}")
+
+
+         sendTokens(payload.amount, payload.senderMid)
+    }
+    fun findPeerByAddress(ip: String, port: String) {
+        Log.d(LOGGING_TAG, "calling findPeerByAddress with ip $ip and port $port"  )
+        Log.d(LOGGING_TAG, " $port mylibtorrent port: $libtorrentPort actual port: ${myPeer.address.port}"  )
+       val peerlist =  getPeers().filter {
+            print(port)
+            it.address.ip == ip }
+
+        for (peer in peerlist) {
+            requestPeerLibtorrentPort(peer.mid, port)
+        }
+
+
+    }
+    fun findPeerByIps(ip: String): List<Peer?> {
+        return getPeers().filter { it.address.ip == ip  }
+    }
+    fun getBalance(): Float {
+        return walletManager.getOrCreateWallet(myPeer.mid).balance
+    }
     class Factory(
         private val context: Context
     ) : Overlay.Factory<DeToksCommunity>(DeToksCommunity::class.java) {

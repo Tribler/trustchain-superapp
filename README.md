@@ -28,6 +28,15 @@ An online indicator and the last message is shown for each contact. Users can ex
 ### DeToks
 **Decentralised TikTok** skeleton app for the CS4160 Blockchain Engineering (2022/23) course.
 
+
+The aim of DeToks is to be the decentralised version of the famous TikTok app. When leeching users pay tokens, and when seeding they gain tokens.
+
+The user can watch videos on the main screen and can swipe up or down, to go forwards or backwards in the videos. Whenever a video has not been downloaded yet, the user is presented with a loading screen displaying the download status and a loading bar. The videos are shown according to the leeching strategy that the user can select in the settings screen. The user can also enable seeding, in which case videos are downloaded according to the selected seeding strategy so that they can then be seeded. Additional torrenting statistics can be seen in the debug screen accessed through the settings. From the main screen displaying the video the statistics of the video can be viewed in the video statistics screen by pressing debug.
+
+![demo-smallest](https://user-images.githubusercontent.com/31625452/236405398-5f2dcad4-1394-4929-afcd-ebb2204301a2.gif)
+
+More documentation on the DeToks app can be found [here](https://github.com/ChrisSBras/trustchain-superapp/blob/master/detoks/README.md).
+
 ### Digital Euro
 
 The Superapp is connected to the European IBAN Euro system.
@@ -196,6 +205,7 @@ Sharing, storing, and searching of scientific publications through the p2p ipv8 
 
 
 [More about literature dao app](literaturedao/README.md)
+
 
 ### Do you want to add your own app?
 

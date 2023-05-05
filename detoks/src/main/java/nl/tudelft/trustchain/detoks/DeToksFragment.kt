@@ -1,8 +1,11 @@
 package nl.tudelft.trustchain.detoks
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
+import androidx.navigation.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
 import mu.KotlinLogging
@@ -55,6 +58,12 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         viewPagerVideos.adapter = VideosAdapter(torrentManager)
         viewPagerVideos.currentItem = 0
         onPageChangeCallback()
+
+        val settingsButton = view.findViewById<Button>(R.id.strategyButton)
+        settingsButton.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toStrategyFragment) }
+
+        val debugButton = view.findViewById<Button>(R.id.debugButton)
+        debugButton.setOnClickListener { p0 -> p0!!.findNavController().navigate(R.id.action_toDebugFragment) }
     }
 
     /**
@@ -82,6 +91,6 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
 
     companion object {
         const val DEFAULT_CACHING_AMOUNT = 2
-        const val DEFAULT_TORRENT_FILE = "detoks.torrent"
+        val DEFAULT_TORRENT_FILE = "detoks.torrent"
     }
 }

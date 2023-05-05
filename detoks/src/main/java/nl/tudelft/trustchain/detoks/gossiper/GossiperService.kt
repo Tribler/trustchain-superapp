@@ -5,8 +5,6 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import kotlinx.coroutines.*
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.detoks.DeToksCommunity
 import kotlin.system.exitProcess
 
 class GossiperService : Service() {
@@ -20,7 +18,6 @@ class GossiperService : Service() {
         BootGossiper(1000L, 4),
         NetworkSizeGossiper(30000L, 4, 1),
         TorrentGossiper(4000L, 4, 4, this),
-        WatchTimeGossiper(4000L, 4, 4, this)
     )
 
 
