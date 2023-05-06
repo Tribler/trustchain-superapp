@@ -14,7 +14,8 @@ class IncrementalPersonalizedPageRankMeritRank (
     alphaDecay: Float,
     val betaDecayThreshold: Float,
     val betaDecay: Float,
-    graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>
+    graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>,
+    val heapEfficientImplementation: Boolean = true
 ): IncrementalRandomWalkedBasedRankingAlgo<SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, Node, NodeTrustEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}
     private val iter = CustomRandomWalkVertexIterator(graph, rootNode, maxWalkLength.toLong(), alphaDecay, Random())
@@ -69,8 +70,7 @@ class IncrementalPersonalizedPageRankMeritRank (
 
     override fun calculateRankings() {
         val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it != rootNode }
-        val betaDecays = calculateBetaDecays(nodeCounts)
-        val test = betaDecays[Node("sybil1")]
+        val betaDecays = if(heapEfficientImplementation) calculateBetaDecays(nodeCounts) else calculateBetaDecaysSpaceIntensive()
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
             //effect on informativeness basd on decay using beta decay value
@@ -109,5 +109,32 @@ class IncrementalPersonalizedPageRankMeritRank (
         }
         return shouldBetaDecay
     }
+
+    private fun calculateBetaDecaysSpaceIntensive(): Map<Node, Boolean> {
+        val shouldBetaDecay = mutableMapOf<Node, Boolean>()
+        val totalVisitsToNode = mutableMapOf<Node, Int>()
+        val visitToNodeThroughOtherNode = mutableMapOf<Node, MutableMap<Node, Int>>()
+        for(walk in randomWalks) {
+            val uniqueNodes = mutableSetOf<Node>()
+            for(node in walk) {
+                if(!uniqueNodes.contains(node)) {
+                    totalVisitsToNode[node] = (totalVisitsToNode[node] ?: 0) + 1
+                    for (visitedNode in uniqueNodes) {
+                        val existingMap = visitToNodeThroughOtherNode[node] ?: mutableMapOf()
+                        existingMap[visitedNode] = (existingMap[visitedNode] ?: 0) + 1
+                        visitToNodeThroughOtherNode[node] = existingMap
+                    }
+                    uniqueNodes.add(node)
+                }
+            }
+        }
+        for(node in totalVisitsToNode.keys) {
+            val maxVisitsFromAnotherNode = visitToNodeThroughOtherNode[node]?.filter { it.key != rootNode }?.values?.max() ?: 0
+            val score = maxVisitsFromAnotherNode / totalVisitsToNode[node]!!
+            shouldBetaDecay[node] = score > betaDecayThreshold
+        }
+        return shouldBetaDecay
+    }
+
 
 }
