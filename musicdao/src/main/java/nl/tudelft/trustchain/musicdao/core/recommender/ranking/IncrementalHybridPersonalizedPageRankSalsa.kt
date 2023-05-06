@@ -26,7 +26,7 @@ class IncrementalHybridPersonalizedPageRankSalsa (
             graph.vertexSet().filterIsInstance<Node>()
                 .toList()
         )
-    private lateinit var randomWalks: MutableList<MutableList<NodeOrSong>>
+    lateinit var randomWalks: MutableList<MutableList<NodeOrSong>>
 
     init {
         initiateRandomWalks()
