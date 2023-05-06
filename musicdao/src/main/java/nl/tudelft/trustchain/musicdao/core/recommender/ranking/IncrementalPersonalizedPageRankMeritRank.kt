@@ -68,34 +68,43 @@ class IncrementalPersonalizedPageRankMeritRank (
     }
 
     override fun calculateRankings() {
-        val betaDecays = calculateBetaDecays()
         val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it != rootNode }
+        val betaDecays = calculateBetaDecays(nodeCounts)
+        val test = betaDecays[Node("sybil1")]
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
             //effect on informativeness basd on decay using beta decay value
-            val betaDecayedScore = (occ.toDouble() / totalOccs) * ( betaDecays[node]?.let { (1 - betaDecay).toDouble() } ?: 1.0)
+            val betaDecay = if(betaDecays[node]!!) (1 - betaDecay).toDouble() else 1.0
+            val betaDecayedScore = (occ.toDouble() / totalOccs) * betaDecay
             node.setPersonalizedPageRankScore(betaDecayedScore)
         }
     }
 
-    private fun calculateBetaDecays(): Map<Node, Boolean> {
+    private fun calculateBetaDecays(nodeCounts: Map<Node, Int>): Map<Node, Boolean> {
         val shouldBetaDecay = mutableMapOf<Node, Boolean>()
-        val totalVisitsToNode = mutableMapOf<Node, Int>()
-        val visitToNodeThroughOtherNode = mutableMapOf<Node, MutableMap<Node, Int>>()
-        for(walk in randomWalks) {
-            val uniqueNodes = mutableSetOf<Node>()
-            for(node in walk) {
-                totalVisitsToNode[node] = (totalVisitsToNode[node] ?: 0) + 1
-                for(visitedNode in uniqueNodes) {
-                    val existingMap = visitToNodeThroughOtherNode[node] ?: mutableMapOf()
-                    existingMap[visitedNode] = (existingMap[visitedNode] ?: 0) + 1
+        for(node in nodeCounts.keys) {
+            val visitThroughAnotherNode = mutableMapOf<Node, Int>()
+            var totalVisits = 0
+            for(walk in randomWalks) {
+                if(walk.contains(node)) {
+                    val uniqueNodes = mutableSetOf<Node>()
+                    totalVisits++
+                    for(visitNode in walk) {
+                        if (visitNode != node) {
+                            if(!uniqueNodes.contains(visitNode)) {
+                                visitThroughAnotherNode[visitNode] =
+                                    visitThroughAnotherNode[visitNode]?.let { it + 1 } ?: 1
+                                uniqueNodes.add(visitNode)
+                            }
+                        } else {
+                            break
+                        }
+                    }
                 }
-                uniqueNodes.add(node)
             }
-        }
-        for(node in totalVisitsToNode.keys) {
-            val maxVisitsFromAnotherNode = visitToNodeThroughOtherNode[node]?.values?.sum() ?: 0
-            val score = maxVisitsFromAnotherNode / totalVisitsToNode[node]!!
+            visitThroughAnotherNode[rootNode] = 0
+            val maxVisitsFromAnotherNode = visitThroughAnotherNode.values.max()
+            val score = maxVisitsFromAnotherNode / totalVisits
             shouldBetaDecay[node] = score > betaDecayThreshold
         }
         return shouldBetaDecay
