@@ -104,7 +104,7 @@ class IncrementalPersonalizedPageRankMeritRank (
             }
             visitThroughAnotherNode[rootNode] = 0
             val maxVisitsFromAnotherNode = visitThroughAnotherNode.values.max()
-            val score = maxVisitsFromAnotherNode / totalVisits
+            val score = maxVisitsFromAnotherNode.toFloat() / totalVisits
             shouldBetaDecay[node] = score > betaDecayThreshold
         }
         return shouldBetaDecay
@@ -130,7 +130,7 @@ class IncrementalPersonalizedPageRankMeritRank (
         }
         for(node in totalVisitsToNode.keys) {
             val maxVisitsFromAnotherNode = visitToNodeThroughOtherNode[node]?.filter { it.key != rootNode }?.values?.max() ?: 0
-            val score = maxVisitsFromAnotherNode / totalVisitsToNode[node]!!
+            val score = maxVisitsFromAnotherNode.toFloat() / totalVisitsToNode[node]!!
             shouldBetaDecay[node] = score > betaDecayThreshold
         }
         return shouldBetaDecay
