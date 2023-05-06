@@ -1,10 +1,11 @@
 package nl.tudelft.trustchain.musicdao.recommender
 
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiper
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.SubNetworks
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.TrustNetwork
+import nl.tudelft.trustchain.musicdao.core.recommender.graph.*
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import org.junit.Assert
 import org.junit.Test
@@ -24,6 +25,7 @@ class TrustNetworkTest {
     private val maxTimestamp = System.currentTimeMillis() + 10000
     private val minTimestamp = System.currentTimeMillis()
     private lateinit var edgeGossiper: EdgeGossiper
+    private val logger = KotlinLogging.logger {}
 
     private fun setUp() {
         nodeToNodeNetwork = NodeToNodeNetwork()
@@ -72,6 +74,43 @@ class TrustNetworkTest {
         Assert.assertTrue(edgeOneAdded)
         Assert.assertTrue(edgeTwoAdded)
         Assert.assertEquals(initialNodeToSongEdgeSize + 2, trustNetwork.getAllNodeToSongEdges().size)
+    }
+
+    @Test
+    fun canSerializeTrustNetworkAndDeserializeFromIt() {
+        setUp()
+        trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), 0.toString())
+        val newNode = Node(nNodes.toString())
+        trustNetwork.addNode(newNode)
+        trustNetwork.addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(4.2), rootNode, newNode))
+        trustNetwork.addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(5.2), newNode, rootNode))
+        val newSongRec = SongRecommendation("someHash")
+        trustNetwork.addSongRec(newSongRec)
+        trustNetwork.addNodeToSongEdge(NodeSongEdgeWithNodeAndSongRec(NodeSongEdge(4.2), rootNode, newSongRec))
+        trustNetwork.addNodeToSongEdge(NodeSongEdgeWithNodeAndSongRec(NodeSongEdge(5.2), newNode, newSongRec))
+        val serializedTrustNetwork = trustNetwork.serialize()
+        val stringifiedTrustNetwork = Json.encodeToString(serializedTrustNetwork)
+        val trustNetworkSubNetworks = Json.decodeFromString<SerializedSubNetworks>(stringifiedTrustNetwork)
+        val newTrustNetwork = TrustNetwork(trustNetworkSubNetworks, rootNode.getIpv8())
+        Assert.assertEquals(serializedTrustNetwork.nodeToNodeNetworkSerialized, trustNetworkSubNetworks.nodeToNodeNetworkSerialized)
+        Assert.assertEquals(serializedTrustNetwork.nodeToSongNetworkSerialized, trustNetworkSubNetworks.nodeToSongNetworkSerialized)
+        Assert.assertEquals(trustNetwork.nodeToNodeNetwork.graph, newTrustNetwork.nodeToNodeNetwork.graph)
+        Assert.assertEquals(trustNetwork.nodeToSongNetwork.graph, newTrustNetwork.nodeToSongNetwork.graph)
+    }
+
+    @Test
+    fun heapSpaceTest() {
+        // Get current size of heap in bytes
+        // Get current size of heap in bytes
+        val heapSize = Runtime.getRuntime().totalMemory()
+        // Get maximum size of heap in bytes. The heap cannot grow beyond this size.// Any attempt will result in an OutOfMemoryException.
+        // Get maximum size of heap in bytes. The heap cannot grow beyond this size.// Any attempt will result in an OutOfMemoryException.
+        val heapMaxSize = Runtime.getRuntime().maxMemory()
+        // Get amount of free memory within the heap in bytes. This size will increase // after garbage collection and decrease as new objects are created.
+        // Get amount of free memory within the heap in bytes. This size will increase // after garbage collection and decrease as new objects are created.
+        val heapFreeSize = Runtime.getRuntime().freeMemory()
+
+        Assert.assertEquals(1021021, heapMaxSize)
     }
 
 }

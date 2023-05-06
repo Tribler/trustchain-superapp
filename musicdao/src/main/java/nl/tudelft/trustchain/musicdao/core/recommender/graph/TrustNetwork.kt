@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.graph
 
-import androidx.annotation.VisibleForTesting
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsa
@@ -20,6 +19,10 @@ open class TrustNetwork {
         const val REPETITIONS = 10000
         const val RESET_PROBABILITY = 0.01f
         const val EXPLORATION_PROBABILITY = 0.05f
+
+        fun deserialize(networks: SerializedSubNetworks): SubNetworks {
+            return SubNetworks(NodeToNodeNetwork(networks.nodeToNodeNetworkSerialized), NodeToSongNetwork(networks.nodeToSongNetworkSerialized))
+        }
     }
 
     constructor(subNetworks: SubNetworks, sourceNodeAddress: String) {
@@ -31,6 +34,8 @@ open class TrustNetwork {
         incrementalPersonalizedPageRank = IncrementalPersonalizedPageRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, nodeToNodeNetwork.graph)
         incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsa(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, EXPLORATION_PROBABILITY, nodeToSongNetwork.graph)
     }
+
+    constructor(serializedSubNetworks: SerializedSubNetworks, sourceNodeAddress: String): this(deserialize(serializedSubNetworks), sourceNodeAddress)
 
     constructor(sourceNodeAddress: String) {
         nodeToNodeNetwork = NodeToNodeNetwork()
@@ -224,5 +229,10 @@ open class TrustNetwork {
         return nodeToSongNetwork.addNodeOrSong(songRec)
     }
 
+    fun serialize(): SerializedSubNetworks {
+        val serializedNodeToNodeNetwork = nodeToNodeNetwork.serialize()
+        val serializedNodeToSongNetwork = nodeToSongNetwork.serializeCompact()
+        return SerializedSubNetworks(serializedNodeToNodeNetwork, serializedNodeToSongNetwork)
+    }
 
 }
