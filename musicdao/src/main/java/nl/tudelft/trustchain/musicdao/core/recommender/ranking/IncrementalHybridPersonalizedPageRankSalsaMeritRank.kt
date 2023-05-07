@@ -10,10 +10,9 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
     maxWalkLength: Int,
     repetitions: Int,
     rootNode: Node,
-    resetProbability: Float,
-    val betaDecayThreshold: Float,
-    val betaDecay: Float,
-    explorationProbability: Float,
+    alphaDecay: Double,
+    betaDecay: Double,
+    explorationProbability: Double,
     graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>,
     val heapEfficientImplementation: Boolean = true
 ) : IncrementalRandomWalkedBasedRankingAlgo<DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>, NodeOrSong, NodeSongEdge>(
@@ -27,13 +26,14 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
             graph,
             rootNode,
             maxWalkLength.toLong(),
-            resetProbability,
+            alphaDecay,
             explorationProbability,
             Random(),
             graph.vertexSet().filterIsInstance<Node>()
                 .toList()
         )
-    private lateinit var randomWalks: MutableList<MutableList<NodeOrSong>>
+    private val betaDecayThreshold = 1.0 - betaDecay
+    lateinit var randomWalks: MutableList<MutableList<NodeOrSong>>
 
     init {
         initiateRandomWalks()
@@ -56,7 +56,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
         val betaDecays = if(heapEfficientImplementation) calculateBetaDecays(songCounts) else calculateBetaDecaysSpaceIntensive()
         val totalOccs = songCounts.values.sum()
         for ((songRec, occ) in songCounts) {
-            val betaDecay = if(betaDecays[songRec]!!) (1 - betaDecay).toDouble() else 1.0
+            val betaDecay = 1.0 - (betaDecays[songRec] ?: 0.0)
             songRec.rankingScore = (occ.toDouble() / totalOccs) * betaDecay
         }
     }
@@ -80,8 +80,8 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
         }
     }
 
-    private fun calculateBetaDecays(recCounts: Map<NodeOrSong, Int>): Map<SongRecommendation, Boolean> {
-        val shouldBetaDecay = mutableMapOf<SongRecommendation, Boolean>()
+    private fun calculateBetaDecays(recCounts: Map<NodeOrSong, Int>): Map<SongRecommendation, Double> {
+        val betaDecay = mutableMapOf<SongRecommendation, Double>()
         for (rec in recCounts.keys) {
             val visitThroughAnotherNode = mutableMapOf<NodeOrSong, Int>()
             var totalVisits = 0
@@ -106,14 +106,14 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
                 print("bla")
             }
             val maxVisitsFromAnotherNode = visitThroughAnotherNode.values.max()
-            val score = maxVisitsFromAnotherNode.toFloat() / totalVisits
-            shouldBetaDecay[rec as SongRecommendation] = score > betaDecayThreshold
+            val score = maxVisitsFromAnotherNode.toDouble() / totalVisits
+            betaDecay[rec as SongRecommendation] = if(score > betaDecayThreshold) score else 0.0
         }
-        return shouldBetaDecay
+        return betaDecay
     }
 
-    private fun calculateBetaDecaysSpaceIntensive(): Map<SongRecommendation, Boolean> {
-        val shouldBetaDecay = mutableMapOf<SongRecommendation, Boolean>()
+    private fun calculateBetaDecaysSpaceIntensive(): Map<SongRecommendation, Double> {
+        val betaDecay = mutableMapOf<SongRecommendation, Double>()
         val totalVisitsToRec = mutableMapOf<SongRecommendation, Int>()
         val visitToNodeThroughOtherNode = mutableMapOf<SongRecommendation, MutableMap<NodeOrSong, Int>>()
         for (walk in randomWalks) {
@@ -135,9 +135,9 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
         for (node in totalVisitsToRec.keys) {
                 val maxVisitsFromAnotherNode =
                     visitToNodeThroughOtherNode[node]?.filter { it.key != rootNode }?.values?.max() ?: 0
-                val score = maxVisitsFromAnotherNode.toFloat() / totalVisitsToRec[node]!!
-                shouldBetaDecay[node] = score > betaDecayThreshold
+                val score = maxVisitsFromAnotherNode.toDouble() / totalVisitsToRec[node]!!
+                betaDecay[node] = if(score > betaDecayThreshold) score else 0.0
         }
-        return shouldBetaDecay
+        return betaDecay
     }
 }

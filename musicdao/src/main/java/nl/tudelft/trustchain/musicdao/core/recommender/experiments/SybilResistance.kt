@@ -19,7 +19,7 @@ fun main() {
     val usersFile = File("$contextDir/dataset/kaggle_users.txt")
     val loadedTrustNetwork = File("$contextDir/dataset/test_network.txt").readText()
     val subNetworks = Json.decodeFromString<SerializedSubNetworks>(loadedTrustNetwork)
-    trustNetwork = TrustNetwork(subNetworks, "d7083f5e1d50c264277d624340edaaf3dc16095b")
-    print("bla")
+    
+
 }
 

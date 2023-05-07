@@ -13,7 +13,7 @@ class IncrementalPersonalizedPageRank (
     maxWalkLength: Int,
     repetitions: Int,
     rootNode: Node,
-    resetProbability: Float,
+    resetProbability: Double,
     graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>
 ): IncrementalRandomWalkedBasedRankingAlgo<SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, Node, NodeTrustEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}

@@ -25,7 +25,7 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
     private val nEdges = 10
     private val repetitions = 40000
     private val maxWalkLength = 1000
-    private val explorationProbability = 0.05f
+    private val explorationProbability = 0.05
 
     @Before
     fun setUp() {
@@ -54,14 +54,14 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
 
     @Test
     fun canCaclulateScoreForSongs() {
-        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.01f, explorationProbability, nodeToSongNetwork.graph)
+        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.01, explorationProbability, nodeToSongNetwork.graph)
         incrementalHybrid.calculateRankings()
         Assert.assertEquals(1.0, nodeToSongNetwork.getAllSongs().map { it.rankingScore }.sum(), 0.001)
     }
 
     @Test
     fun scoreForSongsReflectsPreferencesOfUsers() {
-        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.01f, explorationProbability, nodeToSongNetwork.graph)
+        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.01, explorationProbability, nodeToSongNetwork.graph)
         incrementalHybrid.calculateRankings()
         val allSongEdges = nodeToSongNetwork.getAllEdges()
         val rootSongsSorted = allSongEdges.filter { nodeToSongNetwork.graph.getEdgeSource(it) == rootNode }.sortedBy { it.affinity }.map { nodeToSongNetwork.graph.getEdgeTarget(it) }
@@ -70,9 +70,9 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
 
     @Test
     fun scoreForSongsReflectsTrustInNeighbors() {
-        val pageRank = IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.05f, nodeToNodeNetwork.graph)
+        val pageRank = IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.05, nodeToNodeNetwork.graph)
         pageRank.calculateRankings()
-        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.05f, explorationProbability, nodeToSongNetwork.graph)
+        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.05, explorationProbability, nodeToSongNetwork.graph)
         incrementalHybrid.calculateRankings()
         val allNodeToNodeEdges = nodeToNodeNetwork.getAllEdges()
         val allNeighborsSortedByTrust = allNodeToNodeEdges.filter { nodeToNodeNetwork.graph.getEdgeSource(it) == rootNode }.map { nodeToNodeNetwork.graph.getEdgeTarget(it) }.sortedBy { it.getPersonalizedPageRankScore() }
@@ -86,9 +86,9 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
 
     @Test
     fun canModifyNodeToSongEdgesWhichIncrementallyAltersSongRanking() {
-        val pageRank = IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.01f, nodeToNodeNetwork.graph)
+        val pageRank = IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.01, nodeToNodeNetwork.graph)
         pageRank.calculateRankings()
-        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.01f, explorationProbability, nodeToSongNetwork.graph)
+        incrementalHybrid = IncrementalHybridPersonalizedPageRankSalsa(maxWalkLength, repetitions, rootNode, 0.01, explorationProbability, nodeToSongNetwork.graph)
         incrementalHybrid.calculateRankings()
         val rootSongEdges = nodeToSongNetwork.getAllEdges().filter { nodeToSongNetwork.graph.getEdgeSource(it) == rootNode }
         val rootSongs = rootSongEdges.map { nodeToSongNetwork.graph.getEdgeTarget(it) }

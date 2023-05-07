@@ -11,14 +11,14 @@ class IncrementalPersonalizedPageRankMeritRank (
     maxWalkLength: Int,
     repetitions: Int,
     rootNode: Node,
-    alphaDecay: Float,
-    val betaDecayThreshold: Float,
-    val betaDecay: Float,
+    alphaDecay: Double,
+    betaDecay: Double,
     graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>,
     val heapEfficientImplementation: Boolean = true
 ): IncrementalRandomWalkedBasedRankingAlgo<SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, Node, NodeTrustEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}
     private val iter = CustomRandomWalkVertexIterator(graph, rootNode, maxWalkLength.toLong(), alphaDecay, Random())
+    private val betaDecayThreshold = 1.0 - betaDecay
     lateinit var randomWalks: MutableList<MutableList<Node>>
 
     init {
@@ -73,15 +73,14 @@ class IncrementalPersonalizedPageRankMeritRank (
         val betaDecays = if(heapEfficientImplementation) calculateBetaDecays(nodeCounts) else calculateBetaDecaysSpaceIntensive()
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
-            //effect on informativeness basd on decay using beta decay value
-            val betaDecay = if(betaDecays[node]!!) (1 - betaDecay).toDouble() else 1.0
+            val betaDecay = 1.0 - (betaDecays[node] ?: 0.0)
             val betaDecayedScore = (occ.toDouble() / totalOccs) * betaDecay
             node.setPersonalizedPageRankScore(betaDecayedScore)
         }
     }
 
-    private fun calculateBetaDecays(nodeCounts: Map<Node, Int>): Map<Node, Boolean> {
-        val shouldBetaDecay = mutableMapOf<Node, Boolean>()
+    private fun calculateBetaDecays(nodeCounts: Map<Node, Int>): Map<Node, Double> {
+        val betaDecay = mutableMapOf<Node, Double>()
         for(node in nodeCounts.keys) {
             val visitThroughAnotherNode = mutableMapOf<Node, Int>()
             var totalVisits = 0
@@ -104,14 +103,14 @@ class IncrementalPersonalizedPageRankMeritRank (
             }
             visitThroughAnotherNode[rootNode] = 0
             val maxVisitsFromAnotherNode = visitThroughAnotherNode.values.max()
-            val score = maxVisitsFromAnotherNode.toFloat() / totalVisits
-            shouldBetaDecay[node] = score > betaDecayThreshold
+            val score = maxVisitsFromAnotherNode.toDouble() / totalVisits
+            betaDecay[node] = if(score > betaDecayThreshold) score else 0.0
         }
-        return shouldBetaDecay
+        return betaDecay
     }
 
-    private fun calculateBetaDecaysSpaceIntensive(): Map<Node, Boolean> {
-        val shouldBetaDecay = mutableMapOf<Node, Boolean>()
+    private fun calculateBetaDecaysSpaceIntensive(): Map<Node, Double> {
+        val betaDecay = mutableMapOf<Node, Double>()
         val totalVisitsToNode = mutableMapOf<Node, Int>()
         val visitToNodeThroughOtherNode = mutableMapOf<Node, MutableMap<Node, Int>>()
         for(walk in randomWalks) {
@@ -130,10 +129,10 @@ class IncrementalPersonalizedPageRankMeritRank (
         }
         for(node in totalVisitsToNode.keys) {
             val maxVisitsFromAnotherNode = visitToNodeThroughOtherNode[node]?.filter { it.key != rootNode }?.values?.max() ?: 0
-            val score = maxVisitsFromAnotherNode.toFloat() / totalVisitsToNode[node]!!
-            shouldBetaDecay[node] = score > betaDecayThreshold
+            val score = maxVisitsFromAnotherNode.toDouble() / totalVisitsToNode[node]!!
+            betaDecay[node] = if(score > betaDecayThreshold) score else 0.0
         }
-        return shouldBetaDecay
+        return betaDecay
     }
 
 

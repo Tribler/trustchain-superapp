@@ -3,13 +3,15 @@ package nl.tudelft.trustchain.musicdao.core.recommender.graph
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsa
+import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsaMeritRank
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRank
+import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRankMeritRank
 
 open class TrustNetwork {
     val nodeToNodeNetwork: NodeToNodeNetwork
     val nodeToSongNetwork: NodeToSongNetwork
-    protected val incrementalPersonalizedPageRank: IncrementalPersonalizedPageRank
-    protected val incrementalHybridPersonalizedPageRankSalsa: IncrementalHybridPersonalizedPageRankSalsa
+    protected val incrementalPersonalizedPageRank: IncrementalPersonalizedPageRankMeritRank
+    protected val incrementalHybridPersonalizedPageRankSalsa: IncrementalHybridPersonalizedPageRankSalsaMeritRank
     private val allNodes: MutableList<Node>
     private val logger = KotlinLogging.logger {}
     val rootNode: Node
@@ -17,8 +19,9 @@ open class TrustNetwork {
     companion object {
         const val MAX_WALK_LENGTH = 1000
         const val REPETITIONS = 10000
-        const val RESET_PROBABILITY = 0.01f
-        const val EXPLORATION_PROBABILITY = 0.05f
+        const val ALPHA_DECAY = 0.1
+        const val BETA_DECAY = 0.05
+        const val EXPLORATION_PROBABILITY = 0.05
 
         fun deserialize(networks: SerializedSubNetworks): SubNetworks {
             return SubNetworks(NodeToNodeNetwork(networks.nodeToNodeNetworkSerialized), NodeToSongNetwork(networks.nodeToSongNetworkSerialized))
@@ -31,8 +34,8 @@ open class TrustNetwork {
         val allNodesList = nodeToNodeNetwork.getAllNodes()
         allNodes = allNodesList.toMutableList()
         rootNode = allNodes.first { it.getIpv8() == sourceNodeAddress}
-        incrementalPersonalizedPageRank = IncrementalPersonalizedPageRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, nodeToNodeNetwork.graph)
-        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsa(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, EXPLORATION_PROBABILITY, nodeToSongNetwork.graph)
+        incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, nodeToNodeNetwork.graph, false)
+        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY,  EXPLORATION_PROBABILITY, nodeToSongNetwork.graph)
     }
 
     constructor(serializedSubNetworks: SerializedSubNetworks, sourceNodeAddress: String): this(deserialize(serializedSubNetworks), sourceNodeAddress)
@@ -44,8 +47,8 @@ open class TrustNetwork {
         allNodes = mutableListOf(rootNode)
         nodeToSongNetwork = NodeToSongNetwork()
         nodeToSongNetwork.addNodeOrSong(rootNode)
-        incrementalPersonalizedPageRank = IncrementalPersonalizedPageRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, nodeToNodeNetwork.graph)
-        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsa(MAX_WALK_LENGTH, REPETITIONS, rootNode, RESET_PROBABILITY, EXPLORATION_PROBABILITY, nodeToSongNetwork.graph)
+        incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, nodeToNodeNetwork.graph, false)
+        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank(MAX_WALK_LENGTH, REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, EXPLORATION_PROBABILITY, nodeToSongNetwork.graph)
     }
 
     open fun bulkAddNodeToSongEdgesForNode(edges: List<NodeSongEdgeWithNodeAndSongRec>, sourceNode: Node): Boolean {

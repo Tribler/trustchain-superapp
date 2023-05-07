@@ -53,7 +53,7 @@ public class CustomRandomWalkVertexIterator<V, E>
     }
 
     private V nextVertex;
-    private final float resetProbability;
+    private final double resetProbability;
 
     /**
      * Create a new iterator
@@ -65,7 +65,7 @@ public class CustomRandomWalkVertexIterator<V, E>
      * @param rng the random number generator
      */
     public CustomRandomWalkVertexIterator(
-        Graph<V, E> graph, V vertex, long maxHops, float resetProbability, Random rng)
+        Graph<V, E> graph, V vertex, long maxHops, double resetProbability, Random rng)
     {
         this.graph = Objects.requireNonNull(graph);
         this.outEdgesTotalWeight = new HashMap<>();

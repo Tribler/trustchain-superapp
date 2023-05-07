@@ -10,8 +10,8 @@ class IncrementalHybridPersonalizedPageRankSalsa (
     maxWalkLength: Int,
     repetitions: Int,
     rootNode: Node,
-    resetProbability: Float,
-    explorationProbability: Float,
+    resetProbability: Double,
+    explorationProbability: Double,
     graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>
 ): IncrementalRandomWalkedBasedRankingAlgo<DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>, NodeOrSong, NodeSongEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}

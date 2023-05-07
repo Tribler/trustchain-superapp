@@ -62,8 +62,8 @@ public class CustomHybridRandomWalkWithExplorationIterator<E>
     }
 
     private Node lastNode;
-    private final float resetProbability;
-    private final float randomNodeProbability;
+    private final double resetProbability;
+    private final double randomNodeProbability;
 
     /**
      * Create a new iterator
@@ -77,7 +77,7 @@ public class CustomHybridRandomWalkWithExplorationIterator<E>
      */
     @SuppressLint("NewApi")
     public CustomHybridRandomWalkWithExplorationIterator(
-            Graph<NodeOrSong, E> graph, Node vertex, long maxHops, float resetProbability, float explorationProbability, Random rng, List<Node> nodes) {
+            Graph<NodeOrSong, E> graph, Node vertex, long maxHops, double resetProbability, double explorationProbability, Random rng, List<Node> nodes) {
         this.graph = Objects.requireNonNull(graph);
         this.outEdgesTotalWeight = new HashMap<>();
         this.personalizedPageRankTotalWeight = new HashMap<>();
