@@ -4,9 +4,13 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
@@ -16,20 +20,22 @@ import java.util.*
 const val LIKE_BLOCK: String = "like_block"
 
 class DeToksCommunity(
-    private val context: Context, settings: TrustChainSettings,
+    private val context: Context,
+    settings: TrustChainSettings,
     database: TrustChainStore,
     crawler: TrustChainCrawler = TrustChainCrawler()
 ) : TrustChainCommunity(settings, database, crawler) {
 
+    override val serviceId = "426a7db45eb3563ae047639817baec4db2bc7c42"
     private val walletManager = WalletManager(context)
     private val visitedPeers  = mutableListOf<Peer>()
+    private val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
 
     init {
-        messageHandlers[MESSAGE_TORRENT_ID] = ::onGossip
-        messageHandlers[MESSAGE_TRANSACTION_ID] = ::onTransactionMessage
         registerBlockSigner(LIKE_BLOCK, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
-                if(userLikedVideo(block.transaction["video"] as String,block.transaction["torrent"] as String, block.transaction["liker"] as String)) return
+                Log.wtf("detoks","liker is "+block.transaction["liker"] as String )
+                Log.wtf("detoks","video is "+block.transaction["video"] as String)
                 createAgreementBlock(block, block.transaction)
             }
         })
@@ -37,12 +43,19 @@ class DeToksCommunity(
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Detoks", "onBlockReceived: ${block.blockId} ${block.transaction}")
-                val video = block.transaction.get("video") as String
+                val video = block.transaction["video"] as String
                 val torrent = block.transaction.get("torrent") as String
                 val magnet = block.transaction.get("torrentMagnet") as String
+                val community = IPv8Android.getInstance().getOverlay<DeToksCommunity>()!!
+                val newLikes = community.getLikes(video, torrent).size
                 Log.d("Detoks", "Received like for $video, $torrent")
-                if (firstInstance(video, torrent)) TorrentManager.getInstance(context).addMagnet(magnet)
-
+                Log.d("Detoks", "new number of likes: $newLikes")
+                // 1 block is always in the DB since we just received it
+                if (duplicates(video, torrent) > 1) {
+                    Log.wtf("Detoks", "Ignoring magnet for duplicate video: $video, $torrent")
+                    return
+                }
+                TorrentManager.getInstance(context).addMagnet(magnet)
             }
         })
     }
@@ -52,18 +65,13 @@ class DeToksCommunity(
         const val MESSAGE_TRANSACTION_ID = 2
 
     }
-
-    override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c25"
-    val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
-    val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
-
     fun sendTokens(amount: Int, recipientMid: String) {
         val senderWallet = walletManager.getOrCreateWallet(myPeer.mid)
 
-        Log.d("DetoksCommunity", "my wallet ${senderWallet.balance}")
+//        Log.d("DetoksCommunity", "my wallet ${senderWallet.balance}")
 
         if (senderWallet.balance >= amount) {
-            Log.d("DetoksCommunity", "Sending $amount money to $recipientMid")
+//            Log.d("DetoksCommunity", "Sending $amount money to $recipientMid")
             senderWallet.balance -= amount
             walletManager.setWalletBalance(myPeer.mid, senderWallet.balance)
 
@@ -79,15 +87,15 @@ class DeToksCommunity(
                 send(peer.address, packet)
             }
         } else {
-            Log.d("DeToksCommunity", "Insufficient funds!")
+//            Log.d("DeToksCommunity", "Insufficient funds!")
         }
 
     }
 
     fun gossipWith(peer: Peer) {
-        Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
-        Log.d("DetoksCommunity", "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
-        Log.d("DetoksCommunity", "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
+//        Log.d("DeToksCommunity", "Gossiping with ${peer.mid}, address: ${peer.address}")
+//        Log.d("DetoksCommunity", "My wallet size: ${walletManager.getOrCreateWallet(myPeer.mid)}")
+//        Log.d("DetoksCommunity", "My peer wallet size: ${walletManager.getOrCreateWallet(peer.mid)}")
         val listOfTorrents = TorrentManager.getInstance(context).getListOfTorrents()
         if(listOfTorrents.isEmpty()) return
         val magnet = listOfTorrents.random().makeMagnetUri()
@@ -104,10 +112,12 @@ class DeToksCommunity(
     }
 
     private fun onGossip(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
+        val (_, payload) = packet.getAuthPayload(TorrentMessage.Deserializer)
         val torrentManager = TorrentManager.getInstance(context)
-        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
+//        Log.d("DeToksCommunity", "received torrent from ${peer.mid}, address: ${peer.address}, magnet: ${payload.magnet}")
+
         torrentManager.addTorrent(payload.magnet)
+
     }
     private fun onTransactionMessage(packet: Packet) {
         val (_, payload) = packet.getAuthPayload(TransactionMessage.Deserializer)
@@ -122,9 +132,9 @@ class DeToksCommunity(
             recipientWallet.balance += payload.amount
             walletManager.setWalletBalance(payload.recipientMID, recipientWallet.balance)
 
-            Log.d("DeToksCommunity", "Received ${payload.amount} tokens from ${payload.senderMID}")
+//            Log.d("DeToksCommunity", "Received ${payload.amount} tokens from ${payload.senderMID}")
         } else {
-            Log.d("DeToksCommunity", "Insufficient funds from ${payload.senderMID}!")
+//            Log.d("DeToksCommunity", "Insufficient funds from ${payload.senderMID}!")
         }
     }
 
@@ -134,23 +144,40 @@ class DeToksCommunity(
         if (peer.address in DEFAULT_ADDRESSES) {
             lastTrackerResponses[peer.address] = Date()
         }
+        // We meet a new peer -> crawl their chain
+        runBlocking {
+            // Blocking!!!
+            launch { // launch a new coroutine and continue
+                super.crawlChain(peer, null) // Crawl their chain (unknown last block)
+            }
+        }
     }
 
-    fun broadcastLike(vid: String, torrent: String, creator: String, magnet: String) {
-        if(userLikedVideo(vid,torrent,myPeer.publicKey.toString())) return
-        Log.d("DeToks", "Liking: $vid")
+    fun broadcastLike(vid: String, torrent: String, creator: String, magnet: String, flag: Boolean = false) {
+        if (userLikedVideo(vid, torrent, myPeer.publicKey.toString())) return
         val timestamp = System.currentTimeMillis().toString()
-        val like = Like(myPeer.publicKey.toString(), vid, torrent, creator,timestamp, magnet)
+        val like = Like(if (flag) creator else myPeer.publicKey.toString(), vid, torrent, creator, timestamp, magnet)
         createProposalBlock(LIKE_BLOCK, like.toMap(), myPeer.publicKey.keyToBin())
-        Log.d("DeToks", "$like")
     }
 
     fun getLikes(vid: String, torrent: String): List<TrustChainBlock> {
         return database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["video"] == vid && it.transaction["torrent"] == torrent
-        }
+        }.distinctBy { it.transaction["liker"] }
     }
+    fun getAllUniqueVideos(): List<Pair<String,String>> {
+        val videos = database.getBlocksWithType(LIKE_BLOCK)
+        val unique = videos.filter{ video -> videos.count { it.transaction["video"] == video.transaction["video"] && it.transaction["torrent"] == video.transaction["torrent"] } == 1}
+        return unique.map { Pair(it.transaction["video"] as String,it.transaction["torrent"] as String) }
+    }
+    fun getAuthorOfMagnet(magnet: String): String {
+        val a = database.getBlocksWithType(LIKE_BLOCK).filter {
+            it.transaction["torrentMagnet"] == magnet
+        }
+        if(a.isEmpty()) return ""
+        return a[0].transaction["author"] as String
 
+    }
     fun getBlocksByAuthor(author: String): List<TrustChainBlock> {
         val authorsBlocks =  database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["author"] == author
@@ -158,18 +185,21 @@ class DeToksCommunity(
         if(authorsBlocks.isEmpty()) return authorsBlocks
         return authorsBlocks.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()})
     }
-    fun getEarliestDate(vid: String, torrent: String):Long {
-        if(firstInstance(vid,torrent)) return Long.MAX_VALUE
-        return (getLikes(vid,torrent).sortedBy{(it.transaction["timestamp"] as String).toLong()}.get(0).transaction["timestamp"] as String).toLong()
+
+    fun getNotifications(author: String): List<TrustChainBlock> {
+        return getBlocksByAuthor(author).filter { it.transaction["liker"] != author }
+    }
+
+    fun getEarliestDate(vid: String, torrent: String): Long {
+        if(duplicates(vid,torrent) == 0) return Long.MAX_VALUE
+        return (getLikes(vid,torrent).sortedBy{(it.transaction["timestamp"] as String).toLong()}[0].transaction["timestamp"] as String).toLong()
     }
 
     fun userLikedVideo(vid: String, torrent: String, liker: String): Boolean {
         return getLikes(vid, torrent).any { it.transaction["liker"] == liker }
     }
-    fun firstInstance(vid: String, torrent: String): Boolean {
-        val exists = database.getBlocksWithType(LIKE_BLOCK).filter { it.transaction["video"] == vid && it.transaction["torrent"] == torrent }.size
-        if(exists == 0) return true
-        return false
+    fun duplicates(vid: String, torrent: String): Int {
+        return database.getBlocksWithType(LIKE_BLOCK).filter { it.transaction["video"] == vid && it.transaction["torrent"] == torrent }.size
     }
 
     fun getPostedVideos(author: String): List<Pair<String, Int>> {
@@ -177,24 +207,23 @@ class DeToksCommunity(
         data class Key(val video: String, val torrent: String)
         fun TrustChainBlock.toKey() = Key(transaction["video"] as String, transaction["torrent"] as String)
             val likes = getBlocksByAuthor(author).groupBy { it.toKey() }
-        // no need to sort here as getblocksbyauthor already sorts
         return likes.entries.map {
             Pair(it.key.video, it.value.size)
         }
     }
 
     fun listOfLikedVideosAndTorrents(person: String): List<Pair<String,String>> {
-        var iterato = database.getBlocksWithType(LIKE_BLOCK).filter {
+        val iterato = database.getBlocksWithType(LIKE_BLOCK).filter {
             it.transaction["liker"] == person
         }
         if(iterato.isEmpty()) return emptyList()
-        var iterator= iterato.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()}).listIterator()
-        var likedVideos = ArrayList<Pair<String,String>>()
+        val iterator= iterato.sortedWith(compareByDescending{(it.transaction["timestamp"] as String).toLong()}).listIterator()
+        val likedVideos = ArrayList<Pair<String,String>>()
         while(iterator.hasNext()) {
             val block = iterator.next()
-            likedVideos.add(Pair(block.transaction.get("video") as String, block.transaction.get("torrentMagnet") as String))
+            likedVideos.add(Pair(block.transaction["video"] as String, block.transaction["torrentMagnet"] as String))
         }
-        return likedVideos;
+        return likedVideos
     }
 
     class Factory(
