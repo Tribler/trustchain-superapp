@@ -116,6 +116,17 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MusicDaoTheme"></activity>
 
+
+        <activity
+            android:name="nl.tudelft.trustchain.peerai.PeerAIActivity"
+            android:exported="true"
+            android:label="PeerAI App"
+            android:parentActivityName=".ui.dashboard.DashboardActivity"
+            android:screenOrientation="portrait"
+
+
+        ></activity>
+
         <service
             android:name="nl.tudelft.trustchain.app.service.TrustChainService"
             android:exported="false" />
