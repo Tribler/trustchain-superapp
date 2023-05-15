@@ -21,6 +21,11 @@ import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.voting.VotingActivity
 import nl.tudelft.trustchain.detoks.DeToksActivity
+import nl.tudelft.trustchain.peerai.PeerAIActivity
+
+
+
+
 
 enum class AppDefinition(
     @DrawableRes val icon: Int,
@@ -134,4 +139,15 @@ enum class AppDefinition(
         R.color.green,
         LiteratureDaoActivity::class.java
     ),
+
+
+        PeerAi(
+        R.drawable.ic_book_hover_over_hand,
+        "PeerAI",
+        R.color.green,
+            PeerAIActivity::class.java
+    )
+
+
+
 }

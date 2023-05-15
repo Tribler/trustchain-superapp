@@ -125,6 +125,8 @@ dependencies {
     implementation project(':valuetransfer')
     implementation project(':atomic-swap')
     implementation project(':literaturedao')
+    implementation project(':peerai')
+
     implementation project(':detoks')
     api(project(':common')) {
         exclude group: 'net.java.dev.jna'

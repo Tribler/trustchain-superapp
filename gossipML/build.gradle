@@ -124,8 +124,8 @@ dependencies {
 
     // Cryptocurrency integration
     implementation('org.bitcoinj:bitcoinj-core:0.15.10')
-    implementation 'org.knowm.xchange:xchange-parent:5.0.1'
-    implementation 'org.knowm.xchange:xchange-binance:5.0.1'
+    //implementation 'org.knowm.xchange:xchange-parent:5.0.1'
+    //implementation 'org.knowm.xchange:xchange-binance:5.0.1'
 
     // Testing
     testImplementation 'junit:junit:4.12'
