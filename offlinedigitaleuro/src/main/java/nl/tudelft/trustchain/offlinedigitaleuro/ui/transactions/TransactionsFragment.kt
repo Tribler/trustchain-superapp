@@ -59,9 +59,9 @@ class TransactionsFragment : OfflineDigitalEuroBaseFragment(R.layout.transaction
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.trustScoresRecyclerView.adapter = adapter
-        binding.trustScoresRecyclerView.layoutManager = LinearLayoutManager(context)
-        binding.trustScoresRecyclerView.addItemDecoration(
+        binding.transactionsHistoryRecyclerView.adapter = adapter
+        binding.transactionsHistoryRecyclerView.layoutManager = LinearLayoutManager(context)
+        binding.transactionsHistoryRecyclerView.addItemDecoration(
             DividerItemDecoration(
                 context,
                 LinearLayout.VERTICAL

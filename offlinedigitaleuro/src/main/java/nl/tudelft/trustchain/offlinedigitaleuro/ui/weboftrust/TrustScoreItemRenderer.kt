@@ -14,12 +14,12 @@ class TrustScoreItemRenderer : ItemLayoutRenderer<TrustScoreItem, View>(
         txtPubKey.text = item.trustScore.public_key
         txtTrustScore.text = item.trustScore.trust_score.toString()
         if (item.trustScore.trust_score <= 0)
-            txtTrustScore.setTextColor(ContextCompat.getColor(context, R.color.errorColor))
+            txtTrustScore.setTextColor(ContextCompat.getColor(context, R.color.red))
         else
             if(item.trustScore.trust_score < 30)
                 txtTrustScore.setTextColor(ContextCompat.getColor(context, R.color.metallic_gold))
             else
-                txtTrustScore.setTextColor(ContextCompat.getColor(context, R.color.green_190))
+                txtTrustScore.setTextColor(ContextCompat.getColor(context, R.color.green))
     }
 
     override fun getLayoutResourceId(): Int {

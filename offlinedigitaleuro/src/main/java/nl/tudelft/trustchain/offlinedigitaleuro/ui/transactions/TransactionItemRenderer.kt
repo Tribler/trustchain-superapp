@@ -13,11 +13,16 @@ class TransactionItemRenderer : ItemLayoutRenderer<TransactionItem, View>(
     override fun bindView(item: TransactionItem, view: View) = with(view) {
         if (item.transaction.amount < 0) {
             txtType.setText(R.string.sent)
-            txtAmount.setTextColor(ContextCompat.getColor(context, R.color.errorColor))
+            txtAmount.setTextColor(ContextCompat.getColor(context, R.color.red))
+            imageInOut.setImageResource(R.drawable.ic_baseline_outgoing_24)
+            imageInOut.setColorFilter(ContextCompat.getColor(context, R.color.red))
         } else {
             txtType.setText(R.string.received)
-            txtAmount.setTextColor(ContextCompat.getColor(context, R.color.green_190))
+            txtAmount.setTextColor(ContextCompat.getColor(context, R.color.green))
+            imageInOut.setImageResource(R.drawable.ic_baseline_incoming_24)
+            imageInOut.setColorFilter(ContextCompat.getColor(context, R.color.green))
         }
+
         txtPeerId.text = item.transaction.public_key
         txtAmount.text = item.transaction.amount.toString()
         txtDate.text = item.transaction.transaction_datetime

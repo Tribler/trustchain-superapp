@@ -8,6 +8,16 @@
     android:orientation="vertical"
     android:padding="8dp">
 
+    <ImageView
+        android:id="@+id/imageInOut"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_baseline_outgoing_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/red" />
+
     <TextView
         android:id="@+id/txtAmount"
         android:layout_width="80dp"
@@ -15,7 +25,7 @@
         android:text=""
         android:textSize="25sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/imageInOut"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -25,7 +35,6 @@
         android:layout_marginStart="16dp"
         android:ellipsize="end"
         android:gravity="center"
-        android:lines="1"
         android:textColor="@color/text_primary"
         android:typeface="monospace"
         app:layout_constraintBottom_toTopOf="@id/txtDate"
@@ -39,8 +48,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="5dp"
-        android:textColor="#AAAAAA"
-        android:textSize="12sp"
+        android:textColor="#AA00AA"
+        android:textSize="11sp"
         app:layout_constraintBottom_toBottomOf="@id/txtPeerId"
         app:layout_constraintStart_toStartOf="@id/txtPeerId"
         app:layout_constraintTop_toBottomOf="@id/txtPeerId"
@@ -54,7 +63,7 @@
         android:layout_marginEnd="5dp"
         android:ellipsize="end"
         android:lines="1"
-        android:textColor="@color/text_secondary"
+        android:textColor="#AA00AA"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/txtPeerId"
         app:layout_constraintTop_toBottomOf="@id/txtDate"
