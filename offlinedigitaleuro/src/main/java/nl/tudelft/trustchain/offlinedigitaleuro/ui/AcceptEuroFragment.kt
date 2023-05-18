@@ -48,7 +48,7 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
         binding.btnAccept.setOnClickListener {
             if (maybeTransaction == null || maybePrevOwner == null) {
                 val prevMsg: String = binding.txtError.text.toString()
-                val newErrMsg = "Error: transaction is not good. Reject instead"
+                val newErrMsg = "Error: transaction is not good. Refuse instead"
                 // to display the error message only once
                 if (!prevMsg.contains(newErrMsg)) {
                     val newMsg = "$prevMsg\n$newErrMsg"
