@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.offlinedigitaleuro.ui.weboftrust
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -27,19 +28,17 @@ class WebOfTrustFragment : OfflineDigitalEuroBaseFragment(R.layout.web_of_trust_
         liveData { emit(listOf()) }
     }
 
+    @SuppressLint("NotifyDataSetChanged") // suppression because the notify is triggered once
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         adapter.registerRenderer(TrustScoreItemRenderer())
 
         lifecycleScope.launchWhenResumed {
-            while(isActive) {
                 val items = db.webOfTrustDao().getAllTrustScores()
                     .map { trustScore: WebOfTrust -> TrustScoreItem(trustScore) }
                 adapter.updateItems(items)
                 adapter.notifyDataSetChanged()
-                delay(1000L)
-            }
         }
     }
 

@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.offlinedigitaleuro.ui.transactions
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -39,20 +40,18 @@ class TransactionsFragment : OfflineDigitalEuroBaseFragment(R.layout.transaction
         binding.txtBalance.text = sum.toString()
     }
 
+    @SuppressLint("NotifyDataSetChanged") // suppression because the notify is triggered once
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         adapter.registerRenderer(TransactionItemRenderer())
 
         lifecycleScope.launchWhenResumed {
-            while (isActive) {
                 updateBalance()
                 val items = db.transactionsDao().getTransactionData()
                     .map { transaction: Transactions -> TransactionItem(transaction) }
                 adapter.updateItems(items)
                 adapter.notifyDataSetChanged()
-                delay(1000L)
-            }
         }
     }
 

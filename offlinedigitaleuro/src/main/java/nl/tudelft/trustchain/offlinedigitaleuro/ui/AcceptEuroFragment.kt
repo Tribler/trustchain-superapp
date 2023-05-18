@@ -194,7 +194,6 @@ class AcceptEuroFragment : OfflineDigitalEuroBaseFragment(R.layout.accept_euro_f
         maybePrevOwner = null
     }
 
-    @SuppressLint("SetTextI18n")
     private fun setTrustScoreAndMessage() {
         if (doubleSpendExists) {
             val prevMsg = binding.trustScoreWarning.text
