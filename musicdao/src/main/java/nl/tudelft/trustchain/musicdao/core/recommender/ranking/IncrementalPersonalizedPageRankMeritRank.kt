@@ -12,13 +12,13 @@ class IncrementalPersonalizedPageRankMeritRank (
     repetitions: Int,
     rootNode: Node,
     alphaDecay: Double,
-    betaDecay: Double,
+    private val betaDecay: Double,
+    private val betaDecayThreshold: Double = 0.95,
     graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>,
     val heapEfficientImplementation: Boolean = true
 ): IncrementalRandomWalkedBasedRankingAlgo<SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, Node, NodeTrustEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}
     private val iter = CustomRandomWalkVertexIterator(graph, rootNode, maxWalkLength.toLong(), alphaDecay, Random())
-    private val betaDecayThreshold = 1.0 - betaDecay
     lateinit var randomWalks: MutableList<MutableList<Node>>
 
     init {
@@ -73,8 +73,8 @@ class IncrementalPersonalizedPageRankMeritRank (
         val betaDecays = if(heapEfficientImplementation) calculateBetaDecays(nodeCounts) else calculateBetaDecaysSpaceIntensive()
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
-            val betaDecay = 1.0 - (betaDecays[node] ?: 0.0)
-            val betaDecayedScore = (occ.toDouble() / totalOccs) * betaDecay
+            val decay = (1.0 - (betaDecays[node]?.let { it * betaDecay } ?: 0.0))
+            val betaDecayedScore = (occ.toDouble() / totalOccs) * decay
             node.setPersonalizedPageRankScore(betaDecayedScore)
         }
     }
@@ -128,7 +128,7 @@ class IncrementalPersonalizedPageRankMeritRank (
             }
         }
         for(node in totalVisitsToNode.keys) {
-            val maxVisitsFromAnotherNode = visitToNodeThroughOtherNode[node]?.filter { it.key != rootNode }?.values?.max() ?: 0
+            val maxVisitsFromAnotherNode = visitToNodeThroughOtherNode[node]?.filter { it.key != rootNode }?.values?.maxOrNull() ?: 0
             val score = maxVisitsFromAnotherNode.toDouble() / totalVisitsToNode[node]!!
             betaDecay[node] = if(score > betaDecayThreshold) score else 0.0
         }

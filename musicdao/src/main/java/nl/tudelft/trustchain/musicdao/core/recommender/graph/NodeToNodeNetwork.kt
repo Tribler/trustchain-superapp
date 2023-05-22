@@ -5,6 +5,7 @@ import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToNodeNetwork.CustomImporter
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import org.jgrapht.graph.SimpleDirectedWeightedGraph
+import org.jgrapht.nio.dot.DOTExporter
 import java.io.ByteArrayOutputStream
 import java.io.StringReader
 import java.io.StringWriter
@@ -89,6 +90,13 @@ class NodeToNodeNetwork {
 
     fun serializeZipped(): ByteArray {
         return gzip(serialize())
+    }
+
+    fun exportAsDot(): String {
+        val stringWriter = StringWriter()
+        val dotExporter = DOTExporter<Node, NodeTrustEdge>()
+        dotExporter.exportGraph(graph, stringWriter)
+        return stringWriter.toString()
     }
 
     private fun gzip(content: String): ByteArray {

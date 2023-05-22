@@ -166,6 +166,7 @@ public class CustomImporter
 
             NodeTrustEdge e = new NodeTrustEdge(t.getThird(), new Timestamp(t.getFourth()));
             graph.addEdge(from, to, e);
+            graph.setEdgeWeight(e, t.getThird());
             notifyEdge(e);
         };
 

@@ -19,7 +19,7 @@ class IncrementalPersonalizedPageRankMeritRankTest {
     private val nNodes = 500
     private val nEdges = 10
     private val repetitions = 10000
-    private val maxWalkLength = 10000
+    private val maxWalkLength = 1000
     private val betaDecayThreshold = 0.5
 
     @Before
@@ -41,7 +41,7 @@ class IncrementalPersonalizedPageRankMeritRankTest {
 
     @Test
     fun canCaclulatePersonalizedPageRank() {
-        incrementalPageRankWithMeritRank = IncrementalPersonalizedPageRankMeritRank( maxWalkLength, repetitions, rootNode, 0.01, betaDecayThreshold, network.graph)
+        incrementalPageRankWithMeritRank = IncrementalPersonalizedPageRankMeritRank( maxWalkLength, repetitions, rootNode, 0.0, betaDecayThreshold, network.graph)
         incrementalPageRankWithMeritRank.calculateRankings()
         Assert.assertEquals(0.0, rootNode.getPersonalizedPageRankScore(), 0.001)
         val rootNeighbors = network.getAllEdges().filter { network.graph.getEdgeSource(it) == rootNode }.map { network.graph.getEdgeTarget(it) }

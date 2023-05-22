@@ -12,24 +12,21 @@ import java.io.FileReader
 import java.io.IOException
 import kotlin.random.Random
 
+// Sybil Attack which involves targeting specific Root Nodes
+// In each Root Node's simulation we create a sybil attack tailored to it
 fun main() {
     lateinit var trustNetwork: TrustNetwork
     val currentDir = System.getProperty("user.dir")
     val contextDir = "$currentDir/musicdao/src/test/resources"
     val loadedTrustNetwork = File("$contextDir/dataset/test_network.txt").readText()
     val subNetworks = Json.decodeFromString<SerializedSubNetworks>(loadedTrustNetwork)
-//    val fileOut = File("$contextDir/dataset/sybil_experiment_out_flat_3.txt")
-    val fileOut = File("$contextDir/dataset/sybil_experiment_debug.txt")
+    val fileOut = File("$contextDir/dataset/sybil_experiment_out_flat_3.txt")
     val seed = 42
     val rng = Random(seed)
     fileOut.createNewFile()
     val percentageAttackers = 0.3
     val topXRec = 0.1
     trustNetwork = TrustNetwork(subNetworks, "d7083f5e1d50c264277d624340edaaf3dc16095b")
-    val dotFile = File("$contextDir/dataset/test.dot")
-    dotFile.createNewFile()
-    val text = trustNetwork.nodeToNodeNetwork.exportAsDot()
-    fileOut.appendText(text)
     val nTopSongs = 100
     val interactionFile = File("$contextDir/dataset/kaggle_visible_evaluation_triplets.txt")
     val songListenCount = mutableMapOf<SongRecommendation, Int>()
@@ -60,7 +57,6 @@ fun main() {
     val randomAttackerIndices = generateSequence {
         rng.nextInt(0, totalNodes - 1)
     }.distinct()
-        .filter { trustNetwork.nodeToNodeNetwork.graph.incomingEdgesOf(allNodes[it]).size > 0 }
         .take(nAttackerNodes)
         .sorted()
         .toSet()
@@ -69,7 +65,7 @@ fun main() {
         attackerNodes.add(allNodes[i])
     }
     for ((index, attackerNode) in attackerNodes.withIndex()) {
-        val nSybilNodes = Random.nextInt(1, 250)
+        val nSybilNodes = Random.nextInt(1, 5)
         val typeAttack = rng.nextInt(3)
         val sybilSongRecs = (1..5).map { SongRecommendation("sybilSong-$index-$it") }
         sybilSongRecs.forEach {
@@ -172,7 +168,6 @@ fun main() {
         rng.nextInt(0, totalNodes - 1)
     }.filterNot { randomAttackerIndices.contains(it) }
         .distinct()
-        .filter { trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(allNodes[it]).size > 0 }
         .take(nRootNodes)
         .sorted()
         .toSet()
@@ -191,14 +186,13 @@ fun main() {
             var top2000SongsSybil = 0
             var top5000SongsSybil = 0
             for ((index, rootNode) in rootNodes.withIndex()) {
-                //DEBUG
                 println("ROOT NODE $index")
                 trustNetwork = TrustNetwork(
                     SubNetworks(newNodeToNodeNetwork, newNodeToSongNetwork),
                     rootNode.getIpv8(),
                     0.0,
-                    0.5,
-                    0.5
+                    betaDecay,
+                    exploration
                 )
                 val allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
                 for (song in allSongs) {

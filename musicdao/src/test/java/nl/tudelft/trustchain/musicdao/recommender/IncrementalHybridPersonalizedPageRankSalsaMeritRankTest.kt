@@ -8,10 +8,7 @@ import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeSongEdge
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge
 import nl.tudelft.trustchain.musicdao.core.recommender.model.SongRecommendation
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsa
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsaMeritRank
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRank
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRankMeritRank
+import nl.tudelft.trustchain.musicdao.core.recommender.ranking.*
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -112,7 +109,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRankTest {
         val sybilSong2ScoreWithoutBetaDecay = sybilSong2.getRecommendationScore()
         val sybilSong3ScoreWithoutBetaDecay = sybilSong3.getRecommendationScore()
 
-        incrementalHybridPersonalizedPageRankSalsaMeritRank = IncrementalHybridPersonalizedPageRankSalsaMeritRank(maxWalkLength, repetitions, rootNode, 0.01, betaDecayThreshold, 0.01, nodeToSongNetwork.graph, true)
+        incrementalHybridPersonalizedPageRankSalsaMeritRank = IncrementalHybridPersonalizedPageRankSalsaMeritRank(maxWalkLength, repetitions, rootNode, 0.01, 0.01, nodeToSongNetwork.graph, true)
         incrementalHybridPersonalizedPageRankSalsaMeritRank.calculateRankings()
 
         val sybilSong1ScoreWithBetaDecay = sybilSong1.getRecommendationScore()
@@ -123,7 +120,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRankTest {
         Assert.assertTrue(sybilSong2ScoreWithoutBetaDecay > sybilSong2ScoreWithBetaDecay)
         Assert.assertTrue(sybilSong3ScoreWithoutBetaDecay > sybilSong3ScoreWithBetaDecay)
 
-        incrementalHybridPersonalizedPageRankSalsaMeritRank = IncrementalHybridPersonalizedPageRankSalsaMeritRank(maxWalkLength, repetitions, rootNode, 0.01, 0.0, 0.01, nodeToSongNetwork.graph, true)
+        incrementalHybridPersonalizedPageRankSalsaMeritRank = IncrementalHybridPersonalizedPageRankSalsaMeritRank(maxWalkLength, repetitions, rootNode, 0.01, 0.01, nodeToSongNetwork.graph, true)
         incrementalHybridPersonalizedPageRankSalsaMeritRank.calculateRankings()
 
         val sybilSong1ScoreWithZeroBetaDecay = sybilSong1.getRecommendationScore()
@@ -134,5 +131,31 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRankTest {
         Assert.assertTrue(sybilSong2ScoreWithZeroBetaDecay > sybilSong2ScoreWithBetaDecay)
         Assert.assertTrue(sybilSong3ScoreWithZeroBetaDecay > sybilSong3ScoreWithBetaDecay)
     }
+
+    @Test
+    fun scoreForSongsReflectsPreferencesOfUsersWithLowExplorationProbability() {
+        incrementalHybridPersonalizedPageRankSalsaMeritRank = IncrementalHybridPersonalizedPageRankSalsaMeritRank(maxWalkLength, repetitions, rootNode, 0.01, 0.0, nodeToSongNetwork.graph, true)
+        incrementalHybridPersonalizedPageRankSalsaMeritRank.calculateRankings()
+        val allSongEdges = nodeToSongNetwork.getAllEdges()
+        val rootSongsSorted = allSongEdges.filter { nodeToSongNetwork.graph.getEdgeSource(it) == rootNode }.sortedBy { it.affinity }.map { nodeToSongNetwork.graph.getEdgeTarget(it) }
+        Assert.assertTrue(rootSongsSorted.first().rankingScore < rootSongsSorted.last().rankingScore)
+    }
+
+    @Test
+    fun scoreForSongsReflectsTrustInNeighborsWithHighExplorationProbability() {
+        val pageRank = IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.05, nodeToNodeNetwork.graph)
+        pageRank.calculateRankings()
+        val incrementalHybridPersonalizedPageRankSalsaMeritRank2 = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(maxWalkLength, repetitions, rootNode, 0.01, 0.0, 0.95, 1.00, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, true)
+        incrementalHybridPersonalizedPageRankSalsaMeritRank2.calculateRankings()
+        val allNodeToNodeEdges = nodeToNodeNetwork.getAllEdges()
+        val allNeighborsSortedByTrust = allNodeToNodeEdges.filter { nodeToNodeNetwork.graph.getEdgeSource(it) == rootNode }.map { nodeToNodeNetwork.graph.getEdgeTarget(it) }.sortedBy { it.getPersonalizedPageRankScore() }
+        val leastTrustedNeighbor = allNeighborsSortedByTrust.first()
+        val mostTrustedNeighbor = allNeighborsSortedByTrust.last()
+        val allSongEdges = nodeToSongNetwork.getAllEdges()
+        val leastTrustedNeighborSongsWeight = allSongEdges.filter { nodeToSongNetwork.graph.getEdgeSource(it) == leastTrustedNeighbor }.sortedBy { it.affinity }.map { nodeToSongNetwork.graph.getEdgeTarget(it).rankingScore }.sum()
+        val mostTrustedNeighborSongsWeight = allSongEdges.filter { nodeToSongNetwork.graph.getEdgeSource(it) == mostTrustedNeighbor }.sortedBy { it.affinity }.map { nodeToSongNetwork.graph.getEdgeTarget(it).rankingScore }.sum()
+        Assert.assertTrue(leastTrustedNeighborSongsWeight < mostTrustedNeighborSongsWeight)
+    }
+
 
 }

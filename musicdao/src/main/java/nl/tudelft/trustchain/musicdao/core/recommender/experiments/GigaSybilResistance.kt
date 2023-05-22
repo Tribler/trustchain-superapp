@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.experiments
 
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import nl.tudelft.ipv8.util.random
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.*
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import java.io.BufferedReader
@@ -18,19 +16,15 @@ fun main() {
     val contextDir = "$currentDir/musicdao/src/test/resources"
     val loadedTrustNetwork = File("$contextDir/dataset/test_network.txt").readText()
     val subNetworks = Json.decodeFromString<SerializedSubNetworks>(loadedTrustNetwork)
-//    val fileOut = File("$contextDir/dataset/sybil_experiment_out_flat_3.txt")
-    val fileOut = File("$contextDir/dataset/sybil_experiment_debug.txt")
+    val fileOut = File("$contextDir/dataset/giga_sybil_experiment_final_final_twitter_strat.txt")
     val seed = 42
     val rng = Random(seed)
     fileOut.createNewFile()
-    val percentageAttackers = 0.3
-    val topXRec = 0.1
+    val percentageAttackers = 0.6
     trustNetwork = TrustNetwork(subNetworks, "d7083f5e1d50c264277d624340edaaf3dc16095b")
+    var repGain = 0.0
     val dotFile = File("$contextDir/dataset/test.dot")
     dotFile.createNewFile()
-    val text = trustNetwork.nodeToNodeNetwork.exportAsDot()
-    fileOut.appendText(text)
-    val nTopSongs = 100
     val interactionFile = File("$contextDir/dataset/kaggle_visible_evaluation_triplets.txt")
     val songListenCount = mutableMapOf<SongRecommendation, Int>()
     try {
@@ -69,13 +63,15 @@ fun main() {
         attackerNodes.add(allNodes[i])
     }
     for ((index, attackerNode) in attackerNodes.withIndex()) {
-        val nSybilNodes = Random.nextInt(1, 250)
-        val typeAttack = rng.nextInt(3)
+        val typeAttack = rng.nextInt(2)
         val sybilSongRecs = (1..5).map { SongRecommendation("sybilSong-$index-$it") }
         sybilSongRecs.forEach {
             trustNetwork.addSongRec(it)
         }
-
+        val attackerEdges = trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(attackerNode).toList()
+        for(i in 0 until attackerEdges.size) {
+            trustNetwork.nodeToNodeNetwork.removeEdge(attackerEdges[i])
+        }
         //linear attack
         when (typeAttack) {
             0 -> {
@@ -86,7 +82,7 @@ fun main() {
                 for (sybilSongRec in sybilSongRecs) {
                     trustNetwork.nodeToSongNetwork.addEdge(attackerNode, sybilSongRec, NodeSongEdge(0.2))
                 }
-                for (i in (1..nSybilNodes)) {
+                for (i in (1..90)) {
                     val nextNode = Node("sybilNode-$index-${i + 1}")
                     val randomPopularSongInts = generateSequence {
                         rng.nextInt(popularSongs.size)
@@ -101,37 +97,11 @@ fun main() {
                     for (attackSongRec in popularSongsAttack) {
                         trustNetwork.nodeToSongNetwork.addEdge(newNode, attackSongRec, NodeSongEdge(0.1))
                     }
-                    if (nSybilNodes != i) {
+                    if (90 != i) {
                         trustNetwork.addNode(nextNode)
                         trustNetwork.nodeToNodeNetwork.addEdge(newNode, nextNode, NodeTrustEdge(1.0))
                     }
                     newNode = nextNode
-                }
-            }
-            //parallel attack
-            1 -> {
-                for (sybilSongRec in sybilSongRecs) {
-                    trustNetwork.nodeToSongNetwork.addEdge(attackerNode, sybilSongRec, NodeSongEdge(0.2))
-                }
-                for (i in (1..nSybilNodes)) {
-                    val nextNode = Node("sybilNode-$index-$i")
-                    trustNetwork.addNode(nextNode)
-                    val randomPopularSongInts = generateSequence {
-                        rng.nextInt(popularSongs.size)
-                    }.distinct().take(5).toSet()
-                    val popularSongsAttack = mutableListOf<SongRecommendation>()
-                    for (j in randomPopularSongInts) {
-                        popularSongsAttack.add(popularSongs[j])
-                    }
-                    for (sybilSongRec in sybilSongRecs) {
-                        trustNetwork.nodeToSongNetwork.addEdge(nextNode, sybilSongRec, NodeSongEdge(0.1))
-                    }
-                    for (attackSongRec in popularSongsAttack) {
-                        trustNetwork.nodeToSongNetwork.addEdge(nextNode, attackSongRec, NodeSongEdge(0.1))
-                    }
-                    if (nSybilNodes != i) {
-                        trustNetwork.nodeToNodeNetwork.addEdge(attackerNode, nextNode, NodeTrustEdge(10.0))
-                    }
                 }
             }
             // cycle attack
@@ -139,7 +109,7 @@ fun main() {
                 for (sybilSongRec in sybilSongRecs) {
                     trustNetwork.nodeToSongNetwork.addEdge(attackerNode, sybilSongRec, NodeSongEdge(0.2))
                 }
-                for (i in (1..nSybilNodes)) {
+                for (i in (1..2)) {
                     val nextNode = Node("sybilNode-$index-$i")
                     trustNetwork.addNode(nextNode)
                     val randomPopularSongInts = generateSequence {
@@ -155,16 +125,14 @@ fun main() {
                     for (attackSongRec in popularSongsAttack) {
                         trustNetwork.nodeToSongNetwork.addEdge(nextNode, attackSongRec, NodeSongEdge(0.1))
                     }
-                    if (nSybilNodes != i) {
-                        trustNetwork.nodeToNodeNetwork.addEdge(attackerNode, nextNode, NodeTrustEdge(10.0))
-                        trustNetwork.nodeToNodeNetwork.addEdge(nextNode, attackerNode, NodeTrustEdge(10.0))
+                    if (5 != i) {
+                        trustNetwork.nodeToNodeNetwork.addEdge(attackerNode, nextNode, NodeTrustEdge(100.0))
+                        trustNetwork.nodeToNodeNetwork.addEdge(nextNode, attackerNode, NodeTrustEdge(100.0))
                     }
                 }
             }
         }
     }
-    val stringifiedTrustNetwork = Json.encodeToString(trustNetwork.serialize())
-    File("$contextDir/dataset/test_attack_linear_network.txt").writeText(stringifiedTrustNetwork)
     val newNodeToNodeNetwork = trustNetwork.nodeToNodeNetwork
     val newNodeToSongNetwork = trustNetwork.nodeToSongNetwork
     val nRootNodes = 20
@@ -172,7 +140,7 @@ fun main() {
         rng.nextInt(0, totalNodes - 1)
     }.filterNot { randomAttackerIndices.contains(it) }
         .distinct()
-        .filter { trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(allNodes[it]).size > 0 }
+        .filter { trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(allNodes[it]).size > 3 }
         .take(nRootNodes)
         .sorted()
         .toSet()
@@ -181,66 +149,75 @@ fun main() {
         rootNodes.add(allNodes[i])
     }
 
-    val decayValues: List<Double> = (0..10 step 1).map { it.toDouble() / 10 }
-    for (betaDecay in decayValues) {
-        for (exploration in decayValues) {
-            println("BETA DECAY $betaDecay EXPLORATION $exploration experiments starting")
-            var reputationGainForSybils = 0.0
-            var top100SongsSybil = 0
-            var top1000SongsSybil = 0
-            var top2000SongsSybil = 0
-            var top5000SongsSybil = 0
-            for ((index, rootNode) in rootNodes.withIndex()) {
-                //DEBUG
-                println("ROOT NODE $index")
-                trustNetwork = TrustNetwork(
-                    SubNetworks(newNodeToNodeNetwork, newNodeToSongNetwork),
-                    rootNode.getIpv8(),
-                    0.0,
-                    0.5,
-                    0.5
-                )
-                val allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
-                for (song in allSongs) {
-                    if (song.getTorrentHash().contains("sybilSong")) {
-                        reputationGainForSybils += song.rankingScore
+    val betaDecayValues: List<Double> = (0..10 step 2).map { it.toDouble() / 10 }
+
+    for(betaDecay in betaDecayValues) {
+        for (exploration in betaDecayValues) {
+                println("BETA DECAY $betaDecay experiments starting")
+                var reputationGainForSybils = 0.0
+                var top100SongsSybil = 0
+                var top1000SongsSybil = 0
+                var top2000SongsSybil = 0
+                var top5000SongsSybil = 0
+                for ((index, rootNode) in rootNodes.withIndex()) {
+                    println("ROOT NODE $index")
+                    val nodeToNodeNetwork = NodeToNodeNetwork(newNodeToNodeNetwork.graph)
+                    val nodeToSongNetwork = NodeToSongNetwork(newNodeToSongNetwork.graph)
+                    trustNetwork = TrustNetwork(
+                        SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
+                        rootNode.getIpv8(),
+                        0.01,
+                        0.6,
+                        0.5
+                    )
+                    val allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
+                    val allNodes = trustNetwork.nodeToNodeNetwork.getAllNodes().toList()
+                    println("REPUTATION GAIN $reputationGainForSybils")
+                    val top100Songs = allSongs.sortedBy { it.rankingScore }.takeLast(100).toList()
+                    for ((i, song) in top100Songs.withIndex()) {
+                        if (song.getTorrentHash().contains("sybil")) {
+                            top100SongsSybil += i
+                        }
+                    }
+                    val top1000Songs = allSongs.sortedBy { it.rankingScore }.takeLast((1000).toInt()).toList()
+                    for ((i, song) in top1000Songs.withIndex()) {
+                        if (song.getTorrentHash().contains("sybil")) {
+                            top1000SongsSybil += i
+                        }
+                    }
+                    val top2000Songs = allSongs.sortedBy { it.rankingScore }.takeLast(2000).toList()
+                    for ((i, song) in top2000Songs.withIndex()) {
+                        if (song.getTorrentHash().contains("sybil")) {
+                            top2000SongsSybil += i
+                        }
+                    }
+                    val top5000Songs = allSongs.sortedBy { it.rankingScore }.takeLast(5000).toList()
+                    for ((i, song) in top5000Songs.withIndex()) {
+                        if (song.getTorrentHash().contains("sybil")) {
+                            top5000SongsSybil += i
+                        }
+                    }
+                    for (song in allSongs) {
+                        if (song.getTorrentHash().contains("sybilSong") && song.rankingScore > 0.0) {
+                            reputationGainForSybils += song.rankingScore
+                            song.rankingScore = 0.0
+                        }
+                    }
+                    for(node in allNodes) {
+                        node.rankingScore = 0.0
                     }
                 }
-                val top100Songs = allSongs.sortedBy { it.rankingScore }.takeLast(100).toList()
-                for ((i, song) in top100Songs.withIndex()) {
-                    if (song.getTorrentHash().contains("sybil")) {
-                        top100SongsSybil += i
-                    }
-                }
-                val top1000Songs = allSongs.sortedBy { it.rankingScore }.takeLast((1000).toInt()).toList()
-                for ((i, song) in top1000Songs.withIndex()) {
-                    if (song.getTorrentHash().contains("sybil")) {
-                        top1000SongsSybil += i
-                    }
-                }
-                val top2000Songs = allSongs.sortedBy { it.rankingScore }.takeLast(2000).toList()
-                for ((i, song) in top2000Songs.withIndex()) {
-                    if (song.getTorrentHash().contains("sybil")) {
-                        top2000SongsSybil += i
-                    }
-                }
-                val top5000Songs = allSongs.sortedBy { it.rankingScore }.takeLast(5000).toList()
-                for ((i, song) in top5000Songs.withIndex()) {
-                    if (song.getTorrentHash().contains("sybil")) {
-                        top5000SongsSybil += i
-                    }
-                }
-            }
-            fileOut.appendText("BETA DECAY: $betaDecay EXPLORATION $exploration REPUTATION GAIN: $reputationGainForSybils")
-            fileOut.appendText("\n")
-            fileOut.appendText("TOP 100 SONGS SYBIL: $top100SongsSybil")
-            fileOut.appendText("\n")
-            fileOut.appendText("TOP 1000 SONGS SYBIL: $top1000SongsSybil")
-            fileOut.appendText("\n")
-            fileOut.appendText("TOP 2000 SONGS SYBIL: $top2000SongsSybil")
-            fileOut.appendText("\n")
-            fileOut.appendText("TOP 5000 SONGS SYBIL: $top5000SongsSybil")
-            fileOut.appendText("\n")
+
+                fileOut.appendText("BETA DECAY: $betaDecay EXPLORATION: $exploration REPUTATION GAIN: $reputationGainForSybils")
+                fileOut.appendText("\n")
+                fileOut.appendText("TOP 100 SONGS SYBIL: $top100SongsSybil")
+                fileOut.appendText("\n")
+                fileOut.appendText("TOP 1000 SONGS SYBIL: $top1000SongsSybil")
+                fileOut.appendText("\n")
+                fileOut.appendText("TOP 2000 SONGS SYBIL: $top2000SongsSybil")
+                fileOut.appendText("\n")
+                fileOut.appendText("TOP 5000 SONGS SYBIL: $top5000SongsSybil")
+                fileOut.appendText("\n")
         }
     }
 }

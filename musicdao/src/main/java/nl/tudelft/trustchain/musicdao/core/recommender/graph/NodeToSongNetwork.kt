@@ -26,6 +26,10 @@ class NodeToSongNetwork {
         graph = DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>(NodeSongEdge::class.java)
     }
 
+    constructor(network: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>) {
+        this.graph = network
+    }
+
     constructor(serializedString: String) {
         val network = DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>(NodeSongEdge::class.java)
         val importer =
