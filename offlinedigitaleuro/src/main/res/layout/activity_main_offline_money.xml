@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivityOfflineDigitalEuro">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/balanceLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="1dp">
+
+        <TextView
+            android:id="@+id/txtOwnPublicKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:lines="1"
+            android:typeface="monospace"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"
+            tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
+
+        <TextView
+            android:id="@+id/txtOwnName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/your_balance"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/txtOwnPublicKey"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtBalance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="20.00"
+            android:textSize="60sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/txtOwnName"  />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TableRow
+                android:id="@+id/firstLine"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/firstCell"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center">
+
+                    <TextView
+                        android:id="@+id/edt10Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="50sp"
+                        android:text="16"
+                        android:layout_gravity="center" />
+
+                    <ImageView
+                        android:id="@+id/txt10Euro"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="0dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/euro_10"
+                        android:scaleType="center"
+                        android:layout_gravity="center"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/secondCell"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center">
+
+                    <TextView
+                        android:id="@+id/edt5Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="50sp"
+                        android:text="16"
+                        android:layout_gravity="center" />
+
+                    <ImageView
+                        android:id="@+id/txt5Euro"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="0dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/euro_5"
+                        android:scaleType="center"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
+
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/secondLine"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:id="@+id/thirdCell"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center">
+
+                    <TextView
+                        android:id="@+id/edt2Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="50sp"
+                        android:text="22"
+                        android:layout_gravity="center" />
+
+                    <ImageView
+                        android:id="@+id/txt2Euro"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="0dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/euro_2"
+                        android:scaleType="center"
+                        android:layout_gravity="center"/>
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/fourthCell"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center">
+
+                    <TextView
+                        android:id="@+id/edt1Euro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="50sp"
+                        android:text="20"
+                        android:layout_gravity="center" />
+
+                    <ImageView
+                        android:id="@+id/txt1Euro"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="0dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/euro_1"
+                        android:scaleType="center"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
+            </TableRow>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGet"
+                style="@style/Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="@string/get"
+                app:icon="@drawable/ic_baseline_photo_camera_24"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/secondLine" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSend"
+                style="@style/Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="@string/send"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnGet" />
+
+        </TableLayout>
+    </ScrollView>
+
+</LinearLayout>

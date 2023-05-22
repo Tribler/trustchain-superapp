@@ -1,0 +1,37 @@
+<resources>
+    <string name="title_activity_main_offline_money">Offline Digital Euro</string>
+    <string name="transfer">Transfer</string>
+    <string name="transaction_history">Transaction History</string>
+    <string name="your_balance">Your balance</string>
+    <string name="get_or_transfer_token">Get or transfer token:</string>
+    <string name="get">Get</string>
+    <string name="send">Send</string>
+    <string name="sent">Sent</string>
+    <string name="received">Received</string>
+    <string name="your_public_key">Your public key:</string>
+    <string name="transfer_amount">Transfer amount:</string>
+    <string name="cancel">Cancel</string>
+    <string name="have_the_requesting_party_scan_this_code_then_press_done">Have the Requesting party scan this code, then press done</string>
+    <string name="sending">Sending</string>
+    <string name="continueString">Continue</string>
+    <string name="print_money">Print Money</string>
+    <string name="verify_money">Verify Money</string>
+    <string name="print">Print</string>
+    <string name="list_of_user_from_web_of_trust">List of user from web of trust</string>
+    <string name="send_money_trustscore_warning_high">INFO: The public key you are receiving from has a good trust score (%d)!</string>
+    <string name="send_money_trustscore_warning_average">INFO: The public key you are receiving from has an average trust score (%d).</string>
+    <string name="send_money_trustscore_warning_neutral">WARNING: The public key you are receiving from has a neutral trust score (%d).</string>
+    <string name="send_money_trustscore_warning_low">WARNING: The public key you are receiving from has a low trust score (%d).</string>
+    <string name="send_money_trustscore_warning_double_spender">RED FLAG: The public key you are receiving is probably a DOUBLE SPENDER with trust score (%d).</string>
+    <string name="send_money_trustscore_warning_no_score">WARNING: No trust score available for the public key you are receiving from.</string>
+    <string name="accept">Accept</string>
+    <string name="refuse">Refuse</string>
+    <string name="from">From:</string>
+    <string name="receiving">Receiving:</string>
+    <string name="web_of_trust">Web Of Trust</string>
+    <string name="error_messages">Error messages:</string>
+    <string name="print_10">Print 10€:</string>
+    <string name="print_5">Print 5€:</string>
+    <string name="print_2">Print 2€:</string>
+    <string name="print_1">Print 1€:</string>
+</resources>

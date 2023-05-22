@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/imageInOut"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_baseline_outgoing_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/red" />
+
+    <TextView
+        android:id="@+id/txtAmount"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="25sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/imageInOut"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txtPeerId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:textColor="@color/text_primary"
+        android:typeface="monospace"
+        app:layout_constraintBottom_toTopOf="@id/txtDate"
+        app:layout_constraintStart_toEndOf="@id/txtAmount"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
+
+    <TextView
+        android:id="@+id/txtDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:textColor="#AA00AA"
+        android:textSize="11sp"
+        app:layout_constraintBottom_toBottomOf="@id/txtPeerId"
+        app:layout_constraintStart_toStartOf="@id/txtPeerId"
+        app:layout_constraintTop_toBottomOf="@id/txtPeerId"
+        tools:text="10:00" />
+
+    <TextView
+        android:id="@+id/txtType"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="5dp"
+        android:ellipsize="end"
+        android:lines="1"
+        android:textColor="#AA00AA"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/txtPeerId"
+        app:layout_constraintTop_toBottomOf="@id/txtDate"
+        tools:text="Transfer" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
