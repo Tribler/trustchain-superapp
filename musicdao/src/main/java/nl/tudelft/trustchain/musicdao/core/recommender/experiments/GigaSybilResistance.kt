@@ -10,6 +10,9 @@ import java.io.FileReader
 import java.io.IOException
 import kotlin.random.Random
 
+// When a user selects a song, they want it to be a non-sybil/spam entry
+// Spamming is also bad for a system's resources
+
 fun main() {
     lateinit var trustNetwork: TrustNetwork
     val currentDir = System.getProperty("user.dir")
@@ -20,7 +23,7 @@ fun main() {
     val seed = 42
     val rng = Random(seed)
     fileOut.createNewFile()
-    val percentageAttackers = 0.6
+    val percentageAttackers = 0.05
     trustNetwork = TrustNetwork(subNetworks, "d7083f5e1d50c264277d624340edaaf3dc16095b")
     var repGain = 0.0
     val dotFile = File("$contextDir/dataset/test.dot")
@@ -64,7 +67,7 @@ fun main() {
     }
     for ((index, attackerNode) in attackerNodes.withIndex()) {
         val typeAttack = rng.nextInt(2)
-        val sybilSongRecs = (1..5).map { SongRecommendation("sybilSong-$index-$it") }
+        val sybilSongRecs = (1..3).map { SongRecommendation("sybilSong-$index-$it") }
         sybilSongRecs.forEach {
             trustNetwork.addSongRec(it)
         }
@@ -82,7 +85,7 @@ fun main() {
                 for (sybilSongRec in sybilSongRecs) {
                     trustNetwork.nodeToSongNetwork.addEdge(attackerNode, sybilSongRec, NodeSongEdge(0.2))
                 }
-                for (i in (1..90)) {
+                for (i in (1..1000)) {
                     val nextNode = Node("sybilNode-$index-${i + 1}")
                     val randomPopularSongInts = generateSequence {
                         rng.nextInt(popularSongs.size)
@@ -152,7 +155,6 @@ fun main() {
     val betaDecayValues: List<Double> = (0..10 step 2).map { it.toDouble() / 10 }
 
     for(betaDecay in betaDecayValues) {
-        for (exploration in betaDecayValues) {
                 println("BETA DECAY $betaDecay experiments starting")
                 var reputationGainForSybils = 0.0
                 var top100SongsSybil = 0
@@ -161,17 +163,27 @@ fun main() {
                 var top5000SongsSybil = 0
                 for ((index, rootNode) in rootNodes.withIndex()) {
                     println("ROOT NODE $index")
+                    var allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
+                    for (song in allSongs) {
+                        if (song.getTorrentHash().contains("sybilSong") && song.rankingScore > 0.0) {
+                            reputationGainForSybils += song.rankingScore
+                        }
+                        song.rankingScore = 0.0
+                    }
+                    for(node in allNodes) {
+                        node.rankingScore = 0.0
+                    }
                     val nodeToNodeNetwork = NodeToNodeNetwork(newNodeToNodeNetwork.graph)
                     val nodeToSongNetwork = NodeToSongNetwork(newNodeToSongNetwork.graph)
                     trustNetwork = TrustNetwork(
                         SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
                         rootNode.getIpv8(),
-                        0.01,
-                        0.6,
-                        0.5
+                        0.001,
+                        1.0,
+                        0.0,
+                        100000
                     )
-                    val allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
-                    val allNodes = trustNetwork.nodeToNodeNetwork.getAllNodes().toList()
+                    allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
                     println("REPUTATION GAIN $reputationGainForSybils")
                     val top100Songs = allSongs.sortedBy { it.rankingScore }.takeLast(100).toList()
                     for ((i, song) in top100Songs.withIndex()) {
@@ -200,15 +212,15 @@ fun main() {
                     for (song in allSongs) {
                         if (song.getTorrentHash().contains("sybilSong") && song.rankingScore > 0.0) {
                             reputationGainForSybils += song.rankingScore
-                            song.rankingScore = 0.0
                         }
+                        song.rankingScore = 0.0
                     }
                     for(node in allNodes) {
                         node.rankingScore = 0.0
                     }
                 }
 
-                fileOut.appendText("BETA DECAY: $betaDecay EXPLORATION: $exploration REPUTATION GAIN: $reputationGainForSybils")
+                fileOut.appendText("BETA DECAY: $betaDecay REPUTATION GAIN: $reputationGainForSybils")
                 fileOut.appendText("\n")
                 fileOut.appendText("TOP 100 SONGS SYBIL: $top100SongsSybil")
                 fileOut.appendText("\n")
@@ -218,6 +230,5 @@ fun main() {
                 fileOut.appendText("\n")
                 fileOut.appendText("TOP 5000 SONGS SYBIL: $top5000SongsSybil")
                 fileOut.appendText("\n")
-        }
     }
 }

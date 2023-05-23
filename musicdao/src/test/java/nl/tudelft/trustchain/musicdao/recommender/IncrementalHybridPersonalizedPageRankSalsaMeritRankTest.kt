@@ -134,7 +134,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRankTest {
 
     @Test
     fun scoreForSongsReflectsPreferencesOfUsersWithLowExplorationProbability() {
-        incrementalHybridPersonalizedPageRankSalsaMeritRank = IncrementalHybridPersonalizedPageRankSalsaMeritRank(maxWalkLength, repetitions, rootNode, 0.01, 0.0, nodeToSongNetwork.graph, true)
+        incrementalHybridPersonalizedPageRankSalsaMeritRank = IncrementalHybridPersonalizedPageRankSalsaMeritRank(maxWalkLength, repetitions, rootNode, 0.01, 0.0,  nodeToSongNetwork.graph, true)
         incrementalHybridPersonalizedPageRankSalsaMeritRank.calculateRankings()
         val allSongEdges = nodeToSongNetwork.getAllEdges()
         val rootSongsSorted = allSongEdges.filter { nodeToSongNetwork.graph.getEdgeSource(it) == rootNode }.sortedBy { it.affinity }.map { nodeToSongNetwork.graph.getEdgeTarget(it) }
@@ -145,8 +145,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRankTest {
     fun scoreForSongsReflectsTrustInNeighborsWithHighExplorationProbability() {
         val pageRank = IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.05, nodeToNodeNetwork.graph)
         pageRank.calculateRankings()
-        val incrementalHybridPersonalizedPageRankSalsaMeritRank2 = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(maxWalkLength, repetitions, rootNode, 0.01, 0.0, 0.95, 1.00, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, true)
-        incrementalHybridPersonalizedPageRankSalsaMeritRank2.calculateRankings()
+        incrementalHybridPersonalizedPageRankSalsaMeritRank.calculateRankings()
         val allNodeToNodeEdges = nodeToNodeNetwork.getAllEdges()
         val allNeighborsSortedByTrust = allNodeToNodeEdges.filter { nodeToNodeNetwork.graph.getEdgeSource(it) == rootNode }.map { nodeToNodeNetwork.graph.getEdgeTarget(it) }.sortedBy { it.getPersonalizedPageRankScore() }
         val leastTrustedNeighbor = allNeighborsSortedByTrust.first()

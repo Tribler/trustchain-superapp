@@ -70,7 +70,7 @@ class IncrementalPersonalizedPageRankMeritRank (
 
     override fun calculateRankings() {
         val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it != rootNode }
-        val betaDecays = if(heapEfficientImplementation) calculateBetaDecays(nodeCounts) else calculateBetaDecaysSpaceIntensive()
+        val betaDecays = calculateBetaDecaysSpaceIntensive()
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
             val decay = (1.0 - (betaDecays[node]?.let { it * betaDecay } ?: 0.0))
@@ -115,22 +115,38 @@ class IncrementalPersonalizedPageRankMeritRank (
         val visitToNodeThroughOtherNode = mutableMapOf<Node, MutableMap<Node, Int>>()
         for(walk in randomWalks) {
             val uniqueNodes = mutableSetOf<Node>()
+            val uniqueNodesList = mutableListOf<Node>()
             for(node in walk) {
-                if(!uniqueNodes.contains(node)) {
+                if (node != rootNode) {
                     totalVisitsToNode[node] = (totalVisitsToNode[node] ?: 0) + 1
-                    for (visitedNode in uniqueNodes) {
-                        val existingMap = visitToNodeThroughOtherNode[node] ?: mutableMapOf()
-                        existingMap[visitedNode] = (existingMap[visitedNode] ?: 0) + 1
-                        visitToNodeThroughOtherNode[node] = existingMap
+                    if (!uniqueNodes.contains(node)) {
+                        for (visitedNode in uniqueNodes) {
+                            val existingMap = visitToNodeThroughOtherNode[node] ?: mutableMapOf()
+                            existingMap[visitedNode] = (existingMap[visitedNode] ?: 0) + 1
+                            visitToNodeThroughOtherNode[node] = existingMap
+                        }
+                        uniqueNodes.add(node)
+                    } else {
+                        var lastOccurence = 0
+                        for (i in uniqueNodesList.size - 1 downTo 0) {
+                            if (uniqueNodesList[i] == node) {
+                                lastOccurence = i
+                            }
+                        }
+                        for (visitedNode in uniqueNodesList.slice(lastOccurence until uniqueNodesList.size).toSet()) {
+                            val existingMap = visitToNodeThroughOtherNode[node] ?: mutableMapOf()
+                            existingMap[visitedNode] = (existingMap[visitedNode] ?: 0) + 1
+                            visitToNodeThroughOtherNode[node] = existingMap
+                        }
                     }
-                    uniqueNodes.add(node)
+                    uniqueNodesList.add(node)
                 }
             }
         }
         for(node in totalVisitsToNode.keys) {
             val maxVisitsFromAnotherNode = visitToNodeThroughOtherNode[node]?.filter { it.key != rootNode }?.values?.maxOrNull() ?: 0
             val score = maxVisitsFromAnotherNode.toDouble() / totalVisitsToNode[node]!!
-            betaDecay[node] = if(score > betaDecayThreshold) score else 0.0
+            betaDecay[node] = if(score > betaDecayThreshold) 1.0 else 0.0
         }
         return betaDecay
     }

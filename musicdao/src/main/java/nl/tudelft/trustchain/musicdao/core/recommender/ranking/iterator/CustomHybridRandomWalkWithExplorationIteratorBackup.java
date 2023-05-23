@@ -15,7 +15,6 @@ import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A hybrid personalized PageRank/SALSA random walk iterator for undirected bipartite graphs.
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
  *
  * @param <E> the graph edge type
  */
-public class CustomHybridRandomWalkWithExplorationIterator<E>
+public class CustomHybridRandomWalkWithExplorationIteratorBackup<E>
         implements
         Iterator<NodeOrSong> {
     private final Random rng;
@@ -75,7 +74,7 @@ public class CustomHybridRandomWalkWithExplorationIterator<E>
      * @param rng              the random number generator
      */
     @SuppressLint("NewApi")
-    public CustomHybridRandomWalkWithExplorationIterator(
+    public CustomHybridRandomWalkWithExplorationIteratorBackup(
             Graph<NodeOrSong, E> graph, Node vertex, long maxHops, double resetProbability, double explorationProbability, Random rng, List<Node> nodes) {
         this.graph = Objects.requireNonNull(graph);
         this.outEdgesTotalWeight = new HashMap<>();
@@ -145,10 +144,17 @@ public class CustomHybridRandomWalkWithExplorationIterator<E>
         }
 
         hops++;
+        if (graph.outDegreeOf(nextVertex) == 0) {
+            nextVertex = null;
+            lastSong = null;
+            hops = 0;
+            return;
+        }
 
         E e = null;
         E lastSongEdge = lastSong == null ? null : graph.getEdge(nextVertex, lastSong);
-        double outEdgesWeight = getOutEdgesWeight((Node) nextVertex);
+        double lastNodeWeight = lastSong == null ? 0 : graph.getEdgeWeight(lastSongEdge);
+        double outEdgesWeight = getOutEdgesWeight((Node) nextVertex) - lastNodeWeight;
         if (outEdgesWeight == 0) {
             nextVertex = null;
             lastSong = null;
@@ -158,17 +164,13 @@ public class CustomHybridRandomWalkWithExplorationIterator<E>
         double p = outEdgesWeight * rng.nextDouble();
         double cumulativeP = 0d;
         for (E curEdge : graph.outgoingEdgesOf(nextVertex)) {
+            if(curEdge != lastSongEdge) {
                 cumulativeP += graph.getEdgeWeight(curEdge);
                 if (p <= cumulativeP) {
                     e = curEdge;
                     break;
                 }
-        }
-        if(e == null || e == lastSongEdge) {
-            nextVertex = null;
-            lastSong = null;
-            hops = 0;
-            return;
+            }
         }
         nextVertex = Graphs.getOppositeVertex(graph, e, nextVertex);
         if (nextVertex instanceof Node)
@@ -184,9 +186,16 @@ public class CustomHybridRandomWalkWithExplorationIterator<E>
         }
 
         hops++;
+        if (graph.outDegreeOf(nextVertex) == 0 || graph.outDegreeOf(nextVertex) == 1 && graph.getEdgeSource(graph.outgoingEdgesOf(nextVertex).iterator().next()) == lastNode) {
+            nextVertex = null;
+            lastSong = null;
+            hops = 0;
+            return;
+        }
 
-        E e = null;
-        double outEdgesWeight = getOutEdgesWeight((SongRecommendation) nextVertex);
+        E lastNodeEdge = graph.getEdge(lastNode, nextVertex);
+        double lastNodeWeight = graph.getEdgeWeight(lastNodeEdge);
+        double outEdgesWeight = getOutEdgesWeight((SongRecommendation) nextVertex) - lastNodeWeight;
         if (outEdgesWeight == 0) {
             nextVertex = null;
             lastSong = null;
@@ -197,39 +206,53 @@ public class CustomHybridRandomWalkWithExplorationIterator<E>
         double cumulativeP = 0d;
         Node oppositeNode = null;
         for (E curEdge : graph.outgoingEdgesOf(nextVertex)) {
+            oppositeNode = (Node) Graphs.getOppositeVertex(graph, curEdge, nextVertex);
+            if (!oppositeNode.equals(lastNode)) {
                 cumulativeP += graph.getEdgeWeight(curEdge);
                 if (p <= cumulativeP) {
-                    e = curEdge;
                     break;
                 }
             }
-        if(e == null) {
-            nextVertex = null;
-            lastSong = null;
-            hops = 0;
-            return;
-        }
-        oppositeNode = (Node) Graphs.getOppositeVertex(graph, e, nextVertex);
-        if (oppositeNode.equals(lastNode)) {
-            nextVertex = null;
-            lastSong = null;
-            hops = 0;
-            return;
         }
         nextVertex = oppositeNode;
     }
 
-    @SuppressLint("NewApi")
     @NotNull
     private Double getOutEdgesWeight(Node vertex) {
-            return outEdgesTotalWeight.computeIfAbsent(vertex, v -> graph
+        double outEdgesWeight = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            outEdgesWeight = outEdgesTotalWeight.computeIfAbsent(vertex, v -> graph
                     .outgoingEdgesOf(v).stream().mapToDouble(graph::getEdgeWeight).sum());
+        } else {
+            if (!outEdgesTotalWeight.containsKey(vertex)) {
+                for (E edge : graph.outgoingEdgesOf(vertex)) {
+                    outEdgesWeight += graph.getEdgeWeight(edge);
+                }
+                outEdgesTotalWeight.put(vertex, outEdgesWeight);
+            } else {
+                Double weight = outEdgesTotalWeight.get(vertex);
+                if (weight != null) {
+                    outEdgesWeight = weight;
+                }
+            }
+        }
+        return outEdgesWeight;
     }
 
-    @SuppressLint("NewApi")
     @NotNull
     private Double getOutEdgesWeight(SongRecommendation song) {
-        return personalizedPageRankAndEdgeTotalWeight.computeIfAbsent(song, v -> graph
-                .outgoingEdgesOf(v).stream().mapToDouble(graph::getEdgeWeight).sum());
+        double outEdgesWeight = 0;
+            if (!personalizedPageRankAndEdgeTotalWeight.containsKey(song)) {
+                    for (E edge : graph.outgoingEdgesOf(song)) {
+                        outEdgesWeight += graph.getEdgeWeight(edge);
+                    }
+                personalizedPageRankAndEdgeTotalWeight.put(song, outEdgesWeight);
+            } else {
+                Double weight = personalizedPageRankAndEdgeTotalWeight.get(song);
+                if (weight != null) {
+                    outEdgesWeight = weight;
+                }
+            }
+        return outEdgesWeight;
     }
 }
