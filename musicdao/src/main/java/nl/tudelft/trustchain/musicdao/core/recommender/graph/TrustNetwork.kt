@@ -15,7 +15,7 @@ open class TrustNetwork {
     companion object {
         const val MAX_WALK_LENGTH = 10000
         const val ALPHA_REPETITIONS = 10000
-        const val BETA_REPETITIONS = 200000
+        const val BETA_REPETITIONS = 10000
         const val ALPHA_DECAY = 0.1
         const val BETA_DECAY = 0.05
         const val BETA_DECAY_THRESHOLD = 0.99
@@ -38,7 +38,7 @@ open class TrustNetwork {
         } else {
             incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(1, 1, rootNode, alphaDecay, betaDecay, 0.95, nodeToNodeNetwork.graph, false)
         }
-        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, 0.001, betaDecay, 0.99,  explorationProbability, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, false)
+        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, 0.01, betaDecay, 0.99,  explorationProbability, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, false)
         incrementalHybridPersonalizedPageRankSalsa.calculateRankings()
     }
 

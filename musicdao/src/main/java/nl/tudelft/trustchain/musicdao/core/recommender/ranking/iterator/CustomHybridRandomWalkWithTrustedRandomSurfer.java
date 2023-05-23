@@ -158,7 +158,7 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
 
         E e = null;
         E lastSongEdge = lastSong == null ? null : graph.getEdge(nextVertex, lastSong);
-        double lastNodeWeight = lastSong == null ? 0 : graph.getEdgeWeight(lastSongEdge);
+        double lastNodeWeight = lastSongEdge == null ? 0 : graph.getEdgeWeight(lastSongEdge);
         double outEdgesWeight = getOutEdgesWeight((Node) nextVertex) - lastNodeWeight;
         if (outEdgesWeight == 0) {
             nextVertex = null;
@@ -214,9 +214,18 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
         }
         double outEdgeWeightSum = neighborWeightSet.values().stream().mapToDouble(Double::doubleValue).sum();
         if (outEdgeWeightSum == 0) {
-            nextVertex = null;
-            lastSong = null;
-            hops = 0;
+            double newOutEdgesWeightSum = lastNodeNeighborEdges.stream().mapToDouble(NodeTrustEdge::getTrust).sum();
+            double p = newOutEdgesWeightSum * rng.nextDouble();
+            double cumulativeP = 0d;
+            Node oppositeNode = null;
+            for (NodeTrustEdge curEdge : lastNodeNeighborEdges) {
+                oppositeNode = Graphs.getOppositeVertex(nodeToNodeGraph, curEdge, lastNode);
+                cumulativeP += nodeToNodeGraph.getEdgeWeight(curEdge);
+                if (p <= cumulativeP) {
+                    break;
+                }
+            }
+            nextVertex = oppositeNode;
             return;
         }
         double p = outEdgeWeightSum * rng.nextDouble();
