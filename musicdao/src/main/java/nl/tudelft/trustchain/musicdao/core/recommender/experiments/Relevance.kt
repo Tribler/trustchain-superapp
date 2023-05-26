@@ -19,7 +19,7 @@ fun rboHelper(ret: Double, i: Int, d: Int, list1: List<SongRecommendation>, list
     else
         rboHelper(ret + term, i +1, d, list1, list2, p)
 }
-fun rbo(list1: List<SongRecommendation>, list2: List<SongRecommendation>, p: Double = 0.9): Double {
+fun rbo(list1: List<SongRecommendation>, list2: List<SongRecommendation>, p: Double = 0.8): Double {
     val k = maxOf(list1.size, list2.size)
     val xK = list1.toSet().intersect(list2.toSet()).size.toDouble()
     val sum = rboHelper(0.0, 1, k, list1, list2, p)
@@ -32,14 +32,14 @@ fun main() {
     val contextDir = "$currentDir/musicdao/src/test/resources"
     val loadedTrustNetwork = File("$contextDir/dataset/test_network.txt").readText()
     val subNetworks = Json.decodeFromString<SerializedSubNetworks>(loadedTrustNetwork)
-    val fileOut = File("$contextDir/dataset/relevance_experiment_out_2.txt")
-    val seed = 42
+    val fileOut = File("$contextDir/dataset/relevance_experiment_out_final.txt")
+    val seed = 5
     val rng = Random(seed)
     trustNetwork = TrustNetwork(subNetworks, "d7083f5e1d50c264277d624340edaaf3dc16095b")
     val allNodes = trustNetwork.nodeToNodeNetwork.getAllNodes().toList()
     val totalNodes = allNodes.size
     fileOut.createNewFile()
-    val nRootNodes = 20
+    val nRootNodes = 100
     val rootNodeIndices = generateSequence {
         rng.nextInt(0, totalNodes - 1)
     }
@@ -54,43 +54,36 @@ fun main() {
 
     val top100ListBases = mutableMapOf<Node, List<SongRecommendation>>()
 
-    for ((index, rootNode) in rootNodes.withIndex()) {
-        println("ROOT NODE $index")
-        trustNetwork = TrustNetwork(
-            subNetworks,
-            rootNode.getIpv8(),
-            0.0,
-            0.0,
-            0.0
-        )
-        val allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
-        val top100Songs = allSongs.sortedBy { it.rankingScore }.takeLast(100).toList().reversed()
-        top100ListBases[rootNode] = top100Songs
-    }
-
-
     val decayValues: List<Double> = (0..10 step 1).map { it.toDouble() / 10 }
-    for (betaDecay in decayValues) {
-        for (exploration in decayValues) {
-            println("BETA DECAY $betaDecay EXPLORATION $exploration experiments starting")
+    val alphaDecayValues: List<Double> = (1..10 step 1).map { it.toDouble() / 10 }
+    for(alphaDecay in alphaDecayValues) {
+        for (betaDecay in decayValues) {
             var top100SongsRbo = 0.0
+            println("$alphaDecay BETA DECAY $betaDecay experiments starting")
+            var allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
+            for (song in allSongs) {
+                song.rankingScore = 0.0
+            }
             for ((index, rootNode) in rootNodes.withIndex()) {
                 println("ROOT NODE $index")
                 trustNetwork = TrustNetwork(
                     subNetworks,
                     rootNode.getIpv8(),
-                    0.0,
+                    alphaDecay,
                     betaDecay,
-                    exploration
+                    0.0
                 )
-                val allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
+                allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
                 val top100Songs = allSongs.sortedBy { it.rankingScore }.takeLast(100).toList().reversed()
+                if (betaDecay == 0.0) {
+                    top100ListBases[rootNode] = top100Songs
+                }
                 top100SongsRbo += rbo(top100ListBases[rootNode]!!, top100Songs)
             }
-            fileOut.appendText("BETA DECAY: $betaDecay EXPLORATION $exploration")
-            fileOut.appendText("\n")
-            fileOut.appendText("TOP 100 SONGS RBO: ${top100SongsRbo / 20}")
-            fileOut.appendText("\n")
-        }
+                fileOut.appendText("ALPHA DECAY: $alphaDecay BETA DECAY: $betaDecay")
+                fileOut.appendText("\n")
+                fileOut.appendText("TOP 100 SONGS RBO: ${top100SongsRbo / 100}")
+                fileOut.appendText("\n")
+            }
     }
 }

@@ -11,30 +11,16 @@ import java.io.IOException
 import kotlin.random.Random
 
 fun main() {
-    lateinit var trustNetwork: TrustNetwork
+    lateinit var trustNetwork: TrustNetworkTwitter
     val currentDir = System.getProperty("user.dir")
     val contextDir = "$currentDir/musicdao/src/test/resources"
     val loadedTrustNetwork = File("$contextDir/dataset/test_network.txt").readText()
     val subNetworks = Json.decodeFromString<SerializedSubNetworks>(loadedTrustNetwork)
     val fileOut = File("$contextDir/dataset/recommendations_quality.txt")
-    val seed = 42
+    val seed = 5
     val rng = Random(seed)
     fileOut.createNewFile()
-    trustNetwork = TrustNetwork(subNetworks, "d7083f5e1d50c264277d624340edaaf3dc16095b")
-    val interactionFile = File("$contextDir/dataset/kaggle_visible_evaluation_triplets.txt")
-    val songListenCount = mutableMapOf<SongRecommendation, Int>()
-    try {
-        BufferedReader(FileReader(interactionFile)).use { br ->
-            var line: String?
-            while (br.readLine().also { line = it } != null) {
-                val words = line?.split("\\s".toRegex())?.toTypedArray()!!
-                songListenCount[SongRecommendation(words[1])] =
-                    (songListenCount[SongRecommendation(words[1])] ?: 0) + words[2].toInt()
-            }
-        }
-    } catch (e: IOException) {
-        e.printStackTrace()
-    }
+    trustNetwork = TrustNetworkTwitter(subNetworks, "d7083f5e1d50c264277d624340edaaf3dc16095b")
 
     val allNodes = trustNetwork.nodeToNodeNetwork.getAllNodes().toList()
     val totalNodes = allNodes.size
@@ -43,7 +29,7 @@ fun main() {
         rng.nextInt(0, totalNodes - 1)
     }
         .distinct()
-        .filter { trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(allNodes[it]).size > 4 }
+        .filter { trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(allNodes[it]).size > 1 &&  trustNetwork.nodeToSongNetwork.graph.outgoingEdgesOf(allNodes[it]).size > 1 }
         .take(nRootNodes)
         .sorted()
         .toSet()
@@ -52,10 +38,9 @@ fun main() {
         rootNodes.add(allNodes[i])
     }
 
-    val totalRandomWalks: List<Int> = (10..20 step 10).map { it * 100000 }
 
-    for(randomWalks in totalRandomWalks) {
-                println("Bexperiments starting")
+    for(alphaDecay in listOf(0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)) {
+                println("Experiments starting: Twitter")
                 var top100SongsCount = 0.0
                 var top500SongsCount = 0.0
                 var top1000SongsCount = 0.0
@@ -69,15 +54,18 @@ fun main() {
                     val edgeWithLargestWeight = outgoingRootNodeEdges.maxBy { it.affinity }
                     val songWithLargestAffinity = nodeToSongNetwork.graph.getEdgeTarget(edgeWithLargestWeight)
                     nodeToSongNetwork.removeEdge(edgeWithLargestWeight)
-                    trustNetwork = TrustNetwork(
+                    var allSongs = nodeToSongNetwork.getAllSongs().toList()
+                    for (song in allSongs) {
+                        song.rankingScore = 0.0
+                    }
+                    trustNetwork = TrustNetworkTwitter(
                         SubNetworks(NodeToNodeNetwork(subNetworks.nodeToNodeNetworkSerialized), nodeToSongNetwork),
                         rootNode.getIpv8(),
+                        alphaDecay,
                         0.0,
-                        0.0,
-                        0.0,
-                        randomWalks
+                        0.0
                     )
-                    val allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
+                    allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
                     val top100Songs = allSongs.sortedBy { it.rankingScore }.takeLast((100).toInt()).toList()
                     for (song in top100Songs) {
                         if(song == songWithLargestAffinity) {
@@ -111,7 +99,7 @@ fun main() {
                     missingSongScore += songWithLargestAffinity.rankingScore
                 }
 
-                fileOut.appendText("TOTAL RANDOM WALKS: $randomWalks")
+                fileOut.appendText("ALPHA DECAY: $alphaDecay")
                 fileOut.appendText("\n")
                 fileOut.appendText("AVERAGE SONGS SCORE: ${missingSongScore/rootNodeIndices.size}")
                 fileOut.appendText("\n")

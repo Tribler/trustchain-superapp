@@ -19,13 +19,12 @@ fun main() {
     val contextDir = "$currentDir/musicdao/src/test/resources"
     val loadedTrustNetwork = File("$contextDir/dataset/test_network.txt").readText()
     val subNetworks = Json.decodeFromString<SerializedSubNetworks>(loadedTrustNetwork)
-    val fileOut = File("$contextDir/dataset/giga_sybil_experiment_final_final_twitter_strat.txt")
-    val seed = 42
+    val fileOut = File("$contextDir/dataset/giga_sybil_experiment_final.txt")
+    val seed = 5
     val rng = Random(seed)
     fileOut.createNewFile()
     val percentageAttackers = 0.05
     trustNetwork = TrustNetwork(subNetworks, "d7083f5e1d50c264277d624340edaaf3dc16095b")
-    var repGain = 0.0
     val dotFile = File("$contextDir/dataset/test.dot")
     dotFile.createNewFile()
     val interactionFile = File("$contextDir/dataset/kaggle_visible_evaluation_triplets.txt")
@@ -138,7 +137,7 @@ fun main() {
     }
     val newNodeToNodeNetwork = trustNetwork.nodeToNodeNetwork
     val newNodeToSongNetwork = trustNetwork.nodeToSongNetwork
-    val nRootNodes = 20
+    val nRootNodes = 100
     val rootNodeIndices = generateSequence {
         rng.nextInt(0, totalNodes - 1)
     }.filterNot { randomAttackerIndices.contains(it) }
@@ -152,83 +151,86 @@ fun main() {
         rootNodes.add(allNodes[i])
     }
 
-    val betaDecayValues: List<Double> = (0..10 step 2).map { it.toDouble() / 10 }
+    val alphaDecayValues: List<Double> = (1..10 step 1).map { it.toDouble() / 10 }
+    val betaDecayValues: List<Double> = (0..10 step 1).map { it.toDouble() / 10 }
 
-    for(betaDecay in betaDecayValues) {
-                println("BETA DECAY $betaDecay experiments starting")
-                var reputationGainForSybils = 0.0
-                var top100SongsSybil = 0
-                var top1000SongsSybil = 0
-                var top2000SongsSybil = 0
-                var top5000SongsSybil = 0
-                for ((index, rootNode) in rootNodes.withIndex()) {
-                    println("ROOT NODE $index")
-                    var allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
-                    for (song in allSongs) {
-                        if (song.getTorrentHash().contains("sybilSong") && song.rankingScore > 0.0) {
-                            reputationGainForSybils += song.rankingScore
-                        }
-                        song.rankingScore = 0.0
+    for(alphaDecay in alphaDecayValues) {
+        for (betaDecay in betaDecayValues) {
+            println("BETA DECAY $betaDecay experiments starting")
+            var reputationGainForSybils = 0.0
+            var top100SongsSybil = 0
+            var top1000SongsSybil = 0
+            var top2000SongsSybil = 0
+            var top5000SongsSybil = 0
+            for ((index, rootNode) in rootNodes.withIndex()) {
+                println("ROOT NODE $index")
+                var allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
+                for (song in allSongs) {
+                    if (song.getTorrentHash().contains("sybilSong") && song.rankingScore > 0.0) {
+                        reputationGainForSybils += song.rankingScore
                     }
-                    for(node in allNodes) {
-                        node.rankingScore = 0.0
-                    }
-                    val nodeToNodeNetwork = NodeToNodeNetwork(newNodeToNodeNetwork.graph)
-                    val nodeToSongNetwork = NodeToSongNetwork(newNodeToSongNetwork.graph)
-                    trustNetwork = TrustNetwork(
-                        SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
-                        rootNode.getIpv8(),
-                        0.001,
-                        1.0,
-                        0.0,
-                        100000
-                    )
-                    allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
-                    println("REPUTATION GAIN $reputationGainForSybils")
-                    val top100Songs = allSongs.sortedBy { it.rankingScore }.takeLast(100).toList()
-                    for ((i, song) in top100Songs.withIndex()) {
-                        if (song.getTorrentHash().contains("sybil")) {
-                            top100SongsSybil += i
-                        }
-                    }
-                    val top1000Songs = allSongs.sortedBy { it.rankingScore }.takeLast((1000).toInt()).toList()
-                    for ((i, song) in top1000Songs.withIndex()) {
-                        if (song.getTorrentHash().contains("sybil")) {
-                            top1000SongsSybil += i
-                        }
-                    }
-                    val top2000Songs = allSongs.sortedBy { it.rankingScore }.takeLast(2000).toList()
-                    for ((i, song) in top2000Songs.withIndex()) {
-                        if (song.getTorrentHash().contains("sybil")) {
-                            top2000SongsSybil += i
-                        }
-                    }
-                    val top5000Songs = allSongs.sortedBy { it.rankingScore }.takeLast(5000).toList()
-                    for ((i, song) in top5000Songs.withIndex()) {
-                        if (song.getTorrentHash().contains("sybil")) {
-                            top5000SongsSybil += i
-                        }
-                    }
-                    for (song in allSongs) {
-                        if (song.getTorrentHash().contains("sybilSong") && song.rankingScore > 0.0) {
-                            reputationGainForSybils += song.rankingScore
-                        }
-                        song.rankingScore = 0.0
-                    }
-                    for(node in allNodes) {
-                        node.rankingScore = 0.0
+                    song.rankingScore = 0.0
+                }
+                for (node in allNodes) {
+                    node.rankingScore = 0.0
+                }
+                val nodeToNodeNetwork = NodeToNodeNetwork(newNodeToNodeNetwork.graph)
+                val nodeToSongNetwork = NodeToSongNetwork(newNodeToSongNetwork.graph)
+                trustNetwork = TrustNetwork(
+                    SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
+                    rootNode.getIpv8(),
+                    alphaDecay,
+                    betaDecay,
+                    0.0,
+                    100000
+                )
+                allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
+                println("REPUTATION GAIN $reputationGainForSybils")
+                val top100Songs = allSongs.sortedBy { it.rankingScore }.takeLast(100).toList()
+                for ((i, song) in top100Songs.withIndex()) {
+                    if (song.getTorrentHash().contains("sybil")) {
+                        top100SongsSybil += i
                     }
                 }
+                val top1000Songs = allSongs.sortedBy { it.rankingScore }.takeLast((1000).toInt()).toList()
+                for ((i, song) in top1000Songs.withIndex()) {
+                    if (song.getTorrentHash().contains("sybil")) {
+                        top1000SongsSybil += i
+                    }
+                }
+                val top2000Songs = allSongs.sortedBy { it.rankingScore }.takeLast(2000).toList()
+                for ((i, song) in top2000Songs.withIndex()) {
+                    if (song.getTorrentHash().contains("sybil")) {
+                        top2000SongsSybil += i
+                    }
+                }
+                val top5000Songs = allSongs.sortedBy { it.rankingScore }.takeLast(5000).toList()
+                for ((i, song) in top5000Songs.withIndex()) {
+                    if (song.getTorrentHash().contains("sybil")) {
+                        top5000SongsSybil += i
+                    }
+                }
+                for (song in allSongs) {
+                    if (song.getTorrentHash().contains("sybilSong") && song.rankingScore > 0.0) {
+                        reputationGainForSybils += song.rankingScore
+                    }
+                    song.rankingScore = 0.0
+                }
+                for (node in allNodes) {
+                    node.rankingScore = 0.0
+                }
+            }
 
-                fileOut.appendText("BETA DECAY: $betaDecay REPUTATION GAIN: $reputationGainForSybils")
-                fileOut.appendText("\n")
-                fileOut.appendText("TOP 100 SONGS SYBIL: $top100SongsSybil")
-                fileOut.appendText("\n")
-                fileOut.appendText("TOP 1000 SONGS SYBIL: $top1000SongsSybil")
-                fileOut.appendText("\n")
-                fileOut.appendText("TOP 2000 SONGS SYBIL: $top2000SongsSybil")
-                fileOut.appendText("\n")
-                fileOut.appendText("TOP 5000 SONGS SYBIL: $top5000SongsSybil")
-                fileOut.appendText("\n")
+            fileOut.appendText("ALPHA DECAY: $alphaDecay BETA DECAY: $betaDecay REPUTATION GAIN: $reputationGainForSybils")
+            fileOut.appendText("\n")
+            fileOut.appendText("TOP 100 SONGS SYBIL: ${top100SongsSybil/100}")
+            fileOut.appendText("\n")
+            fileOut.appendText("TOP 1000 SONGS SYBIL: ${top1000SongsSybil/100}")
+            fileOut.appendText("\n")
+            fileOut.appendText("TOP 2000 SONGS SYBIL: ${top2000SongsSybil/100}")
+            fileOut.appendText("\n")
+            fileOut.appendText("TOP 5000 SONGS SYBIL: ${top5000SongsSybil/100}")
+            fileOut.appendText("\n")
+        }
     }
 }

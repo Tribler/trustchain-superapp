@@ -4,11 +4,11 @@ import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.*
 
-open class TrustNetwork {
+open class TrustNetworkTwitter {
     val nodeToNodeNetwork: NodeToNodeNetwork
     val nodeToSongNetwork: NodeToSongNetwork
     protected val incrementalPersonalizedPageRank: IncrementalPersonalizedPageRankMeritRank
-    protected val incrementalHybridPersonalizedPageRankSalsa: IncrementalHybridPersonalizedPageRankSalsaMeritRank2
+    protected val incrementalHybridPersonalizedPageRankSalsa: IncrementalHybridPersonalizedPageRankSalsaMeritRank
     private val allNodes: MutableList<Node>
     private val logger = KotlinLogging.logger {}
     val rootNode: Node
@@ -33,13 +33,13 @@ open class TrustNetwork {
         allNodes = allNodesList.toMutableList()
         rootNode = allNodes.first { it.getIpv8() == sourceNodeAddress}
         if(explorationProbability != 0.0) {
-            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, 0.005, betaDecay, BETA_DECAY_THRESHOLD, nodeToNodeNetwork.graph, false)
+            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, 0.005, betaDecay, 0.95, nodeToNodeNetwork.graph, false)
             incrementalPersonalizedPageRank.calculateRankings()
         } else {
-            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(1, 1, rootNode, alphaDecay, betaDecay, BETA_DECAY_THRESHOLD, nodeToNodeNetwork.graph, false)
+            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(1, 1, rootNode, alphaDecay, betaDecay, 0.95, nodeToNodeNetwork.graph, false)
         }
 //        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, 0.01, betaDecay, 0.99,  explorationProbability, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, false)
-        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, alphaDecay, betaDecay, 0.99,  explorationProbability, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, false)
+        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank(MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, alphaDecay, 0.0, nodeToSongNetwork.graph, false)
         incrementalHybridPersonalizedPageRankSalsa.calculateRankings()
     }
 
@@ -53,7 +53,7 @@ open class TrustNetwork {
         nodeToSongNetwork = NodeToSongNetwork()
         nodeToSongNetwork.addNodeOrSong(rootNode)
         incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, 0.95, nodeToNodeNetwork.graph, false)
-        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, 0.1, 0.01, 0.01, EXPLORATION_PROBABILITY, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, false)
+        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank(MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, 0.1, 0.0, nodeToSongNetwork.graph, false)
     }
 
     open fun bulkAddNodeToSongEdgesForNode(edges: List<NodeSongEdgeWithNodeAndSongRec>, sourceNode: Node): Boolean {

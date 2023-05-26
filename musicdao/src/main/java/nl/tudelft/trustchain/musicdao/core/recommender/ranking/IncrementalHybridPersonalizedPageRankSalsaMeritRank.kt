@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.musicdao.core.recommender.ranking
 
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
+import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkTwitter
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkWithExplorationIterator
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
 import java.util.*
@@ -21,7 +22,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
 ) {
     private val logger = KotlinLogging.logger {}
     private val iter =
-        CustomHybridRandomWalkWithExplorationIterator(
+        CustomHybridRandomWalkTwitter(
             graph,
             rootNode,
             maxWalkLength.toLong(),
