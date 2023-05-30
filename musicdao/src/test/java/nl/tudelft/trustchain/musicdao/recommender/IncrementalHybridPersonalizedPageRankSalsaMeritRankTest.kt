@@ -1,13 +1,11 @@
 package nl.tudelft.trustchain.musicdao.recommender
 
-import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiper
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.TrustNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeSongEdge
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge
-import nl.tudelft.trustchain.musicdao.core.recommender.model.SongRecommendation
+import nl.tudelft.trustchain.musicdao.core.recommender.model.Recommendation
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.*
 import org.junit.Assert
 import org.junit.Before
@@ -41,7 +39,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRankTest {
             nodeToSongNetwork.addNodeOrSong(nodeToAdd)
         }
         for(song in 0 until nSongs) {
-            nodeToSongNetwork.addNodeOrSong(SongRecommendation(song.toString()))
+            nodeToSongNetwork.addNodeOrSong(Recommendation(song.toString()))
         }
         // Create 10 edges from each node to 10 random songs
         val allNodes = nodeToSongNetwork.getAllNodes().toList()
@@ -52,7 +50,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRankTest {
                 var randomNum = (0 until nSongs - 1).random(rng)
                 nodeToSongNetwork.addEdge(node, allSongs[randomNum], NodeSongEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp))))
                 randomNum = (0 until nNodes - 1).random(rng)
-                val randomNode = if(randomNum < node.getIpv8().toInt()) randomNum else randomNum + 1
+                val randomNode = if(randomNum < node.getKey().toInt()) randomNum else randomNum + 1
                 nodeToNodeNetwork.addEdge(node, allNodes[randomNode], NodeTrustEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp))))
             }
         }
@@ -69,9 +67,9 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRankTest {
         nodeToSongNetwork.addNodeOrSong(sybilNode1)
         nodeToSongNetwork.addNodeOrSong(sybilNode2)
         nodeToSongNetwork.addNodeOrSong(sybilNode3)
-        val sybilSong1 = SongRecommendation("sybil1")
-        val sybilSong2 = SongRecommendation("sybil2")
-        val sybilSong3 = SongRecommendation("sybil3")
+        val sybilSong1 = Recommendation("sybil1")
+        val sybilSong2 = Recommendation("sybil2")
+        val sybilSong3 = Recommendation("sybil3")
         nodeToSongNetwork.addNodeOrSong(sybilSong1)
         nodeToSongNetwork.addNodeOrSong(sybilSong2)
         nodeToSongNetwork.addNodeOrSong(sybilSong3)

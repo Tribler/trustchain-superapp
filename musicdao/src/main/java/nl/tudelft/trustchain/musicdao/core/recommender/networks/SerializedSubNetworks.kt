@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.musicdao.core.recommender.graph
+package nl.tudelft.trustchain.musicdao.core.recommender.networks
 
 import kotlinx.serialization.Serializable
 

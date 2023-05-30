@@ -10,7 +10,7 @@ import android.os.Build;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeOrSong;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge;
-import nl.tudelft.trustchain.musicdao.core.recommender.model.SongRecommendation;
+import nl.tudelft.trustchain.musicdao.core.recommender.model.Recommendation;
 import org.jetbrains.annotations.NotNull;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -34,7 +34,7 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
     private final Graph<NodeOrSong, E> graph;
     private final Graph<Node, NodeTrustEdge> nodeToNodeGraph;
     private final Map<Node, Double> outEdgesTotalWeight;
-    private Map<SongRecommendation, Map<Node, Double>> personalizedPageRankAndEdgeTotalWeight;
+    private Map<Recommendation, Map<Node, Double>> personalizedPageRankAndEdgeTotalWeight;
     private final long maxHops;
 
     public NodeOrSong getNextVertex() {
@@ -63,7 +63,7 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
     }
 
     private Node lastNode;
-    private SongRecommendation lastSong;
+    private Recommendation lastSong;
     private final double resetProbability;
     private final double randomNodeProbability;
 
@@ -112,7 +112,7 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
             lastNode = (Node) value;
             computeNextSong();
         } else {
-            lastSong = (SongRecommendation) value;
+            lastSong = (Recommendation) value;
             computeNextNode();
         }
         return value;
@@ -205,7 +205,7 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
         hops++;
         Set<NodeTrustEdge> lastNodeNeighborEdges = nodeToNodeGraph.outgoingEdgesOf(lastNode);
         List<Node> lastNodeNeighbors = lastNodeNeighborEdges.stream().map(nodeToNodeGraph::getEdgeTarget).collect(Collectors.toList());
-        Map<Node, Double> outEdgesWeightDist = getOutEdgesWeight((SongRecommendation) nextVertex);
+        Map<Node, Double> outEdgesWeightDist = getOutEdgesWeight((Recommendation) nextVertex);
         Map<Node, Double> neighborWeightSet = new HashMap<>(lastNodeNeighbors.size());
         for(Node neighbor: lastNodeNeighbors) {
             if(outEdgesWeightDist.containsKey(neighbor)) {
@@ -269,7 +269,7 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
     }
 
     @NotNull
-    private Map<Node, Double> getOutEdgesWeight(SongRecommendation song) {
+    private Map<Node, Double> getOutEdgesWeight(Recommendation song) {
         Map<Node, Double> outEdgesWeight = new HashMap<>();
             if (!personalizedPageRankAndEdgeTotalWeight.containsKey(song)) {
                     for (E edge : graph.outgoingEdgesOf(song)) {

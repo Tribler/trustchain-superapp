@@ -11,19 +11,7 @@ abstract class RecommenderCommunityBase : Community() {
 
     abstract var edgeGossipList: ArrayList<Pair<Peer, NodeToNodeEdgeGossip>>
 
-    abstract fun setEVAOnReceiveProgressCallback(
-        f: (peer: Peer, info: String, progress: TransferProgress) -> Unit
-    )
+    abstract fun sendNodeToNodeEdges(torrentName: String)
 
-    abstract fun setEVAOnReceiveCompleteCallback(
-        f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit
-    )
-
-    abstract fun setEVAOnErrorCallback(
-        f: (peer: Peer, exception: TransferException) -> Unit
-    )
-
-    abstract fun informAboutTorrent(torrentName: String)
-
-    abstract fun sendAppRequest(torrentInfoHash: String, peer: Peer, uuid: String)
+    abstract fun sendNodeToSongEdges(torrentInfoHash: String, peer: Peer, uuid: String)
 }

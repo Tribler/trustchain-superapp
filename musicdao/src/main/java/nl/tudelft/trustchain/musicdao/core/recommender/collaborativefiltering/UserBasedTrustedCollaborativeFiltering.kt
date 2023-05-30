@@ -1,6 +1,6 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.collaborativefiltering
 
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.TrustNetwork
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.TrustNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import java.lang.Float.POSITIVE_INFINITY
 import kotlin.math.sqrt
@@ -26,13 +26,13 @@ class UserBasedTrustedCollaborativeFiltering(
         }
     }
 
-    override fun similarNodes(nodeToSongEdges: List<NodeSongEdgeWithNodeAndSongRec>, size: Int): Map<Node, Double> {
-        val sourceAffinities = nodeToSongEdges.associateBy({ it.songRec }, { it.nodeSongEdge.affinity })
+    override fun similarNodes(nodeToSongEdges: List<NodeRecEdge>, size: Int): Map<Node, Double> {
+        val sourceAffinities = nodeToSongEdges.associateBy({ it.rec }, { it.nodeSongEdge.affinity })
         val nodeSimilarities = mutableListOf<NodeSimilarity>()
         for (node in sortedTopTrustedUsers) {
             val targetSongEdges = trustNetwork.nodeToSongNetwork.graph.outgoingEdgesOf(node)
             val targetAffinities =
-                targetSongEdges.associateBy({ trustNetwork.nodeToSongNetwork.graph.getEdgeTarget(it) as SongRecommendation },
+                targetSongEdges.associateBy({ trustNetwork.nodeToSongNetwork.graph.getEdgeTarget(it) as Recommendation },
                     { it.affinity })
             val commonItems = sourceAffinities.keys.intersect(targetAffinities.keys)
             val nodeSimilarity = NodeSimilarity(node)
@@ -61,9 +61,9 @@ class UserBasedTrustedCollaborativeFiltering(
     }
 
     private fun calculateRatingDifferenceOfCommonItem(
-        sourceAffinities: Map<SongRecommendation, Double>,
-        targetAffinities: Map<SongRecommendation, Double>,
-        commonItems: Set<SongRecommendation>
+        sourceAffinities: Map<Recommendation, Double>,
+        targetAffinities: Map<Recommendation, Double>,
+        commonItems: Set<Recommendation>
     ): Double {
         var maxRating = 0.0
         var minRating = POSITIVE_INFINITY.toDouble()
@@ -85,9 +85,9 @@ class UserBasedTrustedCollaborativeFiltering(
     }
 
     private fun calculatePearsonCorrelationCoefficient(
-        sourceAffinities: Map<SongRecommendation, Double>,
-        targetAffinities: Map<SongRecommendation, Double>,
-        commonItems: Set<SongRecommendation>
+        sourceAffinities: Map<Recommendation, Double>,
+        targetAffinities: Map<Recommendation, Double>,
+        commonItems: Set<Recommendation>
     ): Double {
         val sourceAvg = sourceAffinities.values.average()
         val targetAvg = targetAffinities.values.average()

@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.model
 
 import kotlinx.serialization.Serializable
-import nl.tudelft.trustchain.musicdao.core.repositories.model.Song
 
 @Serializable
 abstract class NodeOrSong(
@@ -25,7 +24,7 @@ abstract class NodeOrSong(
         if(this is Node) {
             return other is Node && identifier == other.identifier
         } else {
-            return other is SongRecommendation && identifier == other.identifier
+            return other is Recommendation && identifier == other.identifier
         }
     }
 }

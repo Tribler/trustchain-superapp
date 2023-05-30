@@ -4,6 +4,9 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.*
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.SerializedSubNetworks
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.SubNetworks
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.TrustNetwork
 import java.io.File
 import kotlin.random.Random
 
@@ -51,7 +54,7 @@ fun main() {
             nodeToNodeNetwork.removeEdge(attackerNodeNeighborEdges[i])
         }
         var newNode = Node("sybilNode-1")
-        val sybilSongRecs = (1..3).map { SongRecommendation("sybilSong-$it") }
+        val sybilSongRecs = (1..3).map { Recommendation("sybilSong-$it") }
         nodeToNodeNetwork.addNode(newNode)
         nodeToSongNetwork.addNodeOrSong(newNode)
         nodeToNodeNetwork.addEdge(attackerNode, newNode, NodeTrustEdge(1.0))
@@ -75,14 +78,14 @@ fun main() {
         }
         trustNetwork = TrustNetwork(
             SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
-            rootNode.getIpv8(),
+            rootNode.getKey(),
             0.1,
             0.8,
             0.0
         )
         allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
         for (song in allSongs) {
-            if (song.getTorrentHash().contains("sybilSong") && song.rankingScore > 0.0) {
+            if (song.getUniqueIdentifier().contains("sybilSong") && song.rankingScore > 0.0) {
                 reputationGainForSybils += song.rankingScore
             }
         }

@@ -4,10 +4,10 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.*
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
-import java.io.BufferedReader
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.SerializedSubNetworks
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.SubNetworks
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.TrustNetworkTwitter
 import java.io.File
-import java.io.FileReader
-import java.io.IOException
 import kotlin.random.Random
 
 fun main() {
@@ -60,7 +60,7 @@ fun main() {
                     }
                     trustNetwork = TrustNetworkTwitter(
                         SubNetworks(NodeToNodeNetwork(subNetworks.nodeToNodeNetworkSerialized), nodeToSongNetwork),
-                        rootNode.getIpv8(),
+                        rootNode.getKey(),
                         alphaDecay,
                         0.0,
                         0.0

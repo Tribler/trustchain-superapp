@@ -3,9 +3,10 @@ package nl.tudelft.trustchain.musicdao.core.recommender.experiments
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import nl.tudelft.ipv8.util.random
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.*
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.SerializedSubNetworks
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.SubNetworks
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.TrustNetwork
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -29,14 +30,14 @@ fun main() {
     trustNetwork = TrustNetwork(subNetworks, "d7083f5e1d50c264277d624340edaaf3dc16095b")
     val nTopSongs = 100
     val interactionFile = File("$contextDir/dataset/kaggle_visible_evaluation_triplets.txt")
-    val songListenCount = mutableMapOf<SongRecommendation, Int>()
+    val songListenCount = mutableMapOf<Recommendation, Int>()
     try {
         BufferedReader(FileReader(interactionFile)).use { br ->
             var line: String?
             while (br.readLine().also { line = it } != null) {
                 val words = line?.split("\\s".toRegex())?.toTypedArray()!!
-                songListenCount[SongRecommendation(words[1])] =
-                    (songListenCount[SongRecommendation(words[1])] ?: 0) + words[2].toInt()
+                songListenCount[Recommendation(words[1])] =
+                    (songListenCount[Recommendation(words[1])] ?: 0) + words[2].toInt()
             }
         }
     } catch (e: IOException) {
@@ -67,7 +68,7 @@ fun main() {
     for ((index, attackerNode) in attackerNodes.withIndex()) {
         val nSybilNodes = Random.nextInt(1, 5)
         val typeAttack = rng.nextInt(3)
-        val sybilSongRecs = (1..5).map { SongRecommendation("sybilSong-$index-$it") }
+        val sybilSongRecs = (1..5).map { Recommendation("sybilSong-$index-$it") }
         sybilSongRecs.forEach {
             trustNetwork.addSongRec(it)
         }
@@ -87,7 +88,7 @@ fun main() {
                     val randomPopularSongInts = generateSequence {
                         rng.nextInt(popularSongs.size)
                     }.distinct().take(5).toSet()
-                    val popularSongsAttack = mutableListOf<SongRecommendation>()
+                    val popularSongsAttack = mutableListOf<Recommendation>()
                     for (j in randomPopularSongInts) {
                         popularSongsAttack.add(popularSongs[j])
                     }
@@ -115,7 +116,7 @@ fun main() {
                     val randomPopularSongInts = generateSequence {
                         rng.nextInt(popularSongs.size)
                     }.distinct().take(5).toSet()
-                    val popularSongsAttack = mutableListOf<SongRecommendation>()
+                    val popularSongsAttack = mutableListOf<Recommendation>()
                     for (j in randomPopularSongInts) {
                         popularSongsAttack.add(popularSongs[j])
                     }
@@ -141,7 +142,7 @@ fun main() {
                     val randomPopularSongInts = generateSequence {
                         rng.nextInt(popularSongs.size)
                     }.distinct().take(5).toSet()
-                    val popularSongsAttack = mutableListOf<SongRecommendation>()
+                    val popularSongsAttack = mutableListOf<Recommendation>()
                     for (j in randomPopularSongInts) {
                         popularSongsAttack.add(popularSongs[j])
                     }
@@ -189,38 +190,38 @@ fun main() {
                 println("ROOT NODE $index")
                 trustNetwork = TrustNetwork(
                     SubNetworks(newNodeToNodeNetwork, newNodeToSongNetwork),
-                    rootNode.getIpv8(),
+                    rootNode.getKey(),
                     0.0,
                     betaDecay,
                     exploration
                 )
                 val allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
                 for (song in allSongs) {
-                    if (song.getTorrentHash().contains("sybilSong")) {
+                    if (song.getUniqueIdentifier().contains("sybilSong")) {
                         reputationGainForSybils += song.rankingScore
                     }
                 }
                 val top100Songs = allSongs.sortedBy { it.rankingScore }.takeLast(100).toList()
                 for ((i, song) in top100Songs.withIndex()) {
-                    if (song.getTorrentHash().contains("sybil")) {
+                    if (song.getUniqueIdentifier().contains("sybil")) {
                         top100SongsSybil += i
                     }
                 }
                 val top1000Songs = allSongs.sortedBy { it.rankingScore }.takeLast((1000).toInt()).toList()
                 for ((i, song) in top1000Songs.withIndex()) {
-                    if (song.getTorrentHash().contains("sybil")) {
+                    if (song.getUniqueIdentifier().contains("sybil")) {
                         top1000SongsSybil += i
                     }
                 }
                 val top2000Songs = allSongs.sortedBy { it.rankingScore }.takeLast(2000).toList()
                 for ((i, song) in top2000Songs.withIndex()) {
-                    if (song.getTorrentHash().contains("sybil")) {
+                    if (song.getUniqueIdentifier().contains("sybil")) {
                         top2000SongsSybil += i
                     }
                 }
                 val top5000Songs = allSongs.sortedBy { it.rankingScore }.takeLast(5000).toList()
                 for ((i, song) in top5000Songs.withIndex()) {
-                    if (song.getTorrentHash().contains("sybil")) {
+                    if (song.getUniqueIdentifier().contains("sybil")) {
                         top5000SongsSybil += i
                     }
                 }

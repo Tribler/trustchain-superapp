@@ -139,7 +139,6 @@ class FOCCommunity(
         val torrentHash = payload.message.substringAfter("magnet:?xt=urn:btih:")
             .substringBefore("&dn=")
         if (torrentMessagesList.none {
-            it.second
             val existingHash = it.second.message.substringAfter("magnet:?xt=urn:btih:").substringBefore("&dn=")
             torrentHash == existingHash
         }

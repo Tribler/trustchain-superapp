@@ -106,7 +106,7 @@ public class CustomExporter
             out.print(" ");
             out.print(getVertexId(vertex));
             out.print(" ");
-            out.print(vertex.getIpv8());
+            out.print(vertex.getKey());
             out.print(" ");
             out.print(vertex.getPersonalizedPageRankScore());
             out.println();

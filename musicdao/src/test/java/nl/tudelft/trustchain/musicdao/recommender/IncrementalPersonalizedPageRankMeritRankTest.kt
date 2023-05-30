@@ -33,7 +33,7 @@ class IncrementalPersonalizedPageRankMeritRankTest {
         for(node in allNodes) {
             for(i in 0 until nEdges) {
                 val randomNum = (0 until nNodes - 1).random(rng)
-                val randomNode = if(randomNum < node.getIpv8().toInt()) randomNum else randomNum + 1
+                val randomNode = if(randomNum < node.getKey().toInt()) randomNum else randomNum + 1
                 network.addEdge(node, allNodes[randomNode], NodeTrustEdge(rng.nextDouble()))
             }
         }

@@ -5,7 +5,7 @@ import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeSongEdge
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge
-import nl.tudelft.trustchain.musicdao.core.recommender.model.SongRecommendation
+import nl.tudelft.trustchain.musicdao.core.recommender.model.Recommendation
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsa
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalPersonalizedPageRank
 import org.junit.Assert
@@ -35,7 +35,7 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
             nodeToSongNetwork.addNodeOrSong(nodeToAdd)
         }
         for(song in 0 until nSongs) {
-            nodeToSongNetwork.addNodeOrSong(SongRecommendation(song.toString()))
+            nodeToSongNetwork.addNodeOrSong(Recommendation(song.toString()))
         }
         // Create 10 edges from each node to 10 random songs
         val allNodes = nodeToSongNetwork.getAllNodes().toList()
@@ -46,7 +46,7 @@ class IncrementalHybridPersonalizedPageRankSalsaTest {
                 var randomNum = (0 until nSongs - 1).random(rng)
                 nodeToSongNetwork.addEdge(node, allSongs[randomNum], NodeSongEdge(rng.nextDouble()))
                 randomNum = (0 until nNodes - 1).random(rng)
-                val randomNode = if(randomNum < node.getIpv8().toInt()) randomNum else randomNum + 1
+                val randomNode = if(randomNum < node.getKey().toInt()) randomNum else randomNum + 1
                 nodeToNodeNetwork.addEdge(node, allNodes[randomNode], NodeTrustEdge(rng.nextDouble()))
             }
         }

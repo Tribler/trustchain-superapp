@@ -18,10 +18,8 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToSongNetwork;
 
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.Quadruple;
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.Triple;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*;
 import org.jgrapht.Graph;
-import org.jgrapht.alg.util.Pair;
 import org.jgrapht.nio.BaseEventDrivenImporter;
 import org.jgrapht.nio.GraphImporter;
 import org.jgrapht.nio.ImportException;
@@ -146,7 +144,7 @@ public class CustomImporter
 
         public final Consumer<Quadruple<Integer, String, Double, Boolean>> nodeConsumer = d -> {
             if(d.getFourth()) {
-                SongRecommendation song = new SongRecommendation(d.getSecond(), d.getThird());
+                Recommendation song = new Recommendation(d.getSecond(), d.getThird());
                 graph.addVertex(song);
                 map.put(d.getFirst() - 1, song);
                 notifyVertex(song);

@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.musicdao.recommender
 
 import nl.tudelft.trustchain.musicdao.core.recommender.gossip.NodeToNodeEdgeGossip
-import nl.tudelft.trustchain.musicdao.core.recommender.gossip.NodeToSongEdgeGossip
+import nl.tudelft.trustchain.musicdao.core.recommender.gossip.NodeToRecEdgeGossip
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import org.junit.Assert
 import org.junit.Test
@@ -17,9 +17,9 @@ class GraphSerializationTest {
 
     val nodeToSongTrust = 4.2
     val someNodeSongEdge = NodeSongEdge(nodeToSongTrust, Timestamp(341234))
-    val someSongRec = SongRecommendation("someTorrentHash")
-    val someNodeSongEdgeWithSourceAndTarget = NodeSongEdgeWithNodeAndSongRec(someNodeSongEdge, sourceNode, someSongRec)
-    val nodeToSongEdgeGossip = NodeToSongEdgeGossip(someNodeSongEdgeWithSourceAndTarget)
+    val someSongRec = Recommendation("someTorrentHash")
+    val someNodeSongEdgeWithSourceAndTarget = NodeRecEdge(someNodeSongEdge, sourceNode, someSongRec)
+    val nodeToRecEdgeGossip = NodeToRecEdgeGossip(someNodeSongEdgeWithSourceAndTarget)
 
     @Test
     fun canSerializeAndDeserializeNodeToNodeEdgeGossip() {
@@ -32,11 +32,11 @@ class GraphSerializationTest {
 
     @Test
     fun canSerializeAndDeserializeNodeToSongEdgeGossip() {
-        val serializedNodeSongEdge = nodeToSongEdgeGossip.serialize()
-        val deserializedEdge = NodeToSongEdgeGossip.deserialize(serializedNodeSongEdge, 0).first
+        val serializedNodeSongEdge = nodeToRecEdgeGossip.serialize()
+        val deserializedEdge = NodeToRecEdgeGossip.deserialize(serializedNodeSongEdge, 0).first
         Assert.assertEquals(nodeToSongTrust, deserializedEdge.edge.nodeSongEdge.affinity, 0.001)
         Assert.assertEquals(sourceNode, deserializedEdge.edge.node)
-        Assert.assertEquals(someSongRec, deserializedEdge.edge.songRec)
+        Assert.assertEquals(someSongRec, deserializedEdge.edge.rec)
     }
 
 

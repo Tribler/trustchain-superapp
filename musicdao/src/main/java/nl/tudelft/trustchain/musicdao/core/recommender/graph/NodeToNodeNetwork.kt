@@ -38,7 +38,7 @@ class NodeToNodeNetwork {
 
     fun addNode(node: Node): Boolean {
         return graph.addVertex(node).also {
-            if (!it) logger.error { "Couldn't add node ${node.getIpv8()} to node to node network" }
+            if (!it) logger.error { "Couldn't add node ${node.getKey()} to node to node network" }
         }
     }
 

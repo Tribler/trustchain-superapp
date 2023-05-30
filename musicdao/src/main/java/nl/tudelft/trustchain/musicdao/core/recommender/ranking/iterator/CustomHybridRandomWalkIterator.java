@@ -8,12 +8,11 @@ package nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator;
 import android.os.Build;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeOrSong;
-import nl.tudelft.trustchain.musicdao.core.recommender.model.SongRecommendation;
+import nl.tudelft.trustchain.musicdao.core.recommender.model.Recommendation;
 import org.jetbrains.annotations.NotNull;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 
-import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -31,7 +30,7 @@ public class CustomHybridRandomWalkIterator<E>
     private final Random rng;
     private final Graph<NodeOrSong, E> graph;
     private final Map<Node, Double> outEdgesTotalWeight;
-    private final Map<SongRecommendation, Double> personalizedPageRankTotalWeight;
+    private final Map<Recommendation, Double> personalizedPageRankTotalWeight;
     private final long maxHops;
 
     public NodeOrSong getNextVertex() {
@@ -104,13 +103,13 @@ public class CustomHybridRandomWalkIterator<E>
         return value;
     }
 
-    public void modifyPersonalizedPageRanks(Set<SongRecommendation> affectedSongs) {
+    public void modifyPersonalizedPageRanks(Set<Recommendation> affectedSongs) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            for (SongRecommendation changedSongRec : affectedSongs) {
+            for (Recommendation changedSongRec : affectedSongs) {
                 personalizedPageRankTotalWeight.put(changedSongRec, graph.outgoingEdgesOf(changedSongRec).stream().mapToDouble(this::returnPageRankOfNeighbour).sum());
             }
         } else {
-            for (SongRecommendation changedSongRec : affectedSongs) {
+            for (Recommendation changedSongRec : affectedSongs) {
                 double outEdgesTotalWeightSum = 0.0;
                 for (E edge : graph.outgoingEdgesOf(changedSongRec)) {
                     outEdgesTotalWeightSum += returnPageRankOfNeighbour(edge);
@@ -178,7 +177,7 @@ public class CustomHybridRandomWalkIterator<E>
         }
 
         E e = null;
-        double outEdgesWeight = getOutEdgesWeight((SongRecommendation) nextVertex) - lastNode.getPersonalizedPageRankScore();
+        double outEdgesWeight = getOutEdgesWeight((Recommendation) nextVertex) - lastNode.getPersonalizedPageRankScore();
         if (outEdgesWeight == 0) {
             List<E> outEdges = new ArrayList<>(graph.outgoingEdgesOf(nextVertex));
             int randIndex = rng.nextInt(outEdges.size() - 1);
@@ -230,7 +229,7 @@ public class CustomHybridRandomWalkIterator<E>
     }
 
     @NotNull
-    private Double getOutEdgesWeight(SongRecommendation song) {
+    private Double getOutEdgesWeight(Recommendation song) {
         double outEdgesWeight = 0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             outEdgesWeight = personalizedPageRankTotalWeight.computeIfAbsent(song, s -> graph

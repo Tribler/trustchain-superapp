@@ -9,7 +9,7 @@ import android.annotation.SuppressLint;
 import android.os.Build;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeOrSong;
-import nl.tudelft.trustchain.musicdao.core.recommender.model.SongRecommendation;
+import nl.tudelft.trustchain.musicdao.core.recommender.model.Recommendation;
 import org.jetbrains.annotations.NotNull;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -31,7 +31,7 @@ public class CustomHybridRandomWalkWithExplorationIteratorBackup<E>
     private final Random rng;
     private final Graph<NodeOrSong, E> graph;
     private final Map<Node, Double> outEdgesTotalWeight;
-    private Map<SongRecommendation, Double> personalizedPageRankAndEdgeTotalWeight;
+    private Map<Recommendation, Double> personalizedPageRankAndEdgeTotalWeight;
     private final long maxHops;
 
     public NodeOrSong getNextVertex() {
@@ -59,7 +59,7 @@ public class CustomHybridRandomWalkWithExplorationIteratorBackup<E>
     }
 
     private Node lastNode;
-    private SongRecommendation lastSong;
+    private Recommendation lastSong;
     private final double resetProbability;
     private final double randomNodeProbability;
 
@@ -107,7 +107,7 @@ public class CustomHybridRandomWalkWithExplorationIteratorBackup<E>
             lastNode = (Node) value;
             computeNextSong();
         } else {
-            lastSong = (SongRecommendation) value;
+            lastSong = (Recommendation) value;
             computeNextNode();
         }
         return value;
@@ -195,7 +195,7 @@ public class CustomHybridRandomWalkWithExplorationIteratorBackup<E>
 
         E lastNodeEdge = graph.getEdge(lastNode, nextVertex);
         double lastNodeWeight = graph.getEdgeWeight(lastNodeEdge);
-        double outEdgesWeight = getOutEdgesWeight((SongRecommendation) nextVertex) - lastNodeWeight;
+        double outEdgesWeight = getOutEdgesWeight((Recommendation) nextVertex) - lastNodeWeight;
         if (outEdgesWeight == 0) {
             nextVertex = null;
             lastSong = null;
@@ -240,7 +240,7 @@ public class CustomHybridRandomWalkWithExplorationIteratorBackup<E>
     }
 
     @NotNull
-    private Double getOutEdgesWeight(SongRecommendation song) {
+    private Double getOutEdgesWeight(Recommendation song) {
         double outEdgesWeight = 0;
             if (!personalizedPageRankAndEdgeTotalWeight.containsKey(song)) {
                     for (E edge : graph.outgoingEdgesOf(song)) {

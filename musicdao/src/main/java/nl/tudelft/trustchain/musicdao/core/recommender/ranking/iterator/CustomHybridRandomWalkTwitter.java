@@ -10,7 +10,7 @@ import android.annotation.SuppressLint;
 import android.os.Build;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeOrSong;
-import nl.tudelft.trustchain.musicdao.core.recommender.model.SongRecommendation;
+import nl.tudelft.trustchain.musicdao.core.recommender.model.Recommendation;
 import org.jetbrains.annotations.NotNull;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -32,7 +32,7 @@ public class CustomHybridRandomWalkTwitter<E>
     private final Random rng;
     private final Graph<NodeOrSong, E> graph;
     private final Map<Node, Double> outEdgesTotalWeight;
-    private Map<SongRecommendation, Double> personalizedPageRankAndEdgeTotalWeight;
+    private Map<Recommendation, Double> personalizedPageRankAndEdgeTotalWeight;
     private final long maxHops;
 
     public NodeOrSong getNextVertex() {
@@ -60,7 +60,7 @@ public class CustomHybridRandomWalkTwitter<E>
     }
 
     private Node lastNode;
-    private SongRecommendation lastSong;
+    private Recommendation lastSong;
     private final double resetProbability;
 
     /**
@@ -106,7 +106,7 @@ public class CustomHybridRandomWalkTwitter<E>
             lastNode = (Node) value;
             computeNextSong();
         } else {
-            lastSong = (SongRecommendation) value;
+            lastSong = (Recommendation) value;
             computeNextNode();
         }
         return value;
@@ -184,7 +184,7 @@ public class CustomHybridRandomWalkTwitter<E>
         hops++;
 
         E e = null;
-        double outEdgesWeight = getOutEdgesWeight((SongRecommendation) nextVertex);
+        double outEdgesWeight = getOutEdgesWeight((Recommendation) nextVertex);
         if (outEdgesWeight == 0) {
             nextVertex = null;
             lastSong = null;
@@ -226,7 +226,7 @@ public class CustomHybridRandomWalkTwitter<E>
 
     @SuppressLint("NewApi")
     @NotNull
-    private Double getOutEdgesWeight(SongRecommendation song) {
+    private Double getOutEdgesWeight(Recommendation song) {
         return personalizedPageRankAndEdgeTotalWeight.computeIfAbsent(song, v -> graph
                 .outgoingEdgesOf(v).stream().mapToDouble(graph::getEdgeWeight).sum());
     }

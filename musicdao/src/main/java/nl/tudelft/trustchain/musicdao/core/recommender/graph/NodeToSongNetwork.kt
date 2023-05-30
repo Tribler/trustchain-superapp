@@ -5,7 +5,6 @@ import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.NodeToSongNetwork.CustomExporter
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
-import org.jgrapht.graph.SimpleDirectedWeightedGraph
 import java.io.StringReader
 import java.io.StringWriter
 
@@ -45,7 +44,7 @@ class NodeToSongNetwork {
     }
 
     fun addEdge(source: NodeOrSong, target: NodeOrSong, nodeSongEdge: NodeSongEdge): Boolean {
-        if (source is Node && target is Node || source is SongRecommendation && target is SongRecommendation)
+        if (source is Node && target is Node || source is Recommendation && target is Recommendation)
             return false
         if (!graph.containsVertex(source)) {
                 logger.error { "Couldn't add edge $nodeSongEdge because source node doesn't exist" }
@@ -82,8 +81,8 @@ class NodeToSongNetwork {
         return graph.vertexSet().filterIsInstance<Node>().toSet()
     }
 
-    fun getAllSongs(): Set<SongRecommendation> {
-        return graph.vertexSet().filterIsInstance<SongRecommendation>().toSet()
+    fun getAllSongs(): Set<Recommendation> {
+        return graph.vertexSet().filterIsInstance<Recommendation>().toSet()
     }
 
     fun getAllEdges(): Set<NodeSongEdge> {

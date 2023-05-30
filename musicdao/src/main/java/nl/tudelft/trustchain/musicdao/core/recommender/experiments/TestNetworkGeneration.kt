@@ -3,8 +3,8 @@ package nl.tudelft.trustchain.musicdao.core.recommender.experiments
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.musicdao.core.recommender.collaborativefiltering.UserBasedTrustedCollaborativeFiltering
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.*
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.SongRecTrustNetwork
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -33,7 +33,7 @@ fun main() {
             var line: String?
             while (br.readLine().also { line = it } != null) {
                 val words = line?.split("\\s".toRegex())?.toTypedArray()
-                trustNetwork.addSongRec(SongRecommendation(words!!.first()))
+                trustNetwork.addSongRec(Recommendation(words!!.first()))
             }
         }
     } catch (e: IOException) {
@@ -44,7 +44,7 @@ fun main() {
             var line: String?
             while (br.readLine().also { line = it } != null) {
                 val words = line?.split("\\s".toRegex())?.toTypedArray()
-                trustNetwork.addSongRec(SongRecommendation(words!!.first()))
+                trustNetwork.addSongRec(Recommendation(words!!.first()))
             }
         }
     } catch (e: IOException) {
@@ -55,21 +55,21 @@ fun main() {
             var line: String?
             var lastNode: Node = interactionFile.bufferedReader()
                 .use { Node(it.readLine().split("\\s".toRegex()).toTypedArray().first()) }
-            var songRecAndListenCount: MutableMap<SongRecommendation, Int> = mutableMapOf()
+            var songRecAndListenCount: MutableMap<Recommendation, Int> = mutableMapOf()
             while (br.readLine().also { line = it } != null) {
                 val words = line?.split("\\s".toRegex())?.toTypedArray()
                 if (Node(words!!.first()) != lastNode) {
                     val totalCount = songRecAndListenCount.values.sum()
-                    val nodeToSongEdges = mutableListOf<NodeSongEdgeWithNodeAndSongRec>()
+                    val nodeToSongEdges = mutableListOf<NodeRecEdge>()
                     for ((rec, count) in songRecAndListenCount) {
                         val affinity = count.toDouble() / totalCount
-                        nodeToSongEdges.add(NodeSongEdgeWithNodeAndSongRec(NodeSongEdge(affinity), lastNode, rec))
+                        nodeToSongEdges.add(NodeRecEdge(NodeSongEdge(affinity), lastNode, rec))
                     }
                     trustNetwork.bulkAddNodeToSongEdgesForExperiments(nodeToSongEdges, lastNode)
                     songRecAndListenCount = mutableMapOf()
                     lastNode = Node(words.first())
                 }
-                songRecAndListenCount[SongRecommendation(words[1])] = words[2].toInt()
+                songRecAndListenCount[Recommendation(words[1])] = words[2].toInt()
             }
         }
     } catch (e: IOException) {
@@ -80,8 +80,8 @@ fun main() {
         println("$nodesCompleted/$totalNodes")
         val nTSGraph = trustNetwork.nodeToSongNetwork.graph
         val nodeSongEdges = nTSGraph.outgoingEdgesOf(node)
-            .map { NodeSongEdgeWithNodeAndSongRec(it, node, nTSGraph.getEdgeTarget(it) as SongRecommendation) }
-        val nodeSongs = nodeSongEdges.map { it.songRec }
+            .map { NodeRecEdge(it, node, nTSGraph.getEdgeTarget(it) as Recommendation) }
+        val nodeSongs = nodeSongEdges.map { it.rec }
         if (nodeSongs.isEmpty())
             continue
         val commonItemUsers = trustNetwork.nodeToNodeNetwork.getAllNodes().filter {

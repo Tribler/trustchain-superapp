@@ -3,8 +3,8 @@ package nl.tudelft.trustchain.musicdao.recommender
 import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiper
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.SubNetworks
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.TrustNetwork
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.SubNetworks
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.TrustNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsa
 import org.junit.Assert
@@ -37,7 +37,7 @@ class EdgeGossiperTest {
             nodeToSongNetwork.addNodeOrSong(nodeToAdd)
         }
         for (song in 0 until nSongs) {
-            nodeToSongNetwork.addNodeOrSong(SongRecommendation(song.toString()))
+            nodeToSongNetwork.addNodeOrSong(Recommendation(song.toString()))
         }
         // Create 10 edges from each node to 10 random songs
         val allNodes = nodeToSongNetwork.getAllNodes().toList()
@@ -52,7 +52,7 @@ class EdgeGossiperTest {
                     NodeSongEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp)))
                 )
                 randomNum = (0 until nNodes - 1).random(rng)
-                val randomNode = if (randomNum < node.getIpv8().toInt()) randomNum else randomNum + 1
+                val randomNode = if (randomNum < node.getKey().toInt()) randomNum else randomNum + 1
                 nodeToNodeNetwork.addEdge(
                     node,
                     allNodes[randomNode],
@@ -64,7 +64,7 @@ class EdgeGossiperTest {
 
     @Test
     fun canInitializeDeltasForEdgeGossiping() {
-        trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getIpv8())
+        trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getKey())
         edgeGossiper = EdgeGossiper(RecommenderCommunityMock("someServiceId"), false, trustNetwork)
         val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
         val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas
@@ -87,7 +87,7 @@ class EdgeGossiperTest {
 
     @Test
     fun canInitializeWeightsBasedOnDeltaValues() {
-        trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getIpv8())
+        trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getKey())
         edgeGossiper = EdgeGossiper(RecommenderCommunityMock("someServiceId"), false, trustNetwork)
         val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
         val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas
@@ -119,7 +119,7 @@ class EdgeGossiperTest {
     @Test
     fun usesTimeWindowToConstructDeltasAndWeights() {
         val someTimeWindow = Random.nextInt(1, EdgeGossiper.TIME_WINDOW)
-        trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getIpv8())
+        trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getKey())
         edgeGossiper = EdgeGossiper(RecommenderCommunityMock("someServiceId"), false, trustNetwork, someTimeWindow)
         val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
         val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas

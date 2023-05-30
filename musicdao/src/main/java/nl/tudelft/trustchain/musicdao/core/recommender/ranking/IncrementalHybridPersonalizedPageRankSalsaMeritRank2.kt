@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.musicdao.core.recommender.ranking
 
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkWithExplorationIterator
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkWithTrustedRandomSurfer
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
 import org.jgrapht.graph.SimpleDirectedWeightedGraph
@@ -57,8 +56,8 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
     }
 
     override fun calculateRankings() {
-        val songsInWalks = randomWalks.flatten().filterIsInstance<SongRecommendation>()
-        val songsToValue = mutableMapOf<SongRecommendation, Double>()
+        val songsInWalks = randomWalks.flatten().filterIsInstance<Recommendation>()
+        val songsToValue = mutableMapOf<Recommendation, Double>()
         val betaDecays = calculateBetaDecaysSpaceIntensive()
         for(song in songsInWalks) {
             songsToValue[song] = 0.0
@@ -69,7 +68,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
                 if(index % 2 == 0) {
                     modifier = (1.0 - pageRankBalance) + (nodeOrSong.rankingScore * totalNodes * pageRankBalance)
                 } else {
-                    songsToValue[nodeOrSong as SongRecommendation] = songsToValue[nodeOrSong]!! + modifier
+                    songsToValue[nodeOrSong as Recommendation] = songsToValue[nodeOrSong]!! + modifier
                 }
             }
         }
@@ -141,14 +140,14 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
 //        return betaDecay
 //    }
 
-    private fun calculateBetaDecaysSpaceIntensive(): Map<SongRecommendation, Double> {
-        val betaDecay = mutableMapOf<SongRecommendation, Double>()
-        val totalVisitsToRec = mutableMapOf<SongRecommendation, Int>()
-        val visitToNodeThroughOtherNode = mutableMapOf<SongRecommendation, MutableMap<NodeOrSong, Int>>()
+    private fun calculateBetaDecaysSpaceIntensive(): Map<Recommendation, Double> {
+        val betaDecay = mutableMapOf<Recommendation, Double>()
+        val totalVisitsToRec = mutableMapOf<Recommendation, Int>()
+        val visitToNodeThroughOtherNode = mutableMapOf<Recommendation, MutableMap<NodeOrSong, Int>>()
         for (walk in randomWalks) {
             val uniqueNodesOrSong = mutableSetOf<NodeOrSong>()
             for (nodeOrRec in walk) {
-                if (nodeOrRec is SongRecommendation) {
+                if (nodeOrRec is Recommendation) {
                     if (!uniqueNodesOrSong.contains(nodeOrRec)) {
                         totalVisitsToRec[nodeOrRec] = (totalVisitsToRec[nodeOrRec] ?: 0) + 1
                         for (visitedNode in uniqueNodesOrSong) {

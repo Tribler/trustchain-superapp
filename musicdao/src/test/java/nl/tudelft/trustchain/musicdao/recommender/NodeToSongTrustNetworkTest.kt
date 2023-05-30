@@ -1,10 +1,9 @@
 package nl.tudelft.trustchain.musicdao.recommender
 
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeSongEdge
-import nl.tudelft.trustchain.musicdao.core.recommender.model.SongRecommendation
+import nl.tudelft.trustchain.musicdao.core.recommender.model.Recommendation
 import org.junit.Assert
 import org.junit.Test
 import java.sql.Timestamp
@@ -14,8 +13,8 @@ class NodeToSongTrustNetworkTest {
     private val someNode = Node("someNode")
     private val randomNodeWithRandomPageRank = Node("randomNode", 0.3)
     private val anotherNode = Node("anotherNode")
-    private val someSongRecommendation = SongRecommendation("someTorrentHash", 0.5)
-    private val anotherSongRecommendation = SongRecommendation("anotherTorrentHash", 0.8)
+    private val someRecommendation = Recommendation("someTorrentHash", 0.5)
+    private val anotherRecommendation = Recommendation("anotherTorrentHash", 0.8)
     private val dummyValue = 0.5
     private val anotherDummyValue = 0.3
     private val yetAnotherDummyValue = 0.4
@@ -65,7 +64,7 @@ e 1 4 0.4 1
     @Test
     fun canAddSongsToEmptyNodeToSongNetwork() {
         network = NodeToSongNetwork()
-        network.addNodeOrSong(someSongRecommendation)
+        network.addNodeOrSong(someRecommendation)
         Assert.assertEquals(0, network.getAllNodes().size)
         Assert.assertEquals(1, network.getAllSongs().size)
     }
@@ -74,10 +73,10 @@ e 1 4 0.4 1
     fun canAddEdgesBetweenNodesAndSongs() {
         network = NodeToSongNetwork()
         network.addNodeOrSong(someNode)
-        network.addNodeOrSong(someSongRecommendation)
+        network.addNodeOrSong(someRecommendation)
         Assert.assertEquals(1, network.getAllNodes().size)
         Assert.assertEquals(1, network.getAllSongs().size)
-        val edgeAdded = network.addEdge(someNode, someSongRecommendation, someNodeSongEdge)
+        val edgeAdded = network.addEdge(someNode, someRecommendation, someNodeSongEdge)
         Assert.assertTrue(edgeAdded)
         val edges = network.getAllEdges()
         Assert.assertEquals(someNodeSongEdge, edges.first())
@@ -94,9 +93,9 @@ e 1 4 0.4 1
         network.addNodeOrSong(anotherNode)
         val edgeBetweenNodesAdded = network.addEdge(someNode, anotherNode, someNodeSongEdge)
         Assert.assertFalse(edgeBetweenNodesAdded)
-        network.addNodeOrSong(someSongRecommendation)
-        network.addNodeOrSong(anotherSongRecommendation)
-        val edgeBetweenSongsAdded = network.addEdge(someSongRecommendation, anotherSongRecommendation, anotherNodeSongEdge)
+        network.addNodeOrSong(someRecommendation)
+        network.addNodeOrSong(anotherRecommendation)
+        val edgeBetweenSongsAdded = network.addEdge(someRecommendation, anotherRecommendation, anotherNodeSongEdge)
         Assert.assertFalse(edgeBetweenSongsAdded)
     }
 
@@ -104,8 +103,8 @@ e 1 4 0.4 1
     fun canRemoveEdgesFromNodeToSongNetwork() {
         network = NodeToSongNetwork()
         network.addNodeOrSong(someNode)
-        network.addNodeOrSong(someSongRecommendation)
-        val edgeAdded = network.addEdge(someNode, someSongRecommendation, someNodeSongEdge)
+        network.addNodeOrSong(someRecommendation)
+        val edgeAdded = network.addEdge(someNode, someRecommendation, someNodeSongEdge)
         Assert.assertTrue(edgeAdded)
         val edgeRemoved = network.removeEdge(someNodeSongEdge)
         Assert.assertTrue(edgeRemoved)
@@ -119,12 +118,12 @@ e 1 4 0.4 1
         network = NodeToSongNetwork()
         network.addNodeOrSong(someNode)
         network.addNodeOrSong(randomNodeWithRandomPageRank)
-        network.addNodeOrSong(someSongRecommendation)
-        network.addNodeOrSong(anotherSongRecommendation)
+        network.addNodeOrSong(someRecommendation)
+        network.addNodeOrSong(anotherRecommendation)
 
-        network.addEdge(someNode, someSongRecommendation, someNodeSongEdge)
-        network.addEdge(randomNodeWithRandomPageRank, someSongRecommendation, anotherNodeSongEdge)
-        network.addEdge(someNode, anotherSongRecommendation, yetAnotherNodeSongEdge)
+        network.addEdge(someNode, someRecommendation, someNodeSongEdge)
+        network.addEdge(randomNodeWithRandomPageRank, someRecommendation, anotherNodeSongEdge)
+        network.addEdge(someNode, anotherRecommendation, yetAnotherNodeSongEdge)
 
         val serializedOutput = network.serializeCompact()
         Assert.assertEquals(compactNodeToNodeGraph, serializedOutput)
@@ -134,7 +133,7 @@ e 1 4 0.4 1
             newNodeToSongNetwork.graph
         )
         Assert.assertEquals(
-            newNodeToSongNetwork.getAllNodes().filter { it.getIpv8() == randomNodeWithRandomPageRank.getIpv8() }.first().getPersonalizedPageRankScore(),
+            newNodeToSongNetwork.getAllNodes().filter { it.getKey() == randomNodeWithRandomPageRank.getKey() }.first().getPersonalizedPageRankScore(),
             randomNodeWithRandomPageRank.getPersonalizedPageRankScore(),
             0.001
         )

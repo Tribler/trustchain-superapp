@@ -8,7 +8,7 @@ import nl.tudelft.trustchain.musicdao.core.cache.parser.Converters
 
 @Database(
     entities = [AlbumEntity::class],
-    version = 5,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

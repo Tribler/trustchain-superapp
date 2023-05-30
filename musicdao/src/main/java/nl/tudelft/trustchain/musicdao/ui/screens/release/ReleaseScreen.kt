@@ -41,6 +41,10 @@ import nl.tudelft.trustchain.musicdao.ui.util.dateToShortString
 import nl.tudelft.trustchain.musicdao.ui.navigation.Screen
 import nl.tudelft.trustchain.musicdao.ui.screens.torrent.TorrentStatusScreen
 import dagger.hilt.android.EntryPointAccessors
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.musicdao.core.ipv8.TrustedRecommenderCommunity
+import nl.tudelft.trustchain.musicdao.core.recommender.model.Recommendation
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.SongRecTrustNetwork
 import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -53,6 +57,7 @@ fun ReleaseScreen(
 ) {
     var state by remember { mutableStateOf(0) }
     val titles = listOf("RELEASE", "TORRENT")
+    val trustNetwork = SongRecTrustNetwork.getInstance(IPv8Android.getInstance().getOverlay<TrustedRecommenderCommunity>()!!.myPeer.key.pub().toString(), playerViewModel.cachePath.path.toString())
 
     val viewModelFactory = EntryPointAccessors.fromActivity(
         LocalContext.current as Activity,
@@ -72,6 +77,7 @@ fun ReleaseScreen(
     val context = LocalContext.current
 
     fun play(track: Song, cover: File?) {
+        albumState?.id?.run { trustNetwork?.incrementSongRecListenCount(Recommendation(this)) }
         playerViewModel.playDownloadedTrack(track, context, cover)
     }
 

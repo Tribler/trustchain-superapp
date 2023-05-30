@@ -36,11 +36,13 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import nl.tudelft.trustchain.musicdao.ui.screens.dao.*
 import nl.tudelft.trustchain.musicdao.ui.screens.debug.DebugScreenViewModel
+import nl.tudelft.trustchain.musicdao.ui.screens.discover.DiscoverScreen
 import nl.tudelft.trustchain.musicdao.ui.screens.profile.EditProfileScreen
 import nl.tudelft.trustchain.musicdao.ui.screens.profile.MyProfileScreen
 import nl.tudelft.trustchain.musicdao.ui.screens.profile.MyProfileScreenViewModel
 import nl.tudelft.trustchain.musicdao.ui.screens.profile.ProfileScreen
 import nl.tudelft.trustchain.musicdao.ui.screens.profile_menu.ProfileMenuScreen
+import nl.tudelft.trustchain.musicdao.ui.screens.search.DiscoverScreenViewModel
 
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
@@ -69,6 +71,13 @@ fun AppNavigation(
                 HomeScreen(
                     navController = navController,
                     screenViewModel = searchScreenViewModel
+                )
+            }
+            composable(Screen.Discover.route) {
+                val discoverScreenViewModel: DiscoverScreenViewModel = hiltViewModel()
+                DiscoverScreen(
+                    navController = navController,
+                    discoverScreenViewModel = discoverScreenViewModel
                 )
             }
             composable(Screen.Search.route) {

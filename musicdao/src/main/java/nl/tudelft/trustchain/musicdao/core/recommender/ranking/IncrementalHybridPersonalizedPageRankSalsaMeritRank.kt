@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.musicdao.core.recommender.ranking
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkTwitter
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkWithExplorationIterator
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
 import java.util.*
 
@@ -62,8 +61,8 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
 //    }
 
     override fun calculateRankings() {
-        val songsInWalks = randomWalks.flatten().filterIsInstance<SongRecommendation>()
-        val songsToValue = mutableMapOf<SongRecommendation, Double>()
+        val songsInWalks = randomWalks.flatten().filterIsInstance<Recommendation>()
+        val songsToValue = mutableMapOf<Recommendation, Double>()
         for(song in songsInWalks) {
             songsToValue[song] = 0.0
         }
@@ -73,7 +72,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
                 if(index % 2 == 0) {
                     modifier = (1.0 - pageRankBalance) + (nodeOrSong.rankingScore * totalNodes * pageRankBalance)
                 } else {
-                    songsToValue[nodeOrSong as SongRecommendation] = songsToValue[nodeOrSong]!! + modifier
+                    songsToValue[nodeOrSong as Recommendation] = songsToValue[nodeOrSong]!! + modifier
                 }
             }
         }

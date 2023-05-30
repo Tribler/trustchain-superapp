@@ -44,7 +44,7 @@ class IncrementalHybridPersonalizedPageRankSalsa (
         }
     }
     override fun calculateRankings() {
-        val songCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it is SongRecommendation }
+        val songCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it is Recommendation }
         val totalOccs = songCounts.values.sum()
         for((song, occ) in songCounts) {
             song.rankingScore = occ.toDouble() / totalOccs

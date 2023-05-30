@@ -2,14 +2,15 @@ package nl.tudelft.trustchain.musicdao.core.recommender.experiments
 
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import nl.tudelft.trustchain.musicdao.core.recommender.graph.*
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.SerializedSubNetworks
+import nl.tudelft.trustchain.musicdao.core.recommender.networks.TrustNetwork
 import java.io.File
 import kotlin.random.Random
 import kotlin.math.pow
 
 
-fun rboHelper(ret: Double, i: Int, d: Int, list1: List<SongRecommendation>, list2: List<SongRecommendation>, p: Double): Double {
+fun rboHelper(ret: Double, i: Int, d: Int, list1: List<Recommendation>, list2: List<Recommendation>, p: Double): Double {
     val l1 = list1.take(i).toSet()
     val l2 = list2.take(i).toSet()
     val aD = (l1.intersect(l2).size).toDouble() / i
@@ -19,7 +20,7 @@ fun rboHelper(ret: Double, i: Int, d: Int, list1: List<SongRecommendation>, list
     else
         rboHelper(ret + term, i +1, d, list1, list2, p)
 }
-fun rbo(list1: List<SongRecommendation>, list2: List<SongRecommendation>, p: Double = 0.8): Double {
+fun rbo(list1: List<Recommendation>, list2: List<Recommendation>, p: Double = 0.8): Double {
     val k = maxOf(list1.size, list2.size)
     val xK = list1.toSet().intersect(list2.toSet()).size.toDouble()
     val sum = rboHelper(0.0, 1, k, list1, list2, p)
@@ -52,7 +53,7 @@ fun main() {
         rootNodes.add(allNodes[i])
     }
 
-    val top100ListBases = mutableMapOf<Node, List<SongRecommendation>>()
+    val top100ListBases = mutableMapOf<Node, List<Recommendation>>()
 
     val decayValues: List<Double> = (0..10 step 1).map { it.toDouble() / 10 }
     val alphaDecayValues: List<Double> = (1..10 step 1).map { it.toDouble() / 10 }
@@ -68,7 +69,7 @@ fun main() {
                 println("ROOT NODE $index")
                 trustNetwork = TrustNetwork(
                     subNetworks,
-                    rootNode.getIpv8(),
+                    rootNode.getKey(),
                     alphaDecay,
                     betaDecay,
                     0.0

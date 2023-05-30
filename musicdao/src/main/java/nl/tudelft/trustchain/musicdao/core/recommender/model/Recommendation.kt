@@ -1,11 +1,11 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.model
 
-class SongRecommendation(
-    torrentHash: String,
+class Recommendation(
+    uniqueIdentifier: String,
     recommendationScore: Double = 0.0
-):NodeOrSong(torrentHash, recommendationScore) {
+):NodeOrSong(uniqueIdentifier, recommendationScore) {
 
-    fun getTorrentHash(): String {
+    fun getUniqueIdentifier(): String {
         return identifier
     }
 
@@ -22,6 +22,6 @@ class SongRecommendation(
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is SongRecommendation && identifier == other.identifier
+        return other is Recommendation && identifier == other.identifier
     }
 }

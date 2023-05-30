@@ -1,10 +1,10 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.model
 class Node(
-    ipv8: String,
+    key: String,
     personalisedPageRankScore: Double = 0.0
-):NodeOrSong(ipv8, personalisedPageRankScore) {
+):NodeOrSong(key, personalisedPageRankScore) {
 
-    fun getIpv8(): String {
+    fun getKey(): String {
         return identifier
     }
 

@@ -6,17 +6,16 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
-import nl.tudelft.trustchain.musicdao.core.recommender.model.SongRecommendation
+import nl.tudelft.trustchain.musicdao.core.recommender.model.Recommendation
 
-object SongRecAsStringSerializer : KSerializer<SongRecommendation> {
+object RecAsStringSerializer : KSerializer<Recommendation> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("SongRec", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: SongRecommendation) {
-        encoder.encodeString(value.getTorrentHash())
+    override fun serialize(encoder: Encoder, value: Recommendation) {
+        encoder.encodeString(value.getUniqueIdentifier())
     }
 
-    override fun deserialize(decoder: Decoder): SongRecommendation {
-        return SongRecommendation(decoder.decodeString())
+    override fun deserialize(decoder: Decoder): Recommendation {
+        return Recommendation(decoder.decodeString())
     }
 }
 
