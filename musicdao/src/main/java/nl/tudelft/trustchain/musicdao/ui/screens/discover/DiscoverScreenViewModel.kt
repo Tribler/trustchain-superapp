@@ -75,6 +75,9 @@ class DiscoverScreenViewModel @Inject constructor(
             delay(500)
             _peerAmount.value = recCommunity.getPeers().size
             _isRefreshing.value = false
+            songRecTrustNetwork.refreshRecommendations()
+            val allAlbums = albumRepository.getAlbums()
+            _recommendations.value = ratingOfAlbumNonDownloadedSong(allAlbums)
         }
     }
 

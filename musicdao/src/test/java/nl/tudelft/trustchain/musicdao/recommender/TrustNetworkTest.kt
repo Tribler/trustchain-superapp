@@ -4,7 +4,6 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
-import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiper
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.*
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.networks.SerializedSubNetworks
@@ -27,7 +26,6 @@ class TrustNetworkTest {
     private val nEdges = 10
     private val maxTimestamp = System.currentTimeMillis() + 10000
     private val minTimestamp = System.currentTimeMillis()
-    private lateinit var edgeGossiper: EdgeGossiper
     private val logger = KotlinLogging.logger {}
 
     private fun setUp() {

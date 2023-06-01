@@ -44,8 +44,8 @@ class UserBasedTrustedCollaborativeFiltering(
             }
             nodeSimilarities.add(nodeSimilarity)
         }
-        val maxCommonItems = nodeSimilarities.map { it.commonItems }.max()
-        return if(maxCommonItems == 0) {
+        val maxCommonItems = nodeSimilarities.map { it.commonItems }.maxOrNull()
+        return if(maxCommonItems == null || maxCommonItems == 0) {
             sortedTopTrustedUsers.takeLast(size).associateBy({it}, {it.getPersonalizedPageRankScore()})
         } else {
             val nodesTrustAndSimilarity = mutableListOf<Pair<Node, Double>>()

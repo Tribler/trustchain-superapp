@@ -5,6 +5,8 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
+import nl.tudelft.trustchain.musicdao.core.recommender.collaborativefiltering.CollaborativeFiltering
+import nl.tudelft.trustchain.musicdao.core.recommender.collaborativefiltering.UserBasedTrustedCollaborativeFiltering
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import java.io.File
 import java.nio.file.Files
@@ -17,13 +19,17 @@ class SongRecTrustNetwork: TrustNetwork {
     private var songRecommenders: MutableMap<Recommendation, List<Node>> = mutableMapOf()
     private val recommendersPerSong = 5
     private var appDir = ""
+    private lateinit var userBasedCF: UserBasedTrustedCollaborativeFiltering
 
-    constructor(sourceNodeAddress: String): super(sourceNodeAddress)
+    constructor(sourceNodeAddress: String): super(sourceNodeAddress) {
 
-    constructor(sourceNodeAddress: String, appDirectory: String): super(sourceNodeAddress, appDirectory) {
+    }
+
+    constructor(sourceNodeAddress: String, appDirectory: String): super(sourceNodeAddress, appDirectory, true) {
         appDir = appDirectory
         songRecommenders = fetchSongRecommendersStored(appDirectory) ?: mutableMapOf()
         songRecListenCount = fetchSongCountList(appDirectory) ?: mutableMapOf()
+        userBasedCF = UserBasedTrustedCollaborativeFiltering(nodeToNodeNetwork.getAllNodes().filter { it != rootNode }.toList(), this, 0.5, 0.5)
     }
 
     companion object {
@@ -115,7 +121,22 @@ class SongRecTrustNetwork: TrustNetwork {
         }
     }
 
-    fun refreshRankings() {
+    fun refreshRecommendations() {
+        val rootNeighbors = nodeToNodeNetwork.graph.outgoingEdgesOf(rootNode)
+        incrementalPersonalizedPageRank.initiateRandomWalks()
+        incrementalPersonalizedPageRank.calculateRankings()
+        if(rootNeighbors.size < 5) {
+            userBasedCF = UserBasedTrustedCollaborativeFiltering(nodeToNodeNetwork.getAllNodes().filter { it != rootNode }.toList(), this, 0.5, 0.5)
+            val similarNodesAndScore = userBasedCF.similarNodes(nodeToSongNetwork.graph.outgoingEdgesOf(rootNode).map { NodeRecEdge(it, rootNode, nodeToSongNetwork.graph.getEdgeTarget(it) as Recommendation) }, 5 - rootNeighbors.size).toMutableMap()
+            if(similarNodesAndScore.values.sum() == 0.0) {
+                val newScore = 1.0 / similarNodesAndScore.size
+                similarNodesAndScore.mapValues { newScore }
+            }
+            for((node,score) in similarNodesAndScore) {
+                addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(score), rootNode, node))
+            }
+        }
+        incrementalHybridPersonalizedPageRankSalsa.initiateRandomWalks()
         incrementalHybridPersonalizedPageRankSalsa.calculateRankings()
     }
     override fun bulkAddNodeToSongEdgesForNode(edges: List<NodeRecEdge>, sourceNode: Node): Boolean {

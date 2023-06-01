@@ -1,6 +1,6 @@
 package nl.tudelft.trustchain.musicdao.recommender
 
-import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiper
+import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiperService
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.networks.SubNetworks
@@ -27,7 +27,7 @@ class EdgeGossiperTest {
     private val doubleDelta = 0.0000001
     private val maxTimestamp = System.currentTimeMillis() + 10000
     private val minTimestamp = System.currentTimeMillis()
-    private lateinit var edgeGossiper: EdgeGossiper
+    private lateinit var edgeGossiper: EdgeGossiperService
 
     @Before
     fun setUp() {
@@ -65,18 +65,18 @@ class EdgeGossiperTest {
     @Test
     fun canInitializeDeltasForEdgeGossiping() {
         trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getKey())
-        edgeGossiper = EdgeGossiper(RecommenderCommunityMock("someServiceId"), false, trustNetwork)
+        edgeGossiper = EdgeGossiperService()
         val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
         val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas
 
-        val sortedNtNEdgesInWindow = nodeToNodeNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(EdgeGossiper.TIME_WINDOW)
+        val sortedNtNEdgesInWindow = nodeToNodeNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(10000)
         val oldestNodeToNodeEdge = sortedNtNEdgesInWindow.first()
         val newestNodeToNodeEdge = sortedNtNEdgesInWindow.last()
         val deltaOldestAndNewestNtNEdge = (newestNodeToNodeEdge.timestamp.time - oldestNodeToNodeEdge.timestamp.time).toInt()
         Assert.assertEquals(deltaOldestAndNewestNtNEdge, nodeToNodeDeltas.max())
         Assert.assertEquals(0, nodeToNodeDeltas.min())
 
-        val sortedNtSEdgesInWindow = nodeToSongNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(EdgeGossiper.TIME_WINDOW)
+        val sortedNtSEdgesInWindow = nodeToSongNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(10000)
         val oldestNodeToSongEdge = sortedNtSEdgesInWindow.first()
         val newestNodeToSongEdge = sortedNtSEdgesInWindow.last()
         val deltaOldestAndNewestNtSEdge = (newestNodeToSongEdge.timestamp.time - oldestNodeToSongEdge.timestamp.time).toInt()
@@ -88,13 +88,13 @@ class EdgeGossiperTest {
     @Test
     fun canInitializeWeightsBasedOnDeltaValues() {
         trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getKey())
-        edgeGossiper = EdgeGossiper(RecommenderCommunityMock("someServiceId"), false, trustNetwork)
+        edgeGossiper = EdgeGossiperService()
         val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
         val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas
         val nodeToNodeWeights = edgeGossiper.nodeToNodeEdgeWeights
         val nodeToSongWeights = edgeGossiper.nodeToSongEdgeWeights
 
-        val sortedNtNEdgesInWindow = nodeToNodeNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(EdgeGossiper.TIME_WINDOW)
+        val sortedNtNEdgesInWindow = nodeToNodeNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(10000)
         val oldestNodeToNodeEdge = sortedNtNEdgesInWindow.minBy { it.timestamp }
         val newestNodeToNodeEdge = sortedNtNEdgesInWindow.maxBy { it.timestamp }
         val sumNtNDeltas = nodeToNodeDeltas.sum()
@@ -103,7 +103,7 @@ class EdgeGossiperTest {
         Assert.assertEquals(expectedWeightOldestNtNEdge, nodeToNodeWeights.first(), doubleDelta)
         Assert.assertEquals(expectedWeightNewestNtNEdge, nodeToNodeWeights.last(), doubleDelta)
 
-        val sortedNtSEdgesInWindow = nodeToSongNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(EdgeGossiper.TIME_WINDOW)
+        val sortedNtSEdgesInWindow = nodeToSongNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(10000)
         val oldestNodeToSongEdge = sortedNtSEdgesInWindow.first()
         val newestNodeToSongEdge = sortedNtSEdgesInWindow.last()
         val sumNtSDeltas = nodeToSongDeltas.sum()
@@ -118,9 +118,9 @@ class EdgeGossiperTest {
 
     @Test
     fun usesTimeWindowToConstructDeltasAndWeights() {
-        val someTimeWindow = Random.nextInt(1, EdgeGossiper.TIME_WINDOW)
+        val someTimeWindow = Random.nextInt(1, 10000)
         trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getKey())
-        edgeGossiper = EdgeGossiper(RecommenderCommunityMock("someServiceId"), false, trustNetwork, someTimeWindow)
+        edgeGossiper = EdgeGossiperService()
         val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
         val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas
         val nodeToNodeWeights = edgeGossiper.nodeToNodeEdgeWeights

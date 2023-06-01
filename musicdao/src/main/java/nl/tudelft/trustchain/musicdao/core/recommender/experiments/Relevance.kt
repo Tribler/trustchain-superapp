@@ -71,8 +71,7 @@ fun main() {
                     subNetworks,
                     rootNode.getKey(),
                     alphaDecay,
-                    betaDecay,
-                    0.0
+                    betaDecay
                 )
                 allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
                 val top100Songs = allSongs.sortedBy { it.rankingScore }.takeLast(100).toList().reversed()

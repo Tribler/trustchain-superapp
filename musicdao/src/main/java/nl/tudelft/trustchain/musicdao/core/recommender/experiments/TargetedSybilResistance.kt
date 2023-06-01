@@ -179,8 +179,7 @@ fun main() {
 
     val decayValues: List<Double> = (0..10 step 1).map { it.toDouble() / 10 }
     for (betaDecay in decayValues) {
-        for (exploration in decayValues) {
-            println("BETA DECAY $betaDecay EXPLORATION $exploration experiments starting")
+            println("BETA DECAY $betaDecay experiments starting")
             var reputationGainForSybils = 0.0
             var top100SongsSybil = 0
             var top1000SongsSybil = 0
@@ -192,8 +191,7 @@ fun main() {
                     SubNetworks(newNodeToNodeNetwork, newNodeToSongNetwork),
                     rootNode.getKey(),
                     0.0,
-                    betaDecay,
-                    exploration
+                    betaDecay
                 )
                 val allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
                 for (song in allSongs) {
@@ -226,7 +224,7 @@ fun main() {
                     }
                 }
             }
-            fileOut.appendText("BETA DECAY: $betaDecay EXPLORATION $exploration REPUTATION GAIN: $reputationGainForSybils")
+            fileOut.appendText("BETA DECAY: $betaDecay REPUTATION GAIN: $reputationGainForSybils")
             fileOut.appendText("\n")
             fileOut.appendText("TOP 100 SONGS SYBIL: $top100SongsSybil")
             fileOut.appendText("\n")
@@ -236,6 +234,5 @@ fun main() {
             fileOut.appendText("\n")
             fileOut.appendText("TOP 5000 SONGS SYBIL: $top5000SongsSybil")
             fileOut.appendText("\n")
-        }
     }
 }

@@ -11,6 +11,7 @@ import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.*
 import java.io.File
 import java.nio.file.Files
+import kotlin.math.max
 
 open class TrustNetwork {
     val nodeToNodeNetwork: NodeToNodeNetwork
@@ -28,7 +29,7 @@ open class TrustNetwork {
         const val ALPHA_DECAY = 0.1
         const val BETA_DECAY = 0.8
         const val BETA_DECAY_THRESHOLD = 0.99
-        const val EXPLORATION_PROBABILITY = 0.05
+        const val MAX_RECS_FOR_BOOTSTRAP = 5
         private const val graphsPath = "/trusted_recommender/" + "graphs.txt"
         private var appDir = ""
 
@@ -49,25 +50,22 @@ open class TrustNetwork {
         }
     }
 
-    constructor(subNetworks: SubNetworks, sourceNodeAddress: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, explorationProbability: Double = EXPLORATION_PROBABILITY, totalRandomWalks: Int = MAX_WALK_LENGTH) {
+    constructor(subNetworks: SubNetworks, sourceNodeAddress: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, bootstrap: Boolean = false) {
         nodeToNodeNetwork = subNetworks.nodeToNodeNetwork
         nodeToSongNetwork = subNetworks.nodeToSongNetwork
         val allNodesList = nodeToNodeNetwork.getAllNodes()
         allNodes = allNodesList.toMutableList()
         rootNode = allNodes.first { it.getKey() == sourceNodeAddress}
-        if(explorationProbability != 0.0) {
-            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, 0.005, betaDecay, BETA_DECAY_THRESHOLD, nodeToNodeNetwork.graph, false)
-            incrementalPersonalizedPageRank.calculateRankings()
-        } else {
-            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(1, 1, rootNode, alphaDecay, betaDecay, BETA_DECAY_THRESHOLD, nodeToNodeNetwork.graph, false)
-        }
-//        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, 0.01, betaDecay, 0.99,  explorationProbability, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, false)
+        val outgoingRecsForRoot = nodeToSongNetwork.graph.outgoingEdgesOf(rootNode).size
+        val pageRankBalance = if(bootstrap) 0.0 else maxOf(0.0, (MAX_RECS_FOR_BOOTSTRAP - outgoingRecsForRoot).toDouble() / MAX_RECS_FOR_BOOTSTRAP)
+        incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, 0.005, betaDecay, BETA_DECAY_THRESHOLD, nodeToNodeNetwork.graph, false)
+        incrementalPersonalizedPageRank.calculateRankings()
         incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
-            MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, alphaDecay, betaDecay, 0.99,  explorationProbability, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, false)
+            MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, alphaDecay, betaDecay, 0.99,  pageRankBalance, nodeToSongNetwork.graph, nodeToNodeNetwork.graph)
         incrementalHybridPersonalizedPageRankSalsa.calculateRankings()
     }
 
-    constructor(subNetworks: SubNetworks?, sourceNodeAddress: String, appDirectory: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, explorationProbability: Double = EXPLORATION_PROBABILITY, totalRandomWalks: Int = MAX_WALK_LENGTH) {
+    constructor(subNetworks: SubNetworks?, sourceNodeAddress: String, appDirectory: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, bootstrap: Boolean = false) {
         appDir = appDirectory
         if(subNetworks != null) {
             nodeToNodeNetwork = subNetworks.nodeToNodeNetwork
@@ -75,8 +73,9 @@ open class TrustNetwork {
             val allNodesList = nodeToNodeNetwork.getAllNodes()
             allNodes = allNodesList.toMutableList()
             rootNode = allNodes.first { it.getKey() == sourceNodeAddress }
-            if (explorationProbability != 0.0) {
-                incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(
+            val outgoingRecsForRoot = nodeToSongNetwork.graph.outgoingEdgesOf(rootNode).size
+            val pageRankBalance = if(!bootstrap) 0.0 else maxOf(0.0, (MAX_RECS_FOR_BOOTSTRAP - outgoingRecsForRoot).toDouble() / MAX_RECS_FOR_BOOTSTRAP)
+            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(
                     MAX_WALK_LENGTH,
                     ALPHA_REPETITIONS,
                     rootNode,
@@ -86,19 +85,7 @@ open class TrustNetwork {
                     nodeToNodeNetwork.graph,
                     false
                 )
-                incrementalPersonalizedPageRank.calculateRankings()
-            } else {
-                incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(
-                    1,
-                    1,
-                    rootNode,
-                    alphaDecay,
-                    betaDecay,
-                    BETA_DECAY_THRESHOLD,
-                    nodeToNodeNetwork.graph,
-                    false
-                )
-            }
+            incrementalPersonalizedPageRank.calculateRankings()
             incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
                 MAX_WALK_LENGTH,
                 BETA_REPETITIONS,
@@ -106,10 +93,9 @@ open class TrustNetwork {
                 alphaDecay,
                 betaDecay,
                 0.99,
-                explorationProbability,
+                pageRankBalance,
                 nodeToSongNetwork.graph,
-                nodeToNodeNetwork.graph,
-                false
+                nodeToNodeNetwork.graph
             )
             incrementalHybridPersonalizedPageRankSalsa.calculateRankings()
         } else {
@@ -121,17 +107,17 @@ open class TrustNetwork {
             nodeToSongNetwork.addNodeOrSong(rootNode)
             incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, 0.95, nodeToNodeNetwork.graph, false)
             incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
-                MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, BETA_DECAY_THRESHOLD, EXPLORATION_PROBABILITY, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, false)
+                MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, BETA_DECAY_THRESHOLD, if(bootstrap) 1.0 else 0.0, nodeToSongNetwork.graph, nodeToNodeNetwork.graph)
         }
     }
 
-    constructor(serializedSubNetworks: SerializedSubNetworks, sourceNodeAddress: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, explorationProbability: Double = EXPLORATION_PROBABILITY, totalRandomWalks: Int = MAX_WALK_LENGTH): this(
-        deserialize(serializedSubNetworks), sourceNodeAddress, alphaDecay, betaDecay, explorationProbability, totalRandomWalks)
+    constructor(serializedSubNetworks: SerializedSubNetworks, sourceNodeAddress: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, bootstrap: Boolean = false): this(
+        deserialize(serializedSubNetworks), sourceNodeAddress, alphaDecay, betaDecay, bootstrap)
 
-    constructor(sourceNodeAddress: String, appDirectory: String): this(fetchAndDeserializeNetworks(appDirectory), sourceNodeAddress, appDirectory)
+    constructor(sourceNodeAddress: String, appDirectory: String, bootstrap: Boolean = false): this(fetchAndDeserializeNetworks(appDirectory), sourceNodeAddress, appDirectory, bootstrap = bootstrap)
 
 
-    constructor(sourceNodeAddress: String) {
+    constructor(sourceNodeAddress: String, bootstrap: Boolean = false) {
         nodeToNodeNetwork = NodeToNodeNetwork()
         rootNode = Node(sourceNodeAddress)
         nodeToNodeNetwork.addNode(rootNode)
@@ -140,7 +126,7 @@ open class TrustNetwork {
         nodeToSongNetwork.addNodeOrSong(rootNode)
         incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, 0.95, nodeToNodeNetwork.graph, false)
         incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
-            MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, BETA_DECAY_THRESHOLD, EXPLORATION_PROBABILITY, nodeToSongNetwork.graph, nodeToNodeNetwork.graph, false)
+            MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, BETA_DECAY_THRESHOLD, if(bootstrap) 1.0 else 0.0, nodeToSongNetwork.graph, nodeToNodeNetwork.graph)
     }
 
     @SuppressLint("NewApi")
@@ -240,6 +226,7 @@ open class TrustNetwork {
                 }
                 incrementalPersonalizedPageRank.modifyEdges(setOf(edge.node))
                 incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(edge.node), nodeToNodeNetwork.getAllNodes().toList())
+                overwriteSaveFiles()
             }
         }
     }
@@ -302,6 +289,7 @@ open class TrustNetwork {
                     incrementalPersonalizedPageRank.modifyEdges(setOf(edge.sourceNode))
                     incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(edge.sourceNode), nodeToNodeNetwork.getAllNodes().toList())
                 }
+                overwriteSaveFiles()
             }
         }
     }
@@ -327,11 +315,11 @@ open class TrustNetwork {
     }
 
     fun addNode(node: Node): Boolean {
-        return nodeToSongNetwork.addNodeOrSong(node) && nodeToNodeNetwork.addNode(node)
+        return (nodeToSongNetwork.addNodeOrSong(node) && nodeToNodeNetwork.addNode(node)).also { overwriteSaveFiles() }
     }
 
     fun addSongRec(songRec: Recommendation): Boolean {
-        return nodeToSongNetwork.addNodeOrSong(songRec)
+        return (nodeToSongNetwork.addNodeOrSong(songRec)).also { overwriteSaveFiles() }
     }
 
     fun serialize(): SerializedSubNetworks {

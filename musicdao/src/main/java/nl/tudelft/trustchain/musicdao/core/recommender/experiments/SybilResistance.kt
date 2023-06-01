@@ -198,7 +198,6 @@ fun main() {
                     SubNetworks(newNodeToNodeNetwork, newNodeToSongNetwork),
                     rootNode.getKey(),
                     0.0,
-                    0.5,
                     0.5
                 )
                 val allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()

@@ -1,12 +1,14 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.ranking
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkWithTrustedRandomSurfer
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
 import org.jgrapht.graph.SimpleDirectedWeightedGraph
 import java.util.*
-
+@RequiresApi(Build.VERSION_CODES.N)
 class IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
     maxWalkLength: Int,
     repetitions: Int,
@@ -14,10 +16,9 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
     alphaDecay: Double,
     private val betaDecay: Double,
     private val betaDecayThreshold: Double = 0.95,
-    val pageRankBalance: Double,
+    private val pageRankBalance: Double,
     graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>,
-    nodeToNodeGraph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>,
-    val heapEfficientImplementation: Boolean = true
+    nodeToNodeGraph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>
 ) : IncrementalRandomWalkedBasedRankingAlgo<DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>, NodeOrSong, NodeSongEdge>(
     maxWalkLength,
     repetitions,
@@ -43,6 +44,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
         initiateRandomWalks()
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun performRandomWalk(existingWalk: MutableList<NodeOrSong>) {
         if (existingWalk.size >= maxWalkLength) {
             logger.info { "Random walk requested for already complete or overfull random walk" }
@@ -95,6 +97,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
         initiateRandomWalks()
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun performNewRandomWalk(): MutableList<NodeOrSong> {
         val randomWalk: MutableList<NodeOrSong> = mutableListOf()
         performRandomWalk(randomWalk)

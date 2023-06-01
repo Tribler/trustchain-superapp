@@ -76,8 +76,7 @@ fun main() {
             SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
             rootNode.getKey(),
             0.1,
-            0.8,
-            0.0
+            0.8
         )
         allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
         for (song in allSongs) {

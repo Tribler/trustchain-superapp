@@ -1,10 +1,11 @@
 package nl.tudelft.trustchain.musicdao.core.recommender.gossip
 
-import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
+import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -12,12 +13,8 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.musicdao.CachePath
-import nl.tudelft.trustchain.musicdao.core.ipv8.ReleaseBlockGossiper
 import nl.tudelft.trustchain.musicdao.core.ipv8.TrustedRecommenderCommunity
-import nl.tudelft.trustchain.musicdao.core.recommender.model.Node
-import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeSongEdge
-import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge
-import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdgeWithSourceAndTarget
+import nl.tudelft.trustchain.musicdao.core.recommender.model.*
 import nl.tudelft.trustchain.musicdao.core.recommender.networks.SongRecTrustNetwork
 import java.util.Random
 import javax.inject.Inject
@@ -27,14 +24,14 @@ import kotlin.system.exitProcess
  * Gossips edges in the network to keep graphs synced
  */
 
-const val GOSSIP_DELAY: Long = 4000
+const val GOSSIP_DELAY: Long = 5000
 const val TIME_WINDOW: Int = 10000
 const val N_EDGES_TO_GOSSIP: Int = 5
 
 private val logger = KotlinLogging.logger {}
 
-@SuppressLint("NewApi")
 @AndroidEntryPoint
+@RequiresApi(Build.VERSION_CODES.O)
 class EdgeGossiperService(
 ): Service() {
 
@@ -53,7 +50,6 @@ class EdgeGossiperService(
     private val binder = LocalBinder()
     private val scope = CoroutineScope(Dispatchers.IO)
     private val recCommunity = IPv8Android.getInstance().getOverlay<TrustedRecommenderCommunity>()!!
-    @SuppressLint("NewApi")
     private lateinit var trustNetwork: SongRecTrustNetwork
     private lateinit var sortedNodeToNodeEdges: List<NodeTrustEdge>
     private lateinit var sortedNodeToSongEdges: List<NodeSongEdge>
@@ -72,9 +68,13 @@ class EdgeGossiperService(
 
     private fun updateDeltasAndWeights() {
         if(::trustNetwork.isInitialized) {
-            if (sortedNodeToNodeEdges.size > 1 && sortedNodeToSongEdges.size > 1) {
+            sortedNodeToNodeEdges = trustNetwork.getAllNodeToNodeEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
+            sortedNodeToSongEdges = trustNetwork.getAllNodeToSongEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
+            if (sortedNodeToNodeEdges.isNotEmpty()) {
                 updateNodeToNodeDeltas()
                 updateNodeToNodeWeights()
+            }
+            if(sortedNodeToSongEdges.isNotEmpty()) {
                 updateNodeToSongDeltas()
                 updateNodeToSongWeights()
             }
@@ -82,7 +82,7 @@ class EdgeGossiperService(
     }
 
     private fun updateNodeToNodeDeltas() {
-        val oldestNodeToNodeEdgeTimestamp = sortedNodeToNodeEdges.first().timestamp.time
+        val oldestNodeToNodeEdgeTimestamp = sortedNodeToNodeEdges.first().timestamp.time - (1000 * sortedNodeToNodeEdges.size)
         val deltas = mutableListOf<Int>()
         for(edge in sortedNodeToNodeEdges) {
             deltas.add((edge.timestamp.time - oldestNodeToNodeEdgeTimestamp).toInt())
@@ -91,7 +91,7 @@ class EdgeGossiperService(
     }
 
     private fun updateNodeToSongDeltas() {
-        val oldestNodeToSongEdgeTimestamp = sortedNodeToSongEdges.first().timestamp.time
+        val oldestNodeToSongEdgeTimestamp = sortedNodeToSongEdges.first().timestamp.time - (1000 * sortedNodeToSongEdges.size)
         val deltas = mutableListOf<Int>()
         for(edge in sortedNodeToSongEdges) {
             deltas.add((edge.timestamp.time - oldestNodeToSongEdgeTimestamp).toInt())
@@ -126,13 +126,16 @@ class EdgeGossiperService(
                 sortedNodeToNodeEdges = trustNetwork.getAllNodeToNodeEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
                 sortedNodeToSongEdges = trustNetwork.getAllNodeToSongEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
             }
-                val randomPeer = pickRandomPeer()
-                if (randomPeer != null) {
-                    val nodeToNodeEdgeToGossip = pickRandomNodeToNodeEdgesToGossip()
-                    recCommunity.sendNodeToNodeEdges(randomPeer, nodeToNodeEdgeToGossip)
-                }
+            updateDeltasAndWeights()
+            val randomPeer = pickRandomPeer()
+            if (randomPeer != null) {
+                val nodeToNodeEdgesToGossip = pickRandomNodeToNodeEdgesToGossip()
+                recCommunity.sendNodeToNodeEdges(randomPeer, nodeToNodeEdgesToGossip)
+                val nodeRecEdgesToGossip = pickRandomNodeToSongEdgesToGossip()
+                recCommunity.sendNodeRecEdges(randomPeer, nodeRecEdgesToGossip)
             }
             delay(GOSSIP_DELAY)
+        }
     }
 
     private fun pickRandomNodeToNodeEdgesToGossip(): List<NodeTrustEdgeWithSourceAndTarget> {
@@ -151,6 +154,26 @@ class EdgeGossiperService(
         if(selectedNode != null) {
             val edgesToGossip = trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(selectedNode).sortedBy { it.trust }.takeLast(N_EDGES_TO_GOSSIP)
             return edgesToGossip.map { NodeTrustEdgeWithSourceAndTarget(it!!, selectedNode!!, trustNetwork.nodeToNodeNetwork.graph.getEdgeTarget(it))  }
+        }
+        return listOf()
+    }
+
+    private fun pickRandomNodeToSongEdgesToGossip(): List<NodeRecEdge> {
+        val p = Random().nextDouble()
+        var cumP = 0.0
+        var selectedNode: Node? = null
+        run loop@{
+            nodeToSongEdgeWeights.forEachIndexed { index, d ->
+                cumP += d
+                if (p <= cumP) {
+                    selectedNode = trustNetwork.nodeToSongNetwork.graph.getEdgeSource(sortedNodeToSongEdges[index]) as Node
+                    return@loop
+                }
+            }
+        }
+        if(selectedNode != null) {
+            val edgesToGossip = trustNetwork.nodeToSongNetwork.graph.outgoingEdgesOf(selectedNode).sortedBy { it.affinity }.takeLast(N_EDGES_TO_GOSSIP)
+            return edgesToGossip.map { NodeRecEdge(it!!, selectedNode!!, trustNetwork.nodeToSongNetwork.graph.getEdgeTarget(it) as Recommendation)  }
         }
         return listOf()
     }

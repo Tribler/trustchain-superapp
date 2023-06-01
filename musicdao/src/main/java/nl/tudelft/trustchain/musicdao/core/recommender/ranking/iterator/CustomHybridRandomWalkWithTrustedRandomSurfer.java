@@ -7,6 +7,7 @@ package nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator;
 
 import android.annotation.SuppressLint;
 import android.os.Build;
+import androidx.annotation.RequiresApi;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Node;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeOrSong;
 import nl.tudelft.trustchain.musicdao.core.recommender.model.NodeTrustEdge;
@@ -65,7 +66,7 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
     private Node lastNode;
     private Recommendation lastSong;
     private final double resetProbability;
-    private final double randomNodeProbability;
+    private final double pageRankBalance;
 
     /**
      * Create a new iterator
@@ -74,12 +75,11 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
      * @param vertex           the starting vertex
      * @param maxHops          maximum hops to perform during the walk
      * @param resetProbability probability between 0 and 1 with which to reset the random walk
-     * @param explorationProbability probability between 0 and 1 to start the random walk from a non-root node
      * @param rng              the random number generator
      */
     @SuppressLint("NewApi")
     public CustomHybridRandomWalkWithTrustedRandomSurfer(
-            Graph<NodeOrSong, E> graph, Graph<Node, NodeTrustEdge> nodeToNodeGraph, Node vertex, long maxHops, double resetProbability, double explorationProbability, Random rng, List<Node> nodes) {
+            Graph<NodeOrSong, E> graph, Graph<Node, NodeTrustEdge> nodeToNodeGraph, Node vertex, long maxHops, double resetProbability, double pageRankBalance, Random rng, List<Node> nodes) {
         this.graph = Objects.requireNonNull(graph);
         this.nodeToNodeGraph = Objects.requireNonNull(nodeToNodeGraph);
         this.outEdgesTotalWeight = new HashMap<>();
@@ -92,7 +92,7 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
         this.lastSong = null;
         this.maxHops = maxHops;
         this.resetProbability = resetProbability;
-        this.randomNodeProbability = explorationProbability;
+        this.pageRankBalance = pageRankBalance;
         this.rng = rng;
         this.totalNodes = nodeToNodeGraph.vertexSet().size();
     }
@@ -102,10 +102,34 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
         return nextVertex != null;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public NodeOrSong next() {
         if (nextVertex == null) {
             throw new NoSuchElementException();
+        }
+        if(hops == 0) {
+            if(rng.nextDouble() < pageRankBalance) {
+                List<Node> trustedNeighbors = nodeToNodeGraph.outgoingEdgesOf((Node) nextVertex).stream().map(e -> Graphs.getOppositeVertex(nodeToNodeGraph, e, (Node) nextVertex)).collect(Collectors.toList());
+                if(trustedNeighbors.size() > 0) {
+                    double pageRankSum = trustedNeighbors.stream().mapToDouble(Node::getPersonalizedPageRankScore).sum();
+                    if(pageRankSum == 0.0) {
+                        int nodesToChooseFrom = trustedNeighbors.size();
+                        int chosenNode = rng.nextInt(nodesToChooseFrom);
+                        nextVertex = trustedNeighbors.get(chosenNode);
+                    } else {
+                        double p = pageRankSum * rng.nextDouble();
+                        double cumulativeP = 0d;
+                        for (Node node : trustedNeighbors) {
+                            cumulativeP += node.getPersonalizedPageRankScore();
+                            if (p <= cumulativeP) {
+                                nextVertex = node;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
         NodeOrSong value = nextVertex;
         if (value instanceof Node) {

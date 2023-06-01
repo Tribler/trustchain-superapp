@@ -183,9 +183,7 @@ fun main() {
                     SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
                     rootNode.getKey(),
                     alphaDecay,
-                    betaDecay,
-                    0.0,
-                    100000
+                    betaDecay
                 )
                 allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
                 println("REPUTATION GAIN $reputationGainForSybils")
