@@ -102,14 +102,13 @@ public class CustomHybridRandomWalkWithTrustedRandomSurfer<E>
         return nextVertex != null;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public NodeOrSong next() {
         if (nextVertex == null) {
             throw new NoSuchElementException();
         }
         if(hops == 0) {
-            if(rng.nextDouble() < pageRankBalance) {
+            if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N && rng.nextDouble() < pageRankBalance) {
                 List<Node> trustedNeighbors = nodeToNodeGraph.outgoingEdgesOf((Node) nextVertex).stream().map(e -> Graphs.getOppositeVertex(nodeToNodeGraph, e, (Node) nextVertex)).collect(Collectors.toList());
                 if(trustedNeighbors.size() > 0) {
                     double pageRankSum = trustedNeighbors.stream().mapToDouble(Node::getPersonalizedPageRankScore).sum();
