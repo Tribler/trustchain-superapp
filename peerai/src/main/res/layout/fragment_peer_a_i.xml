@@ -13,7 +13,7 @@
         android:layout_margin="8dp"
         android:iconifiedByDefault="false"
         android:padding="4dp"
-        android:queryHint="Search Programming language" />
+        android:queryHint="Search Album" />
 
     <!--List View from which data is to be searched
          for different programming languages-->
