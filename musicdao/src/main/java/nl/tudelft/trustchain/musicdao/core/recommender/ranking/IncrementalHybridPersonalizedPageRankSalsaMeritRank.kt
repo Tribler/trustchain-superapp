@@ -2,18 +2,20 @@ package nl.tudelft.trustchain.musicdao.core.recommender.ranking
 
 import mu.KotlinLogging
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkTwitter
+import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHybridRandomWalkWithTrustedRandomSurfer
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
+import org.jgrapht.graph.SimpleDirectedWeightedGraph
 import java.util.*
-
 class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
     maxWalkLength: Int,
     repetitions: Int,
     rootNode: Node,
     alphaDecay: Double,
+    private val betaDecay: Double,
+    private val betaDecayThreshold: Double = 0.95,
     private val pageRankBalance: Double,
     graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>,
-    val heapEfficientImplementation: Boolean = true
+    nodeToNodeGraph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>
 ) : IncrementalRandomWalkedBasedRankingAlgo<DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>, NodeOrSong, NodeSongEdge>(
     maxWalkLength,
     repetitions,
@@ -21,8 +23,9 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
 ) {
     private val logger = KotlinLogging.logger {}
     private val iter =
-        CustomHybridRandomWalkTwitter(
+        CustomHybridRandomWalkWithTrustedRandomSurfer(
             graph,
+            nodeToNodeGraph,
             rootNode,
             maxWalkLength.toLong(),
             alphaDecay,
@@ -50,24 +53,15 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
         }
     }
 
-//    override fun calculateRankings() {
-//        val songCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it is SongRecommendation }
-//        val betaDecays = if(heapEfficientImplementation) calculateBetaDecays(songCounts) else calculateBetaDecaysSpaceIntensive()
-//        val totalOccs = songCounts.values.sum()
-//        for ((songRec, occ) in songCounts) {
-//            val betaDecay = 1.0 - (betaDecays[songRec] ?: 0.0)
-//            songRec.rankingScore = (occ.toDouble() / totalOccs) * betaDecay
-//        }
-//    }
-
     override fun calculateRankings() {
         val songsInWalks = randomWalks.flatten().filterIsInstance<Recommendation>()
         val songsToValue = mutableMapOf<Recommendation, Double>()
+        val betaDecays = calculateBetaDecaysSpaceIntensive()
         for(song in songsInWalks) {
             songsToValue[song] = 0.0
         }
         for(walk in randomWalks) {
-            var modifier = 0.0
+            var modifier = 1.0
             walk.forEachIndexed { index, nodeOrSong ->
                 if(index % 2 == 0) {
                     modifier = (1.0 - pageRankBalance) + (nodeOrSong.rankingScore * totalNodes * pageRankBalance)
@@ -78,9 +72,20 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
         }
         val totalOccs = songsToValue.values.sum()
         for ((songRec, value) in songsToValue) {
-            songRec.rankingScore = (value / totalOccs)
+            val decay = (1.0 - (betaDecays[songRec]?.let { it * betaDecay } ?: 0.0))
+            songRec.rankingScore = (value / totalOccs) * decay
         }
     }
+
+//    override fun calculateRankings() {
+//        val songCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it is SongRecommendation }
+//        val betaDecays = if(heapEfficientImplementation) calculateBetaDecays(songCounts) else calculateBetaDecaysSpaceIntensive()
+//        val totalOccs = songCounts.values.sum()
+//        for ((songRec, occ) in songCounts) {
+//            val decay = (1.0 - (betaDecays[songRec]?.let { it * betaDecay } ?: 0.0))
+//            songRec.rankingScore = (occ.toDouble() / totalOccs) * decay
+//        }
+//    }
 
     fun modifyNodesOrSongs(changedNodes: Set<Node>, newNodes: List<Node>) {
         iter.modifyEdges(changedNodes)
@@ -129,6 +134,67 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
 //            val maxVisitsFromAnotherNode = visitThroughAnotherNode.values.max()
 //            val score = maxVisitsFromAnotherNode.toDouble() / totalVisits
 //            betaDecay[rec as SongRecommendation] = if(score > betaDecayThreshold) score else 0.0
+//        }
+//        return betaDecay
+//    }
+
+    private fun calculateBetaDecaysSpaceIntensive(): Map<Recommendation, Double> {
+        val betaDecay = mutableMapOf<Recommendation, Double>()
+        val totalVisitsToRec = mutableMapOf<Recommendation, Int>()
+        val visitToNodeThroughOtherNode = mutableMapOf<Recommendation, MutableMap<NodeOrSong, Int>>()
+        for (walk in randomWalks) {
+            val uniqueNodesOrSong = mutableSetOf<NodeOrSong>()
+            for (nodeOrRec in walk) {
+                if (nodeOrRec is Recommendation) {
+                    if (!uniqueNodesOrSong.contains(nodeOrRec)) {
+                        totalVisitsToRec[nodeOrRec] = (totalVisitsToRec[nodeOrRec] ?: 0) + 1
+                        for (visitedNode in uniqueNodesOrSong) {
+                            val existingMap = visitToNodeThroughOtherNode[nodeOrRec] ?: mutableMapOf()
+                            existingMap[visitedNode] = (existingMap[visitedNode] ?: 0) + 1
+                            visitToNodeThroughOtherNode[nodeOrRec] = existingMap
+                        }
+                    }
+                }
+                uniqueNodesOrSong.add(nodeOrRec)
+            }
+        }
+        for (node in totalVisitsToRec.keys) {
+            val maxVisitsFromAnotherNode =
+                visitToNodeThroughOtherNode[node]?.filter { it.key != rootNode }?.values?.maxOrNull() ?: 0
+            val score = maxVisitsFromAnotherNode.toDouble() / totalVisitsToRec[node]!!
+            betaDecay[node] = if(score > betaDecayThreshold) score else 0.0
+        }
+        return betaDecay
+    }
+
+//    private fun calculateBetaDecays(songRecs: List<SongRecommendation>): Map<SongRecommendation, Double> {
+//        val betaDecay = mutableMapOf<SongRecommendation, Double>()
+//        for (rec in songRecs) {
+//            val visitThroughAnotherNode = mutableMapOf<NodeOrSong, Int>()
+//            var totalVisits = 0
+//            for (walk in randomWalks) {
+//                if (walk.contains(rec)) {
+//                    val uniqueNodes = mutableSetOf<NodeOrSong>()
+//                    totalVisits++
+//                    for (visitNode in walk) {
+//                        if (visitNode == rec) {
+//                            break
+//                        }
+//                        if (!uniqueNodes.contains(visitNode)) {
+//                            visitThroughAnotherNode[visitNode] =
+//                                (visitThroughAnotherNode[visitNode] ?: 0) + 1
+//                            uniqueNodes.add(visitNode)
+//                        }
+//                    }
+//                }
+//            }
+//            visitThroughAnotherNode[rootNode] = 0
+//            if(rec.identifier.contains("sybil")) {
+//                print("bla")
+//            }
+//            val maxVisitsFromAnotherNode = visitThroughAnotherNode.values.max()
+//            val score = maxVisitsFromAnotherNode.toDouble() / totalVisits
+//            betaDecay[rec] = if(score > betaDecayThreshold) score else 0.0
 //        }
 //        return betaDecay
 //    }

@@ -25,15 +25,18 @@ import kotlin.system.exitProcess
  */
 
 const val GOSSIP_DELAY: Long = 5000
-const val TIME_WINDOW: Int = 10000
 const val N_EDGES_TO_GOSSIP: Int = 5
 
 private val logger = KotlinLogging.logger {}
 
 @AndroidEntryPoint
 @RequiresApi(Build.VERSION_CODES.O)
-class EdgeGossiperService(
+class EdgeGossiperService(recCommunity: TrustedRecommenderCommunity? = null
 ): Service() {
+
+    companion object {
+        const val TIME_WINDOW: Int = 10000
+    }
 
     @Inject
     lateinit var cachePath: CachePath
@@ -49,7 +52,7 @@ class EdgeGossiperService(
 
     private val binder = LocalBinder()
     private val scope = CoroutineScope(Dispatchers.IO)
-    private val recCommunity = IPv8Android.getInstance().getOverlay<TrustedRecommenderCommunity>()!!
+    private val recCommunity = recCommunity ?: IPv8Android.getInstance().getOverlay<TrustedRecommenderCommunity>()!!
     private lateinit var trustNetwork: SongRecTrustNetwork
     private lateinit var sortedNodeToNodeEdges: List<NodeTrustEdge>
     private lateinit var sortedNodeToSongEdges: List<NodeSongEdge>
@@ -61,15 +64,10 @@ class EdgeGossiperService(
     var nodeToNodeEdgeWeights = listOf<Double>()
     @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
     var nodeToSongEdgeWeights = listOf<Double>()
-
-    init {
-        updateDeltasAndWeights()
-    }
-
-    private fun updateDeltasAndWeights() {
-        if(::trustNetwork.isInitialized) {
-            sortedNodeToNodeEdges = trustNetwork.getAllNodeToNodeEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
-            sortedNodeToSongEdges = trustNetwork.getAllNodeToSongEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
+    @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
+    fun updateDeltasAndWeights(nodeToNodeEdges: List<NodeTrustEdge>, nodeToSongEdges: List<NodeSongEdge>) {
+            sortedNodeToNodeEdges = nodeToNodeEdges.sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
+            sortedNodeToSongEdges = nodeToSongEdges.sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
             if (sortedNodeToNodeEdges.isNotEmpty()) {
                 updateNodeToNodeDeltas()
                 updateNodeToNodeWeights()
@@ -78,7 +76,6 @@ class EdgeGossiperService(
                 updateNodeToSongDeltas()
                 updateNodeToSongWeights()
             }
-        }
     }
 
     private fun updateNodeToNodeDeltas() {
@@ -118,21 +115,22 @@ class EdgeGossiperService(
             gossipEdges()
         }
     }
-
     private suspend fun gossipEdges() {
         while (scope.isActive) {
             if(!::trustNetwork.isInitialized) {
                 trustNetwork = SongRecTrustNetwork.getInstance(IPv8Android.getInstance().getOverlay<TrustedRecommenderCommunity>()!!.myPeer.key.pub().toString(), cachePath.getPath().toString())
                 sortedNodeToNodeEdges = trustNetwork.getAllNodeToNodeEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
                 sortedNodeToSongEdges = trustNetwork.getAllNodeToSongEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
+                updateDeltasAndWeights(trustNetwork.getAllNodeToNodeEdges(), trustNetwork.getAllNodeToSongEdges())
             }
-            updateDeltasAndWeights()
-            val randomPeer = pickRandomPeer()
-            if (randomPeer != null) {
-                val nodeToNodeEdgesToGossip = pickRandomNodeToNodeEdgesToGossip()
-                recCommunity.sendNodeToNodeEdges(randomPeer, nodeToNodeEdgesToGossip)
-                val nodeRecEdgesToGossip = pickRandomNodeToSongEdgesToGossip()
-                recCommunity.sendNodeRecEdges(randomPeer, nodeRecEdgesToGossip)
+            if(nodeToNodeEdgeDeltas.isNotEmpty() && nodeToSongEdgeDeltas.isNotEmpty()) {
+                val randomPeer = pickRandomPeer()
+                if (randomPeer != null) {
+                    val nodeToNodeEdgesToGossip = pickRandomNodeToNodeEdgesToGossip()
+                    recCommunity.sendNodeToNodeEdges(randomPeer, nodeToNodeEdgesToGossip)
+                    val nodeRecEdgesToGossip = pickRandomNodeToSongEdgesToGossip()
+                    recCommunity.sendNodeRecEdges(randomPeer, nodeRecEdgesToGossip)
+                }
             }
             delay(GOSSIP_DELAY)
         }

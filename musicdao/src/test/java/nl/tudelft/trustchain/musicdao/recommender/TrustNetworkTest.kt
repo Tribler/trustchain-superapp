@@ -99,19 +99,4 @@ class TrustNetworkTest {
         Assert.assertEquals(trustNetwork.nodeToSongNetwork.graph, newTrustNetwork.nodeToSongNetwork.graph)
     }
 
-    @Test
-    fun heapSpaceTest() {
-        // Get current size of heap in bytes
-        // Get current size of heap in bytes
-        val heapSize = Runtime.getRuntime().totalMemory()
-        // Get maximum size of heap in bytes. The heap cannot grow beyond this size.// Any attempt will result in an OutOfMemoryException.
-        // Get maximum size of heap in bytes. The heap cannot grow beyond this size.// Any attempt will result in an OutOfMemoryException.
-        val heapMaxSize = Runtime.getRuntime().maxMemory()
-        // Get amount of free memory within the heap in bytes. This size will increase // after garbage collection and decrease as new objects are created.
-        // Get amount of free memory within the heap in bytes. This size will increase // after garbage collection and decrease as new objects are created.
-        val heapFreeSize = Runtime.getRuntime().freeMemory()
-
-        Assert.assertEquals(1021021, heapMaxSize)
-    }
-
 }

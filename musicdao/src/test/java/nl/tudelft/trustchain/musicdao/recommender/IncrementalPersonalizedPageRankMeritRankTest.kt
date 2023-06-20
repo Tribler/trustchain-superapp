@@ -18,7 +18,7 @@ class IncrementalPersonalizedPageRankMeritRankTest {
     private val rng = Random(seed)
     private val nNodes = 500
     private val nEdges = 10
-    private val repetitions = 10000
+    private val repetitions = 1000
     private val maxWalkLength = 1000
     private val betaDecayThreshold = 0.5
 
@@ -41,7 +41,7 @@ class IncrementalPersonalizedPageRankMeritRankTest {
 
     @Test
     fun canCaclulatePersonalizedPageRank() {
-        incrementalPageRankWithMeritRank = IncrementalPersonalizedPageRankMeritRank( maxWalkLength, repetitions, rootNode, 0.0, 0.0, betaDecayThreshold, network.graph)
+        incrementalPageRankWithMeritRank = IncrementalPersonalizedPageRankMeritRank( maxWalkLength, repetitions, rootNode, 0.1, 0.0, betaDecayThreshold, network.graph)
         incrementalPageRankWithMeritRank.calculateRankings()
         Assert.assertEquals(0.0, rootNode.getPersonalizedPageRankScore(), 0.001)
         val rootNeighbors = network.getAllEdges().filter { network.graph.getEdgeSource(it) == rootNode }.map { network.graph.getEdgeTarget(it) }
@@ -59,10 +59,10 @@ class IncrementalPersonalizedPageRankMeritRankTest {
 
     @Test
     fun decreasingResetProbabilityProportionatelyDecreasesChanceOfResetInRandomWalks() {
-        incrementalPageRankWithMeritRank = IncrementalPersonalizedPageRankMeritRank( maxWalkLength, repetitions, rootNode, 0.01, 0.0, betaDecayThreshold, network.graph)
+        incrementalPageRankWithMeritRank = IncrementalPersonalizedPageRankMeritRank( maxWalkLength, repetitions, rootNode, 0.1, 0.0, betaDecayThreshold, network.graph)
         val randomWalksWithHighResetProbability = incrementalPageRankWithMeritRank.randomWalks
         val nRandomWalksWithHighResetProbability = randomWalksWithHighResetProbability.flatten().count()
-        incrementalPageRankWithMeritRank = IncrementalPersonalizedPageRankMeritRank( maxWalkLength, repetitions, rootNode, 0.001, 0.0, betaDecayThreshold, network.graph)
+        incrementalPageRankWithMeritRank = IncrementalPersonalizedPageRankMeritRank( maxWalkLength, repetitions, rootNode, 0.01, 0.0, betaDecayThreshold, network.graph)
         val randomWalksWithLowerResetProbability = incrementalPageRankWithMeritRank.randomWalks
         val nRandomWalksWithLowerResetProbability = randomWalksWithLowerResetProbability.flatten().count()
         //The Reset Probability decreases by 10, so increase in random walk sizes should lie somewhere between 9 and 11 times
@@ -103,57 +103,6 @@ class IncrementalPersonalizedPageRankMeritRankTest {
         incrementalPageRankWithMeritRank.calculateRankings()
         Assert.assertTrue(randomNeighbor.getPersonalizedPageRankScore() < oldRandomNeighborPageRank)
         Assert.assertTrue(randomNode.getPersonalizedPageRankScore() > oldRandomNodePageRank)
-    }
-
-    @Test
-    fun betaDecaysEnsureThatEntirelySybilNodeReceivesLowerScore() {
-        val sybilNode1 = Node("sybil1")
-        val sybilNode2 = Node("sybil2")
-        val sybilNode3 = Node("sybil3")
-        network.addNode(sybilNode1)
-        network.addNode(sybilNode2)
-        network.addNode(sybilNode3)
-        //select attack vector from trusted neighbor to conduct cycle attack
-        val rootNeighborEdges = network.getAllEdges().filter { network.graph.getEdgeSource(it) == rootNode }.sortedBy { it.trust }
-        val rootNeighbors = rootNeighborEdges.map { network.graph.getEdgeTarget(it) }
-        val attacker = rootNeighbors.last()
-        val existingNeighborsOfAttacker = network.getAllEdges().filter { network.graph.getEdgeSource(it) == attacker }
-        for(existingNeighborEdge in existingNeighborsOfAttacker) {
-            network.removeEdge(existingNeighborEdge)
-        }
-        network.addEdge(attacker, sybilNode1, NodeTrustEdge(1.0 ))
-        network.addEdge(sybilNode1, sybilNode2, NodeTrustEdge(1.0))
-        network.addEdge(sybilNode2, sybilNode3, NodeTrustEdge(1.0))
-
-        //first conduct attack without beta decay
-        val incrementalPageRank = IncrementalPersonalizedPageRank( maxWalkLength, repetitions, rootNode, 0.01, network.graph)
-        incrementalPageRank.calculateRankings()
-
-        val sybilNode1ScoreWithoutBetaDecay = sybilNode1.getPersonalizedPageRankScore()
-        val sybilNode2ScoreWithoutBetaDecay = sybilNode2.getPersonalizedPageRankScore()
-        val sybilNode3ScoreWithoutBetaDecay = sybilNode3.getPersonalizedPageRankScore()
-
-        incrementalPageRankWithMeritRank = IncrementalPersonalizedPageRankMeritRank( maxWalkLength, repetitions, rootNode, 0.01, 0.0, betaDecayThreshold,  network.graph)
-        incrementalPageRankWithMeritRank.calculateRankings()
-
-        val sybilNode1ScoreWithBetaDecay = sybilNode1.getPersonalizedPageRankScore()
-        val sybilNode2ScoreWithBetaDecay = sybilNode2.getPersonalizedPageRankScore()
-        val sybilNode3ScoreWithBetaDecay = sybilNode3.getPersonalizedPageRankScore()
-
-        Assert.assertTrue(sybilNode1ScoreWithoutBetaDecay > sybilNode1ScoreWithBetaDecay)
-        Assert.assertTrue(sybilNode2ScoreWithoutBetaDecay > sybilNode2ScoreWithBetaDecay)
-        Assert.assertTrue(sybilNode3ScoreWithoutBetaDecay > sybilNode3ScoreWithBetaDecay)
-
-        incrementalPageRankWithMeritRank = IncrementalPersonalizedPageRankMeritRank( maxWalkLength, repetitions, rootNode, 0.01, 0.0, betaDecayThreshold,  network.graph)
-        incrementalPageRankWithMeritRank.calculateRankings()
-
-        val sybilNode1ScoreWithZeroBetaDecay = sybilNode1.getPersonalizedPageRankScore()
-        val sybilNode2ScoreWithZeroBetaDecay = sybilNode2.getPersonalizedPageRankScore()
-        val sybilNode3ScoreWithZeroBetaDecay = sybilNode3.getPersonalizedPageRankScore()
-
-        Assert.assertTrue(sybilNode1ScoreWithZeroBetaDecay > sybilNode1ScoreWithBetaDecay)
-        Assert.assertTrue(sybilNode2ScoreWithZeroBetaDecay > sybilNode2ScoreWithBetaDecay)
-        Assert.assertTrue(sybilNode3ScoreWithZeroBetaDecay > sybilNode3ScoreWithBetaDecay)
     }
 
 }

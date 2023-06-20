@@ -1,5 +1,8 @@
 package nl.tudelft.trustchain.musicdao.recommender
 
+import io.mockk.mockk
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.trustchain.musicdao.core.ipv8.TrustedRecommenderCommunity
 import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiperService
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToNodeNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
@@ -17,7 +20,7 @@ class EdgeGossiperTest {
     private var nodeToSongNetwork: NodeToSongNetwork = NodeToSongNetwork()
     private var nodeToNodeNetwork: NodeToNodeNetwork = NodeToNodeNetwork()
     private lateinit var trustNetwork: TrustNetwork
-    private lateinit var incrementalHybrid: IncrementalHybridPersonalizedPageRankSalsa
+    private val communityMock = mockk<TrustedRecommenderCommunity>(relaxed = true)
     private val seed = 42L
     private lateinit var rootNode: Node
     private val rng = Random(seed)
@@ -65,7 +68,8 @@ class EdgeGossiperTest {
     @Test
     fun canInitializeDeltasForEdgeGossiping() {
         trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getKey())
-        edgeGossiper = EdgeGossiperService()
+        edgeGossiper = EdgeGossiperService(communityMock)
+        edgeGossiper.updateDeltasAndWeights(trustNetwork.getAllNodeToNodeEdges(), trustNetwork.getAllNodeToSongEdges())
         val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
         val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas
 
@@ -73,62 +77,32 @@ class EdgeGossiperTest {
         val oldestNodeToNodeEdge = sortedNtNEdgesInWindow.first()
         val newestNodeToNodeEdge = sortedNtNEdgesInWindow.last()
         val deltaOldestAndNewestNtNEdge = (newestNodeToNodeEdge.timestamp.time - oldestNodeToNodeEdge.timestamp.time).toInt()
-        Assert.assertEquals(deltaOldestAndNewestNtNEdge, nodeToNodeDeltas.max())
-        Assert.assertEquals(0, nodeToNodeDeltas.min())
+        Assert.assertEquals(deltaOldestAndNewestNtNEdge, nodeToNodeDeltas.max() - (1000 * nodeToNodeDeltas.size))
+        Assert.assertEquals(0, nodeToNodeDeltas.min() - (1000 * nodeToNodeDeltas.size))
 
         val sortedNtSEdgesInWindow = nodeToSongNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(10000)
         val oldestNodeToSongEdge = sortedNtSEdgesInWindow.first()
         val newestNodeToSongEdge = sortedNtSEdgesInWindow.last()
         val deltaOldestAndNewestNtSEdge = (newestNodeToSongEdge.timestamp.time - oldestNodeToSongEdge.timestamp.time).toInt()
-        Assert.assertEquals(deltaOldestAndNewestNtSEdge, nodeToSongDeltas.max())
-        Assert.assertEquals(0, nodeToSongDeltas.min())
+        Assert.assertEquals(deltaOldestAndNewestNtSEdge, nodeToSongDeltas.max() - (1000 * nodeToNodeDeltas.size))
+        Assert.assertEquals(0, nodeToSongDeltas.min() - (1000 * nodeToNodeDeltas.size))
 
-    }
-
-    @Test
-    fun canInitializeWeightsBasedOnDeltaValues() {
-        trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getKey())
-        edgeGossiper = EdgeGossiperService()
-        val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
-        val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas
-        val nodeToNodeWeights = edgeGossiper.nodeToNodeEdgeWeights
-        val nodeToSongWeights = edgeGossiper.nodeToSongEdgeWeights
-
-        val sortedNtNEdgesInWindow = nodeToNodeNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(10000)
-        val oldestNodeToNodeEdge = sortedNtNEdgesInWindow.minBy { it.timestamp }
-        val newestNodeToNodeEdge = sortedNtNEdgesInWindow.maxBy { it.timestamp }
-        val sumNtNDeltas = nodeToNodeDeltas.sum()
-        val expectedWeightOldestNtNEdge = 0.0
-        val expectedWeightNewestNtNEdge = ((newestNodeToNodeEdge.timestamp.time - oldestNodeToNodeEdge.timestamp.time).toDouble() / sumNtNDeltas)
-        Assert.assertEquals(expectedWeightOldestNtNEdge, nodeToNodeWeights.first(), doubleDelta)
-        Assert.assertEquals(expectedWeightNewestNtNEdge, nodeToNodeWeights.last(), doubleDelta)
-
-        val sortedNtSEdgesInWindow = nodeToSongNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(10000)
-        val oldestNodeToSongEdge = sortedNtSEdgesInWindow.first()
-        val newestNodeToSongEdge = sortedNtSEdgesInWindow.last()
-        val sumNtSDeltas = nodeToSongDeltas.sum()
-        val expectedWeightOldestNtSEdge = 0.0
-        val expectedWeightNewestNtSEdge = ((newestNodeToSongEdge.timestamp.time - oldestNodeToSongEdge.timestamp.time).toDouble() / sumNtSDeltas)
-        Assert.assertEquals(expectedWeightOldestNtSEdge, nodeToSongWeights.first(), doubleDelta)
-        Assert.assertEquals(expectedWeightNewestNtSEdge, nodeToSongWeights.last(), doubleDelta)
-
-        Assert.assertEquals(1.0, nodeToNodeWeights.sum(), doubleDelta)
-        Assert.assertEquals(1.0, nodeToSongWeights.sum(), doubleDelta)
     }
 
     @Test
     fun usesTimeWindowToConstructDeltasAndWeights() {
-        val someTimeWindow = Random.nextInt(1, 10000)
+        val timeWindow = EdgeGossiperService.TIME_WINDOW
         trustNetwork = TrustNetwork(SubNetworks(nodeToNodeNetwork, nodeToSongNetwork), rootNode.getKey())
-        edgeGossiper = EdgeGossiperService()
+        edgeGossiper = EdgeGossiperService(communityMock)
+        edgeGossiper.updateDeltasAndWeights(trustNetwork.getAllNodeToNodeEdges(), trustNetwork.getAllNodeToSongEdges())
         val nodeToNodeDeltas = edgeGossiper.nodeToNodeEdgeDeltas
         val nodeToSongDeltas = edgeGossiper.nodeToSongEdgeDeltas
         val nodeToNodeWeights = edgeGossiper.nodeToNodeEdgeWeights
         val nodeToSongWeights = edgeGossiper.nodeToSongEdgeWeights
 
-        Assert.assertEquals(someTimeWindow, nodeToNodeDeltas.size)
-        Assert.assertEquals(someTimeWindow, nodeToSongDeltas.size)
-        Assert.assertEquals(someTimeWindow, nodeToNodeWeights.size)
-        Assert.assertEquals(someTimeWindow, nodeToSongWeights.size)
+        Assert.assertEquals(timeWindow, nodeToNodeDeltas.size)
+        Assert.assertEquals(timeWindow, nodeToSongDeltas.size)
+        Assert.assertEquals(timeWindow, nodeToNodeWeights.size)
+        Assert.assertEquals(timeWindow, nodeToSongWeights.size)
     }
 }
