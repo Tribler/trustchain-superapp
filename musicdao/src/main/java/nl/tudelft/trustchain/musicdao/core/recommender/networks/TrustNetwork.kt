@@ -32,6 +32,7 @@ open class TrustNetwork {
         const val MAX_RECS_FOR_BOOTSTRAP = 5
         private const val graphsPath = "/trusted_recommender/" + "graphs.txt"
         private var appDir = ""
+        private var useSaveFiles: Boolean = false
 
         fun deserialize(networks: SerializedSubNetworks): SubNetworks {
             return SubNetworks(NodeToNodeNetwork(networks.nodeToNodeNetworkSerialized), NodeToSongNetwork(networks.nodeToSongNetworkSerialized))
@@ -58,11 +59,34 @@ open class TrustNetwork {
         rootNode = allNodes.first { it.getKey() == sourceNodeAddress}
         val outgoingRecsForRoot = nodeToSongNetwork.graph.outgoingEdgesOf(rootNode).size
         val pageRankBalance = if(bootstrap) 0.0 else maxOf(0.0, (MAX_RECS_FOR_BOOTSTRAP - outgoingRecsForRoot).toDouble() / MAX_RECS_FOR_BOOTSTRAP)
-        incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, 0.005, betaDecay, BETA_DECAY_THRESHOLD, nodeToNodeNetwork.graph, false)
-        incrementalPersonalizedPageRank.calculateRankings()
+        if(bootstrap) {
+            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(
+                MAX_WALK_LENGTH,
+                ALPHA_REPETITIONS,
+                rootNode,
+                0.005,
+                betaDecay,
+                BETA_DECAY_THRESHOLD,
+                nodeToNodeNetwork.graph,
+                false
+            )
+            incrementalPersonalizedPageRank.calculateRankings()
+        } else {
+            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(
+                1,
+                1,
+                rootNode,
+                0.005,
+                betaDecay,
+                BETA_DECAY_THRESHOLD,
+                nodeToNodeNetwork.graph,
+                false
+            )
+        }
         incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
             MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, alphaDecay, betaDecay, 0.99,  pageRankBalance, nodeToSongNetwork.graph, nodeToNodeNetwork.graph)
         incrementalHybridPersonalizedPageRankSalsa.calculateRankings()
+        useSaveFiles = false
     }
 
     constructor(subNetworks: SubNetworks?, sourceNodeAddress: String, appDirectory: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, bootstrap: Boolean = false) {
@@ -109,6 +133,7 @@ open class TrustNetwork {
             incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
                 MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, BETA_DECAY_THRESHOLD, if(bootstrap) 1.0 else 0.0, nodeToSongNetwork.graph, nodeToNodeNetwork.graph)
         }
+        useSaveFiles = true
     }
 
     constructor(serializedSubNetworks: SerializedSubNetworks, sourceNodeAddress: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, bootstrap: Boolean = false): this(
@@ -127,16 +152,19 @@ open class TrustNetwork {
         incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, 0.95, nodeToNodeNetwork.graph, false)
         incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank2(
             MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, BETA_DECAY_THRESHOLD, if(bootstrap) 1.0 else 0.0, nodeToSongNetwork.graph, nodeToNodeNetwork.graph)
+        useSaveFiles = false
     }
 
     @SuppressLint("NewApi")
     open fun overwriteSaveFiles() {
-        val graphsFile = File("$appDir$graphsPath")
-        Files.deleteIfExists(graphsFile.toPath())
-        val stringifiedTrustNetwork = Json.encodeToString(serialize())
-        graphsFile.parentFile?.mkdirs()
-        graphsFile.createNewFile()
-        graphsFile.writeText(stringifiedTrustNetwork)
+        if(useSaveFiles) {
+            val graphsFile = File("$appDir$graphsPath")
+            Files.deleteIfExists(graphsFile.toPath())
+            val stringifiedTrustNetwork = Json.encodeToString(serialize())
+            graphsFile.parentFile?.mkdirs()
+            graphsFile.createNewFile()
+            graphsFile.writeText(stringifiedTrustNetwork)
+        }
     }
 
     open fun bulkAddNodeToSongEdgesForNode(edges: List<NodeRecEdge>, sourceNode: Node): Boolean {
@@ -243,22 +271,6 @@ open class TrustNetwork {
                 val existingTrust = existingTrustEdgeToNode?.trust ?: 0.0
                 val newTrust = existingTrust + trustDelta
                 addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(newTrust), rootNode, recommenderNode))
-            }
-        }
-    }
-
-    private fun updateNodeTrustForExperiment(sourceNode: Node, songRec: Recommendation, affinityDelta: Double) {
-        val recommenderNodeEdges = nodeToSongNetwork.graph.outgoingEdgesOf(songRec)
-        val rootNeighborEdges = nodeToNodeNetwork.graph.outgoingEdgesOf(rootNode)
-        for(recommenderNodeEdge in recommenderNodeEdges) {
-            val recommenderNode = nodeToSongNetwork.graph.getEdgeSource(recommenderNodeEdge) as Node
-            if(recommenderNode != sourceNode) {
-                val trustDelta = recommenderNodeEdge.affinity * affinityDelta
-                val existingTrustEdgeToNode =
-                    rootNeighborEdges.find { nodeToNodeNetwork.graph.getEdgeTarget(it) == recommenderNode }
-                val existingTrust = existingTrustEdgeToNode?.trust ?: 0.0
-                val newTrust = existingTrust + trustDelta
-                addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(newTrust), sourceNode, recommenderNode))
             }
         }
     }

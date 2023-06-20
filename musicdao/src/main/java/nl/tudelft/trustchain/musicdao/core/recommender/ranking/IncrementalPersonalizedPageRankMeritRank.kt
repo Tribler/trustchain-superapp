@@ -15,7 +15,7 @@ class IncrementalPersonalizedPageRankMeritRank (
     private val betaDecay: Double,
     private val betaDecayThreshold: Double = 0.95,
     graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>,
-    val heapEfficientImplementation: Boolean = true
+    val heapEfficientImplementation: Boolean = false
 ): IncrementalRandomWalkedBasedRankingAlgo<SimpleDirectedWeightedGraph<Node, NodeTrustEdge>, Node, NodeTrustEdge>(maxWalkLength, repetitions, rootNode) {
     private val logger = KotlinLogging.logger {}
     private val iter = CustomRandomWalkVertexIterator(graph, rootNode, maxWalkLength.toLong(), alphaDecay, Random())
@@ -70,7 +70,7 @@ class IncrementalPersonalizedPageRankMeritRank (
 
     override fun calculateRankings() {
         val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it != rootNode }
-        val betaDecays = calculateBetaDecaysSpaceIntensive()
+        val betaDecays = if(heapEfficientImplementation) calculateBetaDecays(nodeCounts) else calculateBetaDecaysSpaceIntensive()
         val totalOccs = nodeCounts.values.sum()
         for((node, occ) in nodeCounts) {
             val decay = (1.0 - (betaDecays[node]?.let { it * betaDecay } ?: 0.0))

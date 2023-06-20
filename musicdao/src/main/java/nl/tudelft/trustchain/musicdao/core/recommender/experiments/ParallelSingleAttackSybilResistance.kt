@@ -16,7 +16,7 @@ fun main() {
     val contextDir = "$currentDir/musicdao/src/test/resources"
     val loadedTrustNetwork = File("$contextDir/dataset/test_network.txt").readText()
     val subNetworks = Json.decodeFromString<SerializedSubNetworks>(loadedTrustNetwork)
-    val fileOut = File("$contextDir/dataset/parallel_single_attack.txt")
+    val fileOut = File("$contextDir/dataset/parallel_single_attack_multiple_beta_decay.txt")
     val seed = 5
     val rng = Random(seed)
     fileOut.createNewFile()
@@ -45,48 +45,51 @@ fun main() {
         trustNetwork.nodeToNodeNetwork.removeEdge(attackerNodeNeighborEdges[i])
     }
     val allSybilAttacks: List<Int> = (1..100 step 1).map { it }
-    for(sybils in allSybilAttacks) {
-        var reputationGainForSybils = 0.0
-        println("$sybils")
-        val nodeToSongNetwork = NodeToSongNetwork(subNetworks.nodeToSongNetworkSerialized)
-        val nodeToNodeNetwork = NodeToNodeNetwork(subNetworks.nodeToNodeNetworkSerialized)
-        for(i in (0 until attackerNodeNeighborEdges.size)) {
-            nodeToNodeNetwork.removeEdge(attackerNodeNeighborEdges[i])
-        }
-        val sybilSongRecs = (1..3).map { Recommendation("sybilSong-$it") }
-        for (sybilSongRec in sybilSongRecs) {
-            nodeToSongNetwork.addNodeOrSong(sybilSongRec)
-            nodeToSongNetwork.addEdge(attackerNode, sybilSongRec, NodeSongEdge(0.2))
-        }
-        for (i in (1..sybils)) {
-            val nextNode = Node("sybilNode-${i}")
-            nodeToNodeNetwork.addNode(nextNode)
-            nodeToSongNetwork.addNodeOrSong(nextNode)
-            for (sybilSongRec in sybilSongRecs) {
-                nodeToSongNetwork.addEdge(nextNode, sybilSongRec, NodeSongEdge(0.33))
+    for(betaDecay in listOf(0.0, 0.5, 1.0)) {
+        fileOut.appendText("BETA DECAY: $betaDecay")
+        for (sybils in allSybilAttacks) {
+            var reputationGainForSybils = 0.0
+            println("$sybils")
+            val nodeToSongNetwork = NodeToSongNetwork(subNetworks.nodeToSongNetworkSerialized)
+            val nodeToNodeNetwork = NodeToNodeNetwork(subNetworks.nodeToNodeNetworkSerialized)
+            for (i in (0 until attackerNodeNeighborEdges.size)) {
+                nodeToNodeNetwork.removeEdge(attackerNodeNeighborEdges[i])
             }
+            val sybilSongRecs = (1..3).map { Recommendation("sybilSong-$it") }
+            for (sybilSongRec in sybilSongRecs) {
+                nodeToSongNetwork.addNodeOrSong(sybilSongRec)
+                nodeToSongNetwork.addEdge(attackerNode, sybilSongRec, NodeSongEdge(0.2))
+            }
+            for (i in (1..sybils)) {
+                val nextNode = Node("sybilNode-${i}")
+                nodeToNodeNetwork.addNode(nextNode)
+                nodeToSongNetwork.addNodeOrSong(nextNode)
+                for (sybilSongRec in sybilSongRecs) {
+                    nodeToSongNetwork.addEdge(nextNode, sybilSongRec, NodeSongEdge(0.33))
+                }
                 nodeToNodeNetwork.addEdge(attackerNode, nextNode, NodeTrustEdge(1.0))
                 nodeToNodeNetwork.addEdge(nextNode, attackerNode, NodeTrustEdge(1.0))
-        }
-        var allSongs = nodeToSongNetwork.getAllSongs().toList()
-        for (song in allSongs) {
-            song.rankingScore = 0.0
-        }
-        trustNetwork = TrustNetwork(
-            SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
-            rootNode.getKey(),
-            0.1,
-            0.8
-        )
-        allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
-        for (song in allSongs) {
-            if (song.getUniqueIdentifier().contains("sybilSong") && song.rankingScore > 0.0) {
-                reputationGainForSybils += song.rankingScore
             }
-        }
+            var allSongs = nodeToSongNetwork.getAllSongs().toList()
+            for (song in allSongs) {
+                song.rankingScore = 0.0
+            }
+            trustNetwork = TrustNetwork(
+                SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
+                rootNode.getKey(),
+                0.1,
+                betaDecay
+            )
+            allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
+            for (song in allSongs) {
+                if (song.getUniqueIdentifier().contains("sybilSong") && song.rankingScore > 0.0) {
+                    reputationGainForSybils += song.rankingScore
+                }
+            }
             fileOut.appendText("Sybils: $sybils")
             fileOut.appendText("\n")
             fileOut.appendText("REPUTATION GAIN: $reputationGainForSybils")
             fileOut.appendText("\n")
         }
+    }
     }

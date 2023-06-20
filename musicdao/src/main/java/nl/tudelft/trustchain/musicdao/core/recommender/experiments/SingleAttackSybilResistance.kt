@@ -16,7 +16,7 @@ fun main() {
     val contextDir = "$currentDir/musicdao/src/test/resources"
     val loadedTrustNetwork = File("$contextDir/dataset/test_network.txt").readText()
     val subNetworks = Json.decodeFromString<SerializedSubNetworks>(loadedTrustNetwork)
-    val fileOut = File("$contextDir/dataset/linear_single_attack.txt")
+    val fileOut = File("$contextDir/dataset/linear_single_attack_no_alpha_decay.txt")
     val seed = 5
     val rng = Random(seed)
     fileOut.createNewFile()
@@ -79,7 +79,7 @@ fun main() {
         trustNetwork = TrustNetwork(
             SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
             rootNode.getKey(),
-            0.1,
+            0.005,
             0.8
         )
         allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()

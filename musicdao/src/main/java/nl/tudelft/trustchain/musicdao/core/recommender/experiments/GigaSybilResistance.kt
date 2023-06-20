@@ -22,46 +22,29 @@ fun main() {
     val contextDir = "$currentDir/musicdao/src/test/resources"
     val loadedTrustNetwork = File("$contextDir/dataset/test_network.txt").readText()
     val subNetworks = Json.decodeFromString<SerializedSubNetworks>(loadedTrustNetwork)
-    val fileOut = File("$contextDir/dataset/giga_sybil_experiment_final.txt")
+    val fileOut = File("$contextDir/dataset/giga_sybil_experiment_beta_test.txt")
     val seed = 5
     val rng = Random(seed)
     fileOut.createNewFile()
-    val percentageAttackers = 0.05
+    val percentageAttackers = 0.1
     trustNetwork = TrustNetwork(subNetworks, "d7083f5e1d50c264277d624340edaaf3dc16095b")
-    val dotFile = File("$contextDir/dataset/test.dot")
-    dotFile.createNewFile()
-    val interactionFile = File("$contextDir/dataset/kaggle_visible_evaluation_triplets.txt")
-    val songListenCount = mutableMapOf<Recommendation, Int>()
-    try {
-        BufferedReader(FileReader(interactionFile)).use { br ->
-            var line: String?
-            while (br.readLine().also { line = it } != null) {
-                val words = line?.split("\\s".toRegex())?.toTypedArray()!!
-                songListenCount[Recommendation(words[1])] =
-                    (songListenCount[Recommendation(words[1])] ?: 0) + words[2].toInt()
-            }
+
+    var allNodes = trustNetwork.nodeToSongNetwork.getAllNodes().toList()
+    var totalNodes = allNodes.size
+    for(node in 0 until totalNodes) {
+        if(trustNetwork.nodeToNodeNetwork.graph.incomingEdgesOf(allNodes[node]).size == 0) {
+            trustNetwork.nodeToNodeNetwork.graph.removeVertex(allNodes[node])
+            trustNetwork.nodeToSongNetwork.graph.removeVertex(allNodes[node])
         }
-    } catch (e: IOException) {
-        e.printStackTrace()
     }
-
-    val sortedSongListenCount = songListenCount.toList()
-        .sortedBy { (_, value) -> value }
-        .takeLast(500)
-        .reversed()
-        .toMap()
-
-    val popularSongs = sortedSongListenCount.keys.toList()
-
-    val allNodes = trustNetwork.nodeToNodeNetwork.getAllNodes().toList()
-    val totalNodes = allNodes.size
+    allNodes = trustNetwork.nodeToNodeNetwork.getAllNodes().toList()
+    totalNodes = allNodes.size
     val nAttackerNodes = (totalNodes * percentageAttackers).toInt()
     val randomAttackerIndices = generateSequence {
         rng.nextInt(0, totalNodes - 1)
     }.distinct()
         .filter { trustNetwork.nodeToNodeNetwork.graph.incomingEdgesOf(allNodes[it]).size > 0 }
         .take(nAttackerNodes)
-        .sorted()
         .toSet()
     val attackerNodes = mutableListOf<Node>()
     for (i in randomAttackerIndices) {
@@ -71,7 +54,7 @@ fun main() {
         val typeAttack = rng.nextInt(2)
         val sybilSongRecs = (1..3).map { Recommendation("sybilSong-$index-$it") }
         sybilSongRecs.forEach {
-            trustNetwork.addSongRec(it)
+            trustNetwork.nodeToSongNetwork.addNodeOrSong(it)
         }
         val attackerEdges = trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(attackerNode).toList()
         for(i in 0 until attackerEdges.size) {
@@ -81,31 +64,21 @@ fun main() {
         when (typeAttack) {
             0 -> {
                 var newNode = Node("sybilNode-$index-1")
-                trustNetwork.addNode(newNode)
+                trustNetwork.nodeToNodeNetwork.addNode(newNode)
+                trustNetwork.nodeToSongNetwork.addNodeOrSong(newNode)
                 //arbitrary large value
                 trustNetwork.nodeToNodeNetwork.addEdge(attackerNode, newNode, NodeTrustEdge(500.0))
                 for (sybilSongRec in sybilSongRecs) {
                     trustNetwork.nodeToSongNetwork.addEdge(attackerNode, sybilSongRec, NodeSongEdge(0.2))
                 }
-                for (i in (1..1000)) {
+                for (i in (1..20)) {
                     val nextNode = Node("sybilNode-$index-${i + 1}")
-                    val randomPopularSongInts = generateSequence {
-                        rng.nextInt(popularSongs.size)
-                    }.distinct().take(5).toSet()
-                    val popularSongsAttack = mutableListOf<Recommendation>()
-                    for (j in randomPopularSongInts) {
-                        popularSongsAttack.add(popularSongs[j])
-                    }
                     for (sybilSongRec in sybilSongRecs) {
                         trustNetwork.nodeToSongNetwork.addEdge(newNode, sybilSongRec, NodeSongEdge(0.1))
                     }
-                    for (attackSongRec in popularSongsAttack) {
-                        trustNetwork.nodeToSongNetwork.addEdge(newNode, attackSongRec, NodeSongEdge(0.1))
-                    }
-                    if (90 != i) {
-                        trustNetwork.addNode(nextNode)
-                        trustNetwork.nodeToNodeNetwork.addEdge(newNode, nextNode, NodeTrustEdge(1.0))
-                    }
+                    trustNetwork.nodeToNodeNetwork.addNode(nextNode)
+                    trustNetwork.nodeToSongNetwork.addNodeOrSong(nextNode)
+                    trustNetwork.nodeToNodeNetwork.addEdge(newNode, nextNode, NodeTrustEdge(1.0))
                     newNode = nextNode
                 }
             }
@@ -116,24 +89,13 @@ fun main() {
                 }
                 for (i in (1..2)) {
                     val nextNode = Node("sybilNode-$index-$i")
-                    trustNetwork.addNode(nextNode)
-                    val randomPopularSongInts = generateSequence {
-                        rng.nextInt(popularSongs.size)
-                    }.distinct().take(5).toSet()
-                    val popularSongsAttack = mutableListOf<Recommendation>()
-                    for (j in randomPopularSongInts) {
-                        popularSongsAttack.add(popularSongs[j])
-                    }
+                    trustNetwork.nodeToNodeNetwork.addNode(nextNode)
+                    trustNetwork.nodeToSongNetwork.addNodeOrSong(nextNode)
                     for (sybilSongRec in sybilSongRecs) {
                         trustNetwork.nodeToSongNetwork.addEdge(nextNode, sybilSongRec, NodeSongEdge(0.1))
                     }
-                    for (attackSongRec in popularSongsAttack) {
-                        trustNetwork.nodeToSongNetwork.addEdge(nextNode, attackSongRec, NodeSongEdge(0.1))
-                    }
-                    if (5 != i) {
-                        trustNetwork.nodeToNodeNetwork.addEdge(attackerNode, nextNode, NodeTrustEdge(100.0))
-                        trustNetwork.nodeToNodeNetwork.addEdge(nextNode, attackerNode, NodeTrustEdge(100.0))
-                    }
+                    trustNetwork.nodeToNodeNetwork.addEdge(attackerNode, nextNode, NodeTrustEdge(100.0))
+                    trustNetwork.nodeToNodeNetwork.addEdge(nextNode, attackerNode, NodeTrustEdge(100.0))
                 }
             }
         }
@@ -154,11 +116,8 @@ fun main() {
         rootNodes.add(allNodes[i])
     }
 
-    val alphaDecayValues: List<Double> = (1..10 step 1).map { it.toDouble() / 10 }
-    val betaDecayValues: List<Double> = (0..10 step 1).map { it.toDouble() / 10 }
-
-    for(alphaDecay in alphaDecayValues) {
-        for (betaDecay in betaDecayValues) {
+    var betaDecayValues: List<Double> = (0..10 step 1).map { it.toDouble() / 10 }
+    for(betaDecay in betaDecayValues) {
             println("BETA DECAY $betaDecay experiments starting")
             var reputationGainForSybils = 0.0
             var top100SongsSybil = 0
@@ -169,9 +128,6 @@ fun main() {
                 println("ROOT NODE $index")
                 var allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
                 for (song in allSongs) {
-                    if (song.getUniqueIdentifier().contains("sybilSong") && song.rankingScore > 0.0) {
-                        reputationGainForSybils += song.rankingScore
-                    }
                     song.rankingScore = 0.0
                 }
                 for (node in allNodes) {
@@ -182,7 +138,7 @@ fun main() {
                 trustNetwork = TrustNetwork(
                     SubNetworks(nodeToNodeNetwork, nodeToSongNetwork),
                     rootNode.getKey(),
-                    alphaDecay,
+                    0.1,
                     betaDecay
                 )
                 allSongs = trustNetwork.nodeToSongNetwork.getAllSongs().toList()
@@ -222,8 +178,7 @@ fun main() {
                 }
             }
 
-            fileOut.appendText("ALPHA DECAY: $alphaDecay BETA DECAY: $betaDecay REPUTATION GAIN: $reputationGainForSybils")
-            fileOut.appendText("\n")
+
             fileOut.appendText("TOP 100 SONGS SYBIL: ${top100SongsSybil/100}")
             fileOut.appendText("\n")
             fileOut.appendText("TOP 1000 SONGS SYBIL: ${top1000SongsSybil/100}")
@@ -232,6 +187,5 @@ fun main() {
             fileOut.appendText("\n")
             fileOut.appendText("TOP 5000 SONGS SYBIL: ${top5000SongsSybil/100}")
             fileOut.appendText("\n")
-        }
     }
 }
