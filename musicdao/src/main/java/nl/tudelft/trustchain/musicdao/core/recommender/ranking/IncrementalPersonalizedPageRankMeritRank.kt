@@ -61,8 +61,8 @@ class IncrementalPersonalizedPageRankMeritRank (
 
     override fun calculateRankings() {
         val nodeCounts = randomWalks.flatten().groupingBy { it }.eachCount().filterKeys { it != rootNode }
-        val betaDecays = if(heapEfficientImplementation) calculateBetaDecays(nodeCounts) else calculateBetaDecaysSpaceIntensive()
         val totalOccs = nodeCounts.values.sum()
+        val betaDecays = if(heapEfficientImplementation) calculateBetaDecays(nodeCounts) else calculateBetaDecaysSpaceIntensive()
         for((node, occ) in nodeCounts) {
             val decay = (1.0 - (betaDecays[node]?.let { it * betaDecay } ?: 0.0))
             val betaDecayedScore = (occ.toDouble() / totalOccs) * decay
