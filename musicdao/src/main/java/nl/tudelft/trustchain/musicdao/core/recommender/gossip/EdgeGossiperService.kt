@@ -123,11 +123,17 @@ class EdgeGossiperService(recCommunity: TrustedRecommenderCommunity? = null
                 sortedNodeToSongEdges = trustNetwork.getAllNodeToSongEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
                 updateDeltasAndWeights(trustNetwork.getAllNodeToNodeEdges(), trustNetwork.getAllNodeToSongEdges())
             }
-            if(nodeToNodeEdgeDeltas.isNotEmpty() && nodeToSongEdgeDeltas.isNotEmpty()) {
-                val randomPeer = pickRandomPeer()
+            var randomPeer: Peer? = null
+            if(nodeToNodeEdgeDeltas.isNotEmpty()) {
+                randomPeer = pickRandomPeer()
                 if (randomPeer != null) {
                     val nodeToNodeEdgesToGossip = pickRandomNodeToNodeEdgesToGossip()
                     recCommunity.sendNodeToNodeEdges(randomPeer, nodeToNodeEdgesToGossip)
+                }
+            }
+            if(nodeToSongEdgeDeltas.isNotEmpty()) {
+                randomPeer = randomPeer ?: pickRandomPeer()
+                if (randomPeer != null) {
                     val nodeRecEdgesToGossip = pickRandomNodeToSongEdgesToGossip()
                     recCommunity.sendNodeRecEdges(randomPeer, nodeRecEdgesToGossip)
                 }

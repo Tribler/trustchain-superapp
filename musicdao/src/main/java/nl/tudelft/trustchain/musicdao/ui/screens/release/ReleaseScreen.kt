@@ -41,6 +41,7 @@ import nl.tudelft.trustchain.musicdao.ui.util.dateToShortString
 import nl.tudelft.trustchain.musicdao.ui.navigation.Screen
 import nl.tudelft.trustchain.musicdao.ui.screens.torrent.TorrentStatusScreen
 import dagger.hilt.android.EntryPointAccessors
+import mu.KotlinLogging
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.musicdao.core.ipv8.TrustedRecommenderCommunity
 import nl.tudelft.trustchain.musicdao.core.recommender.model.Recommendation
@@ -77,7 +78,14 @@ fun ReleaseScreen(
     val context = LocalContext.current
 
     fun play(track: Song, cover: File?) {
-        albumState?.id?.run { trustNetwork?.incrementSongRecListenCount(Recommendation(this)) }
+        val logger = KotlinLogging.logger {}
+        albumState?.id?.run {
+            try {
+                trustNetwork.incrementSongRecListenCount(Recommendation(this))
+            } catch (e: Exception) {
+                logger.error { e }
+            }
+        }
         playerViewModel.playDownloadedTrack(track, context, cover)
     }
 

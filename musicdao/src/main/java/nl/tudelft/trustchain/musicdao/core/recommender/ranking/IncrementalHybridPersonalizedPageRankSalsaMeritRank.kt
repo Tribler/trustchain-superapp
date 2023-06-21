@@ -64,7 +64,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
             var modifier = 1.0
             walk.forEachIndexed { index, nodeOrSong ->
                 if(index % 2 == 0) {
-                    modifier = (1.0 - pageRankBalance) + (nodeOrSong.rankingScore * totalNodes * pageRankBalance)
+                    modifier = 1.0
                 } else {
                     songsToValue[nodeOrSong as Recommendation] = songsToValue[nodeOrSong]!! + modifier
                 }

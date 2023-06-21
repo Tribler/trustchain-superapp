@@ -22,9 +22,9 @@ open class TrustNetwork {
 
     val rootNode: Node
     companion object {
-        const val MAX_WALK_LENGTH = 10000
-        const val ALPHA_REPETITIONS = 10000
-        const val BETA_REPETITIONS = 10000
+        const val MAX_WALK_LENGTH = 100
+        const val ALPHA_REPETITIONS = 1000
+        const val BETA_REPETITIONS = 1000
         const val ALPHA_DECAY = 0.1
         const val BETA_DECAY = 0.8
         const val BETA_DECAY_THRESHOLD = 0.99
@@ -102,7 +102,7 @@ open class TrustNetwork {
                     MAX_WALK_LENGTH,
                     ALPHA_REPETITIONS,
                     rootNode,
-                    0.005,
+                    alphaDecay,
                     betaDecay,
                     BETA_DECAY_THRESHOLD,
                     nodeToNodeNetwork.graph,

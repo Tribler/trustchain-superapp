@@ -43,24 +43,28 @@ class NodeToNodeNetwork {
     }
 
     fun addEdge(source: Node, target: Node, nodeEdge: NodeTrustEdge): Boolean {
-        if (!graph.containsVertex(source)) {
+        try {
+            if (!graph.containsVertex(source)) {
                 logger.error { "Couldn't add edge $nodeEdge because source node couldn't be added" }
                 return false
-        }
-        if (!graph.containsVertex(target)) {
+            }
+            if (!graph.containsVertex(target)) {
                 logger.error { "Couldn't add edge $nodeEdge because target node couldn't be added" }
                 return false
-        }
-        if (graph.containsEdge(source, target)) {
-            logger.info { "Overwriting edge from ${source} to ${target}" }
-            graph.removeEdge(source, target)
-        }
-        return graph.addEdge(source, target, nodeEdge).also {
-            if (!it) {
-                logger.error { "Couldn't add edge $nodeEdge to network" }
-            } else {
-                graph.setEdgeWeight(nodeEdge, nodeEdge.trust)
             }
+            if (graph.containsEdge(source, target)) {
+                logger.info { "Overwriting edge from ${source} to ${target}" }
+                graph.removeEdge(source, target)
+            }
+            return graph.addEdge(source, target, nodeEdge).also {
+                if (!it) {
+                    logger.error { "Couldn't add edge $nodeEdge to network" }
+                } else {
+                    graph.setEdgeWeight(nodeEdge, nodeEdge.trust)
+                }
+            }
+        } catch (e: Exception) {
+            return false
         }
     }
 

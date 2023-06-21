@@ -46,7 +46,7 @@ class TrustedRecommenderCommunity(
         if(!::trustNetwork.isInitialized) {
             trustNetwork = SongRecTrustNetwork.getInstance(myPeer.key.pub().toString(), appDirectory.path.toString())
         }
-        val payload = packet.getAuthPayload(NodeToNodeEdgeGossip.Deserializer).second.edge
+        val payload = packet.getPayload(NodeToNodeEdgeGossip.Deserializer).edge
         if(trustNetwork.nodeToNodeNetwork.graph.containsVertex(payload.sourceNode)) {
             val existingEdges = trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(payload.sourceNode)
             if (existingEdges.size > 4) {
