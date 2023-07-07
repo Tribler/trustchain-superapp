@@ -65,7 +65,7 @@ class IncrementalPersonalizedPageRankTest {
             IncrementalPersonalizedPageRank(maxWalkLength, repetitions, rootNode, 0.001, network.graph)
         val randomWalksWithLowerResetProbability = incrementalPageRank.randomWalks
         val nRandomWalksWithLowerResetProbability = randomWalksWithLowerResetProbability.flatten().count()
-        //The Reset Probability decreases by 10, so increase in random walk sizes should lie somewhere between 9 and 11 times
+        // The Reset Probability decreases by 10, so increase in random walk sizes should lie somewhere between 9 and 11 times
         Assert.assertTrue(nRandomWalksWithHighResetProbability * 9 < nRandomWalksWithLowerResetProbability)
         Assert.assertTrue(nRandomWalksWithHighResetProbability * 11 > nRandomWalksWithLowerResetProbability)
     }
@@ -104,5 +104,4 @@ class IncrementalPersonalizedPageRankTest {
         Assert.assertTrue(randomNeighbor.getPersonalizedPageRankScore() < oldRandomNeighborPageRank)
         Assert.assertTrue(randomNode.getPersonalizedPageRankScore() > oldRandomNodePageRank)
     }
-
 }
