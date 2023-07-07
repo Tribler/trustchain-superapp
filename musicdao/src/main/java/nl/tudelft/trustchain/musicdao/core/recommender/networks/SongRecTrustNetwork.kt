@@ -17,22 +17,20 @@ class SongRecTrustNetwork: TrustNetwork {
     private val logger = KotlinLogging.logger {}
     private var songRecListenCount: MutableMap<Recommendation, Int> = mutableMapOf()
     private var songRecommenders: MutableMap<Recommendation, List<Node>> = mutableMapOf()
-    private val recommendersPerSong = 5
-    private var appDir = ""
-    private lateinit var userBasedCF: UserBasedTrustedCollaborativeFiltering
-
-    constructor(sourceNodeAddress: String): super(sourceNodeAddress) {
-
-    }
+    private var appDir: String
+    private var userBasedCF: UserBasedTrustedCollaborativeFiltering
 
     constructor(sourceNodeAddress: String, appDirectory: String): super(sourceNodeAddress, appDirectory, true) {
         appDir = appDirectory
         songRecommenders = fetchSongRecommendersStored(appDirectory) ?: mutableMapOf()
         songRecListenCount = fetchSongCountList(appDirectory) ?: mutableMapOf()
-        userBasedCF = UserBasedTrustedCollaborativeFiltering(nodeToNodeNetwork.getAllNodes().filter { it != rootNode }.toList(), this, 0.5, 0.5)
+        userBasedCF = UserBasedTrustedCollaborativeFiltering(nodeToNodeNetwork.getAllNodes().filter { it != rootNode }.toList(), this, USER_BASED_CF_A, USER_BASED_CF_B)
     }
 
     companion object {
+        private const val RECOMMENDERS_PER_SONG = 5
+        private const val USER_BASED_CF_A = 0.5
+        private const val USER_BASED_CF_B = 0.5
         private const val songCountListenPath = "/trusted_recommender/" + "songCountListen.txt"
         private const val songRecommendersPath = "/trusted_recommender/" + "songRecommenders.txt"
         private fun fetchSongCountList(appDirectory: String): MutableMap<Recommendation, Int>? {
@@ -126,14 +124,14 @@ class SongRecTrustNetwork: TrustNetwork {
             val rootNeighbors = nodeToNodeNetwork.graph.outgoingEdgesOf(rootNode)
             incrementalPersonalizedPageRank.initiateRandomWalks()
             incrementalPersonalizedPageRank.calculateRankings()
-            if (rootNeighbors.size < 5) {
+            if (rootNeighbors.size < RECOMMENDERS_PER_SONG) {
                 userBasedCF =
                     UserBasedTrustedCollaborativeFiltering(nodeToNodeNetwork.getAllNodes().filter { it != rootNode }
-                        .toList(), this, 0.5, 0.5)
+                        .toList(), this, USER_BASED_CF_A, USER_BASED_CF_B)
                 val similarNodesAndScore = userBasedCF.similarNodes(
                     nodeToSongNetwork.graph.outgoingEdgesOf(rootNode)
                         .map { NodeRecEdge(it, rootNode, nodeToSongNetwork.graph.getEdgeTarget(it) as Recommendation) },
-                    5 - rootNeighbors.size
+                    RECOMMENDERS_PER_SONG - rootNeighbors.size
                 ).toMutableMap().filterKeys { node -> !nodeToNodeNetwork.graph.outgoingEdgesOf(rootNode).map { nodeToNodeNetwork.graph.getEdgeTarget(it) }.contains(node) }
                 if (similarNodesAndScore.values.sum() == 0.0) {
                     val newScore = 1.0 / similarNodesAndScore.size
@@ -209,7 +207,7 @@ class SongRecTrustNetwork: TrustNetwork {
                     }
                 }
             }
-            val topSongRecommenders = recommendationCount.toList().sortedBy { it.second }.takeLast(recommendersPerSong).map { it.first }.filter { it != rootNode }
+            val topSongRecommenders = recommendationCount.toList().sortedBy { it.second }.takeLast(RECOMMENDERS_PER_SONG).map { it.first }.filter { it != rootNode }
             songRecommenders[songRec] = topSongRecommenders
             for(recommender in topSongRecommenders) {
                     val existingTrustEdgeToNode =

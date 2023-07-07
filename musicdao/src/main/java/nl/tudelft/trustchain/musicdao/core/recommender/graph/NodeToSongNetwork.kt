@@ -9,18 +9,9 @@ import java.io.StringReader
 import java.io.StringWriter
 
 class NodeToSongNetwork {
-    lateinit var graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>
+    var graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>
     private val logger = KotlinLogging.logger {}
-    val initialized = false
-    lateinit var sourceNode: Node
     private val customExporter = CustomExporter()
-
-    companion object {
-    }
-
-    init {
-    }
-
     constructor() {
         graph = DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>(NodeSongEdge::class.java)
     }

@@ -16,9 +16,6 @@ class NodeToNodeNetwork {
     var graph: SimpleDirectedWeightedGraph<Node, NodeTrustEdge>
     private val logger = KotlinLogging.logger {}
     private val customExporter = CustomExporter()
-    val initialized = false
-    lateinit var sourceNode: Node
-
 
     constructor() {
         graph = SimpleDirectedWeightedGraph<Node, NodeTrustEdge>(NodeTrustEdge::class.java)

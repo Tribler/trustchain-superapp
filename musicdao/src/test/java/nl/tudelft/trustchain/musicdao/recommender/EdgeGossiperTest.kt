@@ -9,7 +9,6 @@ import nl.tudelft.trustchain.musicdao.core.recommender.graph.NodeToSongNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.networks.SubNetworks
 import nl.tudelft.trustchain.musicdao.core.recommender.networks.TrustNetwork
 import nl.tudelft.trustchain.musicdao.core.recommender.model.*
-import nl.tudelft.trustchain.musicdao.core.recommender.ranking.IncrementalHybridPersonalizedPageRankSalsa
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test

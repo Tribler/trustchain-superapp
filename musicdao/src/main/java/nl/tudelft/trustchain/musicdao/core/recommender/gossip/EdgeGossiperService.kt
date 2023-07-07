@@ -20,21 +20,15 @@ import java.util.Random
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
-/**
- * Gossips edges in the network to keep graphs synced
- */
-
-const val GOSSIP_DELAY: Long = 5000
-const val N_EDGES_TO_GOSSIP: Int = 5
-
 private val logger = KotlinLogging.logger {}
 
 @AndroidEntryPoint
 @RequiresApi(Build.VERSION_CODES.O)
 class EdgeGossiperService(recCommunity: TrustedRecommenderCommunity? = null
 ): Service() {
-
     companion object {
+        const val GOSSIP_DELAY: Long = 5000
+        const val N_EDGES_TO_GOSSIP: Int = 5
         const val TIME_WINDOW: Int = 10000
     }
 

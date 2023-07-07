@@ -21,6 +21,7 @@ open class TrustNetwork {
     private val logger = KotlinLogging.logger {}
 
     val rootNode: Node
+
     companion object {
         const val MAX_WALK_LENGTH = 100
         const val ALPHA_REPETITIONS = 1000
@@ -34,7 +35,10 @@ open class TrustNetwork {
         private var useSaveFiles: Boolean = false
 
         fun deserialize(networks: SerializedSubNetworks): SubNetworks {
-            return SubNetworks(NodeToNodeNetwork(networks.nodeToNodeNetworkSerialized), NodeToSongNetwork(networks.nodeToSongNetworkSerialized))
+            return SubNetworks(
+                NodeToNodeNetwork(networks.nodeToNodeNetworkSerialized),
+                NodeToSongNetwork(networks.nodeToSongNetworkSerialized)
+            )
         }
 
         @SuppressLint("NewApi")
@@ -50,64 +54,79 @@ open class TrustNetwork {
         }
     }
 
-    constructor(subNetworks: SubNetworks, sourceNodeAddress: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, bootstrap: Boolean = false) {
+    constructor(
+        subNetworks: SubNetworks,
+        sourceNodeAddress: String,
+        alphaDecay: Double = ALPHA_DECAY,
+        betaDecay: Double = BETA_DECAY,
+        bootstrap: Boolean = false
+    ) {
         nodeToNodeNetwork = subNetworks.nodeToNodeNetwork
         nodeToSongNetwork = subNetworks.nodeToSongNetwork
         val allNodesList = nodeToNodeNetwork.getAllNodes()
         allNodes = allNodesList.toMutableList()
-        rootNode = allNodes.first { it.getKey() == sourceNodeAddress}
+        rootNode = allNodes.first { it.getKey() == sourceNodeAddress }
         val outgoingRecsForRoot = nodeToSongNetwork.graph.outgoingEdgesOf(rootNode).size
-        val pageRankBalance = if(bootstrap) 0.0 else maxOf(0.0, (MAX_RECS_FOR_BOOTSTRAP - outgoingRecsForRoot).toDouble() / MAX_RECS_FOR_BOOTSTRAP)
-        if(bootstrap) {
-            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(
-                MAX_WALK_LENGTH,
-                ALPHA_REPETITIONS,
-                rootNode,
-                0.005,
-                betaDecay,
-                BETA_DECAY_THRESHOLD,
-                nodeToNodeNetwork.graph,
-                false
-            )
-            incrementalPersonalizedPageRank.calculateRankings()
-        } else {
-            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(
-                1,
-                1,
-                rootNode,
-                0.005,
-                betaDecay,
-                BETA_DECAY_THRESHOLD,
-                nodeToNodeNetwork.graph,
-                false
-            )
-        }
+        val pageRankBalance = if (bootstrap) 0.0 else maxOf(
+            0.0,
+            (MAX_RECS_FOR_BOOTSTRAP - outgoingRecsForRoot).toDouble() / MAX_RECS_FOR_BOOTSTRAP
+        )
+        incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(
+            MAX_WALK_LENGTH,
+            ALPHA_REPETITIONS,
+            rootNode,
+            ALPHA_DECAY,
+            betaDecay,
+            BETA_DECAY_THRESHOLD,
+            nodeToNodeNetwork.graph,
+            false
+        )
+        incrementalPersonalizedPageRank.calculateRankings()
         incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank(
-            MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, alphaDecay, betaDecay, BETA_DECAY_THRESHOLD,  pageRankBalance, nodeToSongNetwork.graph, nodeToNodeNetwork.graph)
+            MAX_WALK_LENGTH,
+            BETA_REPETITIONS,
+            rootNode,
+            alphaDecay,
+            betaDecay,
+            BETA_DECAY_THRESHOLD,
+            pageRankBalance,
+            nodeToSongNetwork.graph,
+            nodeToNodeNetwork.graph
+        )
         incrementalHybridPersonalizedPageRankSalsa.calculateRankings()
         useSaveFiles = false
     }
 
-    constructor(subNetworks: SubNetworks?, sourceNodeAddress: String, appDirectory: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, bootstrap: Boolean = false) {
+    constructor(
+        subNetworks: SubNetworks?,
+        sourceNodeAddress: String,
+        appDirectory: String,
+        alphaDecay: Double = ALPHA_DECAY,
+        betaDecay: Double = BETA_DECAY,
+        bootstrap: Boolean = false
+    ) {
         appDir = appDirectory
-        if(subNetworks != null) {
+        if (subNetworks != null) {
             nodeToNodeNetwork = subNetworks.nodeToNodeNetwork
             nodeToSongNetwork = subNetworks.nodeToSongNetwork
             val allNodesList = nodeToNodeNetwork.getAllNodes()
             allNodes = allNodesList.toMutableList()
             rootNode = allNodes.first { it.getKey() == sourceNodeAddress }
             val outgoingRecsForRoot = nodeToSongNetwork.graph.outgoingEdgesOf(rootNode).size
-            val pageRankBalance = if(!bootstrap) 0.0 else maxOf(0.0, (MAX_RECS_FOR_BOOTSTRAP - outgoingRecsForRoot).toDouble() / MAX_RECS_FOR_BOOTSTRAP)
+            val pageRankBalance = if (!bootstrap) 0.0 else maxOf(
+                0.0,
+                (MAX_RECS_FOR_BOOTSTRAP - outgoingRecsForRoot).toDouble() / MAX_RECS_FOR_BOOTSTRAP
+            )
             incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(
-                    MAX_WALK_LENGTH,
-                    ALPHA_REPETITIONS,
-                    rootNode,
-                    alphaDecay,
-                    betaDecay,
-                    BETA_DECAY_THRESHOLD,
-                    nodeToNodeNetwork.graph,
-                    false
-                )
+                MAX_WALK_LENGTH,
+                ALPHA_REPETITIONS,
+                rootNode,
+                alphaDecay,
+                betaDecay,
+                BETA_DECAY_THRESHOLD,
+                nodeToNodeNetwork.graph,
+                false
+            )
             incrementalPersonalizedPageRank.calculateRankings()
             incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank(
                 MAX_WALK_LENGTH,
@@ -115,7 +134,7 @@ open class TrustNetwork {
                 rootNode,
                 alphaDecay,
                 betaDecay,
-                0.99,
+                BETA_DECAY_THRESHOLD,
                 pageRankBalance,
                 nodeToSongNetwork.graph,
                 nodeToNodeNetwork.graph
@@ -128,35 +147,52 @@ open class TrustNetwork {
             allNodes = mutableListOf(rootNode)
             nodeToSongNetwork = NodeToSongNetwork()
             nodeToSongNetwork.addNodeOrSong(rootNode)
-            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, 0.95, nodeToNodeNetwork.graph, false)
+            incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(
+                MAX_WALK_LENGTH,
+                ALPHA_REPETITIONS,
+                rootNode,
+                ALPHA_DECAY,
+                BETA_DECAY,
+                BETA_DECAY_THRESHOLD,
+                nodeToNodeNetwork.graph,
+                false
+            )
             incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank(
-                MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, BETA_DECAY_THRESHOLD, if(bootstrap) 1.0 else 0.0, nodeToSongNetwork.graph, nodeToNodeNetwork.graph)
+                MAX_WALK_LENGTH,
+                BETA_REPETITIONS,
+                rootNode,
+                ALPHA_DECAY,
+                BETA_DECAY,
+                BETA_DECAY_THRESHOLD,
+                if (bootstrap) 1.0 else 0.0,
+                nodeToSongNetwork.graph,
+                nodeToNodeNetwork.graph
+            )
         }
         useSaveFiles = true
     }
 
-    constructor(serializedSubNetworks: SerializedSubNetworks, sourceNodeAddress: String, alphaDecay: Double = ALPHA_DECAY, betaDecay: Double = BETA_DECAY, bootstrap: Boolean = false): this(
-        deserialize(serializedSubNetworks), sourceNodeAddress, alphaDecay, betaDecay, bootstrap)
+    constructor(
+        serializedSubNetworks: SerializedSubNetworks,
+        sourceNodeAddress: String,
+        alphaDecay: Double = ALPHA_DECAY,
+        betaDecay: Double = BETA_DECAY,
+        bootstrap: Boolean = false
+    ) : this(
+        deserialize(serializedSubNetworks), sourceNodeAddress, alphaDecay, betaDecay, bootstrap
+    )
 
-    constructor(sourceNodeAddress: String, appDirectory: String, bootstrap: Boolean = false): this(fetchAndDeserializeNetworks(appDirectory), sourceNodeAddress, appDirectory, bootstrap = bootstrap)
+    constructor(sourceNodeAddress: String, appDirectory: String, bootstrap: Boolean = false) : this(
+        fetchAndDeserializeNetworks(appDirectory),
+        sourceNodeAddress,
+        appDirectory,
+        bootstrap = bootstrap
+    )
 
-
-    constructor(sourceNodeAddress: String, bootstrap: Boolean = false) {
-        nodeToNodeNetwork = NodeToNodeNetwork()
-        rootNode = Node(sourceNodeAddress)
-        nodeToNodeNetwork.addNode(rootNode)
-        allNodes = mutableListOf(rootNode)
-        nodeToSongNetwork = NodeToSongNetwork()
-        nodeToSongNetwork.addNodeOrSong(rootNode)
-        incrementalPersonalizedPageRank = IncrementalPersonalizedPageRankMeritRank(MAX_WALK_LENGTH, ALPHA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, 0.95, nodeToNodeNetwork.graph, false)
-        incrementalHybridPersonalizedPageRankSalsa = IncrementalHybridPersonalizedPageRankSalsaMeritRank(
-            MAX_WALK_LENGTH, BETA_REPETITIONS, rootNode, ALPHA_DECAY, BETA_DECAY, BETA_DECAY_THRESHOLD, if(bootstrap) 1.0 else 0.0, nodeToSongNetwork.graph, nodeToNodeNetwork.graph)
-        useSaveFiles = false
-    }
 
     @SuppressLint("NewApi")
     open fun overwriteSaveFiles() {
-        if(useSaveFiles) {
+        if (useSaveFiles) {
             val graphsFile = File("$appDir$graphsPath")
             Files.deleteIfExists(graphsFile.toPath())
             val stringifiedTrustNetwork = Json.encodeToString(serialize())
@@ -168,9 +204,9 @@ open class TrustNetwork {
 
     open fun bulkAddNodeToSongEdgesForNode(edges: List<NodeRecEdge>, sourceNode: Node): Boolean {
         var edgeAdditionFailure = false
-        if(edges.any { it.node != sourceNode })
+        if (edges.any { it.node != sourceNode })
             return false
-        for(edge in edges) {
+        for (edge in edges) {
             var existingAffinity = 0.0
             if (containsEdge(edge.node, edge.rec)) {
                 val existingEdgeTimestamp = nodeToSongNetwork.graph.getEdge(edge.node, edge.rec).timestamp
@@ -190,47 +226,30 @@ open class TrustNetwork {
                 }
             }
             nodeToSongNetwork.addEdge(edge.node, edge.rec, edge.nodeSongEdge).also {
-                if(!it) {
+                if (!it) {
                     logger.error { "Couldn't add edge from ${edge.node} to ${edge.rec}" }
                     edgeAdditionFailure = true
                 } else {
-                    if(edge.node == rootNode) {
+                    if (edge.node == rootNode) {
                         updateNodeTrust(edge.rec, edge.nodeSongEdge.affinity - existingAffinity)
                     }
                 }
             }
         }
         incrementalPersonalizedPageRank.modifyEdges(setOf(sourceNode))
-        incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(sourceNode), nodeToNodeNetwork.getAllNodes().toList())
+        incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(
+            setOf(sourceNode),
+            nodeToNodeNetwork.getAllNodes().toList()
+        )
         return edgeAdditionFailure
     }
-    fun bulkAddNodeToSongEdgesForExperiments(edges: List<NodeRecEdge>, sourceNode: Node): Boolean {
-        var edgeAdditionFailure = false
-        if(edges.any { it.node != sourceNode })
-            return false
-        for(edge in edges) {
-            nodeToSongNetwork.addEdge(edge.node, edge.rec, edge.nodeSongEdge).also {
-                if(!it) {
-                    logger.error { "Couldn't add edge from ${edge.node} to ${edge.rec}" }
-                    edgeAdditionFailure = true
-                }
-            }
-        }
-        return edgeAdditionFailure
-    }
-
-    fun resetRandomWalks() {
-        incrementalPersonalizedPageRank.initiateRandomWalks()
-        incrementalHybridPersonalizedPageRankSalsa.initiateRandomWalks()
-    }
-
 
     fun addNodeToSongEdge(edge: NodeRecEdge): Boolean {
         var existingAffinity = 0.0
-        if(containsEdge(edge.node, edge.rec)) {
+        if (containsEdge(edge.node, edge.rec)) {
             val existingEdgeTimestamp = nodeToSongNetwork.graph.getEdge(edge.node, edge.rec).timestamp
             existingAffinity = nodeToSongNetwork.graph.getEdge(edge.node, edge.rec).affinity
-            if(existingEdgeTimestamp >= edge.nodeSongEdge.timestamp) {
+            if (existingEdgeTimestamp >= edge.nodeSongEdge.timestamp) {
                 return false
             }
         }
@@ -245,14 +264,17 @@ open class TrustNetwork {
             }
         }
         return nodeToSongNetwork.addEdge(edge.node, edge.rec, edge.nodeSongEdge).also {
-            if(!it) {
+            if (!it) {
                 logger.error { "Couldn't add edge from ${edge.node} to ${edge.rec}" }
             } else {
-                if(edge.node == rootNode) {
+                if (edge.node == rootNode) {
                     updateNodeTrust(edge.rec, edge.nodeSongEdge.affinity - existingAffinity)
                 }
                 incrementalPersonalizedPageRank.modifyEdges(setOf(edge.node))
-                incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(edge.node), nodeToNodeNetwork.getAllNodes().toList())
+                incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(
+                    setOf(edge.node),
+                    nodeToNodeNetwork.getAllNodes().toList()
+                )
                 overwriteSaveFiles()
             }
         }
@@ -261,9 +283,9 @@ open class TrustNetwork {
     protected open fun updateNodeTrust(songRec: Recommendation, affinityDelta: Double) {
         val recommenderNodeEdges = nodeToSongNetwork.graph.outgoingEdgesOf(songRec)
         val rootNeighborEdges = nodeToNodeNetwork.graph.outgoingEdgesOf(rootNode)
-        for(recommenderNodeEdge in recommenderNodeEdges) {
+        for (recommenderNodeEdge in recommenderNodeEdges) {
             val recommenderNode = nodeToSongNetwork.graph.getEdgeSource(recommenderNodeEdge) as Node
-            if(recommenderNode != rootNode) {
+            if (recommenderNode != rootNode) {
                 val trustDelta = recommenderNodeEdge.affinity * affinityDelta
                 val existingTrustEdgeToNode =
                     rootNeighborEdges.find { nodeToNodeNetwork.graph.getEdgeTarget(it) == recommenderNode }
@@ -275,9 +297,9 @@ open class TrustNetwork {
     }
 
     fun addNodeToNodeEdge(edge: NodeTrustEdgeWithSourceAndTarget): Boolean {
-        if(containsEdge(edge.sourceNode, edge.targetNode)) {
+        if (containsEdge(edge.sourceNode, edge.targetNode)) {
             val existingEdgeTimestamp = nodeToNodeNetwork.graph.getEdge(edge.sourceNode, edge.targetNode).timestamp
-            if(existingEdgeTimestamp >= edge.nodeTrustEdge.timestamp) {
+            if (existingEdgeTimestamp >= edge.nodeTrustEdge.timestamp) {
                 return false
             }
         }
@@ -293,12 +315,15 @@ open class TrustNetwork {
             }
         }
         return nodeToNodeNetwork.addEdge(edge.sourceNode, edge.targetNode, edge.nodeTrustEdge).also {
-            if(!it) {
+            if (!it) {
                 logger.error { "Couldn't add edge from ${edge.sourceNode} to ${edge.targetNode}" }
             } else {
-                if(!newSourceNode) {
+                if (!newSourceNode) {
                     incrementalPersonalizedPageRank.modifyEdges(setOf(edge.sourceNode))
-                    incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(edge.sourceNode), nodeToNodeNetwork.getAllNodes().toList())
+                    incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(
+                        setOf(edge.sourceNode),
+                        nodeToNodeNetwork.getAllNodes().toList()
+                    )
                 }
                 overwriteSaveFiles()
             }
@@ -314,7 +339,10 @@ open class TrustNetwork {
     }
 
     protected fun containsEdge(source: Node, target: NodeOrSong): Boolean {
-        return if(target is Recommendation) nodeToSongNetwork.graph.containsEdge(source, target) else nodeToNodeNetwork.graph.containsEdge(source, target as Node)
+        return if (target is Recommendation) nodeToSongNetwork.graph.containsEdge(
+            source,
+            target
+        ) else nodeToNodeNetwork.graph.containsEdge(source, target as Node)
     }
 
     protected fun containsNode(node: Node): Boolean {

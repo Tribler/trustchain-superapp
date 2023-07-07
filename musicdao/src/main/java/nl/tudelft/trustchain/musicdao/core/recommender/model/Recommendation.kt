@@ -13,10 +13,6 @@ class Recommendation(
         return rankingScore
     }
 
-    fun setRecommendationScore(score: Double) {
-        rankingScore = score
-    }
-
     override fun hashCode(): Int {
         return identifier.hashCode()
     }
