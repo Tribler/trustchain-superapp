@@ -24,8 +24,9 @@ private val logger = KotlinLogging.logger {}
 
 @AndroidEntryPoint
 @RequiresApi(Build.VERSION_CODES.O)
-class EdgeGossiperService(recCommunity: TrustedRecommenderCommunity? = null
-): Service() {
+class EdgeGossiperService(
+    recCommunity: TrustedRecommenderCommunity? = null
+) : Service() {
     companion object {
         const val GOSSIP_DELAY: Long = 5000
         const val N_EDGES_TO_GOSSIP: Int = 5
@@ -50,41 +51,48 @@ class EdgeGossiperService(recCommunity: TrustedRecommenderCommunity? = null
     private lateinit var trustNetwork: SongRecTrustNetwork
     private lateinit var sortedNodeToNodeEdges: List<NodeTrustEdge>
     private lateinit var sortedNodeToSongEdges: List<NodeSongEdge>
-    @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var nodeToNodeEdgeDeltas = listOf<Int>()
-    @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var nodeToSongEdgeDeltas = listOf<Int>()
-    @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var nodeToNodeEdgeWeights = listOf<Double>()
-    @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var nodeToSongEdgeWeights = listOf<Double>()
-    @VisibleForTesting(otherwise=VisibleForTesting.PRIVATE)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun updateDeltasAndWeights(nodeToNodeEdges: List<NodeTrustEdge>, nodeToSongEdges: List<NodeSongEdge>) {
-            sortedNodeToNodeEdges = nodeToNodeEdges.sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
-            sortedNodeToSongEdges = nodeToSongEdges.sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
-            if (sortedNodeToNodeEdges.isNotEmpty()) {
-                updateNodeToNodeDeltas()
-                updateNodeToNodeWeights()
-            }
-            if(sortedNodeToSongEdges.isNotEmpty()) {
-                updateNodeToSongDeltas()
-                updateNodeToSongWeights()
-            }
+        sortedNodeToNodeEdges = nodeToNodeEdges.sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
+        sortedNodeToSongEdges = nodeToSongEdges.sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
+        if (sortedNodeToNodeEdges.isNotEmpty()) {
+            updateNodeToNodeDeltas()
+            updateNodeToNodeWeights()
+        }
+        if (sortedNodeToSongEdges.isNotEmpty()) {
+            updateNodeToSongDeltas()
+            updateNodeToSongWeights()
+        }
     }
 
     private fun updateNodeToNodeDeltas() {
-        val oldestNodeToNodeEdgeTimestamp = sortedNodeToNodeEdges.first().timestamp.time - (1000 * sortedNodeToNodeEdges.size)
+        val oldestNodeToNodeEdgeTimestamp =
+            sortedNodeToNodeEdges.first().timestamp.time - (1000 * sortedNodeToNodeEdges.size)
         val deltas = mutableListOf<Int>()
-        for(edge in sortedNodeToNodeEdges) {
+        for (edge in sortedNodeToNodeEdges) {
             deltas.add((edge.timestamp.time - oldestNodeToNodeEdgeTimestamp).toInt())
         }
         nodeToNodeEdgeDeltas = deltas
     }
 
     private fun updateNodeToSongDeltas() {
-        val oldestNodeToSongEdgeTimestamp = sortedNodeToSongEdges.first().timestamp.time - (1000 * sortedNodeToSongEdges.size)
+        val oldestNodeToSongEdgeTimestamp =
+            sortedNodeToSongEdges.first().timestamp.time - (1000 * sortedNodeToSongEdges.size)
         val deltas = mutableListOf<Int>()
-        for(edge in sortedNodeToSongEdges) {
+        for (edge in sortedNodeToSongEdges) {
             deltas.add((edge.timestamp.time - oldestNodeToSongEdgeTimestamp).toInt())
         }
         nodeToSongEdgeDeltas = deltas
@@ -103,29 +111,34 @@ class EdgeGossiperService(recCommunity: TrustedRecommenderCommunity? = null
         return nums.map { it.toDouble() / sum }
     }
 
-
     fun start() {
         scope.launch {
             gossipEdges()
         }
     }
+
     private suspend fun gossipEdges() {
         while (scope.isActive) {
-            if(!::trustNetwork.isInitialized) {
-                trustNetwork = SongRecTrustNetwork.getInstance(IPv8Android.getInstance().getOverlay<TrustedRecommenderCommunity>()!!.myPeer.key.pub().toString(), cachePath.getPath().toString())
-                sortedNodeToNodeEdges = trustNetwork.getAllNodeToNodeEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
-                sortedNodeToSongEdges = trustNetwork.getAllNodeToSongEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
+            if (!::trustNetwork.isInitialized) {
+                trustNetwork = SongRecTrustNetwork.getInstance(
+                    IPv8Android.getInstance().getOverlay<TrustedRecommenderCommunity>()!!.myPeer.key.pub().toString(),
+                    cachePath.getPath().toString()
+                )
+                sortedNodeToNodeEdges =
+                    trustNetwork.getAllNodeToNodeEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
+                sortedNodeToSongEdges =
+                    trustNetwork.getAllNodeToSongEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
                 updateDeltasAndWeights(trustNetwork.getAllNodeToNodeEdges(), trustNetwork.getAllNodeToSongEdges())
             }
             var randomPeer: Peer? = null
-            if(nodeToNodeEdgeDeltas.isNotEmpty()) {
+            if (nodeToNodeEdgeDeltas.isNotEmpty()) {
                 randomPeer = pickRandomPeer()
                 if (randomPeer != null) {
                     val nodeToNodeEdgesToGossip = pickRandomNodeToNodeEdgesToGossip()
                     recCommunity.sendNodeToNodeEdges(randomPeer, nodeToNodeEdgesToGossip)
                 }
             }
-            if(nodeToSongEdgeDeltas.isNotEmpty()) {
+            if (nodeToSongEdgeDeltas.isNotEmpty()) {
                 randomPeer = randomPeer ?: pickRandomPeer()
                 if (randomPeer != null) {
                     val nodeRecEdgesToGossip = pickRandomNodeToSongEdgesToGossip()
@@ -149,9 +162,16 @@ class EdgeGossiperService(recCommunity: TrustedRecommenderCommunity? = null
                 }
             }
         }
-        if(selectedNode != null) {
-            val edgesToGossip = trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(selectedNode).sortedBy { it.trust }.takeLast(N_EDGES_TO_GOSSIP)
-            return edgesToGossip.map { NodeTrustEdgeWithSourceAndTarget(it!!, selectedNode!!, trustNetwork.nodeToNodeNetwork.graph.getEdgeTarget(it))  }
+        if (selectedNode != null) {
+            val edgesToGossip = trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(selectedNode).sortedBy { it.trust }
+                .takeLast(N_EDGES_TO_GOSSIP)
+            return edgesToGossip.map {
+                NodeTrustEdgeWithSourceAndTarget(
+                    it!!,
+                    selectedNode!!,
+                    trustNetwork.nodeToNodeNetwork.graph.getEdgeTarget(it)
+                )
+            }
         }
         return listOf()
     }
@@ -164,14 +184,23 @@ class EdgeGossiperService(recCommunity: TrustedRecommenderCommunity? = null
             nodeToSongEdgeWeights.forEachIndexed { index, d ->
                 cumP += d
                 if (p <= cumP) {
-                    selectedNode = trustNetwork.nodeToSongNetwork.graph.getEdgeSource(sortedNodeToSongEdges[index]) as Node
+                    selectedNode =
+                        trustNetwork.nodeToSongNetwork.graph.getEdgeSource(sortedNodeToSongEdges[index]) as Node
                     return@loop
                 }
             }
         }
-        if(selectedNode != null) {
-            val edgesToGossip = trustNetwork.nodeToSongNetwork.graph.outgoingEdgesOf(selectedNode).sortedBy { it.affinity }.takeLast(N_EDGES_TO_GOSSIP)
-            return edgesToGossip.map { NodeRecEdge(it!!, selectedNode!!, trustNetwork.nodeToSongNetwork.graph.getEdgeTarget(it) as Recommendation)  }
+        if (selectedNode != null) {
+            val edgesToGossip =
+                trustNetwork.nodeToSongNetwork.graph.outgoingEdgesOf(selectedNode).sortedBy { it.affinity }
+                    .takeLast(N_EDGES_TO_GOSSIP)
+            return edgesToGossip.map {
+                NodeRecEdge(
+                    it!!,
+                    selectedNode!!,
+                    trustNetwork.nodeToSongNetwork.graph.getEdgeTarget(it) as Recommendation
+                )
+            }
         }
         return listOf()
     }

@@ -12,7 +12,8 @@ import java.io.File
 import java.nio.file.Files
 
 lateinit var trustNetworkInstance: SongRecTrustNetwork
-class SongRecTrustNetwork: TrustNetwork {
+
+class SongRecTrustNetwork : TrustNetwork {
 
     private val logger = KotlinLogging.logger {}
     private var songRecListenCount: MutableMap<Recommendation, Int> = mutableMapOf()
@@ -20,11 +21,16 @@ class SongRecTrustNetwork: TrustNetwork {
     private var appDir: String
     private var userBasedCF: UserBasedTrustedCollaborativeFiltering
 
-    constructor(sourceNodeAddress: String, appDirectory: String): super(sourceNodeAddress, appDirectory, true) {
+    constructor(sourceNodeAddress: String, appDirectory: String) : super(sourceNodeAddress, appDirectory, true) {
         appDir = appDirectory
         songRecommenders = fetchSongRecommendersStored(appDirectory) ?: mutableMapOf()
         songRecListenCount = fetchSongCountList(appDirectory) ?: mutableMapOf()
-        userBasedCF = UserBasedTrustedCollaborativeFiltering(nodeToNodeNetwork.getAllNodes().filter { it != rootNode }.toList(), this, USER_BASED_CF_A, USER_BASED_CF_B)
+        userBasedCF = UserBasedTrustedCollaborativeFiltering(
+            nodeToNodeNetwork.getAllNodes().filter { it != rootNode }.toList(),
+            this,
+            USER_BASED_CF_A,
+            USER_BASED_CF_B
+        )
     }
 
     companion object {
@@ -49,13 +55,16 @@ class SongRecTrustNetwork: TrustNetwork {
             return if (songRecommendersFilePath.exists()) {
                 val songRecommendersText = songRecommendersFilePath.readText()
                 val songCountListInString = Json.decodeFromString<Map<String, List<String>>>(songRecommendersText)
-                return songCountListInString.mapKeys { Recommendation(it.key) }.mapValues { listOfNodes -> listOfNodes.value.map { Node(it) } }.toMutableMap()
+                return songCountListInString.mapKeys { Recommendation(it.key) }
+                    .mapValues { listOfNodes -> listOfNodes.value.map { Node(it) } }.toMutableMap()
             } else {
                 null
             }
         }
+
         fun getInstance(
-            sourceNodeAddress: String, appDirectory: String
+            sourceNodeAddress: String,
+            appDirectory: String
         ): SongRecTrustNetwork {
             if (!::trustNetworkInstance.isInitialized) {
                 trustNetworkInstance = SongRecTrustNetwork(sourceNodeAddress, appDirectory)
@@ -68,15 +77,15 @@ class SongRecTrustNetwork: TrustNetwork {
     fun overwriteLocalFiles() {
         val songCountListFile = File("$appDir$songCountListenPath")
         Files.deleteIfExists(songCountListFile.toPath())
-        val stringifiedListenCount = Json.encodeToString(songRecListenCount.mapKeys { it.key.getUniqueIdentifier() } )
+        val stringifiedListenCount = Json.encodeToString(songRecListenCount.mapKeys { it.key.getUniqueIdentifier() })
         songCountListFile.parentFile?.mkdirs()
         songCountListFile.createNewFile()
         songCountListFile.writeText(stringifiedListenCount)
 
-
         val songRecommendersFile = File("$appDir$songRecommendersPath")
         Files.deleteIfExists(songRecommendersFile.toPath())
-        val stringifiedRecommenders = Json.encodeToString(songRecommenders.mapKeys { it.key.getUniqueIdentifier() }.mapValues { nodeList -> nodeList.value.map { it.getKey() } } )
+        val stringifiedRecommenders = Json.encodeToString(songRecommenders.mapKeys { it.key.getUniqueIdentifier() }
+            .mapValues { nodeList -> nodeList.value.map { it.getKey() } })
         songCountListFile.parentFile?.mkdirs()
         songRecommendersFile.createNewFile()
         songRecommendersFile.writeText(stringifiedRecommenders)
@@ -90,12 +99,12 @@ class SongRecTrustNetwork: TrustNetwork {
     }
 
     fun changeSongRecListenCount(songRec: Recommendation, newCount: Int): Boolean {
-        if(songRec in songRecListenCount && songRecListenCount[songRec] == newCount || newCount < 0)
+        if (songRec in songRecListenCount && songRecListenCount[songRec] == newCount || newCount < 0)
             return false
         songRecListenCount[songRec] = newCount
         val newTotalCount = songRecListenCount.values.sum()
         val nodeToSongEdges = mutableListOf<NodeRecEdge>()
-        for((rec, count) in songRecListenCount) {
+        for ((rec, count) in songRecListenCount) {
             val affinity = count.toDouble() / newTotalCount
             nodeToSongEdges.add(NodeRecEdge(NodeSongEdge(affinity), rootNode, rec))
         }
@@ -109,7 +118,7 @@ class SongRecTrustNetwork: TrustNetwork {
         songRecListenCount = songRecAndCount
         val newTotalCount = songRecListenCount.values.sum()
         val nodeToSongEdges = mutableListOf<NodeRecEdge>()
-        for((rec, count) in songRecListenCount) {
+        for ((rec, count) in songRecListenCount) {
             val affinity = count.toDouble() / newTotalCount
             nodeToSongEdges.add(NodeRecEdge(NodeSongEdge(affinity), rootNode, rec))
         }
@@ -132,7 +141,10 @@ class SongRecTrustNetwork: TrustNetwork {
                     nodeToSongNetwork.graph.outgoingEdgesOf(rootNode)
                         .map { NodeRecEdge(it, rootNode, nodeToSongNetwork.graph.getEdgeTarget(it) as Recommendation) },
                     RECOMMENDERS_PER_SONG - rootNeighbors.size
-                ).toMutableMap().filterKeys { node -> !nodeToNodeNetwork.graph.outgoingEdgesOf(rootNode).map { nodeToNodeNetwork.graph.getEdgeTarget(it) }.contains(node) }
+                ).toMutableMap().filterKeys { node ->
+                    !nodeToNodeNetwork.graph.outgoingEdgesOf(rootNode).map { nodeToNodeNetwork.graph.getEdgeTarget(it) }
+                        .contains(node)
+                }
                 if (similarNodesAndScore.values.sum() == 0.0) {
                     val newScore = 1.0 / similarNodesAndScore.size
                     similarNodesAndScore.mapValues { newScore }
@@ -141,18 +153,22 @@ class SongRecTrustNetwork: TrustNetwork {
                     addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(score), rootNode, node))
                 }
             }
-            incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(nodeToNodeNetwork.getAllNodes(), nodeToNodeNetwork.getAllNodes().toList())
+            incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(
+                nodeToNodeNetwork.getAllNodes(),
+                nodeToNodeNetwork.getAllNodes().toList()
+            )
             incrementalHybridPersonalizedPageRankSalsa.initiateRandomWalks()
             incrementalHybridPersonalizedPageRankSalsa.calculateRankings()
         } catch (e: Exception) {
             logger.error { e }
         }
     }
+
     override fun bulkAddNodeToSongEdgesForNode(edges: List<NodeRecEdge>, sourceNode: Node): Boolean {
         var edgeAdditionFailure = false
-        if(edges.any { it.node != sourceNode })
+        if (edges.any { it.node != sourceNode })
             return false
-        for(edge in edges) {
+        for (edge in edges) {
             var existingAffinity = 0.0
             var isNewEdge = true
             if (containsEdge(edge.node, edge.rec)) {
@@ -174,11 +190,11 @@ class SongRecTrustNetwork: TrustNetwork {
                 }
             }
             nodeToSongNetwork.addEdge(edge.node, edge.rec, edge.nodeSongEdge).also {
-                if(!it) {
+                if (!it) {
                     logger.error { "Couldn't add edge from ${edge.node} to ${edge.rec}" }
                     edgeAdditionFailure = true
                 } else {
-                    if(edge.node == rootNode) {
+                    if (edge.node == rootNode) {
                         val affinityDelta = edge.nodeSongEdge.affinity - existingAffinity
                         updateNodeTrust(edge.rec, affinityDelta, isNewEdge)
                     }
@@ -186,54 +202,65 @@ class SongRecTrustNetwork: TrustNetwork {
             }
         }
         incrementalPersonalizedPageRank.modifyEdges(setOf(sourceNode))
-        incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(setOf(sourceNode), nodeToNodeNetwork.getAllNodes().toList())
+        incrementalHybridPersonalizedPageRankSalsa.modifyNodesOrSongs(
+            setOf(sourceNode),
+            nodeToNodeNetwork.getAllNodes().toList()
+        )
         return edgeAdditionFailure
     }
 
     fun updateNodeTrust(songRec: Recommendation, affinityDelta: Double, isNewEdge: Boolean) {
         val rootNeighborEdges = nodeToNodeNetwork.graph.outgoingEdgesOf(rootNode)
-        val fetchNewRecommenders = (isNewEdge && (!songRecommenders.containsKey(songRec) || songRecommenders[songRec]!!.isEmpty()))
-        if(fetchNewRecommenders) {
+        val fetchNewRecommenders =
+            (isNewEdge && (!songRecommenders.containsKey(songRec) || songRecommenders[songRec]!!.isEmpty()))
+        if (fetchNewRecommenders) {
             val hybridRandomWalks = incrementalHybridPersonalizedPageRankSalsa.randomWalks
             val recommendationCount = mutableMapOf<Node, Int>()
-            for(walk in hybridRandomWalks) {
-                if(walk.contains(songRec)) {
-                    for(node in walk) {
-                        if(node is Node) {
+            for (walk in hybridRandomWalks) {
+                if (walk.contains(songRec)) {
+                    for (node in walk) {
+                        if (node is Node) {
                             recommendationCount[node] = (recommendationCount[node] ?: 0) + 1
-                        } else if(node == songRec) {
+                        } else if (node == songRec) {
                             break
                         }
                     }
                 }
             }
-            val topSongRecommenders = recommendationCount.toList().sortedBy { it.second }.takeLast(RECOMMENDERS_PER_SONG).map { it.first }.filter { it != rootNode }
+            val topSongRecommenders =
+                recommendationCount.toList().sortedBy { it.second }.takeLast(RECOMMENDERS_PER_SONG).map { it.first }
+                    .filter { it != rootNode }
             songRecommenders[songRec] = topSongRecommenders
-            for(recommender in topSongRecommenders) {
-                    val existingTrustEdgeToNode =
-                        rootNeighborEdges.find { nodeToNodeNetwork.graph.getEdgeTarget(it) == recommender }
-                    val existingTrust = existingTrustEdgeToNode?.trust ?: 0.0
+            for (recommender in topSongRecommenders) {
+                val existingTrustEdgeToNode =
+                    rootNeighborEdges.find { nodeToNodeNetwork.graph.getEdgeTarget(it) == recommender }
+                val existingTrust = existingTrustEdgeToNode?.trust ?: 0.0
+                addNodeToNodeEdge(
+                    NodeTrustEdgeWithSourceAndTarget(
+                        NodeTrustEdge(existingTrust + affinityDelta),
+                        rootNode,
+                        recommender
+                    )
+                )
+            }
+        } else {
+            val pastSongRecommenders = songRecommenders[songRec]!!
+            for (recommender in pastSongRecommenders) {
+                val existingTrustEdgeToNode =
+                    rootNeighborEdges.find { nodeToNodeNetwork.graph.getEdgeTarget(it) == recommender }
+                val existingTrust = existingTrustEdgeToNode?.trust ?: 0.0
+                if (existingTrustEdgeToNode != null && existingTrust + affinityDelta < 0.0) {
+                    nodeToNodeNetwork.removeEdge(existingTrustEdgeToNode)
+                } else {
                     addNodeToNodeEdge(
                         NodeTrustEdgeWithSourceAndTarget(
-                            NodeTrustEdge(existingTrust + affinityDelta),
+                            NodeTrustEdge(if (existingTrust + affinityDelta < 0) 0.0 else existingTrust + affinityDelta),
                             rootNode,
                             recommender
                         )
                     )
-            }
-        } else {
-            val pastSongRecommenders = songRecommenders[songRec]!!
-            for(recommender in pastSongRecommenders) {
-                val existingTrustEdgeToNode =
-                    rootNeighborEdges.find { nodeToNodeNetwork.graph.getEdgeTarget(it) == recommender }
-                val existingTrust = existingTrustEdgeToNode?.trust ?: 0.0
-                if(existingTrustEdgeToNode != null && existingTrust + affinityDelta < 0.0) {
-                    nodeToNodeNetwork.removeEdge(existingTrustEdgeToNode)
-                } else {
-                    addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(if(existingTrust + affinityDelta < 0) 0.0 else existingTrust + affinityDelta), rootNode, recommender))
                 }
             }
         }
     }
-
 }

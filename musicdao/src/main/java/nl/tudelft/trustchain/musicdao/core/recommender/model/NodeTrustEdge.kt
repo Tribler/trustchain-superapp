@@ -6,11 +6,11 @@ import org.jgrapht.graph.DefaultWeightedEdge
 import java.sql.Timestamp
 
 @Serializable
-class NodeTrustEdge (
+class NodeTrustEdge(
     val trust: Double = 0.0,
     @Serializable(with = TimeStampAsLongSerializer::class)
     val timestamp: Timestamp = Timestamp(System.currentTimeMillis())
-): DefaultWeightedEdge() {
+) : DefaultWeightedEdge() {
     companion object {
         val TRUST = NodeTrustEdge::trust.name
         val TIMESTAMP = NodeTrustEdge::timestamp.name

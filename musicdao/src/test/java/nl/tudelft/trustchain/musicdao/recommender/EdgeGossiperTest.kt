@@ -75,17 +75,18 @@ class EdgeGossiperTest {
         val sortedNtNEdgesInWindow = nodeToNodeNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(10000)
         val oldestNodeToNodeEdge = sortedNtNEdgesInWindow.first()
         val newestNodeToNodeEdge = sortedNtNEdgesInWindow.last()
-        val deltaOldestAndNewestNtNEdge = (newestNodeToNodeEdge.timestamp.time - oldestNodeToNodeEdge.timestamp.time).toInt()
+        val deltaOldestAndNewestNtNEdge =
+            (newestNodeToNodeEdge.timestamp.time - oldestNodeToNodeEdge.timestamp.time).toInt()
         Assert.assertEquals(deltaOldestAndNewestNtNEdge, nodeToNodeDeltas.max() - (1000 * nodeToNodeDeltas.size))
         Assert.assertEquals(0, nodeToNodeDeltas.min() - (1000 * nodeToNodeDeltas.size))
 
         val sortedNtSEdgesInWindow = nodeToSongNetwork.getAllEdges().sortedBy { it.timestamp }.takeLast(10000)
         val oldestNodeToSongEdge = sortedNtSEdgesInWindow.first()
         val newestNodeToSongEdge = sortedNtSEdgesInWindow.last()
-        val deltaOldestAndNewestNtSEdge = (newestNodeToSongEdge.timestamp.time - oldestNodeToSongEdge.timestamp.time).toInt()
+        val deltaOldestAndNewestNtSEdge =
+            (newestNodeToSongEdge.timestamp.time - oldestNodeToSongEdge.timestamp.time).toInt()
         Assert.assertEquals(deltaOldestAndNewestNtSEdge, nodeToSongDeltas.max() - (1000 * nodeToNodeDeltas.size))
         Assert.assertEquals(0, nodeToSongDeltas.min() - (1000 * nodeToNodeDeltas.size))
-
     }
 
     @Test

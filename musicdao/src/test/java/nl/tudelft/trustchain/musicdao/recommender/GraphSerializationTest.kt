@@ -12,7 +12,8 @@ class GraphSerializationTest {
     val someNodeTrustEdge = NodeTrustEdge(nodeToNodeTrust, Timestamp(343434))
     val sourceNode = Node("someSourceIp")
     val targetNode = Node("someTargetIp")
-    val someNodeTrustEdgeWithSourceAndTarget = NodeTrustEdgeWithSourceAndTarget(someNodeTrustEdge, sourceNode, targetNode)
+    val someNodeTrustEdgeWithSourceAndTarget =
+        NodeTrustEdgeWithSourceAndTarget(someNodeTrustEdge, sourceNode, targetNode)
     val nodeToNodeEdgeGossip = NodeToNodeEdgeGossip(someNodeTrustEdgeWithSourceAndTarget)
 
     val nodeToSongTrust = 4.2
@@ -38,7 +39,4 @@ class GraphSerializationTest {
         Assert.assertEquals(sourceNode, deserializedEdge.edge.node)
         Assert.assertEquals(someSongRec, deserializedEdge.edge.rec)
     }
-
-
-
 }

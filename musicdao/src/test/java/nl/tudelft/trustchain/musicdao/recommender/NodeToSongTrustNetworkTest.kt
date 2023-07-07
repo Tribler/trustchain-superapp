@@ -86,6 +86,7 @@ e 1 4 0.4 1
             0.001
         )
     }
+
     @Test
     fun cannotAddEdgesBetweenNodesAndNodesOrSongsAndSongs() {
         network = NodeToSongNetwork()
@@ -133,11 +134,11 @@ e 1 4 0.4 1
             newNodeToSongNetwork.graph
         )
         Assert.assertEquals(
-            newNodeToSongNetwork.getAllNodes().filter { it.getKey() == randomNodeWithRandomPageRank.getKey() }.first().getPersonalizedPageRankScore(),
+            newNodeToSongNetwork.getAllNodes().filter { it.getKey() == randomNodeWithRandomPageRank.getKey() }.first()
+                .getPersonalizedPageRankScore(),
             randomNodeWithRandomPageRank.getPersonalizedPageRankScore(),
             0.001
         )
     }
-
 
 }

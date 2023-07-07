@@ -142,7 +142,6 @@ e 2 1 0.2 2
         Assert.assertEquals(compactNodeToNodeGraph, serializedGraph)
     }
 
-
     @Test
     fun canCreateANetworkFromSerializedCompactString() {
         nodeToNodeNetwork = NodeToNodeNetwork()
@@ -175,10 +174,10 @@ e 2 1 0.2 2
             newNodeToNodeNetwork.graph
         )
         Assert.assertEquals(
-            newNodeToNodeNetwork.getAllNodes().filter { it.getKey() == randomNode }.first().getPersonalizedPageRankScore(),
+            newNodeToNodeNetwork.getAllNodes().filter { it.getKey() == randomNode }.first()
+                .getPersonalizedPageRankScore(),
             randomNodeWithRandomPageRank.getPersonalizedPageRankScore(),
             0.001
         )
     }
-
 }

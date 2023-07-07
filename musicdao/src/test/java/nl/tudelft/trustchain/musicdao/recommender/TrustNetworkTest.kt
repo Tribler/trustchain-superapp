@@ -31,25 +31,33 @@ class TrustNetworkTest {
     private fun setUp() {
         nodeToNodeNetwork = NodeToNodeNetwork()
         nodeToSongNetwork = NodeToSongNetwork()
-        for(node in 0 until nNodes) {
+        for (node in 0 until nNodes) {
             val nodeToAdd = Node(node.toString())
             nodeToNodeNetwork.addNode(nodeToAdd)
             nodeToSongNetwork.addNodeOrSong(nodeToAdd)
         }
-        for(song in 0 until nSongs) {
+        for (song in 0 until nSongs) {
             nodeToSongNetwork.addNodeOrSong(Recommendation(song.toString()))
         }
         // Create 10 edges from each node to 10 random songs
         val allNodes = nodeToSongNetwork.getAllNodes().toList()
         rootNode = allNodes[0]
         val allSongs = nodeToSongNetwork.getAllSongs().toList()
-        for(node in allNodes) {
-            for(i in 0 until nEdges) {
+        for (node in allNodes) {
+            for (i in 0 until nEdges) {
                 var randomNum = (0 until nSongs - 1).random(rng)
-                nodeToSongNetwork.addEdge(node, allSongs[randomNum], NodeSongEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp))))
+                nodeToSongNetwork.addEdge(
+                    node,
+                    allSongs[randomNum],
+                    NodeSongEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp)))
+                )
                 randomNum = (0 until nNodes - 1).random(rng)
-                val randomNode = if(randomNum < node.getKey().toInt()) randomNum else randomNum + 1
-                nodeToNodeNetwork.addEdge(node, allNodes[randomNode], NodeTrustEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp))))
+                val randomNode = if (randomNum < node.getKey().toInt()) randomNum else randomNum + 1
+                nodeToNodeNetwork.addEdge(
+                    node,
+                    allNodes[randomNode],
+                    NodeTrustEdge(rng.nextDouble(), Timestamp(rng.nextLong(minTimestamp, maxTimestamp)))
+                )
             }
         }
     }
@@ -63,8 +71,10 @@ class TrustNetworkTest {
         val initialNodeToSongEdgeSize = trustNetwork.getAllNodeToSongEdges().size
         val newNode = Node(nNodes.toString())
         trustNetwork.addNode(newNode)
-        var edgeOneAdded = trustNetwork.addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(4.2), rootNode, newNode))
-        var edgeTwoAdded = trustNetwork.addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(5.2), newNode, rootNode))
+        var edgeOneAdded =
+            trustNetwork.addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(4.2), rootNode, newNode))
+        var edgeTwoAdded =
+            trustNetwork.addNodeToNodeEdge(NodeTrustEdgeWithSourceAndTarget(NodeTrustEdge(5.2), newNode, rootNode))
         Assert.assertTrue(edgeOneAdded)
         Assert.assertTrue(edgeTwoAdded)
         Assert.assertEquals(initialNodeToNodeEdgeSize + 2, trustNetwork.getAllNodeToNodeEdges().size)
@@ -93,10 +103,15 @@ class TrustNetworkTest {
         val stringifiedTrustNetwork = Json.encodeToString(serializedTrustNetwork)
         val trustNetworkSubNetworks = Json.decodeFromString<SerializedSubNetworks>(stringifiedTrustNetwork)
         val newTrustNetwork = TrustNetwork(trustNetworkSubNetworks, rootNode.getKey())
-        Assert.assertEquals(serializedTrustNetwork.nodeToNodeNetworkSerialized, trustNetworkSubNetworks.nodeToNodeNetworkSerialized)
-        Assert.assertEquals(serializedTrustNetwork.nodeToSongNetworkSerialized, trustNetworkSubNetworks.nodeToSongNetworkSerialized)
+        Assert.assertEquals(
+            serializedTrustNetwork.nodeToNodeNetworkSerialized,
+            trustNetworkSubNetworks.nodeToNodeNetworkSerialized
+        )
+        Assert.assertEquals(
+            serializedTrustNetwork.nodeToSongNetworkSerialized,
+            trustNetworkSubNetworks.nodeToSongNetworkSerialized
+        )
         Assert.assertEquals(trustNetwork.nodeToNodeNetwork.graph, newTrustNetwork.nodeToNodeNetwork.graph)
         Assert.assertEquals(trustNetwork.nodeToSongNetwork.graph, newTrustNetwork.nodeToSongNetwork.graph)
     }
-
 }

@@ -9,7 +9,7 @@ abstract class IncrementalRandomWalkedBasedRankingAlgo<G, V, E>(
     protected val maxWalkLength: Int,
     protected val repetitions: Int,
     protected val rootNode: Node
-) where G: AbstractBaseGraph<V, E>, V: NodeOrSong, E: DefaultWeightedEdge {
+) where G : AbstractBaseGraph<V, E>, V : NodeOrSong, E : DefaultWeightedEdge {
 
     abstract fun calculateRankings()
 

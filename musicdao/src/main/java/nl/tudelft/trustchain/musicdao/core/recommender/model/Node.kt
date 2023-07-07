@@ -2,7 +2,7 @@ package nl.tudelft.trustchain.musicdao.core.recommender.model
 class Node(
     key: String,
     personalisedPageRankScore: Double = 0.0
-):NodeOrSong(key, personalisedPageRankScore) {
+) : NodeOrSong(key, personalisedPageRankScore) {
 
     fun getKey(): String {
         return identifier

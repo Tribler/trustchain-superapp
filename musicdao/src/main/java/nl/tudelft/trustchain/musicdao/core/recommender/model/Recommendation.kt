@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.musicdao.core.recommender.model
 class Recommendation(
     uniqueIdentifier: String,
     recommendationScore: Double = 0.0
-):NodeOrSong(uniqueIdentifier, recommendationScore) {
+) : NodeOrSong(uniqueIdentifier, recommendationScore) {
 
     fun getUniqueIdentifier(): String {
         return identifier

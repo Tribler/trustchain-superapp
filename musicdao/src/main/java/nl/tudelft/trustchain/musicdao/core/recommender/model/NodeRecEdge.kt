@@ -5,7 +5,7 @@ import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization
 import nl.tudelft.trustchain.musicdao.core.recommender.graph.customSerialization.Edge.RecAsStringSerializer
 
 @Serializable
-data class NodeRecEdge (
+data class NodeRecEdge(
     val nodeSongEdge: NodeSongEdge,
     @Serializable(with = NodeAsStringSerializer::class)
     val node: Node,

@@ -32,31 +32,33 @@ class UserBasedTrustedCollaborativeFiltering(
         for (node in sortedTopTrustedUsers) {
             val targetSongEdges = trustNetwork.nodeToSongNetwork.graph.outgoingEdgesOf(node)
             val targetAffinities =
-                targetSongEdges.associateBy({ trustNetwork.nodeToSongNetwork.graph.getEdgeTarget(it) as Recommendation },
-                    { it.affinity })
+                targetSongEdges.associateBy(
+                    { trustNetwork.nodeToSongNetwork.graph.getEdgeTarget(it) as Recommendation },
+                    { it.affinity }
+                )
             val commonItems = sourceAffinities.keys.intersect(targetAffinities.keys)
             val nodeSimilarity = NodeSimilarity(node)
             if (commonItems.isNotEmpty()) {
-                nodeSimilarity.pcc =
-                    calculatePearsonCorrelationCoefficient(sourceAffinities, targetAffinities, commonItems)
+                nodeSimilarity.pcc = calculatePearsonCorrelationCoefficient(sourceAffinities, targetAffinities, commonItems)
                 nodeSimilarity.rdci = calculateRatingDifferenceOfCommonItem(sourceAffinities, targetAffinities, commonItems)
                 nodeSimilarity.commonItems = commonItems.size
             }
             nodeSimilarities.add(nodeSimilarity)
         }
         val maxCommonItems = nodeSimilarities.map { it.commonItems }.maxOrNull()
-        return if(maxCommonItems == null || maxCommonItems == 0) {
-            sortedTopTrustedUsers.takeLast(size).associateBy({it}, {it.getPersonalizedPageRankScore()})
+        return if (maxCommonItems == null || maxCommonItems == 0) {
+            sortedTopTrustedUsers.takeLast(size).associateBy({ it }, { it.getPersonalizedPageRankScore() })
         } else {
             val nodesTrustAndSimilarity = mutableListOf<Pair<Node, Double>>()
-            for(nodeSim in nodeSimilarities) {
+            for (nodeSim in nodeSimilarities) {
                 val cf = nodeSim.commonItems.toDouble() / maxCommonItems
                 val nSim = cf * nodeSim.pcc
                 val similarity = (nSim * b) + (nodeSim.rdci * (1 - b))
-                val combinedTrustAndSimilarity = (nodeSim.node.getPersonalizedPageRankScore() * a) + ((similarity + 1) * (1 - a))
+                val combinedTrustAndSimilarity =
+                    (nodeSim.node.getPersonalizedPageRankScore() * a) + ((similarity + 1) * (1 - a))
                 nodesTrustAndSimilarity.add(Pair(nodeSim.node, combinedTrustAndSimilarity))
             }
-            nodesTrustAndSimilarity.sortedBy { it.second }.takeLast(size).associateBy({it.first}, {it.second})
+            nodesTrustAndSimilarity.sortedBy { it.second }.takeLast(size).associateBy({ it.first }, { it.second })
         }
     }
 
@@ -70,18 +72,14 @@ class UserBasedTrustedCollaborativeFiltering(
         val cumRatingDifference = commonItems.map {
             val largerRating = maxOf(sourceAffinities[it]!!, targetAffinities[it]!!)
             val smallerRating = minOf(sourceAffinities[it]!!, targetAffinities[it]!!)
-            if (largerRating > maxRating)
-                maxRating = largerRating
-            if (smallerRating < minRating)
-                minRating = smallerRating
+            if (largerRating > maxRating) maxRating = largerRating
+            if (smallerRating < minRating) minRating = smallerRating
             largerRating - smallerRating
         }.sum()
         val ratingDifferenceFactor = cumRatingDifference / commonItems.size
         val ratingSpan = maxRating - minRating
-        return if (ratingSpan == 0.0)
-            0.0
-        else
-            1 - (ratingDifferenceFactor * (1 / ratingSpan))
+        return if (ratingSpan == 0.0) 0.0
+        else 1 - (ratingDifferenceFactor * (1 / ratingSpan))
     }
 
     private fun calculatePearsonCorrelationCoefficient(

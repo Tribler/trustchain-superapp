@@ -27,59 +27,56 @@ class TrustedRecommenderCommunity(
     }
 
     fun sendNodeToNodeEdges(peer: Peer, nodeToNodeEdges: List<NodeTrustEdgeWithSourceAndTarget>) {
-        for(edge in nodeToNodeEdges) {
-            val packet =
-                serializePacket(MessageId.NODE_TO_NODE_EDGE, NodeToNodeEdgeGossip(edge), sign = false)
+        for (edge in nodeToNodeEdges) {
+            val packet = serializePacket(MessageId.NODE_TO_NODE_EDGE, NodeToNodeEdgeGossip(edge), sign = false)
             send(peer, packet)
         }
     }
 
     fun sendNodeRecEdges(peer: Peer, nodeToSongEdges: List<NodeRecEdge>) {
-        for(edge in nodeToSongEdges) {
-            val packet =
-                serializePacket(MessageId.NODE_TO_REC_EDGE, NodeToRecEdgeGossip(edge), sign = false)
+        for (edge in nodeToSongEdges) {
+            val packet = serializePacket(MessageId.NODE_TO_REC_EDGE, NodeToRecEdgeGossip(edge), sign = false)
             send(peer, packet)
         }
     }
 
     private fun onNodeToNodeEdge(packet: Packet) {
-        if(!::trustNetwork.isInitialized) {
+        if (!::trustNetwork.isInitialized) {
             trustNetwork = SongRecTrustNetwork.getInstance(myPeer.key.pub().toString(), appDirectory.path.toString())
         }
         val payload = packet.getPayload(NodeToNodeEdgeGossip.Deserializer).edge
-        if(trustNetwork.nodeToNodeNetwork.graph.containsVertex(payload.sourceNode)) {
+        if (trustNetwork.nodeToNodeNetwork.graph.containsVertex(payload.sourceNode)) {
             val existingEdges = trustNetwork.nodeToNodeNetwork.graph.outgoingEdgesOf(payload.sourceNode)
             if (existingEdges.size > 4) {
                 val oldestEdge = existingEdges.minByOrNull { it.timestamp }!!
-                if(oldestEdge.timestamp > payload.nodeTrustEdge.timestamp)
-                    return
+                if (oldestEdge.timestamp > payload.nodeTrustEdge.timestamp) return
                 trustNetwork.nodeToNodeNetwork.removeEdge(oldestEdge)
             }
         } else {
             trustNetwork.addNode(payload.sourceNode)
         }
-        if(!trustNetwork.nodeToNodeNetwork.graph.containsVertex(payload.targetNode)) {
+        if (!trustNetwork.nodeToNodeNetwork.graph.containsVertex(payload.targetNode)) {
             trustNetwork.addNode(payload.targetNode)
         }
         trustNetwork.addNodeToNodeEdge(payload)
     }
+
     private fun onNodeToRecEdge(packet: Packet) {
-        if(!::trustNetwork.isInitialized) {
+        if (!::trustNetwork.isInitialized) {
             trustNetwork = SongRecTrustNetwork.getInstance(myPeer.key.pub().toString(), appDirectory.path.toString())
         }
         val payload = packet.getPayload(NodeToRecEdgeGossip.Deserializer).edge
-        if(trustNetwork.nodeToSongNetwork.graph.containsVertex(payload.node)) {
+        if (trustNetwork.nodeToSongNetwork.graph.containsVertex(payload.node)) {
             val existingEdges = trustNetwork.nodeToSongNetwork.graph.outgoingEdgesOf(payload.node)
             if (existingEdges.size > 4) {
                 val oldestEdge = existingEdges.minByOrNull { it.timestamp }!!
-                if(oldestEdge.timestamp > payload.nodeSongEdge.timestamp)
-                    return
+                if (oldestEdge.timestamp > payload.nodeSongEdge.timestamp) return
                 trustNetwork.nodeToSongNetwork.removeEdge(oldestEdge)
             }
         } else {
             trustNetwork.addNode(payload.node)
         }
-        if(!trustNetwork.nodeToSongNetwork.graph.containsVertex(payload.rec)) {
+        if (!trustNetwork.nodeToSongNetwork.graph.containsVertex(payload.rec)) {
             trustNetwork.addSongRec(payload.rec)
         }
         trustNetwork.addNodeToSongEdge(payload)
