@@ -18,4 +18,3 @@ object RecAsStringSerializer : KSerializer<Recommendation> {
         return Recommendation(decoder.decodeString())
     }
 }
-

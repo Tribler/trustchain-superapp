@@ -189,7 +189,6 @@ open class TrustNetwork {
         bootstrap = bootstrap
     )
 
-
     @SuppressLint("NewApi")
     open fun overwriteSaveFiles() {
         if (useSaveFiles) {
@@ -366,5 +365,4 @@ open class TrustNetwork {
         val serializedNodeToSongNetwork = nodeToSongNetwork.serializeCompact()
         return SerializedSubNetworks(serializedNodeToNodeNetwork, serializedNodeToSongNetwork)
     }
-
 }

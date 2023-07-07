@@ -50,7 +50,7 @@ class NodeToNodeNetwork {
                 return false
             }
             if (graph.containsEdge(source, target)) {
-                logger.info { "Overwriting edge from ${source} to ${target}" }
+                logger.info { "Overwriting edge from $source to $target" }
                 graph.removeEdge(source, target)
             }
             return graph.addEdge(source, target, nodeEdge).also {

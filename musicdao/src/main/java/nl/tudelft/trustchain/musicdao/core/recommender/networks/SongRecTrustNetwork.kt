@@ -84,8 +84,10 @@ class SongRecTrustNetwork : TrustNetwork {
 
         val songRecommendersFile = File("$appDir$songRecommendersPath")
         Files.deleteIfExists(songRecommendersFile.toPath())
-        val stringifiedRecommenders = Json.encodeToString(songRecommenders.mapKeys { it.key.getUniqueIdentifier() }
-            .mapValues { nodeList -> nodeList.value.map { it.getKey() } })
+        val stringifiedRecommenders = Json.encodeToString(
+            songRecommenders.mapKeys { it.key.getUniqueIdentifier() }
+                .mapValues { nodeList -> nodeList.value.map { it.getKey() } }
+        )
         songCountListFile.parentFile?.mkdirs()
         songRecommendersFile.createNewFile()
         songRecommendersFile.writeText(stringifiedRecommenders)
@@ -135,8 +137,11 @@ class SongRecTrustNetwork : TrustNetwork {
             incrementalPersonalizedPageRank.calculateRankings()
             if (rootNeighbors.size < RECOMMENDERS_PER_SONG) {
                 userBasedCF =
-                    UserBasedTrustedCollaborativeFiltering(nodeToNodeNetwork.getAllNodes().filter { it != rootNode }
-                        .toList(), this, USER_BASED_CF_A, USER_BASED_CF_B)
+                    UserBasedTrustedCollaborativeFiltering(
+                        nodeToNodeNetwork.getAllNodes().filter { it != rootNode }.toList(),
+                        this,
+                        USER_BASED_CF_A, USER_BASED_CF_B
+                    )
                 val similarNodesAndScore = userBasedCF.similarNodes(
                     nodeToSongNetwork.graph.outgoingEdgesOf(rootNode)
                         .map { NodeRecEdge(it, rootNode, nodeToSongNetwork.graph.getEdgeTarget(it) as Recommendation) },

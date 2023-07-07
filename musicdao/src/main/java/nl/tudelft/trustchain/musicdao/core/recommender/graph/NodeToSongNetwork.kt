@@ -12,6 +12,7 @@ class NodeToSongNetwork {
     var graph: DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>
     private val logger = KotlinLogging.logger {}
     private val customExporter = CustomExporter()
+
     constructor() {
         graph = DefaultUndirectedWeightedGraph<NodeOrSong, NodeSongEdge>(NodeSongEdge::class.java)
     }
@@ -38,12 +39,12 @@ class NodeToSongNetwork {
         if (source is Node && target is Node || source is Recommendation && target is Recommendation)
             return false
         if (!graph.containsVertex(source)) {
-                logger.error { "Couldn't add edge $nodeSongEdge because source node doesn't exist" }
-                return false
+            logger.error { "Couldn't add edge $nodeSongEdge because source node doesn't exist" }
+            return false
         }
         if (!graph.containsVertex(target)) {
             logger.error { "Couldn't add edge $nodeSongEdge because target song doesn't exist" }
-                return false
+            return false
         }
         if (graph.containsEdge(source, target)) {
             logger.info { "Overwriting edge from $source to $target" }

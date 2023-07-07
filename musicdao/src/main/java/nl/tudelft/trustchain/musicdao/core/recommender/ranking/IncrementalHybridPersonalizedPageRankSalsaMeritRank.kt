@@ -6,6 +6,7 @@ import nl.tudelft.trustchain.musicdao.core.recommender.ranking.iterator.CustomHy
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph
 import org.jgrapht.graph.SimpleDirectedWeightedGraph
 import java.util.*
+
 class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
     maxWalkLength: Int,
     repetitions: Int,
@@ -56,13 +57,13 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
         val songsInWalks = randomWalks.flatten().filterIsInstance<Recommendation>()
         val songsToValue = mutableMapOf<Recommendation, Double>()
         val betaDecays = calculateBetaDecaysSpaceIntensive()
-        for(song in songsInWalks) {
+        for (song in songsInWalks) {
             songsToValue[song] = 0.0
         }
-        for(walk in randomWalks) {
+        for (walk in randomWalks) {
             var modifier = 1.0
             walk.forEachIndexed { index, nodeOrSong ->
-                if(index % 2 == 0) {
+                if (index % 2 == 0) {
                     modifier = 1.0
                 } else {
                     songsToValue[nodeOrSong as Recommendation] = songsToValue[nodeOrSong]!! + modifier
@@ -119,7 +120,7 @@ class IncrementalHybridPersonalizedPageRankSalsaMeritRank(
             val maxVisitsFromAnotherNode =
                 visitToNodeThroughOtherNode[node]?.filter { it.key != rootNode }?.values?.maxOrNull() ?: 0
             val score = maxVisitsFromAnotherNode.toDouble() / totalVisitsToRec[node]!!
-            betaDecay[node] = if(score > betaDecayThreshold) score else 0.0
+            betaDecay[node] = if (score > betaDecayThreshold) score else 0.0
         }
         return betaDecay
     }

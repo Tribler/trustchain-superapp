@@ -20,4 +20,3 @@ object TimeStampAsLongSerializer : KSerializer<Timestamp> {
         return Timestamp(decoder.decodeLong())
     }
 }
-

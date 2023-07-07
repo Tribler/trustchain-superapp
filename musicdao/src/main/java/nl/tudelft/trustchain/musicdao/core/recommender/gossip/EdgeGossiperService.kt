@@ -20,10 +20,7 @@ import java.util.Random
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
-private val logger = KotlinLogging.logger {}
-
 @AndroidEntryPoint
-@RequiresApi(Build.VERSION_CODES.O)
 class EdgeGossiperService(
     recCommunity: TrustedRecommenderCommunity? = null
 ) : Service() {
@@ -120,10 +117,12 @@ class EdgeGossiperService(
     private suspend fun gossipEdges() {
         while (scope.isActive) {
             if (!::trustNetwork.isInitialized) {
-                trustNetwork = SongRecTrustNetwork.getInstance(
-                    IPv8Android.getInstance().getOverlay<TrustedRecommenderCommunity>()!!.myPeer.key.pub().toString(),
-                    cachePath.getPath().toString()
-                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    trustNetwork = SongRecTrustNetwork.getInstance(
+                        IPv8Android.getInstance().getOverlay<TrustedRecommenderCommunity>()!!.myPeer.key.pub().toString(),
+                        cachePath.getPath().toString()
+                    )
+                }
                 sortedNodeToNodeEdges =
                     trustNetwork.getAllNodeToNodeEdges().sortedBy { it.timestamp }.takeLast(TIME_WINDOW)
                 sortedNodeToSongEdges =

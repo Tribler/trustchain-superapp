@@ -18,4 +18,3 @@ object NodeAsStringSerializer : KSerializer<Node> {
         return Node(decoder.decodeString())
     }
 }
-
