@@ -5,6 +5,7 @@ apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'kotlin-kapt'
 apply plugin: "dagger.hilt.android.plugin"
+apply plugin: 'kotlinx-serialization'
 
 buildscript {
     repositories {
@@ -176,6 +177,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.apache.commons:commons-csv:1.9.0")
 
+    //JGraphT
+    implementation "org.jgrapht:jgrapht-core:1.5.1"
+    implementation "org.jgrapht:jgrapht-io:1.5.1"
 }
 
 repositories {

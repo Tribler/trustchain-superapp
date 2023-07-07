@@ -35,6 +35,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
 import kotlinx.coroutines.*
 import nl.tudelft.trustchain.currencyii.coin.WalletManager
+import nl.tudelft.trustchain.musicdao.core.recommender.gossip.EdgeGossiperService
 import javax.inject.Inject
 
 /**
@@ -68,6 +69,9 @@ class MusicActivity : AppCompatActivity() {
     lateinit var setupMusicCommunity: SetupMusicCommunity
 
     lateinit var mService: MusicGossipingService
+
+    lateinit var mEdgeGossiperService: EdgeGossiperService
+
     var mBound: Boolean = false
 
     @DelicateCoroutinesApi
@@ -88,6 +92,11 @@ class MusicActivity : AppCompatActivity() {
         Intent(this, MusicGossipingService::class.java).also { intent ->
             startService(intent)
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
+        }
+
+        Intent(this, EdgeGossiperService::class.java).also { intent ->
+            startService(intent)
+            bindService(intent, mGossipConnection, Context.BIND_AUTO_CREATE)
         }
 
         Log.d(
@@ -179,6 +188,7 @@ class MusicActivity : AppCompatActivity() {
         super.onDestroy()
         if (mBound) {
             unbindService(mConnection)
+            unbindService(mGossipConnection)
         }
     }
 
@@ -187,6 +197,20 @@ class MusicActivity : AppCompatActivity() {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as MusicGossipingService.LocalBinder
             mService = binder.getService()
+            mBound = true
+        }
+
+        // Called when the connection with the service disconnects unexpectedly
+        override fun onServiceDisconnected(className: ComponentName) {
+            mBound = false
+        }
+    }
+
+    private val mGossipConnection = object : ServiceConnection {
+        // Called when the connection with the service is established
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            val binder = service as EdgeGossiperService.LocalBinder
+            mEdgeGossiperService = binder.getService()
             mBound = true
         }
 

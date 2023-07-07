@@ -28,6 +28,8 @@ class PlayerViewModel(context: Context) : ViewModel() {
         ExoPlayer.Builder(context).build()
     }
 
+    val cachePath = context.cacheDir
+
     private fun buildMediaSource(uri: Uri, context: Context): MediaSource? {
         val dataSourceFactory: DataSource.Factory =
             DefaultDataSourceFactory(context, "musicdao-audioplayer")

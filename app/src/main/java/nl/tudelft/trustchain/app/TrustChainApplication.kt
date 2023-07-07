@@ -68,6 +68,7 @@ import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.gossipML.RecommenderCommunity
 import nl.tudelft.trustchain.gossipML.db.RecommenderStore
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
+import nl.tudelft.trustchain.musicdao.core.ipv8.TrustedRecommenderCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
@@ -119,7 +120,8 @@ class TrustChainApplication : Application() {
                 createRecommenderCommunity(),
                 createIdentityCommunity(),
                 createFOCCommunity(),
-                createDeToksCommunity()
+                createDeToksCommunity(),
+                createTrustedRecommenderCommunity()
             ),
             walkerInterval = 5.0
         )
@@ -453,6 +455,14 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             DeToksCommunity.Factory(this),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createTrustedRecommenderCommunity(): OverlayConfiguration<TrustedRecommenderCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            TrustedRecommenderCommunity.Factory(this),
             listOf(randomWalk)
         )
     }
