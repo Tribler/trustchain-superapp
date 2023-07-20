@@ -5,7 +5,6 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.musicdao.MusicActivity
 import nl.tudelft.trustchain.FOC.MainActivityFOC
-import nl.tudelft.trustchain.atomicswap.AtomicSwapActivity
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
@@ -113,10 +112,4 @@ enum class AppDefinition(
         ValueTransferMainActivity::class.java,
         true,
     ),
-    ATOMIC_SWAP(
-        R.drawable.ic_atomic_swap_24dp,
-        "Atomic Swap",
-        R.color.blue,
-        AtomicSwapActivity::class.java
-    )
 }

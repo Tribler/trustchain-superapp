@@ -53,9 +53,6 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.FOC.community.FOCCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
-import nl.tudelft.trustchain.atomicswap.AtomicSwapCommunity
-import nl.tudelft.trustchain.atomicswap.AtomicSwapTrustchainConstants
-import nl.tudelft.trustchain.atomicswap.ui.swap.LOG
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.bitcoin.WalletService
@@ -107,7 +104,6 @@ class TrustChainApplication : Application() {
                 createTFTPCommunity(),
                 createDemoCommunity(),
                 createWalletCommunity(),
-                createAtomicSwapCommunity(),
                 createMarketCommunity(),
                 createCoinCommunity(),
                 createDaoCommunity(),
@@ -211,52 +207,6 @@ class TrustChainApplication : Application() {
                 }
             }
         )
-
-        trustchain.registerTransactionValidator(
-            AtomicSwapTrustchainConstants.ATOMIC_SWAP_COMPLETED_BLOCK,
-            object : TransactionValidator {
-                override fun validate(
-                    block: TrustChainBlock,
-                    database: TrustChainStore
-                ): ValidationResult {
-                    if ((
-                        block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_COIN] != null &&
-                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_TO_COIN] != null &&
-                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_AMOUNT] != null &&
-                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_TO_AMOUNT] != null &&
-                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_OFFER_ID] != null
-                        ) ||
-                        block.isAgreement
-                    ) {
-                        return ValidationResult.Valid
-                    } else {
-                        return ValidationResult.Invalid(listOf("Proposal invalid"))
-                    }
-                }
-            }
-        )
-
-        trustchain.registerBlockSigner(
-            AtomicSwapTrustchainConstants.ATOMIC_SWAP_COMPLETED_BLOCK,
-            object : BlockSigner {
-                override fun onSignatureRequest(block: TrustChainBlock) {
-                    trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
-                    Log.d(LOG, "Bob created a trustchain agreement block")
-                }
-            }
-        )
-
-        trustchain.addListener(
-            AtomicSwapTrustchainConstants.ATOMIC_SWAP_COMPLETED_BLOCK,
-            object : BlockListener {
-                override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d(
-                        "AtomicSwap",
-                        "onBlockReceived: ${block.blockId} ${block.transaction}"
-                    )
-                }
-            }
-        )
     }
 
     private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {
@@ -267,14 +217,6 @@ class TrustChainApplication : Application() {
 
         return OverlayConfiguration(
             AttestationCommunity.Factory(store),
-            listOf(randomWalk)
-        )
-    }
-
-    private fun createAtomicSwapCommunity(): OverlayConfiguration<AtomicSwapCommunity> {
-        val randomWalk = RandomWalk.Factory()
-        return OverlayConfiguration(
-            Overlay.Factory(AtomicSwapCommunity::class.java),
             listOf(randomWalk)
         )
     }
