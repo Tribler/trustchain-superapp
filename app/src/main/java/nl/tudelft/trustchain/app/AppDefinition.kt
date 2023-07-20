@@ -14,7 +14,6 @@ import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.ssi.SSIMainActivity
 import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
-import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
@@ -119,11 +118,5 @@ enum class AppDefinition(
         "Atomic Swap",
         R.color.blue,
         AtomicSwapActivity::class.java
-    ),
-    LITERATUREDAO(
-        R.drawable.ic_book_hover_over_hand,
-        "LiteratureDao",
-        R.color.green,
-        LiteratureDaoActivity::class.java
-    ),
+    )
 }

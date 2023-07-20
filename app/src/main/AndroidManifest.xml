@@ -158,20 +158,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MusicDaoTheme"></activity>
 
-        <activity
-            android:name="nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity"
-            android:exported="true"
-            android:label="Literature sharing app"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-        </activity>
-
         <service
             android:name="nl.tudelft.trustchain.app.service.TrustChainService"
             android:exported="false" />
