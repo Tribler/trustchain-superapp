@@ -123,11 +123,6 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
-            android:name="nl.tudelft.trustchain.detoks.DeToksActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:theme="@style/Fullscreen" />
-
-        <activity
             android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
             android:exported="true"
             android:launchMode="singleTop"
@@ -183,11 +178,6 @@
 
         <service
             android:name="nl.tudelft.trustchain.musicdao.core.repositories.MusicGossipingService"
-            android:enabled="true"
-            android:exported="false" />
-
-        <service
-            android:name="nl.tudelft.trustchain.detoks.gossiper.GossiperService"
             android:enabled="true"
             android:exported="false" />
 
