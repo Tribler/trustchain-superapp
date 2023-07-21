@@ -93,10 +93,6 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
-            android:name="nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
             android:name="nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 

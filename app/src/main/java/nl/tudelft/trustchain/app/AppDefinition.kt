@@ -13,7 +13,6 @@ import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.ssi.SSIMainActivity
 import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
-import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
@@ -62,12 +61,6 @@ enum class AppDefinition(
         "AI trading bot",
         R.color.blue,
         TrustChainTraderActivity::class.java
-    ),
-    TRUSTCHAIN_PAYLOADGENERATOR(
-        R.drawable.ic_add_black_24dp,
-        "Market Bot",
-        R.color.black,
-        TrustChainPayloadGeneratorActivity::class.java
     ),
     FREEDOM_OF_COMPUTING(
         R.drawable.ic_naruto,

@@ -114,7 +114,6 @@ dependencies {
     implementation project(':trustchain-voter')
     implementation project(':trustchain-explorer')
     implementation project(':trustchain-trader')
-    implementation project(':trustchain-payloadgenerator')
     implementation project(':debug')
     implementation project(':distributedai')
     implementation project(':freedomOfComputing')

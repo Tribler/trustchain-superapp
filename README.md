@@ -86,14 +86,6 @@ There are two ways to find a public key:
 <img src="trustchain-trader/TraderImages/live_trading.gif" width="180"><br />
 [More about AI trading bot](trustchain-trader/readme.md)
 
-### Market Bot
-
-The market bot app can generate bids and asks which are received by the peers in the market community.
-The bid and asks can either be generated automatically or manually. Those bids and asks will be sent as IPv8 messages.
-
-<img src="trustchain-payloadgenerator/GeneratorImages/PayloadFragment.png" width="180"><br />
-[More about Market Bot](trustchain-payloadgenerator/readme.md)
-
 ### Luxury Socialism
 {_recent events have turned this into_ **really bad naming**} We build a DAO for a better world. Luxury socialism is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). It is a proof-of-concept implementation of a DAO system using Trustchain and Bitcoin. Trustchain is used for communication and bookkeeping while the Bitcoin blockchain is used to have collective multi-signature wallets for each DAO. The content of the app is split up in several tabs:
 * **First Time Launch**: The first time the app is launched, the user must setup his bitcoin wallet. Afterwhich the chain will sync and he is routed to the main screens.
