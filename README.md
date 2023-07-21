@@ -64,28 +64,6 @@ Zooming into the actual mechanism of QR-Codes (Creative Commons CC0 license - sh
 
 <img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android-debug.png" width="180">
 
-### AI trading bot
-The AI trading bot is a zero-server AI, which ultimately can understand markets, limit orderbooks, bid/ask pairs and global stock patterns using only smartphones for computing power and connection.
-Built on top of Trustchain, the app provides a small decentralized market for trading, providing safe and verifiable transaction for any arbitrary change of goods.
-
-**AI trading bot** consist of two parts.
-1. An AI trading bot using a Naive Bayes Classifier which buys or sells Bitcoins in a decentralized market.
-2. Sending and receiving money to and from other peers.
-
-**Trading**
-The AI trading bot app is visible upon opening the superapp. It receives bids and asks from other peers that want to buy or sell Bitcoins for Dymbe Dollars.
-Upon receiving a bid or ask, it decides to either execute the offer or not.
-The bot can be toggled on and off using the toggle on the home screen.
-
-**Send/Receive**
-In the sending/receiving money tab one can send money to, or receive money from a different peer.
-There are two ways to find a public key:
-1. The receiving peer presses the send/receive toggle. His public key will be shown as a QR-code. Now pressing the "scan" button on the sender's device allows you can scan the QR code of the receiver.
-2. As a sender, go to the "Peers" fragment in the app, and press the public key of the receiver.
-
-<img src="trustchain-trader/TraderImages/live_trading.gif" width="180"><br />
-[More about AI trading bot](trustchain-trader/readme.md)
-
 ### Luxury Socialism
 {_recent events have turned this into_ **really bad naming**} We build a DAO for a better world. Luxury socialism is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). It is a proof-of-concept implementation of a DAO system using Trustchain and Bitcoin. Trustchain is used for communication and bookkeeping while the Bitcoin blockchain is used to have collective multi-signature wallets for each DAO. The content of the app is split up in several tabs:
 * **First Time Launch**: The first time the app is launched, the user must setup his bitcoin wallet. Afterwhich the chain will sync and he is routed to the main screens.

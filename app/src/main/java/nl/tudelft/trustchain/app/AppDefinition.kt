@@ -14,7 +14,6 @@ import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.ssi.SSIMainActivity
 import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
-import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.voting.VotingActivity
 
@@ -55,12 +54,6 @@ enum class AppDefinition(
         "Luxury Communism",
         R.color.metallic_gold,
         CurrencyIIMainActivity::class.java
-    ),
-    TRUSTCHAIN_TRADER(
-        R.drawable.ic_device_hub_black_24dp,
-        "AI trading bot",
-        R.color.blue,
-        TrustChainTraderActivity::class.java
     ),
     FREEDOM_OF_COMPUTING(
         R.drawable.ic_naruto,
