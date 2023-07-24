@@ -7,17 +7,17 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import nl.tudelft.ipv8.android.service.IPv8Service
 import nl.tudelft.trustchain.app.R
-import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
+import nl.tudelft.trustchain.app.ui.dashboard.DashboardActivity
 
 class TrustChainService : IPv8Service() {
     override fun createNotification(): NotificationCompat.Builder {
-        val trustChainExplorerIntent = Intent(this, TrustChainExplorerActivity::class.java)
+        val trustChainDashboardIntent = Intent(this, DashboardActivity::class.java)
         val flags = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             else -> PendingIntent.FLAG_UPDATE_CURRENT
         }
         val pendingIntent = TaskStackBuilder.create(this)
-            .addNextIntentWithParentStack(trustChainExplorerIntent)
+            .addNextIntentWithParentStack(trustChainDashboardIntent)
             .getPendingIntent(0, flags)
 
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_CONNECTION)

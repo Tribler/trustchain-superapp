@@ -6,7 +6,6 @@ import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.musicdao.MusicActivity
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
-import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.distributedAI.DistributedActivity
@@ -35,12 +34,6 @@ enum class AppDefinition(
         "PeerChat",
         R.color.purple,
         PeerChatActivity::class.java
-    ),
-    TRUSTCHAIN_EXPLORER(
-        R.drawable.ic_device_hub_black_24dp,
-        "TrustChain Explorer",
-        R.color.red,
-        TrustChainExplorerActivity::class.java
     ),
     DEBUG(
         R.drawable.ic_bug_report_black_24dp,
