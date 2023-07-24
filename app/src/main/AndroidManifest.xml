@@ -103,10 +103,6 @@
             tools:ignore="InnerclassSeparator" />
 
         <activity
-            android:name="nl.tudelft.trustchain.voting.VotingActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
             android:name="nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 

@@ -67,7 +67,6 @@ import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import nl.tudelft.trustchain.voting.VotingCommunity
 import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -107,7 +106,6 @@ class TrustChainApplication : Application() {
                 createMarketCommunity(),
                 createCoinCommunity(),
                 createDaoCommunity(),
-                createVotingCommunity(),
                 createMusicCommunity(),
                 createRecommenderCommunity(),
                 createIdentityCommunity(),
@@ -323,17 +321,6 @@ class TrustChainApplication : Application() {
         return OverlayConfiguration(
             Overlay.Factory(CoinCommunity::class.java),
             listOf(randomWalk, nsd)
-        )
-    }
-
-    private fun createVotingCommunity(): OverlayConfiguration<VotingCommunity> {
-        val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "voting.db")
-        val store = TrustChainSQLiteStore(Database(driver))
-        val randomWalk = RandomWalk.Factory()
-        return OverlayConfiguration(
-            VotingCommunity.Factory(settings, store),
-            listOf(randomWalk)
         )
     }
 

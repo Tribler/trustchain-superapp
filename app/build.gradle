@@ -111,7 +111,6 @@ allprojects {
 }
 
 dependencies {
-    implementation project(':trustchain-voter')
     implementation project(':trustchain-explorer')
     implementation project(':debug')
     implementation project(':distributedai')

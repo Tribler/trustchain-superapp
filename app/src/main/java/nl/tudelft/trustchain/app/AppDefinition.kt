@@ -15,7 +15,6 @@ import nl.tudelft.trustchain.ssi.SSIMainActivity
 import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.voting.VotingActivity
 
 enum class AppDefinition(
     @DrawableRes val icon: Int,
@@ -66,12 +65,6 @@ enum class AppDefinition(
         "Distributed AI",
         R.color.red,
         DistributedActivity::class.java
-    ),
-    VOTING(
-        R.drawable.abc_ic_voice_search_api_material,
-        "Voter",
-        R.color.android_green,
-        VotingActivity::class.java
     ),
     MUSIC_DAO(
         android.R.drawable.ic_media_play,
