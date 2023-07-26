@@ -10,7 +10,6 @@ import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.ssi.SSIMainActivity
-import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 
@@ -63,12 +62,6 @@ enum class AppDefinition(
         "EuroToken",
         R.color.metallic_gold,
         EuroTokenMainActivity::class.java
-    ),
-    LIQUIDITY(
-        R.drawable.ic_pool,
-        "Liquidity Pool",
-        R.color.blue,
-        LiquidityPoolMainActivity::class.java
     ),
     VALUETRANSFER(
         R.drawable.ic_idelft_logo,

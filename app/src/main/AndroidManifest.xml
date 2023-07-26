@@ -95,10 +95,6 @@
             tools:ignore="InnerclassSeparator" />
 
         <activity
-            android:name="nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
             android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
             android:exported="true"
             android:launchMode="singleTop"
