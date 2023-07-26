@@ -8,7 +8,6 @@ import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
-import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.ssi.SSIMainActivity
 import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
@@ -52,12 +51,6 @@ enum class AppDefinition(
         "Freedom of Computing",
         R.color.blue,
         MainActivityFOC::class.java
-    ),
-    DNA(
-        R.drawable.ic_bug_report_black_24dp,
-        "Distributed AI",
-        R.color.red,
-        DistributedActivity::class.java
     ),
     MUSIC_DAO(
         android.R.drawable.ic_media_play,
