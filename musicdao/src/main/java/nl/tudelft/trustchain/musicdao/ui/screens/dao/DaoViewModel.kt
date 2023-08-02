@@ -23,7 +23,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.musicdao.core.dao.CoinCommunity
-import nl.tudelft.trustchain.currencyii.TrustChainHelper
+import nl.tudelft.trustchain.musicdao.core.util.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManager
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.musicdao.core.util.DAOTransferFundsHelper

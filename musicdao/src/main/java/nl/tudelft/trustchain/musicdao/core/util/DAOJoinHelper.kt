@@ -12,7 +12,6 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.musicdao.core.dao.CoinCommunity.Companion.SIGNATURE_AGREEMENT_BLOCK
 import nl.tudelft.trustchain.musicdao.core.dao.CoinCommunity.Companion.SIGNATURE_ASK_BLOCK
-import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import nl.tudelft.trustchain.currencyii.util.taproot.MuSig
