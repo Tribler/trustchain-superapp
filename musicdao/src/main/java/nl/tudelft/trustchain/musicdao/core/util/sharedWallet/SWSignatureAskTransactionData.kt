@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.musicdao.core.util.sharedWallet
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
-import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.musicdao.core.dao.CoinCommunity
 
 data class SWSignatureAskBlockTD(
     var SW_UNIQUE_ID: String,
