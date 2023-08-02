@@ -6,9 +6,9 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
+import nl.tudelft.trustchain.musicdao.core.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWJoinBlockTransactionData
-import nl.tudelft.trustchain.currencyii.util.taproot.TaprootUtil
+import nl.tudelft.trustchain.musicdao.core.util.taproot.TaprootUtil
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 

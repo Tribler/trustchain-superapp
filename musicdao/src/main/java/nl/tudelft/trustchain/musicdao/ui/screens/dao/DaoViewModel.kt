@@ -24,10 +24,10 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.musicdao.core.dao.CoinCommunity
 import nl.tudelft.trustchain.musicdao.core.util.TrustChainHelper
-import nl.tudelft.trustchain.currencyii.coin.WalletManager
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
+import nl.tudelft.trustchain.musicdao.core.coin.WalletManager
+import nl.tudelft.trustchain.musicdao.core.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.musicdao.core.util.DAOTransferFundsHelper
-import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
+import nl.tudelft.trustchain.musicdao.core.util.taproot.CTransaction
 import nl.tudelft.trustchain.musicdao.core.dao.*
 import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWResponseSignatureBlockTD
