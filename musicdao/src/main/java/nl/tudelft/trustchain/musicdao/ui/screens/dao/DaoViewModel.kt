@@ -26,10 +26,16 @@ import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManager
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.sharedWallet.*
 import nl.tudelft.trustchain.musicdao.core.util.DAOTransferFundsHelper
 import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import nl.tudelft.trustchain.musicdao.core.dao.*
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWResponseSignatureBlockTD
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWSignatureAskBlockTD
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWSignatureAskTransactionData
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWTransferDoneTransactionData
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWTransferFundsAskTransactionData
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWUtil
 import org.bitcoinj.core.Coin
 import prettyPrint
 import java.util.*

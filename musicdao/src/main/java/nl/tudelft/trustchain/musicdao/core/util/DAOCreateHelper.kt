@@ -8,7 +8,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.util.taproot.TaprootUtil
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey

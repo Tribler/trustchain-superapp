@@ -14,9 +14,16 @@ import nl.tudelft.trustchain.currencyii.CoinCommunity.Companion.SIGNATURE_AGREEM
 import nl.tudelft.trustchain.currencyii.CoinCommunity.Companion.SIGNATURE_ASK_BLOCK
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.sharedWallet.*
 import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import nl.tudelft.trustchain.currencyii.util.taproot.MuSig
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWJoinBlockTD
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWResponseNegativeSignatureTransactionData
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWResponseSignatureBlockTD
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWResponseSignatureTransactionData
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWSignatureAskBlockTD
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWSignatureAskTransactionData
+import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWUtil
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 import java.math.BigInteger
