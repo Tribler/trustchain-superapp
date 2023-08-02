@@ -27,7 +27,7 @@ import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManager
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.*
-import nl.tudelft.trustchain.currencyii.util.DAOTransferFundsHelper
+import nl.tudelft.trustchain.musicdao.core.util.DAOTransferFundsHelper
 import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import nl.tudelft.trustchain.musicdao.core.dao.*
 import org.bitcoinj.core.Coin

@@ -11,9 +11,9 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.sharedWallet.*
-import nl.tudelft.trustchain.currencyii.util.DAOCreateHelper
-import nl.tudelft.trustchain.currencyii.util.DAOJoinHelper
-import nl.tudelft.trustchain.currencyii.util.DAOTransferFundsHelper
+import nl.tudelft.trustchain.musicdao.core.util.DAOCreateHelper
+import nl.tudelft.trustchain.musicdao.core.util.DAOJoinHelper
+import nl.tudelft.trustchain.musicdao.core.util.DAOTransferFundsHelper
 
 @Suppress("UNCHECKED_CAST")
 class DaoCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8db5899c5df5c") :
