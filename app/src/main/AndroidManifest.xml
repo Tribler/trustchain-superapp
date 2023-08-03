@@ -61,11 +61,6 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
-            android:name="nl.tudelft.trustchain.ssi.SSIMainActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:theme="@style/Theme.SSI" />
-
-        <activity
             android:name="nl.tudelft.trustchain.common.ui.QRCodeActivityPortrait"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"

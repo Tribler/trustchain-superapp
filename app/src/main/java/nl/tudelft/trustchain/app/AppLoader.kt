@@ -74,7 +74,8 @@ class AppLoader(
         val DEFAULT_APPS = setOf(
             AppDefinition.VALUETRANSFER.appName,
             AppDefinition.MUSIC_DAO.appName,
-            AppDefinition.EIGHTEEN_PLUS.appName
+            AppDefinition.EUROTOKEN.appName,
+            AppDefinition.FREEDOM_OF_COMPUTING.appName
         )
     }
 }
