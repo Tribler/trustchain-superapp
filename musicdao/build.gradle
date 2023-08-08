@@ -77,7 +77,6 @@ android {
 }
 
 dependencies {
-    implementation project(':gossipML')
     implementation project(':common')
 
     api(project(':ipv8-android')) {

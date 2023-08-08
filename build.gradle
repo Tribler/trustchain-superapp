@@ -32,7 +32,6 @@ buildscript {
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
 
-        // TODO: Find a way to move this to trustchain-trader (gossipML relies on this too)
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
