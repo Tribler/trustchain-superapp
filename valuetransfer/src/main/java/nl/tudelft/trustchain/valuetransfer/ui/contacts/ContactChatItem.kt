@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.valuetransfer.ui.contacts
 import com.mattskala.itemadapter.Item
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
-import nl.tudelft.trustchain.peerchat.entity.ChatMessage
+import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
 
 data class ContactChatItem(
     val chatMessage: ChatMessage,

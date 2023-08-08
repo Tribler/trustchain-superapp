@@ -21,9 +21,9 @@ import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.common.valuetransfer.extensions.decodeImage
-import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.entity.ContactImage
-import nl.tudelft.trustchain.peerchat.entity.ContactState
+import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
+import nl.tudelft.trustchain.valuetransfer.util.ContactImage
+import nl.tudelft.trustchain.valuetransfer.util.ContactState
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentWalletVtBinding

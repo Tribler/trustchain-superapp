@@ -21,9 +21,9 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.common.valuetransfer.extensions.setPadding
 import nl.tudelft.trustchain.common.valuetransfer.extensions.toSquare
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
-import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
+import nl.tudelft.trustchain.valuetransfer.util.PeerChatStore
+import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
+import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
