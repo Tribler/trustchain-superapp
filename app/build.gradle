@@ -113,7 +113,6 @@ allprojects {
 dependencies {
     implementation project(':debug')
     implementation project(':freedomOfComputing')
-    implementation project(':peerchat')
     implementation project(':eurotoken')
     implementation project(':valuetransfer')
     api(project(':common')) {

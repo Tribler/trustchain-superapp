@@ -8,7 +8,6 @@ import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
-import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 
 enum class AppDefinition(
@@ -18,12 +17,6 @@ enum class AppDefinition(
     val activity: Class<out Activity>,
     val disableImageTint: Boolean = false,
 ) {
-    PEERCHAT(
-        R.drawable.ic_chat_black_24dp,
-        "PeerChat",
-        R.color.purple,
-        PeerChatActivity::class.java
-    ),
     DEBUG(
         R.drawable.ic_bug_report_black_24dp,
         "Debug",
