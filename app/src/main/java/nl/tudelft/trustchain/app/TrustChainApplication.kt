@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.content.getSystemService
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -79,6 +80,7 @@ class TrustChainApplication : Application() {
     var isFirstRun: Boolean = false
     lateinit var appLoader: AppLoader
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate() = runBlocking {
         super.onCreate()
         launch {
@@ -93,6 +95,7 @@ class TrustChainApplication : Application() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun initIPv8() {
         val config = IPv8Configuration(
             overlays = listOf(

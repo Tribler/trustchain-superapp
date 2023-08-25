@@ -5,10 +5,12 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
+import androidx.annotation.RequiresApi
 import nl.tudelft.ipv8.android.service.IPv8Service
 import nl.tudelft.trustchain.app.R
 import nl.tudelft.trustchain.app.ui.dashboard.DashboardActivity
 
+@RequiresApi(Build.VERSION_CODES.M)
 class TrustChainService : IPv8Service() {
     override fun createNotification(): NotificationCompat.Builder {
         val trustChainDashboardIntent = Intent(this, DashboardActivity::class.java)
