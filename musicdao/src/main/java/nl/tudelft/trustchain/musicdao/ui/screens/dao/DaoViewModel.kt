@@ -54,6 +54,7 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
         refreshOneShot()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun createGenesisDAO(currentEntranceFee: Long, currentThreshold: Int, context: Context) {
         try {
             val newDAO = getDaoCommunity().createBitcoinGenesisWallet(
@@ -265,6 +266,7 @@ class DaoViewModel @Inject constructor(val artistRepository: ArtistRepository) :
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun joinSharedWalletClicked(daoId: String, context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

@@ -2,7 +2,9 @@ package nl.tudelft.trustchain.musicdao.core.dao
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -46,6 +48,7 @@ class DaoCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8
      * @param entranceFee - Long, the entrance fee for joining the DAO.
      * @param threshold - Int, the percentage of members that need to vote before allowing someone in the DAO.
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun createBitcoinGenesisWallet(
         entranceFee: Long,
         threshold: Int,
@@ -65,6 +68,7 @@ class DaoCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8
      * **NOTE** the latest walletBlockData should be given, otherwise the serialized transaction is invalid.
      * @param walletBlock - the latest (that you know of) shared wallet block.
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun proposeJoinWallet(
         walletBlock: TrustChainBlock
     ): SWSignatureAskTransactionData {
@@ -104,6 +108,7 @@ class DaoCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8
      * @param satoshiAmount - Long, the amount that needs to be transferred
      * @return the proposal block
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun proposeTransferFunds(
         walletBlock: TrustChainBlock,
         receiverAddressSerialized: String,
@@ -126,6 +131,7 @@ class DaoCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8
      * @param receiverAddress - String, the address where the transfer needs to go
      * @param satoshiAmount - Long, the amount that needs to be transferred
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun transferFunds(
         walletData: SWJoinBlockTD,
         walletBlockData: TrustChainTransaction,

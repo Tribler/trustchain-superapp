@@ -2,8 +2,10 @@ package nl.tudelft.trustchain.musicdao.core.util
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -46,6 +48,7 @@ class DAOTransferFundsHelper {
      * @param satoshiAmount - Long, the amount that needs to be transferred
      * @return the proposal block
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun proposeTransferFunds(
         myPeer: Peer,
         mostRecentWalletBlock: TrustChainBlock,
@@ -102,6 +105,7 @@ class DAOTransferFundsHelper {
     /**
      * 3.2 Transfer funds from an existing shared wallet to a third-party. Broadcast bitcoin transaction.
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun transferFunds(
         myPeer: Peer,
         walletData: SWJoinBlockTD,
@@ -159,6 +163,7 @@ class DAOTransferFundsHelper {
     /**
      * 3.3 Everything is done, publish the final serialized bitcoin transaction data on trustchain.
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun broadcastTransferFundSuccessful(
         myPeer: Peer,
         walletData: SWJoinBlockTD,

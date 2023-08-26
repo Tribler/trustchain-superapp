@@ -23,54 +23,11 @@ class SWTransferDoneTransactionData(data: JsonObject) : SWBlockTransactionData(
         return Gson().fromJson(getJsonString(), SWTransferDoneBlockTD::class.java)
     }
 
-    fun addTrustChainPk(publicKey: String) {
-        val data = getData()
-        data.SW_TRUSTCHAIN_PKS.add(publicKey)
-        jsonData = SWUtil.objectToJsonObject(data)
-    }
-
-    fun addBitcoinPk(publicKey: String) {
-        val data = getData()
-        data.SW_BITCOIN_PKS.add(publicKey)
-        jsonData = SWUtil.objectToJsonObject(data)
-    }
-
-    fun addNoncePk(publicKey: String) {
-        val data = getData()
-        data.SW_NONCE_PKS.add(publicKey)
-        jsonData = SWUtil.objectToJsonObject(data)
-    }
-
     fun setTransactionSerialized(serializedTransaction: String) {
         val data = getData()
         data.SW_TRANSACTION_SERIALIZED = serializedTransaction
         jsonData = SWUtil.objectToJsonObject(data)
     }
-
-    constructor(
-        uniqueId: String,
-        transactionSerialized: String,
-        satoshiAmount: Long,
-        trustChainPks: ArrayList<String>,
-        bitcoinPks: ArrayList<String>,
-        noncePks: ArrayList<String>,
-        transferFundsAddressSerialized: String,
-        uniqueProposalId: String = SWUtil.randomUUID()
-    ) : this(
-        SWUtil.objectToJsonObject(
-            SWTransferDoneBlockTD(
-                uniqueId,
-                uniqueProposalId,
-                transactionSerialized,
-                trustChainPks,
-                bitcoinPks,
-                noncePks,
-                satoshiAmount,
-                transferFundsAddressSerialized
-            )
-
-        )
-    )
 
     constructor(transaction: TrustChainTransaction) : this(SWUtil.parseTransaction(transaction))
 }

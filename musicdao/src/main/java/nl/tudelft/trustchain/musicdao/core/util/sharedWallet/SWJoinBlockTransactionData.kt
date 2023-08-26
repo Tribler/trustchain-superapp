@@ -1,5 +1,7 @@
 package nl.tudelft.trustchain.musicdao.core.util.sharedWallet
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
@@ -46,6 +48,7 @@ class SWJoinBlockTransactionData(data: JsonObject) : SWBlockTransactionData(
         jsonData = SWUtil.objectToJsonObject(data)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     constructor(
         entranceFee: Long,
         transactionSerialized: String,
