@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.musicdao.core.util
 
-
 import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Peer
@@ -26,7 +25,6 @@ import nl.tudelft.trustchain.musicdao.core.util.sharedWallet.SWUtil
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 import java.math.BigInteger
-
 
 class DAOJoinHelper {
     private fun getTrustChainCommunity(): TrustChainCommunity {

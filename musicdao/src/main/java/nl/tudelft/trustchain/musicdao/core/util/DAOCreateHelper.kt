@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.musicdao.core.util
 
-
 import android.content.Context
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
