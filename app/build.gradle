@@ -113,7 +113,6 @@ allprojects {
 dependencies {
     implementation project(':debug')
     implementation project(':freedomOfComputing')
-    implementation project(':peerchat')
     implementation project(':eurotoken')
     implementation project(':valuetransfer')
     api(project(':common')) {
@@ -123,9 +122,6 @@ dependencies {
         exclude group: 'net.java.dev.jna'
     }
     api(project(':musicdao')) {
-        exclude group: 'net.java.dev.jna'
-    }
-    api(project(':gossipML')) {
         exclude group: 'net.java.dev.jna'
     }
 

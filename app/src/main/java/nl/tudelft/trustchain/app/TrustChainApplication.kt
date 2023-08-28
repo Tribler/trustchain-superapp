@@ -62,13 +62,10 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.musicdao.core.dao.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
-import nl.tudelft.trustchain.gossipML.RecommenderCommunity
-import nl.tudelft.trustchain.gossipML.db.RecommenderStore
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
+import nl.tudelft.trustchain.valuetransfer.community.PeerChatCommunity
+import nl.tudelft.trustchain.valuetransfer.util.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -110,7 +107,6 @@ class TrustChainApplication : Application() {
                 createCoinCommunity(),
                 createDaoCommunity(),
                 createMusicCommunity(),
-                createRecommenderCommunity(),
                 createIdentityCommunity(),
                 createFOCCommunity(),
             ),
@@ -335,23 +331,6 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             MusicCommunity.Factory(settings, store),
-            listOf(randomWalk)
-        )
-    }
-
-    @OptIn(DelicateCoroutinesApi::class) // TODO: Verify whether usage is correct.
-    private fun createRecommenderCommunity(): OverlayConfiguration<RecommenderCommunity> {
-        val settings = TrustChainSettings()
-        val musicDriver = AndroidSqliteDriver(Database.Schema, this, "music.db")
-        val musicStore = TrustChainSQLiteStore(Database(musicDriver))
-        val driver = AndroidSqliteDriver(MLDatabase.Schema, this, "recommend.db")
-        val database = MLDatabase(driver)
-
-        val recommendStore = RecommenderStore.getInstance(musicStore, database)
-        recommendStore.essentiaJob = GlobalScope.launch { recommendStore.addAllLocalFeatures() }
-        val randomWalk = RandomWalk.Factory()
-        return OverlayConfiguration(
-            RecommenderCommunity.Factory(recommendStore, settings, musicStore),
             listOf(randomWalk)
         )
     }

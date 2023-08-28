@@ -15,12 +15,12 @@ import nl.tudelft.ipv8.messaging.eva.TransferState
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.getColorByHash
-import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
+import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.common.valuetransfer.entity.TransferRequest
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
+import nl.tudelft.trustchain.valuetransfer.community.PeerChatCommunity
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute

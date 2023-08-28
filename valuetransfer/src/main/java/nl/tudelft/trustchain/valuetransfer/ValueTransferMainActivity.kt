@@ -62,11 +62,11 @@ import nl.tudelft.trustchain.common.valuetransfer.extensions.decodeBytes
 import nl.tudelft.trustchain.common.valuetransfer.extensions.imageBytes
 import nl.tudelft.trustchain.common.valuetransfer.extensions.resize
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
-import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.entity.ContactImage
-import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
+import nl.tudelft.trustchain.valuetransfer.community.PeerChatCommunity
+import nl.tudelft.trustchain.valuetransfer.util.PeerChatStore
+import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
+import nl.tudelft.trustchain.valuetransfer.util.ContactImage
+import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityAttestationConfirmDialog

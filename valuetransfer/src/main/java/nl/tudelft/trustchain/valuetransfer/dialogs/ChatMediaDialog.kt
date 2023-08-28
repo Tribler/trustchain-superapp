@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.ItemAdapter
 import nl.tudelft.ipv8.keyvault.PublicKey
-import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
+import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
+import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import java.text.SimpleDateFormat

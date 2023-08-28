@@ -11,7 +11,7 @@ import android.widget.TextView
 import androidx.viewpager.widget.PagerAdapter
 import com.bumptech.glide.Glide
 import com.jsibbold.zoomage.ZoomageView
-import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
+import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.util.OnSwipeTouchListener
 import nl.tudelft.trustchain.valuetransfer.util.getFormattedSize
