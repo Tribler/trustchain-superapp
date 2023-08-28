@@ -1,8 +1,7 @@
-package nl.tudelft.trustchain.ssi.peers
+package nl.tudelft.trustchain.valuetransfer.util
 
 import com.mattskala.itemadapter.Item
 import nl.tudelft.ipv8.keyvault.PublicKey
-import java.util.*
 
 class AuthorityItem(
     val publicKey: PublicKey,
