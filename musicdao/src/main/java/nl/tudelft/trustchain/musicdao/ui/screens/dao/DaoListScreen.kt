@@ -1,5 +1,7 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.dao
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +25,7 @@ import nl.tudelft.trustchain.musicdao.ui.screens.profile_menu.CustomMenuItem
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @Composable
 fun DaoListScreen(navController: NavController, daoViewModel: DaoViewModel) {

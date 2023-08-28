@@ -6,7 +6,6 @@ import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.musicdao.MusicActivity
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
-import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.ssi.SSIMainActivity
@@ -38,12 +37,6 @@ enum class AppDefinition(
         "Debug",
         R.color.dark_gray,
         DebugActivity::class.java
-    ),
-    CURRENCY_II(
-        R.drawable.ic_bitcoin,
-        "Luxury Communism",
-        R.color.metallic_gold,
-        CurrencyIIMainActivity::class.java
     ),
     FREEDOM_OF_COMPUTING(
         R.drawable.ic_naruto,

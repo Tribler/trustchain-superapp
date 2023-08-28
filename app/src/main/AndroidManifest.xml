@@ -81,10 +81,6 @@
             android:theme="@style/Theme.PeerChat" />
 
         <activity
-            android:name="nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
             android:name="nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:theme="@style/Theme.PeerChat" />

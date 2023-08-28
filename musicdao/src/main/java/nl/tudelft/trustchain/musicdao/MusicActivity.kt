@@ -34,7 +34,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
 import kotlinx.coroutines.*
-import nl.tudelft.trustchain.currencyii.coin.WalletManager
+import nl.tudelft.trustchain.musicdao.core.coin.WalletManager
 import javax.inject.Inject
 
 /**
