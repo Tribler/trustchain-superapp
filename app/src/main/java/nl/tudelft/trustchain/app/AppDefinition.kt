@@ -23,17 +23,12 @@ enum class AppDefinition(
         R.color.dark_gray,
         DebugActivity::class.java
     ),
-    FREEDOM_OF_COMPUTING(
-        R.drawable.ic_naruto,
-        "Freedom of Computing",
-        R.color.blue,
-        MainActivityFOC::class.java
-    ),
-    MUSIC_DAO(
-        android.R.drawable.ic_media_play,
-        "MusicDAO",
-        R.color.black,
-        MusicActivity::class.java
+    VALUETRANSFER(
+        R.drawable.ic_idelft_logo,
+        "IDelft",
+        R.color.colorPrimaryValueTransfer,
+        ValueTransferMainActivity::class.java,
+        true,
     ),
     EUROTOKEN(
         R.drawable.ic_baseline_euro_symbol_24,
@@ -41,11 +36,16 @@ enum class AppDefinition(
         R.color.metallic_gold,
         EuroTokenMainActivity::class.java
     ),
-    VALUETRANSFER(
-        R.drawable.ic_idelft_logo,
-        "IDelft",
-        R.color.colorPrimaryValueTransfer,
-        ValueTransferMainActivity::class.java,
-        true,
+    MUSIC_DAO(
+        android.R.drawable.ic_media_play,
+        "MusicDAO",
+        R.color.black,
+        MusicActivity::class.java
+    ),
+    FREEDOM_OF_COMPUTING(
+        R.drawable.ic_naruto,
+        "Freedom of Computing",
+        R.color.blue,
+        MainActivityFOC::class.java
     ),
 }
