@@ -111,21 +111,12 @@ allprojects {
 }
 
 dependencies {
-    implementation project(':trustchain-voter')
-    implementation project(':trustchain-explorer')
-    implementation project(':trustchain-trader')
-    implementation project(':trustchain-payloadgenerator')
     implementation project(':debug')
-    implementation project(':distributedai')
     implementation project(':freedomOfComputing')
     implementation project(':peerchat')
     implementation project(':eurotoken')
     implementation project(':ig-ssi')
-    implementation project(':liquidity-pool')
     implementation project(':valuetransfer')
-    implementation project(':atomic-swap')
-    implementation project(':literaturedao')
-    implementation project(':detoks')
     api(project(':common')) {
         exclude group: 'net.java.dev.jna'
     }

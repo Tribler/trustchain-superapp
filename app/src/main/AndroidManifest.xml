@@ -61,10 +61,6 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
-            android:name="nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
             android:name="nl.tudelft.trustchain.ssi.SSIMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:theme="@style/Theme.SSI" />
@@ -85,18 +81,6 @@
             android:theme="@style/Theme.PeerChat" />
 
         <activity
-            android:name="nl.tudelft.trustchain.distributedAI.DistributedActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
-            android:name="nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
-            android:name="nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
             android:name="nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
@@ -109,23 +93,6 @@
             android:name="nl.tudelft.trustchain.FOC.MainActivityFOC"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             tools:ignore="InnerclassSeparator" />
-
-        <activity
-            android:name="nl.tudelft.trustchain.voting.VotingActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
-            android:name="nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
-            android:name="nl.tudelft.trustchain.atomicswap.AtomicSwapActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
-            android:name="nl.tudelft.trustchain.detoks.DeToksActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:theme="@style/Fullscreen" />
 
         <activity
             android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
@@ -163,31 +130,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MusicDaoTheme"></activity>
 
-        <activity
-            android:name="nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity"
-            android:exported="true"
-            android:label="Literature sharing app"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-        </activity>
-
         <service
             android:name="nl.tudelft.trustchain.app.service.TrustChainService"
             android:exported="false" />
 
         <service
             android:name="nl.tudelft.trustchain.musicdao.core.repositories.MusicGossipingService"
-            android:enabled="true"
-            android:exported="false" />
-
-        <service
-            android:name="nl.tudelft.trustchain.detoks.gossiper.GossiperService"
             android:enabled="true"
             android:exported="false" />
 
