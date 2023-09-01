@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.eurotoken.ui.transactions
 
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.mattskala.itemadapter.ItemLayoutRenderer
@@ -73,7 +74,11 @@ class TransactionItemRenderer(
             txtProp.text =
                 "(${transactionRepository.trustChainCommunity.database.getBlockWithHash((item.transaction.block.transaction[TransactionRepository.KEY_TRANSACTION_HASH] as String).hexToBytes())!!.sequenceNumber})"
         } else if (item.transaction.block.isProposal) {
-            if (transactionRepository.trustChainCommunity.database.getLinked(item.transaction.block) != null) {
+            val linkedBlock = transactionRepository.trustChainCommunity.database.getLinked(
+                item.transaction.block)
+            if (linkedBlock != null) {
+                Log.d("TransactionItemRenderer", "Proposal block: transaction: ${item.transaction.block.transaction} blockId: ${item.transaction.block.blockId} hashNumber: ${item.transaction.block.hashNumber} publicKey: ${item.transaction.block.publicKey} link publik key: ${item.transaction.block.linkPublicKey} type: ${item.transaction.block.type} " +
+                                                          "has link block: ${item.transaction.block.transaction} blockId: ${item.transaction.block.blockId} hashNumber: ${item.transaction.block.hashNumber} publicKey: ${item.transaction.block.publicKey} link publik key: ${item.transaction.block.linkPublicKey} ${item.transaction.block.isAgreement}, ${item.transaction.block.isProposal},")
                 txtProp.text = "P+A"
                 txtProp.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
             } else {

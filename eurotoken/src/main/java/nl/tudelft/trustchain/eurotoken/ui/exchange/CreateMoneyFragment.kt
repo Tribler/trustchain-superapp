@@ -97,7 +97,7 @@ class CreateMoneyFragment : EurotokenBaseFragment(R.layout.fragment_create_money
         }
 
         binding.txtBalance.text =
-            TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+            TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtGatewayPublicKey.text = publicKey
 

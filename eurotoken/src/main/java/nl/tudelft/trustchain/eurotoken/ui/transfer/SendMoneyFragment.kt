@@ -67,7 +67,7 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         }
 
         binding.txtBalance.text =
-            TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+            TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtAmount.text = TransactionRepository.prettyAmount(amount)
         binding.txtContactPublicKey.text = publicKey
@@ -100,6 +100,7 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
                     .addContact(key, newName)
             }
             val success = transactionRepository.sendTransferProposal(publicKey.hexToBytes(), amount)
+            logger.info { "KANDRIO: Sending a transfer proposal resulted in: $success" }
             if(!success) {
                 return@setOnClickListener Toast.makeText(
                     requireContext(),

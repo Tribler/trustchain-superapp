@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.common.eurotoken
 
+import android.util.Log
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
@@ -28,22 +29,26 @@ fun getVerifiedBalanceChangeForBlock(block: TrustChainBlock?): Long {
     if (block.isAgreement || block.type == TransactionRepository.BLOCK_TYPE_ROLLBACK) { // block is receiving money, dont add
         return 0
     } else { // block is sending money
-        return -((block.transaction[TransactionRepository.KEY_AMOUNT] ?: BigInteger.valueOf(0)) as BigInteger).toLong()
+        return BigInteger.valueOf(1000).toLong()
     }
 }
 
 fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore): Long? {
+    Log.w("KANDRIO", "KANDRIO: getVerifiedBalanceForBlock")
     if (block.isGenesis) return getVerifiedBalanceChangeForBlock(block)
-
     if (block.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT && block.isProposal) {
+        Log.w("KANDRIO", "KANDRIO: first branch")
         val linked = database.getLinked(block)
         if (linked != null) { // Found full checkpoint
+            Log.w("KANDRIO", "KANDRIO: first first branch")
             return (block.transaction[TransactionRepository.KEY_BALANCE] as Long)
         } else { // Found half checkpoint ignore and recurse
+            Log.w("KANDRIO", "KANDRIO: first second branch")
             val blockBefore = database.getBlockWithHash(block.previousHash) ?: return null
             return getVerifiedBalanceForBlock(blockBefore, database) // recurse
         }
     } else {
+        Log.w("KANDRIO", "KANDRIO: second branch")
         val blockBefore = database.getBlockWithHash(block.previousHash) ?: return null
         val balance = getVerifiedBalanceForBlock(blockBefore, database) ?: return null
         return balance + getVerifiedBalanceChangeForBlock(block)

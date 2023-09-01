@@ -88,7 +88,7 @@ class DestroyMoneyFragment : EurotokenBaseFragment(R.layout.fragment_destroy_mon
         }
 
         binding.txtBalance.text =
-            TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+            TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtAmount.text = TransactionRepository.prettyAmount(amount)
         binding.txtGatewayPublicKey.text = publicKey

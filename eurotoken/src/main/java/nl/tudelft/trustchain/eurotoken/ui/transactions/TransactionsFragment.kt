@@ -129,7 +129,7 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
                 adapter.updateItems(items)
                 adapter.notifyDataSetChanged()
                 binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                    TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
                 if (ownContact?.name != null) {
                     binding.txtOwnName.text = "Your balance (" + ownContact.name + ")"
                 }
@@ -150,7 +150,7 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
         items.observe(viewLifecycleOwner, Observer {
             adapter.updateItems(it)
             binding.txtBalance.text =
-                TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
         })
     }
 }

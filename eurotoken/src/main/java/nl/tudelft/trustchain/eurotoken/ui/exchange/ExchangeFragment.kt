@@ -113,7 +113,7 @@ class ExchangeFragment : EurotokenBaseFragment() {
                     ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
 
                 txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                    TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
                 if (ownContact?.name != null) {
                     txtOwnName.text = "Your balance (" + ownContact.name + ")"
                 }
