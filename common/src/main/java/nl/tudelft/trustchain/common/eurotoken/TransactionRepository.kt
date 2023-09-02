@@ -1036,6 +1036,6 @@ class TransactionRepository(
         const val KEY_PAYMENT_ID = "payment_id"
         const val KEY_IBAN = "iban"
 
-        const val INITIAL_BALANCE: Long = 1000
+        var INITIAL_BALANCE: Long = 1000
     }
 }
