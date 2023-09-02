@@ -29,13 +29,13 @@ fun getVerifiedBalanceChangeForBlock(block: TrustChainBlock?): Long {
     if (block.isAgreement || block.type == TransactionRepository.BLOCK_TYPE_ROLLBACK) { // block is receiving money, dont add
         return 0
     } else { // block is sending money
-        return BigInteger.valueOf(1000).toLong()
+        return -((block.transaction[TransactionRepository.KEY_AMOUNT] ?: BigInteger.valueOf(0)) as BigInteger).toLong()
     }
 }
 
 fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore): Long? {
     Log.w("KANDRIO", "KANDRIO: getVerifiedBalanceForBlock")
-    if (block.isGenesis) return getVerifiedBalanceChangeForBlock(block)
+    if (block.isGenesis) return block.transaction[TransactionRepository.KEY_BALANCE] as Long
     if (block.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT && block.isProposal) {
         Log.w("KANDRIO", "KANDRIO: first branch")
         val linked = database.getLinked(block)
