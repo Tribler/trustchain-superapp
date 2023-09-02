@@ -77,8 +77,6 @@ class TransactionItemRenderer(
             val linkedBlock = transactionRepository.trustChainCommunity.database.getLinked(
                 item.transaction.block)
             if (linkedBlock != null) {
-                Log.d("TransactionItemRenderer", "Proposal block: transaction: ${item.transaction.block.transaction} blockId: ${item.transaction.block.blockId} hashNumber: ${item.transaction.block.hashNumber} publicKey: ${item.transaction.block.publicKey} link publik key: ${item.transaction.block.linkPublicKey} type: ${item.transaction.block.type} " +
-                                                          "has link block: ${item.transaction.block.transaction} blockId: ${item.transaction.block.blockId} hashNumber: ${item.transaction.block.hashNumber} publicKey: ${item.transaction.block.publicKey} link publik key: ${item.transaction.block.linkPublicKey} ${item.transaction.block.isAgreement}, ${item.transaction.block.isProposal},")
                 txtProp.text = "P+A"
                 txtProp.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
             } else {

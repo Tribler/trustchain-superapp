@@ -30,6 +30,7 @@ import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransferEuroBinding
@@ -53,9 +54,20 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
                 val ownContact =
                     ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
+                val pref = requireContext().getSharedPreferences(
+                    EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                    Context.MODE_PRIVATE
+                )
+                val demoModeEnabled = pref.getBoolean(
+                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
 
-                binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                if (demoModeEnabled) {
+                    binding.txtBalance.text =
+                        TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                } else {
+                    binding.txtBalance.text =
+                        TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                }
                 if (ownContact?.name != null) {
                     binding.missingNameLayout.visibility = View.GONE
                     binding.txtOwnName.text = "Your balance (" + ownContact.name + ")"
@@ -74,8 +86,20 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
         val ownContact = ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
 
-        binding.txtBalance.text =
-            TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+        val pref = requireContext().getSharedPreferences(
+            EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+            Context.MODE_PRIVATE
+        )
+        val demoModeEnabled = pref.getBoolean(
+            EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+
+        if (demoModeEnabled) {
+            binding.txtBalance.text =
+                TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+        } else {
+            binding.txtBalance.text =
+                TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+        }
         binding.txtOwnPublicKey.text = ownKey.keyToHash().toHex()
 
         if (ownContact?.name != null) {

@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.eurotoken.ui.transfer
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -12,6 +13,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentSendMoneyBinding
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
@@ -66,8 +68,20 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
             }
         }
 
-        binding.txtBalance.text =
-            TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+        val pref = requireContext().getSharedPreferences(
+            EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+            Context.MODE_PRIVATE
+        )
+        val demoModeEnabled = pref.getBoolean(
+            EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+
+        if (demoModeEnabled) {
+            binding.txtBalance.text =
+                TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+        } else {
+            binding.txtBalance.text =
+                TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+        }
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtAmount.text = TransactionRepository.prettyAmount(amount)
         binding.txtContactPublicKey.text = publicKey
@@ -100,7 +114,6 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
                     .addContact(key, newName)
             }
             val success = transactionRepository.sendTransferProposal(publicKey.hexToBytes(), amount)
-            logger.info { "KANDRIO: Sending a transfer proposal resulted in: $success" }
             if(!success) {
                 return@setOnClickListener Toast.makeText(
                     requireContext(),

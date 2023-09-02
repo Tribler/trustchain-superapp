@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.eurotoken.ui.transactions
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
+import kotlinx.android.synthetic.main.fragment_exchange.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
@@ -22,6 +24,7 @@ import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransactionsBinding
@@ -128,8 +131,20 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
                 }
                 adapter.updateItems(items)
                 adapter.notifyDataSetChanged()
-                binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                val pref = requireContext().getSharedPreferences(
+                    EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                    Context.MODE_PRIVATE
+                )
+                val demoModeEnabled = pref.getBoolean(
+                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+
+                if (demoModeEnabled) {
+                    binding.txtBalance.text =
+                        TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                } else {
+                    binding.txtBalance.text =
+                        TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                }
                 if (ownContact?.name != null) {
                     binding.txtOwnName.text = "Your balance (" + ownContact.name + ")"
                 }
@@ -149,8 +164,20 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
 
         items.observe(viewLifecycleOwner, Observer {
             adapter.updateItems(it)
-            binding.txtBalance.text =
-                TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+            val pref = requireContext().getSharedPreferences(
+                EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                Context.MODE_PRIVATE
+            )
+            val demoModeEnabled = pref.getBoolean(
+                EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+
+            if (demoModeEnabled) {
+                binding.txtBalance.text =
+                    TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+            } else {
+                binding.txtBalance.text =
+                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+            }
         })
     }
 }
