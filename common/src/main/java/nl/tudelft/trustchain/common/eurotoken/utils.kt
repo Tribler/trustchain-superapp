@@ -34,8 +34,7 @@ fun getVerifiedBalanceChangeForBlock(block: TrustChainBlock?): Long {
 }
 
 fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore): Long? {
-    Log.w("getVerifiedBalanceForBl", "Getting verified balance for block with" +
-                                              "ID: ${block.blockId}")
+    Log.w("getVerifiedBalanceForBl", "Block with ID: ${block.blockId}")
     if (block.isGenesis) {
         val blockBalance = block.transaction[TransactionRepository.KEY_BALANCE]
             ?: return getVerifiedBalanceChangeForBlock(block)

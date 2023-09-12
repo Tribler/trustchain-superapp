@@ -27,7 +27,7 @@ open class EuroTokenBaseValidator(val transactionRepository: TransactionReposito
         assertBalanceExists(block)
         val blockBefore = getBlockBeforeOrRaise(block, database)
         val balanceBefore = if (blockBefore != null) getBalanceForBlock(blockBefore, database)
-                            else TransactionRepository.INITIAL_BALANCE
+        else TransactionRepository.INITIAL_BALANCE
         balanceBefore ?: throw PartialPrevious("Missing previous block")
         Log.w("verifyListedBalance", "Current balance: $balanceBefore")
         val balanceChange = getBalanceChangeForBlock(block)
