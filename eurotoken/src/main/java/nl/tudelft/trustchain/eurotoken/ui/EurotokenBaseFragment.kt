@@ -111,7 +111,7 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         if (demoModeEnabled) {
             TransactionRepository.INITIAL_BALANCE = 1000
         } else {
-            0
+            TransactionRepository.INITIAL_BALANCE = 0
         }
         return getString(R.string.toggle_demo_mode, if (demoModeEnabled) "OFF" else "ON")
     }
