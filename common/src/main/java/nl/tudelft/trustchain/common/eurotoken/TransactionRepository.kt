@@ -98,14 +98,10 @@ class TransactionRepository(
 
     fun getVerifiedBalanceForBlock(block: TrustChainBlock?, database: TrustChainStore): Long? {
         if (block == null) {
-            Log.d("EuroTokenBlock", "Found null block!")
+            Log.d("getVerifiedBalanceForBl", "Found null block!")
             return null
         } // Missing block
-        Log.d("getVerifiedBalanceForBl", "latest block found: proposal: ${block.isProposal}, \n" +
-            "agreement: ${block.isAgreement}, \n" +
-            "genesis: ${block.isGenesis}, \n" +
-            "transaction: ${block.transaction}, \n" +
-            "type: ${block.type}")
+        Log.d("getVerifiedBalanceForBl", "Found block with ID ${block.blockId}")
         if (!EUROTOKEN_TYPES.contains(block.type)) {
             Log.d("EuroTokenBlock", "Validation, not eurotoken ")
             return getVerifiedBalanceForBlock(
@@ -166,11 +162,7 @@ class TransactionRepository(
             Log.d("getBalanceForBlock", "Found null block!")
             return null
         } // Missing block
-        Log.d("getBalanceForBlock", "latest block found: proposal: ${block.isProposal}, \n" +
-            "agreement: ${block.isAgreement}, \n" +
-            "genesis: ${block.isGenesis}, \n" +
-            "transaction: ${block.transaction}, \n" +
-            "type: ${block.type}")
+        Log.d("getBalanceForBlock", "Found block with ID: ${block.blockId}")
         if (!EUROTOKEN_TYPES.contains(block.type)) return getBalanceForBlock(
             database.getBlockWithHash(
                 block.previousHash
@@ -214,8 +206,7 @@ class TransactionRepository(
             Log.d("getMyVerifiedBalance", "no latest block, defaulting to initial balance")
             return INITIAL_BALANCE
         }
-        val myVerifiedBalance = getVerifiedBalanceForBlock(latestBlock,
-                                                           trustChainCommunity.database)!!
+        val myVerifiedBalance = getVerifiedBalanceForBlock(latestBlock, trustChainCommunity.database)!!
         Log.d("getMyVerifiedBalance", "balance = $myVerifiedBalance")
         return myVerifiedBalance
     }
@@ -228,8 +219,7 @@ class TransactionRepository(
             return INITIAL_BALANCE
         }
         Log.d("getMyBalance", "latest block found")
-        val myBalance = getBalanceForBlock(latestBlock,
-                                           trustChainCommunity.database)!!
+        val myBalance = getBalanceForBlock(latestBlock, trustChainCommunity.database)!!
         Log.d("getMyBalance", "balance = $myBalance")
         return myBalance
     }

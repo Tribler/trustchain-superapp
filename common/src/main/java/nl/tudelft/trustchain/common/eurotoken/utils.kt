@@ -34,21 +34,18 @@ fun getVerifiedBalanceChangeForBlock(block: TrustChainBlock?): Long {
 }
 
 fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore): Long? {
-    Log.w("KANDRIO", "KANDRIO: getVerifiedBalanceForBlock")
+    Log.w("getVerifiedBalanceForBl", "Getting verified balance for block with" +
+                                              "ID: ${block.blockId}")
     if (block.isGenesis) return block.transaction[TransactionRepository.KEY_BALANCE] as Long
     if (block.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT && block.isProposal) {
-        Log.w("KANDRIO", "KANDRIO: first branch")
         val linked = database.getLinked(block)
         if (linked != null) { // Found full checkpoint
-            Log.w("KANDRIO", "KANDRIO: first first branch")
             return (block.transaction[TransactionRepository.KEY_BALANCE] as Long)
         } else { // Found half checkpoint ignore and recurse
-            Log.w("KANDRIO", "KANDRIO: first second branch")
             val blockBefore = database.getBlockWithHash(block.previousHash) ?: return null
             return getVerifiedBalanceForBlock(blockBefore, database) // recurse
         }
     } else {
-        Log.w("KANDRIO", "KANDRIO: second branch")
         val blockBefore = database.getBlockWithHash(block.previousHash) ?: return null
         val balance = getVerifiedBalanceForBlock(blockBefore, database) ?: return null
         return balance + getVerifiedBalanceChangeForBlock(block)
