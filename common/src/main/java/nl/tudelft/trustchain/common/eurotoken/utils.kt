@@ -36,7 +36,11 @@ fun getVerifiedBalanceChangeForBlock(block: TrustChainBlock?): Long {
 fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore): Long? {
     Log.w("getVerifiedBalanceForBl", "Getting verified balance for block with" +
                                               "ID: ${block.blockId}")
-    if (block.isGenesis) return block.transaction[TransactionRepository.KEY_BALANCE] as Long
+    if (block.isGenesis) {
+        val blockBalance = block.transaction[TransactionRepository.KEY_BALANCE]
+            ?: return getVerifiedBalanceChangeForBlock(block)
+        return blockBalance as Long
+    }
     if (block.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT && block.isProposal) {
         val linked = database.getLinked(block)
         if (linked != null) { // Found full checkpoint
