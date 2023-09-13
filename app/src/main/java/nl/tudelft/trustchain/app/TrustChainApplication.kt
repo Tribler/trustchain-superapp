@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.content.getSystemService
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -53,27 +54,18 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.FOC.community.FOCCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
-import nl.tudelft.trustchain.atomicswap.AtomicSwapCommunity
-import nl.tudelft.trustchain.atomicswap.AtomicSwapTrustchainConstants
-import nl.tudelft.trustchain.atomicswap.ui.swap.LOG
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.detoks.DeToksCommunity
+import nl.tudelft.trustchain.musicdao.core.dao.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
-import nl.tudelft.trustchain.gossipML.RecommenderCommunity
-import nl.tudelft.trustchain.gossipML.db.RecommenderStore
-import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
+import nl.tudelft.trustchain.valuetransfer.community.PeerChatCommunity
+import nl.tudelft.trustchain.valuetransfer.util.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import nl.tudelft.trustchain.voting.VotingCommunity
-import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -85,6 +77,7 @@ class TrustChainApplication : Application() {
     var isFirstRun: Boolean = false
     lateinit var appLoader: AppLoader
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate() = runBlocking {
         super.onCreate()
         launch {
@@ -99,6 +92,7 @@ class TrustChainApplication : Application() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun initIPv8() {
         val config = IPv8Configuration(
             overlays = listOf(
@@ -109,17 +103,12 @@ class TrustChainApplication : Application() {
                 createTFTPCommunity(),
                 createDemoCommunity(),
                 createWalletCommunity(),
-                createAtomicSwapCommunity(),
                 createMarketCommunity(),
                 createCoinCommunity(),
                 createDaoCommunity(),
-                createVotingCommunity(),
                 createMusicCommunity(),
-                createLiteratureCommunity(),
-                createRecommenderCommunity(),
                 createIdentityCommunity(),
                 createFOCCommunity(),
-                createDeToksCommunity()
             ),
             walkerInterval = 5.0
         )
@@ -215,52 +204,6 @@ class TrustChainApplication : Application() {
                 }
             }
         )
-
-        trustchain.registerTransactionValidator(
-            AtomicSwapTrustchainConstants.ATOMIC_SWAP_COMPLETED_BLOCK,
-            object : TransactionValidator {
-                override fun validate(
-                    block: TrustChainBlock,
-                    database: TrustChainStore
-                ): ValidationResult {
-                    if ((
-                        block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_COIN] != null &&
-                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_TO_COIN] != null &&
-                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_AMOUNT] != null &&
-                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_TO_AMOUNT] != null &&
-                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_OFFER_ID] != null
-                        ) ||
-                        block.isAgreement
-                    ) {
-                        return ValidationResult.Valid
-                    } else {
-                        return ValidationResult.Invalid(listOf("Proposal invalid"))
-                    }
-                }
-            }
-        )
-
-        trustchain.registerBlockSigner(
-            AtomicSwapTrustchainConstants.ATOMIC_SWAP_COMPLETED_BLOCK,
-            object : BlockSigner {
-                override fun onSignatureRequest(block: TrustChainBlock) {
-                    trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
-                    Log.d(LOG, "Bob created a trustchain agreement block")
-                }
-            }
-        )
-
-        trustchain.addListener(
-            AtomicSwapTrustchainConstants.ATOMIC_SWAP_COMPLETED_BLOCK,
-            object : BlockListener {
-                override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d(
-                        "AtomicSwap",
-                        "onBlockReceived: ${block.blockId} ${block.transaction}"
-                    )
-                }
-            }
-        )
     }
 
     private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {
@@ -271,14 +214,6 @@ class TrustChainApplication : Application() {
 
         return OverlayConfiguration(
             AttestationCommunity.Factory(store),
-            listOf(randomWalk)
-        )
-    }
-
-    private fun createAtomicSwapCommunity(): OverlayConfiguration<AtomicSwapCommunity> {
-        val randomWalk = RandomWalk.Factory()
-        return OverlayConfiguration(
-            Overlay.Factory(AtomicSwapCommunity::class.java),
             listOf(randomWalk)
         )
     }
@@ -388,17 +323,6 @@ class TrustChainApplication : Application() {
         )
     }
 
-    private fun createVotingCommunity(): OverlayConfiguration<VotingCommunity> {
-        val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "voting.db")
-        val store = TrustChainSQLiteStore(Database(driver))
-        val randomWalk = RandomWalk.Factory()
-        return OverlayConfiguration(
-            VotingCommunity.Factory(settings, store),
-            listOf(randomWalk)
-        )
-    }
-
     private fun createMusicCommunity(): OverlayConfiguration<MusicCommunity> {
         val settings = TrustChainSettings()
         // TODO: Re-concile this community with Reccomender Community
@@ -411,48 +335,10 @@ class TrustChainApplication : Application() {
         )
     }
 
-    // TODO: Fix for older Android versions.
-    @SuppressLint("NewApi")
-    private fun createLiteratureCommunity(): OverlayConfiguration<LiteratureCommunity> {
-        val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "music.db")
-        val store = TrustChainSQLiteStore(Database(driver))
-        val randomWalk = RandomWalk.Factory()
-        return OverlayConfiguration(
-            LiteratureCommunity.Factory(this, settings, store),
-            listOf(randomWalk)
-        )
-    }
-
-    @OptIn(DelicateCoroutinesApi::class) // TODO: Verify whether usage is correct.
-    private fun createRecommenderCommunity(): OverlayConfiguration<RecommenderCommunity> {
-        val settings = TrustChainSettings()
-        val musicDriver = AndroidSqliteDriver(Database.Schema, this, "music.db")
-        val musicStore = TrustChainSQLiteStore(Database(musicDriver))
-        val driver = AndroidSqliteDriver(MLDatabase.Schema, this, "recommend.db")
-        val database = MLDatabase(driver)
-
-        val recommendStore = RecommenderStore.getInstance(musicStore, database)
-        recommendStore.essentiaJob = GlobalScope.launch { recommendStore.addAllLocalFeatures() }
-        val randomWalk = RandomWalk.Factory()
-        return OverlayConfiguration(
-            RecommenderCommunity.Factory(recommendStore, settings, musicStore),
-            listOf(randomWalk)
-        )
-    }
-
     private fun createFOCCommunity(): OverlayConfiguration<FOCCommunity> {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             FOCCommunity.Factory(this),
-            listOf(randomWalk)
-        )
-    }
-
-    private fun createDeToksCommunity(): OverlayConfiguration<DeToksCommunity> {
-        val randomWalk = RandomWalk.Factory()
-        return OverlayConfiguration(
-            DeToksCommunity.Factory(this),
             listOf(randomWalk)
         )
     }

@@ -8,7 +8,7 @@ import kotlinx.android.synthetic.main.item_contacts_chat.view.ivIdenticon
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.getColorByHash
-import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
+import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import java.text.SimpleDateFormat

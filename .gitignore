@@ -3,7 +3,6 @@ build
 *.iml
 local.properties
 .gradle
-gossipML/.cxx
 **.project
 **.settings
 **.classpath

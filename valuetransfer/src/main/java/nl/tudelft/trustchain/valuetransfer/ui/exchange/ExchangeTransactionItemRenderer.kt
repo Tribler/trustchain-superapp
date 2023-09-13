@@ -8,7 +8,7 @@ import com.mattskala.itemadapter.ItemLayoutRenderer
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
+import nl.tudelft.trustchain.valuetransfer.util.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance

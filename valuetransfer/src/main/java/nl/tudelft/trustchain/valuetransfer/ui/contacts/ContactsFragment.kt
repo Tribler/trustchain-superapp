@@ -20,9 +20,9 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
-import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.entity.ContactImage
-import nl.tudelft.trustchain.peerchat.entity.ContactState
+import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
+import nl.tudelft.trustchain.valuetransfer.util.ContactImage
+import nl.tudelft.trustchain.valuetransfer.util.ContactState
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity

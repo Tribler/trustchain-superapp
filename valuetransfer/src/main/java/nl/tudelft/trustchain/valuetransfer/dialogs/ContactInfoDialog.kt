@@ -30,9 +30,9 @@ import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
-import nl.tudelft.trustchain.peerchat.entity.ContactImage
-import nl.tudelft.trustchain.peerchat.entity.ContactState
-import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
+import nl.tudelft.trustchain.valuetransfer.util.ContactImage
+import nl.tudelft.trustchain.valuetransfer.util.ContactState
+import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment

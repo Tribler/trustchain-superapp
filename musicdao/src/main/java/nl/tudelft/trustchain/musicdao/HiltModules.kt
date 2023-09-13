@@ -30,7 +30,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.currencyii.coin.*
+import nl.tudelft.trustchain.musicdao.core.coin.*
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Singleton
