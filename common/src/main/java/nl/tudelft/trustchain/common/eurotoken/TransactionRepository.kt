@@ -251,6 +251,56 @@ class TransactionRepository(
         )
     }
 
+    fun verifyBalanceAvailable(
+        block: TrustChainBlock,
+        database: TrustChainStore
+    ): ValidationResult {
+        val balance =
+            getVerifiedBalanceForBlock(block, database) ?: return ValidationResult.PartialPrevious
+        if (balance < 0) {
+            val blockBefore = database.getBlockWithHash(block.previousHash) ?: return ValidationResult.PartialPrevious
+            if (lastCheckpointIsEmpty(blockBefore, database)) {
+                // IF INVALID IS RETURNED WE WONT CRAWL FOR LINKED BLOCKS
+                return ValidationResult.PartialPrevious
+            }
+            val errorMsg = "Insufficient balance ($balance) for amount (${getBalanceChangeForBlock(block)})"
+            return ValidationResult.Invalid(listOf(errorMsg))
+        }
+        return ValidationResult.Valid
+    }
+
+    fun verifyListedBalance(block: TrustChainBlock, database: TrustChainStore): ValidationResult {
+        if (!block.transaction.containsKey(KEY_BALANCE)) return ValidationResult.Invalid(listOf("Missing balance"))
+        if (block.isGenesis) {
+            if (block.transaction.containsKey(KEY_AMOUNT)) {
+                if (block.transaction[KEY_BALANCE] != -(block.transaction[KEY_AMOUNT] as BigInteger).toLong()) {
+                    return ValidationResult.Invalid(listOf("Invalid genesis balance"))
+                } else {
+                    return ValidationResult.Valid
+                }
+            } else {
+                if (block.transaction[KEY_BALANCE] != 0L) {
+                    return ValidationResult.Invalid(listOf("Invalid genesis balance"))
+                } else {
+                    return ValidationResult.Valid
+                }
+            }
+        }
+        val blockBefore = database.getBlockWithHash(block.previousHash)
+        if (blockBefore == null) {
+            Log.d("EuroTokenBlock", "Has to crawl for previous!!")
+            return ValidationResult.PartialPrevious
+        }
+        val balanceBefore =
+            getBalanceForBlock(blockBefore, database) ?: return ValidationResult.PartialPrevious
+        val change = getBalanceChangeForBlock(block)
+        if (block.transaction[KEY_BALANCE] != balanceBefore + change) {
+            Log.w("EuroTokenBlock", "Invalid balance")
+            return ValidationResult.Invalid(listOf("Invalid balance"))
+        }
+        return ValidationResult.Valid
+    }
+
     fun verifyBalance() {
         getGatewayPeer()?.let { sendCheckpointProposal(it) }
     }
