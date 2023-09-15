@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.eurotoken.ui.exchange
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -11,6 +12,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentCreateMoneyBinding
@@ -96,8 +98,21 @@ class CreateMoneyFragment : EurotokenBaseFragment(R.layout.fragment_create_money
             }
         }
 
-        binding.txtBalance.text =
-            TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+        val pref = requireContext().getSharedPreferences(
+            EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+            Context.MODE_PRIVATE
+        )
+        val demoModeEnabled = pref.getBoolean(
+            EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+
+        if (demoModeEnabled) {
+            binding.txtBalance.text =
+                TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+        } else {
+            binding.txtBalance.text =
+                TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+        }
+
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtGatewayPublicKey.text = publicKey
 

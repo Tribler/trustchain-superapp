@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.eurotoken.ui.exchange
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -22,6 +23,7 @@ import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.QRCodeUtils
+import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment
@@ -112,8 +114,20 @@ class ExchangeFragment : EurotokenBaseFragment() {
                 val ownContact =
                     ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
 
-                txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                val pref = requireContext().getSharedPreferences(
+                    EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                    Context.MODE_PRIVATE
+                )
+                val demoModeEnabled = pref.getBoolean(
+                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+
+                if (demoModeEnabled) {
+                    txtBalance.text =
+                        TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                } else {
+                    txtBalance.text =
+                        TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                }
                 if (ownContact?.name != null) {
                     txtOwnName.text = "Your balance (" + ownContact.name + ")"
                 }

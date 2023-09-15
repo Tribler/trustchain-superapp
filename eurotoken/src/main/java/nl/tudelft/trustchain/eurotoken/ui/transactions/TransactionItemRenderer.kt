@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.eurotoken.ui.transactions
 
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.mattskala.itemadapter.ItemLayoutRenderer
@@ -73,7 +74,9 @@ class TransactionItemRenderer(
             txtProp.text =
                 "(${transactionRepository.trustChainCommunity.database.getBlockWithHash((item.transaction.block.transaction[TransactionRepository.KEY_TRANSACTION_HASH] as String).hexToBytes())!!.sequenceNumber})"
         } else if (item.transaction.block.isProposal) {
-            if (transactionRepository.trustChainCommunity.database.getLinked(item.transaction.block) != null) {
+            val linkedBlock = transactionRepository.trustChainCommunity.database.getLinked(
+                item.transaction.block)
+            if (linkedBlock != null) {
                 txtProp.text = "P+A"
                 txtProp.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
             } else {

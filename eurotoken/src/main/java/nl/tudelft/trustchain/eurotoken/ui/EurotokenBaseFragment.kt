@@ -108,6 +108,11 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
             Context.MODE_PRIVATE
         )
         val demoModeEnabled = pref.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+        if (demoModeEnabled) {
+            TransactionRepository.INITIAL_BALANCE = 1000
+        } else {
+            TransactionRepository.INITIAL_BALANCE = 0
+        }
         return getString(R.string.toggle_demo_mode, if (demoModeEnabled) "OFF" else "ON")
     }
 

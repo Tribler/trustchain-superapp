@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.common.eurotoken
 
+import android.util.Log
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
@@ -33,8 +34,12 @@ fun getVerifiedBalanceChangeForBlock(block: TrustChainBlock?): Long {
 }
 
 fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore): Long? {
-    if (block.isGenesis) return getVerifiedBalanceChangeForBlock(block)
-
+    Log.w("getVerifiedBalanceForBl", "Block with ID: ${block.blockId}")
+    if (block.isGenesis) {
+        val blockBalance = block.transaction[TransactionRepository.KEY_BALANCE]
+            ?: return getVerifiedBalanceChangeForBlock(block)
+        return blockBalance as Long
+    }
     if (block.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT && block.isProposal) {
         val linked = database.getLinked(block)
         if (linked != null) { // Found full checkpoint
