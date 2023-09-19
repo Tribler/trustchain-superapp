@@ -122,10 +122,7 @@
             android:exported="true"
             android:label="PeerAI App"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait"
-
-
-        ></activity>
+            android:screenOrientation="portrait"></activity>
 
         <service
             android:name="nl.tudelft.trustchain.app.service.TrustChainService"

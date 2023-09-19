@@ -11,10 +11,6 @@ import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.peerai.PeerAIActivity
 
-
-
-
-
 enum class AppDefinition(
     @DrawableRes val icon: Int,
     val appName: String,
@@ -53,15 +49,10 @@ enum class AppDefinition(
         R.color.blue,
         MainActivityFOC::class.java
     ),
-
-
-        PeerAi(
+    PeerAi(
         R.drawable.ic_book_hover_over_hand,
         "PeerAI",
         R.color.green,
-            PeerAIActivity::class.java
+        PeerAIActivity::class.java
     )
-
-
-
 }
