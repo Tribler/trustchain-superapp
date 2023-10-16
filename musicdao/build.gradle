@@ -118,8 +118,8 @@ dependencies {
     // Cryptocurrency integration
     implementation 'org.bitcoinj:bitcoinj-core:0.15.10'
 //    implementation 'com.google.guava:guava:29.0-android'
-    implementation 'org.knowm.xchange:xchange-parent:5.0.1'
-    implementation 'org.knowm.xchange:xchange-binance:5.0.1'
+    //implementation 'org.knowm.xchange:xchange-parent:5.0.1'
+    //implementation 'org.knowm.xchange:xchange-binance:5.0.1'
 
     // Crypto library for testing
     testImplementation "com.goterl:lazysodium-java:5.1.4"

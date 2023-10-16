@@ -115,6 +115,7 @@ dependencies {
     implementation project(':freedomOfComputing')
     implementation project(':eurotoken')
     implementation project(':valuetransfer')
+    implementation project(':peerai')
     api(project(':common')) {
         exclude group: 'net.java.dev.jna'
     }
