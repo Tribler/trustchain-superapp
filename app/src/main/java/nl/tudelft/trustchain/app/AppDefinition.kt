@@ -19,6 +19,12 @@ enum class AppDefinition(
     val activity: Class<out Activity>,
     val disableImageTint: Boolean = false,
 ) {
+    CURRENCY_II(
+        R.drawable.ic_baseline_how_to_vote_24,
+        "On-Chain Democracy",
+        R.color.democracy_blue,
+        CurrencyIIMainActivity::class.java,
+    ),
     DEBUG(
         R.drawable.ic_bug_report_black_24dp,
         "Debug",
@@ -43,13 +49,6 @@ enum class AppDefinition(
         "MusicDAO",
         R.color.black,
         MusicActivity::class.java
-    ),
-    CURRENCY_II(
-        R.drawable.ic_bitcoin,
-        "Decentralised Democracy Template",
-        R.color.metallic_gold,
-        CurrencyIIMainActivity::class.java,
-        true,
     ),
     FREEDOM_OF_COMPUTING(
         R.drawable.ic_naruto,

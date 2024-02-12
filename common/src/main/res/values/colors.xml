@@ -25,6 +25,7 @@
     <color name="metallic_gold">#D4AF37</color>
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
+    <color name="democracy_blue">#0056b3</color>
 
     <array name="colorsChain">
         <item>#EF5350</item>

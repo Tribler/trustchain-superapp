@@ -1,11 +1,11 @@
-# luxury-communism
-<img src="docs/images/logo.png" width=140px style="float:left; z-index:1; margin-right:15px"/>
+# Currency II
+<img src="docs/images/on-chain-democracy.png" width=102 style="float:left; z-index:1; margin-right:15px"/>
 
 **NOTE**
-We seperated this document in two versions. The first version of Luxury Communism uses the classic approach of Multisig transactions, the second version uses Taproot to improve it. Since everything, except for the Multisig part, is the same between the two versions, we decided to keep the first version's documentation for reference.
+We separated this document in two versions. The first version of `currencyii` uses the classic approach of Multisig transactions, the second version uses Taproot to improve it. Since everything, except for the Multisig part, is the same between the two versions, we decided to keep the first version's documentation for reference.
 ## Version 1
-Luxury communism is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). It is a proof-of-concept implementation of a DAO system using Trustchain and Bitcoin. Trustchain is used for communication and bookkeeping while the Bitcoin blockchain is used to have collective multi-signature wallets for each DAO. The content of the app is split up in several tabs:
-* **First Time Launch**: The first time the app is launched, the user must setup his bitcoin wallet. Afterwhich the chain will sync and he is routed to the main screens.
+Currency II is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). It is a proof-of-concept implementation of a DAO system using Trustchain and Bitcoin. Trustchain is used for communication and bookkeeping while the Bitcoin blockchain is used to have collective multi-signature wallets for each DAO. The content of the app is split up in several tabs:
+* **First Time Launch**: The first time the app is launched, the user must setup his bitcoin wallet. After which the chain will sync and he is routed to the main screens.
 * **My DAO's**: A list of all DAO's that the user participates in. Selecting a DAO will allow a user to create a transfer proposal from that DAO.
 * **All DAO's**: A list of all discovered DAO's in the network which the user can propose to join.
 * **Proposals**: A list of all proposals that the user can vote on. This can either be join proposals or proposals from someone else to transfer funds from one of the DAO's.
@@ -39,7 +39,7 @@ Luxury communism is an Android application built on top of [IPv8](https://github
 This document contains the project structure, underlying protocol, and known issues and limitations.
 
 ## Table of Contents
-- [luxury-communism](#luxury-communism)
+- [Currency II](#currency-ii)
     - [Table of Contents](#Table-of-contents)
     - [Project Structure](#Project-Structure)
     - [Protocol: The DAO Trustchain Communication Protocol](#Protocol-The-DAO-Trustchain-Communication-Protocol)
@@ -273,7 +273,7 @@ The project was created in a short time-span and there are several identified is
     - The reason for this limitation mainly is due to implementation details regarding the BitcoinJ client, which does not (easily) allow retro-actively fetching transactions from addresses that are not being watched.
 - **Privacy Considerations**:
     - While users are anonymous and only known by their key pair, the use of the same key pair throughout the protocol does open up the user to be tracked by a party collecting all the broadcasted information regarding the key pair.
-- **MITM attack:** With the current implementation used (IPv8/Trustchain), the system is susceptible to MITM attacks.
+- **MITM attack:** With the current implementation used (IPv8/Trustchain), the system is susceptible to MitM-attacks.
 
 ### Implementation related
 The most important improvement is regarding the collection of votes. A UI can be added for this, such that the users can see the current status of his proposal. Currently, the vote becomes invalid whenever another transaction is done with the same DAO, since the most recent found serialized transaction would be not the most recent. A timeout can be added to make sure the vote does not go on for an unreasonable amount of time. Both improvements need to be visible to the user in the DAO UI.
@@ -285,7 +285,7 @@ To follow up on space efficiency, the serialized Bitcoin transaction should be s
 The voting protocol can be improved to properly use proposal and agreement halfblocks. We decided not to due to the limited development time that we have. Directly sending it to other DAO users (and not the entire community) reduces the number of messages in trustchain.
 
 ## Version 2
-The second version of Luxury Communism throws out the old way of multi-sig, but the integration and communication with trustchain is still the same. Please note that at the time of writing, Taproot was still unreleased. This means that we had to run our own Bitcoin Regtest network to make it possible to use Taproot. Production and TestNet networks are thus disabled in this version until Taproot is officially released.
+The second version of `currencyii` throws out the old way of multi-sig, but the integration and communication with trustchain is still the same. Please note that at the time of writing, Taproot was still unreleased. This means that we had to run our own Bitcoin Regtest network to make it possible to use Taproot. Production and TestNet networks are thus disabled in this version until Taproot is officially released.
 
 Instead of explaining what Taproot exactly is and what it can do ourselves, we will give several resources which can do a much better job at that.
 
@@ -295,7 +295,7 @@ Now that you know what Taproot is, make sure to read the following documents:
 - [Threshold Signatures](https://suredbits.com/schnorr-applications-threshold-signatures/)
 - [Schnorr Applications Frost](https://suredbits.com/schnorr-applications-frost/)
 
-These documents explain the different ways of constructing multisig transactions with Taproot. At the time of writing, MuSig (which is n-n, meaning n users need to commit n valid signatures) was the only feasable option to implement. It was acadamically reviewed, had libraries and several code reviews and did not have any major risks exposed with it's protocol. Ideally, we want t-n, meaning only t &lt;= n users need to commit a valid signature. We identified FROST (which can be seen as the brother of MuSig) as the best candidate at that time. But FROST was not acadamically reviewed yet and the ZCash foundation (by which the protocol was developed) did not have a security audit for the protocol yet. We found implementing FROST therefore too much of a risk, but are hoping that in the future (maybe when you read this) it is reviewed and secure for implementation.
+These documents explain the different ways of constructing multisig transactions with Taproot. At the time of writing, MuSig (which is n-n, meaning n users need to commit n valid signatures) was the only feasible option to implement. It was academically reviewed, had libraries and several code reviews and did not have any major risks exposed with it's protocol. Ideally, we want t-n, meaning only t &lt;= n users need to commit a valid signature. We identified FROST (which can be seen as the brother of MuSig) as the best candidate at that time. But FROST was not acadamically reviewed yet and the ZCash foundation (by which the protocol was developed) did not have a security audit for the protocol yet. We found implementing FROST therefore too much of a risk, but are hoping that in the future (maybe when you read this) it is reviewed and secure for implementation.
 
 t-n transactions allow the DAO to fulfill it's actual purpose: only a percentage of users need to approve a transaction (and share their signatures) to allow a transaction to happen. Furthermore, when configured by the original DAO creator, it also allows n-n. This means that you have full flexibility, which MuSig does not have.
 
