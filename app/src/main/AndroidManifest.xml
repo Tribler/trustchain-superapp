@@ -71,6 +71,10 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
+            android:name="nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+
+        <activity
             android:name="nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:theme="@style/Theme.PeerChat" />
@@ -114,7 +118,7 @@
             android:label="Music App"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.MusicDaoTheme"></activity>
+            android:theme="@style/Theme.MusicDaoTheme" />
 
 
         <activity
@@ -122,7 +126,7 @@
             android:exported="true"
             android:label="PeerAI App"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
 
         <service
             android:name="nl.tudelft.trustchain.app.service.TrustChainService"

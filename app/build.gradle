@@ -122,6 +122,9 @@ dependencies {
     api(project(':common-ethereum')) {
         exclude group: 'net.java.dev.jna'
     }
+    api(project(':currencyii')) {
+        exclude group: 'net.java.dev.jna'
+    }
     api(project(':musicdao')) {
         exclude group: 'net.java.dev.jna'
     }
@@ -163,6 +166,7 @@ dependencies {
     implementation('com.github.tony19:logback-android:2.0.0')
 
     implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
+    implementation project(':currencyii')
 
     // Testing
     testImplementation 'junit:junit:4.13.2'

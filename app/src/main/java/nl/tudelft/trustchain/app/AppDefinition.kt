@@ -6,6 +6,7 @@ import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.musicdao.MusicActivity
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
+import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
@@ -42,6 +43,13 @@ enum class AppDefinition(
         "MusicDAO",
         R.color.black,
         MusicActivity::class.java
+    ),
+    CURRENCY_II(
+        R.drawable.ic_bitcoin,
+        "Decentralised Democracy Template",
+        R.color.metallic_gold,
+        CurrencyIIMainActivity::class.java,
+        true,
     ),
     FREEDOM_OF_COMPUTING(
         R.drawable.ic_naruto,
