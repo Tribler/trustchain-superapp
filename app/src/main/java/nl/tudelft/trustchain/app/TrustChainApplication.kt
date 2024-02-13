@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.app
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -14,18 +13,16 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.preference.PreferenceManager
-import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
-import nl.tudelft.trustchain.musicdao.core.dao.DaoCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.OverlayConfiguration
@@ -34,7 +31,11 @@ import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.messaging.bluetooth.BluetoothLeDiscovery
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
 import nl.tudelft.ipv8.attestation.schema.SchemaManager
-import nl.tudelft.ipv8.attestation.trustchain.*
+import nl.tudelft.ipv8.attestation.trustchain.BlockListener
+import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
@@ -59,13 +60,15 @@ import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.musicdao.core.dao.CoinCommunity
+import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
-import nl.tudelft.trustchain.valuetransfer.community.PeerChatCommunity
-import nl.tudelft.trustchain.valuetransfer.util.PeerChatStore
+import nl.tudelft.trustchain.musicdao.core.dao.DaoCommunity
+import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
+import nl.tudelft.trustchain.valuetransfer.community.PeerChatCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
+import nl.tudelft.trustchain.valuetransfer.util.PeerChatStore
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 

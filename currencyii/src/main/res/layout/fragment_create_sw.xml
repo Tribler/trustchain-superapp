@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_create_sw"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+
+        <TextView
+            android:id="@+id/alert_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".50"
+                android:text="Entrance fee" />
+
+            <EditText
+                android:id="@+id/entrance_fee_tf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".4"
+                android:ems="10"
+                android:hint="Satoshi"
+                android:inputType="numberDecimal"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".50"
+                android:text="Voting threshold" />
+
+            <EditText
+                android:id="@+id/voting_threshold_tf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".40"
+                android:ems="10"
+                android:hint="Percentage (1-100)"
+                android:inputType="numberDecimal"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/create_sw_wallet_button"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Create (Genesis block)" />
+
+    </LinearLayout>
+</FrameLayout>

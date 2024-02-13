@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.app
 
-import android.annotation.SuppressLint
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -59,7 +58,6 @@ class AppLoader(
         }
     }
 
-    @SuppressLint("NewApi")
     private suspend fun setPreferredAppList(newPreferences: Set<String>) {
         dataStore.edit { settings ->
             settings[PREFERRED_APPS] = newPreferences
@@ -72,6 +70,7 @@ class AppLoader(
     companion object {
         val PREFERRED_APPS = stringSetPreferencesKey("preferred_apps")
         val DEFAULT_APPS = setOf(
+            AppDefinition.CURRENCY_II.appName,
             AppDefinition.VALUETRANSFER.appName,
             AppDefinition.MUSIC_DAO.appName,
             AppDefinition.EUROTOKEN.appName,

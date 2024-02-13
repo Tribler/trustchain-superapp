@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">TrustChain Currency</string>
+
+    <plurals name="x_peers">
+        <item quantity="one">%d peer</item>
+        <item quantity="other">%d peers</item>
+    </plurals>
+
+    <plurals name="x_blocks">
+        <item quantity="one">%d block</item>
+        <item quantity="other">%d blocks</item>
+    </plurals>
+
+    <string name="sign_block">Sign block</string>
+    <string name="block_status">Block Status: %s</string>
+
+    <string name="discovered"><![CDATA[<b>Discovered:</b> %s]]></string>
+    <string name="stored"><![CDATA[<b>Stored:</b> %s]]></string>
+
+    <string name="sending_bitcoins">Wallet Overview</string>
+    <string name="send_bitcoin">Send Bitcoin</string>
+    <string name="enter_private_key">Enter Private Key</string>
+    <string name="bitcoin">Bitcoin</string>
+    <string name="dao_overview">Home</string>
+    <string name="all_daos">All DAOs</string>
+    <string name="my_wallet">My Wallet</string>
+    <string name="my_daos">My DAOs</string>
+
+    <string name="my_daos_join_or_create">Join or Create?</string>
+    <string-array name="my_daos_options">
+        <item>Join Existing DAO</item>
+        <item>Create New DAO</item>
+    </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="proposals">Proposals</string>
+
+</resources>

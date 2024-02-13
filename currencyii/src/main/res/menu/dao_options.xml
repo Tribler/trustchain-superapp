@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/my_daos_plus_btn"
+        android:icon="@drawable/ic_add_black_24dp"
+        android:title="Add DAO"
+        app:showAsAction="always" />
+</menu>
