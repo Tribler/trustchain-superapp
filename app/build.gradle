@@ -40,7 +40,7 @@ android {
 
     defaultConfig {
         applicationId "nl.tudelft.trustchain"
-        minSdkVersion 22
+        minSdkVersion 24
         targetSdkVersion 33
         versionCode generateVersionCode()
         versionName "0.3.3"
