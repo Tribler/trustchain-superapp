@@ -28,7 +28,7 @@ Currently, the On-Chain Democracy app only allows Regtest, since it uses a futur
 https://user-images.githubusercontent.com/23526224/116259903-85efd900-a776-11eb-93b1-384936d215c4.mp4
 
 
-[More about Currency II](currencyii/README.md)
+[More about On-Chain Democracy](currencyii/README.md)
 
 
 ### PeerChat
