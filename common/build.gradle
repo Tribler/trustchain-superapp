@@ -1,7 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'com.squareup.sqldelight'
+apply plugin: 'app.cash.sqldelight'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 
 ktlint {
@@ -12,19 +11,20 @@ ktlint {
 }
 
 sqldelight {
-    Database {
-        packageName = "nl.tudelft.common.sqldelight"
-        sourceFolders = ["sqldelight"]
-        schemaOutputDirectory = file("src/main/sqldelight/databases")
+    databases {
+        Database {
+            packageName = "nl.tudelft.common.sqldelight"
+            srcDirs = files(['src/main/sqldelight'])
+            schemaOutputDirectory = file("src/main/sqldelight/databases")
+        }
     }
 }
 
 android {
-    compileSdkVersion 33
-
     defaultConfig {
         minSdkVersion 24
-        targetSdkVersion 33
+        compileSdk 34
+        targetSdkVersion 34
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -53,11 +53,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_17.toString()
         allWarningsAsErrors = true
     }
 
@@ -124,15 +124,16 @@ dependencies {
     implementation files('libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar')
     implementation files('libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar')
     implementation files('libs/jlibtorrent-android-x86_64-' + jlibtorrent_version + '.jar')
+    implementation 'androidx.databinding:viewbinding:8.2.2'
 
     // Testing
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.3'
-    testImplementation "io.mockk:mockk:1.9.3"
+    testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation 'org.json:json:20190722'
-    testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
+    testImplementation "app.cash.sqldelight:sqlite-driver:$sqldelight_version"
     testImplementation "com.goterl:lazysodium-java:5.1.4"
     annotationProcessor "androidx.room:room-compiler:$room_version"
 }

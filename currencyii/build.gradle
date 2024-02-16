@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 
@@ -12,11 +11,10 @@ ktlint {
 }
 
 android {
-    compileSdkVersion 33
-
     defaultConfig {
         minSdkVersion 24
-        targetSdkVersion 33
+        compileSdk 34
+        targetSdkVersion 34
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -29,12 +27,12 @@ android {
     }
 
     compileOptions {
-        targetCompatibility JavaVersion.VERSION_1_8
-        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     buildFeatures {
@@ -87,7 +85,7 @@ dependencies {
     // Testing
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
-    testImplementation "io.mockk:mockk:1.9.3"
+    testImplementation "io.mockk:mockk:$mockk_version"
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
@@ -107,6 +105,6 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-opt-in=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes"
+            "-opt-in=kotlin.ExperimentalUnsignedTypes"
     ]
 }
