@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_send_money.*
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -91,19 +90,19 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
         if (trustScore != null) {
             if (trustScore >= TRUSTSCORE_AVERAGE_BOUNDARY) {
-                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_high, trustScore)
-                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.android_green))
+                binding.trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_high, trustScore)
+                binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.android_green))
             } else if (trustScore > TRUSTSCORE_LOW_BOUNDARY) {
-                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_average, trustScore)
-                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
+                binding.trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_average, trustScore)
+                binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
             } else {
-                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_low, trustScore)
-                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
+                binding.trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_low, trustScore)
+                binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
             }
         } else {
-            trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_no_score)
-            trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
-            trustScoreWarning.visibility = View.VISIBLE
+            binding.trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_no_score)
+            binding.trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
+            binding.trustScoreWarning.visibility = View.VISIBLE
         }
 
         binding.btnSend.setOnClickListener {

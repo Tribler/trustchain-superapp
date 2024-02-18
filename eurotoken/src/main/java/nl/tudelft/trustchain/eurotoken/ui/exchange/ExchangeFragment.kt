@@ -15,20 +15,17 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_exchange.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.eurotoken.R
+import nl.tudelft.trustchain.eurotoken.databinding.FragmentExchangeBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment
-import nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionItem
-import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment.Companion.addDecimalLimiter
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -44,11 +41,29 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class ExchangeFragment : EurotokenBaseFragment() {
+    private var _binding: FragmentExchangeBinding? = null
+    private val binding get() = _binding!!
+
     private var param1: String? = null
     private var param2: String? = null
 
     private val qrCodeUtils by lazy {
         QRCodeUtils(requireContext())
+    }
+
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        // Inflate the layout for this fragment
+        _binding = FragmentExchangeBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -119,17 +134,18 @@ class ExchangeFragment : EurotokenBaseFragment() {
                     Context.MODE_PRIVATE
                 )
                 val demoModeEnabled = pref.getBoolean(
-                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false
+                )
 
                 if (demoModeEnabled) {
-                    txtBalance.text =
+                    binding.txtBalance.text =
                         TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
                 } else {
-                    txtBalance.text =
+                    binding.txtBalance.text =
                         TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
                 }
                 if (ownContact?.name != null) {
-                    txtOwnName.text = "Your balance (" + ownContact.name + ")"
+                    binding.txtOwnName.text = "Your balance (" + ownContact.name + ")"
                 }
                 delay(1000L)
             }
@@ -138,17 +154,17 @@ class ExchangeFragment : EurotokenBaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        txtOwnPublicKey.text = getTrustChainCommunity().myPeer.publicKey.keyToHash().toHex()
-        btnCamera.setOnClickListener {
+        binding.txtOwnPublicKey.text = getTrustChainCommunity().myPeer.publicKey.keyToHash().toHex()
+        binding.btnCamera.setOnClickListener {
             qrCodeUtils.startQRScanner(this)
         }
 
-        edtAmount.addDecimalLimiter()
+        binding.edtAmount.addDecimalLimiter()
 
-        btnInstaSell.setOnClickListener {
-            val amount = TransferFragment.getAmount(edtAmount.text.toString())
+        binding.btnInstaSell.setOnClickListener {
+            val amount = TransferFragment.getAmount(binding.edtAmount.text.toString())
             if (amount > 0) {
-                val iban = edtIBAN.text.toString()
+                val iban = binding.edtIBAN.text.toString()
 //                if (Regex("^NL\\d{2}\\s[A-Z]{4}\\s0(\\d\\s?){9,30}\$").matches(iban)) {
                 transactionRepository.sendDestroyProposalWithIBAN(iban, amount)
                 findNavController().navigate(R.id.action_exchangeFragment_to_transactionsFragment)
@@ -165,14 +181,6 @@ class ExchangeFragment : EurotokenBaseFragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_exchange, container, false)
-    }
-
     companion object {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
@@ -184,8 +192,7 @@ class ExchangeFragment : EurotokenBaseFragment() {
             }
 
         fun EditText.decimalLimiter(string: String): String {
-
-            var amount = TransferFragment.getAmount(string)
+            val amount = TransferFragment.getAmount(string)
 
             if (amount == 0L) {
                 return ""
@@ -196,7 +203,6 @@ class ExchangeFragment : EurotokenBaseFragment() {
         }
 
         fun EditText.addDecimalLimiter() {
-
             this.addTextChangedListener(object : TextWatcher {
 
                 override fun afterTextChanged(s: Editable?) {

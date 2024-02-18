@@ -14,17 +14,11 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_transactions.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
-import mu.KotlinLogging
-import nl.tudelft.ipv8.keyvault.LibNaClPK
-import nl.tudelft.ipv8.keyvault.LibNaClSK.Companion.BIN_PREFIX
-import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.ipv8.util.sha1
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -37,7 +31,6 @@ import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransferEuroBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.Exception
 
 class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) {
     private val binding by viewBinding(FragmentTransferEuroBinding::bind)
@@ -59,7 +52,8 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                     Context.MODE_PRIVATE
                 )
                 val demoModeEnabled = pref.getBoolean(
-                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false
+                )
 
                 if (demoModeEnabled) {
                     binding.txtBalance.text =
@@ -91,7 +85,8 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             Context.MODE_PRIVATE
         )
         val demoModeEnabled = pref.getBoolean(
-            EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+            EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false
+        )
 
         if (demoModeEnabled) {
             binding.txtBalance.text =
@@ -108,7 +103,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         }
 
         fun addName() {
-            var newName = binding.edtMissingName.text.toString()
+            val newName = binding.edtMissingName.text.toString()
             if (newName.isNotEmpty()) {
                 ContactStore.getInstance(requireContext())
                     .addContact(ownKey, newName)
@@ -165,10 +160,10 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
      * Find a [Peer] in the network by its public key.
      * @param pubKey : The public key of the peer to find.
      */
-    private fun findPeer(pubKey : String) : Peer? {
+    private fun findPeer(pubKey: String): Peer? {
         val itr = transactionRepository.trustChainCommunity.getPeers().listIterator()
         while (itr.hasNext()) {
-            val cur : Peer = itr.next()
+            val cur: Peer = itr.next()
             Log.d("EUROTOKEN", cur.key.pub().toString())
             if (cur.key.pub().toString() == pubKey) {
                 return cur
@@ -190,21 +185,32 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
 
                 // Try to send the addresses of the last X transactions to the peer we have just scanned.
                 try {
-                    val peer = findPeer(defaultCryptoProvider.keyFromPublicBin(connectionData.public_key.hexToBytes()).toString())
+                    val peer = findPeer(
+                        defaultCryptoProvider.keyFromPublicBin(connectionData.public_key.hexToBytes())
+                            .toString()
+                    )
                     if (peer == null) {
                         logger.warn { "Could not find peer from QR code by public key " + connectionData.public_key }
-                        Toast.makeText(requireContext(), "Could not find peer from QR code", Toast.LENGTH_LONG)
+                        Toast.makeText(
+                            requireContext(),
+                            "Could not find peer from QR code",
+                            Toast.LENGTH_LONG
+                        )
                             .show()
                     }
                     val euroTokenCommunity = getIpv8().getOverlay<EuroTokenCommunity>()
                     if (euroTokenCommunity == null) {
-                        Toast.makeText(requireContext(), "Could not find community", Toast.LENGTH_LONG)
+                        Toast.makeText(
+                            requireContext(),
+                            "Could not find community",
+                            Toast.LENGTH_LONG
+                        )
                             .show()
                     }
                     if (peer != null && euroTokenCommunity != null) {
                         euroTokenCommunity.sendAddressesOfLastTransactions(peer)
                     }
-                } catch (e : Exception) {
+                } catch (e: Exception) {
                     logger.error { e }
                     Toast.makeText(
                         requireContext(),

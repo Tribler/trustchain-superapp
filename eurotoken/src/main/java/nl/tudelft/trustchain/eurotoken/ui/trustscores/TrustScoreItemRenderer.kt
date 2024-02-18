@@ -2,9 +2,9 @@ package nl.tudelft.trustchain.eurotoken.ui.trustscores
 
 import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_trustscore.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.eurotoken.R
+import nl.tudelft.trustchain.eurotoken.databinding.ItemTrustscoreBinding
 import nl.tudelft.trustchain.eurotoken.entity.TrustScore
 
 /**
@@ -15,8 +15,9 @@ class TrustScoreItemRenderer : ItemLayoutRenderer<TrustScoreItem, View>(
 ) {
 
     override fun bindView(item: TrustScoreItem, view: View) = with(view) {
-        txtPubKey.text = item.trustScore.pubKey.toHex()
-        txtTrustScore.text = item.trustScore.trust.toString() + "%"
+        val binding = ItemTrustscoreBinding.bind(view)
+        binding.txtPubKey.text = item.trustScore.pubKey.toHex()
+        binding.txtTrustScore.text = item.trustScore.trust.toString() + "%"
     }
 
     override fun getLayoutResourceId(): Int {

@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.fragment_exchange.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
@@ -71,7 +70,8 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
                 )
             }
             if (!success) {
-                return Toast.makeText( requireContext(), "Insufficient balance", Toast.LENGTH_LONG ).show()
+                return Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG)
+                    .show()
             }
         }
 
@@ -136,7 +136,8 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
                     Context.MODE_PRIVATE
                 )
                 val demoModeEnabled = pref.getBoolean(
-                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false
+                )
 
                 if (demoModeEnabled) {
                     binding.txtBalance.text =
@@ -169,7 +170,8 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
                 Context.MODE_PRIVATE
             )
             val demoModeEnabled = pref.getBoolean(
-                EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+                EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false
+            )
 
             if (demoModeEnabled) {
                 binding.txtBalance.text =
