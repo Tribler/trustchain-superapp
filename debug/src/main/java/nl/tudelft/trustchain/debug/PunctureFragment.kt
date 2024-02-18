@@ -4,17 +4,16 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentPunctureBinding
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
-@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
     private val binding by viewBinding(FragmentPunctureBinding::bind)
 
@@ -35,7 +34,7 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
             }
         }
         lifecycleScope.launchWhenCreated {
-            getDemoCommunity().punctureChannel.asFlow().collect { (peer, payload) ->
+            getDemoCommunity().punctureChannel.collect { (peer, payload) ->
                 Log.i(
                     "PunctureFragment",
                     "Received puncture from ${peer} on port ${payload.identifier}"
