@@ -118,7 +118,7 @@
                     android:textSize="24sp"
                     android:textStyle="bold" />
 
-                <include layout="@layout/bitcoin_networks"/>
+                <include android:id="@+id/bitcoin_networks_layout" layout="@layout/bitcoin_networks"/>
 
             </LinearLayout>
 

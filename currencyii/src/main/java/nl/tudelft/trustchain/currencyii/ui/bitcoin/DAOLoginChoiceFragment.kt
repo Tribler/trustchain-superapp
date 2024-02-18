@@ -7,9 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_dao_login_choice.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
+import nl.tudelft.trustchain.currencyii.databinding.FragmentDaoLoginChoiceBinding
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import java.io.File
 
@@ -19,19 +19,21 @@ import java.io.File
  * create an instance of this fragment.
  */
 class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
+    private var _binding: FragmentDaoLoginChoiceBinding? = null
+    private val binding get() = _binding!!
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        load_production_wallet.setOnClickListener {
+        binding.loadProductionWallet.setOnClickListener {
             loadWallet(BitcoinNetworkOptions.PRODUCTION)
         }
 
-        load_regtest_wallet.setOnClickListener {
+        binding.loadRegtestWallet.setOnClickListener {
             loadWallet(BitcoinNetworkOptions.REG_TEST)
         }
 
-        load_testnet_wallet.setOnClickListener {
+        binding.loadTestnetWallet.setOnClickListener {
             loadWallet(BitcoinNetworkOptions.TEST_NET)
         }
     }
@@ -42,7 +44,11 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
             WalletManagerAndroid.close()
         }
 
-        val hideWallets = arrayListOf(BitcoinNetworkOptions.TEST_NET, BitcoinNetworkOptions.PRODUCTION, BitcoinNetworkOptions.REG_TEST)
+        val hideWallets = arrayListOf(
+            BitcoinNetworkOptions.TEST_NET,
+            BitcoinNetworkOptions.PRODUCTION,
+            BitcoinNetworkOptions.REG_TEST
+        )
         hideWallets.remove(params)
 
         // Make sure to hide any other wallets that exists, when creating a new wallet
@@ -66,11 +72,16 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         hideNavBar()
+        _binding = FragmentDaoLoginChoiceBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        return inflater.inflate(R.layout.fragment_dao_login_choice, container, false)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {
@@ -111,28 +122,58 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
 
         if (walletToHide.contains(BitcoinNetworkOptions.PRODUCTION)) {
             if (vWalletFileMainNet.exists()) {
-                vWalletFileMainNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${MAIN_NET_WALLET_NAME}_backup_main_net_wallet_$fileSuffix.wallet"))
+                vWalletFileMainNet.renameTo(
+                    File(
+                        this.requireContext().applicationContext.filesDir,
+                        "${MAIN_NET_WALLET_NAME}_backup_main_net_wallet_$fileSuffix.wallet"
+                    )
+                )
             }
             if (vChainFileMainNet.exists()) {
-                vChainFileMainNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${MAIN_NET_WALLET_NAME}_backup_main_net_spvchain_$fileSuffix.spvchain"))
+                vChainFileMainNet.renameTo(
+                    File(
+                        this.requireContext().applicationContext.filesDir,
+                        "${MAIN_NET_WALLET_NAME}_backup_main_net_spvchain_$fileSuffix.spvchain"
+                    )
+                )
             }
             Log.w("Coin", "Renamed MainNet file")
         }
         if (walletToHide.contains(BitcoinNetworkOptions.REG_TEST)) {
             if (vWalletFileRegTest.exists()) {
-                vWalletFileMainNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${REG_TEST_WALLET_NAME}_backup_reg_test_wallet_$fileSuffix.wallet"))
+                vWalletFileMainNet.renameTo(
+                    File(
+                        this.requireContext().applicationContext.filesDir,
+                        "${REG_TEST_WALLET_NAME}_backup_reg_test_wallet_$fileSuffix.wallet"
+                    )
+                )
             }
             if (vChainFileRegTest.exists()) {
-                vChainFileMainNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${REG_TEST_WALLET_NAME}_backup_reg_test_spvchain_$fileSuffix.spvchain"))
+                vChainFileMainNet.renameTo(
+                    File(
+                        this.requireContext().applicationContext.filesDir,
+                        "${REG_TEST_WALLET_NAME}_backup_reg_test_spvchain_$fileSuffix.spvchain"
+                    )
+                )
             }
             Log.w("Coin", "Renamed RegTest file")
         }
         if (walletToHide.contains(BitcoinNetworkOptions.TEST_NET)) {
             if (vWalletFileTestNet.exists()) {
-                vWalletFileTestNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${TEST_NET_WALLET_NAME}_backup_test_net_wallet_$fileSuffix.wallet"))
+                vWalletFileTestNet.renameTo(
+                    File(
+                        this.requireContext().applicationContext.filesDir,
+                        "${TEST_NET_WALLET_NAME}_backup_test_net_wallet_$fileSuffix.wallet"
+                    )
+                )
             }
             if (vChainFileTestNet.exists()) {
-                vChainFileTestNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${TEST_NET_WALLET_NAME}_backup_test_net_spvchain_$fileSuffix.spvchain"))
+                vChainFileTestNet.renameTo(
+                    File(
+                        this.requireContext().applicationContext.filesDir,
+                        "${TEST_NET_WALLET_NAME}_backup_test_net_spvchain_$fileSuffix.spvchain"
+                    )
+                )
             }
             Log.w("Coin", "Renamed TestNet file")
         }

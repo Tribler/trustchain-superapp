@@ -2,13 +2,20 @@ package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_my_daos.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.*
+import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
+import nl.tudelft.trustchain.currencyii.coin.MAIN_NET_WALLET_NAME
+import nl.tudelft.trustchain.currencyii.coin.REG_TEST_WALLET_NAME
+import nl.tudelft.trustchain.currencyii.coin.TEST_NET_WALLET_NAME
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
+import nl.tudelft.trustchain.currencyii.databinding.FragmentMyDaosBinding
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import java.io.File
@@ -19,6 +26,8 @@ import java.io.File
  * create an instance of this fragment.
  */
 class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
+    private var _binding: FragmentMyDaosBinding? = null
+    private val binding get() = _binding!!
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -31,14 +40,20 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         showNavBar()
-        return inflater.inflate(R.layout.fragment_my_daos, container, false)
+        _binding = FragmentMyDaosBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun initMyDAOsView() {
-        create_dao_fab.setOnClickListener {
+        binding.createDaoFab.setOnClickListener {
             Log.i("Coin", "Go to create DAO from My DAOs")
             findNavController().navigate(R.id.createSWFragment)
         }
@@ -51,8 +66,8 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
                 publicKey,
                 "Click to propose transfer"
             )
-        my_daos_list_view.adapter = adapter
-        my_daos_list_view.setOnItemClickListener { _, view, position, id ->
+        binding.myDaosListView.adapter = adapter
+        binding.myDaosListView.setOnItemClickListener { _, view, position, id ->
             val block = sharedWalletBlocks[position]
             val blockData = SWJoinBlockTransactionData(block.transaction).getData()
             findNavController().navigate(
@@ -67,11 +82,11 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
             Log.i("Coin", "Clicked: $view, $position, $id")
         }
 
-        button_create_dao.setOnClickListener {
+        binding.buttonCreateDao.setOnClickListener {
             Log.i("Coin", "Onboarding go to create DAO")
             findNavController().navigate(R.id.createSWFragment)
         }
-        button_join_daos.setOnClickListener {
+        binding.buttonJoinDaos.setOnClickListener {
             Log.i("Coin", "Onboarding go to join DAO")
             findNavController().navigate(R.id.joinNetworkFragment)
         }
@@ -83,18 +98,18 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
     private fun handleOnboardingVisibility(isOnboarding: Boolean) {
         if (isOnboarding) {
             // Show onboarding components
-            not_enrolled_text.visibility = View.VISIBLE
-            onboarding_buttons.visibility = View.VISIBLE
+            binding.notEnrolledText.visibility = View.VISIBLE
+            binding.onboardingButtons.visibility = View.VISIBLE
 
             // Hide create DAO button
-            create_dao_fab.visibility = View.GONE
+            binding.createDaoFab.visibility = View.GONE
         } else {
             // Hide onboarding components
-            not_enrolled_text.visibility = View.GONE
-            onboarding_buttons.visibility = View.GONE
+            binding.notEnrolledText.visibility = View.GONE
+            binding.onboardingButtons.visibility = View.GONE
 
             // Show create DAO button
-            create_dao_fab.visibility = View.VISIBLE
+            binding.createDaoFab.visibility = View.VISIBLE
         }
     }
 
@@ -129,7 +144,8 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         val testNetWalletExists = vWalletFileTestNet.exists()
         val regTestWalletExists = vWalletFileRegTest.exists()
 
-        val wallets = arrayOf(mainNetWalletExists, testNetWalletExists, regTestWalletExists).count { it }
+        val wallets =
+            arrayOf(mainNetWalletExists, testNetWalletExists, regTestWalletExists).count { it }
 
         if (wallets > 1 && !WalletManagerAndroid.isInitialized()) {
             // Go to login, user has 3 wallet files and wallet manager is not initialized

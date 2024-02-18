@@ -7,35 +7,51 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.bitcoin_networks.*
-import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.*
+import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
+import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
+import nl.tudelft.trustchain.currencyii.coin.REG_TEST_FAUCET_DOMAIN
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
+import nl.tudelft.trustchain.currencyii.databinding.FragmentBitcoinBinding
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.wallet.Wallet
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.concurrent.*
-import kotlin.Exception
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 
 const val BALANCE_THRESHOLD = "5"
+
 /**
  * A simple [Fragment] subclass.
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment :
-    BaseFragment(R.layout.fragment_bitcoin),
+class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     ImportKeyDialog.ImportKeyDialogListener {
 
+    private var _binding: FragmentBitcoinBinding? = null
+    private val binding get() = _binding!!
+
     private var getBitcoinPressed = false
+
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -76,38 +92,40 @@ class BitcoinFragment :
                 )
                 true
             }
+
             R.id.item_bitcoin_wallet_settings -> {
                 Log.i("Coin", "Navigating from BitcoinFragment to DaoImportOrCreate")
                 findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToDaoImportOrCreate())
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun initClickListeners() {
         val walletManager = WalletManagerAndroid.getInstance()
-        button_copy_public_address.setOnClickListener {
+        binding.buttonCopyPublicAddress.setOnClickListener {
             copyToClipboard(walletManager.protocolAddress().toString())
         }
 
-        button_copy_wallet_seed.setOnClickListener {
+        binding.buttonCopyWalletSeed.setOnClickListener {
             val seed = walletManager.toSeed()
             copyToClipboard("${seed.seed}, ${seed.creationTime}")
         }
 
-        button_copy_bitcoin_public_key.setOnClickListener {
+        binding.buttonCopyBitcoinPublicKey.setOnClickListener {
             copyToClipboard(walletManager.networkPublicECKeyHex())
         }
 
-        bitcoin_refresh_swiper.setOnRefreshListener {
+        binding.bitcoinRefreshSwiper.setOnRefreshListener {
             this.refresh()
 
             @Suppress("DEPRECATION")
             Handler().postDelayed(
                 {
                     try {
-                        bitcoin_refresh_swiper.isRefreshing = false
+                        binding.bitcoinRefreshSwiper.isRefreshing = false
                     } catch (e: Exception) {
                     }
                 },
@@ -137,12 +155,16 @@ class BitcoinFragment :
     /**
      * Disable the get BTC button, sets the color to gray and changes the onclick listener
      */
-    @Suppress("DEPRECATION")
     private fun disableGetBitcoinButton() {
-        add_btc.isClickable = false
-        add_btc.background.setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
-        add_btc.setOnClickListener {
-            Toast.makeText(this.requireContext(), "You already have enough bitcoin don't you think?", Toast.LENGTH_SHORT).show()
+        binding.addBtc.isClickable = false
+        @Suppress("DEPRECATION") // TODO: Remove deprecated code.
+        binding.addBtc.background.setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
+        binding.addBtc.setOnClickListener {
+            Toast.makeText(
+                this.requireContext(),
+                "You already have enough bitcoin don't you think?",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -151,38 +173,53 @@ class BitcoinFragment :
      */
     private fun enableGetBitcoinButton() {
         val walletManager = WalletManagerAndroid.getInstance()
-        add_btc.isClickable = true
-        add_btc.setOnClickListener {
+        binding.addBtc.isClickable = true
+        binding.addBtc.setOnClickListener {
             if (!getBitcoinPressed) {
                 getBitcoinPressed = true
 
                 if (!addBTC(walletManager.protocolAddress().toString())) {
                     Log.e("Coin", "The server response is failing")
-                    Toast.makeText(this.requireContext(), "Something went wrong, please delete system32", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this.requireContext(),
+                        "Something went wrong, please delete system32",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
-                    Toast.makeText(this.requireContext(), "Successfully added 10 BTC", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this.requireContext(),
+                        "Successfully added 10 BTC",
+                        Toast.LENGTH_SHORT
+                    ).show()
 
                     Thread.sleep(1000)
 
-                    Toast.makeText(this.requireContext(), "It can take up to a minute to register in your balance", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this.requireContext(),
+                        "It can take up to a minute to register in your balance",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     this.refresh(true)
                 }
             } else {
-                Toast.makeText(this.requireContext(), "You are already given an amount of BTC, please wait a little longer", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this.requireContext(),
+                    "You are already given an amount of BTC, please wait a little longer",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
 
     private fun refresh(animation: Boolean? = false) {
         if (animation!!) {
-            bitcoin_refresh_swiper.isRefreshing = true
-
-            @Suppress("DEPRECATION")
+            binding.bitcoinRefreshSwiper.isRefreshing = true
+            @Suppress("DEPRECATION") // TODO: Remove deprecated code.
             Handler().postDelayed(
                 {
                     try {
-                        bitcoin_refresh_swiper.isRefreshing = false
-                    } catch (e: Exception) {
+                        binding.bitcoinRefreshSwiper.isRefreshing = false
+                    } catch (_: Exception) {
                     }
                 },
                 1500
@@ -195,18 +232,19 @@ class BitcoinFragment :
 
         val walletManager = WalletManagerAndroid.getInstance()
 
-        walletBalance.text = walletManager.kit.wallet().balance.toFriendlyString()
-        walletEstimatedBalance.text = walletManager.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
-        chosenNetwork.text = when (walletManager.params.id) {
+        binding.walletBalance.text = walletManager.kit.wallet().balance.toFriendlyString()
+        binding.walletEstimatedBalance.text =
+            walletManager.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
+        binding.chosenNetwork.text = when (walletManager.params.id) {
             NetworkParameters.ID_MAINNET -> "Production Network"
             NetworkParameters.ID_REGTEST -> "RegTest Network"
             NetworkParameters.ID_TESTNET -> "TestNet Network"
             else -> "Unknown Network selected"
         }
         val seed = walletManager.toSeed()
-        walletSeed.text = "${seed.seed}, ${seed.creationTime}"
-        yourPublicHex.text = walletManager.networkPublicECKeyHex()
-        protocolKey.text = walletManager.protocolAddress().toString()
+        binding.walletSeed.text = "${seed.seed}, ${seed.creationTime}"
+        binding.yourPublicHex.text = walletManager.networkPublicECKeyHex()
+        binding.protocolKey.text = walletManager.protocolAddress().toString()
 
         if (checkTooMuchBitcoin()) {
             disableGetBitcoinButton()
@@ -223,7 +261,8 @@ class BitcoinFragment :
      * @return Boolean - if the transaction was successful
      */
     private fun addBTC(address: String): Boolean {
-        val executor: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+        val executor: ExecutorService =
+            Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         val future: Future<Boolean>
 
         val url = "https://$REG_TEST_FAUCET_DOMAIN/addBTC?address=$address"
@@ -256,10 +295,16 @@ class BitcoinFragment :
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         showNavBar()
-        return inflater.inflate(R.layout.fragment_bitcoin, container, false)
+        _binding = FragmentBitcoinBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {
@@ -273,18 +318,10 @@ class BitcoinFragment :
         fun newInstance() = BitcoinFragment()
     }
 
-    override fun onImport(address: String, privateKey: String) {
+    override fun onImport(address: String, privateKey: String, network: BitcoinNetworkOptions) {
         if (!WalletManagerAndroid.isRunning) {
             val config = WalletManagerConfiguration(
-                when (bitcoin_network_radio_group.checkedRadioButtonId) {
-                    R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
-                    R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
-                    R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
-                    else -> {
-                        Toast.makeText(this.requireContext(), "Please select a bitcoin network first", Toast.LENGTH_SHORT).show()
-                        return
-                    }
-                },
+                network,
                 null,
                 AddressPrivateKeyPair(address, privateKey)
             )
@@ -297,8 +334,8 @@ class BitcoinFragment :
                 Toast.makeText(
                     this.requireContext(),
                     "Something went wrong while initializing the new wallet. ${
-                    t.message
-                        ?: "No further information"
+                        t.message
+                            ?: "No further information"
                     }.",
                     Toast.LENGTH_SHORT
                 ).show()

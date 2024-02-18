@@ -4,15 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.bitcoin_networks.*
-import kotlinx.android.synthetic.main.fragment_import_keys.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
 import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
+import nl.tudelft.trustchain.currencyii.databinding.FragmentImportKeysBinding
 
 /**
  * A simple [Fragment] subclass.
@@ -20,24 +20,34 @@ import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
  * create an instance of this fragment.
  */
 class ImportKeysFragment : Fragment() {
+    private var _binding: FragmentImportKeysBinding? = null
+    private val binding get() = _binding!!
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        import_btc_address_btn.setOnClickListener {
+        binding.importBtcAddressBtn.setOnClickListener {
 
+            val networkRadioGroup = binding.bitcoinNetworksLayout.bitcoinNetworkRadioGroup
             val config = WalletManagerConfiguration(
-                when (bitcoin_network_radio_group.checkedRadioButtonId) {
+                when (networkRadioGroup.checkedRadioButtonId) {
                     R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
                     R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
                     R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
                     else -> {
-                        Toast.makeText(this.requireContext(), "Please select a bitcoin network first", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this.requireContext(),
+                            "Please select a bitcoin network first",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         return@setOnClickListener
                     }
                 },
                 null,
-                AddressPrivateKeyPair(pk_input.text.toString(), sk_input.text.toString())
+                AddressPrivateKeyPair(
+                    binding.pkInput.text.toString(),
+                    binding.skInput.text.toString()
+                )
             )
 
             try {
@@ -53,8 +63,8 @@ class ImportKeysFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            pk_input.setText("")
-            sk_input.setText("")
+            binding.pkInput.setText("")
+            binding.skInput.setText("")
         }
     }
 
@@ -62,9 +72,14 @@ class ImportKeysFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_import_keys, container, false)
+    ): View {
+        _binding = FragmentImportKeysBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {

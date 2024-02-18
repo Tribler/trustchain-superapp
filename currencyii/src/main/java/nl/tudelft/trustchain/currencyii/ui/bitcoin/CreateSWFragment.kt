@@ -7,12 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import kotlinx.android.synthetic.main.fragment_create_sw.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
+import nl.tudelft.trustchain.currencyii.databinding.FragmentCreateSwBinding
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 
@@ -22,10 +22,14 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * create an instance of this fragment.
  */
 class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
+
+    private var _binding: FragmentCreateSwBinding? = null
+    private val binding get() = _binding!!
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        create_sw_wallet_button.setOnClickListener {
+        binding.createSwWalletButton.setOnClickListener {
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) {
                     createSharedBitcoinWallet()
@@ -37,22 +41,22 @@ class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
     private fun createSharedBitcoinWallet() {
         if (!validateCreationInput()) {
             activity?.runOnUiThread {
-                alert_label.text =
+                binding.alertLabel.text =
                     "Entrance fee should be an integer >= ${SWUtil.MINIMAL_TRANSACTION_AMOUNT}, threshold an integer > 0 and <= 100"
             }
             return
         }
 
         activity?.runOnUiThread {
-            alert_label.text = "Creating wallet, this might take some time... (0%)"
+            binding.alertLabel.text = "Creating wallet, this might take some time... (0%)"
         }
 
-        val currentEntranceFee = entrance_fee_tf.text.toString().toLong()
-        val currentThreshold = voting_threshold_tf.text.toString().toInt()
+        val currentEntranceFee = binding.entranceFeeTf.text.toString().toLong()
+        val currentThreshold = binding.votingThresholdTf.text.toString().toInt()
 
         activity?.runOnUiThread {
-            voting_threshold_tf.isEnabled = false
-            entrance_fee_tf.isEnabled = false
+            binding.votingThresholdTf.isEnabled = false
+            binding.entranceFeeTf.isEnabled = false
         }
 
         try {
@@ -66,11 +70,11 @@ class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
             walletManager.addNewNonceKey(newDAO.getData().SW_UNIQUE_ID, requireContext())
 
             enableInputFields()
-            alert_label.text = "Wallet created successfully!"
+            binding.alertLabel.text = "Wallet created successfully!"
         } catch (t: Throwable) {
             enableInputFields()
             activity?.runOnUiThread {
-                alert_label.text = t.message ?: "Unexpected error occurred. Try again"
+                binding.alertLabel.text = t.message ?: "Unexpected error occurred. Try again"
             }
         }
     }
@@ -80,24 +84,24 @@ class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
 
         activity?.runOnUiThread {
             if (progress >= 1) {
-                alert_label?.text = "DAO creation progress: completed!"
+                binding.alertLabel?.text = "DAO creation progress: completed!"
             } else {
                 val progressString = "%.0f".format(progress * 100)
-                alert_label?.text = "DAO creation progress: $progressString%..."
+                binding.alertLabel?.text = "DAO creation progress: $progressString%..."
             }
         }
     }
 
     private fun enableInputFields() {
         activity?.runOnUiThread {
-            voting_threshold_tf.isEnabled = true
-            entrance_fee_tf.isEnabled = true
+            binding.votingThresholdTf.isEnabled = true
+            binding.entranceFeeTf.isEnabled = true
         }
     }
 
     private fun validateCreationInput(): Boolean {
-        val entranceFee = entrance_fee_tf.text.toString().toLongOrNull()
-        val votingThreshold = voting_threshold_tf.text.toString().toIntOrNull()
+        val entranceFee = binding.entranceFeeTf.text.toString().toLongOrNull()
+        val votingThreshold = binding.votingThresholdTf.text.toString().toIntOrNull()
         return entranceFee != null &&
             entranceFee >= SWUtil.MINIMAL_TRANSACTION_AMOUNT &&
             votingThreshold != null &&
@@ -109,9 +113,14 @@ class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_create_sw, container, false)
+    ): View {
+        _binding = FragmentCreateSwBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {

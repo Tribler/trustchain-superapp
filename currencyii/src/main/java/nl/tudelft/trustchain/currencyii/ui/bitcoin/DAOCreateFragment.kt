@@ -5,15 +5,23 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.bitcoin_networks.*
-import kotlinx.android.synthetic.main.fragment_dao_wallet_load_form.*
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.*
+import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
+import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
+import nl.tudelft.trustchain.currencyii.coin.MAIN_NET_WALLET_NAME
+import nl.tudelft.trustchain.currencyii.coin.REG_TEST_WALLET_NAME
+import nl.tudelft.trustchain.currencyii.coin.SerializedDeterministicKey
+import nl.tudelft.trustchain.currencyii.coin.TEST_NET_WALLET_NAME
+import nl.tudelft.trustchain.currencyii.coin.WalletManager
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
+import nl.tudelft.trustchain.currencyii.databinding.FragmentDaoWalletLoadFormBinding
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.crypto.MnemonicCode
 import org.bitcoinj.crypto.MnemonicException
@@ -25,6 +33,8 @@ import java.io.File
  * create an instance of this fragment.
  */
 class DAOCreateFragment : BaseFragment() {
+    private var _binding: FragmentDaoWalletLoadFormBinding? = null
+    private val binding get() = _binding!!
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
 
@@ -51,45 +61,55 @@ class DAOCreateFragment : BaseFragment() {
     }
 
     private fun initListeners() {
-        load_wallet_button.setOnClickListener {
+        binding.loadWalletButton.setOnClickListener {
             loadWalletButton()
         }
 
-        generate_new_seed.setOnClickListener {
-            val params = when (bitcoin_network_radio_group.checkedRadioButtonId) {
+        binding.generateNewSeed.setOnClickListener {
+            val networkRadioGroup = binding.bitcoinNetworksLayout.bitcoinNetworkRadioGroup
+            val params = when (networkRadioGroup.checkedRadioButtonId) {
                 R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
                 R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
                 R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
                 else -> {
-                    Toast.makeText(this.requireContext(), "Please select a bitcoin network first", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this.requireContext(),
+                        "Please select a bitcoin network first",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@setOnClickListener
                 }
             }
             val seed = WalletManager.generateRandomDeterministicSeed(params)
-            seed_word_input.setText(seed.seed)
-            seed_number_input.setText(seed.creationTime.toString())
+            binding.seedWordInput.setText(seed.seed)
+            binding.seedNumberInput.setText(seed.creationTime.toString())
         }
 
-        load_debug_seed.setOnClickListener {
+        binding.loadDebugSeed.setOnClickListener {
             val seed = SerializedDeterministicKey(
                 "spell seat genius horn argue family steel buyer spawn chef guard vast",
                 1583488954L
             )
-            seed_word_input.setText(seed.seed)
-            seed_number_input.setText(seed.creationTime.toString())
+            binding.seedWordInput.setText(seed.seed)
+            binding.seedNumberInput.setText(seed.creationTime.toString())
         }
     }
 
     private fun loadWalletButton() {
-        val seed = seed_word_input.text.toString()
-        val creationNumberText = seed_number_input.text.toString()
-        val privateKeys = private_keys_input.text.lines()
-        val params = when (bitcoin_network_radio_group.checkedRadioButtonId) {
+        val seed = binding.seedWordInput.text.toString()
+        val creationNumberText = binding.seedNumberInput.text.toString()
+        val privateKeys = binding.privateKeysInput.text.lines()
+        val networkRadioGroup = binding.bitcoinNetworksLayout.bitcoinNetworkRadioGroup
+        val params = when (networkRadioGroup.checkedRadioButtonId) {
             R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
             R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
             R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
             else -> {
-                Toast.makeText(this.requireContext(), "Please select a bitcoin network first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this.requireContext(),
+                    "Please select a bitcoin network first",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return
             }
         }
@@ -112,8 +132,8 @@ class DAOCreateFragment : BaseFragment() {
             Toast.makeText(
                 this.requireContext(),
                 "The mnemonic seed provided is not correct. ${
-                e.message
-                    ?: "No further information"
+                    e.message
+                        ?: "No further information"
                 }.",
                 Toast.LENGTH_SHORT
             ).show()
@@ -137,6 +157,7 @@ class DAOCreateFragment : BaseFragment() {
                 SerializedDeterministicKey(seed, creationNumber),
                 null
             )
+
             false -> WalletManagerConfiguration(
                 params,
                 SerializedDeterministicKey(seed, creationNumber),
@@ -161,8 +182,8 @@ class DAOCreateFragment : BaseFragment() {
             Toast.makeText(
                 this.requireContext(),
                 "Something went wrong while initializing the wallet. ${
-                t.message
-                    ?: "No further information"
+                    t.message
+                        ?: "No further information"
                 }.",
                 Toast.LENGTH_SHORT
             ).show()
@@ -183,7 +204,13 @@ class DAOCreateFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_dao_wallet_load_form, container, false)
+        _binding = FragmentDaoWalletLoadFormBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {

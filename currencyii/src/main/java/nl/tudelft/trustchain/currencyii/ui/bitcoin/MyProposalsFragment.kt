@@ -9,7 +9,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_my_proposals.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -17,6 +16,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.databinding.FragmentMyProposalsBinding
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
@@ -28,6 +28,9 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * create an instance of this fragment.
  */
 class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
+    private var _binding: FragmentMyProposalsBinding? = null
+    private val binding get() = _binding!!
+
     private var proposals: ArrayList<TrustChainBlock> = ArrayList()
 
     /**
@@ -55,11 +58,13 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
             proposalCopy.addAll(proposals)
 
             for (proposal in proposalCopy) {
-                if (!uniqueProposals.contains(proposal) && isUserInWallet(proposal)) uniqueProposals.add(proposal)
+                if (!uniqueProposals.contains(proposal) && isUserInWallet(proposal)) uniqueProposals.add(
+                    proposal
+                )
             }
             val adaptor = ProposalListAdapter(this, uniqueProposals)
-            proposal_list_view.adapter = adaptor
-            proposal_list_view.setOnItemClickListener { _, _, position, _ ->
+            binding.proposalListView.adapter = adaptor
+            binding.proposalListView.setOnItemClickListener { _, _, position, _ ->
                 val block = uniqueProposals[position]
                 if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
                     try {
@@ -101,7 +106,8 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
      */
     private fun getUserWalletIds(): List<String> {
         val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
-        val wallets = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks().map { SWJoinBlockTransactionData(it.transaction).getData() }
+        val wallets = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
+            .map { SWJoinBlockTransactionData(it.transaction).getData() }
         val userWallets = wallets.filter { it.SW_TRUSTCHAIN_PKS.contains(myPublicKey) }
         return userWallets.map { it.SW_UNIQUE_ID }
     }
@@ -175,8 +181,15 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_my_proposals, container, false)
+        _binding = FragmentMyProposalsBinding.inflate(inflater, container, false)
+        val view = binding.root
+        return view
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
