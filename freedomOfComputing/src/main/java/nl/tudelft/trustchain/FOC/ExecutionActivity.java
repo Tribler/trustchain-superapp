@@ -7,15 +7,19 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
+import nl.tudelft.trustchain.FOC.databinding.ActivityExecutionBinding;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,6 +34,8 @@ import static nl.tudelft.trustchain.FOC.util.ExtensionUtils.dataDotExtension;
 import static nl.tudelft.trustchain.FOC.util.ExtensionUtils.dexExtension;
 
 public class ExecutionActivity extends AppCompatActivity {
+
+    private ActivityExecutionBinding binding;
     private Fragment mainFragment;
     private FragmentManager manager;
     private String apkName;
@@ -59,7 +65,7 @@ public class ExecutionActivity extends AppCompatActivity {
      *
      * @return the latest known state of the dynamically loaded code or null if it does not exist
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.O) // TODO: this should be usable on all versions.
     private Fragment.SavedState getState() {
         // states are stored in the same directories as apks themselves (in the app specific files)
         String fileName = this.apkName + dataDotExtension;
@@ -109,7 +115,9 @@ public class ExecutionActivity extends AppCompatActivity {
             return;
         }
 
-        setContentView(R.layout.activity_execution);
+        binding = ActivityExecutionBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
         Context context = getApplicationContext();
 
         //uncomment if you want to read from the actual phone storage (needs "write" permission)
@@ -137,7 +145,7 @@ public class ExecutionActivity extends AppCompatActivity {
             transaction.add(tmpLayout.getId(), this.mainFragment, "mainFragment");
             transaction.commit();
 
-            ((LinearLayout) findViewById(R.id.llcontainer)).addView(tmpLayout);
+            binding.llcontainer.addView(tmpLayout);
         } catch (Exception e) {
             this.printToast(e.toString());
             Log.i("personal", "Something went wrong");
@@ -147,7 +155,7 @@ public class ExecutionActivity extends AppCompatActivity {
     /**
      * Retrieves the main fragment class from the specified APK.
      * This class can be in any package. The only requirement is the main fragment should be called exactly 'MainFragment'
-     *
+     * <p>
      * Deprecation suppression required to use DexFile, which we use to loop through all classes.
      *
      * @param path to the APK.
@@ -157,7 +165,7 @@ public class ExecutionActivity extends AppCompatActivity {
     private String getMainFragmentClass(String path) {
         try {
             DexFile dx = DexFile.loadDex(path, File.createTempFile("opt", dexExtension,
-                getCacheDir()).getPath(), 0);
+                    getCacheDir()).getPath(), 0);
             for (Enumeration<String> classNames = dx.entries(); classNames.hasMoreElements(); ) {
                 String className = classNames.nextElement();
                 if (className.contains("MainFragment") && !className.contains("$"))

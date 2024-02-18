@@ -11,27 +11,44 @@ import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
-import com.frostwire.jlibtorrent.swig.*
-import kotlinx.android.synthetic.main.activity_main_foc.*
-import kotlinx.android.synthetic.main.fragment_debugging.*
-import kotlinx.android.synthetic.main.fragment_download.*
+import com.frostwire.jlibtorrent.swig.add_files_listener
+import com.frostwire.jlibtorrent.swig.create_flags_t
+import com.frostwire.jlibtorrent.swig.create_torrent
+import com.frostwire.jlibtorrent.swig.error_code
+import com.frostwire.jlibtorrent.swig.file_storage
+import com.frostwire.jlibtorrent.swig.libtorrent
+import com.frostwire.jlibtorrent.swig.set_piece_hashes_listener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.FOC.community.FOCCommunity
+import nl.tudelft.trustchain.FOC.databinding.ActivityMainFocBinding
+import nl.tudelft.trustchain.FOC.databinding.FragmentDebuggingBinding
+import nl.tudelft.trustchain.FOC.databinding.FragmentDownloadBinding
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.apkDotExtension
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.torrentDotExtension
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.displayNameAppender
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.preHashString
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
 import java.net.URL
 import java.net.URLConnection
 
@@ -41,6 +58,8 @@ const val READ_TIMEOUT: Int = 5000
 const val DEFAULT_APK = "search.apk"
 
 open class MainActivityFOC : AppCompatActivity() {
+    lateinit var binding: ActivityMainFocBinding
+
     private val scope = CoroutineScope(Dispatchers.IO)
     var torrentList = ArrayList<Button>()
     private var progressVisible = false
@@ -53,38 +72,52 @@ open class MainActivityFOC : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            setContentView(R.layout.activity_main_foc)
-            setSupportActionBar(toolbar)
+        binding = ActivityMainFocBinding.inflate(layoutInflater)
+        val view = binding.root
 
-            fab.setOnClickListener {
+        try {
+            setContentView(view)
+
+            setSupportActionBar(binding.toolbar)
+
+            binding.fab.setOnClickListener {
                 createDownloadDialog()
             }
 
-            search_bar_input.setOnClickListener {
-                val search = search_bar_input.text.toString()
+            binding.searchBarInput.setOnClickListener {
+                val search = binding.searchBarInput.text.toString()
                 searchAllFiles(search)
             }
 
-            download_progress.setOnClickListener {
-                toggleProgressBar(popUp)
+            hidePopUps(binding.popUpLayout.popUp, binding.debugLayout.debugPopUp)
+            binding.downloadProgress.setOnClickListener {
+                toggleProgressBar(binding.popUpLayout.popUp)
             }
 
-            debugPopUpButton.setOnClickListener {
-                toggleDebugPopUp(debugPopUp)
+            binding.debugPopUpButton.setOnClickListener {
+                toggleDebugPopUp(binding.debugLayout.debugPopUp)
             }
 
-            torrentCount.text = getString(R.string.torrentCount, torrentAmount)
+            binding.torrentCount.text = getString(R.string.torrentCount, torrentAmount)
 
             copyDefaultApp()
-
             showAllFiles()
+
             appGossiper =
-                IPv8Android.getInstance().getOverlay<FOCCommunity>()?.let { AppGossiper.getInstance(s, this, it) }
+                IPv8Android.getInstance().getOverlay<FOCCommunity>()
+                    ?.let { AppGossiper.getInstance(s, this, it) }
             appGossiper?.start()
         } catch (e: Exception) {
             printToast(e.toString())
         }
+    }
+
+    // TODO: Remove hacky fix.
+    private fun hidePopUps(popUpLayout: RelativeLayout, debugLayout: LinearLayout) {
+        popUpLayout.visibility = View.GONE
+        debugLayout.visibility = View.GONE
+        binding.popUpLayout.popUp.visibility = View.GONE
+        binding.debugLayout.debugPopUp.visibility = View.GONE
     }
 
     private fun toggleDebugPopUp(layout: LinearLayout) {
@@ -93,7 +126,7 @@ open class MainActivityFOC : AppCompatActivity() {
 
         if (progressVisible) {
             progressVisible = false
-            popUp.visibility = View.GONE
+            binding.popUpLayout.popUp.visibility = View.GONE
         }
         debugVisible = !debugVisible
     }
@@ -101,10 +134,9 @@ open class MainActivityFOC : AppCompatActivity() {
     private fun toggleProgressBar(progress: RelativeLayout) {
         if (progressVisible) progress.visibility = View.GONE
         else progress.visibility = View.VISIBLE
-
         if (debugVisible) {
             debugVisible = false
-            debugPopUp.visibility = View.GONE
+            binding.debugLayout.debugPopUp.visibility = View.GONE
         }
         progressVisible = !progressVisible
     }
@@ -123,7 +155,7 @@ open class MainActivityFOC : AppCompatActivity() {
     private fun showAllFiles() {
         val files = applicationContext.cacheDir.listFiles()
         if (files != null) {
-            val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+            val torrentListView = binding.contentMainActivityFocLayout.torrentList
             torrentListView.removeAllViews()
             torrentList.clear()
             for (file in files) {
@@ -147,7 +179,7 @@ open class MainActivityFOC : AppCompatActivity() {
     }
 
     private fun searchAllFiles(searchVal: String) {
-        val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+        val torrentListView = binding.contentMainActivityFocLayout.torrentList
         torrentListView.removeAllViews()
         torrentList.clear()
         val files = applicationContext.cacheDir.listFiles()
@@ -169,7 +201,11 @@ open class MainActivityFOC : AppCompatActivity() {
             val file = File(this.applicationContext.cacheDir.absolutePath + "/" + DEFAULT_APK)
             if (!file.exists()) {
                 val outputStream = FileOutputStream(file)
-                val ins = resources.openRawResource(resources.getIdentifier(DEFAULT_APK.split('.').first(), "raw", packageName))
+                val ins = resources.openRawResource(
+                    resources.getIdentifier(
+                        DEFAULT_APK.split('.').first(), "raw", packageName
+                    )
+                )
                 outputStream.write(ins.readBytes())
                 ins.close()
                 outputStream.close()
@@ -188,7 +224,7 @@ open class MainActivityFOC : AppCompatActivity() {
     }
 
     private fun createSuccessfulTorrentButton(uri: Uri) {
-        val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+        val torrentListView = binding.contentMainActivityFocLayout.torrentList
         var button = Button(this)
         val fileName = getFileName(uri)
         button.text = fileName
@@ -202,9 +238,10 @@ open class MainActivityFOC : AppCompatActivity() {
         }
 
         button.isAllCaps = false
-        button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
+        button.backgroundTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
         button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
-        torrentCount.text = getString(R.string.torrentCount, ++torrentAmount)
+        binding.torrentCount.text = getString(R.string.torrentCount, ++torrentAmount)
         button.setOnClickListener {
             loadDynamicCode(fileName)
         }
@@ -215,7 +252,7 @@ open class MainActivityFOC : AppCompatActivity() {
     }
 
     fun createUnsuccessfulTorrentButton(torrentName: String) {
-        val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+        val torrentListView = binding.contentMainActivityFocLayout.torrentList
         val button = Button(this)
         button.text = torrentName
         torrentList.add(button)
@@ -240,14 +277,23 @@ open class MainActivityFOC : AppCompatActivity() {
         input.inputType = InputType.TYPE_CLASS_TEXT
         input.setSingleLine()
         val container = FrameLayout(this)
-        val params = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val params = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
         params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_margin)
         params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_margin)
         input.layoutParams = params
         container.addView(input)
         builder.setView(container)
         builder.setNegativeButton(getString(R.string.cancelButton), null)
-        builder.setPositiveButton(getString(R.string.downloadButton)) { _, _ -> scope.launch { selectNewUrlToDownload(input.text.toString()) } }
+        builder.setPositiveButton(getString(R.string.downloadButton)) { _, _ ->
+            scope.launch {
+                selectNewUrlToDownload(
+                    input.text.toString()
+                )
+            }
+        }
         builder.show()
     }
 
@@ -261,16 +307,19 @@ open class MainActivityFOC : AppCompatActivity() {
 
             // delete torrent file if it exists
             files.find { torrentFile ->
-                getFileName(torrentFile.toUri()) == fileName.replace(apkDotExtension, torrentDotExtension)
+                getFileName(torrentFile.toUri()) == fileName.replace(
+                    apkDotExtension,
+                    torrentDotExtension
+                )
             }?.delete()
 
             if (deleted != null && deleted) {
                 val buttonToBeDeleted = torrentList.find { button -> button.text == fileName }
                 if (buttonToBeDeleted != null) {
-                    val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+                    val torrentListView = binding.contentMainActivityFocLayout.torrentList
                     torrentList.remove(buttonToBeDeleted)
                     torrentListView.removeView(buttonToBeDeleted)
-                    torrentCount.text = getString(R.string.torrentCount, --torrentAmount)
+                    binding.torrentCount.text = getString(R.string.torrentCount, --torrentAmount)
                     appGossiper?.removeTorrent(fileName)
                 }
             }
@@ -295,7 +344,8 @@ open class MainActivityFOC : AppCompatActivity() {
         val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
         try {
             if (cursor != null && cursor.moveToFirst()) {
-                result = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
+                result =
+                    cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
             }
         } finally {
             cursor?.close()
@@ -407,12 +457,19 @@ open class MainActivityFOC : AppCompatActivity() {
     }
 
     private fun resumeUISettings() {
-        download_count.text = getString(R.string.downloadsInProgress, appGossiper?.downloadsInProgress)
-        inQueue.text = getString(R.string.downloadsInQueue, kotlin.math.max(0, appGossiper?.downloadsInProgress?.minus(1) ?: 0))
-        currentDownload.text = appGossiper?.currentDownloadInProgress
-        evaRetryCounter.text = getString(R.string.evaRetries, appGossiper?.evaRetries)
-        progressBar.progress = 0
-        progressBarPercentage.text = getString(R.string.downloadProgressPercentage, "0%")
-        failedCounter.text = getString(R.string.failedCounter, appGossiper?.failedTorrents.toString())
+        binding.downloadCount.text =
+            getString(R.string.downloadsInProgress, appGossiper?.downloadsInProgress)
+        binding.popUpLayout.inQueue.text = getString(
+            R.string.downloadsInQueue,
+            kotlin.math.max(0, appGossiper?.downloadsInProgress?.minus(1) ?: 0)
+        )
+        binding.popUpLayout.currentDownload.text = appGossiper?.currentDownloadInProgress
+        binding.popUpLayout.progressBar.progress = 0
+        binding.popUpLayout.progressBarPercentage.text =
+            getString(R.string.downloadProgressPercentage, "0%")
+        binding.debugLayout.evaRetryCounter.text =
+            getString(R.string.evaRetries, appGossiper?.evaRetries)
+        binding.debugLayout.failedCounter.text =
+            getString(R.string.failedCounter, appGossiper?.failedTorrents.toString())
     }
 }

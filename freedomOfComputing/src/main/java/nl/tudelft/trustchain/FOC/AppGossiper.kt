@@ -1,14 +1,13 @@
 package nl.tudelft.trustchain.FOC
 
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
-import kotlinx.android.synthetic.main.activity_main_foc.*
-import kotlinx.android.synthetic.main.fragment_debugging.*
-import kotlinx.android.synthetic.main.fragment_download.*
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
@@ -75,7 +74,8 @@ class AppGossiper(
             toastingEnabled: Boolean = true
         ): AppGossiper {
             if (!::appGossiperInstance.isInitialized) {
-                appGossiperInstance = AppGossiper(sessionManager, activity, focCommunity, toastingEnabled)
+                appGossiperInstance =
+                    AppGossiper(sessionManager, activity, focCommunity, toastingEnabled)
             }
             return appGossiperInstance
         }
@@ -155,7 +155,8 @@ class AppGossiper(
             }
             activity.runOnUiThread {
                 evaRetries = evaDownload.retryAttempts
-                activity.evaRetryCounter.text = activity.getString(R.string.evaRetries, evaRetries)
+                activity.binding.debugLayout.evaRetryCounter.text =
+                    activity.getString(R.string.evaRetries, evaRetries)
             }
         }
     }
@@ -182,18 +183,25 @@ class AppGossiper(
                         logger.info { "Torrent added" }
                         (alert as AddTorrentAlert).handle().resume()
                     }
+
                     AlertType.BLOCK_FINISHED -> {
                         val a = alert as BlockFinishedAlert
                         val p = (a.handle().status().progress() * 100).toInt()
                         logger.info { "Progress: " + p + " for torrent name: " + a.torrentName() }
                         printToast("Download in progress!")
                         updateProgress(p)
-                        logger.info { java.lang.Long.toString(sessionManager.stats().totalDownload()) }
+                        logger.info {
+                            java.lang.Long.toString(
+                                sessionManager.stats().totalDownload()
+                            )
+                        }
                     }
+
                     AlertType.TORRENT_FINISHED -> {
                         signal.countDown()
                         logger.info { "Torrent finished" }
                     }
+
                     else -> {
                     }
                 }
@@ -450,7 +458,15 @@ class AppGossiper(
                     val attemptUUID = UUID.randomUUID().toString()
                     focCommunity.sendAppRequest(magnetInfoHash, peer, attemptUUID)
                     evaDownload =
-                        EvaDownload(true, System.currentTimeMillis(), magnetInfoHash, peer, 0, torrentName, attemptUUID)
+                        EvaDownload(
+                            true,
+                            System.currentTimeMillis(),
+                            magnetInfoHash,
+                            peer,
+                            0,
+                            torrentName,
+                            attemptUUID
+                        )
                 }
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
@@ -458,7 +474,8 @@ class AppGossiper(
     }
 
     fun removeTorrent(torrentName: String) {
-        val torrentInfo: TorrentInfo? = this.torrentInfos.find { torrentInfo -> torrentInfo.name() == torrentName }
+        val torrentInfo: TorrentInfo? =
+            this.torrentInfos.find { torrentInfo -> torrentInfo.name() == torrentName }
         if (torrentInfo != null) {
             this.torrentInfos.remove(torrentInfo)
         }
@@ -473,33 +490,51 @@ class AppGossiper(
 
     private fun addDownloadToQueue() {
         activity.runOnUiThread {
-            activity.download_count.text = activity.getString(R.string.downloadsInProgress, ++downloadsInProgress)
-            activity.inQueue.text =
-                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            val downloadCount = activity.binding.downloadCount
+            downloadCount.text =
+                activity.getString(R.string.downloadsInProgress, ++downloadsInProgress)
+
+            val inQueue = activity.binding.popUpLayout.inQueue
+            inQueue.text = activity.getString(
+                R.string.downloadsInQueue,
+                kotlin.math.max(0, downloadsInProgress - 1)
+            )
         }
     }
 
     fun updateProgress(progress: Int) {
         activity.runOnUiThread {
-            activity.progressBar.progress = progress
-            activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "$progress%")
+            val progressBar = activity.binding.popUpLayout.progressBar
+            progressBar.progress = progress
+
+            val progressBarPercentage = activity.binding.popUpLayout.progressBarPercentage
+            progressBarPercentage.text =
+                activity.getString(R.string.downloadProgressPercentage, "$progress%")
         }
     }
 
     private fun downloadHasStarted(torrentName: String) {
         currentDownloadInProgress = activity.getString(R.string.currentTorrentDownload, torrentName)
         activity.runOnUiThread {
-            activity.inQueue.text =
-                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-            activity.currentDownload.text = currentDownloadInProgress
+            val inQueue = activity.binding.popUpLayout.inQueue
+            inQueue.text =
+                activity.getString(
+                    R.string.downloadsInQueue,
+                    kotlin.math.max(0, downloadsInProgress - 1)
+                )
+            val currentDownload = activity.binding.popUpLayout.currentDownload
+            currentDownload.text = currentDownloadInProgress
         }
     }
 
     private fun downloadHasFailed() {
         currentDownloadInProgress = activity.getString(R.string.noDownloadInProgress)
         activity.runOnUiThread {
-            activity.currentDownload.text = currentDownloadInProgress
-            activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString())
+            val currentDownload = activity.binding.popUpLayout.currentDownload
+            currentDownload.text = currentDownloadInProgress
+            val failedCounter = activity.binding.debugLayout.failedCounter
+            failedCounter.text =
+                activity.getString(R.string.failedCounter, failedTorrents.toString())
         }
         updateProgress(0)
     }
@@ -507,23 +542,47 @@ class AppGossiper(
     private fun downloadHasPassed() {
         currentDownloadInProgress = activity.getString(R.string.noDownloadInProgress)
         activity.runOnUiThread {
-            activity.download_count.text = activity.getString(R.string.downloadsInProgress, --downloadsInProgress)
-            activity.inQueue.text =
-                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-            activity.currentDownload.text = currentDownloadInProgress
+            activity.binding.downloadCount.text =
+                activity.getString(R.string.downloadsInProgress, --downloadsInProgress)
+            val inQueue = activity.binding.popUpLayout.inQueue
+            inQueue.text =
+                activity.getString(
+                    R.string.downloadsInQueue,
+                    kotlin.math.max(0, downloadsInProgress - 1)
+                )
+
+            val currentDownload = activity.binding.popUpLayout.currentDownload
+            currentDownload.text = currentDownloadInProgress
         }
         updateProgress(0)
     }
 
     private fun initialUISettings() {
         activity.runOnUiThread {
-            activity.download_count.text = activity.getString(R.string.downloadsInProgress, 0)
-            activity.inQueue.text =
-                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-            activity.currentDownload.text = currentDownloadInProgress
-            activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "0%")
-            activity.evaRetryCounter.text = activity.getString(R.string.evaRetries, evaRetries)
-            activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString())
+            activity.binding.downloadCount.text =
+                activity.getString(R.string.downloadsInProgress, 0)
+
+            val inQueue = activity.binding.popUpLayout.inQueue
+            inQueue.text =
+                activity.getString(
+                    R.string.downloadsInQueue,
+                    kotlin.math.max(0, downloadsInProgress - 1)
+                )
+
+            val currentDownload = activity.binding.popUpLayout.currentDownload
+            currentDownload.text = currentDownloadInProgress
+
+            val progressBarPercentage = activity.binding.popUpLayout.progressBarPercentage
+            progressBarPercentage.text =
+                activity.getString(R.string.downloadProgressPercentage, "0%")
+
+            val evaRetryCounter = activity.binding.debugLayout.evaRetryCounter
+            evaRetryCounter.text =
+                activity.getString(R.string.evaRetries, evaRetries)
+
+            val failedCounter = activity.binding.debugLayout.failedCounter
+            failedCounter.text =
+                activity.getString(R.string.failedCounter, failedTorrents.toString())
         }
     }
 }
