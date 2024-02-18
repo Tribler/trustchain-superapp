@@ -5,10 +5,10 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_identity_attestation.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.databinding.ItemIdentityAttestationBinding
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
 
@@ -21,9 +21,10 @@ class AttestationItemRenderer(
 ) {
 
     override fun bindView(item: AttestationItem, view: View) = with(view) {
+        val binding = ItemIdentityAttestationBinding.bind(view)
         if (item.attestationBlob.metadata != null) {
             val metadata = JSONObject(item.attestationBlob.metadata!!)
-            tvAttestationNameValue.apply {
+            binding.tvAttestationNameValue.apply {
                 text = StringBuilder()
                     .append(metadata.optString("attribute"))
                     .append(": ")
@@ -36,33 +37,33 @@ class AttestationItemRenderer(
                 )
             }
 
-            tvAttestationIDFormat.text = StringBuilder()
+            binding.tvAttestationIDFormat.text = StringBuilder()
                 .append("(")
                 .append(item.attestationBlob.idFormat)
                 .append(")")
 
-            ivAttestationQRButton.isVisible = true
-            ivAttestationDelete.isVisible = false
+            binding.ivAttestationQRButton.isVisible = true
+            binding.ivAttestationDelete.isVisible = false
 
-            ivAttestationQRButton.setOnClickListener {
+            binding.ivAttestationQRButton.setOnClickListener {
                 onClickAction(item)
             }
         } else {
-            tvAttestationNameValue.apply {
+            binding.tvAttestationNameValue.apply {
                 text = this.context.resources.getString(R.string.text_attestation_malformed)
                 setTextColor(Color.RED)
             }
 
-            ivAttestationQRButton.isVisible = false
-            ivAttestationDelete.isVisible = true
+            binding.ivAttestationQRButton.isVisible = false
+            binding.ivAttestationDelete.isVisible = true
 
-            ivAttestationDelete.setOnClickListener {
+            binding.ivAttestationDelete.setOnClickListener {
                 onClickAction(item)
             }
         }
 
-        tvAttestationHash.text = item.attestationBlob.attestationHash.toHex()
-        tvAttestationBlob.text = item.attestationBlob.blob.toHex()
+        binding.tvAttestationHash.text = item.attestationBlob.attestationHash.toHex()
+        binding.tvAttestationBlob.text = item.attestationBlob.blob.toHex()
 
         setOnLongClickListener {
             onLongClickAction(item)

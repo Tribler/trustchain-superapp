@@ -11,6 +11,7 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.valuetransfer.util.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.databinding.ItemExchangeTransactionBinding
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import java.math.BigInteger
 import java.text.SimpleDateFormat
@@ -26,16 +27,18 @@ class ExchangeTransactionItemRenderer(
     private val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.ENGLISH)
 
     override fun bindView(item: ExchangeTransactionItem, view: View) = with(view) {
+        val binding = ItemExchangeTransactionBinding.bind(view)
 
-        val currencyAmount = view.findViewById<TextView>(R.id.tvTransactionAmount)
-        val transactionDirectionUp = view.findViewById<ImageView>(R.id.ivDirectionIconUp)
-        val transactionDirectionDown = view.findViewById<ImageView>(R.id.ivDirectionIconDown)
-        val transactionDate = view.findViewById<TextView>(R.id.tvTransactionDate)
-        val transactionType = view.findViewById<TextView>(R.id.tvTransactionType)
-        val blockStatus = view.findViewById<TextView>(R.id.tvTransactionBlockStatus)
-        val blockStatusColorSigned = view.findViewById<ImageView>(R.id.ivTransactionBlockStatusColorSigned)
-        val blockStatusColorSelfSigned = view.findViewById<ImageView>(R.id.ivTransactionBlockStatusColorSelfSigned)
-        val blockStatusColorWaitingForSignature = view.findViewById<ImageView>(R.id.ivTransactionBlockStatusColorWaitingForSignature)
+        val currencyAmount = binding.tvTransactionAmount
+        val transactionDirectionUp = binding.ivDirectionIconUp
+        val transactionDirectionDown = binding.ivDirectionIconDown
+        val transactionDate = binding.tvTransactionDate
+        val transactionType = binding.tvTransactionType
+        val blockStatus = binding.tvTransactionBlockStatus
+        val blockStatusColorSigned = binding.ivTransactionBlockStatusColorSigned
+        val blockStatusColorSelfSigned = binding.ivTransactionBlockStatusColorSelfSigned
+        val blockStatusColorWaitingForSignature =
+            binding.ivTransactionBlockStatusColorWaitingForSignature
 
         val outgoing = !item.transaction.outgoing
 
@@ -45,13 +48,16 @@ class ExchangeTransactionItemRenderer(
                 transactionDirectionUp.isVisible = outgoing
                 transactionDirectionDown.isVisible = !outgoing
             }
+
             TransactionRepository.BLOCK_TYPE_DESTROY -> {
                 transactionType.text = this.context.resources.getString(R.string.text_exchange_sell)
                 transactionDirectionUp.isVisible = outgoing
                 transactionDirectionDown.isVisible = !outgoing
             }
+
             TransactionRepository.BLOCK_TYPE_TRANSFER -> {
-                val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(item.transaction.sender)
+                val contact = ContactStore.getInstance(view.context)
+                    .getContactFromPublicKey(item.transaction.sender)
                 val contactName = contact?.name
                 val unknownName = resources.getString(R.string.text_unknown_contact)
 
@@ -94,14 +100,17 @@ class ExchangeTransactionItemRenderer(
                 blockStatusColorSelfSigned.isVisible = true
                 this.context.resources.getString(R.string.text_exchange_self_signed)
             }
+
             ExchangeTransactionItem.BlockStatus.SIGNED -> {
                 blockStatusColorSigned.isVisible = true
                 this.context.resources.getString(R.string.text_exchange_signed)
             }
+
             ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE -> {
                 blockStatusColorWaitingForSignature.isVisible = true
                 this.context.resources.getString(R.string.text_exchange_waiting_for_signature)
             }
+
             null -> {
                 this.context.resources.getString(R.string.text_exchange_unknown)
             }

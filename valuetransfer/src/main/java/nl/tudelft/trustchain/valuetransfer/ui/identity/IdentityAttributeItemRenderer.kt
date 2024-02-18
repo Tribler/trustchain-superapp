@@ -2,12 +2,12 @@ package nl.tudelft.trustchain.valuetransfer.ui.identity
 
 import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_contact_identity_attribute.view.*
-import kotlinx.android.synthetic.main.item_identity_attribute.view.*
-import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.ItemContactIdentityAttributeBinding
+import nl.tudelft.trustchain.valuetransfer.databinding.ItemIdentityAttributeBinding
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 class IdentityAttributeItemRenderer(
     private val layoutType: Int,
@@ -18,20 +18,23 @@ class IdentityAttributeItemRenderer(
     private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
 
     override fun bindView(item: IdentityAttributeItem, view: View) = with(view) {
-        if (layoutType == 1) {
-            tvAttributeName.text = item.attribute.name
-            tvAttributeValue.text = item.attribute.value
-            tvAttributeDate.text = dateFormat.format(item.attribute.added)
 
-            ivAttributeOptionsButton.setOnClickListener {
+        if (layoutType == 1) {
+            val identityBinding = ItemIdentityAttributeBinding.bind(view)
+            identityBinding.tvAttributeName.text = item.attribute.name
+            identityBinding.tvAttributeValue.text = item.attribute.value
+            identityBinding.tvAttributeDate.text = dateFormat.format(item.attribute.added)
+
+            identityBinding.ivAttributeOptionsButton.setOnClickListener {
                 onOptionsClick(item.attribute)
             }
         } else {
-            tvIdentityAttributeName.text = item.attribute.name
-            tvIdentityAttributeValue.text = item.attribute.value
-            tvIdentityAttributeDate.text = dateFormat.format(item.attribute.added)
+            val contactBinding = ItemContactIdentityAttributeBinding.bind(view)
+            contactBinding.tvIdentityAttributeName.text = item.attribute.name
+            contactBinding.tvIdentityAttributeValue.text = item.attribute.value
+            contactBinding.tvIdentityAttributeDate.text = dateFormat.format(item.attribute.added)
 
-            ivIdentityAttributeCopy.setOnClickListener {
+            contactBinding.ivIdentityAttributeCopy.setOnClickListener {
                 onOptionsClick(item.attribute)
             }
         }

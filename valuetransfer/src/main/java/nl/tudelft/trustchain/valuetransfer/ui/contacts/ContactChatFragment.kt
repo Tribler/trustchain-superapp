@@ -27,8 +27,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.dialog_image.*
-import kotlinx.android.synthetic.main.fragment_contacts_chat.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import nl.tudelft.ipv8.Peer
@@ -108,19 +106,38 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 val hasMessage = item.message.isNotEmpty()
                 val hasAttachment = item.attachment != null
                 val hasTransaction = item.transactionHash != null
-                val messageContainsTerm = item.message.contains(searchFilterLimitValues.first, ignoreCase = true)
+                val messageContainsTerm =
+                    item.message.contains(searchFilterLimitValues.first, ignoreCase = true)
 
                 fun attachmentTypeOf(type: String): Boolean {
                     return item.attachment!!.type == type
                 }
                 when (searchFilterLimitValues.second) {
                     FILTER_TYPE_MESSAGE -> hasMessage && !hasAttachment && !hasTransaction && messageContainsTerm
-                    FILTER_TYPE_TRANSACTION -> (!hasAttachment && hasTransaction && messageContainsTerm) || (hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_TRANSFER_REQUEST) && messageContainsTerm)
-                    FILTER_TYPE_PHOTO -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IMAGE)
-                    FILTER_TYPE_FILE -> hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_FILE)
-                    FILTER_TYPE_LOCATION -> hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_LOCATION) && messageContainsTerm
-                    FILTER_TYPE_CONTACT -> hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_CONTACT) && messageContainsTerm
-                    FILTER_TYPE_IDENTITY_ATTRIBUTE -> hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IDENTITY_ATTRIBUTE) && messageContainsTerm
+                    FILTER_TYPE_TRANSACTION -> (!hasAttachment && hasTransaction && messageContainsTerm) || (hasAttachment && !hasTransaction && attachmentTypeOf(
+                        MessageAttachment.TYPE_TRANSFER_REQUEST
+                    ) && messageContainsTerm)
+
+                    FILTER_TYPE_PHOTO -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(
+                        MessageAttachment.TYPE_IMAGE
+                    )
+
+                    FILTER_TYPE_FILE -> hasAttachment && !hasTransaction && attachmentTypeOf(
+                        MessageAttachment.TYPE_FILE
+                    )
+
+                    FILTER_TYPE_LOCATION -> hasAttachment && !hasTransaction && attachmentTypeOf(
+                        MessageAttachment.TYPE_LOCATION
+                    ) && messageContainsTerm
+
+                    FILTER_TYPE_CONTACT -> hasAttachment && !hasTransaction && attachmentTypeOf(
+                        MessageAttachment.TYPE_CONTACT
+                    ) && messageContainsTerm
+
+                    FILTER_TYPE_IDENTITY_ATTRIBUTE -> hasAttachment && !hasTransaction && attachmentTypeOf(
+                        MessageAttachment.TYPE_IDENTITY_ATTRIBUTE
+                    ) && messageContainsTerm
+
                     else -> messageContainsTerm
                 }
             }
@@ -159,7 +176,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     // Search and filter the messages
     private var searchFilterLimit = MutableLiveData(Pair("", FILTER_TYPE_EVERYTHING))
     private var cameraUri: Uri? = null
-    private var downloadProgress: MutableLiveData<MutableMap<String, TransferProgress>> = MutableLiveData(mutableMapOf())
+    private var downloadProgress: MutableLiveData<MutableMap<String, TransferProgress>> =
+        MutableLiveData(mutableMapOf())
 
     init {
         setHasOptionsMenu(true)
@@ -194,11 +212,13 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
             downloadProgress.value?.let { map ->
                 if (!map.containsKey(progress.id) || (
-                    map.containsKey(progress.id) && (
-                        map[progress.id]!!.state != progress.state ||
-                            kotlin.math.floor(map[progress.id]!!.progress) != kotlin.math.floor(progress.progress)
+                        map.containsKey(progress.id) && (
+                            map[progress.id]!!.state != progress.state ||
+                                kotlin.math.floor(map[progress.id]!!.progress) != kotlin.math.floor(
+                                progress.progress
+                            )
+                            )
                         )
-                    )
                 ) {
                     map[progress.id] = progress
                     downloadProgress.postValue(map)
@@ -227,9 +247,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                 val file = attachment.getFile(requireContext())
 
                                 if (file.exists()) {
-                                    val senderName = if (getTrustChainCommunity().myPeer.publicKey == publicKey) {
-                                        resources.getString(R.string.text_you)
-                                    } else getContactStore().getContactFromPublicKey(publicKey)?.name ?: resources.getString(R.string.text_unknown_contact)
+                                    val senderName =
+                                        if (getTrustChainCommunity().myPeer.publicKey == publicKey) {
+                                            resources.getString(R.string.text_you)
+                                        } else getContactStore().getContactFromPublicKey(publicKey)?.name
+                                            ?: resources.getString(R.string.text_unknown_contact)
                                     val sendDate = it.chatMessage.timestamp
 
                                     val chatMediaItem = ChatMediaItem(
@@ -252,12 +274,15 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                     )
                                 }
                             }
+
                             MessageAttachment.TYPE_IMAGE -> {
                                 val file = attachment.getFile(requireContext())
                                 if (file.exists()) {
-                                    val senderName = if (getTrustChainCommunity().myPeer.publicKey == publicKey) {
-                                        resources.getString(R.string.text_you)
-                                    } else getContactStore().getContactFromPublicKey(publicKey)?.name ?: resources.getString(R.string.text_unknown_contact)
+                                    val senderName =
+                                        if (getTrustChainCommunity().myPeer.publicKey == publicKey) {
+                                            resources.getString(R.string.text_you)
+                                        } else getContactStore().getContactFromPublicKey(publicKey)?.name
+                                            ?: resources.getString(R.string.text_unknown_contact)
                                     val sendDate = it.chatMessage.timestamp
 
                                     val chatMediaItem = ChatMediaItem(
@@ -280,9 +305,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                     )
                                 }
                             }
+
                             MessageAttachment.TYPE_CONTACT -> {
                                 val contact = Contact.deserialize(attachment.content, 0).first
-                                val contactLocal = getContactStore().getContactFromPublicKey(contact.publicKey)
+                                val contactLocal =
+                                    getContactStore().getContactFromPublicKey(contact.publicKey)
 
                                 if (contactLocal == null) {
                                     when (contact.publicKey) {
@@ -290,6 +317,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                             requireContext(),
                                             resources.getString(R.string.snackbar_contact_add_error_self),
                                         )
+
                                         else -> {
                                             ConfirmDialog(
                                                 resources.getString(
@@ -298,7 +326,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                                 )
                                             ) { dialog ->
                                                 try {
-                                                    getContactStore().addContact(contact.publicKey, contact.name)
+                                                    getContactStore().addContact(
+                                                        contact.publicKey,
+                                                        contact.name
+                                                    )
                                                     parentActivity.displayToast(
                                                         requireContext(),
                                                         resources.getString(
@@ -318,8 +349,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                     goToContactFragment(contactLocal)
                                 }
                             }
+
                             MessageAttachment.TYPE_LOCATION -> {
-                                val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
+                                val offsetBuffer =
+                                    attachment.content.copyOfRange(0, attachment.content.size)
                                 JSONObject(offsetBuffer.decodeToString()).let { json ->
                                     Location("").apply {
                                         latitude =
@@ -327,12 +360,19 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                         longitude =
                                             json.getDouble(resources.getString(R.string.text_longitude))
                                     }.let { loc ->
-                                        ChatLocationDialog(publicKey, loc).show(parentFragmentManager, tag)
+                                        ChatLocationDialog(publicKey, loc).show(
+                                            parentFragmentManager,
+                                            tag
+                                        )
                                     }
                                 }
                             }
+
                             MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> {
-                                val attributeValue = IdentityAttribute.deserialize(it.chatMessage.attachment!!.content, 0).first
+                                val attributeValue = IdentityAttribute.deserialize(
+                                    it.chatMessage.attachment!!.content,
+                                    0
+                                ).first
                                 copyToClipboard(
                                     requireContext(),
                                     attributeValue.value,
@@ -346,8 +386,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                     )
                                 )
                             }
+
                             MessageAttachment.TYPE_TRANSFER_REQUEST -> {
-                                val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
+                                val offsetBuffer =
+                                    attachment.content.copyOfRange(0, attachment.content.size)
                                 JSONObject(offsetBuffer.decodeToString()).let { json ->
                                     val description = if (it.chatMessage.message.isNotEmpty()) {
                                         resources.getString(
@@ -358,7 +400,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
                                     if (json.has(QRScanController.KEY_AMOUNT)) {
                                         val amount = json.getString(QRScanController.KEY_AMOUNT)
-                                        val contact = getContactStore().getContactFromPublicKey(publicKey)
+                                        val contact =
+                                            getContactStore().getContactFromPublicKey(publicKey)
 
                                         if (contact != null) {
                                             ExchangeTransferMoneyDialog(
@@ -398,7 +441,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                 !it.chatMessage.outgoing,
                                 block.timestamp
                             ).toExchangeTransactionItem(myPk, myBlocks).let { item ->
-                                ExchangeTransactionDialog(item).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
+                                ExchangeTransactionDialog(item).show(
+                                    parentFragmentManager,
+                                    ExchangeTransactionDialog.TAG
+                                )
                             }
                         }
                     }
@@ -406,7 +452,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 {
                     val peer = Peer(it.first)
                     val id = it.second
-                    val toggleState = getPeerChatCommunity().evaProtocol!!.toggleIncomingTransfer(peer, id)
+                    val toggleState =
+                        getPeerChatCommunity().evaProtocol!!.toggleIncomingTransfer(peer, id)
 
                     downloadProgress.value?.let { map ->
                         val transferProgress = TransferProgress(
@@ -433,11 +480,13 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         contact.observe(
             viewLifecycleOwner,
             Observer { contact ->
-                val identityName = getPeerChatStore().getContactState(publicKey)?.identityInfo?.let {
-                    "${it.initials} ${it.surname}"
-                }
+                val identityName =
+                    getPeerChatStore().getContactState(publicKey)?.identityInfo?.let {
+                        "${it.initials} ${it.surname}"
+                    }
                 parentActivity.setActionBarTitle(
-                    contact?.name ?: (identityName ?: resources.getString(R.string.text_unknown_contact)),
+                    contact?.name ?: (identityName
+                        ?: resources.getString(R.string.text_unknown_contact)),
                     resources.getString(
                         if (isConnected) {
                             R.string.text_contact_connected
@@ -450,13 +499,13 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         )
 
         binding.etMessage.doAfterTextChanged { state ->
-            toggleButton(btnSendMessage, state != null && state.isNotEmpty())
+            toggleButton(binding.btnSendMessage, state != null && state.isNotEmpty())
         }
 
         binding.btnSendMessage.setOnClickListener {
             binding.pbSendMessage.isVisible = true
             val message = binding.etMessage.text.toString()
-            etMessage.closeKeyboard(requireContext())
+            binding.etMessage.closeKeyboard(requireContext())
             binding.etMessage.text = null
             binding.etMessage.clearFocus()
 
@@ -537,6 +586,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             startActivityForResult(intent, PICK_CAMERA)
                         }
                     }
+
                     R.id.actionSendPhotoFromLibrary -> {
                         val mimeTypes = arrayOf("image/*")
                         val intent = Intent(Intent.ACTION_GET_CONTENT)
@@ -551,6 +601,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             PICK_IMAGE
                         )
                     }
+
                     R.id.actionSendFile -> {
                         val mimeTypes = arrayOf(
                             "video/*",
@@ -569,15 +620,22 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             PICK_FILE
                         )
                     }
-                    R.id.actionSendLocation -> ChatLocationDialog(publicKey).show(parentFragmentManager, tag)
+
+                    R.id.actionSendLocation -> ChatLocationDialog(publicKey).show(
+                        parentFragmentManager,
+                        tag
+                    )
+
                     R.id.actionSendContact -> ContactShareDialog(
                         null,
                         contact
                     ).show(parentFragmentManager, tag)
+
                     R.id.actionSendIdentityAttribute -> IdentityAttributeShareDialog(
                         contact,
                         null
                     ).show(parentFragmentManager, tag)
+
                     R.id.actionTransferMoney -> {
                         if (contact != null) {
                             ExchangeTransferMoneyDialog(
@@ -592,6 +650,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             )
                         }
                     }
+
                     R.id.actionRequestMoney -> {
                         if (contact != null) {
                             ExchangeTransferMoneyDialog(
@@ -631,14 +690,15 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 bigOptionsNumber = 8,
                 bigOptionsCols = 2,
             ) { _, item ->
-                searchFilterLimit.value = searchFilterLimit.value?.copy(second = item.title.toString())
+                searchFilterLimit.value =
+                    searchFilterLimit.value?.copy(second = item.title.toString())
 
                 binding.ivFilterByType.setImageDrawable(item.icon)
             }.show(parentFragmentManager, tag)
         }
 
         binding.etSearchMessage.doAfterTextChanged { searchText ->
-            ivSearchClearIcon.isVisible = searchText != null && searchText.isNotEmpty()
+            binding.ivSearchClearIcon.isVisible = searchText != null && searchText.isNotEmpty()
             searchFilterLimit.value = searchFilterLimit.value?.copy(first = searchText.toString())
         }
 
@@ -653,15 +713,18 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     newMessageCount > oldMessageCount -> { // on new message
                         when ((list[list.size - 1] as ContactChatItem).chatMessage.outgoing) {
                             false -> { // incoming message only scroll to bottom when at least one of the last five messages is shown
-                                val layoutManager = LinearLayoutManager::class.java.cast(binding.rvMessages.layoutManager)
+                                val layoutManager =
+                                    LinearLayoutManager::class.java.cast(binding.rvMessages.layoutManager)
                                 if (layoutManager?.findLastVisibleItemPosition()!! < adapterMessages.itemCount - SCROLL_BOTTOM_MESSAGES_SHOWN) {
                                     binding.tvScrollToBottomNewMessage.isVisible = true
                                     false
                                 } else true
                             }
+
                             else -> true // outgoing message scroll to bottom
                         }
                     }
+
                     messageCountChanged -> false // when more messages are shown (scroll to top)
                     newMessageCount == oldMessageCount -> false // when single items are updated
                     else -> true
@@ -690,7 +753,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 val lastVisible = layoutManager.findLastVisibleItemPosition()
                 val endHasBeenReached = lastVisible + SCROLL_BOTTOM_MESSAGES_SHOWN >= totalItemCount
 
-                binding.clScrollToBottom.isVisible = totalItemCount > 0 && !(totalItemCount > 0 && endHasBeenReached)
+                binding.clScrollToBottom.isVisible =
+                    totalItemCount > 0 && !(totalItemCount > 0 && endHasBeenReached)
 
                 if (!(totalItemCount > 0 && endHasBeenReached && !(firstVisible == 0 && lastVisible == totalItemCount - 1))) {
                     binding.tvScrollToBottomNewMessage.isVisible = false
@@ -699,7 +763,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         })
 
         binding.clScrollToBottom.setOnClickListener {
-            scrollToBottom(rvMessages)
+            scrollToBottom(binding.rvMessages)
         }
 
         binding.ivSearchClearIcon.setOnClickListener {
@@ -711,7 +775,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             toggleBlockContact(
                 getPeerChatStore().getContactStateForType(publicKey, PeerChatStore.STATUS_BLOCK)
             )
-            clNewChatRequest.isVisible = getContactStore().getContactFromPublicKey(publicKey) == null
+            binding.clNewChatRequest.isVisible =
+                getContactStore().getContactFromPublicKey(publicKey) == null
         }
 
         contactState.observe(
@@ -720,8 +785,14 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 if (contactState == null) return@Observer
 
                 val color = if (contactState.identityInfo?.isVerified == true) {
-                    ContextCompat.getColor(requireContext(), getColorIDFromThemeAttribute(parentActivity, R.attr.colorAccent))
-                } else ContextCompat.getColor(requireContext(), getColorIDFromThemeAttribute(parentActivity, R.attr.colorError))
+                    ContextCompat.getColor(
+                        requireContext(),
+                        getColorIDFromThemeAttribute(parentActivity, R.attr.colorAccent)
+                    )
+                } else ContextCompat.getColor(
+                    requireContext(),
+                    getColorIDFromThemeAttribute(parentActivity, R.attr.colorError)
+                )
                 val icon = if (contactState.identityInfo?.isVerified == true) {
                     R.drawable.ic_verified_smaller
                 } else R.drawable.ic_verified_not_smaller
@@ -736,8 +807,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         contactImage.observe(
             viewLifecycleOwner,
             Observer { contactImage ->
-                val contactImageView = parentActivity.getCustomActionBar().findViewById<ImageView>(R.id.ivContactImage)
-                val contactIdenticonView = parentActivity.getCustomActionBar().findViewById<ImageView>(R.id.ivContactIdenticon)
+                val contactImageView =
+                    parentActivity.getCustomActionBar().findViewById<ImageView>(R.id.ivContactImage)
+                val contactIdenticonView = parentActivity.getCustomActionBar()
+                    .findViewById<ImageView>(R.id.ivContactIdenticon)
 
                 if (contactImage?.image == null) {
                     val publicKeyString = publicKey.keyToBin().toHex()
@@ -827,6 +900,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
                 return true
             }
+
             MENU_ITEM_SEARCH_FILTER -> {
                 binding.clSearchFilter.isVisible = false
 
@@ -835,7 +909,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 searchFilterLimit.value = searchFilterLimit.value?.copy(first = "")
 
                 if (searchFilterLimit.value?.second != FILTER_TYPE_EVERYTHING) {
-                    searchFilterLimit.value = searchFilterLimit.value?.copy(second = FILTER_TYPE_EVERYTHING)
+                    searchFilterLimit.value =
+                        searchFilterLimit.value?.copy(second = FILTER_TYPE_EVERYTHING)
                 }
                 binding.ivFilterByType.setImageDrawable(
                     ContextCompat.getDrawable(
@@ -869,16 +944,28 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             menuMods = { menu ->
                 if (contactState != null) {
                     if (contactState.isArchived) {
-                        menu.findItem(R.id.actionArchiveContact).title = resources.getString(R.string.menu_contact_chat_options_contact_unarchive)
-                        menu.findItem(R.id.actionArchiveContact).icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_contact_unarchive)
+                        menu.findItem(R.id.actionArchiveContact).title =
+                            resources.getString(R.string.menu_contact_chat_options_contact_unarchive)
+                        menu.findItem(R.id.actionArchiveContact).icon = ContextCompat.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_contact_unarchive
+                        )
                     }
                     if (contactState.isMuted) {
-                        menu.findItem(R.id.actionMuteContact).title = resources.getString(R.string.menu_contact_chat_options_contact_unmute)
-                        menu.findItem(R.id.actionMuteContact).icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_contact_unmute)
+                        menu.findItem(R.id.actionMuteContact).title =
+                            resources.getString(R.string.menu_contact_chat_options_contact_unmute)
+                        menu.findItem(R.id.actionMuteContact).icon = ContextCompat.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_contact_unmute
+                        )
                     }
                     if (contactState.isBlocked) {
-                        menu.findItem(R.id.actionBlockContact).title = resources.getString(R.string.menu_contact_chat_options_contact_unblock)
-                        menu.findItem(R.id.actionBlockContact).icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_contact_unblock)
+                        menu.findItem(R.id.actionBlockContact).title =
+                            resources.getString(R.string.menu_contact_chat_options_contact_unblock)
+                        menu.findItem(R.id.actionBlockContact).icon = ContextCompat.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_contact_unblock
+                        )
                     }
                 }
                 menu
@@ -886,26 +973,34 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             optionSelected = { _, selectedItem ->
                 when (selectedItem.itemId) {
                     R.id.actionViewContact -> {
-                        ContactInfoDialog(publicKey).show(parentFragmentManager, ContactInfoDialog.TAG)
+                        ContactInfoDialog(publicKey).show(
+                            parentFragmentManager,
+                            ContactInfoDialog.TAG
+                        )
                     }
+
                     R.id.actionViewMedia -> ChatMediaDialog(
                         requireContext(),
                         publicKey,
                         null
                     ).show(parentFragmentManager, tag)
+
                     R.id.actionSearchFilterChat -> {
                         binding.clSearchFilter.isVisible = true
                         parentActivity.invalidateOptionsMenu()
                         toggleSearchFilterBar(false)
                     }
+
                     R.id.actionAddContactFromChat -> {
                         addRenameContact(
                             Contact("", publicKey)
                         )
                     }
+
                     R.id.actionEditContactName -> {
                         addRenameContact(contact!!)
                     }
+
                     R.id.actionRemoveLocalConversation -> {
                         ConfirmDialog(
                             resources.getString(
@@ -931,6 +1026,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             }
                         }.show(parentFragmentManager, tag)
                     }
+
                     R.id.actionRemoveContact -> {
                         ConfirmDialog(
                             resources.getString(
@@ -943,7 +1039,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
                                 parentActivity.displayToast(
                                     requireContext(),
-                                    resources.getString(R.string.snackbar_contact_remove_success, contact.name),
+                                    resources.getString(
+                                        R.string.snackbar_contact_remove_success,
+                                        contact.name
+                                    ),
                                     isShort = false
                                 )
                                 dialog.dismiss()
@@ -954,6 +1053,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             }
                         }.show(parentFragmentManager, tag)
                     }
+
                     R.id.actionMuteContact -> {
                         getPeerChatStore().setState(
                             publicKey,
@@ -961,6 +1061,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             if (contactState != null) !contactState.isMuted else true
                         )
                     }
+
                     R.id.actionArchiveContact -> {
                         getPeerChatStore().setState(
                             publicKey,
@@ -968,11 +1069,13 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             if (contactState != null) !contactState.isArchived else true
                         )
                     }
+
                     R.id.actionBlockContact -> {
                         val isBlocked = contactState?.isBlocked ?: false
 
                         toggleBlockContact(isBlocked)
                     }
+
                     R.id.actionCopyPublicKey -> {
                         copyToClipboard(
                             requireContext(),
@@ -988,6 +1091,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             )
                         )
                     }
+
                     R.id.actionShareContact -> ContactShareDialog(
                         contact,
                         null
@@ -1011,7 +1115,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             !isBlocked
         )
 
-        binding.clNewChatRequest.isVisible = !getPeerChatStore().getContactStateForType(publicKey, PeerChatStore.STATUS_BLOCK) && getContactStore().getContactFromPublicKey(publicKey) == null
+        binding.clNewChatRequest.isVisible = !getPeerChatStore().getContactStateForType(
+            publicKey,
+            PeerChatStore.STATUS_BLOCK
+        ) && getContactStore().getContactFromPublicKey(publicKey) == null
     }
 
     private fun addRenameContact(contact: Contact) {
@@ -1076,14 +1183,18 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     )
                 }
             }
-            customView.findViewById<TextView>(R.id.tv_actionbar_subtitle).setTextColor(actionBarTitleColor)
+            customView.findViewById<TextView>(R.id.tv_actionbar_subtitle)
+                .setTextColor(actionBarTitleColor)
         }
     }
 
     private fun goToContactFragment(contact: Contact) {
         val contactChatFragment = ContactChatFragment()
         contactChatFragment.arguments = Bundle().apply {
-            putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, contact.publicKey.keyToBin().toHex())
+            putString(
+                ValueTransferMainActivity.ARG_PUBLIC_KEY,
+                contact.publicKey.keyToBin().toHex()
+            )
             putString(ValueTransferMainActivity.ARG_NAME, contact.name)
             putString(ValueTransferMainActivity.ARG_PARENT, parentTag)
         }
@@ -1104,7 +1215,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     fun onBackPressed() {
         toggleSearchFilterBar()
         parentActivity.setActionBarTitle("", null)
-        etMessage.closeKeyboard(requireContext())
+        binding.etMessage.closeKeyboard(requireContext())
 
         val previousFragment = parentFragmentManager.fragments.filter {
             it.tag == parentTag
@@ -1159,6 +1270,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                         }
                     }
                 }
+
                 PICK_FILE -> if (data != null) {
                     if (data.clipData != null) {
                         data.clipData?.let {
@@ -1173,9 +1285,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                         }
                     }
                 }
+
                 PICK_CAMERA -> cameraUri?.let {
                     sendFromUri(it, TYPE_IMAGE)
                 }
+
                 RENAME_CONTACT -> if (data != null) {
                     searchFilterLimit.value = searchFilterLimit.value
                 }
@@ -1194,6 +1308,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
                 )
             }
+
             TYPE_FILE -> {
                 val documentFile = DocumentFile.fromSingleUri(requireContext(), uri)
                 val fileName = documentFile?.name
@@ -1224,10 +1339,13 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
             ContactChatItem(
                 chatMessage,
-                if (chatMessage.transactionHash != null) getTransactionRepository().getTransactionWithHash(chatMessage.transactionHash) else null,
+                if (chatMessage.transactionHash != null) getTransactionRepository().getTransactionWithHash(
+                    chatMessage.transactionHash
+                ) else null,
                 if (chatMessage.transactionHash != null) blocks else listOf(),
                 (index == 0) && (totalMessageCount >= limitedMessageCount.value?.toInt()!!),
-                (index == 0) || (index > 0 && !dateFormat.format(messages[index-1].timestamp).equals(dateFormat.format(chatMessage.timestamp))),
+                (index == 0) || (index > 0 && !dateFormat.format(messages[index - 1].timestamp)
+                    .equals(dateFormat.format(chatMessage.timestamp))),
                 false,
                 progress
             )
@@ -1235,7 +1353,14 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     }
 
     private fun checkCameraPermissions(): Boolean {
-        return if ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
+        return if ((ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED)
+        ) {
             requestPermissions(
                 arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 PERMISSION_CAMERA

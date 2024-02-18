@@ -18,6 +18,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.valuetransfer.util.AuthorityItem
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogIdentityAttestationAuthoritiesBinding
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.ui.identity.AttestationAuthorityItemRenderer
@@ -35,8 +36,10 @@ class IdentityAttestationAuthoritiesDialog(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_identity_attestation_authorities, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogIdentityAttestationAuthoritiesBinding.inflate(layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -48,8 +51,8 @@ class IdentityAttestationAuthoritiesDialog(
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val authoritiesRecyclerView = view.findViewById<RecyclerView>(R.id.rvAuthorities)
-            val addAuthorityButton = view.findViewById<Button>(R.id.btnAddAuthority)
+            val authoritiesRecyclerView = binding.rvAuthorities
+            val addAuthorityButton = binding.btnAddAuthority
 
             adapterAuthorities.registerRenderer(
                 AttestationAuthorityItemRenderer(
@@ -95,7 +98,8 @@ class IdentityAttestationAuthoritiesDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
     private fun loadAuthorities() {
@@ -108,38 +112,41 @@ class IdentityAttestationAuthoritiesDialog(
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let { result ->
-            try {
-                val obj = JSONObject(result)
+        QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
+            ?.let { result ->
+                try {
+                    val obj = JSONObject(result)
 
-                if (obj.has(QRScanController.KEY_PUBLIC_KEY)) {
-                    try {
-                        defaultCryptoProvider.keyFromPublicBin(obj.optString(QRScanController.KEY_PUBLIC_KEY).hexToBytes())
-                        val publicKey = obj.optString(QRScanController.KEY_PUBLIC_KEY)
+                    if (obj.has(QRScanController.KEY_PUBLIC_KEY)) {
+                        try {
+                            defaultCryptoProvider.keyFromPublicBin(
+                                obj.optString(QRScanController.KEY_PUBLIC_KEY).hexToBytes()
+                            )
+                            val publicKey = obj.optString(QRScanController.KEY_PUBLIC_KEY)
 
-                        this.dismiss()
-                        parentActivity.getQRScanController().addAuthority(publicKey)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                            this.dismiss()
+                            parentActivity.getQRScanController().addAuthority(publicKey)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            parentActivity.displayToast(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_invalid_public_key)
+                            )
+                        }
+                    } else {
                         parentActivity.displayToast(
                             requireContext(),
-                            resources.getString(R.string.snackbar_invalid_public_key)
+                            resources.getString(R.string.snackbar_no_public_key_found)
                         )
                     }
-                } else {
+                } catch (e: Exception) {
+                    e.printStackTrace()
                     parentActivity.displayToast(
                         requireContext(),
-                        resources.getString(R.string.snackbar_no_public_key_found)
+                        resources.getString(R.string.snackbar_qr_code_not_json_format)
                     )
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                parentActivity.displayToast(
-                    requireContext(),
-                    resources.getString(R.string.snackbar_qr_code_not_json_format)
-                )
             }
-        }
     }
 
     private fun createAuthoritiesItems(authorities: List<Authority>): List<AuthorityItem> {

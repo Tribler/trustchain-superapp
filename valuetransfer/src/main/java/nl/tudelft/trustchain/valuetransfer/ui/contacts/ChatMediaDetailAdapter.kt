@@ -7,12 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.viewpager.widget.PagerAdapter
 import com.bumptech.glide.Glide
 import com.jsibbold.zoomage.ZoomageView
+import nl.tudelft.trustchain.valuetransfer.databinding.ItemContactChatMediaDetailDocumentBinding
+import nl.tudelft.trustchain.valuetransfer.databinding.ItemContactChatMediaDetailImageBinding
 import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
-import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.util.OnSwipeTouchListener
 import nl.tudelft.trustchain.valuetransfer.util.getFormattedSize
 
@@ -21,7 +21,8 @@ class ChatMediaDetailAdapter(
     context: Context,
     private val onItem: (Boolean) -> Unit
 ) : PagerAdapter() {
-    var layoutInflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    var layoutInflater: LayoutInflater =
+        context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
     private var items: List<ChatMediaItem> = listOf()
 
@@ -60,16 +61,18 @@ class ChatMediaDetailAdapter(
         onItem(false)
 
         if (item.type == MessageAttachment.TYPE_IMAGE) { // TYPE_IMAGE
-            view = layoutInflater.inflate(R.layout.item_contact_chat_media_detail_image, container, false)
-
-            imageView = view.findViewById(R.id.zmImage) as ZoomageView
-
+            val binding =
+                ItemContactChatMediaDetailImageBinding.inflate(layoutInflater, container, false)
+            view = binding.root
+            imageView = binding.zmImage
             Glide.with(view).load(item.file).into(imageView)
         } else { // TYPE_FILE
-            view = layoutInflater.inflate(R.layout.item_contact_chat_media_detail_document, container, false)
-            imageView = view.findViewById(R.id.ivAttachment)
-            view.findViewById<TextView>(R.id.tvFileName).text = item.fileName
-            view.findViewById<TextView>(R.id.tvFileSize).text = getFormattedSize(item.file.length().toDouble())
+            val binding =
+                ItemContactChatMediaDetailDocumentBinding.inflate(layoutInflater, container, false)
+            view = binding.root
+            imageView = binding.ivAttachment
+            binding.tvFileName.text = item.fileName
+            binding.tvFileSize.text = getFormattedSize(item.file.length().toDouble())
         }
 
         imageView.setOnTouchListener(object : OnSwipeTouchListener(view.context) {

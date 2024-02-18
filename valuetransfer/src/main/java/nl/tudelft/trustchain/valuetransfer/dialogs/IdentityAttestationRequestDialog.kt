@@ -16,6 +16,7 @@ import nl.tudelft.ipv8.attestation.schema.ID_METADATA_BIG
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_HUGE
 import nl.tudelft.ipv8.attestation.wallet.cryptography.bonehexact.BonehPrivateKey
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogIdentityAttestationRequestBinding
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
@@ -28,8 +29,10 @@ class IdentityAttestationRequestDialog(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_identity_attestation_request, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogIdentityAttestationRequestBinding.inflate(layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -39,10 +42,10 @@ class IdentityAttestationRequestDialog(
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val attributeTypeSpinner = view.findViewById<Spinner>(R.id.spinnerAttributeType)
-            val attributeNameView = view.findViewById<EditText>(R.id.etAttributeNameValue)
+            val attributeTypeSpinner = binding.spinnerAttributeType
+            val attributeNameView = binding.etAttributeNameValue
 
-            val requestButton = view.findViewById<Button>(R.id.btnRequestAttestation)
+            val requestButton = binding.btnRequestAttestation
             toggleButton(requestButton, attributeNameView.text.toString().isNotEmpty())
 
             val attributeNameAdapter = object : ArrayAdapter<String>(
@@ -52,13 +55,22 @@ class IdentityAttestationRequestDialog(
             ) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                     return (super.getView(position, convertView, parent) as TextView).apply {
-                        text = getAttestationCommunity().schemaManager.getSchemaNames().sorted()[position]
+                        text = getAttestationCommunity().schemaManager.getSchemaNames()
+                            .sorted()[position]
                         setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
                     }
                 }
 
-                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    return (super.getDropDownView(position, convertView, parent) as TextView).apply {
+                override fun getDropDownView(
+                    position: Int,
+                    convertView: View?,
+                    parent: ViewGroup
+                ): View {
+                    return (super.getDropDownView(
+                        position,
+                        convertView,
+                        parent
+                    ) as TextView).apply {
                         layoutParams.apply {
                             height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
                         }
@@ -74,18 +86,19 @@ class IdentityAttestationRequestDialog(
             }
 
             attributeTypeSpinner.adapter = attributeNameAdapter
-            attributeTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            attributeTypeSpinner.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
 
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    toggleButton(requestButton, attributeNameView.text.isNotEmpty())
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        toggleButton(requestButton, attributeNameView.text.isNotEmpty())
+                    }
                 }
-            }
 
             attributeNameView.doAfterTextChanged { state ->
                 toggleButton(requestButton, state != null && state.isNotEmpty())
@@ -124,6 +137,7 @@ class IdentityAttestationRequestDialog(
             }
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }

@@ -14,6 +14,7 @@ import com.ncorti.slidetoact.SlideToActView
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogExchangeGatewayBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.*
 
@@ -30,8 +31,10 @@ class ExchangeGatewayDialog(
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_exchange_gateway, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogExchangeGatewayBinding.inflate(layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -41,19 +44,19 @@ class ExchangeGatewayDialog(
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val gateWayName = view.findViewById<TextView>(R.id.tvGatewayName)
-            val gateWayPublicKey = view.findViewById<TextView>(R.id.tvGatewayPublicKey)
-            val gateWaySaveConstraintLayout = view.findViewById<ConstraintLayout>(R.id.clSaveGateway)
-            val gateWaySaveSwitch = view.findViewById<Switch>(R.id.switchSaveGateway)
-            val gateWayPreferredConstraintLayout = view.findViewById<ConstraintLayout>(R.id.clPreferredGateway)
-            val gateWayPreferredSwitch = view.findViewById<Switch>(R.id.switchPreferredGateway)
+            val gateWayName = binding.tvGatewayName
+            val gateWayPublicKey = binding.tvGatewayPublicKey
+            val gateWaySaveConstraintLayout = binding.clSaveGateway
+            val gateWaySaveSwitch = binding.switchSaveGateway
+            val gateWayPreferredConstraintLayout = binding.clPreferredGateway
+            val gateWayPreferredSwitch = binding.switchPreferredGateway
 
-            val connectGatewaySlider = view.findViewById<SlideToActView>(R.id.slideConnectGateway)
-            val sellSlider = view.findViewById<SlideToActView>(R.id.slideSell)
+            val connectGatewaySlider = binding.slideConnectGateway
+            val sellSlider = binding.slideSell
 
-            view.findViewById<TextView>(R.id.tvTitleBuy).isVisible = isCreation
-            view.findViewById<TextView>(R.id.tvTitleSell).isVisible = !isCreation
-            view.findViewById<ConstraintLayout>(R.id.clBalanceSellAmount).isVisible = !isCreation
+            binding.tvTitleBuy.isVisible = isCreation
+            binding.tvTitleSell.isVisible = !isCreation
+            binding.clBalanceSellAmount.isVisible = !isCreation
             connectGatewaySlider.isVisible = isCreation
             sellSlider.isVisible = !isCreation
 
@@ -67,10 +70,10 @@ class ExchangeGatewayDialog(
                 parentActivity.getBalance(true).observe(
                     this,
                     Observer {
-                        view.findViewById<TextView>(R.id.tvBalance).text = it
+                        binding.tvBalance.text = it
                     }
                 )
-                view.findViewById<TextView>(R.id.tvSellAmount).text = formatBalance(amount!!)
+                binding.tvSellAmount.text = formatBalance(amount!!)
             }
 
             gateWayPublicKey.text = publicKey.keyToBin().toHex()
@@ -82,9 +85,44 @@ class ExchangeGatewayDialog(
             val saveGateway = gateWaySaveSwitch.isChecked
             val preferredGateway = gateWayPreferredSwitch.isChecked
 
-            connectGatewaySlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
-                override fun onSlideComplete(view: SlideToActView) {
+            connectGatewaySlider.onSlideCompleteListener =
+                object : SlideToActView.OnSlideCompleteListener {
+                    override fun onSlideComplete(view: SlideToActView) {
 
+                        @Suppress("DEPRECATION")
+                        Handler().postDelayed(
+                            Runnable {
+                                if (saveGateway) {
+                                    getGatewayStore().addGateway(
+                                        publicKey,
+                                        name,
+                                        ip,
+                                        port.toLong(),
+                                        preferredGateway
+                                    )
+                                }
+
+                                getEuroTokenCommunity().connectToGateway(
+                                    publicKey.keyToBin().toHex(),
+                                    ip,
+                                    port,
+                                    paymentID
+                                )
+
+                                parentActivity.displayToast(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_gateway_trying_connect),
+                                    isShort = false
+                                )
+                                bottomSheetDialog.dismiss()
+                            },
+                            500
+                        )
+                    }
+                }
+
+            sellSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
+                override fun onSlideComplete(view: SlideToActView) {
                     @Suppress("DEPRECATION")
                     Handler().postDelayed(
                         Runnable {
@@ -98,35 +136,13 @@ class ExchangeGatewayDialog(
                                 )
                             }
 
-                            getEuroTokenCommunity().connectToGateway(
-                                publicKey.keyToBin().toHex(),
+                            getTransactionRepository().sendDestroyProposalWithPaymentID(
+                                publicKey.keyToBin(),
                                 ip,
                                 port,
-                                paymentID
-                            )
-
-                            parentActivity.displayToast(
-                                requireContext(),
-                                resources.getString(R.string.snackbar_gateway_trying_connect),
-                                isShort = false
-                            )
-                            bottomSheetDialog.dismiss()
-                        },
-                        500
-                    )
-                }
-            }
-
-            sellSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
-                override fun onSlideComplete(view: SlideToActView) {
-                    @Suppress("DEPRECATION")
-                    Handler().postDelayed(
-                        Runnable {
-                            if (saveGateway) {
-                                getGatewayStore().addGateway(publicKey, name, ip, port.toLong(), preferredGateway)
-                            }
-
-                            getTransactionRepository().sendDestroyProposalWithPaymentID(publicKey.keyToBin(), ip, port, paymentID, amount!!).let { block ->
+                                paymentID,
+                                amount!!
+                            ).let { block ->
                                 if (block == null) {
                                     parentActivity.displayToast(
                                         requireContext(),
@@ -158,6 +174,7 @@ class ExchangeGatewayDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }

@@ -13,6 +13,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogIdentityAttestationVerifyBinding
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
@@ -30,7 +31,8 @@ class IdentityAttestationVerifyDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_identity_attestation_verify, null)
+            val binding = DialogIdentityAttestationVerifyBinding.inflate(it.layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -40,11 +42,11 @@ class IdentityAttestationVerifyDialog(
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val verificationSummaryView = view.findViewById<ConstraintLayout>(R.id.clVerificationSummary)
-            val attestationFromValue = view.findViewById<EditText>(R.id.etAttestationFromValue)
-            val attestationAttributeValue = view.findViewById<EditText>(R.id.etAttestationAttributeValue)
-            val attestationTypeValue = view.findViewById<EditText>(R.id.etAttestationTypeValue)
-            val verifyButton = view.findViewById<Button>(R.id.btnVerifyAttestation)
+            val verificationSummaryView = binding.clVerificationSummary
+            val attestationFromValue = binding.etAttestationFromValue
+            val attestationAttributeValue = binding.etAttestationAttributeValue
+            val attestationTypeValue = binding.etAttestationTypeValue
+            val verifyButton = binding.btnVerifyAttestation
 
             val metadataObject = JSONObject(metadata)
 
@@ -52,7 +54,7 @@ class IdentityAttestationVerifyDialog(
             attestationAttributeValue.setText(metadataObject.getString(QRScanController.KEY_ATTRIBUTE))
             attestationTypeValue.setText(metadataObject.getString(QRScanController.KEY_ID_FORMAT))
 
-            val loadingSpinner = view.findViewById<ProgressBar>(R.id.pbLoadingSpinner)
+            val loadingSpinner = binding.pbLoadingSpinner
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()

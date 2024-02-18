@@ -24,6 +24,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogContactChatLocationBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import java.util.*
 
@@ -59,20 +60,22 @@ class ChatLocationDialog(
 
             @Suppress("DEPRECATION")
             bottomSheetDialog.window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
-            val view = layoutInflater.inflate(R.layout.dialog_contact_chat_location, null)
+            val binding = DialogContactChatLocationBinding.inflate(it.layoutInflater)
+            val view = binding.root
+
             dialogView = view
 
             // Set action bar
             setHasOptionsMenu(true)
-            actionBar = view.findViewById(R.id.tbActionBar)
+            actionBar = binding.tbActionBar
             actionBar.inflateMenu(R.menu.contact_chat_location)
             actionBar.setOnMenuItemClickListener(this)
             actionBar.setNavigationOnClickListener {
                 bottomSheetDialog.dismiss()
             }
 
-            titleView = view.findViewById(R.id.tvActionbarTitle)
-            subTitleView = view.findViewById(R.id.tvActionbarSubTitle)
+            titleView = binding.tvActionbarTitle
+            subTitleView = binding.tvActionbarSubTitle
 
             if (location != null) {
                 titleView.text = getString(R.string.text_location)
@@ -89,15 +92,15 @@ class ChatLocationDialog(
             mapFragment = childFragmentManager.findFragmentById(R.id.fragmentMap) as SupportMapFragment
             mapFragment.getMapAsync(this)
 
-            locationSendView = view.findViewById<LinearLayout>(R.id.llSendLocation).apply {
+            locationSendView = binding.llSendLocation.apply {
                 setOnClickListener(this@ChatLocationDialog)
             }
-            openDirectionsView = view.findViewById<LinearLayout>(R.id.llOpenDirections).apply {
+            openDirectionsView = binding.llOpenDirections.apply {
                 setOnClickListener(this@ChatLocationDialog)
             }
 
-            locationTypeSend = view.findViewById(R.id.tvLocationTypeSend)
-            locationNameSend = view.findViewById(R.id.tvLocationNameSend)
+            locationTypeSend = binding.tvLocationTypeSend
+            locationNameSend = binding.tvLocationNameSend
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()

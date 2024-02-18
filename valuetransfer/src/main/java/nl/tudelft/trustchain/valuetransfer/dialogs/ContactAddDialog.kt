@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
-import android.widget.*
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -13,11 +12,18 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.util.*
+import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogContactAddBinding
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
-import nl.tudelft.trustchain.valuetransfer.util.*
+import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
+import nl.tudelft.trustchain.valuetransfer.util.createBitmap
+import nl.tudelft.trustchain.valuetransfer.util.getInitials
+import nl.tudelft.trustchain.valuetransfer.util.mapToJSON
+import nl.tudelft.trustchain.valuetransfer.util.onFocusChange
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
+import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import org.json.JSONObject
 
 class ContactAddDialog(
@@ -29,8 +35,10 @@ class ContactAddDialog(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_contact_add, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogContactAddBinding.inflate(layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -42,18 +50,19 @@ class ContactAddDialog(
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val myPublicKeyImageView = view.findViewById<ImageView>(R.id.ivMyQRCode)
-            val copyMyPublicKeyView = view.findViewById<ImageView>(R.id.ivCopyMyPublicKey)
-            val scanContactPublicKeyView = view.findViewById<ImageView>(R.id.btnScanContactPublicKey)
-            val contactNameView = view.findViewById<EditText>(R.id.etContactName)
-            val contactPublicKeyView = view.findViewById<EditText>(R.id.etContactPublicKey)
-            val addContactView = view.findViewById<Button>(R.id.btnAddContact)
+            val myPublicKeyImageView = binding.ivMyQRCode
+            val copyMyPublicKeyView = binding.ivCopyMyPublicKey
+            val scanContactPublicKeyView = binding.btnScanContactPublicKey
+            val contactNameView = binding.etContactName
+            val contactPublicKeyView = binding.etContactPublicKey
+            val addContactView = binding.btnAddContact
 
             contactPublicKeyView.setText(peerPublicKey?.keyToBin()?.toHex())
             contactNameView.setText(name)
             toggleButton(
                 addContactView,
-                contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty()
+                contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString()
+                    .isNotEmpty()
             )
 
             onFocusChange(contactNameView, requireContext())
@@ -62,14 +71,16 @@ class ContactAddDialog(
             contactNameView.doAfterTextChanged {
                 toggleButton(
                     addContactView,
-                    contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty()
+                    contactNameView.text.toString()
+                        .isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty()
                 )
             }
 
             contactPublicKeyView.doAfterTextChanged {
                 toggleButton(
                     addContactView,
-                    contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty()
+                    contactNameView.text.toString()
+                        .isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty()
                 )
             }
 
@@ -99,32 +110,38 @@ class ContactAddDialog(
             addContactView.setOnClickListener {
                 val publicKeyBin = contactPublicKeyView.text.toString()
                 try {
-                    defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes()).let { publicKey ->
-                        val contactName = contactNameView.text.toString()
+                    defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
+                        .let { publicKey ->
+                            val contactName = contactNameView.text.toString()
 
-                        when {
-                            publicKeyBin == myPublicKey.keyToBin().toHex() -> {
-                                parentActivity.displayToast(
-                                    requireContext(),
-                                    resources.getString(R.string.snackbar_contact_add_error_self)
-                                )
-                            }
-                            getContactStore().getContactFromPublicKey(publicKey) != null -> {
-                                parentActivity.displayToast(
-                                    requireContext(),
-                                    resources.getString(R.string.snackbar_contact_add_error_exists)
-                                )
-                            }
-                            else -> {
-                                getContactStore().addContact(publicKey, contactName)
-                                parentActivity.displayToast(
-                                    requireContext(),
-                                    resources.getString(R.string.snackbar_contact_add_success, contactName)
-                                )
-                                bottomSheetDialog.dismiss()
+                            when {
+                                publicKeyBin == myPublicKey.keyToBin().toHex() -> {
+                                    parentActivity.displayToast(
+                                        requireContext(),
+                                        resources.getString(R.string.snackbar_contact_add_error_self)
+                                    )
+                                }
+
+                                getContactStore().getContactFromPublicKey(publicKey) != null -> {
+                                    parentActivity.displayToast(
+                                        requireContext(),
+                                        resources.getString(R.string.snackbar_contact_add_error_exists)
+                                    )
+                                }
+
+                                else -> {
+                                    getContactStore().addContact(publicKey, contactName)
+                                    parentActivity.displayToast(
+                                        requireContext(),
+                                        resources.getString(
+                                            R.string.snackbar_contact_add_success,
+                                            contactName
+                                        )
+                                    )
+                                    bottomSheetDialog.dismiss()
+                                }
                             }
                         }
-                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     parentActivity.displayToast(
@@ -140,11 +157,12 @@ class ContactAddDialog(
             @Suppress("DEPRECATION")
             Handler().postDelayed(
                 {
-                    view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).isVisible = false
+                    binding.pbLoadingSpinner.isVisible = false
 
                     val map = mapOf(
                         QRScanController.KEY_TYPE to QRScanController.VALUE_CONTACT,
-                        QRScanController.KEY_PUBLIC_KEY to getIdentityStore().getIdentity()!!.publicKey.keyToBin().toHex(),
+                        QRScanController.KEY_PUBLIC_KEY to getIdentityStore().getIdentity()!!.publicKey.keyToBin()
+                            .toHex(),
                         QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.let {
                             "${it.givenNames.getInitials()} ${it.surname}"
                         },
@@ -163,24 +181,26 @@ class ContactAddDialog(
             )
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let { result ->
-            try {
-                val obj = JSONObject(result)
+        QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
+            ?.let { result ->
+                try {
+                    val obj = JSONObject(result)
 
-                this.dismiss()
+                    this.dismiss()
 
-                parentActivity.getQRScanController().addContact(obj)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                parentActivity.displayToast(
-                    requireContext(),
-                    resources.getString(R.string.snackbar_qr_code_not_json_format)
-                )
+                    parentActivity.getQRScanController().addContact(obj)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_qr_code_not_json_format)
+                    )
+                }
             }
-        }
     }
 }

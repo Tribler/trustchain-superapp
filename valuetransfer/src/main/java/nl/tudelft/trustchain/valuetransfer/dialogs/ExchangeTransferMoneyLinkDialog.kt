@@ -15,7 +15,6 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.android.synthetic.main.dialog_exchange_transfer_link.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BuildConfig
@@ -23,6 +22,7 @@ import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogExchangeTransferLinkBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.*
 import java.security.interfaces.RSAPublicKey
@@ -47,11 +47,12 @@ class ExchangeTransferMoneyLinkDialog(
         TransactionRepository(IPv8Android.getInstance().getOverlay()!!, gatewayStoreLink)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_exchange_transfer_link, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogExchangeTransferLinkBinding.inflate(layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -61,10 +62,10 @@ class ExchangeTransferMoneyLinkDialog(
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val typeSpinner = view.findViewById<Spinner>(R.id.spinnerType)
-            val ibanView = view.findViewById<TextView>(R.id.etIBAN)
-            val transactionAmountView = view.findViewById<EditText>(R.id.etTransactionAmount)
-            messageView = view.findViewById(R.id.etTransactionMessage)
+            val typeSpinner = binding.spinnerType
+            val ibanView = binding.etIBAN
+            val transactionAmountView = binding.etTransactionAmount
+            messageView = binding.etTransactionMessage
 
             if (isTransfer && message != "") {
                 messageView.setText(resources.getString(R.string.text_re, transactionMessage))
@@ -141,6 +142,7 @@ class ExchangeTransferMoneyLinkDialog(
                     !isValidIban(ibanView.text.toString()) -> {
                         ibanView.background.setTint(Color.parseColor("#FFBABA"))
                     }
+
                     else -> {
                         ibanView.background.setTint(Color.parseColor("#C8FFC4"))
                         IBAN = ibanView.text.toString()
@@ -151,7 +153,7 @@ class ExchangeTransferMoneyLinkDialog(
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
-            bottomSheetDialog.clShareLink.setOnClickListener {
+            binding.clShareLink.setOnClickListener {
                 if (!isValidIban(ibanView.text.toString()) && isEuroTransfer) {
                     parentActivity.displayToast(
                         requireContext(),
@@ -164,16 +166,17 @@ class ExchangeTransferMoneyLinkDialog(
                     )
                 } else {
                     createPaymentId(
-                        (transactionAmountText.replace(",", ".").toDouble() * 100).toInt(), if (isEuroTransfer) ibanView.text.toString() else null
+                        (transactionAmountText.replace(",", ".").toDouble() * 100).toInt(),
+                        if (isEuroTransfer) ibanView.text.toString() else null
                     )
                 }
             }
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     internal fun createPaymentId(amount: Int, iban: String? = null) {
         val host = BuildConfig.DEFAULT_GATEWAY_HOST
         val url = "$host/api/exchange/${if (iban == null) "e2t" else "t2e"}/initiate"
@@ -194,11 +197,11 @@ class ExchangeTransferMoneyLinkDialog(
             { response ->
                 val paymentId = response.getString("payment_id")
                 if (iban == null) {
-                    val gatewaydata = response.getJSONObject("gateway_connection_data")
+                    val gatewayData = response.getJSONObject("gateway_connection_data")
                     getEuroTokenCommunity().connectToGateway(
-                        gatewaydata.getString("public_key"),
-                        gatewaydata.getString("ip"),
-                        gatewaydata.getString("port").toInt(),
+                        gatewayData.getString("public_key"),
+                        gatewayData.getString("ip"),
+                        gatewayData.getString("port").toInt(),
                         paymentId
                     )
                 }
@@ -216,7 +219,6 @@ class ExchangeTransferMoneyLinkDialog(
         queue.add(request)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun showLink(host: String, paymentId: String) {
         val link = getLink(host, paymentId)
         val sendIntent: Intent = Intent().apply {
@@ -234,7 +236,6 @@ class ExchangeTransferMoneyLinkDialog(
         startActivity(shareIntent)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     fun getLink(host: String, paymentId: String): String {
         val ownKey = transactionRepositoryLink.trustChainCommunity.myPeer.publicKey
         val name =
@@ -260,7 +261,8 @@ class ExchangeTransferMoneyLinkDialog(
             simpleParams.append("&t2e=").append(true)
             parameters.append("&t2e=").append(SecurityUtil.urlencode("true"))
             simpleParams.append("&port=").append(BuildConfig.DEFAULT_GATEWAY_PORT)
-            parameters.append("&port=").append(SecurityUtil.urlencode(BuildConfig.DEFAULT_GATEWAY_PORT.toString()))
+            parameters.append("&port=")
+                .append(SecurityUtil.urlencode(BuildConfig.DEFAULT_GATEWAY_PORT.toString()))
         }
         simpleParams.append("&public=").append(ownKey.keyToBin().toHex())
         parameters.append("&public=").append(SecurityUtil.urlencode(ownKey.keyToBin().toHex()))

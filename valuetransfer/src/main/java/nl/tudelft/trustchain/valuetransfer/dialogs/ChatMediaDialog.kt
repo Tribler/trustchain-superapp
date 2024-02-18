@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import kotlinx.coroutines.flow.combine
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogContactChatMediaBinding
 import nl.tudelft.trustchain.valuetransfer.util.*
 
 class ChatMediaDialog(
@@ -46,7 +47,10 @@ class ChatMediaDialog(
     private var isFiltering = false
 
     private val itemsChatMedia: LiveData<List<ChatMediaItem>> by lazy {
-        combine(getPeerChatStore().getAllByPublicKey(publicKey), filterType.asFlow()) { messages, type ->
+        combine(
+            getPeerChatStore().getAllByPublicKey(publicKey),
+            filterType.asFlow()
+        ) { messages, type ->
             val filterTypes = when (type) {
                 FILTER_TYPE_IMAGES -> listOf(MessageAttachment.TYPE_IMAGE)
                 FILTER_TYPE_FILES -> listOf(MessageAttachment.TYPE_FILE)
@@ -81,9 +85,14 @@ class ChatMediaDialog(
             bottomSheetDialog = Dialog(requireContext(), R.style.FullscreenDialog)
 
             @Suppress("DEPRECATION")
-            bottomSheetDialog.window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            bottomSheetDialog.window?.setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+            )
 
-            val view = layoutInflater.inflate(R.layout.dialog_contact_chat_media, null)
+            val binding = DialogContactChatMediaBinding.inflate(it.layoutInflater)
+            val view = binding.root
+
             dialogView = view
 
             // Dialog cannot be discarded on outside touch
@@ -92,7 +101,7 @@ class ChatMediaDialog(
 
             // Set action bar
             setHasOptionsMenu(true)
-            actionBar = view.findViewById(R.id.tbActionBar)
+            actionBar = binding.tbActionBar
             actionBar.inflateMenu(R.menu.contact_chat_media)
             actionBar.setOnMenuItemClickListener(this)
             actionBar.setNavigationOnClickListener {
@@ -102,14 +111,14 @@ class ChatMediaDialog(
             actionBar.menu.getItem(0).isVisible = chatMediaItem != null
 
             // Gallery and detail view and action bar titles
-            galleryView = view.findViewById(R.id.clImageGallery)
-            detailView = view.findViewById(R.id.clImageDetail)
-            noMediaText = view.findViewById(R.id.tvNoMedia)
-            senderTitle = view.findViewById(R.id.tvActionbarSender)
-            dateTitle = view.findViewById(R.id.tvActionbarTime)
+            galleryView = binding.gallery.clImageGallery
+            detailView = binding.detail.clImageDetail
+            noMediaText = binding.gallery.tvNoMedia
+            senderTitle = binding.tvActionbarSender
+            dateTitle = binding.tvActionbarTime
 
             // Viewpager and custom adapter for the detail display
-            viewPager = view.findViewById(R.id.viewPager) as ViewPager
+            viewPager = binding.detail.viewPager
             viewPager!!.adapter = chatMediaDetailAdapter
             viewPager!!.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
                 override fun onPageSelected(p0: Int) {
@@ -135,7 +144,7 @@ class ChatMediaDialog(
                 }
             )
 
-            rvChatMediaItems = view.findViewById(R.id.rvChatMediaItems)
+            rvChatMediaItems = binding.gallery.rvChatMediaItems
             rvChatMediaItems.adapter = adapterChatMedia
             rvChatMediaItems.layoutManager = GridLayoutManager(requireContext(), 3)
 
@@ -162,7 +171,8 @@ class ChatMediaDialog(
                             val index = chatMediaDetailAdapter.getIndexOf(chatMediaItem)
                             viewPager!!.setCurrentItem(index, false)
                             senderTitle.text = chatMediaDetailAdapter.getItem(index).senderName
-                            dateTitle.text = dateFormat.format(chatMediaDetailAdapter.getItem(index).sendDate)
+                            dateTitle.text =
+                                dateFormat.format(chatMediaDetailAdapter.getItem(index).sendDate)
                             galleryView(false)
                         }
                         initialLaunch = false
@@ -175,9 +185,9 @@ class ChatMediaDialog(
                 }
             )
 
-            val showAll = view.findViewById<TextView>(R.id.tvShowAll)
-            val showImages = view.findViewById<TextView>(R.id.tvShowImages)
-            val showFiles = view.findViewById<TextView>(R.id.tvShowFiles)
+            val showAll = binding.gallery.tvShowAll
+            val showImages = binding.gallery.tvShowImages
+            val showFiles = binding.gallery.tvShowFiles
 
             showAll.setOnClickListener {
                 (it as TextView).filterMedia(FILTER_TYPE_ALL, listOf(showImages, showFiles))
@@ -193,7 +203,8 @@ class ChatMediaDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
     override fun onClick(v: View?) {
@@ -210,20 +221,31 @@ class ChatMediaDialog(
                 val currentItem = chatMediaDetailAdapter.getItem(index)
 
                 if (!storageIsWritable()) {
-                    parentActivity.displayToast(c, resources.getString(R.string.text_storage_not_writable))
+                    parentActivity.displayToast(
+                        c,
+                        resources.getString(R.string.text_storage_not_writable)
+                    )
                     return true
                 }
 
                 when (currentItem.type) {
-                    MessageAttachment.TYPE_IMAGE -> BitmapFactory.decodeFile(currentItem.file.path).let { bitmap ->
-                        saveImage(c, bitmap, currentItem.file.name)
-                    }
-                    MessageAttachment.TYPE_FILE -> saveFile(c, currentItem.file, currentItem.fileName ?: currentItem.file.name)
+                    MessageAttachment.TYPE_IMAGE -> BitmapFactory.decodeFile(currentItem.file.path)
+                        .let { bitmap ->
+                            saveImage(c, bitmap, currentItem.file.name)
+                        }
+
+                    MessageAttachment.TYPE_FILE -> saveFile(
+                        c,
+                        currentItem.file,
+                        currentItem.fileName ?: currentItem.file.name
+                    )
                 }
             }
+
             R.id.actionAllMedia -> {
                 senderTitle.text = resources.getString(R.string.text_all_media)
-                dateTitle.text = resources.getString(R.string.text_number_media, adapterChatMedia.itemCount)
+                dateTitle.text =
+                    resources.getString(R.string.text_number_media, adapterChatMedia.itemCount)
                 galleryView(true)
             }
         }
@@ -262,7 +284,8 @@ class ChatMediaDialog(
         return messages.map { item ->
             val senderName = if (myKey == item.sender) {
                 resources.getString(R.string.text_you)
-            } else getContactStore().getContactFromPublicKey(publicKey)?.name ?: resources.getString(R.string.text_unknown_contact)
+            } else getContactStore().getContactFromPublicKey(publicKey)?.name
+                ?: resources.getString(R.string.text_unknown_contact)
 
             val messageID = item.id
             val attachmentFile = item.attachment!!.getFile(requireContext())

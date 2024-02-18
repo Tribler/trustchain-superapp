@@ -1,10 +1,9 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogConfirmBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 
@@ -16,14 +15,16 @@ class ConfirmDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
 
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_confirm, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogConfirmBinding.inflate(layoutInflater)
+            val view = binding.root
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
-            val buttonPositive = view.findViewById<Button>(R.id.btnPositive)
-            val buttonNegative = view.findViewById<Button>(R.id.btnNegative)
+            val tvTitle = binding.tvTitle
+            val buttonPositive = binding.btnPositive
+            val buttonNegative = binding.btnNegative
 
             tvTitle.text = title
 
@@ -39,6 +40,7 @@ class ConfirmDialog(
             }
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }

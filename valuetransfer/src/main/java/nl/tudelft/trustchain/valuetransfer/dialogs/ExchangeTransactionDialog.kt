@@ -18,6 +18,7 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogExchangeTransactionBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeTransactionItem
 import nl.tudelft.trustchain.valuetransfer.util.*
@@ -33,8 +34,10 @@ class ExchangeTransactionDialog(
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_exchange_transaction, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogExchangeTransactionBinding.inflate(it.layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -44,48 +47,54 @@ class ExchangeTransactionDialog(
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val amountView = view.findViewById<TextView>(R.id.tvTransactionAmount)
-            val typeView = view.findViewById<TextView>(R.id.tvTransactionType)
-            val dateView = view.findViewById<TextView>(R.id.tvTransactionDate)
-            val blockStatusView = view.findViewById<TextView>(R.id.tvTransactionBlockStatus)
-            val blockStatusColorSignedView = view.findViewById<ImageView>(R.id.ivTransactionBlockStatusColorSigned)
-            val blockStatusColorSelfSignedView = view.findViewById<ImageView>(R.id.ivTransactionBlockStatusColorSelfSigned)
-            val blockStatusColorWaitingForSignatureView = view.findViewById<ImageView>(R.id.ivTransactionBlockStatusColorWaitingForSignature)
-            val fromToTitleView = view.findViewById<TextView>(R.id.tvTransactionFromToTitle)
-            val fromToNameView = view.findViewById<TextView>(R.id.tvTransactionFromToName)
-            val fromToAddressView = view.findViewById<TextView>(R.id.tvTransactionFromToAddress)
-            val messageRowView = view.findViewById<LinearLayout>(R.id.llTransactionMessageRow)
-            val messageView = view.findViewById<TextView>(R.id.tvTransactionMessage)
-            val rawView = view.findViewById<TextView>(R.id.tvTransactionRaw)
-            val sizeView = view.findViewById<TextView>(R.id.tvTransactionSize)
-            val blockHashView = view.findViewById<TextView>(R.id.tvTransactionBlockHash)
-            val signatureView = view.findViewById<TextView>(R.id.tvTransactionSignature)
-            val transactionResendButton = view.findViewById<ConstraintLayout>(R.id.clTransactionResendButton)
-            val transactionResendButtonView = view.findViewById<TextView>(R.id.tvTransactionResendButton)
-            val transactionSignButton = view.findViewById<ConstraintLayout>(R.id.clTransactionSignButton)
-            val transactionSignButtonView = view.findViewById<TextView>(R.id.tvTransactionSignButton)
+            val amountView = binding.tvTransactionAmount
+            val typeView = binding.tvTransactionType
+            val dateView = binding.tvTransactionDate
+            val blockStatusView = binding.tvTransactionBlockStatus
+            val blockStatusColorSignedView = binding.ivTransactionBlockStatusColorSigned
+            val blockStatusColorSelfSignedView = binding.ivTransactionBlockStatusColorSelfSigned
+            val blockStatusColorWaitingForSignatureView =
+                binding.ivTransactionBlockStatusColorWaitingForSignature
+            val fromToTitleView = binding.tvTransactionFromToTitle
+            val fromToNameView = binding.tvTransactionFromToName
+            val fromToAddressView = binding.tvTransactionFromToAddress
+            val messageRowView = binding.llTransactionMessageRow
+            val messageView = binding.tvTransactionMessage
+            val rawView = binding.tvTransactionRaw
+            val sizeView = binding.tvTransactionSize
+            val blockHashView = binding.tvTransactionBlockHash
+            val signatureView = binding.tvTransactionSignature
+            val transactionResendButton = binding.clTransactionResendButton
+            val transactionResendButtonView = binding.tvTransactionResendButton
+            val transactionSignButton = binding.clTransactionSignButton
+            val transactionSignButtonView = binding.tvTransactionSignButton
 
-            val additionalContentView = view.findViewById<LinearLayout>(R.id.llTransactionAdditional)
-            val additionalToggleView = view.findViewById<RelativeLayout>(R.id.rlTransactionAdditionalTitleRow)
-            val additionalIconHiddenView = view.findViewById<ImageView>(R.id.ivTransactionAdditionalHidden)
-            val additionalIconShowedView = view.findViewById<ImageView>(R.id.ivTransactionAdditionalShowed)
+            val additionalContentView = binding.llTransactionAdditional
+            val additionalToggleView = binding.rlTransactionAdditionalTitleRow
+            val additionalIconHiddenView = binding.ivTransactionAdditionalHidden
+            val additionalIconShowedView = binding.ivTransactionAdditionalShowed
 
-            val viewChatView = view.findViewById<ConstraintLayout>(R.id.tvViewChat)
-            val viewContactView = view.findViewById<ConstraintLayout>(R.id.tvViewContact)
+            val viewChatView = binding.tvViewChat.clOptionBigContainer
+            val viewContactView = binding.tvViewContact.clOptionBigContainer
             viewChatView.apply {
-                isVisible = transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER
+                isVisible =
+                    transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER
                 if (isVisible) {
-                    findViewById<TextView>(R.id.tvOptionBig).text = resources.getString(R.string.text_string_view_chat)
+                    binding.tvViewChat.tvOptionBig.text =
+                        resources.getString(R.string.text_string_view_chat)
                     val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_chat)
-                    findViewById<ImageView>(R.id.ivOptionBig).setImageDrawable(drawable)
+                    binding.tvViewChat.ivOptionBig.setImageDrawable(drawable)
                 }
             }
             viewContactView.apply {
-                isVisible = transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER
+                isVisible =
+                    transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER
                 if (isVisible) {
-                    findViewById<TextView>(R.id.tvOptionBig).text = resources.getString(R.string.text_string_view_contact)
-                    val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_contact)
-                    findViewById<ImageView>(R.id.ivOptionBig).setImageDrawable(drawable)
+                    binding.tvViewContact.tvOptionBig.text =
+                        resources.getString(R.string.text_string_view_contact)
+                    val drawable =
+                        ContextCompat.getDrawable(requireContext(), R.drawable.ic_contact)
+                    binding.tvViewContact.ivOptionBig.setImageDrawable(drawable)
                 }
             }
 
@@ -95,9 +104,10 @@ class ExchangeTransactionDialog(
                 additionalContentView.isVisible = !additionalContentView.isVisible
             }
 
-            val outgoing = if (transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER) {
-                !transactionItem.transaction.outgoing
-            } else transactionItem.transaction.outgoing
+            val outgoing =
+                if (transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER) {
+                    !transactionItem.transaction.outgoing
+                } else transactionItem.transaction.outgoing
 
             val map = transactionItem.transaction.block.transaction.toMap()
             amountView.text = if (map.containsKey("amount")) {
@@ -107,7 +117,13 @@ class ExchangeTransactionDialog(
                 "$plusMin${formatBalance(amount)}"
             } else "-"
 
-            listOf(fromToAddressView, messageView, rawView, blockHashView, signatureView).forEach { textView ->
+            listOf(
+                fromToAddressView,
+                messageView,
+                rawView,
+                blockHashView,
+                signatureView
+            ).forEach { textView ->
                 textView.setOnClickListener {
                     it as TextView
                     when (it.lineCount) {
@@ -122,14 +138,17 @@ class ExchangeTransactionDialog(
                     blockStatusColorSelfSignedView.isVisible = true
                     resources.getString(R.string.text_exchange_self_signed)
                 }
+
                 ExchangeTransactionItem.BlockStatus.SIGNED -> {
                     blockStatusColorSignedView.isVisible = true
                     resources.getString(R.string.text_exchange_signed)
                 }
+
                 ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE -> {
                     blockStatusColorWaitingForSignatureView.isVisible = true
                     resources.getString(R.string.text_exchange_waiting_for_signature)
                 }
+
                 null -> {
                     resources.getString(R.string.text_exchange_unknown)
                 }
@@ -141,20 +160,31 @@ class ExchangeTransactionDialog(
                 TransactionRepository.BLOCK_TYPE_CREATE -> {
                     typeView.text = resources.getString(R.string.text_exchange_buy)
                     fromToTitleView.text = resources.getString(R.string.text_from)
-                    fromToNameView.text = resources.getString(R.string.text_exchange_eurotoken_exchange)
+                    fromToNameView.text =
+                        resources.getString(R.string.text_exchange_eurotoken_exchange)
                     fromToAddressView.text = transactionItem.transaction.sender.keyToBin().toHex()
                 }
+
                 TransactionRepository.BLOCK_TYPE_DESTROY -> {
                     typeView.text = resources.getString(R.string.text_exchange_sell)
                     fromToTitleView.text = resources.getString(R.string.text_to)
-                    fromToNameView.text = resources.getString(R.string.text_exchange_eurotoken_exchange)
+                    fromToNameView.text =
+                        resources.getString(R.string.text_exchange_eurotoken_exchange)
                     fromToAddressView.text = transactionItem.transaction.receiver.keyToBin().toHex()
                 }
-                TransactionRepository.BLOCK_TYPE_TRANSFER -> {
-                    typeView.text = if (outgoing) resources.getString(R.string.text_exchange_transaction_outgoing) else resources.getString(R.string.text_exchange_transaction_incoming)
-                    fromToTitleView.text = if (outgoing) resources.getString(R.string.text_to) else resources.getString(R.string.text_from)
 
-                    val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(publicKey)
+                TransactionRepository.BLOCK_TYPE_TRANSFER -> {
+                    typeView.text =
+                        if (outgoing) resources.getString(R.string.text_exchange_transaction_outgoing) else resources.getString(
+                            R.string.text_exchange_transaction_incoming
+                        )
+                    fromToTitleView.text =
+                        if (outgoing) resources.getString(R.string.text_to) else resources.getString(
+                            R.string.text_from
+                        )
+
+                    val contact =
+                        ContactStore.getInstance(view.context).getContactFromPublicKey(publicKey)
                     val contactName = contact?.name
                     val unknownName = resources.getString(R.string.text_unknown_contact)
 
@@ -162,12 +192,16 @@ class ExchangeTransactionDialog(
                     val identityInitials = contactState?.initials
                     val identitySurname = contactState?.surname
                     val identityName = if (identityInitials != null && identitySurname != null) {
-                        StringBuilder().append(identityInitials).append(" ").append(identitySurname).toString()
+                        StringBuilder().append(identityInitials).append(" ").append(identitySurname)
+                            .toString()
                     } else null
 
                     fromToNameView.text = when {
                         identityName != null && contactName != null && identityName == contactName -> identityName
-                        identityName != null && contactName != null -> StringBuilder().append(identityName).append(" (").append(contactName).append(")").toString()
+                        identityName != null && contactName != null -> StringBuilder().append(
+                            identityName
+                        ).append(" (").append(contactName).append(")").toString()
+
                         identityName != null && contactName == null -> identityName
                         identityName == null && contactName != null -> contactName
                         else -> unknownName
@@ -194,7 +228,8 @@ class ExchangeTransactionDialog(
 
             dateView.text = dateFormat.format(transactionItem.transaction.timestamp)
 
-            val isTransfer = transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER
+            val isTransfer =
+                transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER
             messageRowView.isVisible = isTransfer
             if (messageRowView.isVisible) {
                 getPeerChatStore().getMessageByTransactionHash(transactionItem.transaction.block.calculateHash())?.message.let { message ->
@@ -203,19 +238,26 @@ class ExchangeTransactionDialog(
             }
 
             rawView.text = transactionItem.transaction.block.transaction.toString()
-            sizeView.text = resources.getString(R.string.x_bytes, transactionItem.transaction.block.rawTransaction.size)
+            sizeView.text = resources.getString(
+                R.string.x_bytes,
+                transactionItem.transaction.block.rawTransaction.size
+            )
             blockHashView.text = transactionItem.transaction.block.calculateHash().toHex()
             signatureView.text = transactionItem.transaction.block.signature.toHex()
 
             val trustChainHelper = parentActivity.getStore<TrustChainHelper>()!!
             val transactionRepository = parentActivity.getStore<TransactionRepository>()!!
-            val transaction = transactionRepository.getTransactionWithHash(transactionItem.transaction.block.calculateHash())
+            val transaction =
+                transactionRepository.getTransactionWithHash(transactionItem.transaction.block.calculateHash())
 
-            transactionResendButton.isVisible = outgoing && transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER && transaction != null && transactionItem.status == ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE
+            transactionResendButton.isVisible =
+                outgoing && transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER && transaction != null && transactionItem.status == ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE
 
             transactionResendButton.setOnClickListener {
-                transactionResendButtonView.text = resources.getString(R.string.btn_transaction_resend_trying)
-                val receiver = defaultCryptoProvider.keyFromPublicBin(transactionItem.transaction.block.linkPublicKey)
+                transactionResendButtonView.text =
+                    resources.getString(R.string.btn_transaction_resend_trying)
+                val receiver =
+                    defaultCryptoProvider.keyFromPublicBin(transactionItem.transaction.block.linkPublicKey)
                 val peer = Peer(receiver)
                 transactionRepository.trustChainCommunity.sendBlock(transaction!!, peer)
 
@@ -224,7 +266,9 @@ class ExchangeTransactionDialog(
                 @Suppress("DEPRECATION")
                 Handler().postDelayed(
                     Runnable {
-                        transactionResendButton.isVisible = trustChainHelper.getChainByUser(trustChainHelper.getMyPublicKey()).find { it.linkedBlockId == transaction.blockId } == null
+                        transactionResendButton.isVisible =
+                            trustChainHelper.getChainByUser(trustChainHelper.getMyPublicKey())
+                                .find { it.linkedBlockId == transaction.blockId } == null
                         transactionResendButtonView.text = resendText
                     },
                     2000
@@ -233,8 +277,12 @@ class ExchangeTransactionDialog(
 
             transactionSignButton.isVisible = transactionItem.canSign
             transactionSignButton.setOnClickListener {
-                transactionSignButtonView.text = resources.getString(R.string.text_exchange_signing_transaction)
-                getTrustChainCommunity().createAgreementBlock(transactionItem.transaction.block, transactionItem.transaction.block.transaction)
+                transactionSignButtonView.text =
+                    resources.getString(R.string.text_exchange_signing_transaction)
+                getTrustChainCommunity().createAgreementBlock(
+                    transactionItem.transaction.block,
+                    transactionItem.transaction.block.transaction
+                )
 
                 @Suppress("DEPRECATION")
                 Handler().postDelayed(
@@ -252,17 +300,32 @@ class ExchangeTransactionDialog(
                         ValueTransferMainActivity.exchangeFragmentTag -> {
                             parentActivity.closeAllDialogs()
                             val contact = getContactStore().getContactFromPublicKey(publicKey)
-                            val identityName = getPeerChatStore().getContactState(publicKey)?.identityInfo?.let {
-                                "${it.initials} ${it.surname}"
-                            }
+                            val identityName =
+                                getPeerChatStore().getContactState(publicKey)?.identityInfo?.let {
+                                    "${it.initials} ${it.surname}"
+                                }
                             val args = Bundle().apply {
-                                putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, publicKey.keyToBin().toHex())
-                                putString(ValueTransferMainActivity.ARG_NAME, contact?.name ?: (identityName ?: resources.getString(R.string.text_unknown_contact)))
-                                putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.exchangeFragmentTag)
+                                putString(
+                                    ValueTransferMainActivity.ARG_PUBLIC_KEY,
+                                    publicKey.keyToBin().toHex()
+                                )
+                                putString(
+                                    ValueTransferMainActivity.ARG_NAME,
+                                    contact?.name ?: (identityName
+                                        ?: resources.getString(R.string.text_unknown_contact))
+                                )
+                                putString(
+                                    ValueTransferMainActivity.ARG_PARENT,
+                                    ValueTransferMainActivity.exchangeFragmentTag
+                                )
                             }
 
-                            parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                            parentActivity.detailFragment(
+                                ValueTransferMainActivity.contactChatFragmentTag,
+                                args
+                            )
                         }
+
                         ValueTransferMainActivity.contactChatFragmentTag -> {
                             parentActivity.closeAllDialogs()
                         }
@@ -278,7 +341,10 @@ class ExchangeTransactionDialog(
                         bottomSheetDialog.dismiss()
                     } else {
                         parentActivity.closeAllDialogs()
-                        ContactInfoDialog(publicKey).show(parentFragmentManager, ContactInfoDialog.TAG)
+                        ContactInfoDialog(publicKey).show(
+                            parentFragmentManager,
+                            ContactInfoDialog.TAG
+                        )
                     }
                 } else {
                     bottomSheetDialog.dismiss()
@@ -290,7 +356,8 @@ class ExchangeTransactionDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
     companion object {

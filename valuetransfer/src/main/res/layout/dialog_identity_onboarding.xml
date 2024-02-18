@@ -16,12 +16,14 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <include
+            android:id="@+id/start"
             layout="@layout/dialog_identity_onboarding_start"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical" />
 
         <include
+            android:id="@+id/scan"
             layout="@layout/dialog_identity_onboarding_scan_select"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -30,6 +32,7 @@
             tools:visibility="visible" />
 
         <include
+            android:id="@+id/read"
             layout="@layout/dialog_identity_onboarding_read"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -38,6 +41,7 @@
             tools:visibility="visible" />
 
         <include
+            android:id="@+id/confirm"
             layout="@layout/dialog_identity_onboarding_confirm"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

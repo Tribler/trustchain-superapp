@@ -14,6 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogIdentityAttributeBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
@@ -28,7 +29,8 @@ class IdentityAttributeDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_identity_attribute, null)
+            val binding = DialogIdentityAttributeBinding.inflate(it.layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -40,10 +42,10 @@ class IdentityAttributeDialog(
 
             val unusedAttributes = getIdentityCommunity().getUnusedAttributeNames()
 
-            val attributeNameSpinner = view.findViewById<Spinner>(R.id.spinnerAttributeName)
-            val attributeNameView = view.findViewById<EditText>(R.id.etAttributeName)
-            val attributeValueView = view.findViewById<EditText>(R.id.etAttributeValue)
-            val saveButton = view.findViewById<Button>(R.id.btnSaveAttribute)
+            val attributeNameSpinner = binding.spinnerAttributeName
+            val attributeNameView = binding.etAttributeName
+            val attributeValueView = binding.etAttributeValue
+            val saveButton = binding.btnSaveAttribute
             toggleButton(saveButton, attribute != null)
 
             attributeNameView.isVisible = attribute != null

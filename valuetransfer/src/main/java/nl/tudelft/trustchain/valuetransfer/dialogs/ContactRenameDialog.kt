@@ -4,18 +4,17 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
 import androidx.core.net.toUri
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.common.contacts.Contact
-import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogContactRenameBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
+import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 
 class ContactRenameDialog(
     private val contact: Contact,
@@ -31,8 +30,10 @@ class ContactRenameDialog(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_contact_rename, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogContactRenameBinding.inflate(layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -40,8 +41,8 @@ class ContactRenameDialog(
                 state = BottomSheetBehavior.STATE_EXPANDED
             }
 
-            val contactNameView = view.findViewById<EditText>(R.id.etContactName)
-            val saveContactNameButton = view.findViewById<Button>(R.id.btnSaveContactName)
+            val contactNameView = binding.etContactName
+            val saveContactNameButton = binding.btnSaveContactName
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
@@ -67,9 +68,15 @@ class ContactRenameDialog(
                 )
 
                 if (contact.name.isEmpty()) {
-                    resources.getString(R.string.snackbar_contact_add_success, contactNameView.text.toString())
+                    resources.getString(
+                        R.string.snackbar_contact_add_success,
+                        contactNameView.text.toString()
+                    )
                 } else {
-                    resources.getString(R.string.snackbar_contact_rename_success, contactNameView.text.toString())
+                    resources.getString(
+                        R.string.snackbar_contact_rename_success,
+                        contactNameView.text.toString()
+                    )
                 }.let { text ->
                     bottomSheetDialog.dismiss()
                     parentActivity.displayToast(requireContext(), text)
@@ -81,7 +88,8 @@ class ContactRenameDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
     override fun onDismiss(dialog: DialogInterface) {

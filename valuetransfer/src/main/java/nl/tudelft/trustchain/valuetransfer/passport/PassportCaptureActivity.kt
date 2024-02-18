@@ -4,18 +4,18 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
 import android.widget.TextView
-import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.CaptureActivityBinding
 import nl.tudelft.trustchain.valuetransfer.passport.mlkit.CameraSource
 import nl.tudelft.trustchain.valuetransfer.passport.mlkit.CameraSourcePreview
 import nl.tudelft.trustchain.valuetransfer.passport.mlkit.GraphicOverlay
 import nl.tudelft.trustchain.valuetransfer.passport.mlkit.TextRecognitionProcessor
 import org.jmrtd.lds.icao.MRZInfo
 import java.io.IOException
-import java.lang.Exception
 
 open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.ResultListener {
+
+    private lateinit var binding: CaptureActivityBinding
 
     private var cameraSource: CameraSource? = null
     private var preview: CameraSourcePreview? = null
@@ -27,12 +27,14 @@ open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.Result
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.capture_activity)
+        binding = CaptureActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         Log.d("VTLOG", "CAPTURE STARTED")
 
         if (intent.hasExtra(PassportHandler.DOCUMENT_TYPE)) {
-            documentType = intent.getStringExtra(PassportHandler.DOCUMENT_TYPE) ?: PassportHandler.DOCUMENT_TYPE_OTHER
+            documentType = intent.getStringExtra(PassportHandler.DOCUMENT_TYPE)
+                ?: PassportHandler.DOCUMENT_TYPE_OTHER
             Log.d("VTLOG", "DOCUMENT TYPE: $documentType")
         }
 
@@ -40,11 +42,11 @@ open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.Result
             nfcSupported = intent.getBooleanExtra(PassportHandler.NFC_SUPPORTED, false)
         }
 
-        preview = findViewById(R.id.camera_source_preview)
-        graphicOverlay = findViewById(R.id.graphics_overlay)
-        feedbackText = findViewById(R.id.tvFeedback)
+        preview = binding.cameraSourcePreview
+        graphicOverlay = binding.graphicsOverlay
+        feedbackText = binding.tvFeedback
 
-        findViewById<Button>(R.id.btnScanPrevious).setOnClickListener {
+        binding.btnScanPrevious.setOnClickListener {
             onBackPressed()
         }
 

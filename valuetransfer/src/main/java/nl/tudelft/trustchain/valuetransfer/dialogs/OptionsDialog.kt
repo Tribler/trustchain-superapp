@@ -11,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateMargins
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogOptionsBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
@@ -30,14 +31,14 @@ class OptionsDialog(
     @SuppressLint("RestrictedApi")
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_options, null)
+            val binding = DialogOptionsBinding.inflate(it.layoutInflater)
+            val view = binding.root
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             if (title != null) {
-                view.findViewById<TextView>(R.id.tvTitle).apply {
+                binding.tvTitle.apply {
                     text = title
                     isVisible = true
                 }
@@ -50,7 +51,7 @@ class OptionsDialog(
                 menu = it
             }
 
-            val optionsBigView = view.findViewById<LinearLayout>(R.id.llOptionsBig)
+            val optionsBigView = binding.llOptionsBig
             optionsBigView.isVisible = bigOptionsEnabled == true
 
             val originalItems = menu.nonActionItems
@@ -109,7 +110,7 @@ class OptionsDialog(
                 originalItems.takeLast(originalItems.size - items.size)
             } else originalItems
 
-            view.findViewById<ListView>(R.id.listOptions).apply {
+            binding.listOptions.apply {
                 adapter = object : ArrayAdapter<MenuItemImpl>(
                     requireContext(),
                     android.R.layout.simple_list_item_1,

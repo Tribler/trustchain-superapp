@@ -1,16 +1,24 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.*
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.fragment_contacts_vt.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -20,16 +28,19 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
-import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
-import nl.tudelft.trustchain.valuetransfer.util.ContactImage
-import nl.tudelft.trustchain.valuetransfer.util.ContactState
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentContactsVtBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.ContactAddDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
-import nl.tudelft.trustchain.valuetransfer.util.*
+import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
+import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
+import nl.tudelft.trustchain.valuetransfer.util.ContactImage
+import nl.tudelft.trustchain.valuetransfer.util.ContactState
+import nl.tudelft.trustchain.valuetransfer.util.DividerItemDecorator
+import nl.tudelft.trustchain.valuetransfer.util.closeKeyboard
+import nl.tudelft.trustchain.valuetransfer.util.onFocusChange
+import nl.tudelft.trustchain.valuetransfer.util.showKeyboard
 
 class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
     private val binding by viewBinding(FragmentContactsVtBinding::bind)
@@ -184,14 +195,14 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         initView()
 
         binding.ivSearchBarCancelIcon.setOnClickListener {
-            etSearchContact.text = null
-            etSearchContact.clearFocus()
-            ivSearchBarCancelIcon.isVisible = false
-            etSearchContact.closeKeyboard(requireContext())
+            binding.etSearchContact.text = null
+            binding.etSearchContact.clearFocus()
+            binding.ivSearchBarCancelIcon.isVisible = false
+            binding.etSearchContact.closeKeyboard(requireContext())
         }
 
         binding.etSearchContact.doAfterTextChanged { searchText ->
-            ivSearchBarCancelIcon.isVisible = searchText != null && searchText.isNotEmpty()
+            binding.ivSearchBarCancelIcon.isVisible = searchText != null && searchText.isNotEmpty()
             searchFilter = searchText.toString()
             observeContacts(viewLifecycleOwner, contactsAdapter)
             observeChats(viewLifecycleOwner, chatsAdapter, chatItems, ADAPTER_RECENT)
