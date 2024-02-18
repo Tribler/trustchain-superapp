@@ -1,9 +1,10 @@
 package nl.tudelft.trustchain.valuetransfer.db
 
 import android.content.Context
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
@@ -74,7 +75,7 @@ class IdentityStore(context: Context) {
 
     fun getAllIdentities(): Flow<List<Identity>> {
         return database.dbIdentityQueries.getAll(identityMapper)
-            .asFlow().mapToList()
+            .asFlow().mapToList(Dispatchers.IO)
     }
 
     fun hasIdentity(): Boolean {
@@ -139,7 +140,7 @@ class IdentityStore(context: Context) {
 
     fun getAllAttributes(): Flow<List<IdentityAttribute>> {
         return database.dbAttributeQueries.getAllAttributes(attributeMapper)
-            .asFlow().mapToList()
+            .asFlow().mapToList(Dispatchers.IO)
     }
 
     fun getAttributeNames(): List<String> {

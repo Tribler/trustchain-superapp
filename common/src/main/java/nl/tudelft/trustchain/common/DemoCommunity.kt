@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.common
 
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer

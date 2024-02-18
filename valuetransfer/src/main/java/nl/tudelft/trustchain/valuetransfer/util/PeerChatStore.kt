@@ -2,19 +2,20 @@ package nl.tudelft.trustchain.valuetransfer.util
 
 import android.content.Context
 import android.graphics.BitmapFactory
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOneOrNull
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.valuetransfer.sqldelight.Database
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityInfo
+import nl.tudelft.valuetransfer.sqldelight.Database
 import java.util.*
 
 class PeerChatStore(context: Context) {
@@ -42,7 +43,7 @@ class PeerChatStore(context: Context) {
         }
 
     fun getAllMessages(): Flow<List<ChatMessage>> {
-        return database.dbMessageQueries.getAll(messageMapper).asFlow().mapToList()
+        return database.dbMessageQueries.getAll(messageMapper).asFlow().mapToList(Dispatchers.IO)
     }
 
     fun getMessageById(id: String): ChatMessage? {
@@ -138,7 +139,7 @@ class PeerChatStore(context: Context) {
         val publicKeyBin = publicKey.keyToBin()
         return database.dbMessageQueries.getAllByPublicKey(
             publicKeyBin, publicKeyBin, messageMapper
-        ).asFlow().mapToList()
+        ).asFlow().mapToList(Dispatchers.IO)
     }
 
     fun getAllSentByPublicKeyToMe(publicKey: PublicKey): List<ChatMessage> {
@@ -186,7 +187,7 @@ class PeerChatStore(context: Context) {
     }
 
     fun getAllContactImages(): Flow<List<ContactImage>> {
-        return database.dbContactImageQueries.getAll(contactImageMapper).asFlow().mapToList()
+        return database.dbContactImageQueries.getAll(contactImageMapper).asFlow().mapToList(Dispatchers.IO)
     }
 
     fun getContactImage(publicKey: PublicKey): ContactImage? {
@@ -198,7 +199,7 @@ class PeerChatStore(context: Context) {
     fun getContactImageFlow(publicKey: PublicKey): Flow<ContactImage?> {
         return database.dbContactImageQueries.getContactImage(
             publicKey.keyToBin(), contactImageMapper
-        ).asFlow().mapToOneOrNull()
+        ).asFlow().mapToOneOrNull(Dispatchers.IO)
     }
 
     fun getContactImageHash(publicKey: PublicKey): String? {
@@ -334,7 +335,7 @@ class PeerChatStore(context: Context) {
 
     fun getContactStateFlow(publicKey: PublicKey): Flow<ContactState?> {
         return database.dbContactStateQueries.getOne(publicKey.keyToBin(), contactStateMapper)
-            .asFlow().mapToOneOrNull()
+            .asFlow().mapToOneOrNull(Dispatchers.IO)
     }
 
     fun getContactStateForType(publicKey: PublicKey, type: String): Boolean {
@@ -375,7 +376,7 @@ class PeerChatStore(context: Context) {
                     initials, surname, is_verified == 1L, image_hash
                 )
             )
-        }.asFlow().mapToList()
+        }.asFlow().mapToList(Dispatchers.IO)
     }
 
     fun removeContactState(publicKey: PublicKey) {

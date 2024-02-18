@@ -1,6 +1,6 @@
 package nl.tudelft.trustchain.eurotoken.db
 import android.content.Context
-import com.squareup.sqldelight.android.AndroidSqliteDriver
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import nl.tudelft.eurotoken.sqldelight.Database
 import nl.tudelft.trustchain.eurotoken.entity.TrustScore
 

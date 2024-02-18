@@ -13,8 +13,8 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.preference.PreferenceManager
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -232,7 +232,7 @@ class TrustChainApplication : Application() {
         val strategies = mutableListOf(
             randomWalk, randomChurn, periodicSimilarity, nsd
         )
-        if (bluetoothManager.adapter != null && Build.VERSION.SDK_INT >= 24) {
+        if (bluetoothManager.adapter != null) {
             val ble = BluetoothLeDiscovery.Factory()
             strategies += ble
         }

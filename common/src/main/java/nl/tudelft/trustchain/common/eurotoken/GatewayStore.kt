@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.common.eurotoken
 
 import android.content.Context
-import com.squareup.sqldelight.android.AndroidSqliteDriver
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import nl.tudelft.common.sqldelight.Database
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
