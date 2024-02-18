@@ -202,11 +202,11 @@ class TransactionRepository(
         Log.d("PEERDISCOVERY", "${trustChainCommunity.getPeers()}")
         val myPublicKey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
         val latestBlock = trustChainCommunity.database.getLatest(myPublicKey)
-        if (latestBlock == null) {
+        val myVerifiedBalance = getVerifiedBalanceForBlock(latestBlock, trustChainCommunity.database)
+        if (latestBlock == null || myVerifiedBalance == null) {
             Log.d("getMyVerifiedBalance", "no latest block, defaulting to initial balance")
             return INITIAL_BALANCE
         }
-        val myVerifiedBalance = getVerifiedBalanceForBlock(latestBlock, trustChainCommunity.database)!!
         Log.d("getMyVerifiedBalance", "balance = $myVerifiedBalance")
         return myVerifiedBalance
     }

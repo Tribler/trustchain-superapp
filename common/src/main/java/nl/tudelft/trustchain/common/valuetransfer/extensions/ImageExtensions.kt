@@ -85,7 +85,7 @@ fun Bitmap.resize(maxDimension: Float): Bitmap? {
         val resized = Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
         Log.d("VTLOG", "BITMAP WIDTH: $width ${resized.width}")
         Log.d("VTLOG", "BITMAP HEIGHT: $height ${resized.height}")
-        Log.d("VTLOG", "BITMAP SIZE IS: ${this.byteCount} ${resized?.byteCount}")
+        Log.d("VTLOG", "BITMAP SIZE IS: ${this.byteCount} ${resized.byteCount}")
         resized
     } catch (e: Exception) {
         e.printStackTrace()

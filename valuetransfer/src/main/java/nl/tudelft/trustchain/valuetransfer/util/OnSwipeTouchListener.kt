@@ -28,26 +28,31 @@ internal open class OnSwipeTouchListener(
         override fun onDown(e: MotionEvent): Boolean {
             return true
         }
+
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             onClick()
             return super.onSingleTapUp(e)
         }
+
         override fun onDoubleTap(e: MotionEvent): Boolean {
             onDoubleClick()
             return super.onDoubleTap(e)
         }
+
         override fun onLongPress(e: MotionEvent) {
             onLongClick()
             super.onLongPress(e)
         }
+
         override fun onFling(
-            e1: MotionEvent,
+            e1: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float
         ): Boolean {
             try {
-                val diffY = e2.y - e1.y
+                // TODO: Safe call should be used here.
+                val diffY = e2.y - e1!!.y
                 val diffX = e2.x - e1.x
                 if (abs(diffX) > abs(diffY)) {
                     if (abs(diffX) > SWIPE_THRESHOLD && abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
@@ -81,6 +86,7 @@ internal open class OnSwipeTouchListener(
     private fun onClick() {}
     private fun onDoubleClick() {}
     private fun onLongClick() {}
+
     init {
         gestureDetector = GestureDetector(context, GestureListener())
     }
