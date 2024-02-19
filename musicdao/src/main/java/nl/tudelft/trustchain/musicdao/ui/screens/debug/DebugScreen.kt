@@ -26,7 +26,6 @@ import nl.tudelft.trustchain.musicdao.ui.components.EmptyState
 @Composable
 @SuppressLint("NewApi")
 fun Debug(debugScreenViewModel: DebugScreenViewModel) {
-
     val torrentHandleStatus by debugScreenViewModel.status.collectAsState(listOf())
     val sessionStatus by debugScreenViewModel.sessionStatus.collectAsState()
 
@@ -101,8 +100,9 @@ fun TorrentStatusListItem(torrentStatus: TorrentStatus) {
                 Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)
             }
         },
-        modifier = Modifier
-            .clickable {}
-            .padding(bottom = 20.dp)
+        modifier =
+            Modifier
+                .clickable {}
+                .padding(bottom = 20.dp)
     )
 }

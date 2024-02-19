@@ -3,9 +3,7 @@ package nl.tudelft.trustchain.musicdao.ui.screens.release.create
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -35,7 +33,6 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalComposeUiApi
 @Composable
 fun CreateReleaseDialog(navController: NavController) {
@@ -59,6 +56,7 @@ fun CreateReleaseDialog(navController: NavController) {
     }
 
     val context = LocalContext.current
+
     fun showDatePicker() {
         val picker = MaterialDatePicker.Builder.datePicker().build()
         (context as AppCompatActivity).let {
@@ -71,15 +69,17 @@ fun CreateReleaseDialog(navController: NavController) {
 
     val scope = rememberCoroutineScope()
     val localContext = LocalContext.current
+
     fun publishRelease() {
         scope.launch {
-            val result = viewModel.createRelease(
-                artist.value,
-                title.value,
-                releaseDate = Instant.now().toString(),
-                uris = fileList.value,
-                localContext
-            )
+            val result =
+                viewModel.createRelease(
+                    artist.value,
+                    title.value,
+                    releaseDate = Instant.now().toString(),
+                    uris = fileList.value,
+                    localContext
+                )
             if (result) {
                 SnackbarHandler.displaySnackbar(text = "Successfully published your release.")
                 navController.popBackStack()
@@ -91,10 +91,11 @@ fun CreateReleaseDialog(navController: NavController) {
 
     Column {
         Surface(
-            modifier = Modifier
-                .requiredWidth(LocalConfiguration.current.screenWidthDp.dp * 1f)
-                .fillMaxSize()
-                .padding(4.dp)
+            modifier =
+                Modifier
+                    .requiredWidth(LocalConfiguration.current.screenWidthDp.dp * 1f)
+                    .fillMaxSize()
+                    .padding(4.dp)
         ) {
             Scaffold(
                 topBar = {
@@ -109,10 +110,11 @@ fun CreateReleaseDialog(navController: NavController) {
                 },
                 content = {
                     Column(
-                        modifier = Modifier
-                            .padding(20.dp)
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
+                        modifier =
+                            Modifier
+                                .padding(20.dp)
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(

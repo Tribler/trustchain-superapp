@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import nl.tudelft.trustchain.musicdao.core.wallet.UserWalletTransaction
 import nl.tudelft.trustchain.musicdao.ui.components.EmptyState
 import nl.tudelft.trustchain.musicdao.ui.components.EmptyStateNotScrollable
-import nl.tudelft.trustchain.musicdao.ui.screens.profile_menu.CustomMenuItem
+import nl.tudelft.trustchain.musicdao.ui.screens.profileMenu.CustomMenuItem
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -45,22 +45,25 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(MaterialTheme.colors.primary)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .background(MaterialTheme.colors.primary)
         ) {
             Column(
-                modifier = Modifier
-                    .padding(20.dp)
-                    .align(
-                        Alignment.BottomStart
-                    )
+                modifier =
+                    Modifier
+                        .padding(20.dp)
+                        .align(
+                            Alignment.BottomStart
+                        )
             ) {
                 Text(
                     text = confirmedBalance.value?.toFriendlyString() ?: "0.00 BTC",
@@ -72,26 +75,29 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
                 )
             }
             Row(
-                modifier = Modifier
-                    .padding(20.dp)
-                    .align(
-                        Alignment.TopEnd
-                    ),
+                modifier =
+                    Modifier
+                        .padding(20.dp)
+                        .align(
+                            Alignment.TopEnd
+                        ),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
                     "Sync Progress",
-                    modifier = Modifier
-                        .padding(end = 15.dp)
-                        .align(Alignment.CenterVertically)
+                    modifier =
+                        Modifier
+                            .padding(end = 15.dp)
+                            .align(Alignment.CenterVertically)
                 )
                 LinearProgressIndicator(
                     syncProgress.value?.let { (it.toFloat() / 100) }
                         ?: 0f,
                     color = MaterialTheme.colors.onPrimary,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .fillMaxWidth()
+                    modifier =
+                        Modifier
+                            .align(Alignment.CenterVertically)
+                            .fillMaxWidth()
                 )
             }
         }
@@ -144,9 +150,10 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
                         EmptyStateNotScrollable(
                             firstLine = "No Transactions",
                             secondLine = "No transactions have been made.",
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .padding(vertical = 50.dp)
+                            modifier =
+                                Modifier
+                                    .align(Alignment.Center)
+                                    .padding(vertical = 50.dp)
                         )
                     } else {
                         Column(modifier = Modifier.fillMaxSize()) {
@@ -169,11 +176,12 @@ fun TransactionItem(userWalletTransaction: UserWalletTransaction) {
     ListItem(
         icon = {
             Icon(
-                imageVector = if (userWalletTransaction.value.isPositive) {
-                    Icons.Outlined.ArrowForward
-                } else {
-                    Icons.Outlined.ArrowBack
-                },
+                imageVector =
+                    if (userWalletTransaction.value.isPositive) {
+                        Icons.Outlined.ArrowForward
+                    } else {
+                        Icons.Outlined.ArrowBack
+                    },
                 contentDescription = null
             )
         },
@@ -184,11 +192,12 @@ fun TransactionItem(userWalletTransaction: UserWalletTransaction) {
             )
         },
         text = {
-            val text = if (userWalletTransaction.value.isPositive) {
-                "Received"
-            } else {
-                "Sent"
-            }
+            val text =
+                if (userWalletTransaction.value.isPositive) {
+                    "Received"
+                } else {
+                    "Sent"
+                }
             Text(text = text)
         },
         secondaryText = {
@@ -197,13 +206,15 @@ fun TransactionItem(userWalletTransaction: UserWalletTransaction) {
         trailing = {
             Text(
                 text = userWalletTransaction.value.toFriendlyString(),
-                style = TextStyle(
-                    color = if (userWalletTransaction.value.isPositive) {
-                        Color.Green
-                    } else {
-                        Color.Red
-                    }
-                )
+                style =
+                    TextStyle(
+                        color =
+                            if (userWalletTransaction.value.isPositive) {
+                                Color.Green
+                            } else {
+                                Color.Red
+                            }
+                    )
             )
         }
     )

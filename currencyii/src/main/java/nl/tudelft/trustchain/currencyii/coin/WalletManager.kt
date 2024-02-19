@@ -35,7 +35,7 @@ const val MIN_BLOCKCHAIN_PEERS_PRODUCTION = 5
 const val REG_TEST_FAUCET_IP = "131.180.27.224"
 const val REG_TEST_FAUCET_DOMAIN = "taproot.tribler.org"
 
-var MIN_BLOCKCHAIN_PEERS = MIN_BLOCKCHAIN_PEERS_TEST_NET
+var minBlockchainPeers = MIN_BLOCKCHAIN_PEERS_TEST_NET
 
 // TODO only allow one proposal at a time (not multiple transfers or multiple joins)
 
@@ -78,40 +78,44 @@ class WalletManager(
     init {
         Log.i("Coin", "Coin: WalletManager attempting to start.")
 
-        params = when (walletManagerConfiguration.network) {
-            BitcoinNetworkOptions.TEST_NET -> TestNet3Params.get()
-            BitcoinNetworkOptions.PRODUCTION -> MainNetParams.get()
-            BitcoinNetworkOptions.REG_TEST -> RegTestParams.get()
-        }
+        params =
+            when (walletManagerConfiguration.network) {
+                BitcoinNetworkOptions.TEST_NET -> TestNet3Params.get()
+                BitcoinNetworkOptions.PRODUCTION -> MainNetParams.get()
+                BitcoinNetworkOptions.REG_TEST -> RegTestParams.get()
+            }
 
-        val filePrefix = when (walletManagerConfiguration.network) {
-            BitcoinNetworkOptions.TEST_NET -> TEST_NET_WALLET_NAME
-            BitcoinNetworkOptions.PRODUCTION -> MAIN_NET_WALLET_NAME
-            BitcoinNetworkOptions.REG_TEST -> REG_TEST_WALLET_NAME
-        }
+        val filePrefix =
+            when (walletManagerConfiguration.network) {
+                BitcoinNetworkOptions.TEST_NET -> TEST_NET_WALLET_NAME
+                BitcoinNetworkOptions.PRODUCTION -> MAIN_NET_WALLET_NAME
+                BitcoinNetworkOptions.REG_TEST -> REG_TEST_WALLET_NAME
+            }
 
-        kit = object : WalletAppKit(params, walletDir, filePrefix) {
-            override fun onSetupCompleted() {
-                // Make a fresh new key if no keys in stored wallet.
-                if (wallet().keyChainGroupSize < 1) {
-                    Log.i("Coin", "Coin: Added manually created fresh key")
-                    wallet().importKey(ECKey())
-                }
-                wallet().allowSpendingUnconfirmedTransactions()
-                Log.i("Coin", "Coin: WalletManager started successfully.")
-                onSetupCompletedListeners.forEach {
-                    Log.i("Coin", "Coin: calling listener $it")
-                    it()
+        kit =
+            object : WalletAppKit(params, walletDir, filePrefix) {
+                override fun onSetupCompleted() {
+                    // Make a fresh new key if no keys in stored wallet.
+                    if (wallet().keyChainGroupSize < 1) {
+                        Log.i("Coin", "Coin: Added manually created fresh key")
+                        wallet().importKey(ECKey())
+                    }
+                    wallet().allowSpendingUnconfirmedTransactions()
+                    Log.i("Coin", "Coin: WalletManager started successfully.")
+                    onSetupCompletedListeners.forEach {
+                        Log.i("Coin", "Coin: calling listener $it")
+                        it()
+                    }
                 }
             }
-        }
 
-        MIN_BLOCKCHAIN_PEERS = when (params) {
-            RegTestParams.get() -> MIN_BLOCKCHAIN_PEERS_REG_TEST
-            MainNetParams.get() -> MIN_BLOCKCHAIN_PEERS_PRODUCTION
-            TestNet3Params.get() -> MIN_BLOCKCHAIN_PEERS_TEST_NET
-            else -> MIN_BLOCKCHAIN_PEERS
-        }
+        minBlockchainPeers =
+            when (params) {
+                RegTestParams.get() -> MIN_BLOCKCHAIN_PEERS_REG_TEST
+                MainNetParams.get() -> MIN_BLOCKCHAIN_PEERS_PRODUCTION
+                TestNet3Params.get() -> MIN_BLOCKCHAIN_PEERS_TEST_NET
+                else -> minBlockchainPeers
+            }
 
         if (params == RegTestParams.get()) {
             try {
@@ -127,36 +131,39 @@ class WalletManager(
                 "Coin",
                 "Coin: received a key to import, will clear the wallet and download again."
             )
-            val deterministicSeed = DeterministicSeed(
-                serializedDeterministicKey.seed,
-                null,
-                "",
-                serializedDeterministicKey.creationTime
-            )
+            val deterministicSeed =
+                DeterministicSeed(
+                    serializedDeterministicKey.seed,
+                    null,
+                    "",
+                    serializedDeterministicKey.creationTime
+                )
             kit.restoreWalletFromSeed(deterministicSeed)
         }
 
-        kit.setDownloadListener(object : DownloadProgressTracker() {
-            override fun progress(
-                pct: Double,
-                blocksSoFar: Int,
-                date: Date?
-            ) {
-                super.progress(pct, blocksSoFar, date)
-                val percentage = pct.toInt()
-                progress = percentage
-                println("Progress: $percentage")
-                Log.i("Coin", "Progress: $percentage")
-            }
+        kit.setDownloadListener(
+            object : DownloadProgressTracker() {
+                override fun progress(
+                    pct: Double,
+                    blocksSoFar: Int,
+                    date: Date?
+                ) {
+                    super.progress(pct, blocksSoFar, date)
+                    val percentage = pct.toInt()
+                    progress = percentage
+                    println("Progress: $percentage")
+                    Log.i("Coin", "Progress: $percentage")
+                }
 
-            override fun doneDownload() {
-                super.doneDownload()
-                progress = 100
-                Log.i("Coin", "Download Complete!")
-                Log.i("Coin", "Balance: ${kit.wallet().balance}")
-                isDownloading = false
+                override fun doneDownload() {
+                    super.doneDownload()
+                    progress = 100
+                    Log.i("Coin", "Download Complete!")
+                    Log.i("Coin", "Balance: ${kit.wallet().balance}")
+                    isDownloading = false
+                }
             }
-        })
+        )
 
         Log.i("Coin", "Coin: starting the setup of kit.")
         kit.setBlockingStartup(false)
@@ -175,10 +182,11 @@ class WalletManager(
 
             Log.i(
                 "Coin",
-                "Coin: Address from private key is: " + LegacyAddress.fromKey(
-                    params,
-                    key
-                ).toString()
+                "Coin: Address from private key is: " +
+                    LegacyAddress.fromKey(
+                        params,
+                        key
+                    ).toString()
             )
 
             kit.wallet().importKey(key)
@@ -243,13 +251,11 @@ class WalletManager(
      * @param entranceFee the entrance fee you are sending
      * @return Pair<Boolean, String> - successfully send the transaction, serializedTransaction
      */
-    fun safeCreationAndSendGenesisWallet(
-        entranceFee: Coin
-    ): Pair<Boolean, String> {
-        val (_, aggPubKey) = MuSig.generate_musig_key(listOf(protocolECKey()))
+    fun safeCreationAndSendGenesisWallet(entranceFee: Coin): Pair<Boolean, String> {
+        val (_, aggPubKey) = MuSig.generateMusigKey(listOf(protocolECKey()))
 
         val pubKeyDataMusig = aggPubKey.getEncoded(true)
-        val addressMuSig = TaprootUtil.key_to_witness(pubKeyDataMusig)
+        val addressMuSig = TaprootUtil.keyToWitness(pubKeyDataMusig)
 
         val transaction = Transaction(params)
 
@@ -300,15 +306,16 @@ class WalletManager(
         val oldMultiSignatureOutput =
             oldTransaction.vout.filter { it.scriptPubKey.size == 35 }[0].nValue
 
-        val newKeys = networkPublicHexKeys.map { publicHexKey: String ->
-            ECKey.fromPublicOnly(publicHexKey.hexToBytes())
-        }
+        val newKeys =
+            networkPublicHexKeys.map { publicHexKey: String ->
+                ECKey.fromPublicOnly(publicHexKey.hexToBytes())
+            }
 
-        val (_, aggPubKey) = MuSig.generate_musig_key(newKeys)
+        val (_, aggPubKey) = MuSig.generateMusigKey(newKeys)
 
         val pubKeyDataMusig = aggPubKey.getEncoded(true)
 
-        val addressMuSig = TaprootUtil.key_to_witness(pubKeyDataMusig)
+        val addressMuSig = TaprootUtil.keyToWitness(pubKeyDataMusig)
 
         val newMultiSignatureOutputMoney = Coin.valueOf(oldMultiSignatureOutput).add(entranceFee)
         newTransaction.addOutput(
@@ -316,10 +323,11 @@ class WalletManager(
             Address.fromString(params, addressMuSig)
         )
 
-        val prevTx = Transaction(
-            params,
-            oldTransactionSerialized.hexToBytes()
-        )
+        val prevTx =
+            Transaction(
+                params,
+                oldTransactionSerialized.hexToBytes()
+            )
         val prevTxOutput = prevTx.outputs.filter { it.scriptBytes.size == 35 }[0]
 
         newTransaction.addInput(
@@ -340,8 +348,9 @@ class WalletManager(
         Log.i("Coin", "Joining DAO - newtxid: " + newTransaction.txId.toString())
         Log.i(
             "Coin",
-            "Joining DAO - serialized new tx without signatures: " + newTransaction.bitcoinSerialize()
-                .toHex()
+            "Joining DAO - serialized new tx without signatures: " +
+                newTransaction.bitcoinSerialize()
+                    .toHex()
         )
 
         // TODO there is probably a bug if multiple vins are required by our own wallet (for example, multiple small txin's combined to 1 big vout)
@@ -365,32 +374,35 @@ class WalletManager(
         walletId: String,
         context: Context
     ): BigInteger {
-        val (cMap, aggPubKey) = MuSig.generate_musig_key(publicKeys)
+        val (cMap, aggPubKey) = MuSig.generateMusigKey(publicKeys)
 
         val detKey = key as DeterministicKey
 
-        val privChallenge1 = detKey.privKey.multiply(BigInteger(1, cMap[key.decompress()])).mod(
-            Schnorr.n
-        )
+        val privChallenge1 =
+            detKey.privKey.multiply(BigInteger(1, cMap[key.decompress()])).mod(
+                Schnorr.n
+            )
 
         val index =
             oldTransaction.vout.indexOf(oldTransaction.vout.filter { it.scriptPubKey.size == 35 }[0])
 
-        val sighashMuSig = CTransaction.TaprootSignatureHash(
-            newTransaction,
-            oldTransaction.vout,
-            SIGHASH_ALL_TAPROOT,
-            input_index = index.toShort()
-        )
-        val signature = MuSig.sign_musig(
-            ECKey.fromPrivate(privChallenge1),
-            getNonceKey(walletId, context).first,
-            MuSig.aggregate_schnorr_nonces(
-                nonces
-            ).first,
-            aggPubKey,
-            sighashMuSig
-        )
+        val sighashMuSig =
+            CTransaction.taprootSignatureHash(
+                newTransaction,
+                oldTransaction.vout,
+                SIGHASH_ALL_TAPROOT,
+                inputIndex = index.toShort()
+            )
+        val signature =
+            MuSig.signMusig(
+                ECKey.fromPrivate(privChallenge1),
+                getNonceKey(walletId, context).first,
+                MuSig.aggregateSchnorrNonces(
+                    nonces
+                ).first,
+                aggPubKey,
+                sighashMuSig
+            )
 
         Log.i(
             "NONCE_KEY",
@@ -418,18 +430,19 @@ class WalletManager(
         Log.i("Coin", "Coin: using ${signaturesOfOldOwners.size} signatures.")
 
         val aggregateSignature =
-            MuSig.aggregate_musig_signatures(signaturesOfOldOwners, aggregateNonce)
+            MuSig.aggregateMusigSignatures(signaturesOfOldOwners, aggregateNonce)
 
         val index =
             newTransaction.vin.indexOf(newTransaction.vin.filter { it.scriptSig.isEmpty() }[0])
 
         val cTxInWitness = CTxInWitness(arrayOf(aggregateSignature))
-        val cTxWitness = CTxWitness(
-            arrayOf(
-                CTxInWitness(),
-                CTxInWitness()
-            )
-        ) // our transactions only have 2 inputs
+        val cTxWitness =
+            CTxWitness(
+                arrayOf(
+                    CTxInWitness(),
+                    CTxInWitness()
+                )
+            ) // our transactions only have 2 inputs
         cTxWitness.vtxinwit[index] = cTxInWitness
 
         newTransaction.wit = cTxWitness
@@ -468,36 +481,39 @@ class WalletManager(
     ): BigInteger {
         val detKey = key as DeterministicKey
 
-        val (cMap, aggPubKey) = MuSig.generate_musig_key(publicKeys)
+        val (cMap, aggPubKey) = MuSig.generateMusigKey(publicKeys)
         val pubKeyDataMuSig = aggPubKey.getEncoded(true)
 
-        val (oldTransaction, newTransaction) = constructNewTransaction(
-            oldTransactionSerialized,
-            pubKeyDataMuSig,
-            paymentAmount,
-            receiverAddress
-        )
+        val (oldTransaction, newTransaction) =
+            constructNewTransaction(
+                oldTransactionSerialized,
+                pubKeyDataMuSig,
+                paymentAmount,
+                receiverAddress
+            )
 
         Log.i(
             "Coin",
-            "Transfer funds DAO - serialized new tx without signature: " + newTransaction.serialize()
-                .toHex()
+            "Transfer funds DAO - serialized new tx without signature: " +
+                newTransaction.serialize()
+                    .toHex()
         )
 
         val privChallenge =
             detKey.privKey.multiply(BigInteger(1, cMap[key.decompress()])).mod(Schnorr.n)
 
-        val sighashMuSig = CTransaction.TaprootSignatureHash(
-            newTransaction,
-            arrayOf(oldTransaction.vout.filter { it.scriptPubKey.size == 35 }[0]),
-            SIGHASH_ALL_TAPROOT,
-            input_index = 0
-        )
+        val sighashMuSig =
+            CTransaction.taprootSignatureHash(
+                newTransaction,
+                arrayOf(oldTransaction.vout.filter { it.scriptPubKey.size == 35 }[0]),
+                SIGHASH_ALL_TAPROOT,
+                inputIndex = 0
+            )
 
-        return MuSig.sign_musig(
+        return MuSig.signMusig(
             ECKey.fromPrivate(privChallenge),
             getNonceKey(walletId, context).first,
-            MuSig.aggregate_schnorr_nonces(
+            MuSig.aggregateSchnorrNonces(
                 nonces
             ).first,
             aggPubKey,
@@ -525,18 +541,19 @@ class WalletManager(
         receiverAddress: Address,
         paymentAmount: Long
     ): Pair<Boolean, String> {
-        val (_, aggPubKey) = MuSig.generate_musig_key(publicKeys)
+        val (_, aggPubKey) = MuSig.generateMusigKey(publicKeys)
         val pubKeyDataMuSig = aggPubKey.getEncoded(true)
 
-        val (_, newTransaction) = constructNewTransaction(
-            oldTransactionSerialized,
-            pubKeyDataMuSig,
-            paymentAmount,
-            receiverAddress
-        )
+        val (_, newTransaction) =
+            constructNewTransaction(
+                oldTransactionSerialized,
+                pubKeyDataMuSig,
+                paymentAmount,
+                receiverAddress
+            )
 
         val aggregateSignature =
-            MuSig.aggregate_musig_signatures(signaturesOfOldOwners, aggregateNonce)
+            MuSig.aggregateMusigSignatures(signaturesOfOldOwners, aggregateNonce)
 
         val cTxInWitness = CTxInWitness(arrayOf(aggregateSignature))
         val cTxWitness = CTxWitness(arrayOf(cTxInWitness))
@@ -545,8 +562,9 @@ class WalletManager(
 
         Log.i(
             "Coin",
-            "Transfer funds DAO - final serialized new tx with signature: " + newTransaction.serialize()
-                .toHex()
+            "Transfer funds DAO - final serialized new tx with signature: " +
+                newTransaction.serialize()
+                    .toHex()
         )
 
         return Pair(sendTaprootTransaction(newTransaction), newTransaction.serialize().toHex())
@@ -569,7 +587,7 @@ class WalletManager(
         val newTransaction = Transaction(params)
         val oldTransaction = CTransaction().deserialize(oldTransactionSerialized.hexToBytes())
 
-        val addressMuSig = TaprootUtil.key_to_witness(pubKeyDataMuSig)
+        val addressMuSig = TaprootUtil.keyToWitness(pubKeyDataMuSig)
 
         val newMultiSignatureOutputMoney = Coin.valueOf(paymentAmount)
         newTransaction.addOutput(newMultiSignatureOutputMoney, receiverAddress)
@@ -600,26 +618,30 @@ class WalletManager(
      */
     private fun sendTaprootTransaction(transaction: CTransaction): Boolean {
         Log.i("Coin", "Sending serialized transaction to the server: ${transaction.serialize().toHex()}")
-        val url = URL(
-            "https://$REG_TEST_FAUCET_DOMAIN/generateBlock?tx_id=${
-            transaction.serialize().toHex()
-            }"
-        )
+        val url =
+            URL(
+                "https://$REG_TEST_FAUCET_DOMAIN/generateBlock?tx_id=${
+                    transaction.serialize().toHex()
+                }"
+            )
 
         val executor: ExecutorService =
             Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
-        val future: Future<Boolean> = executor.submit(object : Callable<Boolean> {
-            override fun call(): Boolean {
-                val connection = url.openConnection() as HttpURLConnection
+        val future: Future<Boolean> =
+            executor.submit(
+                object : Callable<Boolean> {
+                    override fun call(): Boolean {
+                        val connection = url.openConnection() as HttpURLConnection
 
-                try {
-                    return connection.responseCode == 200
-                } finally {
-                    connection.disconnect()
+                        try {
+                            return connection.responseCode == 200
+                        } finally {
+                            connection.disconnect()
+                        }
+                    }
                 }
-            }
-        })
+            )
 
         return try {
             future.get(DEFAULT_BITCOIN_MAX_TIMEOUT, TimeUnit.SECONDS)
@@ -633,7 +655,11 @@ class WalletManager(
      * @param swUniqueId - String, the unique id of the DAO you want to create a nonce for
      * @param privateKey - String, the private key that needs to be stored
      */
-    fun storeNonceKey(swUniqueId: String, context: Context, privateKey: String) {
+    fun storeNonceKey(
+        swUniqueId: String,
+        context: Context,
+        privateKey: String
+    ) {
         val nonceKeyData = context.getSharedPreferences("nonce_keys", 0)!!
         val editor = nonceKeyData.edit()
         Log.i("NONCE_KEY", "Stored key for DAO: $swUniqueId")
@@ -647,9 +673,12 @@ class WalletManager(
      * @param swUniqueId - String, the unique id of the DAO you want to create a nonce for
      * @return nonce key pair
      */
-    fun addNewNonceKey(swUniqueId: String, context: Context): Pair<ECKey, ECPoint> {
+    fun addNewNonceKey(
+        swUniqueId: String,
+        context: Context
+    ): Pair<ECKey, ECPoint> {
         val nonceKeyData = context.getSharedPreferences("nonce_keys", 0)!!
-        val nonce = TaprootUtil.generate_schnorr_nonce(ECKey().privKeyBytes)
+        val nonce = TaprootUtil.generateSchnorrNonce(ECKey().privKeyBytes)
         val privateKey = nonce.first.privKey.toByteArray().toHex()
         val editor = nonceKeyData.edit()
         Log.i("NONCE_KEY", "New key created for DAO: $swUniqueId")
@@ -664,9 +693,12 @@ class WalletManager(
      * @param swUniqueId - String, the unique id of the DAO you want to get a nonce for
      * @return nonce key pair
      */
-    private fun getNonceKey(swUniqueId: String, context: Context): Pair<ECKey, ECPoint> {
+    private fun getNonceKey(
+        swUniqueId: String,
+        context: Context
+    ): Pair<ECKey, ECPoint> {
         val nonceKeyData = context.getSharedPreferences("nonce_keys", 0)!!
-        return TaprootUtil.generate_schnorr_nonce(nonceKeyData.getString(swUniqueId, "")!!.hexToBytes())
+        return TaprootUtil.generateSchnorrNonce(nonceKeyData.getString(swUniqueId, "")!!.hexToBytes())
     }
 
     companion object {
@@ -676,13 +708,15 @@ class WalletManager(
          * @return SerializedDeterministicKey
          */
         fun generateRandomDeterministicSeed(paramsRaw: BitcoinNetworkOptions): SerializedDeterministicKey {
-            val params = when (paramsRaw) {
-                BitcoinNetworkOptions.TEST_NET -> TestNet3Params.get()
-                BitcoinNetworkOptions.PRODUCTION -> MainNetParams.get()
-                BitcoinNetworkOptions.REG_TEST -> RegTestParams.get()
-            }
-            val keyChainGroup = KeyChainGroup.builder(params, KeyChainGroupStructure.DEFAULT)
-                .fromRandom(Script.ScriptType.P2PKH).build()
+            val params =
+                when (paramsRaw) {
+                    BitcoinNetworkOptions.TEST_NET -> TestNet3Params.get()
+                    BitcoinNetworkOptions.PRODUCTION -> MainNetParams.get()
+                    BitcoinNetworkOptions.REG_TEST -> RegTestParams.get()
+                }
+            val keyChainGroup =
+                KeyChainGroup.builder(params, KeyChainGroupStructure.DEFAULT)
+                    .fromRandom(Script.ScriptType.P2PKH).build()
             return deterministicSeedToSerializedDeterministicKey(keyChainGroup.activeKeyChain.seed!!)
         }
 

@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.release
 
 import android.app.Activity
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -43,7 +41,6 @@ import nl.tudelft.trustchain.musicdao.ui.screens.torrent.TorrentStatusScreen
 import dagger.hilt.android.EntryPointAccessors
 import java.io.File
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @Composable
 fun ReleaseScreen(
@@ -54,14 +51,16 @@ fun ReleaseScreen(
     var state by remember { mutableStateOf(0) }
     val titles = listOf("RELEASE", "TORRENT")
 
-    val viewModelFactory = EntryPointAccessors.fromActivity(
-        LocalContext.current as Activity,
-        MusicActivity.ViewModelFactoryProvider::class.java
-    ).noteDetailViewModelFactory()
+    val viewModelFactory =
+        EntryPointAccessors.fromActivity(
+            LocalContext.current as Activity,
+            MusicActivity.ViewModelFactoryProvider::class.java
+        ).noteDetailViewModelFactory()
 
-    val viewModel: ReleaseScreenViewModel = viewModel(
-        factory = ReleaseScreenViewModel.provideFactory(viewModelFactory, releaseId = releaseId)
-    )
+    val viewModel: ReleaseScreenViewModel =
+        viewModel(
+            factory = ReleaseScreenViewModel.provideFactory(viewModelFactory, releaseId = releaseId)
+        )
 
     val torrentStatus by viewModel.torrentState.collectAsState()
     val albumState by viewModel.saturatedReleaseState.observeAsState()
@@ -71,11 +70,17 @@ fun ReleaseScreen(
     // Audio Player
     val context = LocalContext.current
 
-    fun play(track: Song, cover: File?) {
-        playerViewModel.playDownloadedTrack(track, context, cover)
+    fun play(
+        track: Song,
+        cover: File?
+    ) {
+        playerViewModel.playDownloadedTrack(track, cover)
     }
 
-    fun play(track: DownloadingTrack, cover: File?) {
+    fun play(
+        track: DownloadingTrack,
+        cover: File?
+    ) {
         playerViewModel.playDownloadingTrack(
             Song(
                 file = track.file,
@@ -110,9 +115,10 @@ fun ReleaseScreen(
         )
 
         Column(
-            modifier = Modifier
-                .verticalScroll(scrollState)
-                .padding(bottom = 150.dp)
+            modifier =
+                Modifier
+                    .verticalScroll(scrollState)
+                    .padding(bottom = 150.dp)
         ) {
             TabRow(selectedTabIndex = state) {
                 titles.forEachIndexed { index, title ->
@@ -125,32 +131,35 @@ fun ReleaseScreen(
             }
             if (state == 0) {
                 Column(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 20.dp)
+                    modifier =
+                        Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 20.dp)
                 ) {
                     ReleaseCover(
                         file = album.cover,
-                        modifier = Modifier
-                            .height(200.dp)
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(10))
-                            .background(Color.DarkGray)
-                            .shadow(10.dp)
-                            .align(Alignment.CenterHorizontally)
+                        modifier =
+                            Modifier
+                                .height(200.dp)
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(10))
+                                .background(Color.DarkGray)
+                                .shadow(10.dp)
+                                .align(Alignment.CenterHorizontally)
                     )
                 }
                 Header(album, navController = navController)
                 if (album.songs != null && album.songs.isNotEmpty()) {
                     val files = album.songs
                     files.map {
-                        val isPlayingModifier = playingTrack.value?.let { current ->
-                            if (it.title == current.title) {
-                                MaterialTheme.colors.primary
-                            } else {
-                                MaterialTheme.colors.onBackground
-                            }
-                        } ?: MaterialTheme.colors.onBackground
+                        val isPlayingModifier =
+                            playingTrack.value?.let { current ->
+                                if (it.title == current.title) {
+                                    MaterialTheme.colors.primary
+                                } else {
+                                    MaterialTheme.colors.onBackground
+                                }
+                            } ?: MaterialTheme.colors.onBackground
 
                         ListItem(
                             text = { Text(it.title, color = isPlayingModifier, maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -182,9 +191,10 @@ fun ReleaseScreen(
                                         contentDescription = null
                                     )
                                 },
-                                modifier = Modifier.clickable {
-                                    play(it, album.cover)
-                                }
+                                modifier =
+                                    Modifier.clickable {
+                                        play(it, album.cover)
+                                    }
                             )
                         }
                         if (downloadingTracks == null || downloadingTracks.isEmpty()) {
@@ -211,9 +221,11 @@ fun ReleaseScreen(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Header(album: Album, navController: NavController) {
+fun Header(
+    album: Album,
+    navController: NavController
+) {
     Column(modifier = Modifier.padding(top = 10.dp, start = 20.dp, end = 20.dp)) {
         Text(
             album.title,
@@ -248,9 +260,10 @@ fun Header(album: Album, navController: NavController) {
 
         Text(
             "Album - ${dateToShortString(album.releaseDate.toString())}",
-            style = MaterialTheme.typography.body2.merge(
-                SpanStyle(fontWeight = FontWeight.SemiBold, color = Color.Gray)
-            ),
+            style =
+                MaterialTheme.typography.body2.merge(
+                    SpanStyle(fontWeight = FontWeight.SemiBold, color = Color.Gray)
+                ),
             modifier = Modifier.padding(bottom = 10.dp)
         )
         Row(

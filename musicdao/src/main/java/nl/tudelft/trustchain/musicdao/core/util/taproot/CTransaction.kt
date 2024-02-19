@@ -89,29 +89,28 @@ class CTransaction(
     }
 
     companion object {
-
-        fun TaprootSignatureHash(
+        fun taprootSignatureHash(
             txTo: CTransaction,
             spentUtxos: Array<CTxOut>,
-            hash_type: Byte,
-            input_index: Short = 0,
-            scriptpath: Boolean = false,
-            tapscript: CScript = CScript(),
-            codeseparator_pos: Int = -1,
+            hashType: Byte,
+            inputIndex: Short = 0,
+            scriptPath: Boolean = false,
+            tapScript: CScript = CScript(),
+            codeSeparatorPos: Int = -1,
             annex: ByteArray? = null,
-            tapscript_ver: Byte = DEFAULT_TAPSCRIPT_VER
+            tapscriptVer: Byte = DEFAULT_TAPSCRIPT_VER
         ): ByteArray {
             assert(txTo.vin.size == spentUtxos.size)
-            assert((hash_type in 0..3) || (hash_type in 0x81..0x83))
-            assert(input_index < txTo.vin.size)
+            assert((hashType in 0..3) || (hashType in 0x81..0x83))
+            assert(inputIndex < txTo.vin.size)
 
-            val spk = spentUtxos[input_index.toInt()].scriptPubKey
+            val spk = spentUtxos[inputIndex.toInt()].scriptPubKey
 
-            var ssBuf: ByteArray = byteArrayOf(0, hash_type)
+            var ssBuf: ByteArray = byteArrayOf(0, hashType)
             ssBuf += littleEndian(txTo.nVersion)
             ssBuf += littleEndian(txTo.nLockTime)
 
-            if ((hash_type and SIGHASH_ANYONECANPAY) != 1.toByte()) {
+            if ((hashType and SIGHASH_ANYONECANPAY) != 1.toByte()) {
                 var temp: ByteArray = byteArrayOf()
 
                 for (i in txTo.vin) {
@@ -133,7 +132,7 @@ class CTransaction(
                 ssBuf += sha256(temp)
             }
 
-            if ((hash_type and 3) != SIGHASH_SINGLE && (hash_type and 3) != SIGHASH_NONE) {
+            if ((hashType and 3) != SIGHASH_SINGLE && (hashType and 3) != SIGHASH_NONE) {
                 var toHash = byteArrayOf()
                 for (v in txTo.vout) {
                     toHash += v.serialize()
@@ -153,23 +152,23 @@ class CTransaction(
                 spendType = spendType or 2
             }
 
-            if (scriptpath) {
-                assert(tapscript.size() > 0)
-                assert(codeseparator_pos >= -1)
+            if (scriptPath) {
+                assert(tapScript.size() > 0)
+                assert(codeSeparatorPos >= -1)
                 spendType = spendType or 4
             }
 
             ssBuf += byteArrayOf(spendType.toByte())
             ssBuf += Messages.serString(spk)
 
-            if (hash_type and SIGHASH_ANYONECANPAY == 1.toByte()) {
+            if (hashType and SIGHASH_ANYONECANPAY == 1.toByte()) {
                 // not tested, not needed for the transactions we make now.
                 // this is probably wrong though, need to use little endian instead of big endian when adding to ssBuf
-                ssBuf += txTo.vin[input_index.toInt()].prevout.serialize()
-                ssBuf += byteArrayOf(spentUtxos[input_index.toInt()].nValue.toByte())
-                ssBuf += byteArrayOf(txTo.vin[input_index.toInt()].nSequence.toByte())
+                ssBuf += txTo.vin[inputIndex.toInt()].prevout.serialize()
+                ssBuf += byteArrayOf(spentUtxos[inputIndex.toInt()].nValue.toByte())
+                ssBuf += byteArrayOf(txTo.vin[inputIndex.toInt()].nSequence.toByte())
             } else {
-                ssBuf += littleEndian(input_index.toUShort())
+                ssBuf += littleEndian(inputIndex.toUShort())
             }
 
             if ((spendType and 2) == 1) {
@@ -177,32 +176,36 @@ class CTransaction(
                 ssBuf += sha256(Messages.serString(annex!!))
             }
 
-            if ((hash_type and 3) == SIGHASH_SINGLE) {
+            if ((hashType and 3) == SIGHASH_SINGLE) {
                 // not tested, not needed for the transactions we make now.
-                assert(input_index < txTo.vout.size)
-                ssBuf += sha256(txTo.vout[input_index.toInt()].serialize())
+                assert(inputIndex < txTo.vout.size)
+                ssBuf += sha256(txTo.vout[inputIndex.toInt()].serialize())
             }
 
-            if (scriptpath) {
+            if (scriptPath) {
                 // not tested, not needed for the transactions we make now.
                 // this is probably wrong though, need to use little endian instead of big endian when adding to ssBuf
-                ssBuf += taggedHash(
-                    "TapLeaf",
-                    byteArrayOf(tapscript_ver) + Messages.serString(tapscript.bytes)
-                )
+                ssBuf +=
+                    taggedHash(
+                        "TapLeaf",
+                        byteArrayOf(tapscriptVer) + Messages.serString(tapScript.bytes)
+                    )
                 ssBuf += byteArrayOf(0x02)
-                ssBuf += byteArrayOf(codeseparator_pos.toShort().toByte())
+                ssBuf += byteArrayOf(codeSeparatorPos.toShort().toByte())
             }
 
             assert(
-                ssBuf.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 -
-                    (if (hash_type and 3 == SIGHASH_NONE) 1 else 0) * 32 - (
-                    if (isPayToScriptHash(
-                            spk
-                        )
-                    )
-                        1 else 0
-                    ) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptpath) 1 else 0) * 35
+                ssBuf.size == 177 - (hashType and SIGHASH_ANYONECANPAY) * 50 -
+                    (if (hashType and 3 == SIGHASH_NONE) 1 else 0) * 32 - (
+                        if (isPayToScriptHash(
+                                spk
+                            )
+                        ) {
+                            1
+                        } else {
+                            0
+                        }
+                    ) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptPath) 1 else 0) * 35
             )
 
             return taggedHash("TapSighash", ssBuf)
@@ -403,50 +406,66 @@ fun serUint256(u_in: BigInteger): ByteArray {
     return rs
 }
 
-fun serVector(l: Array<CTxOut>, ser_function_name: String? = null): ByteArray {
+fun serVector(
+    l: Array<CTxOut>,
+    ser_function_name: String? = null
+): ByteArray {
     var r = serCompactSize(l.size)
     for (i in l) {
-        r += if (ser_function_name != null) {
-            readInstanceProperty(i, ser_function_name)
-        } else {
-            i.serialize()
-        }
+        r +=
+            if (ser_function_name != null) {
+                readInstanceProperty(i, ser_function_name)
+            } else {
+                i.serialize()
+            }
     }
     return r
 }
 
-fun serVector(l: Array<CTxIn>, ser_function_name: String? = null): ByteArray {
+fun serVector(
+    l: Array<CTxIn>,
+    ser_function_name: String? = null
+): ByteArray {
     var r = serCompactSize(l.size)
     for (i in l) {
-        r += if (ser_function_name != null) {
-            readInstanceProperty(i, ser_function_name)
-        } else {
-            i.serialize()
-        }
+        r +=
+            if (ser_function_name != null) {
+                readInstanceProperty(i, ser_function_name)
+            } else {
+                i.serialize()
+            }
     }
     return r
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <R> readInstanceProperty(instance: Any, propertyName: String): R {
-    val property = instance::class.members
-        // don't cast here to <Any, R>, it would succeed silently
-        .first { it.name == propertyName } as KProperty1<Any, *>
+fun <R> readInstanceProperty(
+    instance: Any,
+    propertyName: String
+): R {
+    val property =
+        instance::class.members
+            // don't cast here to <Any, R>, it would succeed silently
+            .first { it.name == propertyName } as KProperty1<Any, *>
     // force a invalid cast exception if incorrect type here
     return property.get(instance) as R
 }
 
 fun isPayToScriptHash(script: ByteArray): Boolean {
-    return script.size == 23 && OP_HASH160.equals(script[0]) && script[1].toInt() == 20 && OP_EQUAL.equals(
-        script[22]
-    )
+    return script.size == 23 && OP_HASH160.equals(script[0]) && script[1].toInt() == 20 &&
+        OP_EQUAL.equals(
+            script[22]
+        )
 }
 
 fun isPayToTaproot(script: ByteArray): Boolean {
     return script.size == 35 && OP_1.equals(script[0]) && script[1].toInt() == 33 && script[2] >= 0 && script[2] <= 1
 }
 
-fun taggedHash(tag: String, data: ByteArray): ByteArray {
+fun taggedHash(
+    tag: String,
+    data: ByteArray
+): ByteArray {
     var ss = sha256(tag.toByteArray(Charsets.UTF_8))
     ss += ss
     ss += data

@@ -12,7 +12,6 @@ abstract class VTBottomSheetDialogFragment(
     private val contentLayoutId: Int = 0,
     private val isDraggable: Boolean = true
 ) : VTDialogFragment() {
-
     lateinit var bottomSheetDialog: BottomSheetDialog
     lateinit var dialogView: View
 
@@ -38,13 +37,19 @@ abstract class VTBottomSheetDialogFragment(
         if (!isDraggable) {
             bottomSheetDialog.behavior.addBottomSheetCallback(
                 object : BottomSheetBehavior.BottomSheetCallback() {
-                    override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    override fun onStateChanged(
+                        bottomSheet: View,
+                        newState: Int
+                    ) {
                         if (newState == BottomSheetBehavior.STATE_DRAGGING) {
                             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
                         }
                     }
 
-                    override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+                    override fun onSlide(
+                        bottomSheet: View,
+                        slideOffset: Float
+                    ) {}
                 }
             )
         }

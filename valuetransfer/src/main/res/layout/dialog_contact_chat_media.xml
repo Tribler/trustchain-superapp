@@ -83,6 +83,7 @@
         </com.google.android.material.appbar.AppBarLayout>
 
         <include
+            android:id="@+id/detail"
             layout="@layout/dialog_contact_chat_media_detail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -90,6 +91,7 @@
             android:orientation="vertical" />
 
         <include
+            android:id="@+id/gallery"
             layout="@layout/dialog_contact_chat_media_gallery"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

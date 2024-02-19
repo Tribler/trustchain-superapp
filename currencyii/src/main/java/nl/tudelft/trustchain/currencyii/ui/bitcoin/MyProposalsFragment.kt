@@ -9,7 +9,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_my_proposals.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -17,6 +16,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.databinding.FragmentMyProposalsBinding
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
@@ -28,6 +28,10 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * create an instance of this fragment.
  */
 class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
+    @Suppress("ktlint:standard:property-naming") // False positive
+    private var _binding: FragmentMyProposalsBinding? = null
+    private val binding get() = _binding!!
+
     private var proposals: ArrayList<TrustChainBlock> = ArrayList()
 
     /**
@@ -55,11 +59,15 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
             proposalCopy.addAll(proposals)
 
             for (proposal in proposalCopy) {
-                if (!uniqueProposals.contains(proposal) && isUserInWallet(proposal)) uniqueProposals.add(proposal)
+                if (!uniqueProposals.contains(proposal) && isUserInWallet(proposal)) {
+                    uniqueProposals.add(
+                        proposal
+                    )
+                }
             }
             val adaptor = ProposalListAdapter(this, uniqueProposals)
-            proposal_list_view.adapter = adaptor
-            proposal_list_view.setOnItemClickListener { _, _, position, _ ->
+            binding.proposalListView.adapter = adaptor
+            binding.proposalListView.setOnItemClickListener { _, _, position, _ ->
                 val block = uniqueProposals[position]
                 if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
                     try {
@@ -87,11 +95,12 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
      * @return Boolean - if the user is in the wallet
      */
     private fun isUserInWallet(proposal: TrustChainBlock): Boolean {
-        val walletID = if (proposal.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
-            SWSignatureAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
-        } else {
-            SWTransferFundsAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
-        }
+        val walletID =
+            if (proposal.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
+                SWSignatureAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
+            } else {
+                SWTransferFundsAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
+            }
         return getUserWalletIds().contains(walletID)
     }
 
@@ -101,7 +110,9 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
      */
     private fun getUserWalletIds(): List<String> {
         val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
-        val wallets = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks().map { SWJoinBlockTransactionData(it.transaction).getData() }
+        val wallets =
+            getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
+                .map { SWJoinBlockTransactionData(it.transaction).getData() }
         val userWallets = wallets.filter { it.SW_TRUSTCHAIN_PKS.contains(myPublicKey) }
         return userWallets.map { it.SW_UNIQUE_ID }
     }
@@ -112,12 +123,14 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
      */
     private fun updateProposals(newProposals: List<TrustChainBlock>) {
         val coinCommunity = getCoinCommunity()
-        val proposalIds = proposals.map {
-            coinCommunity.fetchSignatureRequestProposalId(it)
-        }
-        val distinctById = newProposals.distinctBy {
-            coinCommunity.fetchSignatureRequestProposalId(it)
-        }
+        val proposalIds =
+            proposals.map {
+                coinCommunity.fetchSignatureRequestProposalId(it)
+            }
+        val distinctById =
+            newProposals.distinctBy {
+                coinCommunity.fetchSignatureRequestProposalId(it)
+            }
 
         for (proposal in distinctById) {
             val currentId = coinCommunity.fetchSignatureRequestProposalId(proposal)
@@ -139,14 +152,15 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                 // TODO: Commented this line out, it causes the app to crash
 //                withTimeout(JoinDAOFragment.SW_CRAWLING_TIMEOUT_MILLI) {
                 trustchain.crawlChain(peer)
-                val crawlResult = trustchain
-                    .getChainByUser(peer.publicKey.keyToBin())
-                    .filter {
-                        (
-                            it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
-                                it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
+                val crawlResult =
+                    trustchain
+                        .getChainByUser(peer.publicKey.keyToBin())
+                        .filter {
+                            (
+                                it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
+                                    it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
                             ) && !getCoinCommunity().checkEnoughFavorSignatures(it)
-                    }
+                        }
                 Log.i(
                     "Coin",
                     "Crawl result: ${crawlResult.size} proposals found (from ${peer.address})"
@@ -163,7 +177,10 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenStarted {
@@ -175,8 +192,15 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_my_proposals, container, false)
+        _binding = FragmentMyProposalsBinding.inflate(inflater, container, false)
+        val view = binding.root
+        return view
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

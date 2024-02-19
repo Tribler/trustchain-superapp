@@ -2,9 +2,7 @@ package nl.tudelft.trustchain.musicdao.ui.screens.settings
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ExperimentalMaterialApi
@@ -20,9 +18,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-@RequiresApi(Build.VERSION_CODES.O)
 fun SettingsScreen(settingsScreenViewModel: SettingsScreenViewModel) {
-
     val coroutine = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -46,9 +42,10 @@ fun SettingsScreen(settingsScreenViewModel: SettingsScreenViewModel) {
     Column {
         ListItem(
             text = { Text(text = "Batch Publish") },
-            modifier = Modifier.clickable {
-                openFilePickerDialog()
-            }
+            modifier =
+                Modifier.clickable {
+                    openFilePickerDialog()
+                }
         )
     }
 }

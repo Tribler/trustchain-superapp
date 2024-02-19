@@ -6,7 +6,6 @@ import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.TestNet3Params
 
 class CoinUtil {
-
     /**
      * Low priority: transaction gets confirmed in 7+ blocks
      * Medium priority: transaction gets confirmed in 3-6 blocks
@@ -36,19 +35,22 @@ class CoinUtil {
             params: NetworkParameters,
             txPriority: TxPriority = TxPriority.MEDIUM_PRIORITY
         ): Long {
-            val fee: Int = when (params) {
-                MainNetParams.get() -> when (txPriority) {
-                    TxPriority.LOW_PRIORITY -> 15000
-                    TxPriority.MEDIUM_PRIORITY -> 25000
-                    TxPriority.HIGH_PRIORITY -> 57000
+            val fee: Int =
+                when (params) {
+                    MainNetParams.get() ->
+                        when (txPriority) {
+                            TxPriority.LOW_PRIORITY -> 15000
+                            TxPriority.MEDIUM_PRIORITY -> 25000
+                            TxPriority.HIGH_PRIORITY -> 57000
+                        }
+                    TestNet3Params.get() ->
+                        when (txPriority) {
+                            TxPriority.LOW_PRIORITY -> 15000
+                            TxPriority.MEDIUM_PRIORITY -> 19000
+                            TxPriority.HIGH_PRIORITY -> 19000
+                        }
+                    else -> return calculateFeeWithPriority(MainNetParams.get(), txPriority)
                 }
-                TestNet3Params.get() -> when (txPriority) {
-                    TxPriority.LOW_PRIORITY -> 15000
-                    TxPriority.MEDIUM_PRIORITY -> 19000
-                    TxPriority.HIGH_PRIORITY -> 19000
-                }
-                else -> return calculateFeeWithPriority(MainNetParams.get(), txPriority)
-            }
             return fee.toLong()
         }
 

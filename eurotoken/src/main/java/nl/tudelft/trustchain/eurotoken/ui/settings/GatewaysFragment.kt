@@ -23,7 +23,6 @@ import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentGatewaysBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 
-
 class GatewaysFragment : EurotokenBaseFragment(R.layout.fragment_gateways) {
     private val binding by viewBinding(FragmentGatewaysBinding::bind)
 
@@ -40,9 +39,11 @@ class GatewaysFragment : EurotokenBaseFragment(R.layout.fragment_gateways) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter.registerRenderer(GatewayItemRenderer({
-            showOptions(it)
-        }))
+        adapter.registerRenderer(
+            GatewayItemRenderer({
+                showOptions(it)
+            })
+        )
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
@@ -54,7 +55,10 @@ class GatewaysFragment : EurotokenBaseFragment(R.layout.fragment_gateways) {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.recyclerView.adapter = adapter
@@ -66,9 +70,12 @@ class GatewaysFragment : EurotokenBaseFragment(R.layout.fragment_gateways) {
             )
         )
 
-        items.observe(viewLifecycleOwner, Observer {
-            adapter.updateItems(it)
-        })
+        items.observe(
+            viewLifecycleOwner,
+            Observer {
+                adapter.updateItems(it)
+            }
+        )
     }
 
     private fun showOptions(gateway: Gateway) {

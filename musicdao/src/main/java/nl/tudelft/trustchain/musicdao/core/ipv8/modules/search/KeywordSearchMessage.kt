@@ -23,12 +23,16 @@ class KeywordSearchMessage(
     }
 
     companion object Deserializer : Deserializable<KeywordSearchMessage> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<KeywordSearchMessage, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<KeywordSearchMessage, Int> {
             var localOffset = 0
-            val originPublicKey = buffer.copyOfRange(
-                offset + localOffset,
-                offset + localOffset + SERIALIZED_PUBLIC_KEY_SIZE
-            )
+            val originPublicKey =
+                buffer.copyOfRange(
+                    offset + localOffset,
+                    offset + localOffset + SERIALIZED_PUBLIC_KEY_SIZE
+                )
             localOffset += SERIALIZED_PUBLIC_KEY_SIZE
             val ttl = deserializeUInt(buffer, offset + localOffset)
             localOffset += SERIALIZED_UINT_SIZE

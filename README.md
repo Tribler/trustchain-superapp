@@ -1,4 +1,5 @@
-# TrustChain Super App [![Build Status](https://github.com/Tribler/trustchain-superapp/workflows/build/badge.svg)](https://github.com/Tribler/trustchain-superapp/actions)
+# TrustChain Super App 
+[![Build Status](https://github.com/Tribler/trustchain-superapp/workflows/build/badge.svg)](https://github.com/Tribler/trustchain-superapp/actions) [![ktlint](https://img.shields.io/badge/ktlint%20code--style-%E2%9D%A4-FF4081)](https://pinterest.github.io/ktlint/)
 
 This repository contains a collection of Android apps built on top of [IPv8](https://github.com/MattSkala/kotlin-ipv8) (our P2P networking stack) and [TrustChain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md) (a scalable, distributed, pair-wise ledger). All applications are built into a single APK, following the concept of [super apps](https://home.kpmg/xx/en/home/insights/2019/06/super-app-or-super-disruption.html) – an emerging trend that allows to provide an ecosystem for multiple services within a single all-in-one app experience.
 
@@ -134,6 +135,7 @@ Run unit tests:
 ```
 ./gradlew test
 ```
+*Note: Currently tests fail on Linux, but pass on Windows and Mac. This is due to the tests relying on a native jlibtorrent binary, of which the linux version cannot be bundled with android builds. We are working on a solution to this problem.*
 
 Run instrumented tests:
 ```
@@ -142,7 +144,7 @@ Run instrumented tests:
 
 ## Code style
 
-[Ktlint](https://ktlint.github.io/) is used to enforce a consistent code style across the whole project.
+[Ktlint](https://ktlint.github.io/) is used to enforce a consistent code style across the whole project. It is recommended to install the [ktlint plugin](https://plugins.jetbrains.com/plugin/15057-ktlint) for your IDE to get real-time feedback.
 
 Check code style:
 ```

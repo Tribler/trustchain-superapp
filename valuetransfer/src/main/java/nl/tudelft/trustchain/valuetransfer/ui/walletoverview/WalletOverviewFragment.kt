@@ -50,7 +50,11 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
     private val myPeerConnected = MutableLiveData(false)
 
     private val itemsIdentity: LiveData<List<Item>> by lazy {
-        combine(getIdentityStore().getAllIdentities(), identityImage.asFlow(), myPeerConnected.asFlow()) { identities, identityImage, connected ->
+        combine(
+            getIdentityStore().getAllIdentities(),
+            identityImage.asFlow(),
+            myPeerConnected.asFlow()
+        ) { identities, identityImage, connected ->
             createIdentityItems(identities, identityImage, connected)
         }.asLiveData()
     }
@@ -83,6 +87,7 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
     }
 
     init {
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
 
         lifecycleScope.launchWhenCreated {
@@ -108,19 +113,25 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
             IdentityItemRenderer(
                 0,
                 { identity ->
-                    val map = mapOf(
-                        QRScanController.KEY_PUBLIC_KEY to identity.publicKey.keyToBin().toHex(),
-                        QRScanController.KEY_NAME to identity.content.let {
-                            "${it.givenNames.getInitials()} ${it.surname}"
-                        },
-                    )
+                    val map =
+                        mapOf(
+                            QRScanController.KEY_PUBLIC_KEY to identity.publicKey.keyToBin().toHex(),
+                            QRScanController.KEY_NAME to
+                                identity.content.let {
+                                    "${it.givenNames.getInitials()} ${it.surname}"
+                                },
+                        )
 
-                    QRCodeDialog(resources.getString(R.string.text_my_public_key), resources.getString(R.string.text_public_key_share_desc), mapToJSON(map).toString())
+                    QRCodeDialog(
+                        resources.getString(R.string.text_my_public_key),
+                        resources.getString(R.string.text_public_key_share_desc),
+                        mapToJSON(map).toString()
+                    )
                         .show(parentFragmentManager, tag)
                 },
                 {},
                 {
-                    parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.identityFragmentTag)
+                    parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.IDENTITY_FRAGMENT_TAG)
                 }
             )
         )
@@ -128,13 +139,14 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         // CONTACTS
         adapterContacts.registerRenderer(
             ChatItemRenderer {
-                val args = Bundle().apply {
-                    putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.walletOverviewFragmentTag)
-                }
+                val args =
+                    Bundle().apply {
+                        putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                        putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                        putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.WALLET_OVER_FRAGMENT_TAG)
+                    }
 
-                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                parentActivity.detailFragment(ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG, args)
             }
         )
 
@@ -166,7 +178,10 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         observeContactsItems(viewLifecycleOwner, adapterContacts, itemsContacts)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
@@ -243,26 +258,29 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                             vertical = true
                         )
                     }
-                    R.id.actionTransferToContact -> ExchangeTransferMoneyDialog(
-                        null,
-                        null,
-                        true
-                    ).show(parentFragmentManager, tag)
-                    R.id.actionRequestTransferContact -> ExchangeTransferMoneyDialog(
-                        null,
-                        null,
-                        false
-                    ).show(parentFragmentManager, tag)
-                    R.id.actionRequestTransferLink -> ExchangeTransferMoneyLinkDialog(
-                        null,
-                        false
-                    ).show(parentFragmentManager, ExchangeTransferMoneyLinkDialog.TAG)
+                    R.id.actionTransferToContact ->
+                        ExchangeTransferMoneyDialog(
+                            null,
+                            null,
+                            true
+                        ).show(parentFragmentManager, tag)
+                    R.id.actionRequestTransferContact ->
+                        ExchangeTransferMoneyDialog(
+                            null,
+                            null,
+                            false
+                        ).show(parentFragmentManager, tag)
+                    R.id.actionRequestTransferLink ->
+                        ExchangeTransferMoneyLinkDialog(
+                            null,
+                            false
+                        ).show(parentFragmentManager, ExchangeTransferMoneyLinkDialog.TAG)
                 }
             }.show(parentFragmentManager, tag)
         }
 
         binding.tvExchangeTitle.setOnClickListener {
-            parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.exchangeFragmentTag)
+            parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.EXCHANGE_FRAGMENT_TAG)
         }
 
         // CONTACTS
@@ -276,30 +294,42 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         observeContactsItems(viewLifecycleOwner, adapterContacts, itemsContacts)
 
         binding.tvContactsTitle.setOnClickListener {
-            parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.contactsFragmentTag)
+            parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.CONTACTS_FRAGMENT_TAG)
         }
 
         binding.clContactsOptions.setOnClickListener {
-            parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.contactsFragmentTag)
+            parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.CONTACTS_FRAGMENT_TAG)
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    @Deprecated("Deprecated in Java")
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
+        @Suppress("DEPRECATION")
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
         inflater.inflate(R.menu.wallet_overview_options, menu)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.actionSettings -> {
-                parentActivity.detailFragment(ValueTransferMainActivity.settingsFragmentTag, Bundle())
+                parentActivity.detailFragment(ValueTransferMainActivity.SETTINGS_FRAGMENT_TAG, Bundle())
             }
         }
+        @Suppress("DEPRECATION")
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         if (resultCode == Activity.RESULT_OK) {
             QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
                 ?.let { result ->
@@ -389,9 +419,10 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                 val contact = getContactStore().getContactFromPublicKey(publicKey)
                 val status = state.firstOrNull { it.publicKey == publicKey }
                 val image = images.firstOrNull { it.publicKey == publicKey }
-                val identityName = status?.identityInfo?.let {
-                    "${it.initials} ${it.surname}"
-                }
+                val identityName =
+                    status?.identityInfo?.let {
+                        "${it.initials} ${it.surname}"
+                    }
 
                 ChatItem(
                     Contact(

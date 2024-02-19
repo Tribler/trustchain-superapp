@@ -1,9 +1,9 @@
 package nl.tudelft.trustchain.musicdaodatafeeder
 
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.mpatric.mp3agic.Mp3File
-import com.squareup.sqldelight.db.SqlDriver
-import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

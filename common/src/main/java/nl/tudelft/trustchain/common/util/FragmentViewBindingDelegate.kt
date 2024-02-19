@@ -16,25 +16,31 @@ class FragmentViewBindingDelegate<T : ViewBinding>(
     val fragment: Fragment,
     val viewBindingFactory: (View) -> T
 ) : ReadOnlyProperty<Fragment, T> {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: T? = null
 
     init {
-        fragment.lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onCreate(owner: LifecycleOwner) {
-                @Suppress("COMPATIBILITY_WARNING")
-                // TODO: Replace observe.
-                fragment.viewLifecycleOwnerLiveData.observe(fragment) { viewLifecycleOwner ->
-                    viewLifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
-                        override fun onDestroy(owner: LifecycleOwner) {
-                            _binding = null
-                        }
-                    })
+        fragment.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onCreate(owner: LifecycleOwner) {
+                    fragment.viewLifecycleOwnerLiveData.observe(fragment) { viewLifecycleOwner ->
+                        viewLifecycleOwner.lifecycle.addObserver(
+                            object : DefaultLifecycleObserver {
+                                override fun onDestroy(owner: LifecycleOwner) {
+                                    _binding = null
+                                }
+                            }
+                        )
+                    }
                 }
             }
-        })
+        )
     }
 
-    override fun getValue(thisRef: Fragment, property: KProperty<*>): T {
+    override fun getValue(
+        thisRef: Fragment,
+        property: KProperty<*>
+    ): T {
         val binding = _binding
         if (binding != null) {
             return binding
@@ -49,6 +55,4 @@ class FragmentViewBindingDelegate<T : ViewBinding>(
     }
 }
 
-fun <T : ViewBinding> Fragment.viewBinding(
-    viewBindingFactory: (View) -> T
-) = FragmentViewBindingDelegate(this, viewBindingFactory)
+fun <T : ViewBinding> Fragment.viewBinding(viewBindingFactory: (View) -> T) = FragmentViewBindingDelegate(this, viewBindingFactory)

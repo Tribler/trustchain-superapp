@@ -5,7 +5,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class Messages {
-
     @Suppress("DEPRECATION")
     companion object {
         fun serCompactSize(l: Int): ByteArray {
@@ -95,7 +94,10 @@ class Messages {
             return r
         }
 
-        fun read(bytes: ByteIterator, numberOfBytes: Long): ByteArray {
+        fun read(
+            bytes: ByteIterator,
+            numberOfBytes: Long
+        ): ByteArray {
             var byteArray = byteArrayOf()
             for (i in 0 until numberOfBytes) {
                 byteArray += bytes.nextByte()

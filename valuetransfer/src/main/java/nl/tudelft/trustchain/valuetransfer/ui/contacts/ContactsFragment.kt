@@ -1,16 +1,24 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.*
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.fragment_contacts_vt.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -20,16 +28,19 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
-import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
-import nl.tudelft.trustchain.valuetransfer.util.ContactImage
-import nl.tudelft.trustchain.valuetransfer.util.ContactState
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentContactsVtBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.ContactAddDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
-import nl.tudelft.trustchain.valuetransfer.util.*
+import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
+import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
+import nl.tudelft.trustchain.valuetransfer.util.ContactImage
+import nl.tudelft.trustchain.valuetransfer.util.ContactState
+import nl.tudelft.trustchain.valuetransfer.util.DividerItemDecorator
+import nl.tudelft.trustchain.valuetransfer.util.closeKeyboard
+import nl.tudelft.trustchain.valuetransfer.util.onFocusChange
+import nl.tudelft.trustchain.valuetransfer.util.showKeyboard
 
 class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
     private val binding by viewBinding(FragmentContactsVtBinding::bind)
@@ -109,53 +120,58 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
 
         contactsAdapter.registerRenderer(
             ContactsItemRenderer {
-                val args = Bundle().apply {
-                    putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
-                }
+                val args =
+                    Bundle().apply {
+                        putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                        putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                        putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.CONTACTS_FRAGMENT_TAG)
+                    }
 
-                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                parentActivity.detailFragment(ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG, args)
             }
         )
 
         chatsAdapter.registerRenderer(
             ChatItemRenderer {
-                val args = Bundle().apply {
-                    putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
-                }
+                val args =
+                    Bundle().apply {
+                        putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                        putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                        putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.CONTACTS_FRAGMENT_TAG)
+                    }
 
-                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                parentActivity.detailFragment(ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG, args)
             }
         )
 
         archivedChatsAdapter.registerRenderer(
             ChatItemRenderer {
-                val args = Bundle().apply {
-                    putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
-                }
+                val args =
+                    Bundle().apply {
+                        putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                        putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                        putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.CONTACTS_FRAGMENT_TAG)
+                    }
 
-                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                parentActivity.detailFragment(ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG, args)
             }
         )
 
         blockedChatsAdapter.registerRenderer(
             ChatItemRenderer {
-                val args = Bundle().apply {
-                    putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
-                }
+                val args =
+                    Bundle().apply {
+                        putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                        putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                        putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.CONTACTS_FRAGMENT_TAG)
+                    }
 
-                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                parentActivity.detailFragment(ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG, args)
             }
         )
 
@@ -178,20 +194,23 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
 
         binding.ivSearchBarCancelIcon.setOnClickListener {
-            etSearchContact.text = null
-            etSearchContact.clearFocus()
-            ivSearchBarCancelIcon.isVisible = false
-            etSearchContact.closeKeyboard(requireContext())
+            binding.etSearchContact.text = null
+            binding.etSearchContact.clearFocus()
+            binding.ivSearchBarCancelIcon.isVisible = false
+            binding.etSearchContact.closeKeyboard(requireContext())
         }
 
         binding.etSearchContact.doAfterTextChanged { searchText ->
-            ivSearchBarCancelIcon.isVisible = searchText != null && searchText.isNotEmpty()
+            binding.ivSearchBarCancelIcon.isVisible = searchText != null && searchText.isNotEmpty()
             searchFilter = searchText.toString()
             observeContacts(viewLifecycleOwner, contactsAdapter)
             observeChats(viewLifecycleOwner, chatsAdapter, chatItems, ADAPTER_RECENT)
@@ -261,7 +280,10 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         }
     }
 
-    private fun toggleChats(from: String, to: String) {
+    private fun toggleChats(
+        from: String,
+        to: String
+    ) {
         if (from == ADAPTER_RECENT) {
             when (to) {
                 ADAPTER_ARCHIVE -> {
@@ -287,13 +309,19 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         binding.tvNoBlockedChats.isVisible = to == ADAPTER_BLOCKED && blockedChatsAdapter.itemCount == 0
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    @Deprecated("Deprecated in Java")
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
+        @Suppress("DEPRECATION")
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
 
         inflater.inflate(R.menu.contacts_options, menu)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.actionSearch -> {
@@ -306,6 +334,7 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
                 }
             }
         }
+        @Suppress("DEPRECATION")
         return super.onOptionsItemSelected(item)
     }
 
@@ -335,7 +364,10 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         )
     }
 
-    private fun observeContacts(owner: LifecycleOwner, adapter: ItemAdapter) {
+    private fun observeContacts(
+        owner: LifecycleOwner,
+        adapter: ItemAdapter
+    ) {
         contactItems.observe(
             owner,
             Observer {
@@ -392,9 +424,10 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
                 val contact = getContactStore().getContactFromPublicKey(publicKey)
                 val status = state.firstOrNull { it.publicKey == publicKey }
                 val image = images.firstOrNull { it.publicKey == publicKey }
-                val identityName = status?.identityInfo?.let {
-                    "${it.initials} ${it.surname}"
-                }
+                val identityName =
+                    status?.identityInfo?.let {
+                        "${it.initials} ${it.surname}"
+                    }
 
                 ChatItem(
                     Contact(

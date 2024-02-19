@@ -67,20 +67,24 @@ class TrustChainHelper(
         publicKey: ByteArray
     ): TrustChainBlock {
         val blockType = "demo_tx_block"
-        val transaction = mapOf(
-            "From" to primaryCurrency.toString(),
-            "Amount from" to amount.toString(),
-            "To" to secondaryCurrency.toString(),
-            "Amount to" to price.toString(),
-            "type" to type.toString()
-        )
+        val transaction =
+            mapOf(
+                "From" to primaryCurrency.toString(),
+                "Amount from" to amount.toString(),
+                "To" to secondaryCurrency.toString(),
+                "Amount to" to price.toString(),
+                "type" to type.toString()
+            )
         return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
     }
 
     /**
      * Creates a new proposal block of type "demo_tx_block", using a float as transaction amount.
      */
-    fun createOfflineTxProposalBlock(amount: Float, publicKey: ByteArray): TrustChainBlock {
+    fun createOfflineTxProposalBlock(
+        amount: Float,
+        publicKey: ByteArray
+    ): TrustChainBlock {
         val blockType = "demo_tx_block"
         val transaction = mapOf("amount" to amount, "offline" to true)
         return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
@@ -89,7 +93,10 @@ class TrustChainHelper(
     /**
      * Creates a new proposal block of type "demo_tx_block", using a float as transaction amount.
      */
-    fun createTxProposalBlock(amount: Float?, publicKey: ByteArray): TrustChainBlock {
+    fun createTxProposalBlock(
+        amount: Float?,
+        publicKey: ByteArray
+    ): TrustChainBlock {
         val blockType = "demo_tx_block"
         val transaction = mapOf("amount" to amount)
         return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)

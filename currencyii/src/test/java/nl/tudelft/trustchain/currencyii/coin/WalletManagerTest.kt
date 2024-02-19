@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class WalletManagerTest {
-
     companion object {
         lateinit var walletManager: WalletManager
 
@@ -14,10 +13,11 @@ class WalletManagerTest {
         @JvmStatic
         fun setup() {
             val config = WalletManagerConfiguration(BitcoinNetworkOptions.REG_TEST)
-            walletManager = WalletManager(
-                config,
-                File(".")
-            )
+            walletManager =
+                WalletManager(
+                    config,
+                    File(".")
+                )
         }
     }
 

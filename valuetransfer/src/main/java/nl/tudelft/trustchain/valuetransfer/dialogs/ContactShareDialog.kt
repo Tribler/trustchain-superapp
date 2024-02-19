@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.valuetransfer.util.*
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogContactShareBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 
 class ContactShareDialog(
@@ -37,8 +38,10 @@ class ContactShareDialog(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_contact_share, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogContactShareBinding.inflate(it.layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -50,22 +53,23 @@ class ContactShareDialog(
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val spinnerRecipient = view.findViewById<Spinner>(R.id.spinnerSelectRecipient)
-            val selectedRecipientView = view.findViewById<TextView>(R.id.tvSelectedRecipient)
-            val spinnerContact = view.findViewById<Spinner>(R.id.spinnerSelectContact)
-            val selectedContactView = view.findViewById<TextView>(R.id.tvSelectedContact)
-            buttonShareContact = view.findViewById<Button>(R.id.btnShareContact)
+            val spinnerRecipient = binding.spinnerSelectRecipient
+            val selectedRecipientView = binding.tvSelectedRecipient
+            val spinnerContact = binding.spinnerSelectContact
+            val selectedContactView = binding.tvSelectedContact
+            buttonShareContact = binding.btnShareContact
 
             lifecycleScope.launch(Dispatchers.Main) {
-                val contacts: MutableList<Contact> = getContactStore().getContacts()
-                    .first()
-                    .filter {
-                        it.publicKey != getTrustChainCommunity().myPeer.publicKey
-                    }
-                    .sortedBy {
-                        it.name
-                    }
-                    .toMutableList()
+                val contacts: MutableList<Contact> =
+                    getContactStore().getContacts()
+                        .first()
+                        .filter {
+                            it.publicKey != getTrustChainCommunity().myPeer.publicKey
+                        }
+                        .sortedBy {
+                            it.name
+                        }
+                        .toMutableList()
 
                 if (contacts.size > 1) {
                     contacts.add(
@@ -157,37 +161,68 @@ class ContactShareDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
-    private fun spinnerSelection(spinner: Spinner, isRecipient: Boolean) {
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-                toggleButton(buttonShareContact, false)
-            }
-
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                when (isRecipient) {
-                    true -> selectedRecipient = if (position == 0) null else spinner.selectedItem as Contact
-                    else -> selectedContact = if (position == 0) null else spinner.selectedItem as Contact
+    private fun spinnerSelection(
+        spinner: Spinner,
+        isRecipient: Boolean
+    ) {
+        spinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(p0: AdapterView<*>?) {
+                    toggleButton(buttonShareContact, false)
                 }
 
-                toggleButton(buttonShareContact, selectedContact != null && selectedRecipient != null)
+                override fun onItemSelected(
+                    p0: AdapterView<*>?,
+                    p1: View?,
+                    position: Int,
+                    p3: Long
+                ) {
+                    when (isRecipient) {
+                        true ->
+                            selectedRecipient =
+                                if (position == 0) null else spinner.selectedItem as Contact
+
+                        else ->
+                            selectedContact =
+                                if (position == 0) null else spinner.selectedItem as Contact
+                    }
+
+                    toggleButton(
+                        buttonShareContact,
+                        selectedContact != null && selectedRecipient != null
+                    )
+                }
             }
-        }
     }
 
-    private fun spinnerAdapter(list: MutableList<Contact>, spinner: Spinner, isRecipient: Boolean): ArrayAdapter<Contact> {
-        val contacts = if (spinner.selectedItemPosition == 0) {
-            list
-        } else {
-            list.filter {
-                it != if (isRecipient) selectedContact else selectedRecipient
+    private fun spinnerAdapter(
+        list: MutableList<Contact>,
+        spinner: Spinner,
+        isRecipient: Boolean
+    ): ArrayAdapter<Contact> {
+        val contacts =
+            if (spinner.selectedItemPosition == 0) {
+                list
+            } else {
+                list.filter {
+                    it != if (isRecipient) selectedContact else selectedRecipient
+                }
             }
-        }
 
-        return object : ArrayAdapter<Contact>(requireContext(), android.R.layout.simple_spinner_item, contacts) {
-            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+        return object : ArrayAdapter<Contact>(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            contacts
+        ) {
+            override fun getDropDownView(
+                position: Int,
+                convertView: View?,
+                parent: ViewGroup
+            ): View {
                 return (super.getDropDownView(position, convertView, parent) as TextView).apply {
                     layoutParams.apply {
                         height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
@@ -202,15 +237,20 @@ class ContactShareDialog(
                         setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
                     }
 
-                    background = if (position == spinner.selectedItemPosition) {
-                        ColorDrawable(Color.LTGRAY)
-                    } else {
-                        ColorDrawable(Color.WHITE)
-                    }
+                    background =
+                        if (position == spinner.selectedItemPosition) {
+                            ColorDrawable(Color.LTGRAY)
+                        } else {
+                            ColorDrawable(Color.WHITE)
+                        }
                 }
             }
 
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            override fun getView(
+                position: Int,
+                convertView: View?,
+                parent: ViewGroup
+            ): View {
                 return (super.getView(position, convertView, parent) as TextView).apply {
                     text = contacts[position].name
 

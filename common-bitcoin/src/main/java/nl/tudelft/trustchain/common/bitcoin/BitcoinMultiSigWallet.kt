@@ -31,7 +31,10 @@ class BitcoinMultiSigWallet(
         return transaction
     }
 
-    fun startWithdraw(value: Coin, receiveAddress: Address): Transaction {
+    fun startWithdraw(
+        value: Coin,
+        receiveAddress: Address
+    ): Transaction {
         val transaction = Transaction(params)
 
         val relayValue = Coin.valueOf(1000)
@@ -60,7 +63,10 @@ class BitcoinMultiSigWallet(
         return transaction
     }
 
-    fun endWithdraw(transaction: Transaction, signatures: List<TransactionSignature>): Transaction {
+    fun endWithdraw(
+        transaction: Transaction,
+        signatures: List<TransactionSignature>
+    ): Transaction {
         for (transactionInput in transaction.inputs) {
             transactionInput.scriptSig = ScriptBuilder.createMultiSigInputScript(signatures)
         }
@@ -71,7 +77,8 @@ class BitcoinMultiSigWallet(
     fun hash(transaction: Transaction): List<Sha256Hash> {
         val transactionHashes = mutableListOf<Sha256Hash>()
         transaction.inputs.forEachIndexed { index, _ ->
-            val transactionHash = transaction.hashForSignature(index, outputScript, Transaction.SigHash.ALL, false)
+            val transactionHash =
+                transaction.hashForSignature(index, outputScript, Transaction.SigHash.ALL, false)
             transactionHashes.add(transactionHash)
         }
         return transactionHashes

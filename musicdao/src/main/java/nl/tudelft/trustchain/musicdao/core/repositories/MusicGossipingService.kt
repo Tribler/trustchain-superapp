@@ -46,7 +46,11 @@ class MusicGossipingService : Service() {
         return binder
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         return START_NOT_STICKY
     }
 
@@ -74,9 +78,10 @@ class MusicGossipingService : Service() {
         while (scope.isActive) {
             // Pick 5 of the most popular torrents and 5 random torrents, and send those stats to any neighbour
             // First, we sort the map based on swarm health
-            val sortedMap = swarmHealthMap.toList()
-                .sortedBy { (_, value) -> value }
-                .toMap()
+            val sortedMap =
+                swarmHealthMap.toList()
+                    .sortedBy { (_, value) -> value }
+                    .toMap()
             gossipSwarmHealth(sortedMap, gossipTopTorrents)
             gossipSwarmHealth(swarmHealthMap, gossipRandomTorrents)
             delay(4000)
@@ -86,7 +91,10 @@ class MusicGossipingService : Service() {
     /**
      * Send SwarmHealth information to #maxIterations random peers
      */
-    private fun gossipSwarmHealth(map: Map<Sha1Hash, SwarmHealth>, maxInterations: Int) {
+    private fun gossipSwarmHealth(
+        map: Map<Sha1Hash, SwarmHealth>,
+        maxInterations: Int
+    ) {
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
         var count = 0
         for (entry in map.entries) {

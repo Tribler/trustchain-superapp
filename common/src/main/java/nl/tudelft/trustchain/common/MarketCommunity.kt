@@ -30,7 +30,10 @@ class MarketCommunity : Community() {
         discoveredAddressesContacted[address] = Date()
     }
 
-    override fun onIntroductionResponse(peer: Peer, payload: IntroductionResponsePayload) {
+    override fun onIntroductionResponse(
+        peer: Peer,
+        payload: IntroductionResponsePayload
+    ) {
         super.onIntroductionResponse(peer, payload)
 
         if (peer.address in DEFAULT_ADDRESSES) {
@@ -50,17 +53,24 @@ class MarketCommunity : Community() {
         notifyListeners(payload)
         Log.d(
             "MarketCommunity",
-            "Received packet:{${payload.primaryCurrency}, ${payload.secondaryCurrency}, ${payload.amount}, ${payload.price}, ${payload.type}}"
+            "Received packet:{${payload.primaryCurrency}, ${payload.secondaryCurrency}," +
+                " ${payload.amount}, ${payload.price}, ${payload.type}}"
         )
     }
 
-    fun addListener(type: TradePayload.Type?, listener: (TradePayload) -> Unit) {
+    fun addListener(
+        type: TradePayload.Type?,
+        listener: (TradePayload) -> Unit
+    ) {
         val listeners = listenersMap[type] ?: mutableListOf()
         listeners.add(listener)
         listenersMap[type] = listeners
     }
 
-    fun removeListener(type: TradePayload.Type?, listener: (TradePayload) -> Unit) {
+    fun removeListener(
+        type: TradePayload.Type?,
+        listener: (TradePayload) -> Unit
+    ) {
         listenersMap[type]?.remove(listener)
     }
 

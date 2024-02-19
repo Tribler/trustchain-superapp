@@ -6,19 +6,19 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.WindowManager
-import android.widget.*
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
-import androidx.core.widget.NestedScrollView
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.dialog_contact.*
-import kotlinx.android.synthetic.main.fragment_exchange_vt.*
-import kotlinx.android.synthetic.main.item_contacts_chat.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
@@ -30,25 +30,25 @@ import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
-import nl.tudelft.trustchain.valuetransfer.util.ContactImage
-import nl.tudelft.trustchain.valuetransfer.util.ContactState
-import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
+import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogContactBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeTransactionItemRenderer
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityAttributeItem
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityAttributeItemRenderer
-import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
-import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
+import nl.tudelft.trustchain.valuetransfer.util.ContactImage
+import nl.tudelft.trustchain.valuetransfer.util.ContactState
 import nl.tudelft.trustchain.valuetransfer.util.DividerItemDecorator
+import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
+import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import nl.tudelft.trustchain.valuetransfer.util.toExchangeTransactionItem
 
 class ContactInfoDialog(
     val publicKey: PublicKey
 ) : VTDialogFragment() {
-
     private val contact: LiveData<Contact?> by lazy {
         getContactStore().getContactFromPublickey(publicKey).asLiveData()
     }
@@ -67,7 +67,10 @@ class ContactInfoDialog(
     private val adapterTransactions = ItemAdapter()
 
     private val itemsAttributes: LiveData<List<Item>> by lazy {
-        getPeerChatStore().getAttachmentsOfType(publicKey, MessageAttachment.TYPE_IDENTITY_ATTRIBUTE).map { attachments ->
+        getPeerChatStore().getAttachmentsOfType(
+            publicKey,
+            MessageAttachment.TYPE_IDENTITY_ATTRIBUTE
+        ).map { attachments ->
             createAttributeItems(attachments)
         }.asLiveData()
     }
@@ -97,7 +100,10 @@ class ContactInfoDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         adapterTransactions.registerRenderer(
             ExchangeTransactionItemRenderer(false, parentActivity) {
-                ExchangeTransactionDialog(it).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
+                ExchangeTransactionDialog(it).show(
+                    parentFragmentManager,
+                    ExchangeTransactionDialog.TAG
+                )
             }
         )
 
@@ -105,33 +111,39 @@ class ContactInfoDialog(
             bottomSheetDialog = Dialog(requireContext(), R.style.FullscreenDialog)
 
             @Suppress("DEPRECATION")
-            bottomSheetDialog.window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
-            val view = layoutInflater.inflate(R.layout.dialog_contact, null)
+            bottomSheetDialog.window?.setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+            )
+            val binding = DialogContactBinding.inflate(layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.setCancelable(false)
             bottomSheetDialog.setCanceledOnTouchOutside(false)
 
-            view.findViewById<ImageView>(R.id.ivClose).setOnClickListener {
+            binding.ivClose.setOnClickListener {
                 bottomSheetDialog.dismiss()
             }
 
-            val contactIdenticonView = view.findViewById<ImageView>(R.id.ivIdenticon)
-            val contactImageView = view.findViewById<ImageView>(R.id.ivContactImage)
-            val nickName = view.findViewById<TextView>(R.id.tvNickNameValue)
-            val nickNameEdit = view.findViewById<ImageView>(R.id.ivNickNameEdit)
-            val verificationStatus = view.findViewById<LinearLayout>(R.id.llVerificationStatus)
-            val verifiedStatus = view.findViewById<TextView>(R.id.tvVerifiedStatus)
-            val notVerifiedStatus = view.findViewById<TextView>(R.id.tvNotVerifiedStatus)
-            val verifiedInfoIcon = view.findViewById<ImageView>(R.id.ivVerifiedInfoIcon)
-            val verifiedInfo = view.findViewById<TextView>(R.id.tvVerifiedInfo)
-            val identityName = view.findViewById<TextView>(R.id.tvIdentityNameValue)
-            val identityNameInfoIcon = view.findViewById<ImageView>(R.id.ivIdentityNameInfoIcon)
-            val identityNameInfo = view.findViewById<TextView>(R.id.tvIdentityNameInfo)
+            val contactIdenticonView = binding.ivIdenticon
+            val contactImageView = binding.ivContactImage
+            val nickName = binding.tvNickNameValue
+            val nickNameEdit = binding.ivNickNameEdit
+            val verificationStatus = binding.llVerificationStatus
+            val verifiedStatus = binding.tvVerifiedStatus
+            val notVerifiedStatus = binding.tvNotVerifiedStatus
+            val verifiedInfoIcon = binding.ivVerifiedInfoIcon
+            val verifiedInfo = binding.tvVerifiedInfo
+            val identityName = binding.tvIdentityNameValue
+            val identityNameInfoIcon = binding.ivIdentityNameInfoIcon
+            val identityNameInfo = binding.tvIdentityNameInfo
 
             nickNameEdit.setOnClickListener {
                 contact.value.let {
-                    val dialogContactRename = ContactRenameDialog(it ?: Contact("", publicKey)).newInstance(123)
+                    val dialogContactRename =
+                        ContactRenameDialog(it ?: Contact("", publicKey)).newInstance(123)
+                    @Suppress("DEPRECATION")
                     dialogContactRename.setTargetFragment(this, 1)
 
                     bottomSheetDialog.hide()
@@ -141,22 +153,27 @@ class ContactInfoDialog(
                 }
             }
 
-            showIdentityAttributes = view.findViewById(R.id.tvShowIdentityAttributes)
-            showTransactions = view.findViewById(R.id.tvShowTransactions)
-            val identityAttributesView = view.findViewById<NestedScrollView>(R.id.clIdentityAttributes)
-            val transactionsView = view.findViewById<NestedScrollView>(R.id.clTransactions)
-            noAttributesView = view.findViewById(R.id.tvNoAttributes)
-            noTransactionsView = view.findViewById(R.id.tvNoTransactions)
+            showIdentityAttributes = binding.tvShowIdentityAttributes
+            showTransactions = binding.tvShowTransactions
+            val identityAttributesView = binding.clIdentityAttributes
+            val transactionsView = binding.clTransactions
+            noAttributesView = binding.tvNoAttributes
+            noTransactionsView = binding.tvNoTransactions
 
             showIdentityAttributes.setOnClickListener {
                 if (identityAttributesView.isVisible) return@setOnClickListener
                 showIdentityAttributes.apply {
                     setTypeface(null, Typeface.BOLD)
-                    background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
+                    background =
+                        ContextCompat.getDrawable(
+                            requireContext(),
+                            R.drawable.pill_rounded_selected
+                        )
                 }
                 showTransactions.apply {
                     setTypeface(null, Typeface.NORMAL)
-                    background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
+                    background =
+                        ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
                 }
                 transactionsView.exitEnterView(requireContext(), identityAttributesView, false)
             }
@@ -165,18 +182,23 @@ class ContactInfoDialog(
                 if (transactionsView.isVisible) return@setOnClickListener
                 showIdentityAttributes.apply {
                     setTypeface(null, Typeface.NORMAL)
-                    background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
+                    background =
+                        ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
                 }
                 showTransactions.apply {
                     setTypeface(null, Typeface.BOLD)
-                    background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
+                    background =
+                        ContextCompat.getDrawable(
+                            requireContext(),
+                            R.drawable.pill_rounded_selected
+                        )
                 }
                 identityAttributesView.exitEnterView(requireContext(), transactionsView)
             }
 
-            val rvIdentityAttributes = view.findViewById<RecyclerView>(R.id.rvContactIdentityAttributes)
-            rvTransactions = view.findViewById(R.id.rvContactTransactions)
-            buttonMoreTransactions = view.findViewById(R.id.btnShowMoreTransactions)
+            val rvIdentityAttributes = binding.rvContactIdentityAttributes
+            rvTransactions = binding.rvContactTransactions
+            buttonMoreTransactions = binding.btnShowMoreTransactions
 
             verifiedInfoIcon.setOnClickListener {
                 verifiedInfo.isVisible = !verifiedInfo.isVisible
@@ -185,7 +207,6 @@ class ContactInfoDialog(
             contact.observe(
                 this,
                 Observer {
-
                     nickName.text = it?.name ?: resources.getString(R.string.text_unknown_contact)
                 }
             )
@@ -212,7 +233,12 @@ class ContactInfoDialog(
             rvIdentityAttributes.apply {
                 adapter = adapterIdentityAttributes
                 layoutManager = LinearLayoutManager(context)
-                val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_identity_attribute, requireContext().theme)
+                val drawable =
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.divider_identity_attribute,
+                        requireContext().theme
+                    )
                 addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
             }
 
@@ -220,7 +246,6 @@ class ContactInfoDialog(
                 this,
                 Observer {
                     adapterIdentityAttributes.updateItems(it)
-
                     noAttributesView.isVisible = it.isEmpty()
                 }
             )
@@ -228,7 +253,12 @@ class ContactInfoDialog(
             rvTransactions.apply {
                 adapter = adapterTransactions
                 layoutManager = LinearLayoutManager(requireContext())
-                val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_transaction, requireContext().theme)
+                val drawable =
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.divider_transaction,
+                        requireContext().theme
+                    )
                 addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
             }
 
@@ -246,10 +276,13 @@ class ContactInfoDialog(
                         return@Observer
                     }
 
-                    contactState.identityInfo?.let {
-                        identityName.text = if (it.initials != null && it.surname != null) {
-                            "${it.initials} ${it.surname}"
-                        } else "-"
+                    contactState.identityInfo.let {
+                        identityName.text =
+                            if (it.initials != null && it.surname != null) {
+                                "${it.initials} ${it.surname}"
+                            } else {
+                                "-"
+                            }
 
                         verificationStatus.isVisible = true
                         verifiedStatus.isVisible = it.isVerified
@@ -289,14 +322,19 @@ class ContactInfoDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
     private suspend fun refreshTransactions() {
         var items: List<Item>
 
         withContext(Dispatchers.IO) {
-            transactionsItems = getTransactionRepository().getTransactionsBetweenMeAndOther(publicKey, getTrustChainHelper())
+            transactionsItems =
+                getTransactionRepository().getTransactionsBetweenMeAndOther(
+                    publicKey,
+                    getTrustChainHelper()
+                )
             items = createTransactionItems(transactionsItems.take(transactionShowCount))
         }
 
@@ -307,14 +345,23 @@ class ContactInfoDialog(
         noTransactionsView.isVisible = items.isEmpty()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        @Suppress("DEPRECATION")
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
-                ContactChatFragment.RENAME_CONTACT -> if (data != null) {
-                    bottomSheetDialog.show()
-                }
+                ContactChatFragment.RENAME_CONTACT ->
+                    if (data != null) {
+                        bottomSheetDialog.show()
+                    }
             }
-        } else super.onActivityResult(requestCode, resultCode, data)
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     private fun createAttributeItems(attachments: List<MessageAttachment>): List<Item> {

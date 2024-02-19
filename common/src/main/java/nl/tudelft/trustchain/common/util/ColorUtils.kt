@@ -7,7 +7,10 @@ import kotlin.math.abs
 /**
  * Get color based on hash.
  */
-fun getColorByHash(context: Context, hash: String): Int {
+fun getColorByHash(
+    context: Context,
+    hash: String
+): Int {
     val colors = context.resources.getIntArray(R.array.colorsChain)
     val number = abs(hash.hashCode() % colors.size)
     return colors[number]

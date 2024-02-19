@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.search
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,9 +18,11 @@ import nl.tudelft.trustchain.musicdao.ui.components.releases.ReleaseList
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterialApi::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SearchScreen(navController: NavController, screenViewModel: SearchScreenViewModel) {
+fun SearchScreen(
+    navController: NavController,
+    screenViewModel: SearchScreenViewModel
+) {
     val releases by screenViewModel.searchResult.collectAsState(listOf())
     val searchQuery by screenViewModel.searchQuery.collectAsState()
 

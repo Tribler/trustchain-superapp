@@ -129,45 +129,31 @@ class PeerChatCommunity(
     /**
      * Set callback entry points
      */
-    fun setOnMessageCallback(
-        f: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit
-    ) {
+    fun setOnMessageCallback(f: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit) {
         this.onMessageCallback = f
     }
 
-    fun setOnContactImageRequestCallback(
-        f: (instance: PeerChatCommunity, peer: Peer) -> Unit
-    ) {
+    fun setOnContactImageRequestCallback(f: (instance: PeerChatCommunity, peer: Peer) -> Unit) {
         this.onContactImageRequestCallback = f
     }
 
-    fun setOnContactImageCallback(
-        f: (contactImage: ContactImage) -> Unit
-    ) {
+    fun setOnContactImageCallback(f: (contactImage: ContactImage) -> Unit) {
         this.onContactImageCallback = f
     }
 
-    fun setEVAOnSendCompleteCallback(
-        f: (peer: Peer, info: String, nonce: ULong) -> Unit
-    ) {
+    fun setEVAOnSendCompleteCallback(f: (peer: Peer, info: String, nonce: ULong) -> Unit) {
         this.evaSendCompleteCallback = f
     }
 
-    fun setEVAOnReceiveProgressCallback(
-        f: (peer: Peer, info: String, progress: TransferProgress) -> Unit
-    ) {
+    fun setEVAOnReceiveProgressCallback(f: (peer: Peer, info: String, progress: TransferProgress) -> Unit) {
         this.evaReceiveProgressCallback = f
     }
 
-    fun setEVAOnReceiveCompleteCallback(
-        f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit
-    ) {
+    fun setEVAOnReceiveCompleteCallback(f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit) {
         this.evaReceiveCompleteCallback = f
     }
 
-    fun setEVAOnErrorCallback(
-        f: (peer: Peer, exception: TransferException) -> Unit
-    ) {
+    fun setEVAOnErrorCallback(f: (peer: Peer, exception: TransferException) -> Unit) {
         this.evaErrorCallback = f
     }
 
@@ -185,14 +171,22 @@ class PeerChatCommunity(
         sendMessage(chatMessage)
     }
 
-    fun sendMessage(message: String, recipient: PublicKey, identityInfo: IdentityInfo? = null) {
+    fun sendMessage(
+        message: String,
+        recipient: PublicKey,
+        identityInfo: IdentityInfo? = null
+    ) {
         val chatMessage = createOutgoingChatMessage(message, null, null, recipient, identityInfo)
         database.addMessage(chatMessage)
 
         sendMessage(chatMessage)
     }
 
-    fun sendImage(file: File, recipient: PublicKey, identityInfo: IdentityInfo? = null) {
+    fun sendImage(
+        file: File,
+        recipient: PublicKey,
+        identityInfo: IdentityInfo? = null
+    ) {
         val hash = file.name.hexToBytes()
         val attachment = MessageAttachment(MessageAttachment.TYPE_IMAGE, file.length(), hash)
         val chatMessage = createOutgoingChatMessage("", attachment, null, recipient, identityInfo)
@@ -222,11 +216,12 @@ class PeerChatCommunity(
         identityInfo: IdentityInfo? = null
     ) {
         val serialized = identityAttribute.serialize()
-        val attachment = MessageAttachment(
-            MessageAttachment.TYPE_IDENTITY_ATTRIBUTE,
-            serialized.size.toLong(),
-            serialized
-        )
+        val attachment =
+            MessageAttachment(
+                MessageAttachment.TYPE_IDENTITY_ATTRIBUTE,
+                serialized.size.toLong(),
+                serialized
+            )
         val chatMessage = createOutgoingChatMessage(attributeMessage, attachment, null, recipient, identityInfo)
 
         database.addMessage(chatMessage)
@@ -261,11 +256,12 @@ class PeerChatCommunity(
     ) {
         val serialized = transferRequest.serialize()
 
-        val attachment = MessageAttachment(
-            MessageAttachment.TYPE_TRANSFER_REQUEST,
-            serialized.size.toLong(),
-            serialized
-        )
+        val attachment =
+            MessageAttachment(
+                MessageAttachment.TYPE_TRANSFER_REQUEST,
+                serialized.size.toLong(),
+                serialized
+            )
         val chatMessage = createOutgoingChatMessage(description ?: "", attachment, null, recipient, identityInfo)
 
         database.addMessage(chatMessage)
@@ -294,23 +290,25 @@ class PeerChatCommunity(
         identityInfo = chatMessage.identityInfo
 
         if (peer != null) {
-            val payload = MessagePayload(
-                chatMessage.id,
-                chatMessage.message,
-                chatMessage.attachment?.type ?: "",
-                chatMessage.attachment?.size ?: 0L,
-                chatMessage.attachment?.content ?: ByteArray(0),
-                chatMessage.transactionHash,
-                chatMessage.identityInfo
-            )
+            val payload =
+                MessagePayload(
+                    chatMessage.id,
+                    chatMessage.message,
+                    chatMessage.attachment?.type ?: "",
+                    chatMessage.attachment?.size ?: 0L,
+                    chatMessage.attachment?.content ?: ByteArray(0),
+                    chatMessage.transactionHash,
+                    chatMessage.identityInfo
+                )
 
-            val packet = serializePacket(
-                MessageId.MESSAGE,
-                payload,
-                sign = true,
-                encrypt = true,
-                recipient = peer
-            )
+            val packet =
+                serializePacket(
+                    MessageId.MESSAGE,
+                    payload,
+                    sign = true,
+                    encrypt = true,
+                    recipient = peer
+                )
 
             logger.debug { "-> $payload, ${chatMessage.transactionHash}, ${payload.transactionHash}" }
             send(peer, packet)
@@ -319,32 +317,46 @@ class PeerChatCommunity(
         }
     }
 
-    fun sendAck(peer: Peer, id: String) {
+    fun sendAck(
+        peer: Peer,
+        id: String
+    ) {
         val payload = AckPayload(id)
         val packet = serializePacket(MessageId.ACK, payload)
         logger.debug { "-> $payload" }
         send(peer, packet)
     }
 
-    fun sendAttachmentRequest(peer: Peer, id: String) {
+    fun sendAttachmentRequest(
+        peer: Peer,
+        id: String
+    ) {
         val payload = AttachmentRequestPayload(id)
         val packet = serializePacket(MessageId.ATTACHMENT_REQUEST, payload)
         logger.debug { "-> $payload" }
         send(peer, packet)
     }
 
-    private fun sendAttachment(peer: Peer, id: String, file: File) {
+    private fun sendAttachment(
+        peer: Peer,
+        id: String,
+        file: File
+    ) {
         val payload = AttachmentPayload(id, file.readBytes())
         val packet =
             serializePacket(MessageId.ATTACHMENT, payload, encrypt = true, recipient = peer)
         logger.debug { "-> $payload" }
 
-        if (evaProtocolEnabled) evaSendBinary(
-            peer,
-            EVAId.EVA_PEERCHAT_ATTACHMENT,
-            id,
-            packet
-        ) else send(peer, packet)
+        if (evaProtocolEnabled) {
+            evaSendBinary(
+                peer,
+                EVAId.EVA_PEERCHAT_ATTACHMENT,
+                id,
+                packet
+            )
+        } else {
+            send(peer, packet)
+        }
     }
 
     fun sendContactImageRequest(recipient: PublicKey) {
@@ -362,7 +374,10 @@ class PeerChatCommunity(
         }
     }
 
-    fun sendContactImage(peer: Peer, contactImage: ContactImage) {
+    fun sendContactImage(
+        peer: Peer,
+        contactImage: ContactImage
+    ) {
         Log.d("VTLOG", "SEND CONTACT IMAGE")
         val payload =
             ContactImagePayload(contactImage.publicKey, contactImage.imageHash, contactImage.image)
@@ -375,9 +390,11 @@ class PeerChatCommunity(
      * On packet receipt
      */
     private fun onMessagePacket(packet: Packet) {
-        val (peer, payload) = packet.getDecryptedAuthPayload(
-            MessagePayload, myPeer.key as PrivateKey
-        )
+        val (peer, payload) =
+            packet.getDecryptedAuthPayload(
+                MessagePayload,
+                myPeer.key as PrivateKey
+            )
         logger.debug { "<- $payload, ${payload.transactionHash}" }
         onMessage(peer, payload)
     }
@@ -395,9 +412,11 @@ class PeerChatCommunity(
     }
 
     private fun onAttachmentPacket(packet: Packet) {
-        val (_, payload) = packet.getDecryptedAuthPayload(
-            AttachmentPayload, myPeer.key as PrivateKey
-        )
+        val (_, payload) =
+            packet.getDecryptedAuthPayload(
+                AttachmentPayload,
+                myPeer.key as PrivateKey
+            )
         logger.debug { "<- $payload" }
         onAttachment(payload)
     }
@@ -412,9 +431,11 @@ class PeerChatCommunity(
     private fun onContactImagePacket(packet: Packet) {
         Log.d("VTLOG", "CONTACT IMAGE PACKET RECEIVED")
 
-        val (peer, payload) = packet.getDecryptedAuthPayload(
-            ContactImagePayload, myPeer.key as PrivateKey
-        )
+        val (peer, payload) =
+            packet.getDecryptedAuthPayload(
+                ContactImagePayload,
+                myPeer.key as PrivateKey
+            )
 
         Log.d("VTLOG", "CONTACT IMAGE CONTENTS PEER: $peer")
         Log.d("VTLOG", "CONTACT IMAGE CONTENTS: ${payload.imageHash}")
@@ -426,7 +447,10 @@ class PeerChatCommunity(
     /**
      * On receipt handlers
      */
-    private fun onMessage(peer: Peer, payload: MessagePayload) {
+    private fun onMessage(
+        peer: Peer,
+        payload: MessagePayload
+    ) {
         Log.d("PeerChat", "onMessage from $peer: $payload")
 
         val chatMessage = createIncomingChatMessage(peer, payload)
@@ -458,7 +482,10 @@ class PeerChatCommunity(
         }
     }
 
-    private fun onAck(peer: Peer, payload: AckPayload) {
+    private fun onAck(
+        peer: Peer,
+        payload: AckPayload
+    ) {
         Log.d("PeerChat", "onAck from $peer: $payload")
 
         try {
@@ -468,7 +495,10 @@ class PeerChatCommunity(
         }
     }
 
-    private fun onAttachmentRequest(peer: Peer, payload: AttachmentRequestPayload) {
+    private fun onAttachmentRequest(
+        peer: Peer,
+        payload: AttachmentRequestPayload
+    ) {
         try {
             val file = MessageAttachment.getFile(context, payload.id)
             if (file.exists()) {
@@ -546,7 +576,10 @@ class PeerChatCommunity(
         )
     }
 
-    private fun createIncomingChatMessage(peer: Peer, message: MessagePayload): ChatMessage {
+    private fun createIncomingChatMessage(
+        peer: Peer,
+        message: MessagePayload
+    ): ChatMessage {
         /*
         // Store attachment
         val file = if (message.attachmentData.isNotEmpty())
@@ -586,7 +619,11 @@ class PeerChatCommunity(
     /**
      * EVA Callbacks
      */
-    private fun onEVASendCompleteCallback(peer: Peer, info: String, nonce: ULong) {
+    private fun onEVASendCompleteCallback(
+        peer: Peer,
+        info: String,
+        nonce: ULong
+    ) {
         Log.d("PeerChat", "ON EVA send complete callback for '$info'")
 
         if (info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
@@ -596,7 +633,11 @@ class PeerChatCommunity(
         }
     }
 
-    private fun onEVAReceiveProgressCallback(peer: Peer, info: String, progress: TransferProgress) {
+    private fun onEVAReceiveProgressCallback(
+        peer: Peer,
+        info: String,
+        progress: TransferProgress
+    ) {
         Log.d("PeerChat", "ON EVA receive progress callback for '$info'")
 
         if (info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
@@ -606,7 +647,12 @@ class PeerChatCommunity(
         }
     }
 
-    private fun onEVAReceiveCompleteCallback(peer: Peer, info: String, id: String, data: ByteArray?) {
+    private fun onEVAReceiveCompleteCallback(
+        peer: Peer,
+        info: String,
+        id: String,
+        data: ByteArray?
+    ) {
         Log.d("PeerChat", "ON EVA receive complete callback for '$info'")
 
         if (info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
@@ -621,7 +667,10 @@ class PeerChatCommunity(
         }
     }
 
-    private fun onEVAErrorCallback(peer: Peer, exception: TransferException) {
+    private fun onEVAErrorCallback(
+        peer: Peer,
+        exception: TransferException
+    ) {
         Log.d("PeerChat", "ON EVA error callback for '${exception.info}'")
 
         if (exception.info != EVAId.EVA_PEERCHAT_ATTACHMENT) return

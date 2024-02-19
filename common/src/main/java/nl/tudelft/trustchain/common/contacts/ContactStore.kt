@@ -1,10 +1,11 @@
 package nl.tudelft.trustchain.common.contacts
 
 import android.content.Context
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOneOrNull
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import nl.tudelft.common.sqldelight.Database
 import nl.tudelft.ipv8.keyvault.PublicKey
@@ -14,11 +15,17 @@ class ContactStore(context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "common.db")
     private val database = Database(driver)
 
-    fun addContact(publicKey: PublicKey, name: String) {
+    fun addContact(
+        publicKey: PublicKey,
+        name: String
+    ) {
         database.dbContactQueries.addContact(name, publicKey.keyToBin())
     }
 
-    fun updateContact(publicKey: PublicKey, name: String) {
+    fun updateContact(
+        publicKey: PublicKey,
+        name: String
+    ) {
         database.dbContactQueries.addContact(name, publicKey.keyToBin())
     }
 
@@ -30,7 +37,9 @@ class ContactStore(context: Context) {
                 contact.name,
                 defaultCryptoProvider.keyFromPublicBin(contact.public_key)
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     fun getContactFromPublickey(publicKey: PublicKey): Flow<Contact?> {
@@ -39,14 +48,14 @@ class ContactStore(context: Context) {
                 name,
                 defaultCryptoProvider.keyFromPublicBin(public_key)
             )
-        }.asFlow().mapToOneOrNull()
+        }.asFlow().mapToOneOrNull(Dispatchers.IO)
     }
 
     fun getContacts(): Flow<List<Contact>> {
         return database.dbContactQueries.getAll { name, public_key ->
             val publicKey = defaultCryptoProvider.keyFromPublicBin(public_key)
             Contact(name, publicKey)
-        }.asFlow().mapToList()
+        }.asFlow().mapToList(Dispatchers.IO)
     }
 
     fun deleteContact(contact: Contact) {
@@ -55,6 +64,7 @@ class ContactStore(context: Context) {
 
     companion object {
         private lateinit var instance: ContactStore
+
         fun getInstance(context: Context): ContactStore {
             if (!Companion::instance.isInitialized) {
                 instance = ContactStore(context)

@@ -8,8 +8,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.button.MaterialButton
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogIdentityDetailsBinding
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
@@ -19,14 +19,15 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class IdentityDetailsDialog : VTDialogFragment() {
-
     private val dateOfBirthFormat = SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH)
     private lateinit var identity: Identity
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_identity_details, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogIdentityDetailsBinding.inflate(layoutInflater)
+            val view = binding.root
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
@@ -47,45 +48,59 @@ class IdentityDetailsDialog : VTDialogFragment() {
             }
 
             // Force the dialog to be undraggable
-            bottomSheetDialog.behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    if (newState == BottomSheetBehavior.STATE_DRAGGING) {
-                        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.addBottomSheetCallback(
+                object :
+                    BottomSheetBehavior.BottomSheetCallback() {
+                    override fun onStateChanged(
+                        bottomSheet: View,
+                        newState: Int
+                    ) {
+                        if (newState == BottomSheetBehavior.STATE_DRAGGING) {
+                            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                        }
                     }
+
+                    override fun onSlide(
+                        bottomSheet: View,
+                        slideOffset: Float
+                    ) {}
                 }
+            )
 
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {}
-            })
-
-            val buttonCancel = view.findViewById<Button>(R.id.btnCancel)
+            val buttonCancel = binding.btnCancel
 
             buttonCancel.setOnClickListener {
                 bottomSheetDialog.dismiss()
             }
 
-            val editTexts = mapOf<String, EditText>(
-                KEY_GIVEN_NAMES to view.findViewById(R.id.etGivenNames),
-                KEY_SURNAME to view.findViewById(R.id.etSurname),
-                KEY_DATE_OF_BIRTH to view.findViewById(R.id.etDateOfBirth),
-                KEY_DATE_OF_EXPIRY to view.findViewById(R.id.etDateOfExpiry),
-                KEY_NATIONALITY to view.findViewById(R.id.etNationality),
-                KEY_PERSONAL_NUMBER to view.findViewById(R.id.etPersonalNumber),
-                KEY_DOCUMENT_NUMBER to view.findViewById(R.id.etDocumentNumber)
-            )
+            val editTexts =
+                mapOf<String, EditText>(
+                    KEY_GIVEN_NAMES to binding.etGivenNames,
+                    KEY_SURNAME to binding.etSurname,
+                    KEY_DATE_OF_BIRTH to binding.etDateOfBirth,
+                    KEY_DATE_OF_EXPIRY to binding.etDateOfExpiry,
+                    KEY_NATIONALITY to binding.etNationality,
+                    KEY_PERSONAL_NUMBER to binding.etPersonalNumber,
+                    KEY_DOCUMENT_NUMBER to binding.etDocumentNumber
+                )
 
-            val btnMale = view.findViewById<MaterialButton>(R.id.btnMale)
-            val btnFemale = view.findViewById<MaterialButton>(R.id.btnFemale)
+            val btnMale = binding.btnMale
+            val btnFemale = binding.btnFemale
             var btnMaleChecked = false
             var btnFemaleChecked = false
-            val selectedGenderColor = getColorIDFromThemeAttribute(parentActivity, R.attr.mutedColor)
+            val selectedGenderColor =
+                getColorIDFromThemeAttribute(parentActivity, R.attr.mutedColor)
             val notSelectedGenderColor = R.color.light_gray
 
-            val saveButton = view.findViewById<Button>(R.id.btnSaveIdentity)
+            val saveButton = binding.btnSaveIdentity
             saveButton.isEnabled = true
 
             editTexts.forEach { map ->
                 map.value.doAfterTextChanged {
-                    toggleButton(saveButton, validateEditTexts(editTexts) && (btnMaleChecked || btnFemaleChecked))
+                    toggleButton(
+                        saveButton,
+                        validateEditTexts(editTexts) && (btnMaleChecked || btnFemaleChecked)
+                    )
                 }
             }
 
@@ -112,6 +127,7 @@ class IdentityDetailsDialog : VTDialogFragment() {
                         setTextColor(Color.WHITE)
                     }
                 }
+
                 VALUE_FEMALE -> {
                     btnMaleChecked = false
                     btnFemaleChecked = true
@@ -188,11 +204,12 @@ class IdentityDetailsDialog : VTDialogFragment() {
             saveButton.setOnClickListener {
                 val givenNames = editTexts[KEY_GIVEN_NAMES]!!.text.toString()
                 val surname = editTexts[KEY_SURNAME]!!.text.toString()
-                val gender = when {
-                    btnMaleChecked -> VALUE_MALE
-                    btnFemaleChecked -> VALUE_FEMALE
-                    else -> VALUE_NEUTRAL
-                }
+                val gender =
+                    when {
+                        btnMaleChecked -> VALUE_MALE
+                        btnFemaleChecked -> VALUE_FEMALE
+                        else -> VALUE_NEUTRAL
+                    }
 
                 identity.content.givenNames = givenNames
                 identity.content.surname = surname
@@ -216,7 +233,8 @@ class IdentityDetailsDialog : VTDialogFragment() {
                 }
             }
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
     private fun validateEditTexts(map: Map<String, EditText>): Boolean {

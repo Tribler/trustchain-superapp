@@ -1,9 +1,10 @@
 package nl.tudelft.trustchain.valuetransfer.db
 
 import android.content.Context
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
@@ -38,7 +39,13 @@ class IdentityStore(context: Context) {
             PersonalIdentity(
                 name!!,
                 surname!!,
-                if (gender == 0L) GENDER_MALE else if (gender == 1L) GENDER_FEMALE else GENDER_NEUTRAL,
+                if (gender == 0L) {
+                    GENDER_MALE
+                } else if (gender == 1L) {
+                    GENDER_FEMALE
+                } else {
+                    GENDER_NEUTRAL
+                },
                 Date(dateOfBirth!!),
                 placeOfBirth!!,
                 nationality!!,
@@ -74,7 +81,7 @@ class IdentityStore(context: Context) {
 
     fun getAllIdentities(): Flow<List<Identity>> {
         return database.dbIdentityQueries.getAll(identityMapper)
-            .asFlow().mapToList()
+            .asFlow().mapToList(Dispatchers.IO)
     }
 
     fun hasIdentity(): Boolean {
@@ -98,7 +105,13 @@ class IdentityStore(context: Context) {
             identity.publicKey.keyToBin(),
             identity.content.givenNames,
             identity.content.surname,
-            if (identity.content.gender == GENDER_MALE) 0L else if (identity.content.gender == GENDER_FEMALE) 1L else 2L,
+            if (identity.content.gender == GENDER_MALE) {
+                0L
+            } else if (identity.content.gender == GENDER_FEMALE) {
+                1L
+            } else {
+                2L
+            },
             identity.content.dateOfBirth.time,
             identity.content.placeOfBirth,
             identity.content.nationality,
@@ -116,7 +129,13 @@ class IdentityStore(context: Context) {
             identity.publicKey.keyToBin(),
             identity.content.givenNames,
             identity.content.surname,
-            if (identity.content.gender == GENDER_MALE) 0L else if (identity.content.gender == GENDER_FEMALE) 1L else 2L,
+            if (identity.content.gender == GENDER_MALE) {
+                0L
+            } else if (identity.content.gender == GENDER_FEMALE) {
+                1L
+            } else {
+                2L
+            },
             identity.content.dateOfBirth.time,
             identity.content.placeOfBirth,
             identity.content.nationality,
@@ -139,7 +158,7 @@ class IdentityStore(context: Context) {
 
     fun getAllAttributes(): Flow<List<IdentityAttribute>> {
         return database.dbAttributeQueries.getAllAttributes(attributeMapper)
-            .asFlow().mapToList()
+            .asFlow().mapToList(Dispatchers.IO)
     }
 
     fun getAttributeNames(): List<String> {
@@ -174,6 +193,7 @@ class IdentityStore(context: Context) {
 
     companion object {
         private lateinit var instance: IdentityStore
+
         fun getInstance(context: Context): IdentityStore {
             if (!::instance.isInitialized) {
                 instance = IdentityStore(context)

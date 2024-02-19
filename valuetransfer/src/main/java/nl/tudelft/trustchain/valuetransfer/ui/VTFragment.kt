@@ -17,8 +17,9 @@ import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.ui.settings.NotificationHandler
 import nl.tudelft.trustchain.valuetransfer.passport.PassportHandler
 
-abstract class VTFragment(@LayoutRes contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
-
+abstract class VTFragment(
+    @LayoutRes contentLayoutId: Int = 0
+) : BaseFragment(contentLayoutId) {
     val parentActivity: ValueTransferMainActivity by lazy {
         requireActivity() as ValueTransferMainActivity
     }

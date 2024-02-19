@@ -17,22 +17,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun EmptyState(firstLine: String, secondLine: String, modifier: Modifier = Modifier, loadingIcon: Boolean = false) {
-
+fun EmptyState(
+    firstLine: String,
+    secondLine: String,
+    modifier: Modifier = Modifier,
+    loadingIcon: Boolean = false
+) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .fillMaxSize()
-            .graphicsLayer(alpha = 0.4f)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxSize()
+                .graphicsLayer(alpha = 0.4f)
+                .verticalScroll(rememberScrollState())
     ) {
         Icon(
             imageVector = Icons.Outlined.Info,
             contentDescription = null,
-            modifier = Modifier
-                .size(100.dp)
-                .padding(bottom = 20.dp)
+            modifier =
+                Modifier
+                    .size(100.dp)
+                    .padding(bottom = 20.dp)
         )
         Text(
             firstLine,
@@ -52,19 +58,25 @@ fun EmptyState(firstLine: String, secondLine: String, modifier: Modifier = Modif
 }
 
 @Composable
-fun EmptyStateNotScrollable(firstLine: String, secondLine: String, modifier: Modifier = Modifier) {
+fun EmptyStateNotScrollable(
+    firstLine: String,
+    secondLine: String,
+    modifier: Modifier = Modifier
+) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .graphicsLayer(alpha = 0.4f)
+        modifier =
+            modifier
+                .graphicsLayer(alpha = 0.4f)
     ) {
         Icon(
             imageVector = Icons.Outlined.Info,
             contentDescription = null,
-            modifier = Modifier
-                .size(100.dp)
-                .padding(bottom = 20.dp)
+            modifier =
+                Modifier
+                    .size(100.dp)
+                    .padding(bottom = 20.dp)
         )
         Text(
             firstLine,

@@ -6,10 +6,9 @@ import org.junit.jupiter.api.Test
 import java.math.BigInteger
 
 class KeyTest {
-
     @Test
     fun generate_schnorr_nonce() {
-        val nonce = TaprootUtil.generate_schnorr_nonce(ECKey().privKeyBytes)
+        val nonce = TaprootUtil.generateSchnorrNonce(ECKey().privKeyBytes)
 
         val expected = BigInteger.ONE
         val actual = Schnorr.jacobi(nonce.second.affineYCoord.toBigInteger())

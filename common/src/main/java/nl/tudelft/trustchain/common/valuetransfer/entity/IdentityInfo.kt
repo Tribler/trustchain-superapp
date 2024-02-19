@@ -9,28 +9,26 @@ data class IdentityInfo(
      * The given names of the identity
      */
     val initials: String?,
-
     /**
      * The surname of the identity
      */
     val surname: String?,
-
     /**
      * The verification status of the identity
      */
     val isVerified: Boolean,
-
     /**
      * The hash of the image of the identity
      */
     val imageHash: String?
 ) : Serializable {
-    fun serialize(): ByteArray = JSONObject().apply {
-        put(IDENTITY_INFO_INITIALS, initials)
-        put(IDENTITY_INFO_SURNAME, surname)
-        put(IDENTITY_INFO_VERIFIED, isVerified)
-        put(IDENTITY_INFO_IMAGE_HASH, imageHash)
-    }.toString().toByteArray()
+    fun serialize(): ByteArray =
+        JSONObject().apply {
+            put(IDENTITY_INFO_INITIALS, initials)
+            put(IDENTITY_INFO_SURNAME, surname)
+            put(IDENTITY_INFO_VERIFIED, isVerified)
+            put(IDENTITY_INFO_IMAGE_HASH, imageHash)
+        }.toString().toByteArray()
 
     companion object : Deserializable<IdentityInfo> {
         private const val IDENTITY_INFO_INITIALS = "identity_info_initials"
@@ -38,7 +36,10 @@ data class IdentityInfo(
         private const val IDENTITY_INFO_VERIFIED = "identity_info_verified"
         private const val IDENTITY_INFO_IMAGE_HASH = "identity_info_image_hash"
 
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<IdentityInfo, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<IdentityInfo, Int> {
             val offsetBuffer = buffer.copyOfRange(offset, buffer.size)
             val json = JSONObject(offsetBuffer.decodeToString())
 

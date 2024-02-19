@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.profile
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,12 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.ui.components.EmptyState
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MyProfileScreen(navController: NavController, profileScreenViewModel: MyProfileScreenViewModel) {
-
+fun MyProfileScreen(
+    navController: NavController,
+    profileScreenViewModel: MyProfileScreenViewModel
+) {
     val profile = profileScreenViewModel.profile.collectAsState()
 
     profile.value?.let {

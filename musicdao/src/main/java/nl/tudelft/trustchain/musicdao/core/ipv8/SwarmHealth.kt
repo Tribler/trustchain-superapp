@@ -8,10 +8,12 @@ import java.util.*
  * identified by its infohash
  */
 class SwarmHealth(
-    val infoHash: String, // String representation of torrent info hash
+    // String representation of torrent info hash
+    val infoHash: String,
     val numPeers: UInt,
     val numSeeds: UInt,
-    val timestamp: ULong = Date().time.toULong() // Timestamp is saved as Date.getTime format
+    // Timestamp is saved as Date.getTime format
+    val timestamp: ULong = Date().time.toULong()
 ) :
     Comparable<SwarmHealth>, Serializable {
     override fun compareTo(other: SwarmHealth): Int {
@@ -48,7 +50,10 @@ class SwarmHealth(
     }
 
     companion object Deserializer : Deserializable<SwarmHealth> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<SwarmHealth, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<SwarmHealth, Int> {
             var localOffset = 0
             val (infoHash, infoHashSize) = deserializeVarLen(buffer, offset + localOffset)
             localOffset += infoHashSize
@@ -73,7 +78,10 @@ class SwarmHealth(
         /**
          * Pick the best SwarmHealth item to keep; by comparing two objects
          */
-        fun pickBest(shLocal: SwarmHealth?, shRemote: SwarmHealth?): SwarmHealth? {
+        fun pickBest(
+            shLocal: SwarmHealth?,
+            shRemote: SwarmHealth?
+        ): SwarmHealth? {
             if (shLocal != null && shRemote != null) {
                 return if (shLocal > shRemote) {
                     shLocal

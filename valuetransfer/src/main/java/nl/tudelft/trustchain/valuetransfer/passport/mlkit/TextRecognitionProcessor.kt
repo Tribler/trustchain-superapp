@@ -31,7 +31,9 @@ class TextRecognitionProcessor(
     private lateinit var scannedTextBuffer: String
     private val shouldThrottle = AtomicBoolean(false)
 
-    fun stop() { textRecognizer.close() }
+    fun stop() {
+        textRecognizer.close()
+    }
 
     @Throws(MlKitException::class)
     fun process(
@@ -43,13 +45,14 @@ class TextRecognitionProcessor(
         if (shouldThrottle.get()) {
             return
         }
-        val inputImage = InputImage.fromByteBuffer(
-            data,
-            frameMetadata.width,
-            frameMetadata.height,
-            frameMetadata.rotation,
-            InputImage.IMAGE_FORMAT_NV21
-        )
+        val inputImage =
+            InputImage.fromByteBuffer(
+                data,
+                frameMetadata.width,
+                frameMetadata.height,
+                frameMetadata.rotation,
+                InputImage.IMAGE_FORMAT_NV21
+            )
         detectInVisionImage(inputImage, frameMetadata, graphicOverlay, feedbackText)
     }
 
@@ -85,148 +88,231 @@ class TextRecognitionProcessor(
         resultListener.onError(e)
     }
 
-    private fun parseMRZStringForType(type: String, lines: List<String>): String? {
+    private fun parseMRZStringForType(
+        type: String,
+        lines: List<String>
+    ): String? {
         return when (type) {
-            TYPE_DOCUMENT_CODE -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[0].substring(0, 1)
+            TYPE_DOCUMENT_CODE ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[0].substring(0, 1)
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[0].substring(0, 1)
+                    }
+
+                    else -> null
                 }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[0].substring(0, 1)
+
+            TYPE_DOCUMENT_NUMBER ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[0].substring(5, 14).replace("O", "0")
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1].substring(0, 9).replace("O", "0")
+                    }
+
+                    else -> null
                 }
-                else -> null
-            }
-            TYPE_DOCUMENT_NUMBER -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[0].substring(5, 14).replace("O", "0")
+
+            TYPE_PERSONAL_NUMBER ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[0].substring(15, 24).replace("O", "0").replace("<", "").trim()
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1].substring(28, 37).replace("O", "0").replace("<", "")
+                    }
+
+                    else -> null
                 }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1].substring(0, 9).replace("O", "0")
+
+            TYPE_DATE_OF_BIRTH ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[1].substring(0, 6)
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1].substring(13, 19)
+                    }
+
+                    else -> null
                 }
-                else -> null
-            }
-            TYPE_PERSONAL_NUMBER -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[0].substring(15, 24).replace("O", "0").replace("<", "").trim()
+
+            TYPE_DATE_OF_EXPIRY ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[1].substring(8, 14)
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1].substring(21, 27)
+                    }
+
+                    else -> null
                 }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1].substring(28, 37).replace("O", "0").replace("<", "")
+
+            TYPE_ISSUER ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[0].substring(2, 5)
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[0].substring(2, 5)
+                    }
+
+                    else -> null
                 }
-                else -> null
-            }
-            TYPE_DATE_OF_BIRTH -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[1].substring(0, 6)
+
+            TYPE_NATIONALITY ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[1].substring(15, 18)
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1].substring(10, 13)
+                    }
+
+                    else -> null
                 }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1].substring(13, 19)
+
+            TYPE_GENDER ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[1].substring(7, 8)
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1].substring(20, 21)
+                    }
+
+                    else -> null
                 }
-                else -> null
-            }
-            TYPE_DATE_OF_EXPIRY -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[1].substring(8, 14)
+
+            TYPE_GIVEN_NAMES ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[2].split("<<")[1].replace("<", " ").trim()
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[0].substring(5).split("<<")[1].replace("<", " ").trim()
+                    }
+
+                    else -> null
                 }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1].substring(21, 27)
+
+            TYPE_SURNAME ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[2].split("<<")[0].replace("<", " ")
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[0].substring(5).split("<<")[0].replace("<", " ")
+                    }
+
+                    else -> null
                 }
-                else -> null
-            }
-            TYPE_ISSUER -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[0].substring(2, 5)
+
+            TYPE_COMBINED ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD ->
+                        lines[0].substring(
+                            5,
+                            30
+                        ).replace("O", "0") + lines[1].substring(0, 7) +
+                            lines[1].substring(
+                                8,
+                                15
+                            ) + lines[1].substring(18, 29)
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT ->
+                        lines[1].substring(
+                            0,
+                            10
+                        ).replace("O", "0") + lines[1].substring(13, 20) +
+                            lines[1].substring(
+                                21,
+                                43
+                            )
+
+                    else -> null
                 }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[0].substring(2, 5)
+
+            TYPE_CHECK_DIGIT_DOCUMENT_NUMBER ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[0][14].toString()
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1][9].toString()
+                    }
+
+                    else -> null
                 }
-                else -> null
-            }
-            TYPE_NATIONALITY -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[1].substring(15, 18)
+
+            TYPE_CHECK_DIGIT_DATE_OF_BIRTH ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[1][6].toString()
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1][19].toString()
+                    }
+
+                    else -> null
                 }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1].substring(10, 13)
+
+            TYPE_CHECK_DIGIT_DATE_OF_EXPIRY ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[1][14].toString()
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1][27].toString()
+                    }
+
+                    else -> null
                 }
-                else -> null
-            }
-            TYPE_GENDER -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[1].substring(7, 8)
+
+            TYPE_CHECK_DIGIT_PERSONAL_NUMBER ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[0][29].toString()
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1][42].toString()
+                    }
+
+                    else -> null
                 }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1].substring(20, 21)
+
+            TYPE_CHECK_DIGIT_COMBINED ->
+                when (documentType) {
+                    PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
+                        lines[1][29].toString()
+                    }
+
+                    PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
+                        lines[1][43].toString()
+                    }
+
+                    else -> null
                 }
-                else -> null
-            }
-            TYPE_GIVEN_NAMES -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[2].split("<<")[1].replace("<", " ").trim()
-                }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[0].substring(5).split("<<")[1].replace("<", " ").trim()
-                }
-                else -> null
-            }
-            TYPE_SURNAME -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[2].split("<<")[0].replace("<", " ")
-                }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[0].substring(5).split("<<")[0].replace("<", " ")
-                }
-                else -> null
-            }
-            TYPE_COMBINED -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> lines[0].substring(5, 30).replace("O", "0") + lines[1].substring(0, 7) + lines[1].substring(8, 15) + lines[1].substring(18, 29)
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> lines[1].substring(0, 10).replace("O", "0") + lines[1].substring(13, 20) + lines[1].substring(21, 43)
-                else -> null
-            }
-            TYPE_CHECK_DIGIT_DOCUMENT_NUMBER -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[0][14].toString()
-                }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1][9].toString()
-                }
-                else -> null
-            }
-            TYPE_CHECK_DIGIT_DATE_OF_BIRTH -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[1][6].toString()
-                }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1][19].toString()
-                }
-                else -> null
-            }
-            TYPE_CHECK_DIGIT_DATE_OF_EXPIRY -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[1][14].toString()
-                }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1][27].toString()
-                }
-                else -> null
-            }
-            TYPE_CHECK_DIGIT_PERSONAL_NUMBER -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[0][29].toString()
-                }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1][42].toString()
-                }
-                else -> null
-            }
-            TYPE_CHECK_DIGIT_COMBINED -> when (documentType) {
-                PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-                    lines[1][29].toString()
-                }
-                PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1][43].toString()
-                }
-                else -> null
-            }
+
             else -> null
         }
     }
@@ -241,53 +327,63 @@ class TextRecognitionProcessor(
 
         Log.d("VTLOG", "TEST SCANNED TEXT $documentType")
 
-        val matchers: Map<String, List<Matcher>> = mapOf(
-            PassportHandler.DOCUMENT_TYPE_ID_CARD to listOf(
-                PATTERN_ID_LINE_1.matcher(scannedTextBuffer),
-                PATTERN_ID_LINE_2.matcher(scannedTextBuffer),
-                PATTERN_ID_LINE_3.matcher(scannedTextBuffer)
-            ),
-            PassportHandler.DOCUMENT_TYPE_PASSPORT to listOf(
-                PATTERN_PASSPORT_LINE_1.matcher(scannedTextBuffer),
-                PATTERN_PASSPORT_LINE_2.matcher(scannedTextBuffer)
+        val matchers: Map<String, List<Matcher>> =
+            mapOf(
+                PassportHandler.DOCUMENT_TYPE_ID_CARD to
+                    listOf(
+                        PATTERN_ID_LINE_1.matcher(scannedTextBuffer),
+                        PATTERN_ID_LINE_2.matcher(scannedTextBuffer),
+                        PATTERN_ID_LINE_3.matcher(scannedTextBuffer)
+                    ),
+                PassportHandler.DOCUMENT_TYPE_PASSPORT to
+                    listOf(
+                        PATTERN_PASSPORT_LINE_1.matcher(scannedTextBuffer),
+                        PATTERN_PASSPORT_LINE_2.matcher(scannedTextBuffer)
+                    )
             )
-        )
 
         if (matchers[documentType]!!.all { it.find() }) {
             graphicOverlay.add(textGraphic)
 
-            val lines = matchers[documentType]!!.map {
-                it.group(0) ?: return
-            }
+            val lines =
+                matchers[documentType]!!.map {
+                    it.group(0) ?: return
+                }
 
-            val checkDigits: Map<String, Int> = try {
-                mapOf(
-                    TYPE_DOCUMENT_NUMBER to parseMRZStringForType(
-                        TYPE_CHECK_DIGIT_DOCUMENT_NUMBER,
-                        lines
-                    )!!.toInt(),
-                    TYPE_PERSONAL_NUMBER to parseMRZStringForType(
-                        TYPE_CHECK_DIGIT_PERSONAL_NUMBER,
-                        lines
-                    )!!.toInt(),
-                    TYPE_DATE_OF_BIRTH to parseMRZStringForType(
-                        TYPE_CHECK_DIGIT_DATE_OF_BIRTH,
-                        lines
-                    )!!.toInt(),
-                    TYPE_DATE_OF_EXPIRY to parseMRZStringForType(
-                        TYPE_CHECK_DIGIT_DATE_OF_EXPIRY,
-                        lines
-                    )!!.toInt(),
-                    TYPE_COMBINED to parseMRZStringForType(
-                        TYPE_CHECK_DIGIT_COMBINED,
-                        lines
-                    )!!.toInt(),
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Log.d("VTLOG", "CHECK DIGIT IS NOT A DIGIT")
-                return
-            }
+            val checkDigits: Map<String, Int> =
+                try {
+                    mapOf(
+                        TYPE_DOCUMENT_NUMBER to
+                            parseMRZStringForType(
+                                TYPE_CHECK_DIGIT_DOCUMENT_NUMBER,
+                                lines
+                            )!!.toInt(),
+                        TYPE_PERSONAL_NUMBER to
+                            parseMRZStringForType(
+                                TYPE_CHECK_DIGIT_PERSONAL_NUMBER,
+                                lines
+                            )!!.toInt(),
+                        TYPE_DATE_OF_BIRTH to
+                            parseMRZStringForType(
+                                TYPE_CHECK_DIGIT_DATE_OF_BIRTH,
+                                lines
+                            )!!.toInt(),
+                        TYPE_DATE_OF_EXPIRY to
+                            parseMRZStringForType(
+                                TYPE_CHECK_DIGIT_DATE_OF_EXPIRY,
+                                lines
+                            )!!.toInt(),
+                        TYPE_COMBINED to
+                            parseMRZStringForType(
+                                TYPE_CHECK_DIGIT_COMBINED,
+                                lines
+                            )!!.toInt(),
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Log.d("VTLOG", "CHECK DIGIT IS NOT A DIGIT")
+                    return
+                }
 
             checkDigits.forEach { (s, i) ->
                 Log.d("VTLOG", "CHECK DIGIT FOR $s  = $i")
@@ -298,19 +394,25 @@ class TextRecognitionProcessor(
             val dateOfExpiry = parseMRZStringForType(TYPE_DATE_OF_EXPIRY, lines) ?: return
 
             if (!digitValidation(documentNumber, checkDigits[TYPE_DOCUMENT_NUMBER]!!)) {
-                Log.d("VTLOG", "DOCUMENT NUMBER CHECK DIGIT FAILS: ${checkDigits[TYPE_DOCUMENT_NUMBER]}")
+                Log.d(
+                    "VTLOG",
+                    "DOCUMENT NUMBER CHECK DIGIT FAILS: ${checkDigits[TYPE_DOCUMENT_NUMBER]}"
+                )
 
-                feedbackText.text = activity.resources.getString(R.string.text_passport_error_invalid_check_digit_doc_nr)
+                feedbackText.text =
+                    activity.resources.getString(R.string.text_passport_error_invalid_check_digit_doc_nr)
                 return
             }
             if (!digitValidation(dateOfBirth, checkDigits[TYPE_DATE_OF_BIRTH]!!)) {
                 Log.d("VTLOG", "DATE BIRTH CHECK DIGIT FAILS: ${checkDigits[TYPE_DATE_OF_BIRTH]}")
-                feedbackText.text = activity.resources.getString(R.string.text_passport_error_invalid_check_digit_date_birth)
+                feedbackText.text =
+                    activity.resources.getString(R.string.text_passport_error_invalid_check_digit_date_birth)
                 return
             }
             if (!digitValidation(dateOfExpiry, checkDigits[TYPE_DATE_OF_EXPIRY]!!)) {
                 Log.d("VTLOG", "DATE EXPIRY CHECK DIGIT FAILS: ${checkDigits[TYPE_DATE_OF_EXPIRY]}")
-                feedbackText.text = activity.resources.getString(R.string.text_passport_error_invalid_check_digit_date_expiry)
+                feedbackText.text =
+                    activity.resources.getString(R.string.text_passport_error_invalid_check_digit_date_expiry)
                 return
             }
 
@@ -330,6 +432,7 @@ class TextRecognitionProcessor(
                         dateOfExpiry
                     )
                 }
+
                 else -> {
                     val documentCode = parseMRZStringForType(TYPE_DOCUMENT_CODE, lines) ?: return
                     val issuer = parseMRZStringForType(TYPE_ISSUER, lines) ?: return
@@ -342,11 +445,13 @@ class TextRecognitionProcessor(
                     val combined = parseMRZStringForType(TYPE_COMBINED, lines) ?: return
 
                     if (!digitValidation(personalNumber, checkDigits[TYPE_PERSONAL_NUMBER]!!)) {
-                        feedbackText.text = activity.resources.getString(R.string.text_passport_error_invalid_check_digit_personal_nr)
+                        feedbackText.text =
+                            activity.resources.getString(R.string.text_passport_error_invalid_check_digit_personal_nr)
                         return
                     }
                     if (!digitValidation(combined, checkDigits[TYPE_COMBINED]!!)) {
-                        feedbackText.text = activity.resources.getString(R.string.text_passport_error_invalid_check_digit_combined)
+                        feedbackText.text =
+                            activity.resources.getString(R.string.text_passport_error_invalid_check_digit_combined)
                         return
                     }
 
@@ -394,7 +499,12 @@ class TextRecognitionProcessor(
         detectInImage(image)
             .addOnSuccessListener { results ->
                 shouldThrottle.set(false)
-                this@TextRecognitionProcessor.onSuccess(results, metadata, graphicOverlay, feedbackText)
+                this@TextRecognitionProcessor.onSuccess(
+                    results,
+                    metadata,
+                    graphicOverlay,
+                    feedbackText
+                )
             }
             .addOnFailureListener { e ->
                 shouldThrottle.set(false)
@@ -491,15 +601,26 @@ class TextRecognitionProcessor(
 
     interface ResultListener {
         fun onSuccess(mrzInfo: MRZInfo?)
+
         fun onError(exp: Exception?)
     }
 
+    @Suppress("ktlint:standard:max-line-length")
     companion object {
-        val PATTERN_ID_LINE_1 = Pattern.compile("([A|C|I][A-Z<])([A-Z<]{3})([A-Z0-9<]{9})([0-9<])([A-Z0-9<]{15})")
-        val PATTERN_ID_LINE_2 = Pattern.compile("([0-9]{6})([0-9])([M|F|<])([0-9]{6})([0-9])([A-Z<]{3})([A-Z0-9<]{11})([0-9])")
-        val PATTERN_ID_LINE_3 = Pattern.compile("([A-Z]{1,30})([<[A-Z]{0,30}]{0,30})(<<)([A-Z]{1,30})(<[A-Z]{0,30})(<{0,30})")
-        val PATTERN_PASSPORT_LINE_1 = Pattern.compile("(P[A-Z<])([A-Z<]{3})([A-Z]{1,30})([<[A-Z]{0,30}]{0,30})(<<)([A-Z]{1,30})(<[A-Z]{0,30})(<{0,30})")
-        val PATTERN_PASSPORT_LINE_2 = Pattern.compile("([A-Z0-9<]{9})([0-9]{1})([A-Z<]{3})([0-9]{6})([0-9]{1})([M|F|X|<]{1})([0-9]{6})([0-9]{1})([A-Z0-9<]{14})([0-9]{1})([0-9]{1})")
+        val PATTERN_ID_LINE_1 =
+            Pattern.compile("([A|C|I][A-Z<])([A-Z<]{3})([A-Z0-9<]{9})([0-9<])([A-Z0-9<]{15})")
+        val PATTERN_ID_LINE_2 =
+            Pattern.compile("([0-9]{6})([0-9])([M|F|<])([0-9]{6})([0-9])([A-Z<]{3})([A-Z0-9<]{11})([0-9])")
+        val PATTERN_ID_LINE_3 =
+            Pattern.compile("([A-Z]{1,30})([<[A-Z]{0,30}]{0,30})(<<)([A-Z]{1,30})(<[A-Z]{0,30})(<{0,30})")
+        val PATTERN_PASSPORT_LINE_1 =
+            Pattern.compile(
+                "(P[A-Z<])([A-Z<]{3})([A-Z]{1,30})([<[A-Z]{0,30}]{0,30})(<<)([A-Z]{1,30})(<[A-Z]{0,30})(<{0,30})"
+            )
+        val PATTERN_PASSPORT_LINE_2 =
+            Pattern.compile(
+                "([A-Z0-9<]{9})([0-9]{1})([A-Z<]{3})([0-9]{6})([0-9]{1})([M|F|X|<]{1})([0-9]{6})([0-9]{1})([A-Z0-9<]{14})([0-9]{1})([0-9]{1})"
+            )
 
         const val TYPE_DOCUMENT_CODE = "document_code"
         const val TYPE_DOCUMENT_NUMBER = "document_number"
@@ -518,19 +639,23 @@ class TextRecognitionProcessor(
         const val TYPE_CHECK_DIGIT_PERSONAL_NUMBER = "check_digit_personal_number"
         const val TYPE_CHECK_DIGIT_COMBINED = "check_digit_combined"
 
-        fun digitValidation(string: String, checkDigit: Int): Boolean {
+        fun digitValidation(
+            string: String,
+            checkDigit: Int
+        ): Boolean {
             val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             val digitWeights: Array<Int> = arrayOf(7, 3, 1)
 
             var sum = 0
 
             string.forEachIndexed { index, char ->
-                val value = when {
-                    char.equals("<") -> 0
-                    alphabet.contains(char) -> (alphabet.indexOf(char) + 10)
-                    char.isDigit() -> Character.getNumericValue(char)
-                    else -> 0
-                }
+                val value =
+                    when {
+                        char.equals("<") -> 0
+                        alphabet.contains(char) -> (alphabet.indexOf(char) + 10)
+                        char.isDigit() -> Character.getNumericValue(char)
+                        else -> 0
+                    }
                 sum += value * digitWeights[index % 3]
             }
 

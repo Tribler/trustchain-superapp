@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.home
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +20,6 @@ import nl.tudelft.trustchain.musicdao.ui.screens.search.SearchScreenViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

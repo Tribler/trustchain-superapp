@@ -8,19 +8,19 @@ import org.junit.jupiter.api.Test
 
 import java.math.BigInteger
 
+@Suppress("ktlint:standard:max-line-length")
 class MuSigTest {
-
     @Test
     fun aggregate_musig_signatures() {
         val nonceKey1 = ECKey.fromPrivate(BigInteger("514451593258031455215956018794650590333274290798379324717376700610851698631"))
         val nonceKey2 = ECKey.fromPrivate(BigInteger("11956400277919736063286645919884525832160975522703242034429953595835464801432"))
-        val R_agg = MuSig.aggregate_schnorr_nonces(listOf(nonceKey1, nonceKey2)).first
+        val rAgg = MuSig.aggregateSchnorrNonces(listOf(nonceKey1, nonceKey2)).first
 
         val s1 = BigInteger("87702316580188192134768828685038019069684190982614451361055363232288478978335")
         val s2 = BigInteger("70205003187379344988121702708730152167489459605852932449770410784261163634250")
 
         val expected = "7bdd007a2ada0fbf18fe8ea7858398e2775195db1a2cef127ef38eef861027bf5d1c6031344b0127f0ebc54b27eb1b7a1cd34229e86be03a2e521ccd92066e28"
-        val actual = MuSig.aggregate_musig_signatures(listOf(s1, s2), R_agg).toHex()
+        val actual = MuSig.aggregateMusigSignatures(listOf(s1, s2), rAgg).toHex()
 
         assertEquals(expected, actual)
     }
@@ -29,17 +29,17 @@ class MuSigTest {
     fun sign_musig() {
         val key1 = ECKey.fromPrivate(BigInteger("88218786999700320424912157840922001183470238663577897435520060565802125439712"))
         val key2 = ECKey.fromPrivate(BigInteger("11756621930195768229168784074199362003209438395325908648574429387730312779458"))
-        val agg_pubkey = MuSig.generate_musig_key(listOf(key1, key2)).second
+        val aggPubKey = MuSig.generateMusigKey(listOf(key1, key2)).second
 
-        val key1_c = ECKey.fromPrivate(BigInteger("1831054192583883058098689099279726084283766354549572339919052854814308263405"))
+        val key1C = ECKey.fromPrivate(BigInteger("1831054192583883058098689099279726084283766354549572339919052854814308263405"))
         val nonceKey1 = ECKey.fromPrivate(BigInteger("514451593258031455215956018794650590333274290798379324717376700610851698631"))
         val nonceKey2 = ECKey.fromPrivate(BigInteger("11956400277919736063286645919884525832160975522703242034429953595835464801432"))
-        val R_agg = MuSig.aggregate_schnorr_nonces(listOf(nonceKey1, nonceKey2)).first
+        val rAgg = MuSig.aggregateSchnorrNonces(listOf(nonceKey1, nonceKey2)).first
 
-        val sighash_musig = "594dc4e841a628509c9467fdcb7361de7b7bba490bedd601d18d4ba7d752888b".hexToBytes()
+        val sigHashMusig = "594dc4e841a628509c9467fdcb7361de7b7bba490bedd601d18d4ba7d752888b".hexToBytes()
 
         val expected = BigInteger("87702316580188192134768828685038019069684190982614451361055363232288478978335")
-        val actual = MuSig.sign_musig(key1_c, nonceKey1, R_agg, agg_pubkey, sighash_musig)
+        val actual = MuSig.signMusig(key1C, nonceKey1, rAgg, aggPubKey, sigHashMusig)
 
         assertEquals(expected, actual)
     }
@@ -50,7 +50,7 @@ class MuSigTest {
         val key2 = ECKey.fromPrivate(BigInteger("11756621930195768229168784074199362003209438395325908648574429387730312779458"))
 
         val expected = "023dd5fc3c1766d0a73466a5997da83efcc529107c9ecd0c56e2a28519f0eb3104"
-        val (cMap, actual) = MuSig.generate_musig_key(listOf(key1, key2))
+        val (cMap, actual) = MuSig.generateMusigKey(listOf(key1, key2))
 
         assertEquals(expected, actual.getEncoded(true).toHex())
 
@@ -72,7 +72,7 @@ class MuSigTest {
         val pubkeyDataMuSig = actual.getEncoded(true)
 
         val expectedAddress = "bcrt1pqq7atlpuzandpfe5v6jejldg8m7v22gs0j0v6rzku23g2x0savcsgwp82mv"
-        val actualAddress = TaprootUtil.key_to_witness(pubkeyDataMuSig)
+        val actualAddress = TaprootUtil.keyToWitness(pubkeyDataMuSig)
 
         assertEquals(expectedAddress, actualAddress)
     }
@@ -83,7 +83,7 @@ class MuSigTest {
         var key2 = ECKey.fromPrivate(BigInteger("08d538794fcc7766ecc1e0fd9c1642e5cd5147c67807cce4d46144db5fcc8534", 16))
 
         var expected = "03326be2da46e2af92df7df4affacc9afdd8b0fb80e7958da65da62b6fc67883f4"
-        var actual = MuSig.aggregate_schnorr_nonces(listOf(key1, key2))
+        var actual = MuSig.aggregateSchnorrNonces(listOf(key1, key2))
 
         assertEquals(expected, actual.first.getEncoded(true).toHex())
         assertTrue(actual.second)
@@ -92,7 +92,7 @@ class MuSigTest {
         key2 = ECKey.fromPrivate(BigInteger("1a6f152e82687bd327d65dafb44c84dad1bcc605c9a128231ce0725305ffdc98", 16))
 
         expected = "037bdd007a2ada0fbf18fe8ea7858398e2775195db1a2cef127ef38eef861027bf"
-        actual = MuSig.aggregate_schnorr_nonces(listOf(key1, key2))
+        actual = MuSig.aggregateSchnorrNonces(listOf(key1, key2))
 
         assertEquals(expected, actual.first.getEncoded(true).toHex())
         assertFalse(actual.second)

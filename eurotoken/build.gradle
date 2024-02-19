@@ -1,27 +1,39 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'app.cash.sqldelight'
+apply plugin: 'org.jlleitschuh.gradle.ktlint'
 
-apply plugin: 'com.squareup.sqldelight'
-
+ktlint {
+    version = "$ktlint_version"
+    android = true
+    outputToConsole = true
+    ignoreFailures = false
+    verbose = true
+}
 
 sqldelight {
-    Database {
-        packageName = "nl.tudelft.eurotoken.sqldelight"
-        sourceFolders = ["sqldelight"]
-        schemaOutputDirectory = file("src/main/sqldelight/databases")
+    databases {
+        Database {
+            packageName = "nl.tudelft.eurotoken.sqldelight"
+            srcDirs = files(["src/main/sqldelight"])
+            schemaOutputDirectory = file("src/main/sqldelight/databases")
+        }
     }
 }
 
 android {
-    compileSdkVersion 33
-
     defaultConfig {
-        minSdkVersion 24
-        targetSdkVersion 33
+        minSdkVersion 26
+        compileSdk 34
+        targetSdkVersion 34
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     buildTypes {
@@ -34,10 +46,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+
     namespace 'nl.tudelft.trustchain.eurotoken'
 }
 

@@ -17,7 +17,7 @@ class TaprootUtil {
          * @param program program
          * @return
          */
-        fun key_to_witness(pubKeyData: ByteArray): String {
+        fun keyToWitness(pubKeyData: ByteArray): String {
             val program = byteArrayOf(pubKeyData[0] and 1.toByte()).plus(pubKeyData.drop(1))
 
             assert(2 <= program.size && program.size <= 40)
@@ -31,16 +31,16 @@ class TaprootUtil {
          * See https://github.com/bitcoinops/bips/blob/v0.1/bip-schnorr.mediawiki#Signing.
          * This implementation ensures the y-coordinate of the nonce point is a quadratic residue modulo the field size.
          */
-        fun generate_schnorr_nonce(privateKey: ByteArray): Pair<ECKey, ECPoint> {
-            val nonce_key = ECKey.fromPrivate(privateKey)
-            var R = nonce_key.pubKeyPoint
-            R = R.normalize()
+        fun generateSchnorrNonce(privateKey: ByteArray): Pair<ECKey, ECPoint> {
+            val nonceKey = ECKey.fromPrivate(privateKey)
+            var r = nonceKey.pubKeyPoint
+            r = r.normalize()
 
-            if (Schnorr.jacobi(R.affineYCoord.toBigInteger()) != BigInteger.ONE) {
-                R = R.negate()
+            if (Schnorr.jacobi(r.affineYCoord.toBigInteger()) != BigInteger.ONE) {
+                r = r.negate()
             }
 
-            return Pair(nonce_key, R)
+            return Pair(nonceKey, r)
         }
     }
 }

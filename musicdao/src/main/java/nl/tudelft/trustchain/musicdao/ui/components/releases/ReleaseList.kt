@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.components.releases
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,7 +19,6 @@ import nl.tudelft.trustchain.musicdao.core.repositories.model.Album
 import nl.tudelft.trustchain.musicdao.ui.components.ReleaseCover
 import nl.tudelft.trustchain.musicdao.ui.navigation.Screen
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable
@@ -46,7 +43,6 @@ fun ReleaseList(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable
@@ -62,11 +58,13 @@ fun NonLazyReleaseList(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable
-fun ReleaseListItem(album: Album, navController: NavController) {
+fun ReleaseListItem(
+    album: Album,
+    navController: NavController
+) {
     ListItem(
         text = { Text(text = album.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         secondaryText = {
@@ -81,10 +79,11 @@ fun ReleaseListItem(album: Album, navController: NavController) {
                         imageVector = Icons.Default.CheckCircle,
                         tint = MaterialTheme.colors.primary,
                         contentDescription = null,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 5.dp)
-                            .size(15.dp)
+                        modifier =
+                            Modifier
+                                .align(Alignment.CenterVertically)
+                                .padding(start = 5.dp)
+                                .size(15.dp)
                     )
                 }
             }
@@ -94,13 +93,14 @@ fun ReleaseListItem(album: Album, navController: NavController) {
                 Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
             }
         },
-        modifier = Modifier.clickable {
-            navController.navigate(
-                Screen.Release.createRoute(
-                    album.id
+        modifier =
+            Modifier.clickable {
+                navController.navigate(
+                    Screen.Release.createRoute(
+                        album.id
+                    )
                 )
-            )
-        },
+            },
         icon = { ReleaseCover(album.cover, modifier = Modifier.size(40.dp)) }
     )
 }

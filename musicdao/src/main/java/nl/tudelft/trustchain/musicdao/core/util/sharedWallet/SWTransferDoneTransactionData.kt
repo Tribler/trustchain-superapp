@@ -17,7 +17,8 @@ data class SWTransferDoneBlockTD(
 )
 
 class SWTransferDoneTransactionData(data: JsonObject) : SWBlockTransactionData(
-    data, CoinCommunity.TRANSFER_FINAL_BLOCK
+    data,
+    CoinCommunity.TRANSFER_FINAL_BLOCK
 ) {
     fun getData(): SWTransferDoneBlockTD {
         return Gson().fromJson(getJsonString(), SWTransferDoneBlockTD::class.java)

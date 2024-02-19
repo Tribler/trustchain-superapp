@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'com.google.gms.google-services'
@@ -27,6 +26,7 @@ ktlint {
     android = true
     outputToConsole = true
     ignoreFailures = false
+    verbose = true
 }
 
 // Generate a version code from git commit count
@@ -36,12 +36,11 @@ static def generateVersionCode() {
 
 
 android {
-    compileSdkVersion 33
-
     defaultConfig {
         applicationId "nl.tudelft.trustchain"
-        minSdkVersion 24
-        targetSdkVersion 33
+        minSdkVersion 26
+        compileSdk 34
+        targetSdkVersion 34
         versionCode generateVersionCode()
         versionName "0.3.3"
 
@@ -59,6 +58,8 @@ android {
 
     sourceSets {
         main {
+            // TODO: Find a way to exclude linux .so
+            // TODO: Reintroduce the jlibtorrent library for linux.
             jniLibs.srcDirs = ['../common/libs']
         }
     }
@@ -69,17 +70,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
     }
 
-    // To inline the bytecode built with JVM target 1.8 into
-    // bytecode that is being built with JVM target 1.6. (e.g. navArgs)
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     buildFeatures {
@@ -91,7 +94,6 @@ android {
         }
     }
 
-    ndkVersion '21.4.7075529'
     namespace 'nl.tudelft.trustchain.app'
 }
 
@@ -189,7 +191,7 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-opt-in=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
-        "-opt-in=kotlin.RequiresOptIn"
+            "-opt-in=kotlin.ExperimentalUnsignedTypes",
+            "-opt-in=kotlin.RequiresOptIn"
     ]
 }

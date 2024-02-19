@@ -47,12 +47,16 @@ fun EditText.showKeyboard(context: Context) {
     inputMethodManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
 }
 
-fun onFocusChange(editText: EditText, context: Context) {
-    editText.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
-        if (!hasFocus) {
-            v.closeKeyboard(context)
+fun onFocusChange(
+    editText: EditText,
+    context: Context
+) {
+    editText.onFocusChangeListener =
+        View.OnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                v.closeKeyboard(context)
+            }
         }
-    }
 }
 
 fun scrollToBottom(recyclerView: RecyclerView) {
@@ -69,7 +73,11 @@ fun scrollToBottom(recyclerView: RecyclerView) {
     }
 }
 
-fun copyToClipboard(context: Context, text: String, label: String) {
+fun copyToClipboard(
+    context: Context,
+    text: String,
+    label: String
+) {
     val clipboard = ContextCompat.getSystemService(context, ClipboardManager::class.java)
     val clip = ClipData.newPlainText(label, text)
     clipboard?.setPrimaryClip(clip)
@@ -83,25 +91,37 @@ fun mapToJSON(attributes: Map<String, String?>): JSONObject {
     return data
 }
 
-fun createBitmap(context: Context, data: String, pColor: Int, bColor: Int): Bitmap {
+fun createBitmap(
+    context: Context,
+    data: String,
+    pColor: Int,
+    bColor: Int
+): Bitmap {
     return QRCodeUtils(context).createQR(data, pColor = pColor, bColor = bColor)!!
 }
 
-fun toggleButton(button: Button, state: Boolean) {
+fun toggleButton(
+    button: Button,
+    state: Boolean
+) {
     button.isEnabled = state
     button.alpha = if (state) 1f else 0.5f
     button.isClickable = state
 }
 
-fun toggleButton(button: ImageButton, state: Boolean) {
+fun toggleButton(
+    button: ImageButton,
+    state: Boolean
+) {
     button.isEnabled = state
     button.alpha = if (state) 1f else 0.5f
     button.isClickable = state
 }
 
 fun formatBalance(amount: Long): String {
-    return (amount / 100).toString() + "," + (abs(amount) % 100).toString()
-        .padStart(2, '0')
+    return (amount / 100).toString() + "," +
+        (abs(amount) % 100).toString()
+            .padStart(2, '0')
 }
 
 fun formatAmount(amount: String): Long {
@@ -121,7 +141,6 @@ fun getAmount(amount: String): Long {
 }
 
 fun EditText.decimalLimiter(string: String): String {
-
     var amount = getAmount(string)
     if (amount == 0L) {
         return "0,00"
@@ -131,38 +150,47 @@ fun EditText.decimalLimiter(string: String): String {
 }
 
 fun EditText.addDecimalLimiter() {
+    this.addTextChangedListener(
+        object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val str = this@addDecimalLimiter.text!!.toString()
+                if (str.isEmpty()) return
+                val str2 = decimalLimiter(str)
 
-    this.addTextChangedListener(object : TextWatcher {
-
-        override fun afterTextChanged(s: Editable?) {
-            val str = this@addDecimalLimiter.text!!.toString()
-            if (str.isEmpty()) return
-            val str2 = decimalLimiter(str)
-
-            if (str2 != str) {
-                this@addDecimalLimiter.setText(str2)
-                val pos = this@addDecimalLimiter.text!!.length
-                this@addDecimalLimiter.setSelection(pos)
+                if (str2 != str) {
+                    this@addDecimalLimiter.setText(str2)
+                    val pos = this@addDecimalLimiter.text!!.length
+                    this@addDecimalLimiter.setSelection(pos)
+                }
             }
-        }
 
-        override fun beforeTextChanged(
-            s: CharSequence?,
-            start: Int,
-            count: Int,
-            after: Int
-        ) {
-        }
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
 
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    })
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) {}
+        }
+    )
 }
 
 /**
  * Identicon generation in Github style avatar. The identicon and its colors is composed of the public key. The dimension must be an odd integer of at least 3.
  */
-fun generateIdenticon(hash: ByteArray, color: Int, resources: Resources, dimension: Int = 5): Bitmap {
-
+fun generateIdenticon(
+    hash: ByteArray,
+    color: Int,
+    resources: Resources,
+    dimension: Int = 5
+): Bitmap {
     val foregroundColor = Color.argb(100, Color.red(color), Color.green(color), Color.blue(color))
     var identiconBitmap = Bitmap.createBitmap(dimension, dimension, Bitmap.Config.ARGB_8888)
 
@@ -181,7 +209,11 @@ fun generateIdenticon(hash: ByteArray, color: Int, resources: Resources, dimensi
     return Bitmap.createScaledBitmap(identiconBitmap, w, h, false)
 }
 
-fun betweenDates(first: Date, second: Date, days: Boolean? = false): Long {
+fun betweenDates(
+    first: Date,
+    second: Date,
+    days: Boolean? = false
+): Long {
     val higher = if (first.time >= second.time) first else second
     val lower = if (first.time < second.time) first else second
 
@@ -194,7 +226,10 @@ fun betweenDates(first: Date, second: Date, days: Boolean? = false): Long {
     return (dayCount / 365)
 }
 
-fun getColorIDFromThemeAttribute(parentActivity: ValueTransferMainActivity, color: Int): Int {
+fun getColorIDFromThemeAttribute(
+    parentActivity: ValueTransferMainActivity,
+    color: Int
+): Int {
     val typedValue = TypedValue()
     parentActivity.theme.resolveAttribute(color, typedValue, true)
     return typedValue.resourceId
@@ -208,11 +243,12 @@ fun DialogFragment.setNavigationBarColor(
     dialog.window!!.navigationBarColor = ContextCompat.getColor(context, getColorIDFromThemeAttribute(parentActivity, R.attr.colorPrimary))
 }
 
-fun Int.dpToPixels(context: Context): Int = TypedValue.applyDimension(
-    TypedValue.COMPLEX_UNIT_DIP,
-    this.toFloat(),
-    context.resources.displayMetrics
-).toInt()
+fun Int.dpToPixels(context: Context): Int =
+    TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        this.toFloat(),
+        context.resources.displayMetrics
+    ).toInt()
 
 fun <R> CoroutineScope.executeAsyncTask(
     onPreExecute: () -> Unit,
@@ -220,13 +256,17 @@ fun <R> CoroutineScope.executeAsyncTask(
     onPostExecute: (R) -> Unit
 ) = launch {
     onPreExecute()
-    val result = withContext(Dispatchers.IO) {
-        doInBackground()
-    }
+    val result =
+        withContext(Dispatchers.IO) {
+            doInBackground()
+        }
     onPostExecute(result)
 }
 
-fun hashString(input: String, algorithm: String): String {
+fun hashString(
+    input: String,
+    algorithm: String
+): String {
     return MessageDigest
         .getInstance(algorithm)
         .digest(input.toByteArray())
@@ -237,7 +277,10 @@ fun String.md5(): String {
     return hashString(this, "MD5")
 }
 
-fun hashBytes(input: ByteArray, algorithm: String): String {
+fun hashBytes(
+    input: ByteArray,
+    algorithm: String
+): String {
     return MessageDigest
         .getInstance(algorithm)
         .digest(input)
@@ -259,21 +302,27 @@ fun String.getInitials(): String {
 
 fun getFormattedSize(size: Double): String {
     return when {
-        size >= 1E6 -> StringBuilder()
-            .append(size.div(1E6).toBigDecimal().setScale(2, RoundingMode.UP).toDouble())
-            .append("MB")
-        size >= 1E3 -> StringBuilder()
-            .append(size.div(1E3).toBigDecimal().setScale(0, RoundingMode.UP))
-            .append("KB")
-        else -> StringBuilder()
-            .append(size.div(1E0).toBigDecimal().setScale(0, RoundingMode.UP))
-            .append("B")
+        size >= 1E6 ->
+            StringBuilder()
+                .append(size.div(1E6).toBigDecimal().setScale(2, RoundingMode.UP).toDouble())
+                .append("MB")
+        size >= 1E3 ->
+            StringBuilder()
+                .append(size.div(1E3).toBigDecimal().setScale(0, RoundingMode.UP))
+                .append("KB")
+        else ->
+            StringBuilder()
+                .append(size.div(1E0).toBigDecimal().setScale(0, RoundingMode.UP))
+                .append("B")
     }.toString()
 }
 
 class DividerItemDecorator(private val divider: Drawable) : RecyclerView.ItemDecoration() {
-
-    override fun onDrawOver(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+    override fun onDrawOver(
+        canvas: Canvas,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
         val dividerLeft = parent.paddingLeft
         val dividerRight = parent.width - parent.paddingRight
         val childCount = parent.childCount

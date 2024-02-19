@@ -15,10 +15,10 @@ dependencies {
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
-    implementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
+    implementation "app.cash.sqldelight:sqlite-driver:$sqldelight_version"
     implementation 'com.mpatric:mp3agic:0.9.1'
     implementation 'com.turn:ttorrent-core:1.5'
-    implementation "com.squareup.sqldelight:coroutines-extensions:$sqldelight_version"
+    implementation "app.cash.sqldelight:coroutines-extensions:$sqldelight_version"
     implementation 'org.bitcoinj:bitcoinj-core:0.15.10'
 
     implementation files('../common/libs/jlibtorrent-' + jlibtorrent_version + '.jar')
@@ -30,6 +30,6 @@ application {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-opt-in=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
+        "-opt-in=kotlin.ExperimentalUnsignedTypes",
     ]
 }

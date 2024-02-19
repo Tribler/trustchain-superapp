@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import kotlinx.android.synthetic.main.fragment_join_network.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -16,6 +15,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
+import nl.tudelft.trustchain.currencyii.databinding.FragmentJoinNetworkBinding
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureBlockTD
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
@@ -27,18 +27,24 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * create an instance of this fragment.
  */
 class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
+    @Suppress("ktlint:standard:property-naming") // False positive
+    private var _binding: FragmentJoinNetworkBinding? = null
+    private val binding get() = _binding!!
+
     private var adapter: SharedWalletListAdapter? = null
     private var fetchedWallets: ArrayList<TrustChainBlock> = ArrayList()
     private var isFetching: Boolean = false
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
         initListeners()
         this.refresh()
     }
 
     private fun initListeners() {
-        join_dao_refresh_swiper.setOnRefreshListener {
+        binding.joinDaoRefreshSwiper.setOnRefreshListener {
             this.refresh()
         }
     }
@@ -53,19 +59,22 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
     private fun enableRefresher() {
         try {
             this.isFetching = true
-            join_dao_refresh_swiper.isRefreshing = true
-        } catch (e: Exception) {
+            binding.joinDaoRefreshSwiper.isRefreshing = true
+        } catch (_: Exception) {
         }
     }
 
     private fun disableRefresher() {
         try {
-            join_dao_refresh_swiper.isRefreshing = false
-        } catch (e: Exception) {
+            binding.joinDaoRefreshSwiper.isRefreshing = false
+        } catch (_: Exception) {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenStarted {
@@ -88,7 +97,7 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                     setAlertText("No DAOs found.")
                 } else {
                     activity?.runOnUiThread {
-                        alert_tf.visibility = View.GONE
+                        binding.alertTf.visibility = View.GONE
                     }
                 }
             }
@@ -99,16 +108,18 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
         // This copy prevents the ConcurrentModificationException
         val walletsCopy = arrayListOf<TrustChainBlock>()
         walletsCopy.addAll(fetchedWallets)
-        val walletIds = walletsCopy.map {
-            SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
-        }
-        val distinctById = newWallets
-            .filter {
-                // Make sure that the trust chain block has the correct type
-                it.type == CoinCommunity.JOIN_BLOCK
-            }.distinctBy {
+        val walletIds =
+            walletsCopy.map {
                 SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
             }
+        val distinctById =
+            newWallets
+                .filter {
+                    // Make sure that the trust chain block has the correct type
+                    it.type == CoinCommunity.JOIN_BLOCK
+                }.distinctBy {
+                    SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
+                }
 
         Log.i("Coin", "${distinctById.size} unique wallets founds. Adding if not present already.")
 
@@ -135,16 +146,17 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 if (!uniqueWallets.contains(wallet)) uniqueWallets.add(wallet)
             }
             // Update the list view with the found shared wallets
-            adapter = SharedWalletListAdapter(
-                this@JoinDAOFragment,
-                uniqueWallets,
-                publicKey,
-                "Click to join",
-                disableOnUserJoined = true
-            )
+            adapter =
+                SharedWalletListAdapter(
+                    this@JoinDAOFragment,
+                    uniqueWallets,
+                    publicKey,
+                    "Click to join",
+                    disableOnUserJoined = true
+                )
 
-            list_view.adapter = adapter
-            list_view.setOnItemClickListener { _, view, position, id ->
+            binding.listView.adapter = adapter
+            binding.listView.setOnItemClickListener { _, view, position, id ->
                 lifecycleScope.launch {
                     withContext(Dispatchers.IO) {
                         Log.i("Coin", "Clicked: $view, $position, $id")
@@ -171,8 +183,9 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 // TODO: Commented this line out, it causes the app to crash
 //                withTimeout(SW_CRAWLING_TIMEOUT_MILLI) {
                 trustchain.crawlChain(peer)
-                val crawlResult = trustchain
-                    .getChainByUser(peer.publicKey.keyToBin())
+                val crawlResult =
+                    trustchain
+                        .getChainByUser(peer.publicKey.keyToBin())
 
                 updateSharedWallets(crawlResult)
 //                }
@@ -193,15 +206,16 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 ?: block
 
         // Add a proposal to trust chain to join a shared wallet
-        val proposeBlockData = try {
-            getCoinCommunity().proposeJoinWallet(
-                mostRecentSWBlock
-            ).getData()
-        } catch (t: Throwable) {
-            Log.e("Coin", "Join wallet proposal failed. ${t.message ?: "No further information"}.")
-            setAlertText(t.message ?: "Unexpected error occurred. Try again")
-            return
-        }
+        val proposeBlockData =
+            try {
+                getCoinCommunity().proposeJoinWallet(
+                    mostRecentSWBlock
+                ).getData()
+            } catch (t: Throwable) {
+                Log.e("Coin", "Join wallet proposal failed. ${t.message ?: "No further information"}.")
+                setAlertText(t.message ?: "Unexpected error occurred. Try again")
+                return
+            }
 
         val context = requireContext()
         // Wait and collect signatures
@@ -236,9 +250,7 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
     /**
      * Collect the signatures of a join proposal
      */
-    private fun collectJoinWalletResponses(
-        blockData: SWSignatureAskBlockTD
-    ): List<SWResponseSignatureBlockTD>? {
+    private fun collectJoinWalletResponses(blockData: SWSignatureAskBlockTD): List<SWResponseSignatureBlockTD>? {
         val responses =
             getCoinCommunity().fetchProposalResponses(
                 blockData.SW_UNIQUE_ID,
@@ -261,8 +273,8 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
 
     private fun setAlertText(text: String) {
         activity?.runOnUiThread {
-            alert_tf?.visibility = View.VISIBLE
-            alert_tf?.text = text
+            binding.alertTf.visibility = View.VISIBLE
+            binding.alertTf.text = text
         }
     }
 
@@ -270,9 +282,14 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_join_network, container, false)
+    ): View {
+        _binding = FragmentJoinNetworkBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {

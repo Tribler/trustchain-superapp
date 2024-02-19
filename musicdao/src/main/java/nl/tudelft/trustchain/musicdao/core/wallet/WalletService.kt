@@ -29,25 +29,27 @@ class WalletService(val config: WalletConfig, private val app: WalletAppKit) {
     }
 
     init {
-        app.setDownloadListener(object : DownloadProgressTracker() {
-            override fun progress(
-                pct: Double,
-                blocksSoFar: Int,
-                date: Date?
-            ) {
-                super.progress(pct, blocksSoFar, date)
-                val percentage = pct.toInt()
-                percentageSynced = percentage
-                Log.i("MusicDao2", "Progress: $percentage")
-            }
+        app.setDownloadListener(
+            object : DownloadProgressTracker() {
+                override fun progress(
+                    pct: Double,
+                    blocksSoFar: Int,
+                    date: Date?
+                ) {
+                    super.progress(pct, blocksSoFar, date)
+                    val percentage = pct.toInt()
+                    percentageSynced = percentage
+                    Log.i("MusicDao2", "Progress: $percentage")
+                }
 
-            override fun doneDownload() {
-                super.doneDownload()
-                percentageSynced = 100
-                Log.d("MusicDao2", "Download Complete!")
-                Log.d("MusicDao2", "Balance: ${app.wallet().balance}")
+                override fun doneDownload() {
+                    super.doneDownload()
+                    percentageSynced = 100
+                    Log.d("MusicDao2", "Download Complete!")
+                    Log.d("MusicDao2", "Balance: ${app.wallet().balance}")
+                }
             }
-        })
+        )
         started = true
     }
 
@@ -64,24 +66,29 @@ class WalletService(val config: WalletConfig, private val app: WalletAppKit) {
      * @param coinsAmount the amount of coins to send, as a string, such as "5", "0.5"
      * @param publicKey the public key address of the cryptocurrency wallet to send the funds to
      */
-    fun sendCoins(publicKey: String, coinsAmount: String): Boolean {
+    fun sendCoins(
+        publicKey: String,
+        coinsAmount: String
+    ): Boolean {
         Log.d("MusicDao", "Wallet (1): sending $coinsAmount to $publicKey")
 
-        val coins: BigDecimal = try {
-            BigDecimal(coinsAmount.toDouble())
-        } catch (e: NumberFormatException) {
-            Log.d("MusicDao", "Wallet (2): failed to parse $coinsAmount")
-            null
-        } ?: return false
+        val coins: BigDecimal =
+            try {
+                BigDecimal(coinsAmount.toDouble())
+            } catch (e: NumberFormatException) {
+                Log.d("MusicDao", "Wallet (2): failed to parse $coinsAmount")
+                null
+            } ?: return false
 
         val satoshiAmount = (coins * SATS_PER_BITCOIN).toLong()
 
-        val targetAddress: Address = try {
-            Address.fromString(config.networkParams, publicKey)
-        } catch (e: Exception) {
-            Log.d("MusicDao", "Wallet (3): failed to parse $publicKey")
-            null
-        } ?: return false
+        val targetAddress: Address =
+            try {
+                Address.fromString(config.networkParams, publicKey)
+            } catch (e: Exception) {
+                Log.d("MusicDao", "Wallet (3): failed to parse $publicKey")
+                null
+            } ?: return false
 
         val sendRequest = SendRequest.to(targetAddress, Coin.valueOf(satoshiAmount))
 

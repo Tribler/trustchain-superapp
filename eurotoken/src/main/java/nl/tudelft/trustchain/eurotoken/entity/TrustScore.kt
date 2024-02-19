@@ -3,9 +3,9 @@ package nl.tudelft.trustchain.eurotoken.entity
 /**
  * The [TrustScore] of a peer by public key.
  */
-data class TrustScore (
-    val pubKey : ByteArray,
-    val trust : Int
+data class TrustScore(
+    val pubKey: ByteArray,
+    val trust: Int
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

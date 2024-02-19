@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.donate
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,13 +16,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.ui.SnackbarHandler
 import nl.tudelft.trustchain.musicdao.ui.components.EmptyState
-import nl.tudelft.trustchain.musicdao.ui.screens.profile_menu.CustomMenuItem
+import nl.tudelft.trustchain.musicdao.ui.screens.profileMenu.CustomMenuItem
 import nl.tudelft.trustchain.musicdao.ui.screens.wallet.BitcoinWalletViewModel
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: String, navController: NavController) {
+fun DonateScreen(
+    bitcoinWalletViewModel: BitcoinWalletViewModel,
+    publicKey: String,
+    navController: NavController
+) {
     val donateScreenViewModel: DonateScreenViewModel = hiltViewModel()
     val artist = donateScreenViewModel.artist.collectAsState()
     val amount = rememberSaveable { mutableStateOf("0.1") }
@@ -36,7 +37,6 @@ fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: Stri
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun send() {
         // Check if enough balance available
         val confirmedBalance = bitcoinWalletViewModel.confirmedBalance.value
@@ -57,7 +57,10 @@ fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: Stri
     }
 
     if (artist.value == null) {
-        EmptyState(firstLine = "404", secondLine = "This artist has not published a key you can donate to.")
+        EmptyState(
+            firstLine = "404",
+            secondLine = "This artist has not published a key you can donate to."
+        )
         return
     }
 
@@ -72,7 +75,11 @@ fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: Stri
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 5.dp)
         )
-        OutlinedTextField(value = amount.value, onValueChange = { amount.value = it }, modifier = Modifier.padding(bottom = 10.dp))
+        OutlinedTextField(
+            value = amount.value,
+            onValueChange = { amount.value = it },
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
         Row {
             Button(
                 onClick = {

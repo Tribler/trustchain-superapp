@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.valuetransfer.ui.settings
 
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -42,69 +41,80 @@ class NotificationHandler(
     private val notificationManager by lazy {
         parentActivity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
-    private lateinit var messagesChannel: NotificationChannel
-    private lateinit var transactionsChannel: NotificationChannel
+    private var messagesChannel: NotificationChannel
+    private var transactionsChannel: NotificationChannel
     private var notificationCount = 0
 
     init {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            messagesChannel =
-                if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_MESSAGES_ID) == null) {
-                    NotificationChannel(
-                        NOTIFICATION_CHANNEL_MESSAGES_ID,
-                        NOTIFICATION_CHANNEL_MESSAGES_NAME,
-                        NotificationManager.IMPORTANCE_HIGH
-                    ).apply {
-                        description = NOTIFICATION_CHANNEL_MESSAGES_DESCRIPTION
-                        setShowBadge(true)
-                        notificationManager.createNotificationChannel(this)
-                    }
-                } else notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_MESSAGES_ID)
+        messagesChannel =
+            if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_MESSAGES_ID) == null) {
+                NotificationChannel(
+                    NOTIFICATION_CHANNEL_MESSAGES_ID,
+                    NOTIFICATION_CHANNEL_MESSAGES_NAME,
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = NOTIFICATION_CHANNEL_MESSAGES_DESCRIPTION
+                    setShowBadge(true)
+                    notificationManager.createNotificationChannel(this)
+                }
+            } else {
+                notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_MESSAGES_ID)
+            }
 
-            transactionsChannel =
-                if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_TRANSACTIONS_ID) == null) {
-                    NotificationChannel(
-                        NOTIFICATION_CHANNEL_TRANSACTIONS_ID,
-                        NOTIFICATION_CHANNEL_TRANSACTIONS_NAME,
-                        NotificationManager.IMPORTANCE_HIGH
-                    ).apply {
-                        description = NOTIFICATION_CHANNEL_TRANSACTIONS_DESCRIPTION
-                        notificationManager.createNotificationChannel(this)
-                    }
-                } else notificationManager.getNotificationChannel(
+        transactionsChannel =
+            if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_TRANSACTIONS_ID) == null) {
+                NotificationChannel(
+                    NOTIFICATION_CHANNEL_TRANSACTIONS_ID,
+                    NOTIFICATION_CHANNEL_TRANSACTIONS_NAME,
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = NOTIFICATION_CHANNEL_TRANSACTIONS_DESCRIPTION
+                    notificationManager.createNotificationChannel(this)
+                }
+            } else {
+                notificationManager.getNotificationChannel(
                     NOTIFICATION_CHANNEL_TRANSACTIONS_ID
                 )
-        }
+            }
     }
 
     fun cancelAll() {
         notificationManager.cancelAll()
     }
 
-    fun notify(peer: Peer, chatMessage: ChatMessage, isAppInForeground: Boolean) {
+    fun notify(
+        peer: Peer,
+        chatMessage: ChatMessage,
+        isAppInForeground: Boolean
+    ) {
         if (!NotificationManagerCompat.from(parentActivity).areNotificationsEnabled()) return
 
         val activeFragment = parentActivity.getActiveFragment()
         val publicKeyString = peer.publicKey.keyToBin().toHex()
 
         if (isAppInForeground && (activeFragment is ContactChatFragment) && (
-            activeFragment.arguments?.getString(
+                activeFragment.arguments?.getString(
                     ValueTransferMainActivity.ARG_PUBLIC_KEY
                 ) == publicKeyString
             )
-        ) return
+        ) {
+            return
+        }
 
         when (typeOfMessage(chatMessage)) {
             TYPE_MESSAGE -> message(peer, chatMessage, isAppInForeground)
-            TYPE_ATTACHMENT -> chatMessage.attachment?.let { attachment ->
-                attachment(peer, attachment.type, chatMessage.message, isAppInForeground)
-            }
-            TYPE_TRANSACTION -> transaction(
-                peer,
-                chatMessage.message,
-                chatMessage.transactionHash!!,
-                isAppInForeground
-            )
+            TYPE_ATTACHMENT ->
+                chatMessage.attachment?.let { attachment ->
+                    attachment(peer, attachment.type, chatMessage.message, isAppInForeground)
+                }
+
+            TYPE_TRANSACTION ->
+                transaction(
+                    peer,
+                    chatMessage.message,
+                    chatMessage.transactionHash!!,
+                    isAppInForeground
+                )
         }
     }
 
@@ -116,22 +126,23 @@ class NotificationHandler(
     ) {
         val contactImage = peerChatStore.getContactImage(peer.publicKey)
 
-        val builder = NotificationCompat.Builder(parentActivity, channelID).apply {
-            setSmallIcon(R.drawable.ic_blockchain_identity)
-            setLargeIcon(contactImage?.image ?: getIdenticon(peer, parentActivity))
-            setContentTitle(getContactName(peer, contactStore))
-            setContentText(text)
-            setStyle(
-                NotificationCompat.BigTextStyle()
-                    .bigText(text)
-            )
-            setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            setPriority(NotificationCompat.PRIORITY_HIGH)
-            setContentIntent(intent)
-            setAutoCancel(true)
-            setGroup(NOTIFICATION_GROUP_ID)
-            setGroupSummary(true)
-        }
+        val builder =
+            NotificationCompat.Builder(parentActivity, channelID).apply {
+                setSmallIcon(R.drawable.ic_blockchain_identity)
+                setLargeIcon(contactImage?.image ?: getIdenticon(peer, parentActivity))
+                setContentTitle(getContactName(peer, contactStore))
+                setContentText(text)
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(text)
+                )
+                setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                setPriority(NotificationCompat.PRIORITY_HIGH)
+                setContentIntent(intent)
+                setAutoCancel(true)
+                setGroup(NOTIFICATION_GROUP_ID)
+                setGroupSummary(true)
+            }
 
         @Suppress("MissingPermission") // TODO: Fix permission issue.
         with(NotificationManagerCompat.from(parentActivity)) {
@@ -142,14 +153,11 @@ class NotificationHandler(
     }
 
     fun getNotificationChannelStatus(channelID: String): String {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return if (notificationManager.getNotificationChannel(channelID).importance != NotificationManager.IMPORTANCE_NONE) {
-                NOTIFICATION_STATUS_ENABLED
-            } else {
-                NOTIFICATION_STATUS_DISABLED
-            }
+        return if (notificationManager.getNotificationChannel(channelID).importance != NotificationManager.IMPORTANCE_NONE) {
+            NOTIFICATION_STATUS_ENABLED
+        } else {
+            NOTIFICATION_STATUS_DISABLED
         }
-        return NOTIFICATION_STATUS_UNKNOWN
     }
 
     fun typeOfMessage(chatMessage: ChatMessage): String {
@@ -159,53 +167,63 @@ class NotificationHandler(
             getNotificationChannelStatus(NOTIFICATION_CHANNEL_TRANSACTIONS_ID) == NOTIFICATION_STATUS_ENABLED
 
         return when {
-            notificationsMessages && chatMessage.message.isNotBlank() && chatMessage.attachment == null && chatMessage.transactionHash == null -> TYPE_MESSAGE
+            notificationsMessages && chatMessage.message.isNotBlank() &&
+                chatMessage.attachment == null &&
+                chatMessage.transactionHash == null -> TYPE_MESSAGE
+
             notificationsMessages && chatMessage.attachment != null -> TYPE_ATTACHMENT
             notificationsTransactions && chatMessage.transactionHash != null -> TYPE_TRANSACTION
             else -> ""
         }
     }
 
-    private fun message(peer: Peer, chatMessage: ChatMessage, isAppInForeground: Boolean = true) {
+    private fun message(
+        peer: Peer,
+        chatMessage: ChatMessage,
+        isAppInForeground: Boolean = true
+    ) {
         val contact = contactStore.getContactFromPublicKey(peer.publicKey)
         val notAContact = contact == null
         val isFirstMessage = peerChatStore.getAllSentByPublicKeyToMe(peer.publicKey).size <= 1
 
-        val message = if (notAContact && isFirstMessage) {
-            parentActivity.resources.getString(R.string.text_contact_chat_request_to_chat)
-        } else {
-            chatMessage.message
-        }
+        val message =
+            if (notAContact && isFirstMessage) {
+                parentActivity.resources.getString(R.string.text_contact_chat_request_to_chat)
+            } else {
+                chatMessage.message
+            }
 
         if (isAppInForeground) {
             sendInternalNotification(peer, message)
         } else {
-            val intent = Intent(parentActivity, ValueTransferMainActivity::class.java).apply {
-                putExtra(
-                    ValueTransferMainActivity.ARG_FRAGMENT,
-                    ValueTransferMainActivity.contactChatFragmentTag
-                )
-                putExtra(
-                    ValueTransferMainActivity.ARG_PUBLIC_KEY,
-                    peer.publicKey.keyToBin().toHex()
-                )
-                addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-            }
-            val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.getActivity(
-                    parentActivity,
-                    ValueTransferMainActivity.NOTIFICATION_INTENT_CHAT,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                )
-            } else {
-                PendingIntent.getActivity(
-                    parentActivity,
-                    ValueTransferMainActivity.NOTIFICATION_INTENT_CHAT,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
+            val intent =
+                Intent(parentActivity, ValueTransferMainActivity::class.java).apply {
+                    putExtra(
+                        ValueTransferMainActivity.ARG_FRAGMENT,
+                        ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG
+                    )
+                    putExtra(
+                        ValueTransferMainActivity.ARG_PUBLIC_KEY,
+                        peer.publicKey.keyToBin().toHex()
+                    )
+                    addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                }
+            val pendingIntent: PendingIntent =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getActivity(
+                        parentActivity,
+                        ValueTransferMainActivity.NOTIFICATION_INTENT_CHAT,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                    )
+                } else {
+                    PendingIntent.getActivity(
+                        parentActivity,
+                        ValueTransferMainActivity.NOTIFICATION_INTENT_CHAT,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+                }
             sendNotification(peer, message, pendingIntent, NOTIFICATION_CHANNEL_MESSAGES_ID)
         }
     }
@@ -217,34 +235,46 @@ class NotificationHandler(
         isAppInForeground: Boolean = true
     ) = with(parentActivity) {
         when (type) {
-            MessageAttachment.TYPE_IMAGE -> listOf(
-                getEmojiByUnicode(EMOJI_CAMERA),
-                ATTACHMENT_TYPE_PHOTO
-            )
-            MessageAttachment.TYPE_FILE -> listOf(
-                getEmojiByUnicode(EMOJI_FILE),
-                ATTACHMENT_TYPE_FILE
-            )
-            MessageAttachment.TYPE_CONTACT -> listOf(
-                getEmojiByUnicode(EMOJI_CONTACT),
-                ATTACHMENT_TYPE_CONTACT
-            )
-            MessageAttachment.TYPE_LOCATION -> listOf(
-                getEmojiByUnicode(EMOJI_LOCATION),
-                ATTACHMENT_TYPE_LOCATION
-            )
-            MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> listOf(
-                getEmojiByUnicode(
-                    EMOJI_IDENTITY_ATTRIBUTE
-                ),
-                ATTACHMENT_TYPE_IDENTITY_ATTRIBUTE
-            )
+            MessageAttachment.TYPE_IMAGE ->
+                listOf(
+                    getEmojiByUnicode(EMOJI_CAMERA),
+                    ATTACHMENT_TYPE_PHOTO
+                )
+
+            MessageAttachment.TYPE_FILE ->
+                listOf(
+                    getEmojiByUnicode(EMOJI_FILE),
+                    ATTACHMENT_TYPE_FILE
+                )
+
+            MessageAttachment.TYPE_CONTACT ->
+                listOf(
+                    getEmojiByUnicode(EMOJI_CONTACT),
+                    ATTACHMENT_TYPE_CONTACT
+                )
+
+            MessageAttachment.TYPE_LOCATION ->
+                listOf(
+                    getEmojiByUnicode(EMOJI_LOCATION),
+                    ATTACHMENT_TYPE_LOCATION
+                )
+
+            MessageAttachment.TYPE_IDENTITY_ATTRIBUTE ->
+                listOf(
+                    getEmojiByUnicode(
+                        EMOJI_IDENTITY_ATTRIBUTE
+                    ),
+                    ATTACHMENT_TYPE_IDENTITY_ATTRIBUTE
+                )
+
             MessageAttachment.TYPE_TRANSFER_REQUEST -> {
                 when {
-                    message != "" -> parentActivity.resources.getString(
-                        R.string.text_contact_chat_incoming_transfer_request_with_message,
-                        message
-                    )
+                    message != "" ->
+                        parentActivity.resources.getString(
+                            R.string.text_contact_chat_incoming_transfer_request_with_message,
+                            message
+                        )
+
                     else -> ""
                 }.let { text ->
                     listOf(
@@ -254,21 +284,23 @@ class NotificationHandler(
                     )
                 }
             }
+
             else -> listOf()
         }.joinToString(" ").let { text ->
             if (isAppInForeground) {
                 sendInternalNotification(peer, text)
             } else {
-                val intent = Intent(this, ValueTransferMainActivity::class.java).apply {
-                    putExtra(
-                        ValueTransferMainActivity.ARG_FRAGMENT,
-                        ValueTransferMainActivity.contactChatFragmentTag
-                    )
-                    putExtra(
-                        ValueTransferMainActivity.ARG_PUBLIC_KEY,
-                        peer.publicKey.keyToBin().toHex()
-                    )
-                }
+                val intent =
+                    Intent(this, ValueTransferMainActivity::class.java).apply {
+                        putExtra(
+                            ValueTransferMainActivity.ARG_FRAGMENT,
+                            ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG
+                        )
+                        putExtra(
+                            ValueTransferMainActivity.ARG_PUBLIC_KEY,
+                            peer.publicKey.keyToBin().toHex()
+                        )
+                    }
                 val pendingIntent: PendingIntent =
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         PendingIntent.getActivity(
@@ -303,64 +335,72 @@ class NotificationHandler(
     ) = with(parentActivity) {
         val transaction = transactionRepository.getTransactionWithHash(transactionHash)
 
-        val transactionText = if (transaction != null) {
-            val map = transaction.transaction.toMap()
-            if (map.containsKey(QRScanController.KEY_AMOUNT)) {
+        val transactionText =
+            if (transaction != null) {
+                val map = transaction.transaction.toMap()
+                if (map.containsKey(QRScanController.KEY_AMOUNT)) {
+                    listOf(
+                        getEmojiByUnicode(EMOJI_TRANSACTION),
+                        resources.getString(
+                            R.string.text_contact_chat_incoming_transfer_of,
+                            formatBalance((map[QRScanController.KEY_AMOUNT] as BigInteger).toLong())
+                        )
+                    )
+                } else {
+                    listOf(
+                        getEmojiByUnicode(EMOJI_TRANSACTION),
+                        resources.getString(R.string.text_contact_chat_incoming_transfer)
+                    )
+                }
+            } else {
                 listOf(
                     getEmojiByUnicode(EMOJI_TRANSACTION),
-                    resources.getString(
-                        R.string.text_contact_chat_incoming_transfer_of,
-                        formatBalance((map[QRScanController.KEY_AMOUNT] as BigInteger).toLong())
-                    )
+                    resources.getString(R.string.text_contact_chat_incoming_transfer)
                 )
-            } else listOf(
-                getEmojiByUnicode(EMOJI_TRANSACTION),
-                resources.getString(R.string.text_contact_chat_incoming_transfer)
-            )
-        } else {
-            listOf(
-                getEmojiByUnicode(EMOJI_TRANSACTION),
-                resources.getString(R.string.text_contact_chat_incoming_transfer)
-            )
-        }.joinToString(" ")
+            }.joinToString(" ")
 
-        val text = if (message.isNotBlank()) {
-            getString(
-                R.string.text_contact_chat_incoming_transfer_with_message,
-                transactionText,
-                message
-            )
-        } else transactionText
+        val text =
+            if (message.isNotBlank()) {
+                getString(
+                    R.string.text_contact_chat_incoming_transfer_with_message,
+                    transactionText,
+                    message
+                )
+            } else {
+                transactionText
+            }
 
         if (isAppInForeground) {
             sendInternalNotification(peer, text)
         } else {
-            val intent = Intent(this, ValueTransferMainActivity::class.java).apply {
-                putExtra(
-                    ValueTransferMainActivity.ARG_FRAGMENT,
-                    ValueTransferMainActivity.exchangeFragmentTag
-                )
-                putExtra(
-                    ValueTransferMainActivity.ARG_PUBLIC_KEY,
-                    peer.publicKey.keyToBin().toHex()
-                )
-                addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-            }
-            val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.getActivity(
-                    parentActivity,
-                    ValueTransferMainActivity.NOTIFICATION_INTENT_CHAT,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                )
-            } else {
-                PendingIntent.getActivity(
-                    parentActivity,
-                    ValueTransferMainActivity.NOTIFICATION_INTENT_CHAT,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
+            val intent =
+                Intent(this, ValueTransferMainActivity::class.java).apply {
+                    putExtra(
+                        ValueTransferMainActivity.ARG_FRAGMENT,
+                        ValueTransferMainActivity.EXCHANGE_FRAGMENT_TAG
+                    )
+                    putExtra(
+                        ValueTransferMainActivity.ARG_PUBLIC_KEY,
+                        peer.publicKey.keyToBin().toHex()
+                    )
+                    addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                }
+            val pendingIntent: PendingIntent =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getActivity(
+                        parentActivity,
+                        ValueTransferMainActivity.NOTIFICATION_INTENT_CHAT,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                    )
+                } else {
+                    PendingIntent.getActivity(
+                        parentActivity,
+                        ValueTransferMainActivity.NOTIFICATION_INTENT_CHAT,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+                }
 
             sendNotification(
                 peer,
@@ -371,36 +411,46 @@ class NotificationHandler(
         }
     }
 
-    private fun sendInternalNotification(peer: Peer, text: String) = with(parentActivity) {
+    private fun sendInternalNotification(
+        peer: Peer,
+        text: String
+    ) = with(parentActivity) {
         val contact = contactStore.getContactFromPublicKey(peer.publicKey)
-        val identityName = peerChatStore.getContactState(peer.publicKey)?.identityInfo?.let {
-            "${it.initials} ${it.surname}"
-        }
+        val identityName =
+            peerChatStore.getContactState(peer.publicKey)?.identityInfo?.let {
+                "${it.initials} ${it.surname}"
+            }
 
-        val args = Bundle().apply {
-            putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, peer.publicKey.keyToBin().toHex())
-            putString(
-                ValueTransferMainActivity.ARG_NAME,
-                contact?.name ?: (
-                    identityName
-                        ?: resources.getString(R.string.text_unknown_contact)
+        val args =
+            Bundle().apply {
+                putString(
+                    ValueTransferMainActivity.ARG_PUBLIC_KEY,
+                    peer.publicKey.keyToBin().toHex()
+                )
+                putString(
+                    ValueTransferMainActivity.ARG_NAME,
+                    contact?.name ?: (
+                        identityName
+                            ?: resources.getString(R.string.text_unknown_contact)
                     )
-            )
-            putString(
-                ValueTransferMainActivity.ARG_PARENT,
-                getActiveFragment()?.tag ?: ValueTransferMainActivity.walletOverviewFragmentTag
-            )
-        }
+                )
+                putString(
+                    ValueTransferMainActivity.ARG_PARENT,
+                    getActiveFragment()?.tag ?: ValueTransferMainActivity.WALLET_OVER_FRAGMENT_TAG
+                )
+            }
 
-        val action = View.OnClickListener {
-            detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
-        }
+        val action =
+            View.OnClickListener {
+                detailFragment(ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG, args)
+            }
 
-        val bitmap = peerChatStore.getContactImage(peer.publicKey)?.image?.toSquare()
-            ?: getIdenticon(
-                peer,
-                this
-            ).setPadding(resources.getDimensionPixelSize(R.dimen.notificationInternalIdentiticonPadding))
+        val bitmap =
+            peerChatStore.getContactImage(peer.publicKey)?.image?.toSquare()
+                ?: getIdenticon(
+                    peer,
+                    this
+                ).setPadding(resources.getDimensionPixelSize(R.dimen.notificationInternalIdentiticonPadding))
         val size = resources.getDimensionPixelSize(R.dimen.notificationInternalImageSize)
         val resizedBitmap = Bitmap.createScaledBitmap(bitmap, size, size, true)
         val drawable = RoundedBitmapDrawableFactory.create(resources, resizedBitmap)
@@ -413,8 +463,9 @@ class NotificationHandler(
             text,
             type = ValueTransferMainActivity.SNACKBAR_TYPE_INFO,
             isShort = false,
-            title = contact?.name
-                ?: parentActivity.resources.getString(R.string.text_unknown_contact),
+            title =
+                contact?.name
+                    ?: parentActivity.resources.getString(R.string.text_unknown_contact),
             action = action,
             icon = drawable
         )
@@ -454,6 +505,7 @@ class NotificationHandler(
         const val ATTACHMENT_TYPE_TRANSFER_REQUEST = "Transfer Request"
 
         private lateinit var instance: NotificationHandler
+
         fun getInstance(parentActivity: ValueTransferMainActivity): NotificationHandler {
             if (!::instance.isInitialized) {
                 instance = NotificationHandler(parentActivity)
@@ -465,7 +517,10 @@ class NotificationHandler(
             return String(Character.toChars(unicode))
         }
 
-        private fun getContactName(peer: Peer, contactStore: ContactStore): String {
+        private fun getContactName(
+            peer: Peer,
+            contactStore: ContactStore
+        ): String {
             return contactStore.getContactFromPublicKey(peer.publicKey)?.name
                 ?: instance.parentActivity.resources.getString(
                     R.string.text_unknown_contact_extra,
@@ -473,7 +528,10 @@ class NotificationHandler(
                 )
         }
 
-        private fun getIdenticon(peer: Peer, activity: ValueTransferMainActivity): Bitmap {
+        private fun getIdenticon(
+            peer: Peer,
+            activity: ValueTransferMainActivity
+        ): Bitmap {
             val publicKeyString = peer.publicKey.keyToBin().toHex()
 
             return generateIdenticon(

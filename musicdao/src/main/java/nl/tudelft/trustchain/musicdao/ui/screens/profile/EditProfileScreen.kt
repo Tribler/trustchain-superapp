@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.profile
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +16,6 @@ import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.ui.SnackbarHandler
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EditProfileScreen(navController: NavController) {
     val ownProfileViewScreenModel: MyProfileScreenViewModel = hiltViewModel()
@@ -32,12 +29,13 @@ fun EditProfileScreen(navController: NavController) {
 
     fun save() {
         coroutine.launch {
-            val result = ownProfileViewScreenModel.publishEdit(
-                name = name.value ?: "",
-                bitcoinAddress = bitcoinPublicKey.value ?: "",
-                socials = socials.value ?: "",
-                biography = biography.value ?: ""
-            )
+            val result =
+                ownProfileViewScreenModel.publishEdit(
+                    name = name.value ?: "",
+                    bitcoinAddress = bitcoinPublicKey.value ?: "",
+                    socials = socials.value ?: "",
+                    biography = biography.value ?: ""
+                )
             if (result) {
                 navController.popBackStack()
                 SnackbarHandler.displaySnackbar(text = "Successfully published your profile")
@@ -48,9 +46,10 @@ fun EditProfileScreen(navController: NavController) {
     }
 
     Column(
-        modifier = Modifier
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            Modifier
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState())
     ) {
         Column(modifier = Modifier.padding(bottom = 20.dp)) {
             Text(text = "Name", fontWeight = FontWeight.Bold)

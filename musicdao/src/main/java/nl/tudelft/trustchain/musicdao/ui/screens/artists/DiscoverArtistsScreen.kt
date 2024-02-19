@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.artists
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +24,6 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @ExperimentalMaterialApi
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DiscoverArtistsScreen(navController: NavController) {
     val discoverArtistsViewModel: DiscoverArtistsViewModel = hiltViewModel()
@@ -42,9 +39,10 @@ fun DiscoverArtistsScreen(navController: NavController) {
                     ListItem(
                         icon = { Icon(Icons.Default.Person, contentDescription = null) },
                         text = { Text(text = it.name) },
-                        modifier = Modifier.clickable {
-                            navController.navigate(Screen.Profile.createRoute(it.publicKey))
-                        }
+                        modifier =
+                            Modifier.clickable {
+                                navController.navigate(Screen.Profile.createRoute(it.publicKey))
+                            }
                     )
                 }
             }

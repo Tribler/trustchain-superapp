@@ -11,7 +11,9 @@ import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
 
-abstract class BaseFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(contentLayoutId) {
+abstract class BaseFragment(
+    @LayoutRes contentLayoutId: Int = 0
+) : Fragment(contentLayoutId) {
     protected val trustchain: TrustChainHelper by lazy {
         TrustChainHelper(getTrustChainCommunity())
     }

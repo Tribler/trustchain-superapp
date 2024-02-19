@@ -2,9 +2,7 @@ package nl.tudelft.trustchain.musicdao.core.torrent.fileProcessing
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.musicdao.core.util.Util
 import com.mpatric.mp3agic.Mp3File
 import java.io.File
@@ -13,9 +11,7 @@ import java.lang.Exception
 import java.nio.file.Path
 import java.nio.file.Paths
 
-@RequiresApi(Build.VERSION_CODES.O)
 class FileProcessor {
-
     companion object {
         private fun getFiles(path: Path): List<File>? {
             val folder = path.toFile()
@@ -34,9 +30,10 @@ class FileProcessor {
 
         fun getMP3Files(path: Path): List<Mp3File>? {
             val files = getFiles(path) ?: return null
-            val mp3Files = files.toList().filter {
-                it.extension == "mp3"
-            }
+            val mp3Files =
+                files.toList().filter {
+                    it.extension == "mp3"
+                }
 
             return mp3Files.mapNotNull {
                 try {
@@ -46,6 +43,7 @@ class FileProcessor {
                 }
             }
         }
+
         fun getTitle(mp3: Mp3File): String {
             val title = Util.getTitle(mp3)
             if (title != null) {
@@ -53,9 +51,10 @@ class FileProcessor {
                 return title
             }
 
-            val fileNameTitle = mp3.filename
-                .substringAfterLast("/")
-                .substringBefore(".mp3")
+            val fileNameTitle =
+                mp3.filename
+                    .substringAfterLast("/")
+                    .substringBefore(".mp3")
             Log.d("MusicDao", "2 Get Title: $fileNameTitle vs ${mp3.filename}")
 
             return fileNameTitle
@@ -80,19 +79,21 @@ class FileProcessor {
             val mp3Files = getMP3Files(folder.toPath()) ?: return null
 
             // 1. cover.jpg
-            val first = files.find { file ->
-                file.nameWithoutExtension.lowercase() == "cover" &&
-                    (allowedExtensions.firstOrNull { it == file.extension } != null)
-            }
+            val first =
+                files.find { file ->
+                    file.nameWithoutExtension.lowercase() == "cover" &&
+                        (allowedExtensions.firstOrNull { it == file.extension } != null)
+                }
 
             if (first != null) {
                 return first
             }
 
             // 2. any other image
-            val second = files.find { file ->
-                allowedExtensions.firstOrNull { it == file.extension } != null
-            }
+            val second =
+                files.find { file ->
+                    allowedExtensions.firstOrNull { it == file.extension } != null
+                }
 
             if (second != null) {
                 return second

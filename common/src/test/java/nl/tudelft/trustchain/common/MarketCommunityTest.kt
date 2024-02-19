@@ -1,6 +1,11 @@
 package nl.tudelft.trustchain.common
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.spyk
+import io.mockk.verify
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.EndpointAggregator
 import nl.tudelft.ipv8.peerdiscovery.Network

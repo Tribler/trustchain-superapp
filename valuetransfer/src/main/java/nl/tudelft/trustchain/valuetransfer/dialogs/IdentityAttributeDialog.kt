@@ -14,6 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogIdentityAttributeBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
@@ -22,13 +23,13 @@ import java.lang.IllegalStateException
 class IdentityAttributeDialog(
     private var attribute: IdentityAttribute?,
 ) : VTDialogFragment() {
-
     private var selectedName = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_identity_attribute, null)
+            val binding = DialogIdentityAttributeBinding.inflate(it.layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -40,60 +41,67 @@ class IdentityAttributeDialog(
 
             val unusedAttributes = getIdentityCommunity().getUnusedAttributeNames()
 
-            val attributeNameSpinner = view.findViewById<Spinner>(R.id.spinnerAttributeName)
-            val attributeNameView = view.findViewById<EditText>(R.id.etAttributeName)
-            val attributeValueView = view.findViewById<EditText>(R.id.etAttributeValue)
-            val saveButton = view.findViewById<Button>(R.id.btnSaveAttribute)
+            val attributeNameSpinner = binding.spinnerAttributeName
+            val attributeNameView = binding.etAttributeName
+            val attributeValueView = binding.etAttributeValue
+            val saveButton = binding.btnSaveAttribute
             toggleButton(saveButton, attribute != null)
 
             attributeNameView.isVisible = attribute != null
             attributeNameSpinner.isVisible = attribute == null
 
             if (attribute == null) {
-                val attributeNameAdapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, unusedAttributes) {
-                    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                        return (super.getView(position, convertView, parent) as TextView).apply {
-                            text = unusedAttributes[position]
-                            setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                val attributeNameAdapter =
+                    object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, unusedAttributes) {
+                        override fun getView(
+                            position: Int,
+                            convertView: View?,
+                            parent: ViewGroup
+                        ): View {
+                            return (super.getView(position, convertView, parent) as TextView).apply {
+                                text = unusedAttributes[position]
+                                setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                            }
                         }
-                    }
 
-                    override fun getDropDownView(
-                        position: Int,
-                        convertView: View?,
-                        parent: ViewGroup
-                    ): View {
-                        return (super.getDropDownView(position, convertView, parent) as TextView).apply {
-                            layoutParams.apply {
-                                height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                            }
-                            gravity = Gravity.CENTER_VERTICAL
-                            setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-                            background = if (position == attributeNameSpinner.selectedItemPosition) {
-                                ColorDrawable(Color.LTGRAY)
-                            } else {
-                                ColorDrawable(Color.WHITE)
+                        override fun getDropDownView(
+                            position: Int,
+                            convertView: View?,
+                            parent: ViewGroup
+                        ): View {
+                            return (super.getDropDownView(position, convertView, parent) as TextView).apply {
+                                layoutParams.apply {
+                                    height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
+                                }
+                                gravity = Gravity.CENTER_VERTICAL
+                                setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                                background =
+                                    if (position == attributeNameSpinner.selectedItemPosition) {
+                                        ColorDrawable(Color.LTGRAY)
+                                    } else {
+                                        ColorDrawable(Color.WHITE)
+                                    }
                             }
                         }
                     }
-                }
 
                 attributeNameSpinner.adapter = attributeNameAdapter
-                attributeNameSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-                        selectedName = ""
-                    }
+                attributeNameSpinner.onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+                            selectedName = ""
+                        }
 
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        selectedName = unusedAttributes[position]
-                        toggleButton(saveButton, selectedName != "" && attributeValueView.text.isNotEmpty())
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+                            selectedName = unusedAttributes[position]
+                            toggleButton(saveButton, selectedName != "" && attributeValueView.text.isNotEmpty())
+                        }
                     }
-                }
             } else {
                 attributeNameView.setText(attribute!!.name)
                 attributeValueView.setText(attribute!!.value)

@@ -14,13 +14,15 @@ import androidx.navigation.NavHostController
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     var selectedBottomBarIndex by remember { mutableStateOf(0) }
+
     data class BottomNavigationItem(val label: String, val route: String, val icon: ImageVector)
 
-    val items = listOf(
-        BottomNavigationItem("Home", Screen.Home.route, Icons.Filled.Home),
-        BottomNavigationItem("Creator", Screen.CreatorMenu.route, Icons.Filled.Person),
-        BottomNavigationItem("DAO", Screen.DaoRoute.route, Icons.Filled.Person)
-    )
+    val items =
+        listOf(
+            BottomNavigationItem("Home", Screen.Home.route, Icons.Filled.Home),
+            BottomNavigationItem("Creator", Screen.CreatorMenu.route, Icons.Filled.Person),
+            BottomNavigationItem("DAO", Screen.DaoRoute.route, Icons.Filled.Person)
+        )
 
     BottomNavigation {
         items.forEachIndexed { index, s ->

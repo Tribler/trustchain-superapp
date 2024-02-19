@@ -14,7 +14,6 @@ class AppLoader(
     private val dataStore: DataStore<Preferences>,
     private val firstRun: Boolean = false
 ) {
-
     val preferredApps: List<DashboardItem>
         get() = apps.filter { it.isPreferred }
     var apps: Set<DashboardItem>
@@ -26,12 +25,13 @@ class AppLoader(
                 setPreferredAppList(DEFAULT_APPS)
             } else {
                 val pApps = getPreferredAppList()
-                apps = AppDefinition.values().map { app ->
-                    DashboardItem(
-                        app,
-                        isPreferred = pApps.contains(app.appName)
-                    )
-                }.toSet()
+                apps =
+                    AppDefinition.values().map { app ->
+                        DashboardItem(
+                            app,
+                            isPreferred = pApps.contains(app.appName)
+                        )
+                    }.toSet()
             }
         }
     }
@@ -49,10 +49,11 @@ class AppLoader(
     }
 
     private suspend fun getPreferredAppList(): Set<String> {
-        val preferredApps: Flow<Set<String>> = dataStore.data
-            .map { preferences ->
-                preferences[PREFERRED_APPS] ?: emptySet()
-            }
+        val preferredApps: Flow<Set<String>> =
+            dataStore.data
+                .map { preferences ->
+                    preferences[PREFERRED_APPS] ?: emptySet()
+                }
         preferredApps.first().let {
             return it
         }
@@ -69,12 +70,13 @@ class AppLoader(
 
     companion object {
         val PREFERRED_APPS = stringSetPreferencesKey("preferred_apps")
-        val DEFAULT_APPS = setOf(
-            AppDefinition.CURRENCY_II.appName,
-            AppDefinition.VALUETRANSFER.appName,
-            AppDefinition.MUSIC_DAO.appName,
-            AppDefinition.EUROTOKEN.appName,
-            AppDefinition.FREEDOM_OF_COMPUTING.appName
-        )
+        val DEFAULT_APPS =
+            setOf(
+                AppDefinition.CURRENCY_II.appName,
+                AppDefinition.VALUETRANSFER.appName,
+                AppDefinition.MUSIC_DAO.appName,
+                AppDefinition.EUROTOKEN.appName,
+                AppDefinition.FREEDOM_OF_COMPUTING.appName
+            )
     }
 }

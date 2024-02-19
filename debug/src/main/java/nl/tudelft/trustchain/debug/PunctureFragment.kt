@@ -4,17 +4,16 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentPunctureBinding
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
-@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
     private val binding by viewBinding(FragmentPunctureBinding::bind)
 
@@ -25,7 +24,10 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
     private val firstMessageTimestamps = mutableMapOf<String, Date>()
     private var firstSentMessageTimestamp: Date? = null
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenCreated {
@@ -35,10 +37,10 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
             }
         }
         lifecycleScope.launchWhenCreated {
-            getDemoCommunity().punctureChannel.asFlow().collect { (peer, payload) ->
+            getDemoCommunity().punctureChannel.collect { (peer, payload) ->
                 Log.i(
                     "PunctureFragment",
-                    "Received puncture from ${peer} on port ${payload.identifier}"
+                    "Received puncture from $peer on port ${payload.identifier}"
                 )
                 received++
                 receivedMap[peer.toString()] = (receivedMap[peer.toString()] ?: 0) + 1
@@ -84,9 +86,12 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
             }
         }
     }
-    */
+     */
 
-    private suspend fun punctureAll(ip: String, slow: Boolean) = with(Dispatchers.Default) {
+    private suspend fun punctureAll(
+        ip: String,
+        slow: Boolean
+    ) = with(Dispatchers.Default) {
         for (i in MIN_PORT..MAX_PORT) {
             val ipv4 = IPv4Address(ip, i)
             getDemoCommunity().sendPuncture(ipv4, i)
@@ -98,8 +103,10 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
         }
     }
 
-
-    private suspend fun punctureSingle(ip: String, port: Int) {
+    private suspend fun punctureSingle(
+        ip: String,
+        port: Int
+    ) {
         while (true) {
             val ipv4 = IPv4Address(ip, port)
             getDemoCommunity().sendPuncture(ipv4, port)
@@ -112,7 +119,8 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
     private fun updateView() {
         val df = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM)
         binding.txtResult.text =
-            "Sent: $sent\nFirst Sent: $firstSentMessageTimestamp\nReceived: $received\n\n" + receivedMap.map {
+            "Sent: $sent\nFirst Sent: $firstSentMessageTimestamp\nReceived: $received\n\n" +
+            receivedMap.map {
                 val date = firstMessageTimestamps[it.key]
                 val time = if (date != null) df.format(date) else null
                 it.key + " (" + time + ") -> " + it.value

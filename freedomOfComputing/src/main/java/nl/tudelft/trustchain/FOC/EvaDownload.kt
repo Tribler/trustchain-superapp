@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.FOC
+package nl.tudelft.trustchain.foc
 
 import nl.tudelft.ipv8.Peer
 

@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
@@ -17,18 +16,10 @@ import nl.tudelft.trustchain.app.TrustChainApplication
 import nl.tudelft.trustchain.app.databinding.ActivityDashboardBinding
 import nl.tudelft.trustchain.common.util.viewBinding
 
-@RequiresApi(Build.VERSION_CODES.M)
 class DashboardActivity : AppCompatActivity() {
     private val binding by viewBinding(ActivityDashboardBinding::inflate)
 
     private val adapter = ItemAdapter()
-
-    private val BLUETOOTH_PERMISSIONS_REQUEST_CODE = 200
-    private val SETTINGS_INTENT_CODE = 1000
-
-    private val BLUETOOTH_PERMISSIONS_SCAN = "android.permission.BLUETOOTH_SCAN"
-    private val BLUETOOTH_PERMISSIONS_CONNECT = "android.permission.BLUETOOTH_CONNECT"
-    private val BLUETOOTH_PERMISSIONS_ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE"
 
     override fun onResume() {
         super.onResume()
@@ -75,19 +66,19 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun hasBluetoothPermissions(): Boolean {
-        return checkSelfPermission(BLUETOOTH_PERMISSIONS_ADVERTISE) == PackageManager.PERMISSION_GRANTED &&
-            checkSelfPermission(BLUETOOTH_PERMISSIONS_CONNECT) == PackageManager.PERMISSION_GRANTED &&
-            checkSelfPermission(BLUETOOTH_PERMISSIONS_SCAN) == PackageManager.PERMISSION_GRANTED
+        return checkSelfPermission(Companion.BLUETOOTH_PERMISSIONS_ADVERTISE) == PackageManager.PERMISSION_GRANTED &&
+            checkSelfPermission(Companion.BLUETOOTH_PERMISSIONS_CONNECT) == PackageManager.PERMISSION_GRANTED &&
+            checkSelfPermission(Companion.BLUETOOTH_PERMISSIONS_SCAN) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestBluetoothPermissions() {
         requestPermissions(
             arrayOf(
-                BLUETOOTH_PERMISSIONS_ADVERTISE,
-                BLUETOOTH_PERMISSIONS_CONNECT,
-                BLUETOOTH_PERMISSIONS_SCAN
+                Companion.BLUETOOTH_PERMISSIONS_ADVERTISE,
+                Companion.BLUETOOTH_PERMISSIONS_CONNECT,
+                Companion.BLUETOOTH_PERMISSIONS_SCAN
             ),
-            BLUETOOTH_PERMISSIONS_REQUEST_CODE
+            Companion.BLUETOOTH_PERMISSIONS_REQUEST_CODE
         )
     }
 
@@ -97,7 +88,7 @@ class DashboardActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         when (requestCode) {
-            BLUETOOTH_PERMISSIONS_REQUEST_CODE -> {
+            Companion.BLUETOOTH_PERMISSIONS_REQUEST_CODE -> {
                 if (hasBluetoothPermissions()) {
                     (application as TrustChainApplication).initIPv8()
                 } else {
@@ -109,9 +100,13 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     @Suppress("DEPRECATION")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         when (requestCode) {
-            SETTINGS_INTENT_CODE -> {
+            Companion.SETTINGS_INTENT_CODE -> {
                 if (hasBluetoothPermissions()) {
                     (application as TrustChainApplication).initIPv8()
                 } else {
@@ -138,11 +133,19 @@ class DashboardActivity : AppCompatActivity() {
                         val uri: Uri = Uri.fromParts("package", packageName, null)
                         intent.data = uri
                         @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
-                        startActivityForResult(intent, SETTINGS_INTENT_CODE)
+                        startActivityForResult(intent, Companion.SETTINGS_INTENT_CODE)
                     }
                 }.create()
             }
             .show()
             .setCanceledOnTouchOutside(false)
+    }
+
+    companion object {
+        private const val BLUETOOTH_PERMISSIONS_REQUEST_CODE = 200
+        private const val SETTINGS_INTENT_CODE = 1000
+        private const val BLUETOOTH_PERMISSIONS_SCAN = "android.permission.BLUETOOTH_SCAN"
+        private const val BLUETOOTH_PERMISSIONS_CONNECT = "android.permission.BLUETOOTH_CONNECT"
+        private const val BLUETOOTH_PERMISSIONS_ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE"
     }
 }

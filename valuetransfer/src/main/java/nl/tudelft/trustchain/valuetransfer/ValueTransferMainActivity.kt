@@ -25,7 +25,6 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -39,8 +38,6 @@ import com.androidadvance.topsnackbar.TSnackbar
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.jaredrummler.blockingdialog.BlockingDialogManager
-import kotlinx.android.synthetic.main.dialog_image.*
-import kotlinx.android.synthetic.main.main_activity_vt.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
@@ -68,6 +65,7 @@ import nl.tudelft.trustchain.valuetransfer.util.ChatMessage
 import nl.tudelft.trustchain.valuetransfer.util.ContactImage
 import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
+import nl.tudelft.trustchain.valuetransfer.databinding.MainActivityVtBinding
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityAttestationConfirmDialog
 import nl.tudelft.trustchain.valuetransfer.passport.PassportHandler
@@ -83,12 +81,12 @@ import nl.tudelft.trustchain.valuetransfer.ui.settings.NotificationHandler
 import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
-import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
 import java.util.*
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
+    private lateinit var binding: MainActivityVtBinding
 
     /**
      * All fragments within this application, contact chat fragment excluded because it depends on arguments
@@ -116,26 +114,40 @@ class ValueTransferMainActivity : BaseActivity() {
      * Initialize all communities and (database) stores and repo's for performance purposes and
      * ease of use in other classes/fragments.
      */
-    val communities: Map<Class<out Community>, Community> = mapOf(
-        TrustChainCommunity::class.java to IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!,
-        IdentityCommunity::class.java to IPv8Android.getInstance().getOverlay<IdentityCommunity>()!!,
-        PeerChatCommunity::class.java to IPv8Android.getInstance().getOverlay<PeerChatCommunity>()!!,
-        EuroTokenCommunity::class.java to IPv8Android.getInstance().getOverlay<EuroTokenCommunity>()!!,
-        AttestationCommunity::class.java to IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
-    )
-    val stores: Map<Any, Any> = mapOf(
-        IdentityStore::class.java to IdentityStore.getInstance(this),
-        PeerChatStore::class.java to PeerChatStore.getInstance(this),
-        GatewayStore::class.java to GatewayStore.getInstance(this),
-        ContactStore::class.java to ContactStore.getInstance(this),
-        TransactionRepository::class.java to TransactionRepository(getCommunity()!!, GatewayStore.getInstance(this)),
-        TrustChainHelper::class.java to TrustChainHelper(getCommunity()!!),
-    )
+    val communities: Map<Class<out Community>, Community> =
+        mapOf(
+            TrustChainCommunity::class.java to
+                IPv8Android.getInstance()
+                    .getOverlay<TrustChainCommunity>()!!,
+            IdentityCommunity::class.java to
+                IPv8Android.getInstance()
+                    .getOverlay<IdentityCommunity>()!!,
+            PeerChatCommunity::class.java to
+                IPv8Android.getInstance()
+                    .getOverlay<PeerChatCommunity>()!!,
+            EuroTokenCommunity::class.java to
+                IPv8Android.getInstance()
+                    .getOverlay<EuroTokenCommunity>()!!,
+            AttestationCommunity::class.java to
+                IPv8Android.getInstance()
+                    .getOverlay<AttestationCommunity>()!!
+        )
+    val stores: Map<Any, Any> =
+        mapOf(
+            IdentityStore::class.java to IdentityStore.getInstance(this),
+            PeerChatStore::class.java to PeerChatStore.getInstance(this),
+            GatewayStore::class.java to GatewayStore.getInstance(this),
+            ContactStore::class.java to ContactStore.getInstance(this),
+            TransactionRepository::class.java to
+                TransactionRepository(
+                    getCommunity()!!,
+                    GatewayStore.getInstance(this)
+                ),
+            TrustChainHelper::class.java to TrustChainHelper(getCommunity()!!),
+        )
 
     @SuppressLint("RestrictedApi")
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
-
         /**
          * Initialize app preferences class and set theme saved in it
          */
@@ -144,22 +156,8 @@ class ValueTransferMainActivity : BaseActivity() {
         appPreferences.switchTheme(currentTheme)
 
         super.onCreate(savedInstanceState)
-
-        // Set status bar to black on Lollipop when in day mode
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            window.statusBarColor = if (currentTheme == AppPreferences.APP_THEME_NIGHT) {
-                ContextCompat.getColor(
-                    applicationContext,
-                    getColorIDFromThemeAttribute(
-                        this@ValueTransferMainActivity,
-                        R.attr.colorPrimary
-                    )
-                )
-            } else {
-                Color.BLACK
-            }
-        }
-        setContentView(R.layout.main_activity_vt)
+        binding = MainActivityVtBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         val action: String? = intent?.action
         val data: Uri? = intent?.data
         var requestMoney = false
@@ -184,11 +182,12 @@ class ValueTransferMainActivity : BaseActivity() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(
             LifecycleEventObserver { _, event: Lifecycle.Event ->
                 val temp = isAppInForeground
-                isAppInForeground = listOf(
-                    Lifecycle.Event.ON_CREATE,
-                    Lifecycle.Event.ON_START,
-                    Lifecycle.Event.ON_RESUME
-                ).contains(event)
+                isAppInForeground =
+                    listOf(
+                        Lifecycle.Event.ON_CREATE,
+                        Lifecycle.Event.ON_START,
+                        Lifecycle.Event.ON_RESUME
+                    ).contains(event)
 
                 if (temp != isAppInForeground && isAppInForeground) notificationHandler.cancelAll()
                 Log.d("VTLOG", "FOREGROUND: $isAppInForeground")
@@ -198,26 +197,38 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * On initialisation of activity pre-load all fragments to allow instant switching to increase performance
          */
-        if (!requestMoney)
+        if (!requestMoney) {
             fragmentManager.beginTransaction()
-                .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
-                .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
-                .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
-                .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
-                .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
-                .add(R.id.container, exchangeTransferMoneyLinkFragment, exchangeTransferMoneyLinkFragmentTag).hide(exchangeTransferMoneyLinkFragment)
-                .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
+                .add(R.id.container, identityFragment, IDENTITY_FRAGMENT_TAG).hide(identityFragment)
+                .add(R.id.container, exchangeFragment, EXCHANGE_FRAGMENT_TAG).hide(exchangeFragment)
+                .add(R.id.container, contactsFragment, CONTACTS_FRAGMENT_TAG).hide(contactsFragment)
+                .add(R.id.container, qrScanController, QR_SCAN_CONTROLLER_TAG)
+                .hide(qrScanController)
+                .add(R.id.container, settingsFragment, SETTINGS_FRAGMENT_TAG).hide(settingsFragment)
+                .add(
+                    R.id.container,
+                    exchangeTransferMoneyLinkFragment,
+                    EXCHANGE_TRANSFER_MONEY_LINK_FRAGMENT_TAG
+                ).hide(exchangeTransferMoneyLinkFragment)
+                .add(R.id.container, walletOverviewFragment, WALLET_OVER_FRAGMENT_TAG)
                 .commit()
-        else
+        } else {
             fragmentManager.beginTransaction()
-                .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
-                .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
-                .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
-                .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
-                .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
-                .add(R.id.container, exchangeTransferMoneyLinkFragment, exchangeTransferMoneyLinkFragmentTag)
-                .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag).hide(walletOverviewFragment)
+                .add(R.id.container, identityFragment, IDENTITY_FRAGMENT_TAG).hide(identityFragment)
+                .add(R.id.container, exchangeFragment, EXCHANGE_FRAGMENT_TAG).hide(exchangeFragment)
+                .add(R.id.container, contactsFragment, CONTACTS_FRAGMENT_TAG).hide(contactsFragment)
+                .add(R.id.container, qrScanController, QR_SCAN_CONTROLLER_TAG)
+                .hide(qrScanController)
+                .add(R.id.container, settingsFragment, SETTINGS_FRAGMENT_TAG).hide(settingsFragment)
+                .add(
+                    R.id.container,
+                    exchangeTransferMoneyLinkFragment,
+                    EXCHANGE_TRANSFER_MONEY_LINK_FRAGMENT_TAG
+                )
+                .add(R.id.container, walletOverviewFragment, WALLET_OVER_FRAGMENT_TAG)
+                .hide(walletOverviewFragment)
                 .commit()
+        }
         fragmentManager.executePendingTransactions()
 
         /**
@@ -226,10 +237,11 @@ class ValueTransferMainActivity : BaseActivity() {
         bottomNavigationViewListeners()
 
         val bottomView: BottomNavigationMenuView =
-            bottomNavigationView.getChildAt(0) as BottomNavigationMenuView
+            binding.bottomNavigationView.getChildAt(0) as BottomNavigationMenuView
         (bottomView.getChildAt(2) as BottomNavigationItemView).setIconSize(
             TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, 40f,
+                TypedValue.COMPLEX_UNIT_DIP,
+                40f,
                 resources.displayMetrics
             ).toInt()
         )
@@ -243,7 +255,8 @@ class ValueTransferMainActivity : BaseActivity() {
         peerChatCommunity.setOnContactImageCallback(::onContactImageCallback)
         peerChatCommunity.createContactStateTable()
         peerChatCommunity.createContactImageTable()
-        peerChatCommunity.identityInfo = identityCommunity.getIdentityInfo(appPreferences.getIdentityFaceHash())
+        peerChatCommunity.identityInfo =
+            identityCommunity.getIdentityInfo(appPreferences.getIdentityFaceHash())
 
         /**
          * Attestation community callbacks and register own key as trusted authority
@@ -267,7 +280,8 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Enable click on notification when app is currently not on foreground
          */
-        if (intent != null && identityCommunity.hasIdentity() && !lifecycle.currentState.isAtLeast(
+        if (intent != null && identityCommunity.hasIdentity() &&
+            !lifecycle.currentState.isAtLeast(
                 Lifecycle.State.RESUMED
             )
         ) {
@@ -304,27 +318,29 @@ class ValueTransferMainActivity : BaseActivity() {
         if (passportHandler.getNFCAdapter() != null) {
             val intent = Intent(applicationContext, this.javaClass)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.getActivity(
-                    this,
-                    0,
-                    Intent(this, javaClass).addFlags(
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    ),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                )
-            } else {
-                PendingIntent.getActivity(
-                    this,
-                    0,
-                    Intent(this, javaClass).addFlags(
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    ),
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
+            val pendingIntent: PendingIntent =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getActivity(
+                        this,
+                        0,
+                        Intent(this, javaClass).addFlags(
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        ),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                    )
+                } else {
+                    PendingIntent.getActivity(
+                        this,
+                        0,
+                        Intent(this, javaClass).addFlags(
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        ),
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+                }
             val filter = arrayOf(arrayOf("android.nfc.tech.IsoDep"))
-            passportHandler.getNFCAdapter()!!.enableForegroundDispatch(this, pendingIntent, null, filter)
+            passportHandler.getNFCAdapter()!!
+                .enableForegroundDispatch(this, pendingIntent, null, filter)
         }
     }
 
@@ -333,9 +349,7 @@ class ValueTransferMainActivity : BaseActivity() {
      */
     override fun onPause() {
         super.onPause()
-
         isAppInForeground = false
-
         passportHandler.getNFCAdapter()?.disableForegroundDispatch(this)
     }
 
@@ -350,7 +364,6 @@ class ValueTransferMainActivity : BaseActivity() {
         when {
             intent.action == NfcAdapter.ACTION_TECH_DISCOVERED -> nfcIntentController(intent)
             getCommunity<IdentityCommunity>()!!.hasIdentity() -> {
-
                 @Suppress("DEPRECATION")
                 Handler().postDelayed(
                     {
@@ -366,6 +379,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * Process an incoming NFC tag intent
      */
     private fun nfcIntentController(intent: Intent) {
+        @Suppress("DEPRECATION")
         intent.extras?.getParcelable<Tag>(NfcAdapter.EXTRA_TAG)?.let { tag ->
             if (tag.techList.contains("android.nfc.tech.IsoDep")) {
                 passportHandler.setIsoDep(tag)
@@ -383,17 +397,27 @@ class ValueTransferMainActivity : BaseActivity() {
             closeAllDialogs()
 
             when (fragmentTag) {
-                contactChatFragmentTag -> {
+                CONTACT_CHAT_FRAGMENT_TAG -> {
                     when (val fragment = notificationChatIntent(intent)) {
                         is ContactChatFragment -> {
-                            val previousFragmentTag = fragment.arguments?.getString(ARG_PARENT) ?: walletOverviewFragmentTag
+                            val previousFragmentTag =
+                                fragment.arguments?.getString(ARG_PARENT)
+                                    ?: WALLET_OVER_FRAGMENT_TAG
                             val previousFragment = getFragmentByTag(previousFragmentTag)!!
 
-                            if (previousFragmentTag == contactChatFragmentTag) {
-                                if (previousFragment.arguments?.getString(ARG_PUBLIC_KEY) != fragment.arguments?.getString(ARG_PUBLIC_KEY)) {
-                                    fragment.arguments = fragment.arguments?.apply {
-                                        putString(ARG_PARENT, previousFragment.arguments?.getString(ARG_PARENT))
-                                    }
+                            if (previousFragmentTag == CONTACT_CHAT_FRAGMENT_TAG) {
+                                if (previousFragment.arguments?.getString(ARG_PUBLIC_KEY) !=
+                                    fragment.arguments?.getString(
+                                        ARG_PUBLIC_KEY
+                                    )
+                                ) {
+                                    fragment.arguments =
+                                        fragment.arguments?.apply {
+                                            putString(
+                                                ARG_PARENT,
+                                                previousFragment.arguments?.getString(ARG_PARENT)
+                                            )
+                                        }
 
                                     fragmentManager.beginTransaction().apply {
                                         remove(previousFragment)
@@ -407,11 +431,13 @@ class ValueTransferMainActivity : BaseActivity() {
                                 }.commit()
                             }
                         }
+
                         is ContactsFragment -> {
-                            selectBottomNavigationItem(contactsFragmentTag)
+                            selectBottomNavigationItem(CONTACTS_FRAGMENT_TAG)
                         }
                     }
                 }
+
                 else -> {
                     getActiveFragment()?.let { previousFragment ->
                         if (previousFragment is ContactChatFragment) {
@@ -424,12 +450,14 @@ class ValueTransferMainActivity : BaseActivity() {
                     fragmentManager.executePendingTransactions()
 
                     when (fragmentTag) {
-                        settingsFragmentTag -> {
-                            detailFragment(settingsFragmentTag, Bundle())
+                        SETTINGS_FRAGMENT_TAG -> {
+                            detailFragment(SETTINGS_FRAGMENT_TAG, Bundle())
                         }
-                        exchangeTransferMoneyLinkFragmentTag -> {
-                            detailFragment(exchangeTransferMoneyLinkFragmentTag, Bundle())
+
+                        EXCHANGE_TRANSFER_MONEY_LINK_FRAGMENT_TAG -> {
+                            detailFragment(EXCHANGE_TRANSFER_MONEY_LINK_FRAGMENT_TAG, Bundle())
                         }
+
                         else -> {
                             selectBottomNavigationItem(fragmentTag)
                             (getFragmentByTag(fragmentTag)!! as VTFragment).initView()
@@ -462,16 +490,23 @@ class ValueTransferMainActivity : BaseActivity() {
             try {
                 val publicKey = defaultCryptoProvider.keyFromPublicBin(publicKeyString.hexToBytes())
                 val contact = getStore<ContactStore>()!!.getContactFromPublicKey(publicKey)
-                val identityName = getStore<PeerChatStore>()!!.getContactState(publicKey)?.identityInfo?.let {
-                    "${it.initials} ${it.surname}"
-                }
+                val identityName =
+                    getStore<PeerChatStore>()!!.getContactState(publicKey)?.identityInfo?.let {
+                        "${it.initials} ${it.surname}"
+                    }
 
                 ContactChatFragment().apply {
-                    arguments = bundleOf(
-                        ARG_PUBLIC_KEY to publicKeyString,
-                        ARG_NAME to (contact?.name ?: (identityName ?: resources.getString(R.string.text_unknown_contact))),
-                        ARG_PARENT to (activeFragment?.tag ?: walletOverviewFragmentTag)
-                    )
+                    arguments =
+                        bundleOf(
+                            ARG_PUBLIC_KEY to publicKeyString,
+                            ARG_NAME to (
+                                contact?.name ?: (
+                                    identityName
+                                        ?: resources.getString(R.string.text_unknown_contact)
+                                )
+                            ),
+                            ARG_PARENT to (activeFragment?.tag ?: WALLET_OVER_FRAGMENT_TAG)
+                        )
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -538,14 +573,39 @@ class ValueTransferMainActivity : BaseActivity() {
      * Define bottom navigation view listeners
      */
     private fun bottomNavigationViewListeners() {
-        bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
+        @Suppress("DEPRECATION")
+        binding.bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
             val activeTag = getActiveFragment()?.tag
 
             when (menuItem.itemId) {
-                R.id.walletOverviewFragment -> if (activeTag != walletOverviewFragmentTag) switchFragment(walletOverviewFragment)
-                R.id.identityFragment -> if (activeTag != identityFragmentTag) switchFragment(identityFragment)
-                R.id.exchangeFragment -> if (activeTag != exchangeFragmentTag) switchFragment(exchangeFragment)
-                R.id.contactsFragment -> if (activeTag != contactsFragmentTag) switchFragment(contactsFragment)
+                R.id.walletOverviewFragment ->
+                    if (activeTag != WALLET_OVER_FRAGMENT_TAG) {
+                        switchFragment(
+                            walletOverviewFragment
+                        )
+                    }
+
+                R.id.identityFragment ->
+                    if (activeTag != IDENTITY_FRAGMENT_TAG) {
+                        switchFragment(
+                            identityFragment
+                        )
+                    }
+
+                R.id.exchangeFragment ->
+                    if (activeTag != EXCHANGE_FRAGMENT_TAG) {
+                        switchFragment(
+                            exchangeFragment
+                        )
+                    }
+
+                R.id.contactsFragment ->
+                    if (activeTag != CONTACTS_FRAGMENT_TAG) {
+                        switchFragment(
+                            contactsFragment
+                        )
+                    }
+
                 R.id.qrScanControllerFragment -> {
                     qrScanController.initiateScan()
                     return@setOnNavigationItemSelectedListener false
@@ -573,11 +633,14 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Controller from fragment to detail view fragment
      */
-    fun detailFragment(tag: String, args: Bundle) {
+    fun detailFragment(
+        tag: String,
+        args: Bundle
+    ) {
         val activeFragment = getActiveFragment()
 
         when (tag) {
-            contactChatFragmentTag -> {
+            CONTACT_CHAT_FRAGMENT_TAG -> {
                 val contactChatFragment = ContactChatFragment()
                 contactChatFragment.arguments = args
 
@@ -585,10 +648,11 @@ class ValueTransferMainActivity : BaseActivity() {
                     setCustomAnimations(0, R.anim.exit_to_left)
                     if (activeFragment != null) hide(activeFragment)
                     setCustomAnimations(R.anim.enter_from_right, 0)
-                    add(R.id.container, contactChatFragment, contactChatFragmentTag)
+                    add(R.id.container, contactChatFragment, CONTACT_CHAT_FRAGMENT_TAG)
                 }.commit()
             }
-            settingsFragmentTag -> {
+
+            SETTINGS_FRAGMENT_TAG -> {
                 fragmentManager.beginTransaction().apply {
                     setCustomAnimations(0, R.anim.exit_to_left)
                     if (activeFragment != null) hide(activeFragment)
@@ -598,7 +662,8 @@ class ValueTransferMainActivity : BaseActivity() {
 
                 (settingsFragment as VTFragment).initView()
             }
-            exchangeTransferMoneyLinkFragmentTag -> {
+
+            EXCHANGE_TRANSFER_MONEY_LINK_FRAGMENT_TAG -> {
                 fragmentManager.beginTransaction().apply {
                     setCustomAnimations(0, R.anim.exit_to_left)
                     if (activeFragment != null) hide(activeFragment)
@@ -616,13 +681,13 @@ class ValueTransferMainActivity : BaseActivity() {
      */
     private fun getFragmentByTag(tag: String): Fragment? {
         return when (tag) {
-            walletOverviewFragmentTag -> walletOverviewFragment
-            identityFragmentTag -> identityFragment
-            exchangeFragmentTag -> exchangeFragment
-            contactsFragmentTag -> contactsFragment
-            settingsFragmentTag -> settingsFragment
-            exchangeTransferMoneyLinkFragmentTag -> exchangeTransferMoneyLinkFragment
-            contactChatFragmentTag -> fragmentManager.findFragmentByTag(tag)
+            WALLET_OVER_FRAGMENT_TAG -> walletOverviewFragment
+            IDENTITY_FRAGMENT_TAG -> identityFragment
+            EXCHANGE_FRAGMENT_TAG -> exchangeFragment
+            CONTACTS_FRAGMENT_TAG -> contactsFragment
+            SETTINGS_FRAGMENT_TAG -> settingsFragment
+            EXCHANGE_TRANSFER_MONEY_LINK_FRAGMENT_TAG -> exchangeTransferMoneyLinkFragment
+            CONTACT_CHAT_FRAGMENT_TAG -> fragmentManager.findFragmentByTag(tag)
             else -> null
         }
     }
@@ -683,7 +748,12 @@ class ValueTransferMainActivity : BaseActivity() {
         action: View.OnClickListener? = null,
         icon: Drawable? = null,
     ) {
-        val snackbar = TSnackbar.make(view, text, if (isShort) TSnackbar.LENGTH_SHORT else TSnackbar.LENGTH_LONG)
+        val snackbar =
+            TSnackbar.make(
+                view,
+                text,
+                if (isShort) TSnackbar.LENGTH_SHORT else TSnackbar.LENGTH_LONG
+            )
         val snackbarView = snackbar.view
 
         // Add on click listener action
@@ -697,7 +767,12 @@ class ValueTransferMainActivity : BaseActivity() {
 
         // Set extra title if exists
         if (title != null) {
-            snackbar.setText(HtmlCompat.fromHtml("<b>$title</b><br>\n$text", HtmlCompat.FROM_HTML_MODE_LEGACY))
+            snackbar.setText(
+                HtmlCompat.fromHtml(
+                    "<b>$title</b><br>\n$text",
+                    HtmlCompat.FROM_HTML_MODE_LEGACY
+                )
+            )
         }
 
         // Show snackbar just below status bar
@@ -707,8 +782,11 @@ class ValueTransferMainActivity : BaseActivity() {
         layoutParams.setMargins(margin, marginTop, margin, layoutParams.bottomMargin)
 
         // Add text and icon to snackbar
-        val textView = snackbarView.findViewById<TextView>(com.androidadvance.topsnackbar.R.id.snackbar_text)
-        textView.textSize = resources.getDimension(R.dimen.actionBarSubTitleSize) / resources.displayMetrics.scaledDensity
+        val textView =
+            snackbarView.findViewById<TextView>(com.androidadvance.topsnackbar.R.id.snackbar_text)
+        @Suppress("DEPRECATION")
+        textView.textSize =
+            resources.getDimension(R.dimen.actionBarSubTitleSize) / resources.displayMetrics.scaledDensity
 
         if (icon != null) {
             textView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
@@ -719,10 +797,21 @@ class ValueTransferMainActivity : BaseActivity() {
 
         // Set background of snackbar depending on content
         when (type) {
-            SNACKBAR_TYPE_INFO -> snackbarView.background = ContextCompat.getDrawable(context, R.drawable.square_rounded_info)
-            SNACKBAR_TYPE_SUCCESS -> snackbarView.background = ContextCompat.getDrawable(context, R.drawable.square_rounded_green)
-            SNACKBAR_TYPE_WARNING -> snackbarView.background = ContextCompat.getDrawable(context, R.drawable.square_rounded_orange)
-            SNACKBAR_TYPE_ERROR -> snackbarView.background = ContextCompat.getDrawable(context, R.drawable.square_rounded_red)
+            SNACKBAR_TYPE_INFO ->
+                snackbarView.background =
+                    ContextCompat.getDrawable(context, R.drawable.square_rounded_info)
+
+            SNACKBAR_TYPE_SUCCESS ->
+                snackbarView.background =
+                    ContextCompat.getDrawable(context, R.drawable.square_rounded_green)
+
+            SNACKBAR_TYPE_WARNING ->
+                snackbarView.background =
+                    ContextCompat.getDrawable(context, R.drawable.square_rounded_orange)
+
+            SNACKBAR_TYPE_ERROR ->
+                snackbarView.background =
+                    ContextCompat.getDrawable(context, R.drawable.square_rounded_red)
         }
 
         snackbar.show()
@@ -732,25 +821,27 @@ class ValueTransferMainActivity : BaseActivity() {
      * Programmatically push bottom navigation item using tag
      */
     fun selectBottomNavigationItem(tag: String) {
-        bottomNavigationView.selectedItemId = when (tag) {
-            walletOverviewFragmentTag -> R.id.walletOverviewFragment
-            identityFragmentTag -> R.id.identityFragment
-            exchangeFragmentTag -> R.id.exchangeFragment
-            contactsFragmentTag -> R.id.contactsFragment
-            else -> R.id.walletOverviewFragment
-        }
+        binding.bottomNavigationView.selectedItemId =
+            when (tag) {
+                WALLET_OVER_FRAGMENT_TAG -> R.id.walletOverviewFragment
+                IDENTITY_FRAGMENT_TAG -> R.id.identityFragment
+                EXCHANGE_FRAGMENT_TAG -> R.id.exchangeFragment
+                CONTACTS_FRAGMENT_TAG -> R.id.contactsFragment
+                else -> R.id.walletOverviewFragment
+            }
     }
 
     /**
      * Enable custom actionbar to be aligned in center (fragment titles) and left (chat)
      */
     fun setActionBarWithGravity(alignment: Int) {
-        val params = ActionBar.LayoutParams(
-            ActionBar.LayoutParams.WRAP_CONTENT,
-            ActionBar.LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = alignment
-        }
+        val params =
+            ActionBar.LayoutParams(
+                ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = alignment
+            }
 
         supportActionBar?.customView = null
         supportActionBar?.setCustomView(customActionBar, params)
@@ -766,7 +857,10 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Change title or subtitle of action bar
      */
-    fun setActionBarTitle(title: String?, subtitle: String?) = with(customActionBar) {
+    fun setActionBarTitle(
+        title: String?,
+        subtitle: String?
+    ) = with(customActionBar) {
         findViewById<TextView>(R.id.tv_actionbar_title).text = title
         findViewById<TextView>(R.id.tv_actionbar_subtitle).apply {
             text = subtitle ?: ""
@@ -777,21 +871,26 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Change only subtitle of action bar
      */
-    fun setActionBarSubTitle(subtitle: String) = with(customActionBar) {
-        findViewById<TextView>(R.id.tv_actionbar_subtitle).apply {
-            text = subtitle
-            isVisible = true
+    fun setActionBarSubTitle(subtitle: String) =
+        with(customActionBar) {
+            findViewById<TextView>(R.id.tv_actionbar_subtitle).apply {
+                text = subtitle
+                isVisible = true
+            }
         }
-    }
 
-    fun setActionBarTitleSize(size: Float) = with(customActionBar) {
-        findViewById<TextView>(R.id.tv_actionbar_title).textSize = size
-    }
+    fun setActionBarTitleSize(size: Float) =
+        with(customActionBar) {
+            findViewById<TextView>(R.id.tv_actionbar_title).textSize = size
+        }
 
     /**
      * Set an icon next to the action bar title
      */
-    fun setActionBarTitleIcon(icon: Int? = null, color: Int? = null) = with(customActionBar) {
+    fun setActionBarTitleIcon(
+        icon: Int? = null,
+        color: Int? = null
+    ) = with(customActionBar) {
         findViewById<TextView>(R.id.tv_actionbar_title).apply {
             setCompoundDrawablesWithIntrinsicBounds(0, 0, icon ?: 0, 0)
 
@@ -808,10 +907,11 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Set an icon next to the action bar subtitle
      */
-    fun setActionBarSubTitleIcon(icon: Int? = null) = with(customActionBar) {
-        findViewById<TextView>(R.id.tv_actionbar_subtitle)
-            .setCompoundDrawablesRelativeWithIntrinsicBounds(icon ?: 0, 0, 0, 0)
-    }
+    fun setActionBarSubTitleIcon(icon: Int? = null) =
+        with(customActionBar) {
+            findViewById<TextView>(R.id.tv_actionbar_subtitle)
+                .setCompoundDrawablesRelativeWithIntrinsicBounds(icon ?: 0, 0, 0, 0)
+        }
 
     /**
      * Toggle visibility of back button in action bar
@@ -825,7 +925,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * Toggle visibility of bottom navigation view
      */
     fun toggleBottomNavigation(state: Boolean) {
-        bottomNavigationView.isVisible = state
+        binding.bottomNavigationView.isVisible = state
     }
 
     /**
@@ -848,7 +948,10 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Enable one-time update of balance for complete app
      */
-    fun setBalance(balance: String, isVerified: Boolean) {
+    fun setBalance(
+        balance: String,
+        isVerified: Boolean
+    ) {
         if (isVerified) {
             this.verifiedBalance.postValue(balance)
         } else {
@@ -865,7 +968,11 @@ class ValueTransferMainActivity : BaseActivity() {
         chatMessage: ChatMessage
     ) {
         // Discard callback when there's no identity imported or when the message is already in the database (delivered using ip or bluetooth packet)
-        if (lifecycle.currentState == Lifecycle.State.DESTROYED || !getCommunity<IdentityCommunity>()!!.hasIdentity() || community.getDatabase().getMessageById(chatMessage.id) != null) {
+        if (lifecycle.currentState == Lifecycle.State.DESTROYED ||
+            !getCommunity<IdentityCommunity>()!!.hasIdentity() ||
+            community.getDatabase()
+                .getMessageById(chatMessage.id) != null
+        ) {
             return
         }
 
@@ -888,8 +995,9 @@ class ValueTransferMainActivity : BaseActivity() {
                     peerChatStore.setIdentityState(chatMessage.sender, identityInfo)
                     contactImageRequest = true
                 }
+
                 currentContactState.identityInfo != identityInfo -> {
-                    if (currentContactState.identityInfo!!.imageHash != identityInfo.imageHash) {
+                    if (currentContactState.identityInfo.imageHash != identityInfo.imageHash) {
                         contactImageRequest = true
                     }
 
@@ -898,9 +1006,11 @@ class ValueTransferMainActivity : BaseActivity() {
                         identityInfo
                     )
                 }
+
                 contactImage == null && (identityInfo.imageHash != null && identityInfo.imageHash != "") -> {
                     contactImageRequest = true
                 }
+
                 identityInfo.imageHash == null && contactImage != null -> {
                     peerChatStore.removeContactImage(peer.publicKey)
                 }
@@ -909,8 +1019,11 @@ class ValueTransferMainActivity : BaseActivity() {
 
         val idInfo = currentContactState?.identityInfo
         val messageIdInfo = chatMessage.identityInfo
-        var identityIsUpdated = idInfo?.isVerified != messageIdInfo?.isVerified || idInfo?.initials != messageIdInfo?.initials || idInfo?.surname != messageIdInfo?.surname
-        var newMessages: MutableList<ChatMessage> = mutableListOf()
+        var identityIsUpdated =
+            idInfo?.isVerified != messageIdInfo?.isVerified ||
+                idInfo?.initials != messageIdInfo?.initials ||
+                idInfo?.surname != messageIdInfo?.surname
+        val newMessages: MutableList<ChatMessage> = mutableListOf()
 
         // When a message is sent but not received, and this activity hasn't been initialized,
         // the message may be sent without identity info. This tells the user that the info is unknown
@@ -937,9 +1050,12 @@ class ValueTransferMainActivity : BaseActivity() {
         if (identityIsUpdated) {
             val messages: MutableList<String> = mutableListOf()
 
-            val verificationStatusText = if (messageIdInfo?.isVerified == true) {
-                resources.getString(R.string.text_verified_lower)
-            } else resources.getString(R.string.text_unverified_lower)
+            val verificationStatusText =
+                if (messageIdInfo?.isVerified == true) {
+                    resources.getString(R.string.text_verified_lower)
+                } else {
+                    resources.getString(R.string.text_unverified_lower)
+                }
 
             if (idInfo == null) {
                 messages.add(
@@ -956,43 +1072,47 @@ class ValueTransferMainActivity : BaseActivity() {
                 messages.add(resources.getString(R.string.text_identity_updated))
 
                 when {
-                    idInfo.isVerified != messageIdInfo?.isVerified -> messages.add(
-                        resources.getString(
-                            R.string.text_identity_updated_verification,
-                            verificationStatusText
+                    idInfo.isVerified != messageIdInfo?.isVerified ->
+                        messages.add(
+                            resources.getString(
+                                R.string.text_identity_updated_verification,
+                                verificationStatusText
+                            )
                         )
-                    )
+
                     idInfo.initials != messageIdInfo.initials ||
-                        idInfo.surname != messageIdInfo.surname -> messages.add(
-                        resources.getString(
-                            R.string.text_identity_updated_name,
-                            "${idInfo.initials} ${idInfo.surname}",
-                            "${messageIdInfo.initials} ${messageIdInfo.surname}"
+                        idInfo.surname != messageIdInfo.surname ->
+                        messages.add(
+                            resources.getString(
+                                R.string.text_identity_updated_name,
+                                "${idInfo.initials} ${idInfo.surname}",
+                                "${messageIdInfo.initials} ${messageIdInfo.surname}"
+                            )
                         )
-                    )
                 }
 
                 if (messageIdInfo?.isVerified != true) messages.add(resources.getString(R.string.text_identity_updated_unverified_message))
                 messages.add(resources.getString(R.string.text_identity_updated_careful))
             }
 
-            val updatedIdentityChatMessage = ChatMessage(
-                UUID.randomUUID().toString(),
-                messages.joinToString(" "),
-                MessageAttachment(
-                    MessageAttachment.TYPE_IDENTITY_UPDATED,
-                    0,
-                    byteArrayOf()
-                ),
-                peer.publicKey,
-                getCommunity<TrustChainCommunity>()!!.myPeer.publicKey,
-                false,
-                chatMessage.timestamp,
-                ack = true,
-                read = true,
-                attachmentFetched = true,
-                transactionHash = null,
-            )
+            val updatedIdentityChatMessage =
+                ChatMessage(
+                    UUID.randomUUID().toString(),
+                    messages.joinToString(" "),
+                    MessageAttachment(
+                        MessageAttachment.TYPE_IDENTITY_UPDATED,
+                        0,
+                        byteArrayOf()
+                    ),
+                    peer.publicKey,
+                    getCommunity<TrustChainCommunity>()!!.myPeer.publicKey,
+                    false,
+                    chatMessage.timestamp,
+                    ack = true,
+                    read = true,
+                    attachmentFetched = true,
+                    transactionHash = null,
+                )
             newMessages.add(updatedIdentityChatMessage)
         }
 
@@ -1020,14 +1140,14 @@ class ValueTransferMainActivity : BaseActivity() {
 
         // Request attachment
         if (chatMessage.attachment != null) {
-            when (chatMessage.attachment!!.type) {
+            when (chatMessage.attachment.type) {
                 MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> return
                 MessageAttachment.TYPE_CONTACT -> return
                 MessageAttachment.TYPE_LOCATION -> return
                 MessageAttachment.TYPE_TRANSFER_REQUEST -> return
                 MessageAttachment.TYPE_IDENTITY_UPDATED -> return
                 else -> { // for image or file
-                    val fileID = chatMessage.attachment!!.content.toHex()
+                    val fileID = chatMessage.attachment.content.toHex()
                     val file = MessageAttachment.getFile(this, fileID)
                     if (file.exists()) {
                         community.getDatabase().setAttachmentFetched(fileID)
@@ -1042,7 +1162,10 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Callback on receipt of a request to send contact image
      */
-    private fun onContactImageRequestCallback(community: PeerChatCommunity, peer: Peer) {
+    private fun onContactImageRequestCallback(
+        community: PeerChatCommunity,
+        peer: Peer
+    ) {
         val identityFaceImage = appPreferences.getIdentityFace()
         val identityFaceHash = appPreferences.getIdentityFaceHash()
         val decodedImage = identityFaceImage?.let { decodeBytes(it) }
@@ -1053,11 +1176,12 @@ class ValueTransferMainActivity : BaseActivity() {
             bitmap = bitmap.resize(200f)
         }
 
-        val contactImage = ContactImage(
-            getCommunity<TrustChainCommunity>()!!.myPeer.publicKey,
-            identityFaceHash,
-            bitmap
-        )
+        val contactImage =
+            ContactImage(
+                getCommunity<TrustChainCommunity>()!!.myPeer.publicKey,
+                identityFaceHash,
+                bitmap
+            )
 
         community.sendContactImage(peer, contactImage)
     }
@@ -1071,24 +1195,37 @@ class ValueTransferMainActivity : BaseActivity() {
         val peerChatStore: PeerChatStore = getStore()!!
 
         if (contactImage.imageHash != null && contactImage.image != null) {
-            imageBytes(contactImage.image!!)?.let { imageBytes ->
+            imageBytes(contactImage.image)?.let { imageBytes ->
                 peerChatStore.setContactImage(
                     contactImage.publicKey,
                     imageBytes,
-                    contactImage.imageHash!!
+                    contactImage.imageHash
                 )
-                peerChatStore.setState(contactImage.publicKey, PeerChatStore.STATUS_IMAGE_HASH, false, contactImage.imageHash!!)
+                peerChatStore.setState(
+                    contactImage.publicKey,
+                    PeerChatStore.STATUS_IMAGE_HASH,
+                    false,
+                    contactImage.imageHash
+                )
             }
         } else {
             peerChatStore.removeContactImage(contactImage.publicKey)
-            peerChatStore.setState(contactImage.publicKey, PeerChatStore.STATUS_IMAGE_HASH, false, null)
+            peerChatStore.setState(
+                contactImage.publicKey,
+                PeerChatStore.STATUS_IMAGE_HASH,
+                false,
+                null
+            )
         }
     }
 
     /**
      * On receipt of a chunk of the requested attestation execute the following
      */
-    private fun attestationChunkCallback(peer: Peer, i: Int) {
+    private fun attestationChunkCallback(
+        peer: Peer,
+        i: Int
+    ) {
         Log.i("VTLOG", "Received attestation chunk $i from ${peer.mid}.")
         Handler(Looper.getMainLooper()).post {
             displayToast(applicationContext, "Received $i attestation chunks from ${peer.mid}.")
@@ -1108,7 +1245,17 @@ class ValueTransferMainActivity : BaseActivity() {
         metaData: String?,
         signature: ByteArray?
     ) {
-        attestationRequestCompleteCallback(forPeer, attributeName, attestation, attributeHash, idFormat, fromPeer, metaData, signature, applicationContext)
+        attestationRequestCompleteCallback(
+            forPeer,
+            attributeName,
+            attestation,
+            attributeHash,
+            idFormat,
+            fromPeer,
+            metaData,
+            signature,
+            applicationContext
+        )
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -1124,12 +1271,22 @@ class ValueTransferMainActivity : BaseActivity() {
         context: Context
     ) {
         if (fromPeer == null) {
-            Log.i("VTLOG", "Signed attestation for attribute $attributeName for peer ${forPeer.mid}.")
+            Log.i(
+                "VTLOG",
+                "Signed attestation for attribute $attributeName for peer ${forPeer.mid}."
+            )
             Handler(Looper.getMainLooper()).post {
-                displayToast(applicationContext, "Successfully sent attestation for $attributeName to peer ${forPeer.mid}", isShort = false)
+                displayToast(
+                    applicationContext,
+                    "Successfully sent attestation for $attributeName to peer ${forPeer.mid}",
+                    isShort = false
+                )
             }
         } else {
-            Log.i("VTLOG", "Received attestation for attribute $attributeName with metadata: $metaData.")
+            Log.i(
+                "VTLOG",
+                "Received attestation for attribute $attributeName with metadata: $metaData."
+            )
             Handler(Looper.getMainLooper()).post {
                 displayToast(applicationContext, "Received Attestation for $attributeName")
             }
@@ -1139,21 +1296,32 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * On receipt of an attestation request (initiated by the other party) execute the following
      */
-    private fun attestationRequestCallback(peer: Peer, attributeName: String, metadata: String): ByteArray {
-
+    private fun attestationRequestCallback(
+        peer: Peer,
+        attributeName: String,
+        metadata: String
+    ): ByteArray {
         val parsedMetadata = JSONObject(metadata)
         val idFormat = parsedMetadata.optString("id_format", ID_METADATA)
 
         closeAllDialogs()
 
-        val input = BlockingDialogManager.getInstance()
-            .showAndWait<String?>(this, IdentityAttestationConfirmDialog(attributeName, idFormat, this))
-            ?: throw RuntimeException("User cancelled dialog.")
+        val input =
+            BlockingDialogManager.getInstance()
+                .showAndWait<String?>(
+                    this,
+                    IdentityAttestationConfirmDialog(attributeName, idFormat, this)
+                )
+                ?: throw RuntimeException("User cancelled dialog.")
 
         Log.i("VTLOG", "Signing attestation with value $input with format $idFormat.")
 
         Handler(Looper.getMainLooper()).post {
-            displayToast(applicationContext, "Signing attestation for $attributeName for peer ${peer.mid} ...", isShort = false)
+            displayToast(
+                applicationContext,
+                "Signing attestation for $attributeName for peer ${peer.mid} ...",
+                isShort = false
+            )
         }
 
         return when (idFormat) {
@@ -1165,9 +1333,14 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Check camera permissions
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun checkCameraPermissions() {
-        if ((ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
+        if ((
+                ActivityCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.CAMERA
+                ) != PackageManager.PERMISSION_GRANTED
+            )
+        ) {
             requestPermissions(
                 arrayOf(Manifest.permission.CAMERA),
                 PERMISSION_CAMERA
@@ -1203,14 +1376,15 @@ class ValueTransferMainActivity : BaseActivity() {
     }
 
     companion object {
-        const val walletOverviewFragmentTag = "wallet_overview_fragment"
-        const val identityFragmentTag = "identity_fragment"
-        const val exchangeFragmentTag = "exchange_fragment"
-        const val contactsFragmentTag = "contacts_fragment"
-        const val qrScanControllerTag = "qrscancontroller"
-        const val contactChatFragmentTag = "contact_chat_fragment"
-        const val settingsFragmentTag = "settings_fragment"
-        const val exchangeTransferMoneyLinkFragmentTag = "exchange_transfer_money_link_fragment"
+        const val WALLET_OVER_FRAGMENT_TAG = "wallet_overview_fragment"
+        const val IDENTITY_FRAGMENT_TAG = "identity_fragment"
+        const val EXCHANGE_FRAGMENT_TAG = "exchange_fragment"
+        const val CONTACTS_FRAGMENT_TAG = "contacts_fragment"
+        const val QR_SCAN_CONTROLLER_TAG = "qrscancontroller"
+        const val CONTACT_CHAT_FRAGMENT_TAG = "contact_chat_fragment"
+        const val SETTINGS_FRAGMENT_TAG = "settings_fragment"
+        const val EXCHANGE_TRANSFER_MONEY_LINK_FRAGMENT_TAG =
+            "exchange_transfer_money_link_fragment"
         const val SNACKBAR_TYPE_SUCCESS = "success"
         const val SNACKBAR_TYPE_WARNING = "warning"
         const val SNACKBAR_TYPE_ERROR = "error"

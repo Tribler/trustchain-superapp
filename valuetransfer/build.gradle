@@ -1,7 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'com.squareup.sqldelight'
+apply plugin: 'app.cash.sqldelight'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 
 ktlint {
@@ -9,13 +8,16 @@ ktlint {
     android = true
     outputToConsole = true
     ignoreFailures = false
+    verbose = true
 }
 
 sqldelight {
-    Database {
-        packageName = "nl.tudelft.valuetransfer.sqldelight"
-        sourceFolders = ["sqldelight"]
-        schemaOutputDirectory = file("src/main/sqldelight/databases")
+    databases {
+        Database {
+            packageName = "nl.tudelft.valuetransfer.sqldelight"
+            srcDirs = files(["src/main/sqldelight"])
+            schemaOutputDirectory = file("src/main/sqldelight/databases")
+        }
     }
 }
 
@@ -26,11 +28,10 @@ repositories {
 }
 
 android {
-    compileSdkVersion 33
-
     defaultConfig {
-        minSdkVersion 24
-        targetSdkVersion 33
+        minSdkVersion 26
+        compileSdk 34
+        targetSdkVersion 34
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -48,16 +49,18 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17.VERSION_17
     }
+
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
+
     buildFeatures {
         viewBinding = true
     }
-    ndkVersion '21.1.6352462'
+
     namespace 'nl.tudelft.trustchain.valuetransfer'
 }
 
@@ -98,8 +101,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation "androidx.room:room-runtime:$room_version"
     implementation project(path: ':eurotoken')
-    implementation 'com.google.android.gms:play-services-maps:18.0.0'
-    implementation 'com.google.android.gms:play-services-location:18.0.0'
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+    implementation 'com.google.android.gms:play-services-location:21.1.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     // Testing
@@ -134,6 +137,6 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-opt-in=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
+            "-opt-in=kotlin.ExperimentalUnsignedTypes",
     ]
 }

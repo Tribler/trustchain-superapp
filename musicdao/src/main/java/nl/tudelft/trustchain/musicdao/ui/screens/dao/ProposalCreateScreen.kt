@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.dao
 
 import android.app.Activity
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -16,9 +14,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.ui.SnackbarHandler
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ProposalCreateScreen(daoId: String, daoViewModel: DaoViewModel, navController: NavController) {
+fun ProposalCreateScreen(
+    daoId: String,
+    daoViewModel: DaoViewModel,
+    navController: NavController
+) {
     var satoshi by rememberSaveable { mutableStateOf("6000") }
     var address by rememberSaveable { mutableStateOf("mkKcu9VCNTAerxbZLXvLSGBTBiLwqGqcDL") }
     var chosenArtist by rememberSaveable { mutableStateOf("") }
@@ -56,13 +57,15 @@ fun ProposalCreateScreen(daoId: String, daoViewModel: DaoViewModel, navControlle
     }
 
     Card(
-        modifier = Modifier
-            .padding(20.dp)
+        modifier =
+            Modifier
+                .padding(20.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
         ) {
             OutlinedTextField(
                 value = satoshi,
@@ -97,7 +100,9 @@ fun ProposalCreateScreen(daoId: String, daoViewModel: DaoViewModel, navControlle
                     daoViewModel.getListsOfArtists().map { artist ->
                         DropdownMenuItem(
                             onClick = {
-                                address = artist.bitcoinAddress; expanded = false; chosenArtist =
+                                address = artist.bitcoinAddress
+                                expanded = false
+                                chosenArtist =
                                     artist.name
                             }
                         ) {

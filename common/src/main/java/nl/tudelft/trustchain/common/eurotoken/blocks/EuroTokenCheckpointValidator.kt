@@ -6,7 +6,10 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.eurotoken.verifyGatewayIdentity
 
 class EuroTokenCheckpointValidator(transactionRepository: TransactionRepository) : EuroTokenBaseValidator(transactionRepository) {
-    override fun validateEuroTokenProposal(block: TrustChainBlock, database: TrustChainStore) {
+    override fun validateEuroTokenProposal(
+        block: TrustChainBlock,
+        database: TrustChainStore
+    ) {
         assertBalanceExists(block)
         // Don't validate balances (this would crawl for previous), we check for this later
         verifyGatewayIdentity(block.linkPublicKey, transactionRepository.gatewayStore)

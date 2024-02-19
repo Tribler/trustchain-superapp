@@ -7,6 +7,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogIdentityAttestationAuthorityBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import java.lang.IllegalStateException
@@ -14,11 +15,11 @@ import java.lang.IllegalStateException
 class IdentityAttestationAuthorityDialog(
     private val authorityKey: PublicKey,
 ) : VTDialogFragment() {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_identity_attestation_authority, null)
+            val binding = DialogIdentityAttestationAuthorityBinding.inflate(layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -28,8 +29,8 @@ class IdentityAttestationAuthorityDialog(
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val authorityAddressValue = view.findViewById<EditText>(R.id.etAuthorityAddressValue)
-            val addAuthorityButton = view.findViewById<Button>(R.id.btnAddAuthority)
+            val authorityAddressValue = binding.etAuthorityAddressValue
+            val addAuthorityButton = binding.btnAddAuthority
 
             authorityAddressValue.setText(authorityKey.keyToBin().toHex())
 

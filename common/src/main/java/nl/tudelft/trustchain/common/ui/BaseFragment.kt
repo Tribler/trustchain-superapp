@@ -9,7 +9,9 @@ import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 
-abstract class BaseFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(contentLayoutId) {
+abstract class BaseFragment(
+    @LayoutRes contentLayoutId: Int = 0
+) : Fragment(contentLayoutId) {
     protected val trustchain: TrustChainHelper by lazy {
         TrustChainHelper(getTrustChainCommunity())
     }

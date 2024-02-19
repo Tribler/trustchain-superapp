@@ -16,7 +16,6 @@ import nl.tudelft.trustchain.eurotoken.databinding.FragmentDestroyMoneyBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 
 class DestroyMoneyFragment : EurotokenBaseFragment(R.layout.fragment_destroy_money) {
-
     private var addGateway = false
     private var setPreferred = false
 
@@ -33,13 +32,16 @@ class DestroyMoneyFragment : EurotokenBaseFragment(R.layout.fragment_destroy_mon
         )
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         val publicKey = requireArguments().getString(ARG_PUBLIC_KEY)!!
         val amount = requireArguments().getLong(ARG_AMOUNT)
         val name = requireArguments().getString(ARG_NAME)!!
-        val payment_id = requireArguments().getString(ARG_PAYMENT_ID)!!
+        val paymentId = requireArguments().getString(ARG_PAYMENT_ID)!!
         val ip = requireArguments().getString(ARG_IP)!!
         val port = requireArguments().getInt(ARG_PORT)
 
@@ -89,12 +91,16 @@ class DestroyMoneyFragment : EurotokenBaseFragment(R.layout.fragment_destroy_mon
             }
         }
 
-        val pref = requireContext().getSharedPreferences(
-            EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
-            Context.MODE_PRIVATE
-        )
-        val demoModeEnabled = pref.getBoolean(
-            EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+        val pref =
+            requireContext().getSharedPreferences(
+                EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                Context.MODE_PRIVATE
+            )
+        val demoModeEnabled =
+            pref.getBoolean(
+                EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                false
+            )
 
         if (demoModeEnabled) {
             binding.txtBalance.text =
@@ -119,16 +125,11 @@ class DestroyMoneyFragment : EurotokenBaseFragment(R.layout.fragment_destroy_mon
                 publicKey.hexToBytes(),
                 ip,
                 port,
-                payment_id,
+                paymentId,
                 amount
             )
             findNavController().navigate(R.id.action_destroyMoneyFragment_to_transactionsFragment)
         }
-
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
     }
 
     companion object {

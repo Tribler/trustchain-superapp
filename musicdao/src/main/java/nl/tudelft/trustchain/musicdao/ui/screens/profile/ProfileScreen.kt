@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.profile
 
 import android.app.Activity
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,18 +18,21 @@ import dagger.hilt.android.EntryPointAccessors
 
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ProfileScreen(publicKey: String, navController: NavController) {
+fun ProfileScreen(
+    publicKey: String,
+    navController: NavController
+) {
+    val viewModelFactory =
+        EntryPointAccessors.fromActivity(
+            LocalContext.current as Activity,
+            MusicActivity.ViewModelFactoryProvider::class.java
+        ).profileScreenViewModelFactory()
 
-    val viewModelFactory = EntryPointAccessors.fromActivity(
-        LocalContext.current as Activity,
-        MusicActivity.ViewModelFactoryProvider::class.java
-    ).profileScreenViewModelFactory()
-
-    val viewModel: ProfileScreenViewModel = viewModel(
-        factory = ProfileScreenViewModel.provideFactory(viewModelFactory, publicKey = publicKey)
-    )
+    val viewModel: ProfileScreenViewModel =
+        viewModel(
+            factory = ProfileScreenViewModel.provideFactory(viewModelFactory, publicKey = publicKey)
+        )
 
     val profile = viewModel.profile.collectAsState()
     val releases = viewModel.releases.collectAsState()

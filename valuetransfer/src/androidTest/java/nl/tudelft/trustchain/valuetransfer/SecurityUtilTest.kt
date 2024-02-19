@@ -20,12 +20,12 @@ class SecurityUtilTest {
     }
 
     @Test
-    fun SignatureValidation() {
+    fun signatureValidation() {
         assertEquals(SecurityUtil.validate(input, signature, keys.public), true)
     }
 
     @Test
-    fun DetectInputTampering() {
+    fun detectInputTampering() {
         val tamperedInput = input + "extra"
         assertEquals(SecurityUtil.validate(tamperedInput, signature, keys.public), false)
     }

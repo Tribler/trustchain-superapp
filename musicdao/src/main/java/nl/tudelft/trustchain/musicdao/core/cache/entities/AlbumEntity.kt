@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.core.cache.entities
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import nl.tudelft.trustchain.musicdao.core.repositories.model.Album
@@ -23,7 +21,6 @@ data class AlbumEntity(
     val infoHash: String?,
     val torrentPath: String?
 ) {
-    @RequiresApi(Build.VERSION_CODES.O)
     fun toAlbum(): Album {
         return Album(
             id = id,
@@ -33,24 +30,26 @@ data class AlbumEntity(
             publisher = publisher,
             releaseDate = Instant.parse(releaseDate),
             songs = songs.map { it.toSong() },
-            cover = cover?.let { path ->
-                File(path).let {
-                    if (it.exists()) {
-                        it
-                    } else {
-                        null
+            cover =
+                cover?.let { path ->
+                    File(path).let {
+                        if (it.exists()) {
+                            it
+                        } else {
+                            null
+                        }
+                    }
+                },
+            root =
+                root?.let { path ->
+                    File(path).let {
+                        if (it.exists()) {
+                            it
+                        } else {
+                            null
+                        }
                     }
                 }
-            },
-            root = root?.let { path ->
-                File(path).let {
-                    if (it.exists()) {
-                        it
-                    } else {
-                        null
-                    }
-                }
-            }
         )
     }
 }

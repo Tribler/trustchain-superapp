@@ -11,5 +11,8 @@ interface MultiSigWallet {
      * does not need to immediately be finished after this method finishes. In fact, usually this is
      * not the case with multi-signature wallets.
      */
-    fun startTransaction(amount: Double, address: String)
+    fun startTransaction(
+        amount: Double,
+        address: String
+    )
 }

@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TorrentStatusScreen(torrent: TorrentStatus) {
-
     Column {
         ListItem(text = { Text("Info Hash") }, secondaryText = { Text(torrent.infoHash) })
         ListItem(

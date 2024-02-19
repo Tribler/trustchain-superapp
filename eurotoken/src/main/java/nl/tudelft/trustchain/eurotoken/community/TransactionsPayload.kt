@@ -11,15 +11,19 @@ import nl.tudelft.ipv8.messaging.serializeVarLen
  * encodes public keys such that trust scores can be updated.
  * Used by EuroTokenCommunity
  */
-class TransactionsPayload (    val id: String,
-                               val data: ByteArray
+class TransactionsPayload(
+    val id: String,
+    val data: ByteArray
 ) : Serializable {
     override fun serialize(): ByteArray {
         return serializeVarLen(id.toByteArray()) + serializeVarLen(data)
     }
 
     companion object Deserializer : Deserializable<TransactionsPayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<TransactionsPayload, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<TransactionsPayload, Int> {
             var localOffset = offset
             val (id, idSize) = deserializeVarLen(buffer, localOffset)
             localOffset += idSize

@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_send_money.*
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -16,11 +15,9 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentSendMoneyBinding
-import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 
 class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
-
     private var addContact = false
 
     private val binding by viewBinding(FragmentSendMoneyBinding::bind)
@@ -32,7 +29,10 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         )
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         val publicKey = requireArguments().getString(ARG_PUBLIC_KEY)!!
@@ -68,12 +68,16 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
             }
         }
 
-        val pref = requireContext().getSharedPreferences(
-            EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
-            Context.MODE_PRIVATE
-        )
-        val demoModeEnabled = pref.getBoolean(
-            EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+        val pref =
+            requireContext().getSharedPreferences(
+                EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                Context.MODE_PRIVATE
+            )
+        val demoModeEnabled =
+            pref.getBoolean(
+                EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                false
+            )
 
         if (demoModeEnabled) {
             binding.txtBalance.text =
@@ -91,19 +95,43 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
         if (trustScore != null) {
             if (trustScore >= TRUSTSCORE_AVERAGE_BOUNDARY) {
-                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_high, trustScore)
-                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.android_green))
+                binding.trustScoreWarning.text =
+                    getString(R.string.send_money_trustscore_warning_high, trustScore)
+                binding.trustScoreWarning.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.android_green
+                    )
+                )
             } else if (trustScore > TRUSTSCORE_LOW_BOUNDARY) {
-                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_average, trustScore)
-                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
+                binding.trustScoreWarning.text =
+                    getString(R.string.send_money_trustscore_warning_average, trustScore)
+                binding.trustScoreWarning.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.metallic_gold
+                    )
+                )
             } else {
-                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_low, trustScore)
-                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
+                binding.trustScoreWarning.text =
+                    getString(R.string.send_money_trustscore_warning_low, trustScore)
+                binding.trustScoreWarning.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.red
+                    )
+                )
             }
         } else {
-            trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_no_score)
-            trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
-            trustScoreWarning.visibility = View.VISIBLE
+            binding.trustScoreWarning.text =
+                getString(R.string.send_money_trustscore_warning_no_score)
+            binding.trustScoreWarning.setBackgroundColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.metallic_gold
+                )
+            )
+            binding.trustScoreWarning.visibility = View.VISIBLE
         }
 
         binding.btnSend.setOnClickListener {
@@ -114,7 +142,7 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
                     .addContact(key, newName)
             }
             val success = transactionRepository.sendTransferProposal(publicKey.hexToBytes(), amount)
-            if(!success) {
+            if (!success) {
                 return@setOnClickListener Toast.makeText(
                     requireContext(),
                     "Insufficient balance",
@@ -123,7 +151,6 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
             }
             findNavController().navigate(R.id.action_sendMoneyFragment_to_transactionsFragment)
         }
-
     }
 
     companion object {

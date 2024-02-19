@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.dao
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,14 +19,16 @@ import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.core.dao.daoToColor
 import nl.tudelft.trustchain.musicdao.ui.components.EmptyState
 import nl.tudelft.trustchain.musicdao.ui.navigation.Screen
-import nl.tudelft.trustchain.musicdao.ui.screens.profile_menu.CustomMenuItem
+import nl.tudelft.trustchain.musicdao.ui.screens.profileMenu.CustomMenuItem
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @Composable
-fun DaoListScreen(navController: NavController, daoViewModel: DaoViewModel) {
+fun DaoListScreen(
+    navController: NavController,
+    daoViewModel: DaoViewModel
+) {
     val daos by daoViewModel.daos.collectAsState()
     val isRefreshing by daoViewModel.isRefreshing.collectAsState()
     val daoPeersAmount by daoViewModel.daoPeers.collectAsState()
@@ -41,12 +41,12 @@ fun DaoListScreen(navController: NavController, daoViewModel: DaoViewModel) {
         onRefresh = {
             daoViewModel.refreshOneShot()
         }
-
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
         ) {
             Column {
                 CustomMenuItem(
@@ -85,16 +85,18 @@ fun DaoListScreen(navController: NavController, daoViewModel: DaoViewModel) {
                             item(index) {
                                 Card(
                                     backgroundColor = MaterialTheme.colors.background,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 20.dp),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 20.dp),
                                     onClick = {
                                         navController.navigate(Screen.DaoDetailRoute.createRoute(dao.daoId))
                                     }
                                 ) {
                                     Column(
-                                        modifier = Modifier
-                                            .padding(15.dp),
+                                        modifier =
+                                            Modifier
+                                                .padding(15.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         DaoIcon(dao.name, 64)
@@ -160,19 +162,24 @@ fun DaoListScreen(navController: NavController, daoViewModel: DaoViewModel) {
 }
 
 @Composable
-fun DaoIcon(daoId: String, size: Int) {
+fun DaoIcon(
+    daoId: String,
+    size: Int
+) {
     Box(
-        modifier = Modifier
-            .size(size.dp)
-            .clip(CircleShape)
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        daoToColor(daoId).first,
-                        daoToColor(daoId).second
-                    )
+        modifier =
+            Modifier
+                .size(size.dp)
+                .clip(CircleShape)
+                .background(
+                    brush =
+                        Brush.verticalGradient(
+                            colors =
+                                listOf(
+                                    daoToColor(daoId).first,
+                                    daoToColor(daoId).second
+                                )
+                        )
                 )
-
-            )
     )
 }

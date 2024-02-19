@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.musicdao.ui
 
 import MinimizedPlayer
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
@@ -30,7 +28,6 @@ import nl.tudelft.trustchain.musicdao.ui.navigation.BottomNavigationBar
 
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -73,8 +70,9 @@ fun MusicDAOApp() {
                     MinimizedPlayer(
                         playerViewModel = playerViewModel,
                         navController = navController,
-                        modifier = Modifier
-                            .align(Alignment.End)
+                        modifier =
+                            Modifier
+                                .align(Alignment.End)
                     )
                 }
             },

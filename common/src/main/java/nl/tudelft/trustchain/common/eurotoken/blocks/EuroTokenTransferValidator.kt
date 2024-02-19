@@ -5,7 +5,10 @@ import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 
 class EuroTokenTransferValidator(transactionRepository: TransactionRepository) : EuroTokenBaseValidator(transactionRepository) {
-    override fun validateEuroTokenProposal(block: TrustChainBlock, database: TrustChainStore) {
+    override fun validateEuroTokenProposal(
+        block: TrustChainBlock,
+        database: TrustChainStore
+    ) {
         if (!block.transaction.containsKey(TransactionRepository.KEY_AMOUNT)) {
             throw MissingAmount("Missing amount")
         }
@@ -14,6 +17,6 @@ class EuroTokenTransferValidator(transactionRepository: TransactionRepository) :
     }
 
     class MissingAmount(message: String) : Invalid(message) {
-        override val TYPE: String = "MissingAmount"
+        override val type: String = "MissingAmount"
     }
 }

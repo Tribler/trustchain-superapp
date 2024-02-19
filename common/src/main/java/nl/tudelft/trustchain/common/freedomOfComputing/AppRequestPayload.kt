@@ -7,7 +7,8 @@ import nl.tudelft.ipv8.messaging.serializeVarLen
 
 data class AppRequestPayload(
     val appTorrentInfoHash: String,
-    val uuid: String // Created because EVA doesn't allow retransmits
+    // Created because EVA doesn't allow retransmits
+    val uuid: String
 ) : Serializable {
     override fun serialize(): ByteArray {
         return serializeVarLen(appTorrentInfoHash.toByteArray()) +
@@ -15,7 +16,10 @@ data class AppRequestPayload(
     }
 
     companion object Deserializer : Deserializable<AppRequestPayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<AppRequestPayload, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<AppRequestPayload, Int> {
             var localOffset = offset
             val (appTorrentInfoHash, idSize) = deserializeVarLen(buffer, localOffset)
             localOffset += idSize

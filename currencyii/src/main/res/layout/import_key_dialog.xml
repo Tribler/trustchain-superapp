@@ -31,6 +31,6 @@
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <include layout="@layout/bitcoin_networks"/>
+    <include android:id="@+id/bitcoin_networks_layout" layout="@layout/bitcoin_networks"/>
 
 </LinearLayout>

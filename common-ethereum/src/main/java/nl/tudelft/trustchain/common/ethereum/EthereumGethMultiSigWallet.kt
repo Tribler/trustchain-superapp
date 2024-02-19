@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.common.ethereum
 
 import kotlinx.coroutines.delay
-import nl.tudelft.trustchain.common.ethereum.BuildConfig
 import nl.tudelft.trustchain.common.ethereum.contracts.geth.MultiSigWallet
 import org.ethereum.geth.*
 
@@ -38,8 +37,16 @@ class EthereumGethMultiSigWallet(gethWallet: EthereumGethWallet) {
         return gethNode.peersInfo.size() > 0L
     }
 
-    class MySigner(private val account: Account?, private val keyStore: KeyStore?, private val password: String?, private val chainId: BigInt?) : Signer {
-        override fun sign(address: Address?, transaction: Transaction?): Transaction {
+    class MySigner(
+        private val account: Account?,
+        private val keyStore: KeyStore?,
+        private val password: String?,
+        private val chainId: BigInt?
+    ) : Signer {
+        override fun sign(
+            address: Address?,
+            transaction: Transaction?
+        ): Transaction {
             return keyStore!!.signTxPassphrase(account, password, transaction, chainId)
         }
     }

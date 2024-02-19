@@ -20,17 +20,21 @@ import nl.tudelft.trustchain.common.ui.QRCodeActivityPortrait
  * Helper class for creating
  */
 class QRCodeUtils(private val context: Context) {
-
     /**
      * Start the QR scanner, which if successful, calls onActivityResult() on the fragment
      */
-    fun startQRScanner(fragment: Fragment, promptText: String? = null, vertical: Boolean = false) {
+    fun startQRScanner(
+        fragment: Fragment,
+        promptText: String? = null,
+        vertical: Boolean = false
+    ) {
         run {
-            val integrator = FragmentIntentIntegrator(fragment)
-                .setPrompt(promptText ?: "Scan QR Code")
-                .setOrientationLocked(false)
-                .setBeepEnabled(true)
-                .setCameraId(0)
+            val integrator =
+                FragmentIntentIntegrator(fragment)
+                    .setPrompt(promptText ?: "Scan QR Code")
+                    .setOrientationLocked(false)
+                    .setBeepEnabled(true)
+                    .setCameraId(0)
             if (vertical) {
                 integrator.captureActivity = QRCodeActivityPortrait::class.java
             }
@@ -38,7 +42,11 @@ class QRCodeUtils(private val context: Context) {
         }
     }
 
-    fun parseActivityResult(requestCode: Int, resultCode: Int, data: Intent?): String? {
+    fun parseActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ): String? {
         return IntentIntegrator.parseActivityResult(requestCode, resultCode, data)?.contents
     }
 
@@ -48,7 +56,7 @@ class QRCodeUtils(private val context: Context) {
      */
     fun createQR(
         text: String,
-        size: Int = QRCodeSize,
+        size: Int = QR_CODE_SIZE,
         pColor: Int = pixelColor,
         bColor: Int = backgroundColor
     ): Bitmap? {
@@ -70,18 +78,20 @@ class QRCodeUtils(private val context: Context) {
     @Throws(WriterException::class)
     private fun textToImageEncode(
         value: String,
-        size: Int = QRCodeSize,
+        size: Int = QR_CODE_SIZE,
         pColor: Int = pixelColor,
         bColor: Int = backgroundColor
     ): Bitmap? {
         val bitMatrix: BitMatrix
         try {
-            bitMatrix = MultiFormatWriter().encode(
-                value,
-                BarcodeFormat.QR_CODE,
-                size,
-                size, null
-            )
+            bitMatrix =
+                MultiFormatWriter().encode(
+                    value,
+                    BarcodeFormat.QR_CODE,
+                    size,
+                    size,
+                    null
+                )
         } catch (IllegalArgumentException: IllegalArgumentException) {
             return null
         }
@@ -93,10 +103,12 @@ class QRCodeUtils(private val context: Context) {
         for (y in 0 until bitMatrixHeight) {
             val offset = y * bitMatrixWidth
             for (x in 0 until bitMatrixWidth) {
-                pixels[offset + x] = if (bitMatrix.get(x, y))
-                    ContextCompat.getColor(context, pColor)
-                else
-                    ContextCompat.getColor(context, bColor)
+                pixels[offset + x] =
+                    if (bitMatrix.get(x, y)) {
+                        ContextCompat.getColor(context, pColor)
+                    } else {
+                        ContextCompat.getColor(context, bColor)
+                    }
             }
         }
         val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_8888)
@@ -106,7 +118,7 @@ class QRCodeUtils(private val context: Context) {
     }
 
     companion object {
-        const val QRCodeSize = 500
+        const val QR_CODE_SIZE = 500
         var pixelColor = R.color.black
         var backgroundColor = R.color.white
     }

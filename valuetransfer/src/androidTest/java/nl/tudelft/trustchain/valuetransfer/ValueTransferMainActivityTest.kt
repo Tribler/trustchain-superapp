@@ -7,6 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Suppress("ktlint:standard:max-line-length")
 @RunWith(AndroidJUnit4::class)
 class ValueTransferMainActivityTest {
     private val exchangeTransferMoneyLinkFragment = ExchangeTransferMoneyLinkFragment()

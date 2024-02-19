@@ -2,12 +2,10 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import com.android.volley.Request
@@ -15,7 +13,6 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.android.synthetic.main.dialog_exchange_transfer_link.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BuildConfig
@@ -23,6 +20,7 @@ import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.databinding.DialogExchangeTransferLinkBinding
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.*
 import java.security.interfaces.RSAPublicKey
@@ -37,7 +35,7 @@ class ExchangeTransferMoneyLinkDialog(
     private var transactionAmountText = ""
     private var transactionMessage = message ?: " "
     private var isEuroTransfer = false
-    private var IBAN = ""
+    private var iban = ""
     private lateinit var messageView: EditText
     private lateinit var typeAdapter: ArrayAdapter<CharSequence>
     private val gatewayStoreLink by lazy {
@@ -47,11 +45,12 @@ class ExchangeTransferMoneyLinkDialog(
         TransactionRepository(IPv8Android.getInstance().getOverlay()!!, gatewayStoreLink)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_exchange_transfer_link, null)
+            val bottomSheetDialog =
+                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val binding = DialogExchangeTransferLinkBinding.inflate(layoutInflater)
+            val view = binding.root
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -61,10 +60,10 @@ class ExchangeTransferMoneyLinkDialog(
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val typeSpinner = view.findViewById<Spinner>(R.id.spinnerType)
-            val ibanView = view.findViewById<TextView>(R.id.etIBAN)
-            val transactionAmountView = view.findViewById<EditText>(R.id.etTransactionAmount)
-            messageView = view.findViewById(R.id.etTransactionMessage)
+            val typeSpinner = binding.spinnerType
+            val ibanView = binding.etIBAN
+            val transactionAmountView = binding.etTransactionAmount
+            messageView = binding.etTransactionMessage
 
             if (isTransfer && message != "") {
                 messageView.setText(resources.getString(R.string.text_re, transactionMessage))
@@ -77,11 +76,12 @@ class ExchangeTransferMoneyLinkDialog(
                 transactionAmountView.setText(formatAmount(amount).toString())
             }
 
-            typeAdapter = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.exchange_types,
-                android.R.layout.simple_spinner_item
-            )
+            typeAdapter =
+                ArrayAdapter.createFromResource(
+                    requireContext(),
+                    R.array.exchange_types,
+                    android.R.layout.simple_spinner_item
+                )
 
             typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item)
             typeSpinner.adapter = typeAdapter
@@ -114,20 +114,15 @@ class ExchangeTransferMoneyLinkDialog(
             transactionAmountView.doAfterTextChanged {
                 transactionAmount = formatAmount(transactionAmountView.text.toString())
                 transactionAmountText = transactionAmountView.text.toString()
-                //                  Large number warning
                 if (isValidTransactionAmount(transactionAmountText) == "Valid but large") {
                     transactionAmountView.background.setTint(Color.parseColor("#FFF9BA"))
-                }
-//                  Invalid:
-                else if (isValidTransactionAmount(transactionAmountText) == "Invalid") {
+                } else if (isValidTransactionAmount(transactionAmountText) == "Invalid") {
                     transactionAmountView.background.setTint(Color.parseColor("#FFBABA"))
                     parentActivity.displayToast(
                         requireContext(),
                         resources.getString(R.string.transer_money_link_valid_transaction_value)
                     )
-                }
-//              Is valid:
-                else {
+                } else {
                     transactionAmountView.background.setTint(Color.parseColor("#C8FFC4"))
                 }
             }
@@ -141,9 +136,10 @@ class ExchangeTransferMoneyLinkDialog(
                     !isValidIban(ibanView.text.toString()) -> {
                         ibanView.background.setTint(Color.parseColor("#FFBABA"))
                     }
+
                     else -> {
                         ibanView.background.setTint(Color.parseColor("#C8FFC4"))
-                        IBAN = ibanView.text.toString()
+                        iban = ibanView.text.toString()
                     }
                 }
             }
@@ -151,7 +147,7 @@ class ExchangeTransferMoneyLinkDialog(
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
-            bottomSheetDialog.clShareLink.setOnClickListener {
+            binding.clShareLink.setOnClickListener {
                 if (!isValidIban(ibanView.text.toString()) && isEuroTransfer) {
                     parentActivity.displayToast(
                         requireContext(),
@@ -164,17 +160,21 @@ class ExchangeTransferMoneyLinkDialog(
                     )
                 } else {
                     createPaymentId(
-                        (transactionAmountText.replace(",", ".").toDouble() * 100).toInt(), if (isEuroTransfer) ibanView.text.toString() else null
+                        (transactionAmountText.replace(",", ".").toDouble() * 100).toInt(),
+                        if (isEuroTransfer) ibanView.text.toString() else null
                     )
                 }
             }
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    internal fun createPaymentId(amount: Int, iban: String? = null) {
+    internal fun createPaymentId(
+        amount: Int,
+        iban: String? = null
+    ) {
         val host = BuildConfig.DEFAULT_GATEWAY_HOST
         val url = "$host/api/exchange/${if (iban == null) "e2t" else "t2e"}/initiate"
         Log.e("test", url)
@@ -189,53 +189,61 @@ class ExchangeTransferMoneyLinkDialog(
             jsonObject.put("destination_iban", iban)
         }
         // Volley post request with parameters
-        val request = JsonObjectRequest(
-            Request.Method.POST, url, jsonObject,
-            { response ->
-                val paymentId = response.getString("payment_id")
-                if (iban == null) {
-                    val gatewaydata = response.getJSONObject("gateway_connection_data")
-                    getEuroTokenCommunity().connectToGateway(
-                        gatewaydata.getString("public_key"),
-                        gatewaydata.getString("ip"),
-                        gatewaydata.getString("port").toInt(),
-                        paymentId
+        val request =
+            JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                { response ->
+                    val paymentId = response.getString("payment_id")
+                    if (iban == null) {
+                        val gatewayData = response.getJSONObject("gateway_connection_data")
+                        getEuroTokenCommunity().connectToGateway(
+                            gatewayData.getString("public_key"),
+                            gatewayData.getString("ip"),
+                            gatewayData.getString("port").toInt(),
+                            paymentId
+                        )
+                    }
+                    showLink(host, paymentId)
+                },
+                { error ->
+                    Log.e("server_err", error.message ?: error.toString())
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_unexpected_error_occurred)
                     )
                 }
-                showLink(host, paymentId)
-            },
-            { error ->
-                Log.e("server_err", error.message ?: error.toString())
-                parentActivity.displayToast(
-                    requireContext(),
-                    resources.getString(R.string.snackbar_unexpected_error_occurred)
-                )
-            }
-        )
+            )
         // Add the volley post request to the request queue
         queue.add(request)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun showLink(host: String, paymentId: String) {
+    private fun showLink(
+        host: String,
+        paymentId: String
+    ) {
         val link = getLink(host, paymentId)
-        val sendIntent: Intent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(
-                Intent.EXTRA_TEXT,
-                resources.getString(R.string.text_request_euro_1) +
-                    transactionAmountText +
-                    resources.getString(R.string.text_request_euro_2) +
-                    link
-            )
-            type = "text/plain"
-        }
+        val sendIntent: Intent =
+            Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    resources.getString(R.string.text_request_euro_1) +
+                        transactionAmountText +
+                        resources.getString(R.string.text_request_euro_2) +
+                        link
+                )
+                type = "text/plain"
+            }
         val shareIntent = Intent.createChooser(sendIntent, null)
         startActivity(shareIntent)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    fun getLink(host: String, paymentId: String): String {
+    fun getLink(
+        host: String,
+        paymentId: String
+    ): String {
         val ownKey = transactionRepositoryLink.trustChainCommunity.myPeer.publicKey
         val name =
             ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)?.name
@@ -260,7 +268,8 @@ class ExchangeTransferMoneyLinkDialog(
             simpleParams.append("&t2e=").append(true)
             parameters.append("&t2e=").append(SecurityUtil.urlencode("true"))
             simpleParams.append("&port=").append(BuildConfig.DEFAULT_GATEWAY_PORT)
-            parameters.append("&port=").append(SecurityUtil.urlencode(BuildConfig.DEFAULT_GATEWAY_PORT.toString()))
+            parameters.append("&port=")
+                .append(SecurityUtil.urlencode(BuildConfig.DEFAULT_GATEWAY_PORT.toString()))
         }
         simpleParams.append("&public=").append(ownKey.keyToBin().toHex())
         parameters.append("&public=").append(SecurityUtil.urlencode(ownKey.keyToBin().toHex()))
@@ -299,19 +308,13 @@ class ExchangeTransferMoneyLinkDialog(
     internal fun isValidTransactionAmount(transactionAmountText: String): String {
         val transactionAmountDouble = transactionAmountText.replace(",", ".").toDoubleOrNull()
         if (transactionAmountDouble != null) {
-//          Large number warning
             return if (transactionAmountDouble >= HIGHTRANSACTIONWARNINGVALUE && transactionAmountDouble < TOOHIGHTRANSACTIONVALUE) {
                 "Valid but large"
-            }
-//          Too large:
-            else if (transactionAmountDouble >= TOOHIGHTRANSACTIONVALUE) {
+            } else if (transactionAmountDouble >= TOOHIGHTRANSACTIONVALUE) {
                 "Invalid"
-            }
-//          Is valid:
-            else {
+            } else {
                 "Valid"
             }
-//      Not valid:
         } else {
             return "Invalid"
         }

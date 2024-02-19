@@ -13,27 +13,28 @@ class DashboardSelectorActivity : AppCompatActivity() {
     private val binding by viewBinding(FragmentDashboardSelectorBinding::inflate)
     private val adapter = ItemAdapter()
 
-    override fun onCreate(savedInstanceState: Bundle?) = runBlocking {
-        super.onCreate(savedInstanceState)
-        title = "Projects"
+    override fun onCreate(savedInstanceState: Bundle?) =
+        runBlocking {
+            super.onCreate(savedInstanceState)
+            title = "Projects"
 
-        adapter.registerRenderer(
-            DashboardSelectorRenderer { item, isChecked ->
-                runBlocking {
-                    if (isChecked) {
-                        (application as TrustChainApplication).appLoader.setPreferredApp(item.app.appName)
-                    } else {
-                        (application as TrustChainApplication).appLoader.removePreferredApp(item.app.appName)
+            adapter.registerRenderer(
+                DashboardSelectorRenderer { item, isChecked ->
+                    runBlocking {
+                        if (isChecked) {
+                            (application as TrustChainApplication).appLoader.setPreferredApp(item.app.appName)
+                        } else {
+                            (application as TrustChainApplication).appLoader.removePreferredApp(item.app.appName)
+                        }
                     }
                 }
-            }
-        )
+            )
 
-        setContentView(binding.root)
-        val layoutManager = GridLayoutManager(baseContext, 3)
-        binding.recyclerView.layoutManager = layoutManager
-        binding.recyclerView.adapter = adapter
+            setContentView(binding.root)
+            val layoutManager = GridLayoutManager(baseContext, 3)
+            binding.recyclerView.layoutManager = layoutManager
+            binding.recyclerView.adapter = adapter
 
-        adapter.updateItems((application as TrustChainApplication).appLoader.apps.toList())
-    }
+            adapter.updateItems((application as TrustChainApplication).appLoader.apps.toList())
+        }
 }

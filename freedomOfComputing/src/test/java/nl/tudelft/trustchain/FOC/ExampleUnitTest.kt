@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.FOC
+package nl.tudelft.trustchain.foc
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

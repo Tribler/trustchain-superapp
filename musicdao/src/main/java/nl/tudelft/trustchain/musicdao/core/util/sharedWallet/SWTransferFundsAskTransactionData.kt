@@ -18,7 +18,8 @@ data class SWTransferFundsAskBlockTD(
 )
 
 class SWTransferFundsAskTransactionData(data: JsonObject) : SWBlockTransactionData(
-    data, CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
+    data,
+    CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
 ) {
     fun getData(): SWTransferFundsAskBlockTD {
         return Gson().fromJson(getJsonString(), SWTransferFundsAskBlockTD::class.java)
@@ -47,7 +48,6 @@ class SWTransferFundsAskTransactionData(data: JsonObject) : SWBlockTransactionDa
                 receiverPk,
                 transactionSerialized
             )
-
         )
     )
 
