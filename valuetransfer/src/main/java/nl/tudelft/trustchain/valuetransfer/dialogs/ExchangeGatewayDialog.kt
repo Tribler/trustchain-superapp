@@ -1,10 +1,8 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -26,7 +24,6 @@ class ExchangeGatewayDialog(
     private val name: String,
     private val amount: Long?,
 ) : VTDialogFragment() {
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog =

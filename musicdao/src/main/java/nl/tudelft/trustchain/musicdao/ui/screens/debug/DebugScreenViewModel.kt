@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.debug
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import nl.tudelft.trustchain.musicdao.core.torrent.TorrentEngine
@@ -16,7 +14,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @OptIn(DelicateCoroutinesApi::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class DebugScreenViewModel
     @Inject

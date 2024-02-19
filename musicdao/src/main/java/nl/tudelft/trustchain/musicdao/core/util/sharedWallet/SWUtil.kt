@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.core.util.sharedWallet
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
@@ -20,7 +18,6 @@ object SWUtil {
      * Generate a random 128 bit string
      * From: https://sakthipriyan.com/2017/04/02/creating-base64-uuid-in-java.html
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     @JvmStatic
     fun randomUUID(): String {
         val uuid: UUID = UUID.randomUUID()

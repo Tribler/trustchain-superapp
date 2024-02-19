@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.components.releases
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,7 +19,6 @@ import nl.tudelft.trustchain.musicdao.core.repositories.model.Album
 import nl.tudelft.trustchain.musicdao.ui.components.ReleaseCover
 import nl.tudelft.trustchain.musicdao.ui.navigation.Screen
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable
@@ -46,7 +43,6 @@ fun ReleaseList(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable
@@ -62,7 +58,6 @@ fun NonLazyReleaseList(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable

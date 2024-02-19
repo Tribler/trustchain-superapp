@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.app.Dialog
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.AppCompatTextView
@@ -20,7 +19,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.viewpager.widget.ViewPager
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatMediaDetailAdapter
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatMediaItem
@@ -224,7 +222,6 @@ class ChatMediaDialog(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.actionSaveFile -> {

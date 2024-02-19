@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
 import android.nfc.NfcAdapter
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
@@ -232,20 +231,9 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
     private fun openNFCSettings() {
         val intent =
             Intent().apply {
-                when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-                        action = Settings.ACTION_NFC_SETTINGS
-                        putExtra(Settings.EXTRA_APP_PACKAGE, parentActivity.packageName)
-                    }
-
-                    else -> {
-                        action = "android.settings.WIRELESS_SETTINGS"
-                        putExtra("app_package", parentActivity.packageName)
-                        putExtra("app_uid", parentActivity.applicationInfo.uid)
-                    }
-                }
+                action = Settings.ACTION_NFC_SETTINGS
+                putExtra(Settings.EXTRA_APP_PACKAGE, parentActivity.packageName)
             }
-
         startActivity(intent)
     }
 

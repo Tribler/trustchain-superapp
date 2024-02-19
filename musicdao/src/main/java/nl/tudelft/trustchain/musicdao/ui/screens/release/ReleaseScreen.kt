@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.release
 
 import android.app.Activity
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -43,7 +41,6 @@ import nl.tudelft.trustchain.musicdao.ui.screens.torrent.TorrentStatusScreen
 import dagger.hilt.android.EntryPointAccessors
 import java.io.File
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @Composable
 fun ReleaseScreen(
@@ -224,7 +221,6 @@ fun ReleaseScreen(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Header(
     album: Album,

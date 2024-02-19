@@ -2,9 +2,7 @@ package nl.tudelft.trustchain.musicdao.core.torrent.fileProcessing
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.musicdao.core.util.Util
 import com.mpatric.mp3agic.Mp3File
 import java.io.File
@@ -13,7 +11,6 @@ import java.lang.Exception
 import java.nio.file.Path
 import java.nio.file.Paths
 
-@RequiresApi(Build.VERSION_CODES.O)
 class FileProcessor {
     companion object {
         private fun getFiles(path: Path): List<File>? {

@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.musicdao.core.repositories.album
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import kotlinx.coroutines.DelicateCoroutinesApi
 import nl.tudelft.trustchain.musicdao.CachePath
 import nl.tudelft.trustchain.musicdao.core.repositories.AlbumRepository
@@ -14,7 +12,6 @@ import java.time.Instant
 import java.util.*
 import javax.inject.Inject
 
-@RequiresApi(Build.VERSION_CODES.O)
 class BatchPublisher
     @Inject
     constructor(

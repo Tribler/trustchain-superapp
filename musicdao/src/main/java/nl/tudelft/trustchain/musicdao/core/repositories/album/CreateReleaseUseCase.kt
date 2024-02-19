@@ -2,9 +2,7 @@ package nl.tudelft.trustchain.musicdao.core.repositories.album
 
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import kotlinx.coroutines.DelicateCoroutinesApi
 import nl.tudelft.trustchain.musicdao.CachePath
 import nl.tudelft.trustchain.musicdao.core.repositories.AlbumRepository
@@ -21,7 +19,6 @@ class CreateReleaseUseCase
         private val cachePath: CachePath
     ) {
         @OptIn(DelicateCoroutinesApi::class)
-        @RequiresApi(Build.VERSION_CODES.O)
         suspend operator fun invoke(
             artist: String,
             title: String,

@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.profile
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +16,6 @@ import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.ui.SnackbarHandler
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EditProfileScreen(navController: NavController) {
     val ownProfileViewScreenModel: MyProfileScreenViewModel = hiltViewModel()

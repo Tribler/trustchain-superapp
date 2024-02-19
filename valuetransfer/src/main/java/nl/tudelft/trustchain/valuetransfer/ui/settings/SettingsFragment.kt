@@ -2,11 +2,9 @@ package nl.tudelft.trustchain.valuetransfer.ui.settings
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.*
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
@@ -25,9 +23,12 @@ import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
 class SettingsFragment : VTFragment(R.layout.fragment_settings) {
     private val binding by viewBinding(FragmentSettingsBinding::bind)
 
-    private val notificationsStatus = MutableLiveData(NotificationHandler.NOTIFICATION_STATUS_DISABLED)
-    private val notificationsMessageStatus = MutableLiveData(NotificationHandler.NOTIFICATION_STATUS_UNKNOWN)
-    private val notificationsTransactionStatus = MutableLiveData(NotificationHandler.NOTIFICATION_STATUS_UNKNOWN)
+    private val notificationsStatus =
+        MutableLiveData(NotificationHandler.NOTIFICATION_STATUS_DISABLED)
+    private val notificationsMessageStatus =
+        MutableLiveData(NotificationHandler.NOTIFICATION_STATUS_UNKNOWN)
+    private val notificationsTransactionStatus =
+        MutableLiveData(NotificationHandler.NOTIFICATION_STATUS_UNKNOWN)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,7 +45,6 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
         setHasOptionsMenu(true)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?
@@ -146,7 +146,8 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
                     } else {
                         ""
                     }
-                binding.llNotificationsSpecific.isVisible = it == NotificationHandler.NOTIFICATION_STATUS_ENABLED
+                binding.llNotificationsSpecific.isVisible =
+                    it == NotificationHandler.NOTIFICATION_STATUS_ENABLED
             }
         )
 
@@ -169,21 +170,11 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun openChannelSettings() {
         val intent =
             Intent().apply {
-                when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-                        action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                        putExtra(Settings.EXTRA_APP_PACKAGE, parentActivity.packageName)
-                    }
-                    else -> {
-                        action = "android.settings.APP_NOTIFICATION_SETTINGS"
-                        putExtra("app_package", parentActivity.packageName)
-                        putExtra("app_uid", parentActivity.applicationInfo.uid)
-                    }
-                }
+                action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                putExtra(Settings.EXTRA_APP_PACKAGE, parentActivity.packageName)
             }
         startActivity(intent)
     }

@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.release
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
 import nl.tudelft.trustchain.musicdao.core.cache.entities.AlbumEntity
@@ -19,7 +17,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 @OptIn(DelicateCoroutinesApi::class)
-@RequiresApi(Build.VERSION_CODES.O)
 class ReleaseScreenViewModel
     @AssistedInject
     constructor(

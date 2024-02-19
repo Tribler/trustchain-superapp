@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.musicdao
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
@@ -109,7 +107,6 @@ class HiltModules {
             ?: throw IllegalStateException("DaoCommunity is not configured")
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
     fun path(
@@ -118,7 +115,6 @@ class HiltModules {
         return CachePath(applicationContext)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
     fun downloadFinishUseCase(
@@ -128,7 +124,6 @@ class HiltModules {
         return DownloadFinishUseCase(database = database, cachePath = cachePath)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
     fun provideWalletService(
@@ -148,7 +143,6 @@ class HiltModules {
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
     fun provideWalletManager(
@@ -179,7 +173,6 @@ class HiltModules {
 }
 
 class CachePath(val applicationContext: Context) {
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getPath(): Path? {
         return Paths.get("${applicationContext.cacheDir}")
     }

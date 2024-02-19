@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -17,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.ui.screens.profile.MyProfileScreenViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @Composable
 fun Drawer(

@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.core.repositories
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -17,7 +15,6 @@ import javax.inject.Inject
  * This class will be the class the application interacts with and will return
  * the data that the UI/CMD interface can work with.
  */
-@RequiresApi(Build.VERSION_CODES.O)
 class AlbumRepository
     @Inject
     constructor(

@@ -3,10 +3,8 @@ package nl.tudelft.trustchain.musicdao.core.torrent
 import android.content.Context
 import android.content.res.Resources
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
-import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.musicdao.CachePath
 import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
 import nl.tudelft.trustchain.musicdao.core.torrent.fileProcessing.DownloadFinishUseCase
@@ -29,7 +27,6 @@ import kotlin.io.path.createDirectories
 
 @DelicateCoroutinesApi
 @Singleton
-@RequiresApi(Build.VERSION_CODES.O)
 class TorrentEngine
     @Inject
     constructor(

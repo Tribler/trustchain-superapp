@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.profileMenu
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.ui.navigation.Screen
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileMenuScreen(navController: NavController) {
     Column {

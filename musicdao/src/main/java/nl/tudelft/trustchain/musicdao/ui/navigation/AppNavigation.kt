@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -44,7 +42,6 @@ import nl.tudelft.trustchain.musicdao.ui.screens.profileMenu.ProfileMenuScreen
 
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun AppNavigation(

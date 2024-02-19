@@ -523,6 +523,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     @Suppress("DEPRECATION")
     override fun onActivityResult(
         requestCode: Int,
@@ -534,7 +535,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                 if (data != null) {
                     data.data?.let { uri ->
                         val bitmap =
-                            if (Build.VERSION.SDK_INT >= 29) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                 val source = ImageDecoder.createSource(parentActivity.contentResolver, uri)
                                 ImageDecoder.decodeBitmap(source)
                             } else {

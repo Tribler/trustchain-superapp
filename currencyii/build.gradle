@@ -13,7 +13,7 @@ ktlint {
 
 android {
     defaultConfig {
-        minSdkVersion 24
+        minSdkVersion 26
         compileSdk 34
         targetSdkVersion 34
 

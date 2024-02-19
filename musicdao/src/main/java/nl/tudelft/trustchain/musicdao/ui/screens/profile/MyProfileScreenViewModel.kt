@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.profile
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
@@ -13,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class MyProfileScreenViewModel
     @Inject

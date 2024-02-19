@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.eurotoken.ui.exchange
 import android.content.Context
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.RequiresApi
 import androidx.navigation.fragment.findNavController
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
@@ -39,8 +38,6 @@ class CreateMoneyFragment : EurotokenBaseFragment(R.layout.fragment_create_money
             ?: throw java.lang.IllegalStateException("EuroTokenCommunity is not configured")
     }
 
-
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?

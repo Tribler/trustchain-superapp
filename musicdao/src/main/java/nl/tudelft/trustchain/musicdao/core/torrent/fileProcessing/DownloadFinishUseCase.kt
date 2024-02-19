@@ -1,18 +1,15 @@
 package nl.tudelft.trustchain.musicdao.core.torrent.fileProcessing
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
-import nl.tudelft.trustchain.musicdao.CachePath
-import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
-import nl.tudelft.trustchain.musicdao.core.cache.entities.SongEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.tudelft.trustchain.musicdao.CachePath
+import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
+import nl.tudelft.trustchain.musicdao.core.cache.entities.SongEntity
 import java.nio.file.Paths
 
-@RequiresApi(Build.VERSION_CODES.O)
-class DownloadFinishUseCase constructor(
+class DownloadFinishUseCase(
     private val database: CacheDatabase,
     private val cachePath: CachePath
 ) {

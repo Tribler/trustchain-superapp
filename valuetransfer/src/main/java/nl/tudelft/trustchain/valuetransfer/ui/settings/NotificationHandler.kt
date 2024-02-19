@@ -41,43 +41,41 @@ class NotificationHandler(
     private val notificationManager by lazy {
         parentActivity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
-    private lateinit var messagesChannel: NotificationChannel
-    private lateinit var transactionsChannel: NotificationChannel
+    private var messagesChannel: NotificationChannel
+    private var transactionsChannel: NotificationChannel
     private var notificationCount = 0
 
     init {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            messagesChannel =
-                if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_MESSAGES_ID) == null) {
-                    NotificationChannel(
-                        NOTIFICATION_CHANNEL_MESSAGES_ID,
-                        NOTIFICATION_CHANNEL_MESSAGES_NAME,
-                        NotificationManager.IMPORTANCE_HIGH
-                    ).apply {
-                        description = NOTIFICATION_CHANNEL_MESSAGES_DESCRIPTION
-                        setShowBadge(true)
-                        notificationManager.createNotificationChannel(this)
-                    }
-                } else {
-                    notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_MESSAGES_ID)
+        messagesChannel =
+            if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_MESSAGES_ID) == null) {
+                NotificationChannel(
+                    NOTIFICATION_CHANNEL_MESSAGES_ID,
+                    NOTIFICATION_CHANNEL_MESSAGES_NAME,
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = NOTIFICATION_CHANNEL_MESSAGES_DESCRIPTION
+                    setShowBadge(true)
+                    notificationManager.createNotificationChannel(this)
                 }
+            } else {
+                notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_MESSAGES_ID)
+            }
 
-            transactionsChannel =
-                if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_TRANSACTIONS_ID) == null) {
-                    NotificationChannel(
-                        NOTIFICATION_CHANNEL_TRANSACTIONS_ID,
-                        NOTIFICATION_CHANNEL_TRANSACTIONS_NAME,
-                        NotificationManager.IMPORTANCE_HIGH
-                    ).apply {
-                        description = NOTIFICATION_CHANNEL_TRANSACTIONS_DESCRIPTION
-                        notificationManager.createNotificationChannel(this)
-                    }
-                } else {
-                    notificationManager.getNotificationChannel(
-                        NOTIFICATION_CHANNEL_TRANSACTIONS_ID
-                    )
+        transactionsChannel =
+            if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_TRANSACTIONS_ID) == null) {
+                NotificationChannel(
+                    NOTIFICATION_CHANNEL_TRANSACTIONS_ID,
+                    NOTIFICATION_CHANNEL_TRANSACTIONS_NAME,
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = NOTIFICATION_CHANNEL_TRANSACTIONS_DESCRIPTION
+                    notificationManager.createNotificationChannel(this)
                 }
-        }
+            } else {
+                notificationManager.getNotificationChannel(
+                    NOTIFICATION_CHANNEL_TRANSACTIONS_ID
+                )
+            }
     }
 
     fun cancelAll() {
@@ -109,6 +107,7 @@ class NotificationHandler(
                 chatMessage.attachment?.let { attachment ->
                     attachment(peer, attachment.type, chatMessage.message, isAppInForeground)
                 }
+
             TYPE_TRANSACTION ->
                 transaction(
                     peer,
@@ -154,14 +153,11 @@ class NotificationHandler(
     }
 
     fun getNotificationChannelStatus(channelID: String): String {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return if (notificationManager.getNotificationChannel(channelID).importance != NotificationManager.IMPORTANCE_NONE) {
-                NOTIFICATION_STATUS_ENABLED
-            } else {
-                NOTIFICATION_STATUS_DISABLED
-            }
+        return if (notificationManager.getNotificationChannel(channelID).importance != NotificationManager.IMPORTANCE_NONE) {
+            NOTIFICATION_STATUS_ENABLED
+        } else {
+            NOTIFICATION_STATUS_DISABLED
         }
-        return NOTIFICATION_STATUS_UNKNOWN
     }
 
     fun typeOfMessage(chatMessage: ChatMessage): String {
@@ -174,6 +170,7 @@ class NotificationHandler(
             notificationsMessages && chatMessage.message.isNotBlank() &&
                 chatMessage.attachment == null &&
                 chatMessage.transactionHash == null -> TYPE_MESSAGE
+
             notificationsMessages && chatMessage.attachment != null -> TYPE_ATTACHMENT
             notificationsTransactions && chatMessage.transactionHash != null -> TYPE_TRANSACTION
             else -> ""
@@ -243,21 +240,25 @@ class NotificationHandler(
                     getEmojiByUnicode(EMOJI_CAMERA),
                     ATTACHMENT_TYPE_PHOTO
                 )
+
             MessageAttachment.TYPE_FILE ->
                 listOf(
                     getEmojiByUnicode(EMOJI_FILE),
                     ATTACHMENT_TYPE_FILE
                 )
+
             MessageAttachment.TYPE_CONTACT ->
                 listOf(
                     getEmojiByUnicode(EMOJI_CONTACT),
                     ATTACHMENT_TYPE_CONTACT
                 )
+
             MessageAttachment.TYPE_LOCATION ->
                 listOf(
                     getEmojiByUnicode(EMOJI_LOCATION),
                     ATTACHMENT_TYPE_LOCATION
                 )
+
             MessageAttachment.TYPE_IDENTITY_ATTRIBUTE ->
                 listOf(
                     getEmojiByUnicode(
@@ -265,6 +266,7 @@ class NotificationHandler(
                     ),
                     ATTACHMENT_TYPE_IDENTITY_ATTRIBUTE
                 )
+
             MessageAttachment.TYPE_TRANSFER_REQUEST -> {
                 when {
                     message != "" ->
@@ -272,6 +274,7 @@ class NotificationHandler(
                             R.string.text_contact_chat_incoming_transfer_request_with_message,
                             message
                         )
+
                     else -> ""
                 }.let { text ->
                     listOf(
@@ -281,6 +284,7 @@ class NotificationHandler(
                     )
                 }
             }
+
             else -> listOf()
         }.joinToString(" ").let { text ->
             if (isAppInForeground) {
@@ -419,7 +423,10 @@ class NotificationHandler(
 
         val args =
             Bundle().apply {
-                putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, peer.publicKey.keyToBin().toHex())
+                putString(
+                    ValueTransferMainActivity.ARG_PUBLIC_KEY,
+                    peer.publicKey.keyToBin().toHex()
+                )
                 putString(
                     ValueTransferMainActivity.ARG_NAME,
                     contact?.name ?: (

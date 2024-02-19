@@ -62,7 +62,6 @@ public class ExecutionActivity extends AppCompatActivity {
      *
      * @return the latest known state of the dynamically loaded code or null if it does not exist
      */
-    @RequiresApi(Build.VERSION_CODES.O) // TODO: this should be usable on all versions.
     private Fragment.SavedState getState() {
         // states are stored in the same directories as apks themselves (in the app specific files)
         String fileName = this.apkName + DATA_DOT_EXTENSION;
@@ -127,11 +126,9 @@ public class ExecutionActivity extends AppCompatActivity {
             String mainFragmentClass = getMainFragmentClass(apkPath);
             Class<?> fragmentClass = classLoader.loadClass((mainFragmentClass != null) ? mainFragmentClass : "com.execmodule." + activeApp + ".MainFragment");
             this.mainFragment = (Fragment) fragmentClass.newInstance();
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                Fragment.SavedState state = this.getState();
-                if (state != null) {
-                    this.mainFragment.setInitialSavedState(state);
-                }
+            Fragment.SavedState state = this.getState();
+            if (state != null) {
+                this.mainFragment.setInitialSavedState(state);
             }
 
             LinearLayout tmpLayout = new LinearLayout(context);

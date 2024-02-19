@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.dao
 
 import android.app.Activity
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -16,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.ui.SnackbarHandler
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProposalCreateScreen(
     daoId: String,

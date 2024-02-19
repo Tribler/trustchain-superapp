@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.musicdao.core.util
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -29,7 +27,6 @@ class DAOCreateHelper {
      * If the transaction is valid, the result is broadcasted on trust chain.
      * **Throws** exceptions if something goes wrong with creating or broadcasting bitcoin transaction.
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     fun createBitcoinGenesisWallet(
         myPeer: Peer,
         entranceFee: Long,
@@ -56,7 +53,6 @@ class DAOCreateHelper {
      * 1.2 Finishes the last step of creating a genesis shared bitcoin wallet.
      * Posts a self-signed trust chain block containing the shared wallet data.
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun broadcastCreatedSharedWallet(
         myPeer: Peer,
         transactionSerialized: String,

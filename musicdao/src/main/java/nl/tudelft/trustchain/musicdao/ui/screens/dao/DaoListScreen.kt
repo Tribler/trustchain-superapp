@@ -25,7 +25,6 @@ import nl.tudelft.trustchain.musicdao.ui.screens.profileMenu.CustomMenuItem
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @Composable
 fun DaoListScreen(

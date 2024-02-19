@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.core.repositories
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
 import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artistAnnounce.ArtistAnnounceBlock
 import nl.tudelft.trustchain.musicdao.core.ipv8.blocks.artistAnnounce.ArtistAnnounceBlockRepository
@@ -12,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Singleton
 class ArtistRepository
     @Inject

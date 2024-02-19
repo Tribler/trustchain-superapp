@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
@@ -1218,7 +1217,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         binding.clSearchFilter.isVisible = !hide
 
         val typedValue = TypedValue()
-
         parentActivity.theme.resolveAttribute(
             if (hide) R.attr.colorPrimary else R.attr.colorAccent,
             typedValue,
@@ -1226,18 +1224,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         )
 
         val color = ContextCompat.getColor(requireContext(), typedValue.resourceId)
-
-        parentActivity.window.statusBarColor =
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                val currentTheme = appPreferences.getCurrentTheme()
-                if (currentTheme == AppPreferences.APP_THEME_NIGHT) {
-                    color
-                } else {
-                    Color.BLACK
-                }
-            } else {
-                color
-            }
+        parentActivity.window.statusBarColor = color
 
         val actionBarTypedValue = TypedValue()
         parentActivity.theme.resolveAttribute(

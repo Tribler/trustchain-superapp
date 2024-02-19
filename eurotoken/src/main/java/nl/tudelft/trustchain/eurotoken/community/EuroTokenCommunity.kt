@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.eurotoken.community
 
 import android.content.Context
-import androidx.annotation.RequiresApi
 import kotlin.random.Random
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
@@ -88,7 +87,6 @@ class EuroTokenCommunity(
         transactionRepository.attemptRollback(peer, payload.transactionHash)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun connectToGateway(
         public_key: String,
         ip: String,

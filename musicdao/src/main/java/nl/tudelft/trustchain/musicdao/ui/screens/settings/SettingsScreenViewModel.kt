@@ -2,9 +2,7 @@ package nl.tudelft.trustchain.musicdao.ui.screens.settings
 
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import nl.tudelft.trustchain.musicdao.CachePath
 import nl.tudelft.trustchain.musicdao.core.repositories.album.BatchPublisher
@@ -21,7 +19,6 @@ class SettingsScreenViewModel
         private val cachePath: CachePath,
         private val androidURIController: AndroidURIController
     ) : ViewModel() {
-        @RequiresApi(Build.VERSION_CODES.O)
         suspend fun publishBatch(
             uri: Uri,
             context: Context

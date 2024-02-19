@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.search
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class SearchScreenViewModel
     @Inject
@@ -50,7 +47,6 @@ class SearchScreenViewModel
             }
         }
 
-        @RequiresApi(Build.VERSION_CODES.O)
         fun searchDebounced(searchText: String) {
             _searchQuery.value = searchText
 
@@ -71,7 +67,6 @@ class SearchScreenViewModel
             return downloadedAlbums
         }
 
-        @RequiresApi(Build.VERSION_CODES.O)
         private suspend fun search(searchText: String) {
             if (searchText.isEmpty()) {
                 _searchResult.value = downloadedFirstInListOfAlbums(albumRepository.getAlbums())

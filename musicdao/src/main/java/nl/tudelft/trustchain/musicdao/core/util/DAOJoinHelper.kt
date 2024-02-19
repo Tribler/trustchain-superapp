@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.musicdao.core.util
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -44,7 +42,6 @@ class DAOJoinHelper {
      * **NOTE** the latest walletBlockData should be given, otherwise the serialized transaction is invalid.
      * @param mostRecentWalletBlock - the latest (that you know of) shared wallet block.
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     fun proposeJoinWallet(
         myPeer: Peer,
         mostRecentWalletBlock: TrustChainBlock

@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.util
 
-import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import androidx.annotation.RequiresApi
 import java.lang.RuntimeException
 import java.math.BigInteger
 import java.net.URLDecoder
@@ -17,7 +15,6 @@ object SecurityUtil {
     private const val KEY_ALIAS = "nl.tudelft.trustchain.key"
     private const val ANDROID_KEYSTORE = "AndroidKeyStore"
 
-    @RequiresApi(Build.VERSION_CODES.M)
     fun generateKey(): KeyPair {
         // We are creating a RSA key pair
         val keyPairGenerator: KeyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, ANDROID_KEYSTORE)

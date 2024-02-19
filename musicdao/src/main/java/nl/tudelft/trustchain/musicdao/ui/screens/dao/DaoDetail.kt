@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.dao
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -27,7 +25,6 @@ import nl.tudelft.trustchain.musicdao.ui.util.Chip
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-@RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun DaoDetailScreen(
     navController: NavController,
@@ -52,7 +49,6 @@ fun DaoDetailScreen(
 }
 
 @SuppressLint("UnrememberedMutableState")
-@RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun DaoDetailPure(
     daoInitial: DAO,

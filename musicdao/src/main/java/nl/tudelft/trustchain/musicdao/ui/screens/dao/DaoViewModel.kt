@@ -3,9 +3,7 @@ package nl.tudelft.trustchain.musicdao.ui.screens.dao
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import nl.tudelft.trustchain.musicdao.core.repositories.ArtistRepository
@@ -55,7 +53,6 @@ class DaoViewModel
             refreshOneShot()
         }
 
-        @RequiresApi(Build.VERSION_CODES.O)
         fun createGenesisDAO(
             currentEntranceFee: Long,
             currentThreshold: Int,
@@ -284,7 +281,6 @@ class DaoViewModel
             }
         }
 
-        @RequiresApi(Build.VERSION_CODES.O)
         fun joinSharedWalletClicked(
             daoId: String,
             context: Context
@@ -642,7 +638,6 @@ class DaoViewModel
             return Coin.valueOf(previousTransaction.vout.filter { it.scriptPubKey.size == 35 }[0].nValue)
         }
 
-        @RequiresApi(Build.VERSION_CODES.O)
         fun getListsOfArtists(): List<Artist> {
             return artistRepository.getArtists()
         }

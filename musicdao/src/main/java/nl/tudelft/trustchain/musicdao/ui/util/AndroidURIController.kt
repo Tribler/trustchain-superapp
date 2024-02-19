@@ -2,8 +2,6 @@ package nl.tudelft.trustchain.musicdao.ui.util
 
 import android.content.Context
 import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import nl.tudelft.trustchain.musicdao.CachePath
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -11,7 +9,6 @@ import java.io.InputStream
 import java.nio.file.Path
 import javax.inject.Inject
 
-@RequiresApi(Build.VERSION_CODES.O)
 class AndroidURIController
     @Inject
     constructor(cacheDir: CachePath) {

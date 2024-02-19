@@ -1,10 +1,8 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -30,7 +28,6 @@ class ExchangeTransactionDialog(
 ) : VTDialogFragment() {
     private val dateFormat = SimpleDateFormat("d MMMM yyyy, HH:mm", Locale.ENGLISH)
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog =

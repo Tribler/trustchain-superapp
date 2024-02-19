@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.profile
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -26,7 +24,6 @@ import nl.tudelft.trustchain.musicdao.ui.navigation.Screen
 
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Profile(
     artist: Artist,

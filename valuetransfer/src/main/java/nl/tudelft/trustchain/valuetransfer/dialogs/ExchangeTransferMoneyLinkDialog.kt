@@ -2,12 +2,10 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import com.android.volley.Request
@@ -47,7 +45,6 @@ class ExchangeTransferMoneyLinkDialog(
         TransactionRepository(IPv8Android.getInstance().getOverlay()!!, gatewayStoreLink)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog =
@@ -174,7 +171,6 @@ class ExchangeTransferMoneyLinkDialog(
             ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     internal fun createPaymentId(
         amount: Int,
         iban: String? = null

@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
@@ -17,7 +16,6 @@ import nl.tudelft.trustchain.app.TrustChainApplication
 import nl.tudelft.trustchain.app.databinding.ActivityDashboardBinding
 import nl.tudelft.trustchain.common.util.viewBinding
 
-@RequiresApi(Build.VERSION_CODES.M)
 class DashboardActivity : AppCompatActivity() {
     private val binding by viewBinding(ActivityDashboardBinding::inflate)
 

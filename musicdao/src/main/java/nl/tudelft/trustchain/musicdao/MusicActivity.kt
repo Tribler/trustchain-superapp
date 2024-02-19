@@ -5,12 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -73,7 +71,6 @@ class MusicActivity : AppCompatActivity() {
     @DelicateCoroutinesApi
     @ExperimentalAnimationApi
     @ExperimentalFoundationApi
-    @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalMaterialApi
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -233,7 +230,6 @@ class MusicActivity : AppCompatActivity() {
         return uriList
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun iterativelyFetchReleases() {
         @Suppress("DEPRECATION")
         lifecycleScope.launchWhenStarted {
