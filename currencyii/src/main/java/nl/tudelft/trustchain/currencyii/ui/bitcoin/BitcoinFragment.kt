@@ -86,6 +86,7 @@ class BitcoinFragment :
         inflater.inflate(R.menu.bitcoin_options, menu)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         @Suppress("DEPRECATION")
         return when (item.itemId) {
@@ -194,7 +195,7 @@ class BitcoinFragment :
                 } else {
                     Toast.makeText(
                         this.requireContext(),
-                        "Successfully added 10 BTC",
+                        "Successfully added 0.10 BTC",
                         Toast.LENGTH_SHORT
                     ).show()
 
