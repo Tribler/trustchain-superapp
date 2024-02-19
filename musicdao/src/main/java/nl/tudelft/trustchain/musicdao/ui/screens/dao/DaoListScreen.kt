@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.musicdao.ui.screens.dao
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
