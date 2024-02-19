@@ -27,12 +27,6 @@ android {
         }
     }
 
-    sourceSets {
-        main {
-            jniLibs.srcDirs = ['../common/libs']
-        }
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -59,6 +53,7 @@ dependencies {
     implementation files('../common/libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar')
     implementation files('../common/libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar')
     implementation files('../common/libs/jlibtorrent-android-x86_64-' + jlibtorrent_version + '.jar')
+    implementation files('../common/libs/jlibtorrent-macosx-arm64-' + jlibtorrent_version + '.jar')
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.9.0'

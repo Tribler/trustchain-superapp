@@ -47,13 +47,10 @@ android {
         allWarningsAsErrors = true
     }
 
-    sourceSets {
-        main {
-            jniLibs.srcDirs = ['../common/libs']
-        }
-    }
-
     namespace 'nl.tudelft.trustchain.common.ethereum'
+    buildFeatures {
+        buildConfig true
+    }
 }
 
 dependencies {
