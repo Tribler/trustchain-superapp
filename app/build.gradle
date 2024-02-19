@@ -58,6 +58,8 @@ android {
 
     sourceSets {
         main {
+            // TODO: Find a way to exclude linux .so
+            // TODO: Reintroduce the jlibtorrent library for linux.
             jniLibs.srcDirs = ['../common/libs']
         }
     }
