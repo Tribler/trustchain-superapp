@@ -8,7 +8,8 @@ on:
 jobs:
   test:
     name: Run Tests
-    runs-on: windows-latest # TODO: Ubuntu currently broken.
+    # TODO: Ubuntu currently broken.
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -20,6 +21,10 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
+
+      # TODO: This is currently broken due to SqlDelight.
+      #      - name: Run check
+      #        run: bash ./gradlew check
 
       - name: Run tests
         run: bash ./gradlew test

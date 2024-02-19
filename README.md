@@ -135,6 +135,7 @@ Run unit tests:
 ```
 ./gradlew test
 ```
+*Note: Currently tests fail on Linux, but pass on Windows and Mac. This is due to the tests relying on a native jlibtorrent binary, of which the linux version cannot be bundled with android builds. We are working on a solution to this problem.*
 
 Run instrumented tests:
 ```
