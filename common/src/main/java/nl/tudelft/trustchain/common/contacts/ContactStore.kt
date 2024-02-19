@@ -15,11 +15,17 @@ class ContactStore(context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "common.db")
     private val database = Database(driver)
 
-    fun addContact(publicKey: PublicKey, name: String) {
+    fun addContact(
+        publicKey: PublicKey,
+        name: String
+    ) {
         database.dbContactQueries.addContact(name, publicKey.keyToBin())
     }
 
-    fun updateContact(publicKey: PublicKey, name: String) {
+    fun updateContact(
+        publicKey: PublicKey,
+        name: String
+    ) {
         database.dbContactQueries.addContact(name, publicKey.keyToBin())
     }
 
@@ -31,7 +37,9 @@ class ContactStore(context: Context) {
                 contact.name,
                 defaultCryptoProvider.keyFromPublicBin(contact.public_key)
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     fun getContactFromPublickey(publicKey: PublicKey): Flow<Contact?> {
@@ -56,6 +64,7 @@ class ContactStore(context: Context) {
 
     companion object {
         private lateinit var instance: ContactStore
+
         fun getInstance(context: Context): ContactStore {
             if (!Companion::instance.isInitialized) {
                 instance = ContactStore(context)

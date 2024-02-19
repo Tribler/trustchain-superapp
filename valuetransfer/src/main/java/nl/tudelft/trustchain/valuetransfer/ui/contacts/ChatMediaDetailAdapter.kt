@@ -26,12 +26,18 @@ class ChatMediaDetailAdapter(
 
     private var items: List<ChatMediaItem> = listOf()
 
-    fun setItems(items: List<ChatMediaItem>, silent: Boolean = false) {
+    fun setItems(
+        items: List<ChatMediaItem>,
+        silent: Boolean = false
+    ) {
         this.items = items
         if (!silent) notifyDataSetChanged()
     }
 
-    override fun isViewFromObject(view: View, `object`: Any): Boolean {
+    override fun isViewFromObject(
+        view: View,
+        `object`: Any
+    ): Boolean {
         return view === `object` as LinearLayout
     }
 
@@ -53,7 +59,10 @@ class ChatMediaDetailAdapter(
         return items.size
     }
 
-    override fun instantiateItem(container: ViewGroup, position: Int): Any {
+    override fun instantiateItem(
+        container: ViewGroup,
+        position: Int
+    ): Any {
         val view: View
         val imageView: ImageView
         val item = items[position]
@@ -75,22 +84,28 @@ class ChatMediaDetailAdapter(
             binding.tvFileSize.text = getFormattedSize(item.file.length().toDouble())
         }
 
-        imageView.setOnTouchListener(object : OnSwipeTouchListener(view.context) {
-            override fun onSwipeDown() {
-                if ((item.type == MessageAttachment.TYPE_IMAGE && (imageView as ZoomageView).currentScaleFactor == 1.0f)) {
-                    onItem(true)
-                } else if (item.type == MessageAttachment.TYPE_FILE) {
-                    onItem(true)
+        imageView.setOnTouchListener(
+            object : OnSwipeTouchListener(view.context) {
+                override fun onSwipeDown() {
+                    if ((item.type == MessageAttachment.TYPE_IMAGE && (imageView as ZoomageView).currentScaleFactor == 1.0f)) {
+                        onItem(true)
+                    } else if (item.type == MessageAttachment.TYPE_FILE) {
+                        onItem(true)
+                    }
                 }
             }
-        })
+        )
 
         container.addView(view)
 
         return view
     }
 
-    override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
+    override fun destroyItem(
+        container: ViewGroup,
+        position: Int,
+        `object`: Any
+    ) {
         container.removeView(`object` as LinearLayout)
     }
 }

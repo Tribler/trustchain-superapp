@@ -8,10 +8,13 @@ import nl.tudelft.trustchain.app.databinding.ItemSelectorBinding
 class DashboardSelectorRenderer(
     private val onItemClick: (DashboardItem, Boolean) -> Unit
 ) : BindingItemRenderer<DashboardItem, ItemSelectorBinding>(
-    DashboardItem::class.java,
-    ItemSelectorBinding::inflate
-) {
-    override fun bindView(item: DashboardItem, binding: ItemSelectorBinding) {
+        DashboardItem::class.java,
+        ItemSelectorBinding::inflate
+    ) {
+    override fun bindView(
+        item: DashboardItem,
+        binding: ItemSelectorBinding
+    ) {
         val context = binding.root.context
         val color = ResourcesCompat.getColor(context.resources, item.app.color, null)
         binding.imgIcon.setImageResource(item.app.icon)

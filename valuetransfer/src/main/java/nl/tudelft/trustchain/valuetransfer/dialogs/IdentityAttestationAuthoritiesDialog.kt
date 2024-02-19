@@ -3,10 +3,8 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.mattskala.itemadapter.ItemAdapter
@@ -29,7 +27,6 @@ import java.lang.IllegalStateException
 class IdentityAttestationAuthoritiesDialog(
     private val myPublicKey: String
 ) : VTDialogFragment() {
-
     private lateinit var dialogView: View
 
     private val adapterAuthorities = ItemAdapter()
@@ -106,12 +103,17 @@ class IdentityAttestationAuthoritiesDialog(
         createAuthoritiesItems(
             getAttestationCommunity().trustedAuthorityManager.getAuthorities()
         ).apply {
-            if (this.size != adapterAuthorities.itemCount)
+            if (this.size != adapterAuthorities.itemCount) {
                 adapterAuthorities.updateItems(this)
+            }
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
             ?.let { result ->
                 try {

@@ -15,20 +15,22 @@ import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
-class HomeScreenViewModel @Inject constructor(
-    private val albumRepository: AlbumRepository,
-    private val musicCommunity: MusicCommunity
-) : ViewModel() {
+class HomeScreenViewModel
+    @Inject
+    constructor(
+        private val albumRepository: AlbumRepository,
+        private val musicCommunity: MusicCommunity
+    ) : ViewModel() {
+        private val _releases: MutableLiveData<List<Album>> = MutableLiveData()
+        var releases: LiveData<List<Album>> = _releases
 
-    private val _releases: MutableLiveData<List<Album>> = MutableLiveData()
-    var releases: LiveData<List<Album>> = _releases
+        @Suppress("ktlint:standard:property-naming")
+        private val _peerAmount: MutableLiveData<Int> = MutableLiveData()
 
-    private val _peerAmount: MutableLiveData<Int> = MutableLiveData()
-
-    init {
-        viewModelScope.launch {
-            releases = albumRepository.getAlbumsFlow()
-            _peerAmount.value = musicCommunity.getPeers().size
+        init {
+            viewModelScope.launch {
+                releases = albumRepository.getAlbumsFlow()
+                _peerAmount.value = musicCommunity.getPeers().size
+            }
         }
     }
-}

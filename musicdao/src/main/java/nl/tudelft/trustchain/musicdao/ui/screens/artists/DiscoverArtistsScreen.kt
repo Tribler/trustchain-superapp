@@ -42,9 +42,10 @@ fun DiscoverArtistsScreen(navController: NavController) {
                     ListItem(
                         icon = { Icon(Icons.Default.Person, contentDescription = null) },
                         text = { Text(text = it.name) },
-                        modifier = Modifier.clickable {
-                            navController.navigate(Screen.Profile.createRoute(it.publicKey))
-                        }
+                        modifier =
+                            Modifier.clickable {
+                                navController.navigate(Screen.Profile.createRoute(it.publicKey))
+                            }
                     )
                 }
             }

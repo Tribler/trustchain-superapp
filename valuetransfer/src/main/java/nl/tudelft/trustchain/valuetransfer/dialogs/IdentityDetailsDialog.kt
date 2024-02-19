@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.button.MaterialButton
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.databinding.DialogIdentityDetailsBinding
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
@@ -20,7 +19,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class IdentityDetailsDialog : VTDialogFragment() {
-
     private val dateOfBirthFormat = SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH)
     private lateinit var identity: Identity
 
@@ -50,16 +48,24 @@ class IdentityDetailsDialog : VTDialogFragment() {
             }
 
             // Force the dialog to be undraggable
-            bottomSheetDialog.behavior.addBottomSheetCallback(object :
-                BottomSheetBehavior.BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    if (newState == BottomSheetBehavior.STATE_DRAGGING) {
-                        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.addBottomSheetCallback(
+                object :
+                    BottomSheetBehavior.BottomSheetCallback() {
+                    override fun onStateChanged(
+                        bottomSheet: View,
+                        newState: Int
+                    ) {
+                        if (newState == BottomSheetBehavior.STATE_DRAGGING) {
+                            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                        }
                     }
-                }
 
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {}
-            })
+                    override fun onSlide(
+                        bottomSheet: View,
+                        slideOffset: Float
+                    ) {}
+                }
+            )
 
             val buttonCancel = binding.btnCancel
 
@@ -67,15 +73,16 @@ class IdentityDetailsDialog : VTDialogFragment() {
                 bottomSheetDialog.dismiss()
             }
 
-            val editTexts = mapOf<String, EditText>(
-                KEY_GIVEN_NAMES to binding.etGivenNames,
-                KEY_SURNAME to binding.etSurname,
-                KEY_DATE_OF_BIRTH to binding.etDateOfBirth,
-                KEY_DATE_OF_EXPIRY to binding.etDateOfExpiry,
-                KEY_NATIONALITY to binding.etNationality,
-                KEY_PERSONAL_NUMBER to binding.etPersonalNumber,
-                KEY_DOCUMENT_NUMBER to binding.etDocumentNumber
-            )
+            val editTexts =
+                mapOf<String, EditText>(
+                    KEY_GIVEN_NAMES to binding.etGivenNames,
+                    KEY_SURNAME to binding.etSurname,
+                    KEY_DATE_OF_BIRTH to binding.etDateOfBirth,
+                    KEY_DATE_OF_EXPIRY to binding.etDateOfExpiry,
+                    KEY_NATIONALITY to binding.etNationality,
+                    KEY_PERSONAL_NUMBER to binding.etPersonalNumber,
+                    KEY_DOCUMENT_NUMBER to binding.etDocumentNumber
+                )
 
             val btnMale = binding.btnMale
             val btnFemale = binding.btnFemale
@@ -197,11 +204,12 @@ class IdentityDetailsDialog : VTDialogFragment() {
             saveButton.setOnClickListener {
                 val givenNames = editTexts[KEY_GIVEN_NAMES]!!.text.toString()
                 val surname = editTexts[KEY_SURNAME]!!.text.toString()
-                val gender = when {
-                    btnMaleChecked -> VALUE_MALE
-                    btnFemaleChecked -> VALUE_FEMALE
-                    else -> VALUE_NEUTRAL
-                }
+                val gender =
+                    when {
+                        btnMaleChecked -> VALUE_MALE
+                        btnFemaleChecked -> VALUE_FEMALE
+                        else -> VALUE_NEUTRAL
+                    }
 
                 identity.content.givenNames = givenNames
                 identity.content.surname = surname

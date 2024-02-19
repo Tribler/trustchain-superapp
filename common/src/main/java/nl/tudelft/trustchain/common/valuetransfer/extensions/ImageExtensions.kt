@@ -18,7 +18,10 @@ fun decodeBytes(encoded: String): ByteArray = Base64.decode(encoded, Base64.DEFA
 /**
  * Convert image bitmap to bytearray
  */
-fun imageBytes(bitmap: Bitmap, quality: Int = 100): ByteArray? {
+fun imageBytes(
+    bitmap: Bitmap,
+    quality: Int = 100
+): ByteArray? {
     val baos = ByteArrayOutputStream()
 
     return try {
@@ -45,7 +48,10 @@ fun bytesToImage(bytes: ByteArray): Bitmap? {
 /**
  * Encode image bitmap to string
  */
-fun encodeImage(bitmap: Bitmap, quality: Int = 100): String? {
+fun encodeImage(
+    bitmap: Bitmap,
+    quality: Int = 100
+): String? {
     val baos = ByteArrayOutputStream()
 
     return try {
@@ -78,9 +84,10 @@ fun decodeImage(decoded: String): Bitmap? {
 fun Bitmap.resize(maxDimension: Float): Bitmap? {
     return try {
         val scale = if (width > maxDimension || height > maxDimension) maxDimension / maxOf(width, height) else 1.0f
-        val matrix = Matrix().apply {
-            postScale(scale, scale)
-        }
+        val matrix =
+            Matrix().apply {
+                postScale(scale, scale)
+            }
 
         val resized = Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
         Log.d("VTLOG", "BITMAP WIDTH: $width ${resized.width}")

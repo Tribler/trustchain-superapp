@@ -60,15 +60,16 @@ class ContactShareDialog(
             buttonShareContact = binding.btnShareContact
 
             lifecycleScope.launch(Dispatchers.Main) {
-                val contacts: MutableList<Contact> = getContactStore().getContacts()
-                    .first()
-                    .filter {
-                        it.publicKey != getTrustChainCommunity().myPeer.publicKey
-                    }
-                    .sortedBy {
-                        it.name
-                    }
-                    .toMutableList()
+                val contacts: MutableList<Contact> =
+                    getContactStore().getContacts()
+                        .first()
+                        .filter {
+                            it.publicKey != getTrustChainCommunity().myPeer.publicKey
+                        }
+                        .sortedBy {
+                            it.name
+                        }
+                        .toMutableList()
 
                 if (contacts.size > 1) {
                     contacts.add(
@@ -164,27 +165,38 @@ class ContactShareDialog(
             ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
-    private fun spinnerSelection(spinner: Spinner, isRecipient: Boolean) {
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-                toggleButton(buttonShareContact, false)
-            }
-
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                when (isRecipient) {
-                    true -> selectedRecipient =
-                        if (position == 0) null else spinner.selectedItem as Contact
-
-                    else -> selectedContact =
-                        if (position == 0) null else spinner.selectedItem as Contact
+    private fun spinnerSelection(
+        spinner: Spinner,
+        isRecipient: Boolean
+    ) {
+        spinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(p0: AdapterView<*>?) {
+                    toggleButton(buttonShareContact, false)
                 }
 
-                toggleButton(
-                    buttonShareContact,
-                    selectedContact != null && selectedRecipient != null
-                )
+                override fun onItemSelected(
+                    p0: AdapterView<*>?,
+                    p1: View?,
+                    position: Int,
+                    p3: Long
+                ) {
+                    when (isRecipient) {
+                        true ->
+                            selectedRecipient =
+                                if (position == 0) null else spinner.selectedItem as Contact
+
+                        else ->
+                            selectedContact =
+                                if (position == 0) null else spinner.selectedItem as Contact
+                    }
+
+                    toggleButton(
+                        buttonShareContact,
+                        selectedContact != null && selectedRecipient != null
+                    )
+                }
             }
-        }
     }
 
     private fun spinnerAdapter(
@@ -192,13 +204,14 @@ class ContactShareDialog(
         spinner: Spinner,
         isRecipient: Boolean
     ): ArrayAdapter<Contact> {
-        val contacts = if (spinner.selectedItemPosition == 0) {
-            list
-        } else {
-            list.filter {
-                it != if (isRecipient) selectedContact else selectedRecipient
+        val contacts =
+            if (spinner.selectedItemPosition == 0) {
+                list
+            } else {
+                list.filter {
+                    it != if (isRecipient) selectedContact else selectedRecipient
+                }
             }
-        }
 
         return object : ArrayAdapter<Contact>(
             requireContext(),
@@ -224,15 +237,20 @@ class ContactShareDialog(
                         setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
                     }
 
-                    background = if (position == spinner.selectedItemPosition) {
-                        ColorDrawable(Color.LTGRAY)
-                    } else {
-                        ColorDrawable(Color.WHITE)
-                    }
+                    background =
+                        if (position == spinner.selectedItemPosition) {
+                            ColorDrawable(Color.LTGRAY)
+                        } else {
+                            ColorDrawable(Color.WHITE)
+                        }
                 }
             }
 
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            override fun getView(
+                position: Int,
+                convertView: View?,
+                parent: ViewGroup
+            ): View {
                 return (super.getView(position, convertView, parent) as TextView).apply {
                     text = contacts[position].name
 

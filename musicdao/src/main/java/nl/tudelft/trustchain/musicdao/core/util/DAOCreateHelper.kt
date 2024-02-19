@@ -15,7 +15,6 @@ import org.bitcoinj.core.ECKey
 
 class DAOCreateHelper {
     private fun getTrustChainCommunity(): TrustChainCommunity {
-
         return IPv8Android.getInstance().getOverlay()
             ?: throw IllegalStateException("TrustChainCommunity is not configured")
     }
@@ -38,9 +37,10 @@ class DAOCreateHelper {
         context: Context
     ): SWJoinBlockTransactionData {
         val walletManager = WalletManagerAndroid.getInstance()
-        val (_, serializedTransaction) = walletManager.safeCreationAndSendGenesisWallet(
-            Coin.valueOf(entranceFee)
-        )
+        val (_, serializedTransaction) =
+            walletManager.safeCreationAndSendGenesisWallet(
+                Coin.valueOf(entranceFee)
+            )
 
         // Broadcast on trust chain if no errors are thrown in the previous step.
         return broadcastCreatedSharedWallet(
@@ -67,17 +67,18 @@ class DAOCreateHelper {
         val walletManager = WalletManagerAndroid.getInstance()
         val bitcoinPublicKey = walletManager.networkPublicECKeyHex()
         val trustChainPk = myPeer.publicKey.keyToBin()
-        val nonceKey = TaprootUtil.generate_schnorr_nonce(ECKey().privKeyBytes)
+        val nonceKey = TaprootUtil.generateSchnorrNonce(ECKey().privKeyBytes)
         val noncePoint = nonceKey.second.getEncoded(true).toHex()
 
-        val blockData = SWJoinBlockTransactionData(
-            entranceFee,
-            transactionSerialized,
-            votingThreshold,
-            arrayListOf(trustChainPk.toHex()),
-            arrayListOf(bitcoinPublicKey),
-            arrayListOf(noncePoint)
-        )
+        val blockData =
+            SWJoinBlockTransactionData(
+                entranceFee,
+                transactionSerialized,
+                votingThreshold,
+                arrayListOf(trustChainPk.toHex()),
+                arrayListOf(bitcoinPublicKey),
+                arrayListOf(noncePoint)
+            )
 
         walletManager.storeNonceKey(blockData.getData().SW_UNIQUE_ID, context, nonceKey.first.privKeyBytes.toHex())
 

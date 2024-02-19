@@ -37,7 +37,7 @@ class ExchangeTransferMoneyLinkDialog(
     private var transactionAmountText = ""
     private var transactionMessage = message ?: " "
     private var isEuroTransfer = false
-    private var IBAN = ""
+    private var iban = ""
     private lateinit var messageView: EditText
     private lateinit var typeAdapter: ArrayAdapter<CharSequence>
     private val gatewayStoreLink by lazy {
@@ -47,6 +47,7 @@ class ExchangeTransferMoneyLinkDialog(
         TransactionRepository(IPv8Android.getInstance().getOverlay()!!, gatewayStoreLink)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog =
@@ -78,11 +79,12 @@ class ExchangeTransferMoneyLinkDialog(
                 transactionAmountView.setText(formatAmount(amount).toString())
             }
 
-            typeAdapter = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.exchange_types,
-                android.R.layout.simple_spinner_item
-            )
+            typeAdapter =
+                ArrayAdapter.createFromResource(
+                    requireContext(),
+                    R.array.exchange_types,
+                    android.R.layout.simple_spinner_item
+                )
 
             typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item)
             typeSpinner.adapter = typeAdapter
@@ -115,20 +117,15 @@ class ExchangeTransferMoneyLinkDialog(
             transactionAmountView.doAfterTextChanged {
                 transactionAmount = formatAmount(transactionAmountView.text.toString())
                 transactionAmountText = transactionAmountView.text.toString()
-                //                  Large number warning
                 if (isValidTransactionAmount(transactionAmountText) == "Valid but large") {
                     transactionAmountView.background.setTint(Color.parseColor("#FFF9BA"))
-                }
-//                  Invalid:
-                else if (isValidTransactionAmount(transactionAmountText) == "Invalid") {
+                } else if (isValidTransactionAmount(transactionAmountText) == "Invalid") {
                     transactionAmountView.background.setTint(Color.parseColor("#FFBABA"))
                     parentActivity.displayToast(
                         requireContext(),
                         resources.getString(R.string.transer_money_link_valid_transaction_value)
                     )
-                }
-//              Is valid:
-                else {
+                } else {
                     transactionAmountView.background.setTint(Color.parseColor("#C8FFC4"))
                 }
             }
@@ -145,7 +142,7 @@ class ExchangeTransferMoneyLinkDialog(
 
                     else -> {
                         ibanView.background.setTint(Color.parseColor("#C8FFC4"))
-                        IBAN = ibanView.text.toString()
+                        iban = ibanView.text.toString()
                     }
                 }
             }
@@ -177,7 +174,11 @@ class ExchangeTransferMoneyLinkDialog(
             ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
-    internal fun createPaymentId(amount: Int, iban: String? = null) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    internal fun createPaymentId(
+        amount: Int,
+        iban: String? = null
+    ) {
         val host = BuildConfig.DEFAULT_GATEWAY_HOST
         val url = "$host/api/exchange/${if (iban == null) "e2t" else "t2e"}/initiate"
         Log.e("test", url)
@@ -192,51 +193,61 @@ class ExchangeTransferMoneyLinkDialog(
             jsonObject.put("destination_iban", iban)
         }
         // Volley post request with parameters
-        val request = JsonObjectRequest(
-            Request.Method.POST, url, jsonObject,
-            { response ->
-                val paymentId = response.getString("payment_id")
-                if (iban == null) {
-                    val gatewayData = response.getJSONObject("gateway_connection_data")
-                    getEuroTokenCommunity().connectToGateway(
-                        gatewayData.getString("public_key"),
-                        gatewayData.getString("ip"),
-                        gatewayData.getString("port").toInt(),
-                        paymentId
+        val request =
+            JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                { response ->
+                    val paymentId = response.getString("payment_id")
+                    if (iban == null) {
+                        val gatewayData = response.getJSONObject("gateway_connection_data")
+                        getEuroTokenCommunity().connectToGateway(
+                            gatewayData.getString("public_key"),
+                            gatewayData.getString("ip"),
+                            gatewayData.getString("port").toInt(),
+                            paymentId
+                        )
+                    }
+                    showLink(host, paymentId)
+                },
+                { error ->
+                    Log.e("server_err", error.message ?: error.toString())
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_unexpected_error_occurred)
                     )
                 }
-                showLink(host, paymentId)
-            },
-            { error ->
-                Log.e("server_err", error.message ?: error.toString())
-                parentActivity.displayToast(
-                    requireContext(),
-                    resources.getString(R.string.snackbar_unexpected_error_occurred)
-                )
-            }
-        )
+            )
         // Add the volley post request to the request queue
         queue.add(request)
     }
 
-    private fun showLink(host: String, paymentId: String) {
+    private fun showLink(
+        host: String,
+        paymentId: String
+    ) {
         val link = getLink(host, paymentId)
-        val sendIntent: Intent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(
-                Intent.EXTRA_TEXT,
-                resources.getString(R.string.text_request_euro_1) +
-                    transactionAmountText +
-                    resources.getString(R.string.text_request_euro_2) +
-                    link
-            )
-            type = "text/plain"
-        }
+        val sendIntent: Intent =
+            Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    resources.getString(R.string.text_request_euro_1) +
+                        transactionAmountText +
+                        resources.getString(R.string.text_request_euro_2) +
+                        link
+                )
+                type = "text/plain"
+            }
         val shareIntent = Intent.createChooser(sendIntent, null)
         startActivity(shareIntent)
     }
 
-    fun getLink(host: String, paymentId: String): String {
+    fun getLink(
+        host: String,
+        paymentId: String
+    ): String {
         val ownKey = transactionRepositoryLink.trustChainCommunity.myPeer.publicKey
         val name =
             ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)?.name
@@ -301,19 +312,13 @@ class ExchangeTransferMoneyLinkDialog(
     internal fun isValidTransactionAmount(transactionAmountText: String): String {
         val transactionAmountDouble = transactionAmountText.replace(",", ".").toDoubleOrNull()
         if (transactionAmountDouble != null) {
-//          Large number warning
             return if (transactionAmountDouble >= HIGHTRANSACTIONWARNINGVALUE && transactionAmountDouble < TOOHIGHTRANSACTIONVALUE) {
                 "Valid but large"
-            }
-//          Too large:
-            else if (transactionAmountDouble >= TOOHIGHTRANSACTIONVALUE) {
+            } else if (transactionAmountDouble >= TOOHIGHTRANSACTIONVALUE) {
                 "Invalid"
-            }
-//          Is valid:
-            else {
+            } else {
                 "Valid"
             }
-//      Not valid:
         } else {
             return "Invalid"
         }

@@ -5,9 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import nl.tudelft.trustchain.currencyii.R
@@ -25,10 +22,13 @@ import kotlin.concurrent.thread
  * create an instance of this fragment.
  */
 class BlockchainDownloadFragment : BaseFragment(R.layout.fragment_blockchain_download) {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentBlockchainDownloadBinding? = null
     private val binding get() = _binding!!
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
 
         // TODO: The routing is cleaner to do via the previously displayed fragment.
@@ -74,12 +74,13 @@ class BlockchainDownloadFragment : BaseFragment(R.layout.fragment_blockchain_dow
                 "${WalletManagerAndroid.getInstance().progress}%"
             binding.bitcoinDownloadProgress.progress =
                 WalletManagerAndroid.getInstance().progress
-            val networkName = when (WalletManagerAndroid.getInstance().params) {
-                RegTestParams.get() -> "RegTest"
-                TestNet3Params.get() -> "TestNet"
-                MainNetParams.get() -> "MainNet"
-                else -> return null
-            }
+            val networkName =
+                when (WalletManagerAndroid.getInstance().params) {
+                    RegTestParams.get() -> "RegTest"
+                    TestNet3Params.get() -> "TestNet"
+                    MainNetParams.get() -> "MainNet"
+                    else -> return null
+                }
             binding.downloadingChainTv.text =
                 "Please wait while the chain from $networkName is downloading. "
 

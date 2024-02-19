@@ -26,9 +26,12 @@ import java.io.File
  * create an instance of this fragment.
  */
 class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentMyDaosBinding? = null
     private val binding get() = _binding!!
 
+    @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         handleDownloadNavigation()
@@ -125,20 +128,23 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
     private fun handleWalletNavigation() {
         val navController = findNavController()
 
-        val vWalletFileMainNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$MAIN_NET_WALLET_NAME.wallet"
-        )
+        val vWalletFileMainNet =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$MAIN_NET_WALLET_NAME.wallet"
+            )
 
-        val vWalletFileTestNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$TEST_NET_WALLET_NAME.wallet"
-        )
+        val vWalletFileTestNet =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$TEST_NET_WALLET_NAME.wallet"
+            )
 
-        val vWalletFileRegTest = File(
-            this.requireContext().applicationContext.filesDir,
-            "$REG_TEST_WALLET_NAME.wallet"
-        )
+        val vWalletFileRegTest =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$REG_TEST_WALLET_NAME.wallet"
+            )
 
         val mainNetWalletExists = vWalletFileMainNet.exists()
         val testNetWalletExists = vWalletFileTestNet.exists()
@@ -153,11 +159,12 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
             navController.navigate(MyDAOsFragmentDirections.actionMyDAOsFragmentToDaoLoginChoice())
         } else if (wallets == 1 && !WalletManagerAndroid.isInitialized()) {
             // Initialize wallet with the single wallet file that the user has stored
-            val params = when {
-                testNetWalletExists -> BitcoinNetworkOptions.TEST_NET
-                mainNetWalletExists -> BitcoinNetworkOptions.PRODUCTION
-                else -> BitcoinNetworkOptions.REG_TEST
-            }
+            val params =
+                when {
+                    testNetWalletExists -> BitcoinNetworkOptions.TEST_NET
+                    mainNetWalletExists -> BitcoinNetworkOptions.PRODUCTION
+                    else -> BitcoinNetworkOptions.REG_TEST
+                }
             val config = WalletManagerConfiguration(params)
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)
                 .setConfiguration(config).init()

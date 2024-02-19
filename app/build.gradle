@@ -26,6 +26,7 @@ ktlint {
     android = true
     outputToConsole = true
     ignoreFailures = false
+    verbose = true
 }
 
 // Generate a version code from git commit count

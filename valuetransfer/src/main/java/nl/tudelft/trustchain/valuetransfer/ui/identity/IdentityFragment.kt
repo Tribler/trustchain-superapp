@@ -87,6 +87,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     }
 
     init {
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
 
         lifecycleScope.launchWhenCreated {
@@ -109,14 +110,20 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             IdentityItemRenderer(
                 1,
                 { identity ->
-                    val map = mapOf(
-                        QRScanController.KEY_PUBLIC_KEY to identity.publicKey.keyToBin().toHex(),
-                        QRScanController.KEY_NAME to identity.content.let {
-                            "${it.givenNames.getInitials()} ${it.surname}"
-                        },
-                    )
+                    val map =
+                        mapOf(
+                            QRScanController.KEY_PUBLIC_KEY to identity.publicKey.keyToBin().toHex(),
+                            QRScanController.KEY_NAME to
+                                identity.content.let {
+                                    "${it.givenNames.getInitials()} ${it.surname}"
+                                },
+                        )
 
-                    QRCodeDialog(resources.getString(R.string.text_my_public_key), resources.getString(R.string.text_public_key_share_desc), mapToJSON(map).toString())
+                    QRCodeDialog(
+                        resources.getString(R.string.text_my_public_key),
+                        resources.getString(R.string.text_public_key_share_desc),
+                        mapToJSON(map).toString()
+                    )
                         .show(parentFragmentManager, tag)
                 },
                 { identity ->
@@ -172,15 +179,17 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                     bigOptionsEnabled = true,
                 ) { _, item ->
                     when (item.itemId) {
-                        R.id.actionEditIdentityAttribute -> IdentityAttributeDialog(it).show(
-                            parentFragmentManager,
-                            tag
-                        )
+                        R.id.actionEditIdentityAttribute ->
+                            IdentityAttributeDialog(it).show(
+                                parentFragmentManager,
+                                tag
+                            )
                         R.id.actionDeleteIdentityAttribute -> deleteIdentityAttribute(it)
-                        R.id.actionShareIdentityAttribute -> IdentityAttributeShareDialog(
-                            null,
-                            it
-                        ).show(parentFragmentManager, tag)
+                        R.id.actionShareIdentityAttribute ->
+                            IdentityAttributeShareDialog(
+                                null,
+                                it
+                            ).show(parentFragmentManager, tag)
                     }
                 }.show(parentFragmentManager, tag)
             }
@@ -198,14 +207,15 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                         val attestation = manager.deserialize(blob.blob, blob.idFormat)
                         val parsedMetadata = JSONObject(blob.metadata!!)
 
-                        val map = mapOf(
-                            QRScanController.KEY_PRESENTATION to QRScanController.VALUE_ATTESTATION,
-                            QRScanController.KEY_METADATA to blob.metadata,
-                            QRScanController.KEY_ATTESTATION_HASH to attestation.getHash().toHex(),
-                            QRScanController.KEY_SIGNATURE to blob.signature!!.toHex(),
-                            QRScanController.KEY_SIGNEE_KEY to IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex(),
-                            QRScanController.KEY_ATTESTOR_KEY to blob.attestorKey!!.keyToBin().toHex()
-                        )
+                        val map =
+                            mapOf(
+                                QRScanController.KEY_PRESENTATION to QRScanController.VALUE_ATTESTATION,
+                                QRScanController.KEY_METADATA to blob.metadata,
+                                QRScanController.KEY_ATTESTATION_HASH to attestation.getHash().toHex(),
+                                QRScanController.KEY_SIGNATURE to blob.signature!!.toHex(),
+                                QRScanController.KEY_SIGNEE_KEY to IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex(),
+                                QRScanController.KEY_ATTESTOR_KEY to blob.attestorKey!!.keyToBin().toHex()
+                            )
 
                         QRCodeDialog(
                             resources.getString(R.string.dialog_title_attestation),
@@ -237,7 +247,10 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     }
 
     @SuppressLint("RestrictedApi")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
@@ -333,7 +346,12 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    @Deprecated("Deprecated in Java")
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
+        @Suppress("DEPRECATION")
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
         menu.add(Menu.NONE, MENU_ITEM_OPTIONS, Menu.NONE, null)
@@ -341,6 +359,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
     }
 
+    @Deprecated("Deprecated in Java")
     @SuppressLint("RestrictedApi")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         OptionsDialog(
@@ -348,12 +367,14 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             resources.getString(R.string.dialog_choose_option),
         ) { _, selectedItem ->
             when (selectedItem.itemId) {
-                R.id.actionViewAuthorities -> IdentityAttestationAuthoritiesDialog(
-                    trustchain.getMyPublicKey().toHex()
-                ).show(parentFragmentManager, tag)
+                R.id.actionViewAuthorities ->
+                    IdentityAttestationAuthoritiesDialog(
+                        trustchain.getMyPublicKey().toHex()
+                    ).show(parentFragmentManager, tag)
             }
         }.show(parentFragmentManager, tag)
 
+        @Suppress("DEPRECATION")
         return super.onOptionsItemSelected(item)
     }
 
@@ -459,6 +480,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        @Suppress("DEPRECATION")
         startActivityForResult(
             Intent.createChooser(
                 intent,
@@ -488,7 +510,10 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             }
     }
 
-    private fun createIdentityItems(identities: List<Identity>, imageString: String?): List<Item> {
+    private fun createIdentityItems(
+        identities: List<Identity>,
+        imageString: String?
+    ): List<Item> {
         return identities.map { identity ->
             IdentityItem(
                 identity,
@@ -499,17 +524,22 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     }
 
     @Suppress("DEPRECATION")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == PICK_IDENTITY_IMAGE) {
                 if (data != null) {
                     data.data?.let { uri ->
-                        val bitmap = if (Build.VERSION.SDK_INT >= 29) {
-                            val source = ImageDecoder.createSource(parentActivity.contentResolver, uri)
-                            ImageDecoder.decodeBitmap(source)
-                        } else {
-                            MediaStore.Images.Media.getBitmap(parentActivity.contentResolver, uri)
-                        }
+                        val bitmap =
+                            if (Build.VERSION.SDK_INT >= 29) {
+                                val source = ImageDecoder.createSource(parentActivity.contentResolver, uri)
+                                ImageDecoder.decodeBitmap(source)
+                            } else {
+                                MediaStore.Images.Media.getBitmap(parentActivity.contentResolver, uri)
+                            }
 
                         appPreferences.setIdentityFace(encodeImage(bitmap))
                     }
@@ -530,12 +560,14 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                                     val publicKey = obj.optString(QRScanController.KEY_PUBLIC_KEY)
 
                                     when (scanIntent) {
-                                        ADD_ATTESTATION_INTENT -> getQRScanController().addAttestation(
-                                            publicKey
-                                        )
-                                        ADD_AUTHORITY_INTENT -> getQRScanController().addAuthority(
-                                            publicKey
-                                        )
+                                        ADD_ATTESTATION_INTENT ->
+                                            getQRScanController().addAttestation(
+                                                publicKey
+                                            )
+                                        ADD_AUTHORITY_INTENT ->
+                                            getQRScanController().addAuthority(
+                                                publicKey
+                                            )
                                     }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -559,7 +591,9 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                         }
                     }
             }
-        } else super.onActivityResult(requestCode, resultCode, data)
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     companion object {

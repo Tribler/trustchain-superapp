@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.FOC
+package nl.tudelft.trustchain.foc
 
 import android.content.Context
 import com.frostwire.jlibtorrent.*
@@ -7,8 +7,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.Key
-import nl.tudelft.trustchain.FOC.community.FOCMessage
-import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.constructMagnetLink
+import nl.tudelft.trustchain.foc.community.FOCMessage
+import nl.tudelft.trustchain.foc.util.MagnetUtils.Companion.constructMagnetLink
 import org.awaitility.Awaitility.await
 import org.junit.Assert
 import org.junit.Before
@@ -22,7 +22,6 @@ import kotlin.Pair
  * App Gossiping Tests
  */
 class AppGossiperTest {
-
     private lateinit var sessionManager: SessionManager
     private lateinit var mainActivity: MainActivityFOC
     private lateinit var focCommunityMock: FOCCommunityMock
@@ -32,11 +31,12 @@ class AppGossiperTest {
     private val firstPeerKey = mockk<Key>()
     private val firstPeerKeyHash = byteArrayOf(0, 1, 2)
     private val peer = Peer(firstPeerKey)
-    private val someTorrentHash = Sha1Hash(
-        ByteArray(20) {
-            5.toByte()
-        }
-    )
+    private val someTorrentHash =
+        Sha1Hash(
+            ByteArray(20) {
+                5.toByte()
+            }
+        )
     private val someTorrentName = "some-torrent"
     private val contextDir = "src/test/resources"
     private val filesToUpload = arrayOf(File("$contextDir/some.torrent"))
@@ -79,7 +79,10 @@ class AppGossiperTest {
         verify(exactly = 2) { sessionManager.download(capture(torrentInfoSlot), cacheDir) }
         Assert.assertEquals(
             torrentInfoSlot.map { it.infoHash() }.sorted(),
-            listOf(TorrentInfo.bdecode(someMagnetLinkByteArray).infoHash(), TorrentInfo(File(contextDir + "/some.torrent")).infoHash()).sorted()
+            listOf(
+                TorrentInfo.bdecode(someMagnetLinkByteArray).infoHash(),
+                TorrentInfo(File(contextDir + "/some.torrent")).infoHash()
+            ).sorted()
         )
     }
 

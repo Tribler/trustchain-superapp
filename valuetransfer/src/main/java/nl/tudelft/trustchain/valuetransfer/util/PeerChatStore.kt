@@ -24,13 +24,32 @@ class PeerChatStore(context: Context) {
     val contactsStore = ContactStore.getInstance(context)
 
     private val messageMapper =
-        { id: String, message: String, senderPk: ByteArray, receipientPk: ByteArray, outgoing: Long, timestamp: Long, ack: Long, read: Long, attachmentType: String?, attachmentSize: Long?, attachmentContent: ByteArray?, attachmentFetched: Long, transaction_hash: ByteArray? ->
+        {
+                id: String,
+                message: String,
+                senderPk: ByteArray,
+                receipientPk: ByteArray,
+                outgoing: Long,
+                timestamp: Long,
+                ack: Long,
+                read: Long,
+                attachmentType: String?,
+                attachmentSize: Long?,
+                attachmentContent: ByteArray?,
+                attachmentFetched: Long,
+                transaction_hash: ByteArray? ->
             ChatMessage(
                 id,
                 message,
-                if (attachmentType != null && attachmentSize != null && attachmentContent != null) MessageAttachment(
-                    attachmentType, attachmentSize, attachmentContent
-                ) else null,
+                if (attachmentType != null && attachmentSize != null && attachmentContent != null) {
+                    MessageAttachment(
+                        attachmentType,
+                        attachmentSize,
+                        attachmentContent
+                    )
+                } else {
+                    null
+                },
                 defaultCryptoProvider.keyFromPublicBin(senderPk),
                 defaultCryptoProvider.keyFromPublicBin(receipientPk),
                 outgoing == 1L,
@@ -76,7 +95,9 @@ class PeerChatStore(context: Context) {
         isBlocked: Boolean
     ): Flow<List<ChatMessage>> {
         return combine(
-            contactsStore.getContacts(), getAllMessages(), getAllContactState()
+            contactsStore.getContacts(),
+            getAllMessages(),
+            getAllContactState()
         ) { _, messages, state ->
             messages.asSequence().sortedByDescending {
                 it.timestamp.time
@@ -105,9 +126,10 @@ class PeerChatStore(context: Context) {
                     .map { Contact("", it) }.toList()
 
             (contacts + notContacts).map { contact ->
-                val lastMessage = messages.findLast {
-                    it.recipient == contact.publicKey || it.sender == contact.publicKey
-                }
+                val lastMessage =
+                    messages.findLast {
+                        it.recipient == contact.publicKey || it.sender == contact.publicKey
+                    }
                 Pair(contact, lastMessage)
             }
         }
@@ -138,24 +160,32 @@ class PeerChatStore(context: Context) {
     fun getAllByPublicKey(publicKey: PublicKey): Flow<List<ChatMessage>> {
         val publicKeyBin = publicKey.keyToBin()
         return database.dbMessageQueries.getAllByPublicKey(
-            publicKeyBin, publicKeyBin, messageMapper
+            publicKeyBin,
+            publicKeyBin,
+            messageMapper
         ).asFlow().mapToList(Dispatchers.IO)
     }
 
     fun getAllSentByPublicKeyToMe(publicKey: PublicKey): List<ChatMessage> {
         return database.dbMessageQueries.getAllByPublicKey(
-            publicKey.keyToBin(), publicKey.keyToBin(), messageMapper
+            publicKey.keyToBin(),
+            publicKey.keyToBin(),
+            messageMapper
         ).executeAsList()
     }
 
     fun deleteMessagesOfPublicKey(publicKey: PublicKey) {
         database.dbMessageQueries.deleteMessagesOfPublicKey(
-            publicKey.keyToBin(), publicKey.keyToBin()
+            publicKey.keyToBin(),
+            publicKey.keyToBin()
         )
     }
 
     // Get all attachments of type sent by contact
-    fun getAttachmentsOfType(publicKey: PublicKey, type: String): Flow<List<MessageAttachment>> {
+    fun getAttachmentsOfType(
+        publicKey: PublicKey,
+        type: String
+    ): Flow<List<MessageAttachment>> {
         return combine(contactsStore.getContacts(), getAllByPublicKey(publicKey)) { _, messages ->
             messages.asSequence().filter {
                 it.attachment != null && it.attachment.type == type
@@ -163,7 +193,9 @@ class PeerChatStore(context: Context) {
                 it.timestamp.time
             }.map {
                 MessageAttachment(
-                    it.attachment!!.type, it.attachment.size, it.attachment.content
+                    it.attachment!!.type,
+                    it.attachment.size,
+                    it.attachment.content
                 )
             }.toList()
         }
@@ -192,19 +224,22 @@ class PeerChatStore(context: Context) {
 
     fun getContactImage(publicKey: PublicKey): ContactImage? {
         return database.dbContactImageQueries.getContactImage(
-            publicKey.keyToBin(), contactImageMapper
+            publicKey.keyToBin(),
+            contactImageMapper
         ).executeAsOneOrNull()
     }
 
     fun getContactImageFlow(publicKey: PublicKey): Flow<ContactImage?> {
         return database.dbContactImageQueries.getContactImage(
-            publicKey.keyToBin(), contactImageMapper
+            publicKey.keyToBin(),
+            contactImageMapper
         ).asFlow().mapToOneOrNull(Dispatchers.IO)
     }
 
     fun getContactImageHash(publicKey: PublicKey): String? {
         return database.dbContactImageQueries.getContactImage(
-            publicKey.keyToBin(), contactImageMapper
+            publicKey.keyToBin(),
+            contactImageMapper
         ).executeAsOneOrNull()?.imageHash
     }
 
@@ -213,7 +248,11 @@ class PeerChatStore(context: Context) {
             .executeAsOneOrNull() != null
     }
 
-    fun setContactImage(publicKey: PublicKey, imageBytes: ByteArray, hash: String) {
+    fun setContactImage(
+        publicKey: PublicKey,
+        imageBytes: ByteArray,
+        hash: String
+    ) {
         if (hasContactImage(publicKey)) {
             database.dbContactImageQueries.setContactImage(hash, imageBytes, publicKey.keyToBin())
         } else {
@@ -230,56 +269,128 @@ class PeerChatStore(context: Context) {
         database.dbContactStateQueries.createContactStateTable()
     }
 
-    fun setState(publicKey: PublicKey, type: String, status: Boolean, value: String? = null) {
+    fun setState(
+        publicKey: PublicKey,
+        type: String,
+        status: Boolean,
+        value: String? = null
+    ) {
         val state = if (status) 1L else 0L
         val publicKeyBin = publicKey.keyToBin()
 
         if (database.dbContactStateQueries.hasContact(publicKeyBin).executeAsOneOrNull() != null) {
             when (type) {
-                STATUS_ARCHIVE -> database.dbContactStateQueries.setArchiveState(
-                    state, publicKeyBin
-                )
+                STATUS_ARCHIVE ->
+                    database.dbContactStateQueries.setArchiveState(
+                        state,
+                        publicKeyBin
+                    )
                 STATUS_MUTE -> database.dbContactStateQueries.setMuteState(state, publicKeyBin)
                 STATUS_BLOCK -> database.dbContactStateQueries.setBlockState(state, publicKeyBin)
-                STATUS_VERIFICATION -> database.dbContactStateQueries.setVerificationState(
-                    state, publicKeyBin
-                )
-                STATUS_IMAGE_HASH -> database.dbContactStateQueries.setImageHash(
-                    value, publicKeyBin
-                )
-                STATUS_INITIALS -> database.dbContactStateQueries.setInitials(
-                    value, publicKeyBin
-                )
+                STATUS_VERIFICATION ->
+                    database.dbContactStateQueries.setVerificationState(
+                        state,
+                        publicKeyBin
+                    )
+                STATUS_IMAGE_HASH ->
+                    database.dbContactStateQueries.setImageHash(
+                        value,
+                        publicKeyBin
+                    )
+                STATUS_INITIALS ->
+                    database.dbContactStateQueries.setInitials(
+                        value,
+                        publicKeyBin
+                    )
                 STATUS_SURNAME -> database.dbContactStateQueries.setSurname(value, publicKeyBin)
             }
         } else {
             when (type) {
-                STATUS_ARCHIVE -> database.dbContactStateQueries.addContact(
-                    publicKeyBin, state, 0L, 0L, 0L, null, null, null
-                )
-                STATUS_MUTE -> database.dbContactStateQueries.addContact(
-                    publicKeyBin, 0L, state, 0L, 0L, null, null, null
-                )
-                STATUS_BLOCK -> database.dbContactStateQueries.addContact(
-                    publicKeyBin, 0L, 0L, state, 0L, null, null, null
-                )
-                STATUS_VERIFICATION -> database.dbContactStateQueries.addContact(
-                    publicKeyBin, 0L, 0L, 0L, state, null, null, null
-                )
-                STATUS_IMAGE_HASH -> database.dbContactStateQueries.addContact(
-                    publicKeyBin, 0L, 0L, 0L, 0L, value, null, null
-                )
-                STATUS_INITIALS -> database.dbContactStateQueries.addContact(
-                    publicKeyBin, 0L, 0L, 0L, 0L, null, value, null
-                )
-                STATUS_SURNAME -> database.dbContactStateQueries.addContact(
-                    publicKeyBin, 0L, 0L, 0L, 0L, null, null, value
-                )
+                STATUS_ARCHIVE ->
+                    database.dbContactStateQueries.addContact(
+                        publicKeyBin,
+                        state,
+                        0L,
+                        0L,
+                        0L,
+                        null,
+                        null,
+                        null
+                    )
+                STATUS_MUTE ->
+                    database.dbContactStateQueries.addContact(
+                        publicKeyBin,
+                        0L,
+                        state,
+                        0L,
+                        0L,
+                        null,
+                        null,
+                        null
+                    )
+                STATUS_BLOCK ->
+                    database.dbContactStateQueries.addContact(
+                        publicKeyBin,
+                        0L,
+                        0L,
+                        state,
+                        0L,
+                        null,
+                        null,
+                        null
+                    )
+                STATUS_VERIFICATION ->
+                    database.dbContactStateQueries.addContact(
+                        publicKeyBin,
+                        0L,
+                        0L,
+                        0L,
+                        state,
+                        null,
+                        null,
+                        null
+                    )
+                STATUS_IMAGE_HASH ->
+                    database.dbContactStateQueries.addContact(
+                        publicKeyBin,
+                        0L,
+                        0L,
+                        0L,
+                        0L,
+                        value,
+                        null,
+                        null
+                    )
+                STATUS_INITIALS ->
+                    database.dbContactStateQueries.addContact(
+                        publicKeyBin,
+                        0L,
+                        0L,
+                        0L,
+                        0L,
+                        null,
+                        value,
+                        null
+                    )
+                STATUS_SURNAME ->
+                    database.dbContactStateQueries.addContact(
+                        publicKeyBin,
+                        0L,
+                        0L,
+                        0L,
+                        0L,
+                        null,
+                        null,
+                        value
+                    )
             }
         }
     }
 
-    fun setIdentityState(publicKey: PublicKey, identityInfo: IdentityInfo) {
+    fun setIdentityState(
+        publicKey: PublicKey,
+        identityInfo: IdentityInfo
+    ) {
         if (getContactState(publicKey) != null) {
             database.dbContactStateQueries.updateContactIdentity(
                 if (identityInfo.isVerified) 1L else 0L,
@@ -321,14 +432,25 @@ class PeerChatStore(context: Context) {
     }
 
     private val contactStateMapper =
-        { public_key: ByteArray, is_archived: Long, is_muted: Long, is_blocked: Long, is_verified: Long, image_hash: String?, initials: String?, surname: String? ->
+        {
+                public_key: ByteArray,
+                is_archived: Long,
+                is_muted: Long,
+                is_blocked: Long,
+                is_verified: Long,
+                image_hash: String?,
+                initials: String?,
+                surname: String? ->
             ContactState(
                 defaultCryptoProvider.keyFromPublicBin(public_key),
                 is_archived == 1L,
                 is_muted == 1L,
                 is_blocked == 1L,
                 IdentityInfo(
-                    initials, surname, is_verified == 1L, image_hash
+                    initials,
+                    surname,
+                    is_verified == 1L,
+                    image_hash
                 )
             )
         }
@@ -338,42 +460,69 @@ class PeerChatStore(context: Context) {
             .asFlow().mapToOneOrNull(Dispatchers.IO)
     }
 
-    fun getContactStateForType(publicKey: PublicKey, type: String): Boolean {
+    fun getContactStateForType(
+        publicKey: PublicKey,
+        type: String
+    ): Boolean {
         val publicKeyBytes = publicKey.keyToBin()
         return when (type) {
-            STATUS_ARCHIVE -> database.dbContactStateQueries.getArchiveState(publicKeyBytes)
-                .executeAsOneOrNull()
-            STATUS_MUTE -> database.dbContactStateQueries.getMuteState(publicKeyBytes)
-                .executeAsOneOrNull()
-            STATUS_BLOCK -> database.dbContactStateQueries.getBlockState(publicKeyBytes)
-                .executeAsOneOrNull()
-            STATUS_VERIFICATION -> database.dbContactStateQueries.getVerificationState(
-                publicKeyBytes
-            ).executeAsOneOrNull()
+            STATUS_ARCHIVE ->
+                database.dbContactStateQueries.getArchiveState(publicKeyBytes)
+                    .executeAsOneOrNull()
+            STATUS_MUTE ->
+                database.dbContactStateQueries.getMuteState(publicKeyBytes)
+                    .executeAsOneOrNull()
+            STATUS_BLOCK ->
+                database.dbContactStateQueries.getBlockState(publicKeyBytes)
+                    .executeAsOneOrNull()
+            STATUS_VERIFICATION ->
+                database.dbContactStateQueries.getVerificationState(
+                    publicKeyBytes
+                ).executeAsOneOrNull()
             else -> null
         } == 1L
     }
 
-    fun getContactStateValueForType(publicKey: PublicKey, type: String): String? {
+    fun getContactStateValueForType(
+        publicKey: PublicKey,
+        type: String
+    ): String? {
         val publicKeyBytes = publicKey.keyToBin()
         return when (type) {
-            STATUS_IMAGE_HASH -> database.dbContactStateQueries.getImageHash(publicKeyBytes)
-                .executeAsOneOrNull()?.image_hash
-            STATUS_INITIALS -> database.dbContactStateQueries.getInitials(publicKeyBytes)
-                .executeAsOneOrNull()?.initials
-            STATUS_SURNAME -> database.dbContactStateQueries.getSurname(publicKeyBytes)
-                .executeAsOneOrNull()?.surname
+            STATUS_IMAGE_HASH ->
+                database.dbContactStateQueries.getImageHash(publicKeyBytes)
+                    .executeAsOneOrNull()?.image_hash
+            STATUS_INITIALS ->
+                database.dbContactStateQueries.getInitials(publicKeyBytes)
+                    .executeAsOneOrNull()?.initials
+            STATUS_SURNAME ->
+                database.dbContactStateQueries.getSurname(publicKeyBytes)
+                    .executeAsOneOrNull()?.surname
             else -> null
         }
     }
 
     fun getAllContactState(): Flow<List<ContactState>> {
-        return database.dbContactStateQueries.getAll { public_key, is_archived, is_muted, is_blocked, is_verified, image_hash, initials, surname ->
+        return database.dbContactStateQueries.getAll {
+                public_key,
+                is_archived,
+                is_muted,
+                is_blocked,
+                is_verified,
+                image_hash,
+                initials,
+                surname ->
             val publicKey = defaultCryptoProvider.keyFromPublicBin(public_key)
             ContactState(
-                publicKey, is_archived == 1L, is_muted == 1L, is_blocked == 1L,
+                publicKey,
+                is_archived == 1L,
+                is_muted == 1L,
+                is_blocked == 1L,
                 IdentityInfo(
-                    initials, surname, is_verified == 1L, image_hash
+                    initials,
+                    surname,
+                    is_verified == 1L,
+                    image_hash
                 )
             )
         }.asFlow().mapToList(Dispatchers.IO)
@@ -393,6 +542,7 @@ class PeerChatStore(context: Context) {
         const val STATUS_SURNAME = "status_surname"
 
         private lateinit var instance: PeerChatStore
+
         fun getInstance(context: Context): PeerChatStore {
             if (!::instance.isInitialized) {
                 instance = PeerChatStore(context)

@@ -16,29 +16,31 @@ data class ContactImage(
      * The public key of the contact.
      */
     val publicKey: PublicKey,
-
     /**
      * Hash of image
      */
     val imageHash: String?,
-
     /**
      * Image of contact
      */
     val image: Bitmap?,
 ) : Serializable {
-    fun serialize(): ByteArray = JSONObject().apply {
-        put(PUBLIC_KEY, publicKey.keyToBin().toHex())
-        put(IMAGE_HASH, imageHash)
-        put(IMAGE, image?.let { imageBytes(it) })
-    }.toString().toByteArray()
+    fun serialize(): ByteArray =
+        JSONObject().apply {
+            put(PUBLIC_KEY, publicKey.keyToBin().toHex())
+            put(IMAGE_HASH, imageHash)
+            put(IMAGE, image?.let { imageBytes(it) })
+        }.toString().toByteArray()
 
     companion object : Deserializable<ContactImage> {
         private const val PUBLIC_KEY = "public_key"
         private const val IMAGE_HASH = "image_hash"
         private const val IMAGE = "image"
 
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<ContactImage, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<ContactImage, Int> {
             val offsetBuffer = buffer.copyOfRange(0, buffer.size)
             val json = JSONObject(offsetBuffer.decodeToString())
             val imageEncoded = json.getString(IMAGE)

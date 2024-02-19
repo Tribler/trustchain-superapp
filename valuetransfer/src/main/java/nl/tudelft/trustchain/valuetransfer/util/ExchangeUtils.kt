@@ -20,18 +20,20 @@ fun Transaction.toExchangeTransactionItem(
 
     // Some other (agreement) block is linked to the current proposal block. This is to find the status of outgoing transactions.
     val outgoingIsLinkedBlock = blocks.find { block.linkedBlockId == it.blockId } != null
-    val status = when {
-        hasLinkedBlock || outgoingIsLinkedBlock -> ExchangeTransactionItem.BlockStatus.SIGNED
-        block.isSelfSigned -> ExchangeTransactionItem.BlockStatus.SELF_SIGNED
-        isProposalBlock -> ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE
-        else -> null
-    }
+    val status =
+        when {
+            hasLinkedBlock || outgoingIsLinkedBlock -> ExchangeTransactionItem.BlockStatus.SIGNED
+            block.isSelfSigned -> ExchangeTransactionItem.BlockStatus.SELF_SIGNED
+            isProposalBlock -> ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE
+            else -> null
+        }
 
     // Determine whether the transaction/block can be signed
-    val canSign = (isAnyCounterpartyPk || isMyPk) &&
-        isProposalBlock &&
-        !block.isSelfSigned &&
-        !hasLinkedBlock
+    val canSign =
+        (isAnyCounterpartyPk || isMyPk) &&
+            isProposalBlock &&
+            !block.isSelfSigned &&
+            !hasLinkedBlock
 
     return ExchangeTransactionItem(
         this,

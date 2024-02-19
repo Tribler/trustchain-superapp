@@ -10,12 +10,10 @@ data class MessageAttachment constructor(
      * The type of the attachment. Currently, only "image" is supported.
      */
     val type: String,
-
     /**
      * The size of the attachment in bytes.
      */
     val size: Long,
-
     /**
      * The hash of the attachment that can be used for retrieving its data.
      */
@@ -53,7 +51,11 @@ data class MessageAttachment constructor(
         const val TYPE_IDENTITY_ATTRIBUTE = "identity_attribute"
         const val TYPE_IDENTITY_UPDATED = "identity_updated"
         const val TYPE_TRANSFER_REQUEST = "transfer_request"
-        fun getFile(context: Context, id: String): File {
+
+        fun getFile(
+            context: Context,
+            id: String
+        ): File {
             val path = "" + context.filesDir + "/" + id
             return File(path)
         }

@@ -11,7 +11,6 @@ import nl.tudelft.trustchain.valuetransfer.dialogs.*
 import org.json.JSONObject
 
 class QRScanController : VTFragment() {
-
     fun initiateScan() {
         QRCodeUtils(requireContext()).startQRScanner(
             this,
@@ -20,7 +19,10 @@ class QRScanController : VTFragment() {
         )
     }
 
-    private fun checkRequiredVariables(variables: List<String>, data: JSONObject): Boolean {
+    private fun checkRequiredVariables(
+        variables: List<String>,
+        data: JSONObject
+    ): Boolean {
         variables.forEach { variable ->
             if (!data.has(variable)) {
                 parentActivity.displayToast(
@@ -37,12 +39,10 @@ class QRScanController : VTFragment() {
     }
 
     fun addAuthority(publicKey: String) {
-
         IdentityAttestationAuthorityDialog(defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())).show(parentFragmentManager, tag)
     }
 
     fun addAttestation(publicKey: String) {
-
         val peer = getAttestationCommunity().getPeers().find { peer -> peer.publicKey.keyToBin().toHex() == publicKey }
 
         if (peer != null) {
@@ -56,7 +56,6 @@ class QRScanController : VTFragment() {
     }
 
     private fun verifyAttestation(data: JSONObject) {
-
         val variables = listOf(KEY_METADATA, KEY_ATTESTATION_HASH, KEY_SIGNATURE, KEY_SIGNEE_KEY, KEY_ATTESTOR_KEY)
         checkRequiredVariables(variables, data)
 
@@ -135,11 +134,15 @@ class QRScanController : VTFragment() {
         }
     }
 
-    fun exchangeMoney(data: JSONObject, isCreation: Boolean) {
-        val variables = when {
-            isCreation -> listOf(KEY_PAYMENT_ID, KEY_PUBLIC_KEY, KEY_IP, KEY_PORT, KEY_NAME)
-            else -> listOf(KEY_PAYMENT_ID, KEY_PUBLIC_KEY, KEY_IP, KEY_PORT, KEY_NAME, KEY_AMOUNT)
-        }
+    fun exchangeMoney(
+        data: JSONObject,
+        isCreation: Boolean
+    ) {
+        val variables =
+            when {
+                isCreation -> listOf(KEY_PAYMENT_ID, KEY_PUBLIC_KEY, KEY_IP, KEY_PORT, KEY_NAME)
+                else -> listOf(KEY_PAYMENT_ID, KEY_PUBLIC_KEY, KEY_IP, KEY_PORT, KEY_NAME, KEY_AMOUNT)
+            }
 
         checkRequiredVariables(variables, data)
 
@@ -165,7 +168,11 @@ class QRScanController : VTFragment() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let { result ->
             try {
                 val obj = JSONObject(result)

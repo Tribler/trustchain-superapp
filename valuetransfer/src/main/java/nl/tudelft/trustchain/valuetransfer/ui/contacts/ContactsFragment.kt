@@ -120,53 +120,58 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
 
         contactsAdapter.registerRenderer(
             ContactsItemRenderer {
-                val args = Bundle().apply {
-                    putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
-                }
+                val args =
+                    Bundle().apply {
+                        putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                        putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                        putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.CONTACTS_FRAGMENT_TAG)
+                    }
 
-                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                parentActivity.detailFragment(ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG, args)
             }
         )
 
         chatsAdapter.registerRenderer(
             ChatItemRenderer {
-                val args = Bundle().apply {
-                    putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
-                }
+                val args =
+                    Bundle().apply {
+                        putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                        putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                        putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.CONTACTS_FRAGMENT_TAG)
+                    }
 
-                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                parentActivity.detailFragment(ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG, args)
             }
         )
 
         archivedChatsAdapter.registerRenderer(
             ChatItemRenderer {
-                val args = Bundle().apply {
-                    putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
-                }
+                val args =
+                    Bundle().apply {
+                        putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                        putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                        putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.CONTACTS_FRAGMENT_TAG)
+                    }
 
-                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                parentActivity.detailFragment(ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG, args)
             }
         )
 
         blockedChatsAdapter.registerRenderer(
             ChatItemRenderer {
-                val args = Bundle().apply {
-                    putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
-                }
+                val args =
+                    Bundle().apply {
+                        putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                        putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                        putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.CONTACTS_FRAGMENT_TAG)
+                    }
 
-                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                parentActivity.detailFragment(ValueTransferMainActivity.CONTACT_CHAT_FRAGMENT_TAG, args)
             }
         )
 
@@ -189,7 +194,10 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
@@ -272,7 +280,10 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         }
     }
 
-    private fun toggleChats(from: String, to: String) {
+    private fun toggleChats(
+        from: String,
+        to: String
+    ) {
         if (from == ADAPTER_RECENT) {
             when (to) {
                 ADAPTER_ARCHIVE -> {
@@ -298,13 +309,19 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         binding.tvNoBlockedChats.isVisible = to == ADAPTER_BLOCKED && blockedChatsAdapter.itemCount == 0
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    @Deprecated("Deprecated in Java")
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
+        @Suppress("DEPRECATION")
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
 
         inflater.inflate(R.menu.contacts_options, menu)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.actionSearch -> {
@@ -317,6 +334,7 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
                 }
             }
         }
+        @Suppress("DEPRECATION")
         return super.onOptionsItemSelected(item)
     }
 
@@ -346,7 +364,10 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         )
     }
 
-    private fun observeContacts(owner: LifecycleOwner, adapter: ItemAdapter) {
+    private fun observeContacts(
+        owner: LifecycleOwner,
+        adapter: ItemAdapter
+    ) {
         contactItems.observe(
             owner,
             Observer {
@@ -403,9 +424,10 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
                 val contact = getContactStore().getContactFromPublicKey(publicKey)
                 val status = state.firstOrNull { it.publicKey == publicKey }
                 val image = images.firstOrNull { it.publicKey == publicKey }
-                val identityName = status?.identityInfo?.let {
-                    "${it.initials} ${it.surname}"
-                }
+                val identityName =
+                    status?.identityInfo?.let {
+                        "${it.initials} ${it.surname}"
+                    }
 
                 ChatItem(
                     Contact(

@@ -10,7 +10,6 @@ data class ArtistAnnounceBlock(
     val socials: String,
     val protocolVersion: String
 ) {
-
     companion object {
         const val BLOCK_TYPE = "artist_announce"
 

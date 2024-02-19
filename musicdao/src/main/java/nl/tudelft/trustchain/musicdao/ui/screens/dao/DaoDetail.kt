@@ -29,7 +29,11 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
-fun DaoDetailScreen(navController: NavController, daoId: String, daoViewModel: DaoViewModel) {
+fun DaoDetailScreen(
+    navController: NavController,
+    daoId: String,
+    daoViewModel: DaoViewModel
+) {
     val navigateToProposal = fun(proposalId: String) {
         navController.navigate(Screen.ProposalDetailRoute.createRoute(proposalId))
     }
@@ -58,19 +62,21 @@ fun DaoDetailPure(
 ) {
     var state by remember { mutableStateOf(0) }
 
-    val titles = mapOf(
-        "list" to "Proposals",
-        "new" to "New Proposal",
-        "about" to "About"
-    )
+    val titles =
+        mapOf(
+            "list" to "Proposals",
+            "new" to "New Proposal",
+            "about" to "About"
+        )
 
     val isRefreshing by daoViewModel.isRefreshing.collectAsState()
     val refreshState = rememberSwipeRefreshState(isRefreshing)
 
     val daos by daoViewModel.daos.collectAsState()
-    val daoDerivedState = derivedStateOf {
-        daos.toList().find { daoInitial.daoId == it.second.daoId }?.second
-    }
+    val daoDerivedState =
+        derivedStateOf {
+            daos.toList().find { daoInitial.daoId == it.second.daoId }?.second
+        }
     val dao = daoDerivedState.value
 
     if (dao == null) {
@@ -78,17 +84,15 @@ fun DaoDetailPure(
         return
     }
 
-    SwipeRefresh(
-        state = refreshState,
-        onRefresh = {
-            daoViewModel.refreshOneShot()
-        }
-    ) {
+    SwipeRefresh(state = refreshState, onRefresh = {
+        daoViewModel.refreshOneShot()
+    }) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp)
-                .verticalScroll(rememberScrollState())
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState())
         ) {
             Card {
                 Column {
@@ -130,6 +134,7 @@ fun DaoDetailPure(
                                             state = 1
                                             navigateToNewProposal(dao.daoId)
                                         }
+
                                         "about" -> state = 2
                                     }
                                 }
@@ -144,6 +149,7 @@ fun DaoDetailPure(
                     0 -> {
                         ProposalList(dao, navigateToProposal, daoViewModel)
                     }
+
                     2 -> {
                         About(dao)
                     }
@@ -161,14 +167,16 @@ fun ProposalList(
 ) {
     if (!daoViewModel.userInDao(dao)) {
         Card(
-            modifier = Modifier
-                .padding(top = 10.dp)
-                .fillMaxWidth()
+            modifier =
+                Modifier
+                    .padding(top = 10.dp)
+                    .fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxWidth()
+                modifier =
+                    Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
             ) {
                 Text("You are not a member of this DAO, you will not see any proposals.")
             }
@@ -186,21 +194,22 @@ fun ProposalList(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ProposalCard(proposal: Proposal, navigateToProposal: ((proposalId: String) -> Unit)?) {
+fun ProposalCard(
+    proposal: Proposal,
+    navigateToProposal: ((proposalId: String) -> Unit)?
+) {
     when (proposal) {
         is JoinProposal -> {
-            Card(
-                modifier = Modifier.padding(top = 10.dp),
-                onClick = {
-                    if (navigateToProposal != null) {
-                        navigateToProposal(proposal.proposalId)
-                    }
+            Card(modifier = Modifier.padding(top = 10.dp), onClick = {
+                if (navigateToProposal != null) {
+                    navigateToProposal(proposal.proposalId)
                 }
-            ) {
+            }) {
                 Column(
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth()
+                    modifier =
+                        Modifier
+                            .padding(20.dp)
+                            .fillMaxWidth()
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Chip(contentDescription = "", label = "Join Proposal", color = Color.Black)
@@ -249,77 +258,77 @@ fun ProposalCard(proposal: Proposal, navigateToProposal: ((proposalId: String) -
                 }
             }
         }
-        is TransferProposal -> Card(
-            modifier = Modifier.padding(top = 10.dp),
-            onClick = {
+
+        is TransferProposal ->
+            Card(modifier = Modifier.padding(top = 10.dp), onClick = {
                 if (navigateToProposal != null) {
                     navigateToProposal(proposal.proposalId)
                 }
-            }
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxWidth()
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Chip(
-                        contentDescription = "",
-                        label = "Transfer Funds Proposal",
-                        color = Color.Black
+            }) {
+                Column(
+                    modifier =
+                        Modifier
+                            .padding(20.dp)
+                            .fillMaxWidth()
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Chip(
+                            contentDescription = "",
+                            label = "Transfer Funds Proposal",
+                            color = Color.Black
+                        )
+                        if (proposal.isClosed()) {
+                            Chip(contentDescription = "", label = "Closed", color = Color.Red)
+                        } else {
+                            Chip(contentDescription = "", label = "Open")
+                        }
+                    }
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text(
+                        proposal.proposalId,
+                        style = MaterialTheme.typography.h6,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    if (proposal.isClosed()) {
-                        Chip(contentDescription = "", label = "Closed", color = Color.Red)
-                    } else {
-                        Chip(contentDescription = "", label = "Open")
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                        Text(text = "Creator", fontWeight = FontWeight.Bold)
+                        Text(
+                            text = proposal.proposalCreator,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    }
+                    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                        Text(text = "Creation Time", fontWeight = FontWeight.Bold)
+                        Text(text = proposal.proposalTime)
+                    }
+                    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                        Text(text = "Amount", fontWeight = FontWeight.Bold)
+                        Text(text = proposal.transferAmountBitcoinSatoshi.toString())
+                    }
+                    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                        Text(text = "To", fontWeight = FontWeight.Bold)
+                        Text(
+                            text = proposal.transferAddress,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            tint = MaterialTheme.colors.primary,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text(
+                            "${proposal.signatures.size} of ${proposal.signaturesRequired} signatures",
+                            style = MaterialTheme.typography.caption
+                        )
                     }
                 }
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(
-                    proposal.proposalId,
-                    style = MaterialTheme.typography.h6,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                Column(modifier = Modifier.padding(bottom = 20.dp)) {
-                    Text(text = "Creator", fontWeight = FontWeight.Bold)
-                    Text(
-                        text = proposal.proposalCreator,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
-                }
-                Column(modifier = Modifier.padding(bottom = 20.dp)) {
-                    Text(text = "Creation Time", fontWeight = FontWeight.Bold)
-                    Text(text = proposal.proposalTime)
-                }
-                Column(modifier = Modifier.padding(bottom = 20.dp)) {
-                    Text(text = "Amount", fontWeight = FontWeight.Bold)
-                    Text(text = proposal.transferAmountBitcoinSatoshi.toString())
-                }
-                Column(modifier = Modifier.padding(bottom = 20.dp)) {
-                    Text(text = "To", fontWeight = FontWeight.Bold)
-                    Text(
-                        text = proposal.transferAddress,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        tint = MaterialTheme.colors.primary,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.size(5.dp))
-                    Text(
-                        "${proposal.signatures.size} of ${proposal.signaturesRequired} signatures",
-                        style = MaterialTheme.typography.caption
-                    )
-                }
             }
-        }
     }
 }
 

@@ -53,7 +53,7 @@ import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.FOC.community.FOCCommunity
+import nl.tudelft.trustchain.foc.community.FOCCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
@@ -76,45 +76,47 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 @ExperimentalUnsignedTypes
 @HiltAndroidApp
 class TrustChainApplication : Application() {
-
     var isFirstRun: Boolean = false
     lateinit var appLoader: AppLoader
 
     @RequiresApi(Build.VERSION_CODES.M)
-    override fun onCreate() = runBlocking {
-        super.onCreate()
-        launch {
-            isFirstRun = checkFirstRun()
-            appLoader = AppLoader(dataStore, isFirstRun)
-        }
-        defaultCryptoProvider = AndroidCryptoProvider
+    override fun onCreate() =
+        runBlocking {
+            super.onCreate()
+            launch {
+                isFirstRun = checkFirstRun()
+                appLoader = AppLoader(dataStore, isFirstRun)
+            }
+            defaultCryptoProvider = AndroidCryptoProvider
 
-        // Only start IPv8 here if we are on Android 11 or below.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            initIPv8()
+            // Only start IPv8 here if we are on Android 11 or below.
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                initIPv8()
+            }
         }
-    }
 
     @RequiresApi(Build.VERSION_CODES.M)
     fun initIPv8() {
-        val config = IPv8Configuration(
-            overlays = listOf(
-                createDiscoveryCommunity(),
-                createTrustChainCommunity(),
-                createPeerChatCommunity(),
-                createEuroTokenCommunity(),
-                createTFTPCommunity(),
-                createDemoCommunity(),
-                createWalletCommunity(),
-                createMarketCommunity(),
-                createCoinCommunity(),
-                createDaoCommunity(),
-                createMusicCommunity(),
-                createIdentityCommunity(),
-                createFOCCommunity(),
-            ),
-            walkerInterval = 5.0
-        )
+        val config =
+            IPv8Configuration(
+                overlays =
+                    listOf(
+                        createDiscoveryCommunity(),
+                        createTrustChainCommunity(),
+                        createPeerChatCommunity(),
+                        createEuroTokenCommunity(),
+                        createTFTPCommunity(),
+                        createDemoCommunity(),
+                        createWalletCommunity(),
+                        createMarketCommunity(),
+                        createCoinCommunity(),
+                        createDaoCommunity(),
+                        createMusicCommunity(),
+                        createIdentityCommunity(),
+                        createFOCCommunity(),
+                    ),
+                walkerInterval = 5.0
+            )
 
         IPv8Android.Factory(this)
             .setConfiguration(config)
@@ -227,11 +229,16 @@ class TrustChainApplication : Application() {
         val periodicSimilarity = PeriodicSimilarity.Factory()
 
         val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
-        val bluetoothManager = getSystemService<BluetoothManager>()
-            ?: throw IllegalStateException("BluetoothManager not available")
-        val strategies = mutableListOf(
-            randomWalk, randomChurn, periodicSimilarity, nsd
-        )
+        val bluetoothManager =
+            getSystemService<BluetoothManager>()
+                ?: throw IllegalStateException("BluetoothManager not available")
+        val strategies =
+            mutableListOf(
+                randomWalk,
+                randomChurn,
+                periodicSimilarity,
+                nsd
+            )
         if (bluetoothManager.adapter != null) {
             val ble = BluetoothLeDiscovery.Factory()
             strategies += ble
@@ -382,13 +389,15 @@ class TrustChainApplication : Application() {
     }
 
     private suspend fun checkFirstRun(): Boolean {
-        val key = booleanPreferencesKey(
-            FIRST_RUN
-        )
-        val preferredApps: Flow<Boolean> = dataStore.data
-            .map { preferences ->
-                preferences[key] ?: true
-            }
+        val key =
+            booleanPreferencesKey(
+                FIRST_RUN
+            )
+        val preferredApps: Flow<Boolean> =
+            dataStore.data
+                .map { preferences ->
+                    preferences[key] ?: true
+                }
 
         val firstRun = preferredApps.first()
 

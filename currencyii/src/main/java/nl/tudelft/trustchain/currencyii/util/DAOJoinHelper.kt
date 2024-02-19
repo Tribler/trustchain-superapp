@@ -52,14 +52,15 @@ class DAOJoinHelper {
 
         val proposalIDSignature = SWUtil.randomUUID()
 
-        var askSignatureBlockData = SWSignatureAskTransactionData(
-            blockData.SW_UNIQUE_ID,
-            serializedTransaction,
-            mostRecentBlockHash,
-            requiredSignatures,
-            "",
-            proposalIDSignature
-        )
+        var askSignatureBlockData =
+            SWSignatureAskTransactionData(
+                blockData.SW_UNIQUE_ID,
+                serializedTransaction,
+                mostRecentBlockHash,
+                requiredSignatures,
+                "",
+                proposalIDSignature
+            )
 
         for (swParticipantPk in blockData.SW_TRUSTCHAIN_PKS) {
             Log.i(
@@ -67,14 +68,15 @@ class DAOJoinHelper {
                 "Sending JOIN proposal (total: ${blockData.SW_TRUSTCHAIN_PKS.size}) to $swParticipantPk"
             )
 
-            askSignatureBlockData = SWSignatureAskTransactionData(
-                blockData.SW_UNIQUE_ID,
-                serializedTransaction,
-                mostRecentBlockHash,
-                requiredSignatures,
-                swParticipantPk,
-                proposalIDSignature
-            )
+            askSignatureBlockData =
+                SWSignatureAskTransactionData(
+                    blockData.SW_UNIQUE_ID,
+                    serializedTransaction,
+                    mostRecentBlockHash,
+                    requiredSignatures,
+                    swParticipantPk,
+                    proposalIDSignature
+                )
 
             trustchain.createProposalBlock(
                 askSignatureBlockData.getJsonString(),
@@ -133,24 +135,27 @@ class DAOJoinHelper {
 
         val walletManager = WalletManagerAndroid.getInstance()
 
-        val signaturesOfOldOwners = responses.map {
-            BigInteger(1, it.SW_SIGNATURE_SERIALIZED.hexToBytes())
-        }
+        val signaturesOfOldOwners =
+            responses.map {
+                BigInteger(1, it.SW_SIGNATURE_SERIALIZED.hexToBytes())
+            }
 
         val newNonces: ArrayList<String> = ArrayList(responses.map { it.SW_NONCE })
 
-        val noncePoints = oldWalletBlockData.getData().SW_NONCE_PKS.map {
-            ECKey.fromPublicOnly(it.hexToBytes())
-        }
+        val noncePoints =
+            oldWalletBlockData.getData().SW_NONCE_PKS.map {
+                ECKey.fromPublicOnly(it.hexToBytes())
+            }
 
-        val (aggregateNoncePoint, _) = MuSig.aggregate_schnorr_nonces(noncePoints)
+        val (aggregateNoncePoint, _) = MuSig.aggregateSchnorrNonces(noncePoints)
 
         val newTransactionProposal = newTransactionSerialized.hexToBytes()
-        val (status, serializedTransaction) = walletManager.safeSendingJoinWalletTransaction(
-            signaturesOfOldOwners,
-            aggregateNoncePoint,
-            CTransaction().deserialize(newTransactionProposal)
-        )
+        val (status, serializedTransaction) =
+            walletManager.safeSendingJoinWalletTransaction(
+                signaturesOfOldOwners,
+                aggregateNoncePoint,
+                CTransaction().deserialize(newTransactionProposal)
+            )
 
         if (status) {
             Log.i("Coin", "Successfully submitted taproot transaction to server")
@@ -225,27 +230,29 @@ class DAOJoinHelper {
             val walletManager = WalletManagerAndroid.getInstance()
 
             val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
-            val signature = walletManager.safeSigningJoinWalletTransaction(
-                CTransaction().deserialize(oldTransactionSerialized.hexToBytes()),
-                CTransaction().deserialize(newTransactionSerialized.hexToBytes()),
-                joinBlock.SW_BITCOIN_PKS.map { ECKey.fromPublicOnly(it.hexToBytes()) },
-                joinBlock.SW_NONCE_PKS.map { ECKey.fromPublicOnly(it.hexToBytes()) },
-                walletManager.protocolECKey(),
-                joinBlock.SW_UNIQUE_ID,
-                context
-            )
+            val signature =
+                walletManager.safeSigningJoinWalletTransaction(
+                    CTransaction().deserialize(oldTransactionSerialized.hexToBytes()),
+                    CTransaction().deserialize(newTransactionSerialized.hexToBytes()),
+                    joinBlock.SW_BITCOIN_PKS.map { ECKey.fromPublicOnly(it.hexToBytes()) },
+                    joinBlock.SW_NONCE_PKS.map { ECKey.fromPublicOnly(it.hexToBytes()) },
+                    walletManager.protocolECKey(),
+                    joinBlock.SW_UNIQUE_ID,
+                    context
+                )
 
             val nonce = walletManager.addNewNonceKey(joinBlock.SW_UNIQUE_ID, context)
 
             val signatureSerialized = signature.toByteArray().toHex()
             if (votedInFavor) {
-                val agreementData = SWResponseSignatureTransactionData(
-                    blockData.SW_UNIQUE_ID,
-                    blockData.SW_UNIQUE_PROPOSAL_ID,
-                    signatureSerialized,
-                    walletManager.protocolECKey().publicKeyAsHex,
-                    walletManager.nonceECPointHex(nonce)
-                )
+                val agreementData =
+                    SWResponseSignatureTransactionData(
+                        blockData.SW_UNIQUE_ID,
+                        blockData.SW_UNIQUE_PROPOSAL_ID,
+                        signatureSerialized,
+                        walletManager.protocolECKey().publicKeyAsHex,
+                        walletManager.nonceECPointHex(nonce)
+                    )
 
                 trustchain.createProposalBlock(
                     agreementData.getTransactionData(),
@@ -253,13 +260,14 @@ class DAOJoinHelper {
                     agreementData.blockType
                 )
             } else {
-                val negativeResponseData = SWResponseNegativeSignatureTransactionData(
-                    blockData.SW_UNIQUE_ID,
-                    blockData.SW_UNIQUE_PROPOSAL_ID,
-                    signatureSerialized,
-                    walletManager.protocolECKey().publicKeyAsHex,
-                    walletManager.nonceECPointHex(nonce)
-                )
+                val negativeResponseData =
+                    SWResponseNegativeSignatureTransactionData(
+                        blockData.SW_UNIQUE_ID,
+                        blockData.SW_UNIQUE_PROPOSAL_ID,
+                        signatureSerialized,
+                        walletManager.protocolECKey().publicKeyAsHex,
+                        walletManager.nonceECPointHex(nonce)
+                    )
 
                 trustchain.createProposalBlock(
                     negativeResponseData.getTransactionData(),

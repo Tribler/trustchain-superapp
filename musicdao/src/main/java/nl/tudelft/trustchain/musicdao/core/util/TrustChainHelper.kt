@@ -11,7 +11,6 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 class TrustChainHelper(
     private val trustChainCommunity: TrustChainCommunity
 ) {
-
     /**
      * Crawls the chain of the specified peer.
      */
@@ -45,7 +44,10 @@ class TrustChainHelper(
     /**
      * Creates an agreement block to a specified proposal block, using a custom transaction.
      */
-    fun createAgreementBlock(link: TrustChainBlock, transaction: TrustChainTransaction) {
+    fun createAgreementBlock(
+        link: TrustChainBlock,
+        transaction: TrustChainTransaction
+    ) {
         trustChainCommunity.createAgreementBlock(link, transaction)
     }
 

@@ -2,18 +2,25 @@ package nl.tudelft.trustchain.musicdao.ui.navigation
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
+
     object Release : Screen("release/{releaseId}") {
         fun createRoute(releaseId: String) = "release/$releaseId"
     }
 
     object Search : Screen("search")
+
     object Settings : Screen("settings")
+
     object Debug : Screen("debug")
+
     object FullPlayerScreen : Screen("fullPlayerScreen")
 
     object CreatorMenu : Screen("me")
+
     object MyProfile : Screen("me/profile")
+
     object EditProfile : Screen("me/edit")
+
     object BitcoinWallet : Screen("me/wallet")
 
     object DiscoverArtists : Screen("artists")
@@ -41,5 +48,6 @@ sealed class Screen(val route: String) {
     }
 
     object NewDaoRoute : Screen("dao/new")
+
     object CreateRelease : Screen("release/create")
 }

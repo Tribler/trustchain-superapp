@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.musicdao.ui.screens.profile_menu
+package nl.tudelft.trustchain.musicdao.ui.screens.profileMenu
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -25,22 +25,23 @@ import nl.tudelft.trustchain.musicdao.ui.navigation.Screen
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileMenuScreen(navController: NavController) {
-
     Column {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(Brush.verticalGradient(listOf(Color(0xFF77DF7C), Color(0xFF70C774))))
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .background(Brush.verticalGradient(listOf(Color(0xFF77DF7C), Color(0xFF70C774))))
         ) {
             Text(
                 text = "Your Profile",
                 style = MaterialTheme.typography.h6,
-                modifier = Modifier
-                    .padding(20.dp)
-                    .align(
-                        Alignment.BottomStart
-                    )
+                modifier =
+                    Modifier
+                        .padding(20.dp)
+                        .align(
+                            Alignment.BottomStart
+                        )
             )
         }
 
@@ -74,22 +75,28 @@ fun ProfileMenuScreen(navController: NavController) {
 }
 
 @Composable
-fun CustomMenuItem(text: String, onClick: () -> Unit, enabled: Boolean = true, disabled: Boolean = false) {
-
-    val modifier = if (enabled && !disabled) {
-        Modifier.clickable(
-            onClick = { onClick() },
-        )
-    } else {
-        Modifier.graphicsLayer(alpha = 0.4f)
-    }
+fun CustomMenuItem(
+    text: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    disabled: Boolean = false
+) {
+    val modifier =
+        if (enabled && !disabled) {
+            Modifier.clickable(
+                onClick = { onClick() },
+            )
+        } else {
+            Modifier.graphicsLayer(alpha = 0.4f)
+        }
 
     Row(
         modifier = modifier
     ) {
         Row(
-            modifier = Modifier
-                .padding(vertical = 15.dp)
+            modifier =
+                Modifier
+                    .padding(vertical = 15.dp)
         ) {
             Text(text = text, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
             Spacer(Modifier.weight(1f))

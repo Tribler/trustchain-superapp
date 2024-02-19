@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.FOC.community
+package nl.tudelft.trustchain.foc.community
 
 import android.content.Context
 import android.util.Log
@@ -53,21 +53,15 @@ class FOCCommunity(
         exception: TransferException
     ) -> Unit
 
-    override fun setEVAOnReceiveProgressCallback(
-        f: (peer: Peer, info: String, progress: TransferProgress) -> Unit
-    ) {
+    override fun setEVAOnReceiveProgressCallback(f: (peer: Peer, info: String, progress: TransferProgress) -> Unit) {
         this.evaReceiveProgressCallback = f
     }
 
-    override fun setEVAOnReceiveCompleteCallback(
-        f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit
-    ) {
+    override fun setEVAOnReceiveCompleteCallback(f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit) {
         this.evaReceiveCompleteCallback = f
     }
 
-    override fun setEVAOnErrorCallback(
-        f: (peer: Peer, exception: TransferException) -> Unit
-    ) {
+    override fun setEVAOnErrorCallback(f: (peer: Peer, exception: TransferException) -> Unit) {
         this.evaErrorCallback = f
     }
 
@@ -95,17 +89,22 @@ class FOCCommunity(
     override fun informAboutTorrent(torrentName: String) {
         if (torrentName != "") {
             for (peer in getPeers()) {
-                val packet = serializePacket(
-                    MessageId.TORRENT_MESSAGE,
-                    FOCMessage("FOC:" + torrentName),
-                    true
-                )
+                val packet =
+                    serializePacket(
+                        MessageId.TORRENT_MESSAGE,
+                        FOCMessage("foc:" + torrentName),
+                        true
+                    )
                 send(peer.address, packet)
             }
         }
     }
 
-    override fun sendAppRequest(torrentInfoHash: String, peer: Peer, uuid: String) {
+    override fun sendAppRequest(
+        torrentInfoHash: String,
+        peer: Peer,
+        uuid: String
+    ) {
         AppRequestPayload(torrentInfoHash, uuid).let { payload ->
             logger.debug { "-> $payload" }
             send(peer, serializePacket(MessageId.APP_REQUEST, payload))
@@ -136,13 +135,14 @@ class FOCCommunity(
 
     private fun onTorrentMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(FOCMessage)
-        val torrentHash = payload.message.substringAfter("magnet:?xt=urn:btih:")
-            .substringBefore("&dn=")
+        val torrentHash =
+            payload.message.substringAfter("magnet:?xt=urn:btih:")
+                .substringBefore("&dn=")
         if (torrentMessagesList.none {
-            it.second
-            val existingHash = it.second.message.substringAfter("magnet:?xt=urn:btih:").substringBefore("&dn=")
-            torrentHash == existingHash
-        }
+                it.second
+                val existingHash = it.second.message.substringAfter("magnet:?xt=urn:btih:").substringBefore("&dn=")
+                torrentHash == existingHash
+            }
         ) {
             torrentMessagesList.add(Pair(peer, payload))
             Log.i("personal", peer.mid + ": " + payload.message)
@@ -155,7 +155,10 @@ class FOCCommunity(
         onAppRequest(peer, payload)
     }
 
-    private fun onAppRequest(peer: Peer, appRequestPayload: AppRequestPayload) {
+    private fun onAppRequest(
+        peer: Peer,
+        appRequestPayload: AppRequestPayload
+    ) {
         try {
             locateApp(appRequestPayload.appTorrentInfoHash)?.let { file ->
                 logger.debug { "-> sending app ${file.name} to ${peer.mid}" }
@@ -168,16 +171,25 @@ class FOCCommunity(
         }
     }
 
-    private fun sendApp(peer: Peer, appTorrentInfoHash: String, file: File, uuid: String) {
+    private fun sendApp(
+        peer: Peer,
+        appTorrentInfoHash: String,
+        file: File,
+        uuid: String
+    ) {
         val appPayload = AppPayload(appTorrentInfoHash, file.name, file.readBytes())
         val packet =
             serializePacket(MessageId.APP, appPayload, encrypt = true, recipient = peer)
-        if (evaProtocolEnabled) evaSendBinary(
-            peer,
-            EVA_FOC_COMMUNITY_ATTACHMENT,
-            uuid,
-            packet
-        ) else send(peer, packet)
+        if (evaProtocolEnabled) {
+            evaSendBinary(
+                peer,
+                EVA_FOC_COMMUNITY_ATTACHMENT,
+                uuid,
+                packet
+            )
+        } else {
+            send(peer, packet)
+        }
     }
 
     private fun locateApp(appTorrentInfoHash: String): File? {
@@ -197,7 +209,10 @@ class FOCCommunity(
         return null
     }
 
-    private fun isTorrentOkay(torrentInfo: TorrentInfo, saveDirectory: File): Boolean {
+    private fun isTorrentOkay(
+        torrentInfo: TorrentInfo,
+        saveDirectory: File
+    ): Boolean {
         File(saveDirectory.path + "/" + torrentInfo.name()).run {
             if (!arrayListOf("jar", "apk").contains(extension)) return false
             if (length() >= torrentInfo.totalSize()) return true
@@ -206,9 +221,11 @@ class FOCCommunity(
     }
 
     private fun onAppPacket(packet: Packet) {
-        val (peer, payload) = packet.getDecryptedAuthPayload(
-            AppPayload.Deserializer, myPeer.key as PrivateKey
-        )
+        val (peer, payload) =
+            packet.getDecryptedAuthPayload(
+                AppPayload.Deserializer,
+                myPeer.key as PrivateKey
+            )
         logger.debug { "<- Received app from ${peer.mid}" }
         val file = appDirectory.toString() + "/" + payload.appName
         val existingFile = File(file)
@@ -224,7 +241,11 @@ class FOCCommunity(
         }
     }
 
-    private fun onEVASendCompleteCallback(peer: Peer, info: String, nonce: ULong) {
+    private fun onEVASendCompleteCallback(
+        peer: Peer,
+        info: String,
+        nonce: ULong
+    ) {
         Log.d("DemoCommunity", "ON EVA send complete callback for '$info'")
 
         if (info != EVA_FOC_COMMUNITY_ATTACHMENT) return
@@ -234,7 +255,11 @@ class FOCCommunity(
         }
     }
 
-    private fun onEVAReceiveProgressCallback(peer: Peer, info: String, progress: TransferProgress) {
+    private fun onEVAReceiveProgressCallback(
+        peer: Peer,
+        info: String,
+        progress: TransferProgress
+    ) {
         Log.d("DemoCommunity", "ON EVA receive progress callback for '$info'")
 
         if (info != EVA_FOC_COMMUNITY_ATTACHMENT) return
@@ -244,7 +269,12 @@ class FOCCommunity(
         }
     }
 
-    private fun onEVAReceiveCompleteCallback(peer: Peer, info: String, id: String, data: ByteArray?) {
+    private fun onEVAReceiveCompleteCallback(
+        peer: Peer,
+        info: String,
+        id: String,
+        data: ByteArray?
+    ) {
         Log.d("DemoCommunity", "ON EVA receive complete callback for '$info'")
 
         if (info != EVA_FOC_COMMUNITY_ATTACHMENT) return
@@ -259,7 +289,10 @@ class FOCCommunity(
         }
     }
 
-    private fun onEVAErrorCallback(peer: Peer, exception: TransferException) {
+    private fun onEVAErrorCallback(
+        peer: Peer,
+        exception: TransferException
+    ) {
         Log.d("DemoCommunity", "ON EVA error callback for '${exception.info} from ${peer.mid}'")
 
         if (this::evaErrorCallback.isInitialized) {

@@ -26,7 +26,6 @@ class IdentityAttributeShareDialog(
     private val recipient: Contact?,
     private val identityAttribute: IdentityAttribute?,
 ) : VTDialogFragment() {
-
     private var selectedContact: Contact? = recipient
     private var selectedAttribute: IdentityAttribute? = identityAttribute
 
@@ -70,64 +69,69 @@ class IdentityAttributeShareDialog(
                     if (identityAttribute == null) {
                         selectedAttributeView.isVisible = false
 
-                        attributeAdapter = object : ArrayAdapter<IdentityAttribute>(
-                            requireContext(),
-                            android.R.layout.simple_spinner_item,
-                            identityAttributes
-                        ) {
-                            override fun getDropDownView(
-                                position: Int,
-                                convertView: View?,
-                                parent: ViewGroup
-                            ): View {
-                                return (super.getDropDownView(
-                                    position,
-                                    convertView,
-                                    parent
-                                ) as TextView).apply {
-                                    layoutParams.apply {
-                                        height =
-                                            resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                                    }
-                                    gravity = Gravity.CENTER_VERTICAL
-                                    text = identityAttributes[position].name
-                                    setTextColor(
-                                        ContextCompat.getColor(
-                                            requireContext(),
-                                            R.color.black
-                                        )
-                                    )
-
-                                    // Currently selected item background in dropdown
-                                    background =
-                                        if (position == attributeSpinner.selectedItemPosition) {
-                                            ColorDrawable(Color.LTGRAY)
-                                        } else {
-                                            ColorDrawable(Color.WHITE)
+                        attributeAdapter =
+                            object : ArrayAdapter<IdentityAttribute>(
+                                requireContext(),
+                                android.R.layout.simple_spinner_item,
+                                identityAttributes
+                            ) {
+                                override fun getDropDownView(
+                                    position: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup
+                                ): View {
+                                    return (
+                                        super.getDropDownView(
+                                            position,
+                                            convertView,
+                                            parent
+                                        ) as TextView
+                                    ).apply {
+                                        layoutParams.apply {
+                                            height =
+                                                resources.getDimensionPixelSize(R.dimen.textViewHeight)
                                         }
-                                }
-                            }
-
-                            override fun getView(
-                                position: Int,
-                                convertView: View?,
-                                parent: ViewGroup
-                            ): View {
-                                return (super.getView(
-                                    position,
-                                    convertView,
-                                    parent
-                                ) as TextView).apply {
-                                    text = identityAttributes[position].name
-                                    setTextColor(
-                                        ContextCompat.getColor(
-                                            requireContext(),
-                                            R.color.black
+                                        gravity = Gravity.CENTER_VERTICAL
+                                        text = identityAttributes[position].name
+                                        setTextColor(
+                                            ContextCompat.getColor(
+                                                requireContext(),
+                                                R.color.black
+                                            )
                                         )
-                                    )
+
+                                        // Currently selected item background in dropdown
+                                        background =
+                                            if (position == attributeSpinner.selectedItemPosition) {
+                                                ColorDrawable(Color.LTGRAY)
+                                            } else {
+                                                ColorDrawable(Color.WHITE)
+                                            }
+                                    }
+                                }
+
+                                override fun getView(
+                                    position: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup
+                                ): View {
+                                    return (
+                                        super.getView(
+                                            position,
+                                            convertView,
+                                            parent
+                                        ) as TextView
+                                    ).apply {
+                                        text = identityAttributes[position].name
+                                        setTextColor(
+                                            ContextCompat.getColor(
+                                                requireContext(),
+                                                R.color.black
+                                            )
+                                        )
+                                    }
                                 }
                             }
-                        }
 
                         attributeSpinner.adapter = attributeAdapter
 
@@ -176,78 +180,84 @@ class IdentityAttributeShareDialog(
             }
 
             lifecycleScope.launch(Dispatchers.Main) {
-                val contacts: List<Contact> = getContactStore().getContacts()
-                    .first()
-                    .filter {
-                        it.publicKey != getTrustChainCommunity().myPeer.publicKey
-                    }
-                    .sortedBy {
-                        it.name
-                    }
-                    .toList()
+                val contacts: List<Contact> =
+                    getContactStore().getContacts()
+                        .first()
+                        .filter {
+                            it.publicKey != getTrustChainCommunity().myPeer.publicKey
+                        }
+                        .sortedBy {
+                            it.name
+                        }
+                        .toList()
 
                 if (contacts.isNotEmpty()) {
                     if (recipient == null) {
                         selectedContactView.isVisible = false
 
-                        contactAdapter = object : ArrayAdapter<Contact>(
-                            requireContext(),
-                            android.R.layout.simple_spinner_item,
-                            contacts
-                        ) {
-                            override fun getDropDownView(
-                                position: Int,
-                                convertView: View?,
-                                parent: ViewGroup
-                            ): View {
-                                return (super.getDropDownView(
-                                    position,
-                                    convertView,
-                                    parent
-                                ) as TextView).apply {
-                                    layoutParams.apply {
-                                        height =
-                                            resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                                    }
-                                    gravity = Gravity.CENTER_VERTICAL
-                                    text = contacts[position].name
-                                    setTextColor(
-                                        ContextCompat.getColor(
-                                            requireContext(),
-                                            R.color.black
-                                        )
-                                    )
-
-                                    // Currently selected item background in dropdown
-                                    background =
-                                        if (position == contactSpinner.selectedItemPosition) {
-                                            ColorDrawable(Color.LTGRAY)
-                                        } else {
-                                            ColorDrawable(Color.WHITE)
+                        contactAdapter =
+                            object : ArrayAdapter<Contact>(
+                                requireContext(),
+                                android.R.layout.simple_spinner_item,
+                                contacts
+                            ) {
+                                override fun getDropDownView(
+                                    position: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup
+                                ): View {
+                                    return (
+                                        super.getDropDownView(
+                                            position,
+                                            convertView,
+                                            parent
+                                        ) as TextView
+                                    ).apply {
+                                        layoutParams.apply {
+                                            height =
+                                                resources.getDimensionPixelSize(R.dimen.textViewHeight)
                                         }
-                                }
-                            }
-
-                            override fun getView(
-                                position: Int,
-                                convertView: View?,
-                                parent: ViewGroup
-                            ): View {
-                                return (super.getView(
-                                    position,
-                                    convertView,
-                                    parent
-                                ) as TextView).apply {
-                                    text = contacts[position].name
-                                    setTextColor(
-                                        ContextCompat.getColor(
-                                            requireContext(),
-                                            R.color.black
+                                        gravity = Gravity.CENTER_VERTICAL
+                                        text = contacts[position].name
+                                        setTextColor(
+                                            ContextCompat.getColor(
+                                                requireContext(),
+                                                R.color.black
+                                            )
                                         )
-                                    )
+
+                                        // Currently selected item background in dropdown
+                                        background =
+                                            if (position == contactSpinner.selectedItemPosition) {
+                                                ColorDrawable(Color.LTGRAY)
+                                            } else {
+                                                ColorDrawable(Color.WHITE)
+                                            }
+                                    }
+                                }
+
+                                override fun getView(
+                                    position: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup
+                                ): View {
+                                    return (
+                                        super.getView(
+                                            position,
+                                            convertView,
+                                            parent
+                                        ) as TextView
+                                    ).apply {
+                                        text = contacts[position].name
+                                        setTextColor(
+                                            ContextCompat.getColor(
+                                                requireContext(),
+                                                R.color.black
+                                            )
+                                        )
+                                    }
                                 }
                             }
-                        }
                         contactSpinner.adapter = contactAdapter
 
                         contactSpinner.onItemSelectedListener =

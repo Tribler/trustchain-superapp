@@ -17,7 +17,10 @@ class AppPayload(
     }
 
     companion object Deserializer : Deserializable<AppPayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<AppPayload, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<AppPayload, Int> {
             var localOffset = offset
             val (appTorrentInfoHash, hashSize) = deserializeVarLen(buffer, localOffset)
             localOffset += hashSize

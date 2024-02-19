@@ -18,13 +18,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import nl.tudelft.trustchain.musicdao.ui.SnackbarHandler
 import nl.tudelft.trustchain.musicdao.ui.components.EmptyState
-import nl.tudelft.trustchain.musicdao.ui.screens.profile_menu.CustomMenuItem
+import nl.tudelft.trustchain.musicdao.ui.screens.profileMenu.CustomMenuItem
 import nl.tudelft.trustchain.musicdao.ui.screens.wallet.BitcoinWalletViewModel
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: String, navController: NavController) {
+fun DonateScreen(
+    bitcoinWalletViewModel: BitcoinWalletViewModel,
+    publicKey: String,
+    navController: NavController
+) {
     val donateScreenViewModel: DonateScreenViewModel = hiltViewModel()
     val artist = donateScreenViewModel.artist.collectAsState()
     val amount = rememberSaveable { mutableStateOf("0.1") }

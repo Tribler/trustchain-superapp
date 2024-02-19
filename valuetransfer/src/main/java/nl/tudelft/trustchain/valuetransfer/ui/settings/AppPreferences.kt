@@ -10,7 +10,6 @@ import nl.tudelft.trustchain.valuetransfer.util.md5
 class AppPreferences(
     parentActivity: ValueTransferMainActivity
 ) {
-
     private var sharedPreferences: SharedPreferences = parentActivity.getSharedPreferences(PREFS_FILE_NAME, Context.MODE_PRIVATE)
 
     fun getCurrentTheme(): String? {
@@ -69,6 +68,7 @@ class AppPreferences(
         const val APP_THEME_SYSTEM = "system"
 
         private lateinit var instance: AppPreferences
+
         fun getInstance(parentActivity: ValueTransferMainActivity): AppPreferences {
             if (!::instance.isInitialized) {
                 instance = AppPreferences(parentActivity)

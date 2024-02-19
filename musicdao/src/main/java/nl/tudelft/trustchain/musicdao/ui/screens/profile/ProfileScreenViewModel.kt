@@ -16,37 +16,40 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
-class ProfileScreenViewModel @AssistedInject constructor(
-    @Assisted private val publicKey: String,
-    private val artistRepository: ArtistRepository
-) : ViewModel() {
+class ProfileScreenViewModel
+    @AssistedInject
+    constructor(
+        @Assisted private val publicKey: String,
+        private val artistRepository: ArtistRepository
+    ) : ViewModel() {
+        private val _profile: MutableStateFlow<Artist?> = MutableStateFlow(null)
+        var profile: StateFlow<Artist?> = _profile
 
-    private val _profile: MutableStateFlow<Artist?> = MutableStateFlow(null)
-    var profile: StateFlow<Artist?> = _profile
+        private val _releases: MutableStateFlow<List<Album>> = MutableStateFlow(listOf())
+        val releases: StateFlow<List<Album>> = _releases
 
-    private val _releases: MutableStateFlow<List<Album>> = MutableStateFlow(listOf())
-    val releases: StateFlow<List<Album>> = _releases
-
-    init {
-        viewModelScope.launch {
-            profile = artistRepository.getArtistStateFlow(publicKey = publicKey)
-            _releases.value = artistRepository.getArtistReleases(publicKey = publicKey)
-        }
-    }
-
-    @AssistedFactory
-    interface ProfileScreenViewModelFactory {
-        fun create(publicKey: String): ProfileScreenViewModel
-    }
-
-    companion object {
-        fun provideFactory(
-            assistedFactory: ProfileScreenViewModelFactory,
-            publicKey: String
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return assistedFactory.create(publicKey) as T
+        init {
+            viewModelScope.launch {
+                profile = artistRepository.getArtistStateFlow(publicKey = publicKey)
+                _releases.value = artistRepository.getArtistReleases(publicKey = publicKey)
             }
         }
+
+        @AssistedFactory
+        interface ProfileScreenViewModelFactory {
+            fun create(publicKey: String): ProfileScreenViewModel
+        }
+
+        companion object {
+            fun provideFactory(
+                assistedFactory: ProfileScreenViewModelFactory,
+                publicKey: String
+            ): ViewModelProvider.Factory =
+                object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        @Suppress("UNCHECKED_CAST")
+                        return assistedFactory.create(publicKey) as T
+                    }
+                }
+        }
     }
-}

@@ -38,10 +38,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class HiltModules {
-
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext applicationContext: Context): CacheDatabase {
+    fun provideDatabase(
+        @ApplicationContext applicationContext: Context
+    ): CacheDatabase {
         return Room.databaseBuilder(
             applicationContext,
             CacheDatabase::class.java,
@@ -53,7 +54,9 @@ class HiltModules {
 
     @Provides
     @Singleton
-    fun createSessionParams(@ApplicationContext applicationContext: Context): SessionManager {
+    fun createSessionParams(
+        @ApplicationContext applicationContext: Context
+    ): SessionManager {
         val settingsPack = SettingsPack()
 
         val port =
@@ -109,7 +112,9 @@ class HiltModules {
     @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
-    fun path(@ApplicationContext applicationContext: Context): CachePath {
+    fun path(
+        @ApplicationContext applicationContext: Context
+    ): CachePath {
         return CachePath(applicationContext)
     }
 
@@ -156,11 +161,12 @@ class HiltModules {
         }
         val params = BitcoinNetworkOptions.REG_TEST
 
-        val config = WalletManagerConfiguration(
-            params,
-            null,
-            null
-        )
+        val config =
+            WalletManagerConfiguration(
+                params,
+                null,
+                null
+            )
 
         WalletManagerAndroid.Factory(context)
             .setConfiguration(config)

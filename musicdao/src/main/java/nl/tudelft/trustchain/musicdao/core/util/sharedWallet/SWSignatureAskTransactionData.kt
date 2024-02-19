@@ -15,7 +15,8 @@ data class SWSignatureAskBlockTD(
 )
 
 open class SWSignatureAskTransactionData(data: JsonObject) : SWBlockTransactionData(
-    data, CoinCommunity.SIGNATURE_ASK_BLOCK
+    data,
+    CoinCommunity.SIGNATURE_ASK_BLOCK
 ) {
     fun getData(): SWSignatureAskBlockTD {
         return Gson().fromJson(getJsonString(), SWSignatureAskBlockTD::class.java)
@@ -38,7 +39,6 @@ open class SWSignatureAskTransactionData(data: JsonObject) : SWBlockTransactionD
                 requiredSignatures,
                 receiverPk
             )
-
         )
     )
 

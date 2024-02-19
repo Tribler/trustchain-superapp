@@ -17,18 +17,21 @@ class AttestationItemRenderer(
     private val onClickAction: (AttestationItem) -> Unit,
     private val onLongClickAction: (AttestationItem) -> Unit,
 ) : ItemLayoutRenderer<AttestationItem, View>(
-    AttestationItem::class.java
-) {
-
-    override fun bindView(item: AttestationItem, view: View) = with(view) {
+        AttestationItem::class.java
+    ) {
+    override fun bindView(
+        item: AttestationItem,
+        view: View
+    ) = with(view) {
         val binding = ItemIdentityAttestationBinding.bind(view)
         if (item.attestationBlob.metadata != null) {
             val metadata = JSONObject(item.attestationBlob.metadata!!)
             binding.tvAttestationNameValue.apply {
-                text = StringBuilder()
-                    .append(metadata.optString("attribute"))
-                    .append(": ")
-                    .append(metadata.optString("value"))
+                text =
+                    StringBuilder()
+                        .append(metadata.optString("attribute"))
+                        .append(": ")
+                        .append(metadata.optString("value"))
                 setTextColor(
                     ContextCompat.getColor(
                         this.context,
@@ -37,10 +40,11 @@ class AttestationItemRenderer(
                 )
             }
 
-            binding.tvAttestationIDFormat.text = StringBuilder()
-                .append("(")
-                .append(item.attestationBlob.idFormat)
-                .append(")")
+            binding.tvAttestationIDFormat.text =
+                StringBuilder()
+                    .append("(")
+                    .append(item.attestationBlob.idFormat)
+                    .append(")")
 
             binding.ivAttestationQRButton.isVisible = true
             binding.ivAttestationDelete.isVisible = false

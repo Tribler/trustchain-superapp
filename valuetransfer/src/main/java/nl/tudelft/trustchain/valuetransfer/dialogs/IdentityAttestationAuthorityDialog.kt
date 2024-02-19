@@ -15,7 +15,6 @@ import java.lang.IllegalStateException
 class IdentityAttestationAuthorityDialog(
     private val authorityKey: PublicKey,
 ) : VTDialogFragment() {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)

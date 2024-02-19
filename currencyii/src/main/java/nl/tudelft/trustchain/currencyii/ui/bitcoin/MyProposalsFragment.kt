@@ -28,6 +28,7 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * create an instance of this fragment.
  */
 class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentMyProposalsBinding? = null
     private val binding get() = _binding!!
 
@@ -58,9 +59,11 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
             proposalCopy.addAll(proposals)
 
             for (proposal in proposalCopy) {
-                if (!uniqueProposals.contains(proposal) && isUserInWallet(proposal)) uniqueProposals.add(
-                    proposal
-                )
+                if (!uniqueProposals.contains(proposal) && isUserInWallet(proposal)) {
+                    uniqueProposals.add(
+                        proposal
+                    )
+                }
             }
             val adaptor = ProposalListAdapter(this, uniqueProposals)
             binding.proposalListView.adapter = adaptor
@@ -92,11 +95,12 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
      * @return Boolean - if the user is in the wallet
      */
     private fun isUserInWallet(proposal: TrustChainBlock): Boolean {
-        val walletID = if (proposal.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
-            SWSignatureAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
-        } else {
-            SWTransferFundsAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
-        }
+        val walletID =
+            if (proposal.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
+                SWSignatureAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
+            } else {
+                SWTransferFundsAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
+            }
         return getUserWalletIds().contains(walletID)
     }
 
@@ -106,8 +110,9 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
      */
     private fun getUserWalletIds(): List<String> {
         val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
-        val wallets = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
-            .map { SWJoinBlockTransactionData(it.transaction).getData() }
+        val wallets =
+            getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
+                .map { SWJoinBlockTransactionData(it.transaction).getData() }
         val userWallets = wallets.filter { it.SW_TRUSTCHAIN_PKS.contains(myPublicKey) }
         return userWallets.map { it.SW_UNIQUE_ID }
     }
@@ -118,12 +123,14 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
      */
     private fun updateProposals(newProposals: List<TrustChainBlock>) {
         val coinCommunity = getCoinCommunity()
-        val proposalIds = proposals.map {
-            coinCommunity.fetchSignatureRequestProposalId(it)
-        }
-        val distinctById = newProposals.distinctBy {
-            coinCommunity.fetchSignatureRequestProposalId(it)
-        }
+        val proposalIds =
+            proposals.map {
+                coinCommunity.fetchSignatureRequestProposalId(it)
+            }
+        val distinctById =
+            newProposals.distinctBy {
+                coinCommunity.fetchSignatureRequestProposalId(it)
+            }
 
         for (proposal in distinctById) {
             val currentId = coinCommunity.fetchSignatureRequestProposalId(proposal)
@@ -145,14 +152,15 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                 // TODO: Commented this line out, it causes the app to crash
 //                withTimeout(JoinDAOFragment.SW_CRAWLING_TIMEOUT_MILLI) {
                 trustchain.crawlChain(peer)
-                val crawlResult = trustchain
-                    .getChainByUser(peer.publicKey.keyToBin())
-                    .filter {
-                        (
-                            it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
-                                it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
+                val crawlResult =
+                    trustchain
+                        .getChainByUser(peer.publicKey.keyToBin())
+                        .filter {
+                            (
+                                it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
+                                    it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
                             ) && !getCoinCommunity().checkEnoughFavorSignatures(it)
-                    }
+                        }
                 Log.i(
                     "Coin",
                     "Crawl result: ${crawlResult.size} proposals found (from ${peer.address})"
@@ -169,7 +177,10 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenStarted {

@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.FOC;
+package nl.tudelft.trustchain.foc;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -10,17 +10,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
-import nl.tudelft.trustchain.FOC.databinding.ActivityExecutionBinding;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,9 +25,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.Objects;
+import nl.tudelft.trustchain.foc.databinding.ActivityExecutionBinding;
 
-import static nl.tudelft.trustchain.FOC.util.ExtensionUtils.dataDotExtension;
-import static nl.tudelft.trustchain.FOC.util.ExtensionUtils.dexExtension;
+import static nl.tudelft.trustchain.foc.util.ExtensionUtils.DATA_DOT_EXTENSION;
+import static nl.tudelft.trustchain.foc.util.ExtensionUtils.DEX_EXTENSION;
 
 public class ExecutionActivity extends AppCompatActivity {
 
@@ -46,7 +43,7 @@ public class ExecutionActivity extends AppCompatActivity {
      */
     private void storeState() {
         // Store state next to apk
-        String fileName = this.apkName + dataDotExtension;
+        String fileName = this.apkName + DATA_DOT_EXTENSION;
         try {
             FileOutputStream stream = new FileOutputStream(fileName);
             Parcel p = Parcel.obtain();
@@ -68,7 +65,7 @@ public class ExecutionActivity extends AppCompatActivity {
     @RequiresApi(Build.VERSION_CODES.O) // TODO: this should be usable on all versions.
     private Fragment.SavedState getState() {
         // states are stored in the same directories as apks themselves (in the app specific files)
-        String fileName = this.apkName + dataDotExtension;
+        String fileName = this.apkName + DATA_DOT_EXTENSION;
         try {
             Path path = Paths.get(fileName);
             byte[] data = Files.readAllBytes(path);
@@ -164,7 +161,7 @@ public class ExecutionActivity extends AppCompatActivity {
     @SuppressWarnings("deprecation")
     private String getMainFragmentClass(String path) {
         try {
-            DexFile dx = DexFile.loadDex(path, File.createTempFile("opt", dexExtension,
+            DexFile dx = DexFile.loadDex(path, File.createTempFile("opt", DEX_EXTENSION,
                     getCacheDir()).getPath(), 0);
             for (Enumeration<String> classNames = dx.entries(); classNames.hasMoreElements(); ) {
                 String className = classNames.nextElement();

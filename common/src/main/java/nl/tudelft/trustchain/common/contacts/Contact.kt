@@ -38,7 +38,10 @@ data class Contact(
         const val PUBLIC_KEY = "public_key"
         const val NAME = "name"
 
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<Contact, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<Contact, Int> {
             val offsetBuffer = buffer.copyOfRange(0, buffer.size)
             val json = JSONObject(offsetBuffer.decodeToString())
             val name = json.getString(NAME)

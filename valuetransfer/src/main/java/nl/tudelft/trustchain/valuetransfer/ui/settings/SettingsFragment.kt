@@ -21,6 +21,7 @@ import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityDetailsDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityOnboardingDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
 
+@Suppress("OVERRIDE_DEPRECATION")
 class SettingsFragment : VTFragment(R.layout.fragment_settings) {
     private val binding by viewBinding(FragmentSettingsBinding::bind)
 
@@ -39,11 +40,15 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
@@ -51,12 +56,13 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
 
         val theme = appPreferences.getCurrentTheme()
 
-        binding.tvSelectedTheme.text = when (theme) {
-            AppPreferences.APP_THEME_DAY -> resources.getString(R.string.text_theme_day)
-            AppPreferences.APP_THEME_NIGHT -> resources.getString(R.string.text_theme_night)
-            AppPreferences.APP_THEME_SYSTEM -> resources.getString(R.string.text_theme_system)
-            else -> resources.getString(R.string.text_theme_day)
-        }
+        binding.tvSelectedTheme.text =
+            when (theme) {
+                AppPreferences.APP_THEME_DAY -> resources.getString(R.string.text_theme_day)
+                AppPreferences.APP_THEME_NIGHT -> resources.getString(R.string.text_theme_night)
+                AppPreferences.APP_THEME_SYSTEM -> resources.getString(R.string.text_theme_system)
+                else -> resources.getString(R.string.text_theme_day)
+            }
 
         binding.clThemeSelector.apply {
             setOnClickListener {
@@ -125,17 +131,21 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
             }.show(parentFragmentManager, this@SettingsFragment.tag)
         }
 
-        binding.tvAppVersion.text = parentActivity.packageManager.getPackageInfo(
-            parentActivity.packageName,
-            PackageManager.GET_ACTIVITIES
-        ).versionName
+        binding.tvAppVersion.text =
+            parentActivity.packageManager.getPackageInfo(
+                parentActivity.packageName,
+                PackageManager.GET_ACTIVITIES
+            ).versionName
 
         notificationsStatus.observe(
             viewLifecycleOwner,
             Observer {
-                binding.tvNotificationStatus.text = if (it == NotificationHandler.NOTIFICATION_STATUS_DISABLED) {
-                    NotificationHandler.NOTIFICATION_STATUS_DISABLED
-                } else ""
+                binding.tvNotificationStatus.text =
+                    if (it == NotificationHandler.NOTIFICATION_STATUS_DISABLED) {
+                        NotificationHandler.NOTIFICATION_STATUS_DISABLED
+                    } else {
+                        ""
+                    }
                 binding.llNotificationsSpecific.isVisible = it == NotificationHandler.NOTIFICATION_STATUS_ENABLED
             }
         )
@@ -161,19 +171,20 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun openChannelSettings() {
-        val intent = Intent().apply {
-            when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-                    action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                    putExtra(Settings.EXTRA_APP_PACKAGE, parentActivity.packageName)
-                }
-                else -> {
-                    action = "android.settings.APP_NOTIFICATION_SETTINGS"
-                    putExtra("app_package", parentActivity.packageName)
-                    putExtra("app_uid", parentActivity.applicationInfo.uid)
+        val intent =
+            Intent().apply {
+                when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                        action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                        putExtra(Settings.EXTRA_APP_PACKAGE, parentActivity.packageName)
+                    }
+                    else -> {
+                        action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                        putExtra("app_package", parentActivity.packageName)
+                        putExtra("app_uid", parentActivity.applicationInfo.uid)
+                    }
                 }
             }
-        }
         startActivity(intent)
     }
 
@@ -207,7 +218,11 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
         )
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
+        @Suppress("DEPRECATION")
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
     }
@@ -220,13 +235,15 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
                 return true
             }
         }
+        @Suppress("DEPRECATION")
         return super.onOptionsItemSelected(item)
     }
 
     fun onBackPressed(animated: Boolean = true) {
-        val previousFragment = parentFragmentManager.fragments.filter {
-            it.tag == ValueTransferMainActivity.walletOverviewFragmentTag
-        }
+        val previousFragment =
+            parentFragmentManager.fragments.filter {
+                it.tag == ValueTransferMainActivity.WALLET_OVER_FRAGMENT_TAG
+            }
 
         parentFragmentManager.beginTransaction().apply {
             if (animated) setCustomAnimations(0, R.anim.exit_to_right)

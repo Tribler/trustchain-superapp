@@ -13,12 +13,14 @@ class IdentityAttributeItemRenderer(
     private val layoutType: Int,
     private val onOptionsClick: (IdentityAttribute) -> Unit,
 ) : ItemLayoutRenderer<IdentityAttributeItem, View>(
-    IdentityAttributeItem::class.java
-) {
+        IdentityAttributeItem::class.java
+    ) {
     private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
 
-    override fun bindView(item: IdentityAttributeItem, view: View) = with(view) {
-
+    override fun bindView(
+        item: IdentityAttributeItem,
+        view: View
+    ) = with(view) {
         if (layoutType == 1) {
             val identityBinding = ItemIdentityAttributeBinding.bind(view)
             identityBinding.tvAttributeName.text = item.attribute.name

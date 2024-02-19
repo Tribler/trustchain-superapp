@@ -33,7 +33,10 @@ class DemoCommunity : Community() {
         discoveredAddressesContacted[address] = Date()
     }
 
-    override fun onIntroductionResponse(peer: Peer, payload: IntroductionResponsePayload) {
+    override fun onIntroductionResponse(
+        peer: Peer,
+        payload: IntroductionResponsePayload
+    ) {
         super.onIntroductionResponse(peer, payload)
 
         if (peer.address in DEFAULT_ADDRESSES) {
@@ -45,7 +48,10 @@ class DemoCommunity : Community() {
         const val PUNCTURE_TEST = 251
     }
 
-    fun sendPuncture(address: IPv4Address, id: Int) {
+    fun sendPuncture(
+        address: IPv4Address,
+        id: Int
+    ) {
         val payload = PuncturePayload(myEstimatedLan, myEstimatedWan, id)
         val packet = serializePacket(MessageId.PUNCTURE_TEST, payload, sign = false)
         endpoint.send(address, packet)

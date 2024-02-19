@@ -58,18 +58,19 @@ class IdentityCommunity(
         return Identity(
             id = id,
             publicKey = myPeer.publicKey,
-            content = PersonalIdentity(
-                givenNames,
-                surname,
-                gender,
-                Date(dateOfBirth),
-                placeOfBirth,
-                nationality,
-                personalNumber,
-                documentNumber,
-                verified,
-                Date(dateOfExpiry)
-            ),
+            content =
+                PersonalIdentity(
+                    givenNames,
+                    surname,
+                    gender,
+                    Date(dateOfBirth),
+                    placeOfBirth,
+                    nationality,
+                    personalNumber,
+                    documentNumber,
+                    verified,
+                    Date(dateOfExpiry)
+                ),
             added = Date(),
             modified = Date()
         )
@@ -80,7 +81,10 @@ class IdentityCommunity(
         store.deleteIdentity()
     }
 
-    fun createIdentityAttribute(name: String, value: String): IdentityAttribute {
+    fun createIdentityAttribute(
+        name: String,
+        value: String
+    ): IdentityAttribute {
         val id = UUID.randomUUID().toString()
 
         return IdentityAttribute(

@@ -42,13 +42,13 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class MusicActivity : AppCompatActivity() {
-
     @Inject
     lateinit var albumRepository: AlbumRepository
 
     @Inject
     lateinit var artistRepository: ArtistRepository
 
+    @OptIn(DelicateCoroutinesApi::class)
     @Inject
     lateinit var torrentEngine: TorrentEngine
 
@@ -79,6 +79,7 @@ class MusicActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppContainer.provide(this)
+        @Suppress("DEPRECATION")
         lifecycleScope.launchWhenStarted {
             setupMusicCommunity.registerListeners()
             albumRepository.refreshCache()
@@ -145,7 +146,7 @@ class MusicActivity : AppCompatActivity() {
             }
         }
 
-        walletService?.addOnSetupCompletedListener {
+        walletService.addOnSetupCompletedListener {
             val scope = CoroutineScope(Dispatchers.IO)
             val address = walletService.protocolAddress().toString()
             Log.d("MusicDao2", "onSetupCompletedListener (1)")
@@ -182,21 +183,29 @@ class MusicActivity : AppCompatActivity() {
         }
     }
 
-    private val mConnection = object : ServiceConnection {
-        // Called when the connection with the service is established
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val binder = service as MusicGossipingService.LocalBinder
-            mService = binder.getService()
-            mBound = true
+    private val mConnection =
+        object : ServiceConnection {
+            // Called when the connection with the service is established
+            override fun onServiceConnected(
+                className: ComponentName,
+                service: IBinder
+            ) {
+                val binder = service as MusicGossipingService.LocalBinder
+                mService = binder.getService()
+                mBound = true
+            }
+
+            // Called when the connection with the service disconnects unexpectedly
+            override fun onServiceDisconnected(className: ComponentName) {
+                mBound = false
+            }
         }
 
-        // Called when the connection with the service disconnects unexpectedly
-        override fun onServiceDisconnected(className: ComponentName) {
-            mBound = false
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
         val uris = uriListFromLocalFiles(intent = data!!)
@@ -226,6 +235,7 @@ class MusicActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun iterativelyFetchReleases() {
+        @Suppress("DEPRECATION")
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 albumRepository.refreshCache()
@@ -234,7 +244,10 @@ class MusicActivity : AppCompatActivity() {
         }
     }
 
-    override fun startActivityForResult(intent: Intent?, requestCode: Int) {
+    override fun startActivityForResult(
+        intent: Intent?,
+        requestCode: Int
+    ) {
         require(!(requestCode != -1 && requestCode and -0x10000 != 0)) { "Can only use lower 16 bits for requestCode" }
         @Suppress("DEPRECATION")
         super.startActivityForResult(intent, requestCode)
@@ -244,6 +257,7 @@ class MusicActivity : AppCompatActivity() {
     @InstallIn(ActivityComponent::class)
     interface ViewModelFactoryProvider {
         fun noteDetailViewModelFactory(): ReleaseScreenViewModel.ReleaseScreenViewModelFactory
+
         fun profileScreenViewModelFactory(): ProfileScreenViewModel.ProfileScreenViewModelFactory
     }
 }

@@ -33,24 +33,26 @@ data class AlbumEntity(
             publisher = publisher,
             releaseDate = Instant.parse(releaseDate),
             songs = songs.map { it.toSong() },
-            cover = cover?.let { path ->
-                File(path).let {
-                    if (it.exists()) {
-                        it
-                    } else {
-                        null
+            cover =
+                cover?.let { path ->
+                    File(path).let {
+                        if (it.exists()) {
+                            it
+                        } else {
+                            null
+                        }
+                    }
+                },
+            root =
+                root?.let { path ->
+                    File(path).let {
+                        if (it.exists()) {
+                            it
+                        } else {
+                            null
+                        }
                     }
                 }
-            },
-            root = root?.let { path ->
-                File(path).let {
-                    if (it.exists()) {
-                        it
-                    } else {
-                        null
-                    }
-                }
-            }
         )
     }
 }

@@ -11,7 +11,9 @@ data class AddressPrivateKeyPair(
 )
 
 enum class BitcoinNetworkOptions {
-    PRODUCTION, REG_TEST, TEST_NET
+    PRODUCTION,
+    REG_TEST,
+    TEST_NET
 }
 
 class WalletManagerConfiguration(

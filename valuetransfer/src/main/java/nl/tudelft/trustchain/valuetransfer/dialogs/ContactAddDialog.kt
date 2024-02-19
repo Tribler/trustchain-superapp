@@ -61,8 +61,9 @@ class ContactAddDialog(
             contactNameView.setText(name)
             toggleButton(
                 addContactView,
-                contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString()
-                    .isNotEmpty()
+                contactNameView.text.toString().isNotEmpty() &&
+                    contactPublicKeyView.text.toString()
+                        .isNotEmpty()
             )
 
             onFocusChange(contactNameView, requireContext())
@@ -159,14 +160,17 @@ class ContactAddDialog(
                 {
                     binding.pbLoadingSpinner.isVisible = false
 
-                    val map = mapOf(
-                        QRScanController.KEY_TYPE to QRScanController.VALUE_CONTACT,
-                        QRScanController.KEY_PUBLIC_KEY to getIdentityStore().getIdentity()!!.publicKey.keyToBin()
-                            .toHex(),
-                        QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.let {
-                            "${it.givenNames.getInitials()} ${it.surname}"
-                        },
-                    )
+                    val map =
+                        mapOf(
+                            QRScanController.KEY_TYPE to QRScanController.VALUE_CONTACT,
+                            QRScanController.KEY_PUBLIC_KEY to
+                                getIdentityStore().getIdentity()!!.publicKey.keyToBin()
+                                    .toHex(),
+                            QRScanController.KEY_NAME to
+                                getIdentityStore().getIdentity()!!.content.let {
+                                    "${it.givenNames.getInitials()} ${it.surname}"
+                                },
+                        )
 
                     myPublicKeyImageView.setImageBitmap(
                         createBitmap(
@@ -185,7 +189,11 @@ class ContactAddDialog(
             ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
             ?.let { result ->
                 try {

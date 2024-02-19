@@ -32,10 +32,11 @@ fun Chip(
     onClick: () -> Unit = { }
 ) {
     Surface(
-        modifier = Modifier.clickable(
-            enabled = isClickable,
-            onClick = { onClick() }
-        ),
+        modifier =
+            Modifier.clickable(
+                enabled = isClickable,
+                onClick = { onClick() }
+            ),
         elevation = 8.dp,
         shape = MaterialTheme.shapes.small,
         color = color
@@ -49,19 +50,21 @@ fun Chip(
                     leader,
                     contentDescription = contentDescription,
                     tint = startIconTint,
-                    modifier = Modifier
-                        .clickable(enabled = isStartIconEnabled, onClick = onStartIconClicked)
-                        .padding(horizontal = 4.dp)
+                    modifier =
+                        Modifier
+                            .clickable(enabled = isStartIconEnabled, onClick = onStartIconClicked)
+                            .padding(horizontal = 4.dp)
                 )
             }
 
             Text(
                 label,
                 modifier = Modifier.padding(6.dp),
-                style = MaterialTheme.typography.caption.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+                style =
+                    MaterialTheme.typography.caption.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
             )
 
             if (trailer != null) {
@@ -69,9 +72,10 @@ fun Chip(
                     trailer,
                     contentDescription = contentDescription,
                     tint = endIconTint,
-                    modifier = Modifier
-                        .clickable(enabled = isEndIconEnabled, onClick = onEndIconClicked)
-                        .padding(horizontal = 4.dp)
+                    modifier =
+                        Modifier
+                            .clickable(enabled = isEndIconEnabled, onClick = onEndIconClicked)
+                            .padding(horizontal = 4.dp)
                 )
             }
         }

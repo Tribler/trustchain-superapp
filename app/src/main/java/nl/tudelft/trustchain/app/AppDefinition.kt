@@ -4,7 +4,7 @@ import android.app.Activity
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.musicdao.MusicActivity
-import nl.tudelft.trustchain.FOC.MainActivityFOC
+import nl.tudelft.trustchain.foc.MainActivityFOC
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity

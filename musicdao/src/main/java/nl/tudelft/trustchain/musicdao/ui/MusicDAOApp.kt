@@ -73,8 +73,9 @@ fun MusicDAOApp() {
                     MinimizedPlayer(
                         playerViewModel = playerViewModel,
                         navController = navController,
-                        modifier = Modifier
-                            .align(Alignment.End)
+                        modifier =
+                            Modifier
+                                .align(Alignment.End)
                     )
                 }
             },

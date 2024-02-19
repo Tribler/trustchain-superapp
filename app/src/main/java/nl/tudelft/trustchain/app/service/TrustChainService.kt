@@ -14,13 +14,15 @@ import nl.tudelft.trustchain.app.ui.dashboard.DashboardActivity
 class TrustChainService : IPv8Service() {
     override fun createNotification(): NotificationCompat.Builder {
         val trustChainDashboardIntent = Intent(this, DashboardActivity::class.java)
-        val flags = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            else -> PendingIntent.FLAG_UPDATE_CURRENT
-        }
-        val pendingIntent = TaskStackBuilder.create(this)
-            .addNextIntentWithParentStack(trustChainDashboardIntent)
-            .getPendingIntent(0, flags)
+        val flags =
+            when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                else -> PendingIntent.FLAG_UPDATE_CURRENT
+            }
+        val pendingIntent =
+            TaskStackBuilder.create(this)
+                .addNextIntentWithParentStack(trustChainDashboardIntent)
+                .getPendingIntent(0, flags)
 
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_CONNECTION)
             .setContentTitle("IPv8")

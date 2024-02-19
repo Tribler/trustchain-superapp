@@ -33,7 +33,11 @@ fun getPassportImage(imageInfo: AbstractImageInfo): Bitmap? {
  * Decode passport image
  */
 @Throws(IOException::class)
-fun decodePassportImage(imageLength: Int, mimeType: String, inputStream: InputStream): Bitmap? {
+fun decodePassportImage(
+    imageLength: Int,
+    mimeType: String,
+    inputStream: InputStream
+): Bitmap? {
     var input = inputStream
 
     synchronized(input) {
@@ -43,20 +47,42 @@ fun decodePassportImage(imageLength: Int, mimeType: String, inputStream: InputSt
         input = ByteArrayInputStream(bytes)
     }
 
-    return if (MIME_IMAGE_JP2.equals(mimeType, ignoreCase = true) || MIME_IMAGE_JPEG2000.equals(mimeType, ignoreCase = true)) {
+    return if (MIME_IMAGE_JP2.equals(mimeType, ignoreCase = true) ||
+        MIME_IMAGE_JPEG2000.equals(
+            mimeType,
+            ignoreCase = true
+        )
+    ) {
         val bitmap = org.jmrtd.jj2000.JJ2000Decoder.decode(input)
         val intData = bitmap.pixels
 
-        Bitmap.createBitmap(intData, 0, bitmap.width, bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+        Bitmap.createBitmap(
+            intData,
+            0,
+            bitmap.width,
+            bitmap.width,
+            bitmap.height,
+            Bitmap.Config.ARGB_8888
+        )
     } else if (MIME_IMAGE_WSQ.equals(mimeType, ignoreCase = true)) {
         val wsqDecoder = WsqDecoder()
         val bitmap = wsqDecoder.decode(input.readBytes())
         val byteData = bitmap.pixels
         val intData = IntArray(byteData.size)
         for (j in byteData.indices) {
-            intData[j] = -0x1000000 or ((byteData[j].toInt() and 0xFF) shl 16) or ((byteData[j].toInt() and 0xFF) shl 8) or (byteData[j].toInt() and 0xFF)
+            intData[j] = -0x1000000 or
+                ((byteData[j].toInt() and 0xFF) shl 16) or
+                ((byteData[j].toInt() and 0xFF) shl 8) or
+                (byteData[j].toInt() and 0xFF)
         }
-        Bitmap.createBitmap(intData, 0, bitmap.width, bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+        Bitmap.createBitmap(
+            intData,
+            0,
+            bitmap.width,
+            bitmap.width,
+            bitmap.height,
+            Bitmap.Config.ARGB_8888
+        )
     } else {
         return BitmapFactory.decodeStream(input)
     }

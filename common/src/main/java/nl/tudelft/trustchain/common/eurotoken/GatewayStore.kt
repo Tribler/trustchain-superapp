@@ -74,7 +74,9 @@ open class GatewayStore(val database: Database) {
                 gateway.port,
                 gateway.preferred == 1L
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     fun getGatewayFromPublicKey(publicKey: PublicKey): Gateway? {
@@ -88,7 +90,9 @@ open class GatewayStore(val database: Database) {
                 gateway.port,
                 gateway.preferred == 1L
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     fun getGateways(): List<Gateway> {
@@ -104,6 +108,7 @@ open class GatewayStore(val database: Database) {
 
     companion object {
         private lateinit var instance: GatewayStore
+
         fun getInstance(context: Context): GatewayStore {
             if (!Companion::instance.isInitialized) {
                 instance = SqlGatewayStore(context)

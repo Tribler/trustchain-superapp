@@ -32,7 +32,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
-
     private lateinit var startView: ConstraintLayout
     private lateinit var startImportingButton: Button
     private lateinit var startOpenNFCSettingsButton: Button
@@ -61,6 +60,7 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
 
     private var eDocument: EDocument? = null
 
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: DialogIdentityOnboardingBinding? = null
     private val binding get() = _binding!!
 
@@ -230,20 +230,21 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
      * Open device settings to enable NFC
      */
     private fun openNFCSettings() {
-        val intent = Intent().apply {
-            when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-                    action = Settings.ACTION_NFC_SETTINGS
-                    putExtra(Settings.EXTRA_APP_PACKAGE, parentActivity.packageName)
-                }
+        val intent =
+            Intent().apply {
+                when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                        action = Settings.ACTION_NFC_SETTINGS
+                        putExtra(Settings.EXTRA_APP_PACKAGE, parentActivity.packageName)
+                    }
 
-                else -> {
-                    action = "android.settings.WIRELESS_SETTINGS"
-                    putExtra("app_package", parentActivity.packageName)
-                    putExtra("app_uid", parentActivity.applicationInfo.uid)
+                    else -> {
+                        action = "android.settings.WIRELESS_SETTINGS"
+                        putExtra("app_package", parentActivity.packageName)
+                        putExtra("app_uid", parentActivity.applicationInfo.uid)
+                    }
                 }
             }
-        }
 
         startActivity(intent)
     }
@@ -264,15 +265,17 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
         passportHandler.setDocumentType(type)
 
         when (type) {
-            PassportHandler.DOCUMENT_TYPE_PASSPORT -> scanPassportSelected.viewFadeIn(
-                requireContext(),
-                500
-            )
+            PassportHandler.DOCUMENT_TYPE_PASSPORT ->
+                scanPassportSelected.viewFadeIn(
+                    requireContext(),
+                    500
+                )
 
-            PassportHandler.DOCUMENT_TYPE_ID_CARD -> scanIDCardSelected.viewFadeIn(
-                requireContext(),
-                500
-            )
+            PassportHandler.DOCUMENT_TYPE_ID_CARD ->
+                scanIDCardSelected.viewFadeIn(
+                    requireContext(),
+                    500
+                )
         }
 
         @Suppress("DEPRECATION")
@@ -288,31 +291,32 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
     /**
      * Launch NFC scan as async task
      */
-    private fun launchNFCScan() = lifecycleScope.executeAsyncTask(
-        onPreExecute = {
-            Log.d("VTLOG", "LAUNCHED NFC SCAN")
-            startReadingView()
-        },
-        doInBackground = {
-            passportHandler.startNFCReader()
-        },
-        onPostExecute = { result ->
-            if (result is EDocument && result.personDetails != null && result.documentType != null) {
-                this.eDocument = result
+    private fun launchNFCScan() =
+        lifecycleScope.executeAsyncTask(
+            onPreExecute = {
+                Log.d("VTLOG", "LAUNCHED NFC SCAN")
+                startReadingView()
+            },
+            doInBackground = {
+                passportHandler.startNFCReader()
+            },
+            onPostExecute = { result ->
+                if (result is EDocument && result.personDetails != null && result.documentType != null) {
+                    this.eDocument = result
 
-                endReadingView(true)
+                    endReadingView(true)
 
-                readingFinishedSuccessImage.viewFadeIn(requireContext(), 1000)
+                    readingFinishedSuccessImage.viewFadeIn(requireContext(), 1000)
 
-                passportHandler.deactivateNFCAdapter()
-                passportHandler.unsubscribe()
-            } else {
-                readingFailedText.text =
-                    if (result is String) result else resources.getString(R.string.text_error_passport)
-                endReadingView(false)
+                    passportHandler.deactivateNFCAdapter()
+                    passportHandler.unsubscribe()
+                } else {
+                    readingFailedText.text =
+                        if (result is String) result else resources.getString(R.string.text_error_passport)
+                    endReadingView(false)
+                }
             }
-        }
-    )
+        )
 
     /**
      * Create and confirm identity
@@ -320,30 +324,31 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
     private fun confirmIdentity() {
         if (eDocument == null || eDocument!!.personDetails == null) return
 
-        val identity = try {
-            getIdentityCommunity().createIdentity(
-                eDocument!!.personDetails!!.name.toString(),
-                eDocument!!.personDetails!!.surname.toString(),
-                "",
-                eDocument!!.personDetails!!.dateOfBirth!!.toLong(),
-                eDocument!!.personDetails!!.nationality.toString(),
-                eDocument!!.personDetails!!.gender!!.substring(0, 1),
-                eDocument!!.personDetails!!.personalNumber!!.toLong(),
-                eDocument!!.personDetails!!.serialNumber.toString(),
-                nfcSupported,
-                eDocument!!.personDetails!!.dateOfExpiry ?: 0
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Log.d("VTLOG", "IDENTITY CREATION FAILED")
+        val identity =
+            try {
+                getIdentityCommunity().createIdentity(
+                    eDocument!!.personDetails!!.name.toString(),
+                    eDocument!!.personDetails!!.surname.toString(),
+                    "",
+                    eDocument!!.personDetails!!.dateOfBirth!!.toLong(),
+                    eDocument!!.personDetails!!.nationality.toString(),
+                    eDocument!!.personDetails!!.gender!!.substring(0, 1),
+                    eDocument!!.personDetails!!.personalNumber!!.toLong(),
+                    eDocument!!.personDetails!!.serialNumber.toString(),
+                    nfcSupported,
+                    eDocument!!.personDetails!!.dateOfExpiry ?: 0
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.d("VTLOG", "IDENTITY CREATION FAILED")
 
-            parentActivity.displayToast(
-                requireContext(),
-                resources.getString(R.string.snackbar_identity_create_error),
-            )
+                parentActivity.displayToast(
+                    requireContext(),
+                    resources.getString(R.string.snackbar_identity_create_error),
+                )
 
-            return
-        }
+                return
+            }
 
         if (getIdentityCommunity().hasIdentity()) {
             ConfirmDialog(
@@ -471,10 +476,11 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
                 binding.confirm.ivIdentityFaceImage
                     .setImageBitmap(pDetails.faceImage)
 
-                binding.confirm.tvIDFullName.text = StringBuilder()
-                    .append(pDetails.name)
-                    .append(" ")
-                    .append(pDetails.surname)
+                binding.confirm.tvIDFullName.text =
+                    StringBuilder()
+                        .append(pDetails.name)
+                        .append(" ")
+                        .append(pDetails.surname)
                 binding.confirm.tvIDPersonalNumber.text =
                     pDetails.personalNumber
                 binding.confirm.tvIDGender.text = pDetails.gender
@@ -493,7 +499,10 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
     /**
      * Receive listener from NFC reader
      */
-    override fun onReceive(type: String, data: Any?) {
+    override fun onReceive(
+        type: String,
+        data: Any?
+    ) {
         Log.d("VTLOG", "ON RECEIVE $type")
         when (type) {
             RECEIVE_TYPE_NFC -> launchNFCScan()
@@ -503,10 +512,17 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
     /**
      * Passport capture result is received
      */
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK && data != null) {
+            @Suppress("DEPRECATION")
             (data.getSerializableExtra(PassportHandler.MRZ_RESULT) as MRZInfo).run {
                 if (nfcSupported) {
                     passportHandler.activateNFCAdapter()
@@ -526,10 +542,11 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
                     scanView.exitEnterView(requireContext(), readView)
                 } else {
                     val personDetails = passportHandler.mrzToPersonDetails(this)
-                    val eDocument = EDocument(
-                        passportHandler.getDocumentType(),
-                        personDetails
-                    )
+                    val eDocument =
+                        EDocument(
+                            passportHandler.getDocumentType(),
+                            personDetails
+                        )
 
                     this@IdentityOnboardingDialog.eDocument = eDocument
 

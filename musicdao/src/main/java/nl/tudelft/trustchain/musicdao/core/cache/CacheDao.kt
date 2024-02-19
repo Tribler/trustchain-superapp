@@ -6,7 +6,6 @@ import nl.tudelft.trustchain.musicdao.core.cache.entities.AlbumEntity
 
 @Dao
 interface CacheDao {
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(infos: AlbumEntity)
 

@@ -27,6 +27,7 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * create an instance of this fragment.
  */
 class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentJoinNetworkBinding? = null
     private val binding get() = _binding!!
 
@@ -34,7 +35,9 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
     private var fetchedWallets: ArrayList<TrustChainBlock> = ArrayList()
     private var isFetching: Boolean = false
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
         initListeners()
         this.refresh()
@@ -68,7 +71,10 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenStarted {
@@ -102,16 +108,18 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
         // This copy prevents the ConcurrentModificationException
         val walletsCopy = arrayListOf<TrustChainBlock>()
         walletsCopy.addAll(fetchedWallets)
-        val walletIds = walletsCopy.map {
-            SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
-        }
-        val distinctById = newWallets
-            .filter {
-                // Make sure that the trust chain block has the correct type
-                it.type == CoinCommunity.JOIN_BLOCK
-            }.distinctBy {
+        val walletIds =
+            walletsCopy.map {
                 SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
             }
+        val distinctById =
+            newWallets
+                .filter {
+                    // Make sure that the trust chain block has the correct type
+                    it.type == CoinCommunity.JOIN_BLOCK
+                }.distinctBy {
+                    SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
+                }
 
         Log.i("Coin", "${distinctById.size} unique wallets founds. Adding if not present already.")
 
@@ -138,13 +146,14 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 if (!uniqueWallets.contains(wallet)) uniqueWallets.add(wallet)
             }
             // Update the list view with the found shared wallets
-            adapter = SharedWalletListAdapter(
-                this@JoinDAOFragment,
-                uniqueWallets,
-                publicKey,
-                "Click to join",
-                disableOnUserJoined = true
-            )
+            adapter =
+                SharedWalletListAdapter(
+                    this@JoinDAOFragment,
+                    uniqueWallets,
+                    publicKey,
+                    "Click to join",
+                    disableOnUserJoined = true
+                )
 
             binding.listView.adapter = adapter
             binding.listView.setOnItemClickListener { _, view, position, id ->
@@ -174,8 +183,9 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 // TODO: Commented this line out, it causes the app to crash
 //                withTimeout(SW_CRAWLING_TIMEOUT_MILLI) {
                 trustchain.crawlChain(peer)
-                val crawlResult = trustchain
-                    .getChainByUser(peer.publicKey.keyToBin())
+                val crawlResult =
+                    trustchain
+                        .getChainByUser(peer.publicKey.keyToBin())
 
                 updateSharedWallets(crawlResult)
 //                }
@@ -196,15 +206,16 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 ?: block
 
         // Add a proposal to trust chain to join a shared wallet
-        val proposeBlockData = try {
-            getCoinCommunity().proposeJoinWallet(
-                mostRecentSWBlock
-            ).getData()
-        } catch (t: Throwable) {
-            Log.e("Coin", "Join wallet proposal failed. ${t.message ?: "No further information"}.")
-            setAlertText(t.message ?: "Unexpected error occurred. Try again")
-            return
-        }
+        val proposeBlockData =
+            try {
+                getCoinCommunity().proposeJoinWallet(
+                    mostRecentSWBlock
+                ).getData()
+            } catch (t: Throwable) {
+                Log.e("Coin", "Join wallet proposal failed. ${t.message ?: "No further information"}.")
+                setAlertText(t.message ?: "Unexpected error occurred. Try again")
+                return
+            }
 
         val context = requireContext()
         // Wait and collect signatures
@@ -239,9 +250,7 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
     /**
      * Collect the signatures of a join proposal
      */
-    private fun collectJoinWalletResponses(
-        blockData: SWSignatureAskBlockTD
-    ): List<SWResponseSignatureBlockTD>? {
+    private fun collectJoinWalletResponses(blockData: SWSignatureAskBlockTD): List<SWResponseSignatureBlockTD>? {
         val responses =
             getCoinCommunity().fetchProposalResponses(
                 blockData.SW_UNIQUE_ID,
@@ -264,8 +273,8 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
 
     private fun setAlertText(text: String) {
         activity?.runOnUiThread {
-            binding.alertTf?.visibility = View.VISIBLE
-            binding.alertTf?.text = text
+            binding.alertTf.visibility = View.VISIBLE
+            binding.alertTf.text = text
         }
     }
 

@@ -22,14 +22,14 @@ import org.json.JSONObject
 
 class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_transfer_money_link) {
     private val binding by viewBinding(FragmentExchangeTransferMoneyLinkBinding::bind)
-    private var ReceiverName = ""
-    private var ReceiverPublic = ""
-    private var Amount = ""
-    private var Message: String? = null
-    private var E2T = false
-    private var Host = ""
-    private var Port = ""
-    private var PaymentId = ""
+    private var receiverName = ""
+    private var receiverPublic = ""
+    private var amount = ""
+    private var message: String? = null
+    private var e2t = false
+    private var host = ""
+    private var port = ""
+    private var paymentId = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +42,7 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
     }
 
@@ -58,8 +59,8 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
 
     fun handleLinkRequest(data: Uri): Boolean {
         try {
-            val receiver_name = data.getQueryParameter("name")
-            val receiver_public = data.getQueryParameter("public")
+            val receiverName = data.getQueryParameter("name")
+            val receiverPublic = data.getQueryParameter("public")
             val amount = data.getQueryParameter("amount")
             val message = data.getQueryParameter("message")
             val pkstring = data.getQueryParameter("key")
@@ -72,12 +73,18 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
             var url = SecurityUtil.urldecode(data.toString())
             url = url.removeRange(0, url.indexOf("?") + 1)
             url = url.removeRange(url.indexOf("&signature"), url.length)
-            if (amount != null && receiver_public != null && host != null && paymentId != null && pk != null && SecurityUtil.validate(url, signature, pk)) {
+            if (amount != null && receiverPublic != null && host != null && paymentId != null && pk != null &&
+                SecurityUtil.validate(
+                    url,
+                    signature,
+                    pk
+                )
+            ) {
                 setData(
-                    receiver_name,
+                    receiverName,
                     amount,
                     message,
-                    receiver_public,
+                    receiverPublic,
                     t2e,
                     host,
                     port,
@@ -103,56 +110,60 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
         paymentId: String
     ) {
         if (name != null) {
-            this.ReceiverName = name
+            this.receiverName = name
         }
-        this.ReceiverPublic = public
-        this.Amount = amount
-        this.Message = message
-        this.Host = host
-        this.PaymentId = paymentId
+        this.receiverPublic = public
+        this.amount = amount
+        this.message = message
+        this.host = host
+        this.paymentId = paymentId
         if (e2t != null && port != null) {
-            this.E2T = e2t.toBoolean()
-            this.Port = port
+            this.e2t = e2t.toBoolean()
+            this.port = port
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
         onResume()
 
         binding.pbPayingEuro.isVisible = false
-        binding.tvPaymentReceiver.text = this.ReceiverName
-        binding.tvPaymentAmount.text = this.Amount
-        if (this.Message != null) {
+        binding.tvPaymentReceiver.text = this.receiverName
+        binding.tvPaymentAmount.text = this.amount
+        if (this.message != null) {
             binding.llPaymentMessage.visibility = View.VISIBLE
-            binding.tvPaymentMessage.text = this.Message ?: ""
+            binding.tvPaymentMessage.text = this.message ?: ""
         }
 
-        if (!this.E2T) {
+        if (!this.e2t) {
             binding.clPayEuro.visibility = View.VISIBLE
         }
 
         binding.clPayEuro.setOnClickListener {
-            Log.d("server_payEuro", "${this.Host}, ${this.PaymentId}")
+            Log.d("server_payEuro", "${this.host}, ${this.paymentId}")
             binding.pbPayingEuro.isVisible = true
-            openTikkieLink(this.Host, this.PaymentId)
+            openTikkieLink(this.host, this.paymentId)
         }
 
         binding.clPayEurotoken.setOnClickListener {
-            if (!this.E2T) {
+            if (!this.e2t) {
                 @Suppress("DEPRECATION")
                 Handler().postDelayed(
                     {
                         try {
                             // Create proposal block to the recipient
                             val publicKey =
-                                defaultCryptoProvider.keyFromPublicBin(this.ReceiverPublic.hexToBytes())
-                            val block = getTransactionRepository().sendTransferProposalSync(
-                                publicKey.keyToBin(),
-                                this.Amount.replace(",", "").toLong()
-                            )
+                                defaultCryptoProvider.keyFromPublicBin(this.receiverPublic.hexToBytes())
+                            val block =
+                                getTransactionRepository().sendTransferProposalSync(
+                                    publicKey.keyToBin(),
+                                    this.amount.replace(",", "").toLong()
+                                )
                             if (block == null) {
                                 parentActivity.displayToast(
                                     requireContext(),
@@ -160,7 +171,7 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
                                 )
                             } else {
                                 getPeerChatCommunity().sendMessageWithTransaction(
-                                    this.Message ?: "",
+                                    this.message ?: "",
                                     block.calculateHash(),
                                     publicKey,
                                     getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
@@ -170,15 +181,16 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
                                     requireContext(),
                                     resources.getString(
                                         R.string.snackbar_transfer_of,
-                                        this.Amount,
-                                        this.ReceiverName
+                                        this.amount,
+                                        this.receiverName
                                     ),
                                     isShort = false
                                 )
 
-                                val previousFragment = parentFragmentManager.fragments.filter {
-                                    it.tag == ValueTransferMainActivity.walletOverviewFragmentTag
-                                }
+                                val previousFragment =
+                                    parentFragmentManager.fragments.filter {
+                                        it.tag == ValueTransferMainActivity.WALLET_OVER_FRAGMENT_TAG
+                                    }
 
                                 parentFragmentManager.beginTransaction().apply {
                                     hide(this@ExchangeTransferMoneyLinkFragment)
@@ -199,8 +211,15 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
                 )
             } else {
                 try {
-                    val publicKey = defaultCryptoProvider.keyFromPublicBin(this.ReceiverPublic.hexToBytes())
-                    val block = getTransactionRepository().sendDestroyProposalWithPaymentID(publicKey.keyToBin(), this.Host, this.Port.toInt(), this.PaymentId, this.Amount.replace(",", "").toLong())
+                    val publicKey = defaultCryptoProvider.keyFromPublicBin(this.receiverPublic.hexToBytes())
+                    val block =
+                        getTransactionRepository().sendDestroyProposalWithPaymentID(
+                            publicKey.keyToBin(),
+                            this.host,
+                            this.port.toInt(),
+                            this.paymentId,
+                            this.amount.replace(",", "").toLong()
+                        )
 
                     if (block == null) {
                         parentActivity.displayToast(
@@ -209,7 +228,7 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
                         )
                     } else {
                         getPeerChatCommunity().sendMessageWithTransaction(
-                            this.Message ?: "",
+                            this.message ?: "",
                             block.calculateHash(),
                             publicKey,
                             getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
@@ -218,15 +237,16 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
                             requireContext(),
                             resources.getString(
                                 R.string.snackbar_transfer_of,
-                                this.Amount,
-                                this.ReceiverName
+                                this.amount,
+                                this.receiverName
                             ),
                             isShort = false
                         )
 
-                        val previousFragment = parentFragmentManager.fragments.filter {
-                            it.tag == ValueTransferMainActivity.walletOverviewFragmentTag
-                        }
+                        val previousFragment =
+                            parentFragmentManager.fragments.filter {
+                                it.tag == ValueTransferMainActivity.WALLET_OVER_FRAGMENT_TAG
+                            }
 
                         parentFragmentManager.beginTransaction().apply {
                             hide(this@ExchangeTransferMoneyLinkFragment)
@@ -246,11 +266,17 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    @Deprecated("Deprecated in Java")
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
+        @Suppress("DEPRECATION")
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
@@ -259,13 +285,15 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
                 return true
             }
         }
+        @Suppress("DEPRECATION")
         return super.onOptionsItemSelected(item)
     }
 
     fun onBackPressed(animated: Boolean = true) {
-        val previousFragment = parentFragmentManager.fragments.filter {
-            it.tag == ValueTransferMainActivity.walletOverviewFragmentTag
-        }
+        val previousFragment =
+            parentFragmentManager.fragments.filter {
+                it.tag == ValueTransferMainActivity.WALLET_OVER_FRAGMENT_TAG
+            }
 
         parentFragmentManager.beginTransaction().apply {
             if (animated) setCustomAnimations(0, R.anim.exit_to_right)
@@ -277,7 +305,10 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
         (previousFragment[0] as VTFragment).initView()
     }
 
-    fun openTikkieLink(host: String, paymetId: String) {
+    fun openTikkieLink(
+        host: String,
+        paymetId: String
+    ) {
         val url = "$host/api/exchange/e2t/start_payment"
         val queue = Volley.newRequestQueue(this.parentActivity)
         // Post parameters
@@ -285,28 +316,32 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
         params["payment_id"] = paymetId
         val jsonObject = JSONObject(params as Map<*, *>)
         // Volley post request with parameters
-        val request = JsonObjectRequest(
-            Request.Method.POST, url, jsonObject,
-            { response ->
-                Log.d("server_res_pay", response.toString())
-                val gatewaydata = response.getJSONObject("payment_connection_data")
-                Log.d("server_res_tikkie", gatewaydata.getString("url"))
-                val browserIntent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse(gatewaydata.getString("url"))
-                )
-                binding.pbPayingEuro.isVisible = false
-                startActivity(browserIntent)
-            },
-            { error ->
-                Log.d("server_err_pay", error.message ?: error.toString())
-                binding.pbPayingEuro.isVisible = false
-                parentActivity.displayToast(
-                    requireContext(),
-                    resources.getString(R.string.snackbar_unexpected_error_occurred)
-                )
-            }
-        )
+        val request =
+            JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                { response ->
+                    Log.d("server_res_pay", response.toString())
+                    val gatewaydata = response.getJSONObject("payment_connection_data")
+                    Log.d("server_res_tikkie", gatewaydata.getString("url"))
+                    val browserIntent =
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(gatewaydata.getString("url"))
+                        )
+                    binding.pbPayingEuro.isVisible = false
+                    startActivity(browserIntent)
+                },
+                { error ->
+                    Log.d("server_err_pay", error.message ?: error.toString())
+                    binding.pbPayingEuro.isVisible = false
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_unexpected_error_occurred)
+                    )
+                }
+            )
         // Add the volley post request to the request queue
         queue.add(request)
     }

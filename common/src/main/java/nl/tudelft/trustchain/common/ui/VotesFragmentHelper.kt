@@ -16,16 +16,16 @@ import nl.tudelft.trustchain.common.databinding.FragmentVotesTabBinding
  */
 class TabsAdapter(fragment: Fragment, private val voters: Array<ArrayList<String>>) :
     FragmentStateAdapter(fragment) {
-
     override fun getItemCount(): Int = 3
 
     override fun createFragment(position: Int): Fragment {
         // Return a NEW fragment instance in createFragment(int)
         val fragment = TabFragment()
-        fragment.arguments = Bundle().apply {
-            putInt("tabPosition", position)
-            putStringArrayList("voters", voters[position])
-        }
+        fragment.arguments =
+            Bundle().apply {
+                putInt("tabPosition", position)
+                putStringArrayList("voters", voters[position])
+            }
         return fragment
     }
 }
@@ -34,6 +34,7 @@ class TabsAdapter(fragment: Fragment, private val voters: Array<ArrayList<String
  * The fragment for showing the votes in a list
  */
 class TabFragment : Fragment() {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentVotesTabBinding? = null
     private val binding get() = _binding!!
 
@@ -48,16 +49,19 @@ class TabFragment : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         arguments?.takeIf {
             it.containsKey("voters")
         }?.apply {
-
             val votesList = binding.votes
-            votesAdapter = VotesAdapter(
-                view.context,
-                requireArguments().getStringArrayList("voters")!!
-            )
+            votesAdapter =
+                VotesAdapter(
+                    view.context,
+                    requireArguments().getStringArrayList("voters")!!
+                )
             votesList.adapter = votesAdapter
         }
     }
@@ -75,7 +79,6 @@ class VotesAdapter(
     private val context: Context,
     private val voters: ArrayList<String>
 ) : BaseAdapter() {
-
     override fun getCount(): Int {
         return voters.size
     }
@@ -88,12 +91,17 @@ class VotesAdapter(
         return position.toLong()
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val binding = if (convertView != null) {
-            FragmentVotesEntryBinding.bind(convertView)
-        } else {
-            FragmentVotesEntryBinding.inflate(LayoutInflater.from(context))
-        }
+    override fun getView(
+        position: Int,
+        convertView: View?,
+        parent: ViewGroup?
+    ): View {
+        val binding =
+            if (convertView != null) {
+                FragmentVotesEntryBinding.bind(convertView)
+            } else {
+                FragmentVotesEntryBinding.inflate(LayoutInflater.from(context))
+            }
         val view = binding.root
         binding.voterName.text = voters[position]
 

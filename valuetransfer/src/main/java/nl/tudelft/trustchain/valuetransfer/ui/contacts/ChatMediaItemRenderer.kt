@@ -12,10 +12,12 @@ import nl.tudelft.trustchain.valuetransfer.util.MessageAttachment
 class ChatMediaItemRenderer(
     private val onItemClick: (ChatMediaItem) -> Unit
 ) : ItemLayoutRenderer<ChatMediaItem, View>(
-    ChatMediaItem::class.java
-) {
-
-    override fun bindView(item: ChatMediaItem, view: View) = with(view) {
+        ChatMediaItem::class.java
+    ) {
+    override fun bindView(
+        item: ChatMediaItem,
+        view: View
+    ) = with(view) {
         val binding = ItemContactChatMediaGalleryBinding.bind(view)
         val fileNameView = binding.tvFileName
         val ivImageItem = binding.ivImageItem

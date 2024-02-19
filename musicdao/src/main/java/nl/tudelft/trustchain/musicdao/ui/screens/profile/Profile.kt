@@ -28,26 +28,33 @@ import nl.tudelft.trustchain.musicdao.ui.navigation.Screen
 @ExperimentalMaterialApi
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Profile(artist: Artist, releases: List<Album> = listOf(), navController: NavController) {
+fun Profile(
+    artist: Artist,
+    releases: List<Album> = listOf(),
+    navController: NavController
+) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(Brush.verticalGradient(listOf(Color(0xFF77DF7C), Color(0xFF70C774))))
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .background(Brush.verticalGradient(listOf(Color(0xFF77DF7C), Color(0xFF70C774))))
         ) {
             Text(
                 text = artist.name,
                 style = MaterialTheme.typography.h6,
-                modifier = Modifier
-                    .padding(20.dp)
-                    .align(
-                        Alignment.BottomStart
-                    )
+                modifier =
+                    Modifier
+                        .padding(20.dp)
+                        .align(
+                            Alignment.BottomStart
+                        )
             )
         }
 

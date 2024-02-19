@@ -13,29 +13,26 @@ data class TransferRequest(
      * The (optional) description of the transfer request
      */
     val description: String?,
-
     /**
      * The requested amount for transfer
      */
     val amount: Long,
-
     /**
      * The requestor of the request
      */
     val requestor: PublicKey,
-
     /**
      * The receiver of the request
      */
     val receiver: PublicKey
 ) : Serializable {
-
-    fun serialize(): ByteArray = JSONObject().apply {
-        put(TRANSFER_REQUEST_DESCRIPTION, description)
-        put(TRANSFER_REQUEST_AMOUNT, amount)
-        put(TRANSFER_REQUEST_REQUESTOR, requestor.keyToBin().toHex())
-        put(TRANSFER_REQUEST_RECEIVER, receiver.keyToBin().toHex())
-    }.toString().toByteArray()
+    fun serialize(): ByteArray =
+        JSONObject().apply {
+            put(TRANSFER_REQUEST_DESCRIPTION, description)
+            put(TRANSFER_REQUEST_AMOUNT, amount)
+            put(TRANSFER_REQUEST_REQUESTOR, requestor.keyToBin().toHex())
+            put(TRANSFER_REQUEST_RECEIVER, receiver.keyToBin().toHex())
+        }.toString().toByteArray()
 
     companion object : Deserializable<TransferRequest> {
         const val TRANSFER_REQUEST_DESCRIPTION = "description"
@@ -43,7 +40,10 @@ data class TransferRequest(
         const val TRANSFER_REQUEST_REQUESTOR = "requestor"
         const val TRANSFER_REQUEST_RECEIVER = "receiver"
 
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<TransferRequest, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<TransferRequest, Int> {
             val offsetBuffer = buffer.copyOfRange(offset, buffer.size)
             val json = JSONObject(offsetBuffer.decodeToString())
             return Pair(

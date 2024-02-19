@@ -38,14 +38,17 @@ class ContactChatItemRenderer(
     private val onProgressClick: (Pair<PublicKey, String>) -> Unit,
     private val onLoadMoreClick: (ContactChatItem) -> Unit,
 ) : ItemLayoutRenderer<ContactChatItem, View>(
-    ContactChatItem::class.java
-) {
+        ContactChatItem::class.java
+    ) {
     private val timeFormat = SimpleDateFormat("HH:mm", Locale.ENGLISH)
     private val dateFormat = SimpleDateFormat("EEEE, d MMM", Locale.ENGLISH)
     private val previousYearsDateFormat = SimpleDateFormat("EEEE, d MMM yyyy", Locale.ENGLISH)
     private val yearFormat = SimpleDateFormat("yyyy", Locale.ENGLISH)
 
-    override fun bindView(item: ContactChatItem, view: View) = with(view) {
+    override fun bindView(
+        item: ContactChatItem,
+        view: View
+    ) = with(view) {
         val binding = ItemContactsChatDetailBinding.bind(view)
         // Necessary to hide content types because the recycler view sometimes displays wrong data
         binding.clChatMessage.isVisible = false
@@ -112,10 +115,11 @@ class ContactChatItemRenderer(
         if (item.chatMessage.outgoing) {
             binding.ivChatItemStatus.isVisible = item.chatMessage.outgoing
 
-            val itemStatusResource = when {
-                item.chatMessage.ack -> R.drawable.ic_check_double
-                else -> R.drawable.ic_check_single
-            }
+            val itemStatusResource =
+                when {
+                    item.chatMessage.ack -> R.drawable.ic_check_double
+                    else -> R.drawable.ic_check_single
+                }
 
             binding.ivChatItemStatus.setImageResource(itemStatusResource)
         }
@@ -149,7 +153,7 @@ class ContactChatItemRenderer(
 
         // Show the different types of attachments
         item.chatMessage.attachment?.let { attachment ->
-            val size = getFormattedSize(item.chatMessage.attachment?.size!!.toDouble())
+            val size = getFormattedSize(item.chatMessage.attachment.size.toDouble())
 
             when (attachment.type) {
                 MessageAttachment.TYPE_FILE -> {
@@ -167,8 +171,7 @@ class ContactChatItemRenderer(
                             )
                         )
 
-                        binding.tvAttachmentFileSize.isVisible =
-                            item.chatMessage.attachment?.size != null
+                        binding.tvAttachmentFileSize.isVisible = true
                         binding.tvAttachmentFileSize.text = size
                     } else {
                         binding.clAttachmentFile.isVisible = false
@@ -199,10 +202,11 @@ class ContactChatItemRenderer(
 
                             val transferProgress = item.attachtmentTransferProgress
 
-                            item.chatMessage.attachment?.content?.toHex()?.let { id ->
+                            item.chatMessage.attachment.content.toHex().let { id ->
                                 val stopState = transferProgress?.state == TransferState.STOPPED
-                                val isStopped = parentActivity.getCommunity<PeerChatCommunity>()!!
-                                    .evaProtocol!!.isStopped(Peer(item.chatMessage.sender).key, id)
+                                val isStopped =
+                                    parentActivity.getCommunity<PeerChatCommunity>()!!
+                                        .evaProtocol!!.isStopped(Peer(item.chatMessage.sender).key, id)
 
                                 if (stopState || isStopped) {
                                     binding.ivAttachmentProgressPlay.isVisible = true
@@ -237,7 +241,8 @@ class ContactChatItemRenderer(
 
                             binding.pbAttachmentProgressLoadingSpinner.apply {
                                 isVisible =
-                                    !item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING
+                                    !item.chatMessage.attachmentFetched && transferProgress != null &&
+                                    transferProgress.state == TransferState.DOWNLOADING
                                 if (transferProgress != null) {
                                     progress = transferProgress.progress.toInt()
                                 }
@@ -245,9 +250,13 @@ class ContactChatItemRenderer(
                             binding.tvAttachmentProgress.isVisible =
                                 !item.chatMessage.attachmentFetched
                             binding.tvAttachmentProgress.text =
-                                if (!item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING) {
+                                if (!item.chatMessage.attachmentFetched && transferProgress != null &&
+                                    transferProgress.state == TransferState.DOWNLOADING
+                                ) {
                                     "${transferProgress.progress.toInt()}%"
-                                } else ""
+                                } else {
+                                    ""
+                                }
                         }
                     }
 
@@ -268,8 +277,7 @@ class ContactChatItemRenderer(
                         binding.clAttachmentPhotoVideo.isVisible = true
                         binding.clAttachmentPhotoVideo.setBackgroundResource(backgroundResource)
 
-                        binding.tvAttachmentPhotoVideoSize.isVisible =
-                            item.chatMessage.attachment?.size != null
+                        binding.tvAttachmentPhotoVideoSize.isVisible = true
                         binding.tvAttachmentPhotoVideoSize.setBackgroundResource(backgroundResource)
                         binding.tvAttachmentPhotoVideoSize.setTextColor(
                             ContextCompat.getColor(
@@ -307,10 +315,11 @@ class ContactChatItemRenderer(
 
                             val transferProgress = item.attachtmentTransferProgress
 
-                            item.chatMessage.attachment?.content?.toHex()?.let { id ->
+                            item.chatMessage.attachment.content.toHex().let { id ->
                                 val stopState = transferProgress?.state == TransferState.STOPPED
-                                val isStopped = parentActivity.getCommunity<PeerChatCommunity>()!!
-                                    .evaProtocol!!.isStopped(Peer(item.chatMessage.sender).key, id)
+                                val isStopped =
+                                    parentActivity.getCommunity<PeerChatCommunity>()!!
+                                        .evaProtocol!!.isStopped(Peer(item.chatMessage.sender).key, id)
 
                                 if (stopState || isStopped) {
                                     binding.ivAttachmentProgressPlay.isVisible = true
@@ -345,7 +354,8 @@ class ContactChatItemRenderer(
 
                             binding.pbAttachmentProgressLoadingSpinner.apply {
                                 isVisible =
-                                    !item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING
+                                    !item.chatMessage.attachmentFetched && transferProgress != null &&
+                                    transferProgress.state == TransferState.DOWNLOADING
                                 if (transferProgress != null) {
                                     progress = transferProgress.progress.toInt()
                                 }
@@ -353,9 +363,13 @@ class ContactChatItemRenderer(
                             binding.tvAttachmentProgress.isVisible =
                                 !item.chatMessage.attachmentFetched
                             binding.tvAttachmentProgress.text =
-                                if (!item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING) {
+                                if (!item.chatMessage.attachmentFetched && transferProgress != null &&
+                                    transferProgress.state == TransferState.DOWNLOADING
+                                ) {
                                     "${transferProgress.progress.toInt()}%"
-                                } else ""
+                                } else {
+                                    ""
+                                }
                         }
                     }
 

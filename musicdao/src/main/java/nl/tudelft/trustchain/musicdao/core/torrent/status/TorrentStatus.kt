@@ -19,16 +19,20 @@ data class TorrentStatus(
     val downloadingTracks: List<DownloadingTrack>?
 ) {
     companion object {
-        fun mapTorrentHandle(torrentHandle: TorrentHandle, directory: File): TorrentStatus {
+        fun mapTorrentHandle(
+            torrentHandle: TorrentHandle,
+            directory: File
+        ): TorrentStatus {
             val files = torrentHandle.torrentFile()?.files()
 
-            val formatted = if (files != null) {
-                (0 until files.numFiles()).map {
-                    files.filePath(it)
-                }.joinToString("\n")
-            } else {
-                ""
-            }
+            val formatted =
+                if (files != null) {
+                    (0 until files.numFiles()).map {
+                        files.filePath(it)
+                    }.joinToString("\n")
+                } else {
+                    ""
+                }
 
             return TorrentStatus(
                 id = torrentHandle.status().name().toString(),
@@ -46,34 +50,42 @@ data class TorrentStatus(
             )
         }
 
-        private fun downloadingTracks(handle: TorrentHandle, directory: File): List<DownloadingTrack>? {
+        private fun downloadingTracks(
+            handle: TorrentHandle,
+            directory: File
+        ): List<DownloadingTrack>? {
             val files = handle.torrentFile()?.files() ?: return null
             val fileProgress = handle.fileProgress()
 
-            val downloadingTracks = (0 until files.numFiles()).mapNotNull {
-                val file = File("$directory/torrents/${handle.infoHash()}/${files.filePath(it)}")
-                if (file.exists()) {
-                    DownloadingTrack(
-                        title = (
-                            Util.checkAndSanitizeTrackNames(files.fileName(it))
-                                ?: files.fileName(it)
+            val downloadingTracks =
+                (0 until files.numFiles()).mapNotNull {
+                    val file = File("$directory/torrents/${handle.infoHash()}/${files.filePath(it)}")
+                    if (file.exists()) {
+                        DownloadingTrack(
+                            title = (
+                                Util.checkAndSanitizeTrackNames(files.fileName(it))
+                                    ?: files.fileName(it)
                             ),
-                        artist = "Artist",
-                        progress = Util.calculateDownloadProgress(
-                            fileProgress.get(it),
-                            files.fileSize(it)
-                        ),
-                        file = file,
-                        fileIndex = it
-                    )
-                } else {
-                    null
+                            artist = "Artist",
+                            progress =
+                                Util.calculateDownloadProgress(
+                                    fileProgress.get(it),
+                                    files.fileSize(it)
+                                ),
+                            file = file,
+                            fileIndex = it
+                        )
+                    } else {
+                        null
+                    }
                 }
-            }
             return downloadingTracks
         }
 
-        fun torrentHandleFiles(handle: TorrentHandle, cacheDir: File): List<FileWithIndex>? {
+        fun torrentHandleFiles(
+            handle: TorrentHandle,
+            cacheDir: File
+        ): List<FileWithIndex>? {
             val memoryFiles = handle.torrentFile()?.files() ?: return null
 
             return (0 until memoryFiles.numFiles()).mapNotNull {

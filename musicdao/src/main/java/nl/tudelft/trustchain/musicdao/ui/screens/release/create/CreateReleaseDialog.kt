@@ -59,6 +59,7 @@ fun CreateReleaseDialog(navController: NavController) {
     }
 
     val context = LocalContext.current
+
     fun showDatePicker() {
         val picker = MaterialDatePicker.Builder.datePicker().build()
         (context as AppCompatActivity).let {
@@ -71,15 +72,17 @@ fun CreateReleaseDialog(navController: NavController) {
 
     val scope = rememberCoroutineScope()
     val localContext = LocalContext.current
+
     fun publishRelease() {
         scope.launch {
-            val result = viewModel.createRelease(
-                artist.value,
-                title.value,
-                releaseDate = Instant.now().toString(),
-                uris = fileList.value,
-                localContext
-            )
+            val result =
+                viewModel.createRelease(
+                    artist.value,
+                    title.value,
+                    releaseDate = Instant.now().toString(),
+                    uris = fileList.value,
+                    localContext
+                )
             if (result) {
                 SnackbarHandler.displaySnackbar(text = "Successfully published your release.")
                 navController.popBackStack()
@@ -91,10 +94,11 @@ fun CreateReleaseDialog(navController: NavController) {
 
     Column {
         Surface(
-            modifier = Modifier
-                .requiredWidth(LocalConfiguration.current.screenWidthDp.dp * 1f)
-                .fillMaxSize()
-                .padding(4.dp)
+            modifier =
+                Modifier
+                    .requiredWidth(LocalConfiguration.current.screenWidthDp.dp * 1f)
+                    .fillMaxSize()
+                    .padding(4.dp)
         ) {
             Scaffold(
                 topBar = {
@@ -109,10 +113,11 @@ fun CreateReleaseDialog(navController: NavController) {
                 },
                 content = {
                     Column(
-                        modifier = Modifier
-                            .padding(20.dp)
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
+                        modifier =
+                            Modifier
+                                .padding(20.dp)
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(

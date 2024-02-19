@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.widget.*
 import androidx.annotation.RequiresApi
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -27,7 +26,6 @@ class ExchangeGatewayDialog(
     private val name: String,
     private val amount: Long?,
 ) : VTDialogFragment() {
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
@@ -88,7 +86,6 @@ class ExchangeGatewayDialog(
             connectGatewaySlider.onSlideCompleteListener =
                 object : SlideToActView.OnSlideCompleteListener {
                     override fun onSlideComplete(view: SlideToActView) {
-
                         @Suppress("DEPRECATION")
                         Handler().postDelayed(
                             Runnable {
@@ -121,54 +118,55 @@ class ExchangeGatewayDialog(
                     }
                 }
 
-            sellSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
-                override fun onSlideComplete(view: SlideToActView) {
-                    @Suppress("DEPRECATION")
-                    Handler().postDelayed(
-                        Runnable {
-                            if (saveGateway) {
-                                getGatewayStore().addGateway(
-                                    publicKey,
-                                    name,
-                                    ip,
-                                    port.toLong(),
-                                    preferredGateway
-                                )
-                            }
-
-                            getTransactionRepository().sendDestroyProposalWithPaymentID(
-                                publicKey.keyToBin(),
-                                ip,
-                                port,
-                                paymentID,
-                                amount!!
-                            ).let { block ->
-                                if (block == null) {
-                                    parentActivity.displayToast(
-                                        requireContext(),
-                                        resources.getString(
-                                            R.string.snackbar_exchange_sell_error,
-                                            formatBalance(amount)
-                                        ),
-                                        isShort = false
+            sellSlider.onSlideCompleteListener =
+                object : SlideToActView.OnSlideCompleteListener {
+                    override fun onSlideComplete(view: SlideToActView) {
+                        @Suppress("DEPRECATION")
+                        Handler().postDelayed(
+                            Runnable {
+                                if (saveGateway) {
+                                    getGatewayStore().addGateway(
+                                        publicKey,
+                                        name,
+                                        ip,
+                                        port.toLong(),
+                                        preferredGateway
                                     )
-                                } else {
-                                    parentActivity.displayToast(
-                                        requireContext(),
-                                        resources.getString(
-                                            R.string.snackbar_exchange_sell_success,
-                                            formatBalance(amount)
-                                        ),
-                                        isShort = false
-                                    )
-                                    bottomSheetDialog.dismiss()
                                 }
-                            }
-                        },
-                        500
-                    )
+
+                                getTransactionRepository().sendDestroyProposalWithPaymentID(
+                                    publicKey.keyToBin(),
+                                    ip,
+                                    port,
+                                    paymentID,
+                                    amount!!
+                                ).let { block ->
+                                    if (block == null) {
+                                        parentActivity.displayToast(
+                                            requireContext(),
+                                            resources.getString(
+                                                R.string.snackbar_exchange_sell_error,
+                                                formatBalance(amount)
+                                            ),
+                                            isShort = false
+                                        )
+                                    } else {
+                                        parentActivity.displayToast(
+                                            requireContext(),
+                                            resources.getString(
+                                                R.string.snackbar_exchange_sell_success,
+                                                formatBalance(amount)
+                                            ),
+                                            isShort = false
+                                        )
+                                        bottomSheetDialog.dismiss()
+                                    }
+                                }
+                            },
+                            500
+                        )
+                    }
                 }
-            }
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()

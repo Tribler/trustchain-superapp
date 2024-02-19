@@ -26,7 +26,6 @@ import java.lang.IllegalStateException
 class IdentityAttestationRequestDialog(
     private val peer: Peer,
 ) : VTDialogFragment() {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog =
@@ -48,42 +47,51 @@ class IdentityAttestationRequestDialog(
             val requestButton = binding.btnRequestAttestation
             toggleButton(requestButton, attributeNameView.text.toString().isNotEmpty())
 
-            val attributeNameAdapter = object : ArrayAdapter<String>(
-                requireContext(),
-                android.R.layout.simple_spinner_item,
-                getAttestationCommunity().schemaManager.getSchemaNames().sorted()
-            ) {
-                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    return (super.getView(position, convertView, parent) as TextView).apply {
-                        text = getAttestationCommunity().schemaManager.getSchemaNames()
-                            .sorted()[position]
-                        setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+            val attributeNameAdapter =
+                object : ArrayAdapter<String>(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    getAttestationCommunity().schemaManager.getSchemaNames().sorted()
+                ) {
+                    override fun getView(
+                        position: Int,
+                        convertView: View?,
+                        parent: ViewGroup
+                    ): View {
+                        return (super.getView(position, convertView, parent) as TextView).apply {
+                            text =
+                                getAttestationCommunity().schemaManager.getSchemaNames()
+                                    .sorted()[position]
+                            setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                        }
                     }
-                }
 
-                override fun getDropDownView(
-                    position: Int,
-                    convertView: View?,
-                    parent: ViewGroup
-                ): View {
-                    return (super.getDropDownView(
-                        position,
-                        convertView,
-                        parent
-                    ) as TextView).apply {
-                        layoutParams.apply {
-                            height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                        }
-                        gravity = Gravity.CENTER_VERTICAL
-                        setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-                        background = if (position == attributeTypeSpinner.selectedItemPosition) {
-                            ColorDrawable(Color.LTGRAY)
-                        } else {
-                            ColorDrawable(Color.WHITE)
+                    override fun getDropDownView(
+                        position: Int,
+                        convertView: View?,
+                        parent: ViewGroup
+                    ): View {
+                        return (
+                            super.getDropDownView(
+                                position,
+                                convertView,
+                                parent
+                            ) as TextView
+                        ).apply {
+                            layoutParams.apply {
+                                height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
+                            }
+                            gravity = Gravity.CENTER_VERTICAL
+                            setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                            background =
+                                if (position == attributeTypeSpinner.selectedItemPosition) {
+                                    ColorDrawable(Color.LTGRAY)
+                                } else {
+                                    ColorDrawable(Color.WHITE)
+                                }
                         }
                     }
                 }
-            }
 
             attributeTypeSpinner.adapter = attributeNameAdapter
             attributeTypeSpinner.onItemSelectedListener =
@@ -115,11 +123,12 @@ class IdentityAttestationRequestDialog(
                     var privateKey: BonehPrivateKey? = null
 
                     try {
-                        privateKey = when (idFormat) {
-                            ID_METADATA_BIG -> myPeer.identityPrivateKeyBig!!
-                            ID_METADATA_HUGE -> myPeer.identityPrivateKeyHuge!!
-                            else -> myPeer.identityPrivateKeySmall!!
-                        }
+                        privateKey =
+                            when (idFormat) {
+                                ID_METADATA_BIG -> myPeer.identityPrivateKeyBig!!
+                                ID_METADATA_HUGE -> myPeer.identityPrivateKeyHuge!!
+                                else -> myPeer.identityPrivateKeySmall!!
+                            }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     } finally {

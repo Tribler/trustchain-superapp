@@ -10,7 +10,6 @@ import java.math.BigInteger
  * Test was written using code and csv provided on: https://github.com/miketwk/bip-schnorr-java/
  */
 class SchnorrTest {
-
     @ParameterizedTest
     @CsvFileSource(
         files = arrayOf("src/test/java/nl/tudelft/trustchain/currencyii/util/taproot/test-vectors.csv"),
@@ -30,13 +29,17 @@ class SchnorrTest {
 
         if (secKey != null && !secKey.isEmpty()) {
             val seckeyNum = BigInteger(secKey, 16)
-            val sig_actual: String = bytesToHex(schnorr_sign(msg, seckeyNum))
+            val sigActual: String = bytesToHex(schnorr_sign(msg, seckeyNum))
 
-            assertEquals(signature, sig_actual, "Failed signing for test $index, expected $signature but got: $sig_actual")
+            assertEquals(signature, sigActual, "Failed signing for test $index, expected $signature but got: $sigActual")
         }
 
-        val result_actual = schnorr_verify(msg, pubKey, hexStringToByteArray(signature))
+        val resultActual = schnorr_verify(msg, pubKey, hexStringToByteArray(signature))
 
-        assertEquals(result, result_actual, "Failed verification for test $index, expected: $result but got: $result_actual, explanation: $comment")
+        assertEquals(
+            result,
+            resultActual,
+            "Failed verification for test $index, expected: $result but got: $resultActual, explanation: $comment"
+        )
     }
 }

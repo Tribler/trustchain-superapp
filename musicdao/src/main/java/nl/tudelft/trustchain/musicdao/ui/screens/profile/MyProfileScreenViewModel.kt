@@ -15,30 +15,31 @@ import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
-class MyProfileScreenViewModel @Inject constructor(
-    private val artistRepository: ArtistRepository,
-    private val musicCommunity: MusicCommunity,
-) : ViewModel() {
+class MyProfileScreenViewModel
+    @Inject
+    constructor(
+        private val artistRepository: ArtistRepository,
+        private val musicCommunity: MusicCommunity,
+    ) : ViewModel() {
+        private val _profile: MutableStateFlow<Artist?> = MutableStateFlow(null)
+        var profile: StateFlow<Artist?> = _profile
 
-    private val _profile: MutableStateFlow<Artist?> = MutableStateFlow(null)
-    var profile: StateFlow<Artist?> = _profile
+        fun publicKey(): String {
+            return musicCommunity.publicKeyHex()
+        }
 
-    fun publicKey(): String {
-        return musicCommunity.publicKeyHex()
-    }
+        suspend fun publishEdit(
+            name: String,
+            bitcoinAddress: String,
+            socials: String,
+            biography: String
+        ): Boolean {
+            return artistRepository.edit(name, bitcoinAddress, socials, biography)
+        }
 
-    suspend fun publishEdit(
-        name: String,
-        bitcoinAddress: String,
-        socials: String,
-        biography: String
-    ): Boolean {
-        return artistRepository.edit(name, bitcoinAddress, socials, biography)
-    }
-
-    init {
-        viewModelScope.launch {
-            profile = artistRepository.getArtistStateFlow(publicKey())
+        init {
+            viewModelScope.launch {
+                profile = artistRepository.getArtistStateFlow(publicKey())
+            }
         }
     }
-}

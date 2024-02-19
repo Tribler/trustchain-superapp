@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package nl.tudelft.trustchain.musicdao.ui.components.player
 
 import android.view.ViewGroup
@@ -25,17 +27,19 @@ fun FullPlayerScreen(playerViewModel: PlayerViewModel) {
     val track by playerViewModel.playingTrack.collectAsState(null)
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(20.dp)
     ) {
         ReleaseCover(
             file = coverFile,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .shadow(10.dp)
-                .align(Alignment.CenterHorizontally)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .shadow(10.dp)
+                    .align(Alignment.CenterHorizontally)
         )
 
         Column(modifier = Modifier.padding(vertical = 20.dp)) {
@@ -55,12 +59,14 @@ fun FullPlayerScreen(playerViewModel: PlayerViewModel) {
             DisposableEffect(
                 AndroidView(
                     factory = {
+                        @Suppress("DEPRECATION")
                         PlayerView(context).apply {
                             player = playerViewModel.exoPlayer
-                            layoutParams = FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.WRAP_CONTENT,
-                                200
-                            )
+                            layoutParams =
+                                FrameLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    200
+                                )
                             controllerShowTimeoutMs = -1
                             controllerHideOnTouch = false
                             useArtwork = false

@@ -6,7 +6,10 @@ import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import java.math.BigInteger
 
-fun verifyGatewayIdentity(publicKey: ByteArray, gatewayStore: GatewayStore): ValidationResult {
+fun verifyGatewayIdentity(
+    publicKey: ByteArray,
+    gatewayStore: GatewayStore
+): ValidationResult {
     if (gatewayStore.getGatewayFromPublicKey(publicKey) != null) {
         return ValidationResult.Valid
     }
@@ -33,11 +36,15 @@ fun getVerifiedBalanceChangeForBlock(block: TrustChainBlock?): Long {
     }
 }
 
-fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore): Long? {
+fun getVerifiedBalanceForBlock(
+    block: TrustChainBlock,
+    database: TrustChainStore
+): Long? {
     Log.w("getVerifiedBalanceForBl", "Block with ID: ${block.blockId}")
     if (block.isGenesis) {
-        val blockBalance = block.transaction[TransactionRepository.KEY_BALANCE]
-            ?: return getVerifiedBalanceChangeForBlock(block)
+        val blockBalance =
+            block.transaction[TransactionRepository.KEY_BALANCE]
+                ?: return getVerifiedBalanceChangeForBlock(block)
         return blockBalance as Long
     }
     if (block.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT && block.isProposal) {
@@ -55,12 +62,17 @@ fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore
     }
 }
 
-fun getBalanceForBlock(block: TrustChainBlock, database: TrustChainStore): Long? {
+fun getBalanceForBlock(
+    block: TrustChainBlock,
+    database: TrustChainStore
+): Long? {
     if (TransactionRepository.EUROTOKEN_TYPES.contains(block.type)) {
-        if (block.isProposal && block.transaction[TransactionRepository.KEY_BALANCE] != null)
+        if (block.isProposal && block.transaction[TransactionRepository.KEY_BALANCE] != null) {
             return (block.transaction[TransactionRepository.KEY_BALANCE] as Long)
-        if (block.isGenesis)
+        }
+        if (block.isGenesis) {
             return getBalanceChangeForBlock(block)
+        }
     }
     val blockBefore = database.getBlockWithHash(block.previousHash) ?: return null
     val balanceBefore = getBalanceForBlock(blockBefore, database) ?: return null

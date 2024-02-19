@@ -31,7 +31,6 @@ import java.security.PublicKey
 class PassportHandler(
     private val activity: Activity,
 ) {
-
     private lateinit var documentType: String
     private lateinit var basicAuthenticationKey: BACKeySpec
     private var nfcAdapter: NfcAdapter? = null
@@ -131,19 +130,27 @@ class PassportHandler(
     /**
      * Set basic authentication keys
      */
-    fun setBasicAuthenticationKey(documentNumber: String, dateOfBirth: String, dateOfExpiry: String) {
+    fun setBasicAuthenticationKey(
+        documentNumber: String,
+        dateOfBirth: String,
+        dateOfExpiry: String
+    ) {
         basicAuthenticationKey = BACKey(documentNumber, dateOfBirth, dateOfExpiry)
     }
 
     /**
      * Start capturing
      */
-    fun startPassportScanActivity(fragment: Fragment, nfcSupported: Boolean) {
+    fun startPassportScanActivity(
+        fragment: Fragment,
+        nfcSupported: Boolean
+    ) {
         run {
-            val integrator = FragmentIntentIntegrator(fragment)
-                .setOrientationLocked(true)
-                .setBeepEnabled(false)
-                .setCameraId(0)
+            val integrator =
+                FragmentIntentIntegrator(fragment)
+                    .setOrientationLocked(true)
+                    .setBeepEnabled(false)
+                    .setCameraId(0)
 
             integrator.captureActivity = PassportCaptureActivity::class.java
             integrator.addExtra(DOCUMENT_TYPE, documentType)
@@ -172,13 +179,14 @@ class PassportHandler(
             Log.d("VTLOG", "CARD SERVICE OPENED")
 
             Log.d("VTLOG", "PASSPORT SERVICE INITIATED")
-            passportService = PassportService(
-                cardService,
-                PassportService.NORMAL_MAX_TRANCEIVE_LENGTH,
-                PassportService.DEFAULT_MAX_BLOCKSIZE,
-                true,
-                false
-            )
+            passportService =
+                PassportService(
+                    cardService,
+                    PassportService.NORMAL_MAX_TRANCEIVE_LENGTH,
+                    PassportService.DEFAULT_MAX_BLOCKSIZE,
+                    true,
+                    false
+                )
             passportService.open()
 
             Log.d("VTLOG", "PASSPORT SERVICE OPENED")
@@ -238,9 +246,10 @@ class PassportHandler(
 
     private fun establishNFCConnection() {
         try {
-            val cardSecurityFile = CardSecurityFile(
-                passportService.getInputStream(PassportService.EF_CARD_SECURITY)
-            )
+            val cardSecurityFile =
+                CardSecurityFile(
+                    passportService.getInputStream(PassportService.EF_CARD_SECURITY)
+                )
 
             val securityInfoCollection: Collection<SecurityInfo> = cardSecurityFile.securityInfos
 
@@ -300,7 +309,10 @@ class PassportHandler(
         return dg1File.mrzInfo
     }
 
-    fun mrzToPersonDetails(mrzInfo: MRZInfo, image: Bitmap? = null): PersonDetails {
+    fun mrzToPersonDetails(
+        mrzInfo: MRZInfo,
+        image: Bitmap? = null
+    ): PersonDetails {
         return PersonDetails().apply {
             name = mrzInfo.secondaryIdentifier.replace("<", " ").trim()
             surname = mrzInfo.primaryIdentifier.replace("<", " ").trim()
@@ -349,7 +361,9 @@ class PassportHandler(
         return if (allFaceImageInfos.isNotEmpty()) {
             val faceImageInfo = allFaceImageInfos.iterator().next()
             getPassportImage(faceImageInfo)
-        } else null
+        } else {
+            null
+        }
     }
 
     fun getDocumentPublicKey(): PublicKey {
@@ -369,6 +383,7 @@ class PassportHandler(
         const val DOCUMENT_TYPE_OTHER = "O"
 
         private lateinit var instance: PassportHandler
+
         fun getInstance(activity: Activity): PassportHandler {
             if (!::instance.isInitialized) {
                 instance = PassportHandler(activity)

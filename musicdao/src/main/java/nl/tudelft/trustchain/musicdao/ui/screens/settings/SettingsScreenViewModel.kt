@@ -14,17 +14,21 @@ import java.nio.file.Paths
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsScreenViewModel @Inject constructor(
-    private val batchPublisher: BatchPublisher,
-    private val cachePath: CachePath,
-    private val androidURIController: AndroidURIController
-) : ViewModel() {
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun publishBatch(uri: Uri, context: Context) {
-        Log.d("MusicDao", "publishBatch: $uri")
-        val path = Paths.get("${cachePath.getPath()}/batch_publish/output.csv")
-        val output = androidURIController.copyIntoCache(uri, context, path) ?: return
-        batchPublisher.publish(output)
+class SettingsScreenViewModel
+    @Inject
+    constructor(
+        private val batchPublisher: BatchPublisher,
+        private val cachePath: CachePath,
+        private val androidURIController: AndroidURIController
+    ) : ViewModel() {
+        @RequiresApi(Build.VERSION_CODES.O)
+        suspend fun publishBatch(
+            uri: Uri,
+            context: Context
+        ) {
+            Log.d("MusicDao", "publishBatch: $uri")
+            val path = Paths.get("${cachePath.getPath()}/batch_publish/output.csv")
+            val output = androidURIController.copyIntoCache(uri, context, path) ?: return
+            batchPublisher.publish(output)
+        }
     }
-}

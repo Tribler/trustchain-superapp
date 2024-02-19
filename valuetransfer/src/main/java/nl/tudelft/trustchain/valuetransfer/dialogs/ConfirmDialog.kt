@@ -11,10 +11,8 @@ class ConfirmDialog(
     private val title: String,
     private val callback: ((BottomSheetDialog) -> Unit)
 ) : VTDialogFragment() {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-
             val bottomSheetDialog =
                 BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val binding = DialogConfirmBinding.inflate(layoutInflater)

@@ -29,7 +29,10 @@ class MessagePayload constructor(
     }
 
     companion object Deserializer : Deserializable<MessagePayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<MessagePayload, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<MessagePayload, Int> {
             var localOffset = offset
             val (id, idSize) = deserializeVarLen(buffer, localOffset)
             localOffset += idSize

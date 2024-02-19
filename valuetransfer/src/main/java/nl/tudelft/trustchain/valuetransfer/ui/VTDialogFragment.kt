@@ -17,7 +17,6 @@ import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.passport.PassportHandler
 
 abstract class VTDialogFragment : DialogFragment() {
-
     val parentActivity: ValueTransferMainActivity by lazy {
         requireActivity() as ValueTransferMainActivity
     }
@@ -89,9 +88,15 @@ abstract class VTDialogFragment : DialogFragment() {
         parentActivity.appPreferences()
     }
 
-    open fun onReceive(type: String, data: Any? = null) {}
+    open fun onReceive(
+        type: String,
+        data: Any? = null
+    ) {}
 
-    open fun onError(type: String, data: Any? = null) {}
+    open fun onError(
+        type: String,
+        data: Any? = null
+    ) {}
 
     companion object {
         const val RECEIVE_TYPE_NFC = "type_nfc"

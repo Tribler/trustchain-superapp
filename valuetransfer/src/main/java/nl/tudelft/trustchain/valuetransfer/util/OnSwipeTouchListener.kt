@@ -11,11 +11,13 @@ import kotlin.math.abs
 internal open class OnSwipeTouchListener(
     context: Context?
 ) : OnTouchListener {
-
     private val gestureDetector: GestureDetector
     var scaleFactor = 1.0f
 
-    override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+    override fun onTouch(
+        view: View,
+        motionEvent: MotionEvent
+    ): Boolean {
         if (scaleFactor == 1.0f) {
             gestureDetector.onTouchEvent(motionEvent)
         }
@@ -23,8 +25,9 @@ internal open class OnSwipeTouchListener(
     }
 
     private inner class GestureListener : SimpleOnGestureListener() {
-        private val SWIPE_THRESHOLD: Int = 100
-        private val SWIPE_VELOCITY_THRESHOLD: Int = 100
+        private val swipeThreshold: Int = 100
+        private val swipeVelocityThreshold: Int = 100
+
         override fun onDown(e: MotionEvent): Boolean {
             return true
         }
@@ -55,7 +58,7 @@ internal open class OnSwipeTouchListener(
                 val diffY = e2.y - e1!!.y
                 val diffX = e2.x - e1.x
                 if (abs(diffX) > abs(diffY)) {
-                    if (abs(diffX) > SWIPE_THRESHOLD && abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (abs(diffX) > swipeThreshold && abs(velocityX) > swipeVelocityThreshold) {
                         if (diffX > 0) {
                             onSwipeRight()
                         } else {
@@ -63,7 +66,7 @@ internal open class OnSwipeTouchListener(
                         }
                     }
                 } else {
-                    if (abs(diffY) > SWIPE_THRESHOLD && abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (abs(diffY) > swipeThreshold && abs(velocityY) > swipeVelocityThreshold) {
                         if (diffY < 0) {
                             onSwipeUp()
                         } else {
@@ -79,12 +82,19 @@ internal open class OnSwipeTouchListener(
     }
 
     open fun onSwipeRight() {}
+
     open fun onSwipeLeft() {}
+
     open fun onSwipeUp() {}
+
     open fun onSwipeDown() {}
+
     open fun onSingleTap() {}
+
     private fun onClick() {}
+
     private fun onDoubleClick() {}
+
     private fun onLongClick() {}
 
     init {

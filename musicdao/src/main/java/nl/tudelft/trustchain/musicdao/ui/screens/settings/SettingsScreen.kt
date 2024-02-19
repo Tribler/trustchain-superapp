@@ -22,7 +22,6 @@ import kotlinx.coroutines.launch
 @Composable
 @RequiresApi(Build.VERSION_CODES.O)
 fun SettingsScreen(settingsScreenViewModel: SettingsScreenViewModel) {
-
     val coroutine = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -46,9 +45,10 @@ fun SettingsScreen(settingsScreenViewModel: SettingsScreenViewModel) {
     Column {
         ListItem(
             text = { Text(text = "Batch Publish") },
-            modifier = Modifier.clickable {
-                openFilePickerDialog()
-            }
+            modifier =
+                Modifier.clickable {
+                    openFilePickerDialog()
+                }
         )
     }
 }

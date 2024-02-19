@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -33,14 +32,16 @@ import java.io.File
  * create an instance of this fragment.
  */
 class DAOCreateFragment : BaseFragment() {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentDaoWalletLoadFormBinding? = null
     private val binding get() = _binding!!
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-
         handleFirstTimeUsage()
         initListeners()
 
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
     }
 
@@ -67,29 +68,31 @@ class DAOCreateFragment : BaseFragment() {
 
         binding.generateNewSeed.setOnClickListener {
             val networkRadioGroup = binding.bitcoinNetworksLayout.bitcoinNetworkRadioGroup
-            val params = when (networkRadioGroup.checkedRadioButtonId) {
-                R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
-                R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
-                R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
-                else -> {
-                    Toast.makeText(
-                        this.requireContext(),
-                        "Please select a bitcoin network first",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setOnClickListener
+            val params =
+                when (networkRadioGroup.checkedRadioButtonId) {
+                    R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
+                    R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
+                    R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
+                    else -> {
+                        Toast.makeText(
+                            this.requireContext(),
+                            "Please select a bitcoin network first",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@setOnClickListener
+                    }
                 }
-            }
             val seed = WalletManager.generateRandomDeterministicSeed(params)
             binding.seedWordInput.setText(seed.seed)
             binding.seedNumberInput.setText(seed.creationTime.toString())
         }
 
         binding.loadDebugSeed.setOnClickListener {
-            val seed = SerializedDeterministicKey(
-                "spell seat genius horn argue family steel buyer spawn chef guard vast",
-                1583488954L
-            )
+            val seed =
+                SerializedDeterministicKey(
+                    "spell seat genius horn argue family steel buyer spawn chef guard vast",
+                    1583488954L
+                )
             binding.seedWordInput.setText(seed.seed)
             binding.seedNumberInput.setText(seed.creationTime.toString())
         }
@@ -100,19 +103,20 @@ class DAOCreateFragment : BaseFragment() {
         val creationNumberText = binding.seedNumberInput.text.toString()
         val privateKeys = binding.privateKeysInput.text.lines()
         val networkRadioGroup = binding.bitcoinNetworksLayout.bitcoinNetworkRadioGroup
-        val params = when (networkRadioGroup.checkedRadioButtonId) {
-            R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
-            R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
-            R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
-            else -> {
-                Toast.makeText(
-                    this.requireContext(),
-                    "Please select a bitcoin network first",
-                    Toast.LENGTH_SHORT
-                ).show()
-                return
+        val params =
+            when (networkRadioGroup.checkedRadioButtonId) {
+                R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
+                R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
+                R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
+                else -> {
+                    Toast.makeText(
+                        this.requireContext(),
+                        "Please select a bitcoin network first",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return
+                }
             }
-        }
 
         // Simple validation guards.
         if (seed.isEmpty() || creationNumberText.isEmpty()) {
@@ -151,19 +155,22 @@ class DAOCreateFragment : BaseFragment() {
 
         val creationNumber = creationNumberText.toLong()
 
-        val config = when (privateKeys.isEmpty() || privateKeys[0] == "") {
-            true -> WalletManagerConfiguration(
-                params,
-                SerializedDeterministicKey(seed, creationNumber),
-                null
-            )
+        val config =
+            when (privateKeys.isEmpty() || privateKeys[0] == "") {
+                true ->
+                    WalletManagerConfiguration(
+                        params,
+                        SerializedDeterministicKey(seed, creationNumber),
+                        null
+                    )
 
-            false -> WalletManagerConfiguration(
-                params,
-                SerializedDeterministicKey(seed, creationNumber),
-                AddressPrivateKeyPair("", privateKeys[0])
-            )
-        }
+                false ->
+                    WalletManagerConfiguration(
+                        params,
+                        SerializedDeterministicKey(seed, creationNumber),
+                        AddressPrivateKeyPair("", privateKeys[0])
+                    )
+            }
 
         // Rename all stored wallet files that are currently stored on the device
         // Effectively the same as deleting, but safer as they are not lost
@@ -226,30 +233,36 @@ class DAOCreateFragment : BaseFragment() {
      * This function "hides" stored wallets by renaming them.
      */
     private fun hideStoredWallets() {
-        val vWalletFileMainNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$MAIN_NET_WALLET_NAME.wallet"
-        )
-        val vChainFileMainNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$MAIN_NET_WALLET_NAME.spvchain"
-        )
-        val vWalletFileTestNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$TEST_NET_WALLET_NAME.wallet"
-        )
-        val vChainFileTestNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$TEST_NET_WALLET_NAME.spvchain"
-        )
-        val vWalletFileRegTest = File(
-            this.requireContext().applicationContext.filesDir,
-            "$REG_TEST_WALLET_NAME.wallet"
-        )
-        val vChainFileRegTest = File(
-            this.requireContext().applicationContext.filesDir,
-            "$REG_TEST_WALLET_NAME.spvchain"
-        )
+        val vWalletFileMainNet =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$MAIN_NET_WALLET_NAME.wallet"
+            )
+        val vChainFileMainNet =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$MAIN_NET_WALLET_NAME.spvchain"
+            )
+        val vWalletFileTestNet =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$TEST_NET_WALLET_NAME.wallet"
+            )
+        val vChainFileTestNet =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$TEST_NET_WALLET_NAME.spvchain"
+            )
+        val vWalletFileRegTest =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$REG_TEST_WALLET_NAME.wallet"
+            )
+        val vChainFileRegTest =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$REG_TEST_WALLET_NAME.spvchain"
+            )
 
         val fileSuffix = System.currentTimeMillis()
 

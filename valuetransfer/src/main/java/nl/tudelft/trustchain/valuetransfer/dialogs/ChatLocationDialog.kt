@@ -31,7 +31,11 @@ import java.util.*
 class ChatLocationDialog(
     val publicKey: PublicKey,
     private val location: Location? = null
-) : VTDialogFragment(), OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMapClickListener, Toolbar.OnMenuItemClickListener {
+) : VTDialogFragment(),
+    OnMapReadyCallback,
+    View.OnClickListener,
+    GoogleMap.OnMapClickListener,
+    Toolbar.OnMenuItemClickListener {
     private val contact: Contact? by lazy {
         getContactStore().getContactFromPublicKey(publicKey)
     }
@@ -59,13 +63,17 @@ class ChatLocationDialog(
             bottomSheetDialog = Dialog(requireContext(), R.style.FullscreenDialog)
 
             @Suppress("DEPRECATION")
-            bottomSheetDialog.window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
-            val binding = DialogContactChatLocationBinding.inflate(it.layoutInflater)
+            bottomSheetDialog.window?.setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+            )
+            val binding = DialogContactChatLocationBinding.inflate(layoutInflater, null, false)
             val view = binding.root
 
             dialogView = view
 
             // Set action bar
+            @Suppress("DEPRECATION")
             setHasOptionsMenu(true)
             actionBar = binding.tbActionBar
             actionBar.inflateMenu(R.menu.contact_chat_location)
@@ -79,25 +87,35 @@ class ChatLocationDialog(
 
             if (location != null) {
                 titleView.text = getString(R.string.text_location)
-                subTitleView.text = getAddress(location.latitude, location.longitude) ?: resources.getString(R.string.text_address_not_found)
+                subTitleView.text = getAddress(
+                    location.latitude,
+                    location.longitude
+                ) ?: resources.getString(R.string.text_address_not_found)
             } else {
-                titleView.text = resources.getString(R.string.dialog_title_contact_chat_send_location)
-                subTitleView.text = resources.getString(
-                    R.string.text_to_contact,
-                    contact?.name ?: resources.getString(R.string.text_unknown_contact_lowercase)
-                )
+                titleView.text =
+                    resources.getString(R.string.dialog_title_contact_chat_send_location)
+                subTitleView.text =
+                    resources.getString(
+                        R.string.text_to_contact,
+                        contact?.name
+                            ?: resources.getString(R.string.text_unknown_contact_lowercase)
+                    )
                 resources.getString(R.string.text_unknown_contact)
             }
 
-            mapFragment = childFragmentManager.findFragmentById(R.id.fragmentMap) as SupportMapFragment
+            mapFragment =
+                childFragmentManager.findFragmentById(R.id.fragmentMap) as SupportMapFragment
             mapFragment.getMapAsync(this)
 
-            locationSendView = binding.llSendLocation.apply {
-                setOnClickListener(this@ChatLocationDialog)
-            }
-            openDirectionsView = binding.llOpenDirections.apply {
-                setOnClickListener(this@ChatLocationDialog)
-            }
+            locationSendView =
+                binding.llSendLocation.apply {
+                    setOnClickListener(this@ChatLocationDialog)
+                }
+
+            openDirectionsView =
+                binding.llOpenDirections.apply {
+                    setOnClickListener(this@ChatLocationDialog)
+                }
 
             locationTypeSend = binding.tvLocationTypeSend
             locationNameSend = binding.tvLocationNameSend
@@ -106,7 +124,15 @@ class ChatLocationDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+        }
+            ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+    }
+
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
+        super.onViewCreated(view, savedInstanceState)
     }
 
     @Suppress("Deprecation")
@@ -120,13 +146,15 @@ class ChatLocationDialog(
                 }.let {
                     getPeerChatCommunity().sendLocation(
                         it,
-                        getAddress(it.latitude, it.longitude) ?: resources.getString(R.string.text_address_not_found),
+                        getAddress(it.latitude, it.longitude)
+                            ?: resources.getString(R.string.text_address_not_found),
                         publicKey,
                         getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
                     )
                     bottomSheetDialog.dismiss()
                 }
             }
+
             R.id.llOpenDirections -> {
                 val uri = Uri.parse("geo:0,0?q=${location!!.latitude},${location.longitude}()")
                 val mapIntent = Intent(Intent.ACTION_VIEW, uri)
@@ -136,25 +164,31 @@ class ChatLocationDialog(
         }
     }
 
-    override fun onMenuItemClick(item: MenuItem) = when (item.itemId) {
-        R.id.actionShowNormalMap -> {
-            map.mapType = GoogleMap.MAP_TYPE_NORMAL
-            true
+    @Suppress("DEPRECATION")
+    override fun onMenuItemClick(item: MenuItem) =
+        when (item.itemId) {
+            R.id.actionShowNormalMap -> {
+                map.mapType = GoogleMap.MAP_TYPE_NORMAL
+                true
+            }
+
+            R.id.actionShowHybridMap -> {
+                map.mapType = GoogleMap.MAP_TYPE_HYBRID
+                true
+            }
+
+            R.id.actionShowSatelliteMap -> {
+                map.mapType = GoogleMap.MAP_TYPE_SATELLITE
+                true
+            }
+
+            R.id.actionShowTerrainMap -> {
+                map.mapType = GoogleMap.MAP_TYPE_TERRAIN
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
         }
-        R.id.actionShowHybridMap -> {
-            map.mapType = GoogleMap.MAP_TYPE_HYBRID
-            true
-        }
-        R.id.actionShowSatelliteMap -> {
-            map.mapType = GoogleMap.MAP_TYPE_SATELLITE
-            true
-        }
-        R.id.actionShowTerrainMap -> {
-            map.mapType = GoogleMap.MAP_TYPE_TERRAIN
-            true
-        }
-        else -> super.onOptionsItemSelected(item)
-    }
 
     @Suppress("Deprecation")
     override fun onMapReady(googleMap: GoogleMap) {
@@ -179,7 +213,8 @@ class ChatLocationDialog(
                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
 
                     locationTypeSend.text = resources.getString(R.string.text_send_current_location)
-                    locationNameSend.text = getAddress(it.latitude, it.longitude) ?: resources.getString(R.string.text_address_not_found)
+                    locationNameSend.text = getAddress(it.latitude, it.longitude)
+                        ?: resources.getString(R.string.text_address_not_found)
 
                     mapInitialized = true
                 }
@@ -197,16 +232,22 @@ class ChatLocationDialog(
         addMarkerToMap(point.latitude, point.longitude)
     }
 
-    private fun addMarkerToMap(latitude: Double, longitude: Double, move: Boolean = false) {
+    private fun addMarkerToMap(
+        latitude: Double,
+        longitude: Double,
+        move: Boolean = false
+    ) {
         LatLng(latitude, longitude).let { latLng ->
             mapMarker = map.addMarker(MarkerOptions().position(latLng))
 
-            if (move)
+            if (move) {
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.cameraPosition.zoom))
+            }
 
             locationSendView.isVisible = location == null
             locationTypeSend.text = resources.getString(R.string.text_send_this_location)
-            locationNameSend.text = getAddress(latitude, longitude) ?: resources.getString(R.string.text_address_not_found)
+            locationNameSend.text = getAddress(latitude, longitude)
+                ?: resources.getString(R.string.text_address_not_found)
         }
     }
 
@@ -220,16 +261,23 @@ class ChatLocationDialog(
 
             if (map.isMyLocationEnabled) {
                 locationTypeSend.text = resources.getString(R.string.text_send_current_location)
-                locationNameSend.text = getAddress(map.myLocation.latitude, map.myLocation.longitude) ?: resources.getString(R.string.text_address_not_found)
+                locationNameSend.text = getAddress(
+                    map.myLocation.latitude,
+                    map.myLocation.longitude
+                ) ?: resources.getString(R.string.text_address_not_found)
             }
 
             return@setOnMarkerClickListener true
         }
     }
 
-    private fun getAddress(latitude: Double, longitude: Double): String? {
+    private fun getAddress(
+        latitude: Double,
+        longitude: Double
+    ): String? {
         return try {
             val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            @Suppress("DEPRECATION")
             geocoder.getFromLocation(
                 latitude,
                 longitude,
@@ -245,16 +293,22 @@ class ChatLocationDialog(
 
     @Suppress("MissingPermission")
     private fun enableMyLocation() {
+        @Suppress("DEPRECATION")
         if (isPermissionGranted()) {
             try {
                 map.isMyLocationEnabled = true
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        } else requestPermissions(
-            arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION),
-            PERMISSION_LOCATION
-        )
+        } else {
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ),
+                PERMISSION_LOCATION
+            )
+        }
     }
 
     private fun isPermissionGranted(): Boolean {

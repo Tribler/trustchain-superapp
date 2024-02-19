@@ -15,7 +15,10 @@ class ContactImageRequestPayload(
     }
 
     companion object Deserializer : Deserializable<ContactImageRequestPayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<ContactImageRequestPayload, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<ContactImageRequestPayload, Int> {
             var localOffset = offset
             val (sender, senderSize) = deserializeVarLen(buffer, localOffset)
             localOffset += senderSize

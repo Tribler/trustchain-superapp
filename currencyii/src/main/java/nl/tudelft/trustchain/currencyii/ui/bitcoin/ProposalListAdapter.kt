@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.currencyii.ui.bitcoin
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.TextView
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.currencyii.CoinCommunity
@@ -21,13 +20,17 @@ class ProposalListAdapter(
     private val context: BaseFragment,
     private val items: List<TrustChainBlock>
 ) : BaseAdapter() {
-
-    override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
-        val binding = if (p1 != null) {
-            ProposalRowDataBinding.bind(p1)
-        } else {
-            ProposalRowDataBinding.inflate(context.layoutInflater)
-        }
+    override fun getView(
+        p0: Int,
+        p1: View?,
+        p2: ViewGroup?
+    ): View {
+        val binding =
+            if (p1 != null) {
+                ProposalRowDataBinding.bind(p1)
+            } else {
+                ProposalRowDataBinding.inflate(context.layoutInflater)
+            }
         val view = binding.root
 
         val block = items[p0]
@@ -49,21 +52,24 @@ class ProposalListAdapter(
         if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
             val data = SWTransferFundsAskTransactionData(block.transaction).getData()
             // Get favor votes
-            val favorVotes = ArrayList(
-                context.getCoinCommunity()
-                    .fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)
-            ).map { it.SW_BITCOIN_PK }
+            val favorVotes =
+                ArrayList(
+                    context.getCoinCommunity()
+                        .fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)
+                ).map { it.SW_BITCOIN_PK }
             // Get against votes
-            val negativeVotes = ArrayList(
-                context.getCoinCommunity().fetchNegativeProposalResponses(
-                    data.SW_UNIQUE_ID,
-                    data.SW_UNIQUE_PROPOSAL_ID
-                )
-            ).map { it.SW_BITCOIN_PK }
+            val negativeVotes =
+                ArrayList(
+                    context.getCoinCommunity().fetchNegativeProposalResponses(
+                        data.SW_UNIQUE_ID,
+                        data.SW_UNIQUE_PROPOSAL_ID
+                    )
+                ).map { it.SW_BITCOIN_PK }
 
             // Check if I voted
             val myPublicBitcoinKey = walletManager.protocolECKey().publicKeyAsHex
-            if (favorVotes.contains(myPublicBitcoinKey) || negativeVotes.contains(
+            if (favorVotes.contains(myPublicBitcoinKey) ||
+                negativeVotes.contains(
                     myPublicBitcoinKey
                 )
             ) {
@@ -75,9 +81,10 @@ class ProposalListAdapter(
                 view.setBackgroundResource(R.drawable.border)
             }
 
-            val previousTransaction = CTransaction().deserialize(
-                data.SW_TRANSACTION_SERIALIZED.hexToBytes()
-            )
+            val previousTransaction =
+                CTransaction().deserialize(
+                    data.SW_TRANSACTION_SERIALIZED.hexToBytes()
+                )
 
             val previousMultiSigOutput =
                 previousTransaction.vout.filter { it.scriptPubKey.size == 35 }[0]
@@ -96,21 +103,24 @@ class ProposalListAdapter(
         } else if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
             val data = SWSignatureAskTransactionData(block.transaction).getData()
             // Get favor votes
-            val favorVotes = ArrayList(
-                context.getCoinCommunity()
-                    .fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)
-            ).map { it.SW_BITCOIN_PK }
+            val favorVotes =
+                ArrayList(
+                    context.getCoinCommunity()
+                        .fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)
+                ).map { it.SW_BITCOIN_PK }
             // Get against votes
-            val negativeVotes = ArrayList(
-                context.getCoinCommunity().fetchNegativeProposalResponses(
-                    data.SW_UNIQUE_ID,
-                    data.SW_UNIQUE_PROPOSAL_ID
-                )
-            ).map { it.SW_BITCOIN_PK }
+            val negativeVotes =
+                ArrayList(
+                    context.getCoinCommunity().fetchNegativeProposalResponses(
+                        data.SW_UNIQUE_ID,
+                        data.SW_UNIQUE_PROPOSAL_ID
+                    )
+                ).map { it.SW_BITCOIN_PK }
 
             // Check if I voted
             val myPublicBitcoinKey = walletManager.protocolECKey().publicKeyAsHex
-            if (favorVotes.contains(myPublicBitcoinKey) || negativeVotes.contains(
+            if (favorVotes.contains(myPublicBitcoinKey) ||
+                negativeVotes.contains(
                     myPublicBitcoinKey
                 )
             ) {
@@ -132,7 +142,6 @@ class ProposalListAdapter(
         }
 
         return view
-
     }
 
     private fun hideTransferProposalComponents(view: View) {
@@ -151,7 +160,6 @@ class ProposalListAdapter(
         } catch (_: Exception) {
             // View no longer visible.
         }
-
     }
 
     override fun getItem(p0: Int): Any {

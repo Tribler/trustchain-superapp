@@ -33,7 +33,7 @@ import org.bitcoinj.core.*
  * A user can here see the (up/down/undecided)votes and send a vote himself
  */
 class VotesFragment : BaseFragment(R.layout.fragment_votes) {
-
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentVotesBinding? = null
     private val binding get() = _binding!!
 
@@ -68,7 +68,10 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     /**
      * When the view is created it puts the correct data on it.
      */
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         tabsAdapter = TabsAdapter(this, voters)
 
         title = binding.title
@@ -119,12 +122,13 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             lifecycleScope.launch {
                 trustchain.crawlChain(peer)
             }
-            val crawlResult = trustchain
-                .getChainByUser(peer.publicKey.keyToBin())
-                .filter {
-                    it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
-                        it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
-                }
+            val crawlResult =
+                trustchain
+                    .getChainByUser(peer.publicKey.keyToBin())
+                    .filter {
+                        it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
+                            it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
+                    }
             allBlocks = allBlocks + crawlResult
         }
         for (block in allBlocks) {
@@ -144,6 +148,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     /**
      * The method for setting the data for join requests
      */
+    @OptIn(DelicateCoroutinesApi::class)
     private fun signatureAskBlockVotes(blockId: String) {
         val walletManager = WalletManagerAndroid.getInstance()
         val myPublicBitcoinKey = walletManager.protocolECKey().publicKeyAsHex
@@ -156,8 +161,9 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val walletId = data.SW_UNIQUE_ID
 
         // Get information about the shared wallet
-        val sw = getCoinCommunity().discoverSharedWallets()
-            .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
+        val sw =
+            getCoinCommunity().discoverSharedWallets()
+                .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
         // Get the id of the person that wants to join
@@ -254,6 +260,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      * The method for setting the data for transfer funds requests
      * @param blockId
      */
+    @OptIn(DelicateCoroutinesApi::class)
     private fun transferFundsAskBlockVotes(blockId: String) {
         val walletManager = WalletManagerAndroid.getInstance()
         val myPublicBitcoinKey = walletManager.protocolECKey().publicKeyAsHex
@@ -267,8 +274,9 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val priceString = Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT).toFriendlyString()
 
         // Get information about the shared wallet
-        val sw = getCoinCommunity().discoverSharedWallets()
-            .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
+        val sw =
+            getCoinCommunity().discoverSharedWallets()
+                .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
         // Set the voters so that they are visible in the different kind of tabs
@@ -411,18 +419,20 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      */
     private fun areVotesUpdated(data: SWSignatureAskBlockTD): Boolean {
         // Get the favor and against votes
-        val signatures = ArrayList(
-            getCoinCommunity().fetchProposalResponses(
-                data.SW_UNIQUE_ID,
-                data.SW_UNIQUE_PROPOSAL_ID
+        val signatures =
+            ArrayList(
+                getCoinCommunity().fetchProposalResponses(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                )
             )
-        )
-        val negativeSignatures = ArrayList(
-            getCoinCommunity().fetchNegativeProposalResponses(
-                data.SW_UNIQUE_ID,
-                data.SW_UNIQUE_PROPOSAL_ID
+        val negativeSignatures =
+            ArrayList(
+                getCoinCommunity().fetchNegativeProposalResponses(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                )
             )
-        )
 
         // Recalculate the signatures to the PKs
         val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
@@ -439,18 +449,20 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      */
     private fun areVotesUpdated(data: SWTransferFundsAskBlockTD): Boolean {
         // Get the favor and against votes
-        val signatures = ArrayList(
-            getCoinCommunity().fetchProposalResponses(
-                data.SW_UNIQUE_ID,
-                data.SW_UNIQUE_PROPOSAL_ID
+        val signatures =
+            ArrayList(
+                getCoinCommunity().fetchProposalResponses(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                )
             )
-        )
-        val negativeSignatures = ArrayList(
-            getCoinCommunity().fetchNegativeProposalResponses(
-                data.SW_UNIQUE_ID,
-                data.SW_UNIQUE_PROPOSAL_ID
+        val negativeSignatures =
+            ArrayList(
+                getCoinCommunity().fetchNegativeProposalResponses(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                )
             )
-        )
 
         // Recalculate the signatures to the PKs
         val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
@@ -480,18 +492,20 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         data: SWSignatureAskBlockTD
     ) {
         // Get the favor and against votes
-        val signatures = ArrayList(
-            getCoinCommunity().fetchProposalResponses(
-                data.SW_UNIQUE_ID,
-                data.SW_UNIQUE_PROPOSAL_ID
+        val signatures =
+            ArrayList(
+                getCoinCommunity().fetchProposalResponses(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                )
             )
-        )
-        val negativeSignatures = ArrayList(
-            getCoinCommunity().fetchNegativeProposalResponses(
-                data.SW_UNIQUE_ID,
-                data.SW_UNIQUE_PROPOSAL_ID
+        val negativeSignatures =
+            ArrayList(
+                getCoinCommunity().fetchNegativeProposalResponses(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                )
             )
-        )
 
         // Recalculate the signatures to the PKs
         val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
@@ -505,20 +519,25 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      * @param participants - All the participants of the DAO.
      * @param data - The data about the proposal block
      */
-    private fun setVoters(participants: ArrayList<String>, data: SWTransferFundsAskBlockTD) {
+    private fun setVoters(
+        participants: ArrayList<String>,
+        data: SWTransferFundsAskBlockTD
+    ) {
         // Get the favor and against votes
-        val signatures = ArrayList(
-            getCoinCommunity().fetchProposalResponses(
-                data.SW_UNIQUE_ID,
-                data.SW_UNIQUE_PROPOSAL_ID
+        val signatures =
+            ArrayList(
+                getCoinCommunity().fetchProposalResponses(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                )
             )
-        )
-        val negativeSignatures = ArrayList(
-            getCoinCommunity().fetchNegativeProposalResponses(
-                data.SW_UNIQUE_ID,
-                data.SW_UNIQUE_PROPOSAL_ID
+        val negativeSignatures =
+            ArrayList(
+                getCoinCommunity().fetchNegativeProposalResponses(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                )
             )
-        )
 
         // Recalculate the signatures to the PKs
         val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })

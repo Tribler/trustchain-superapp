@@ -1,10 +1,10 @@
-package nl.tudelft.trustchain.FOC
+package nl.tudelft.trustchain.foc
 
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
-import nl.tudelft.trustchain.FOC.community.FOCCommunityBase
-import nl.tudelft.trustchain.FOC.community.FOCMessage
+import nl.tudelft.trustchain.foc.community.FOCCommunityBase
+import nl.tudelft.trustchain.foc.community.FOCMessage
 import java.util.*
 
 @Suppress("deprecation")
@@ -12,7 +12,6 @@ import java.util.*
 class FOCCommunityMock(
     override val serviceId: String
 ) : FOCCommunityBase() {
-
     init {
         evaProtocolEnabled = true
     }
@@ -56,7 +55,11 @@ class FOCCommunityMock(
         torrentsInformedAbout.add(torrentName)
     }
 
-    override fun sendAppRequest(torrentInfoHash: String, peer: Peer, uuid: String) {
+    override fun sendAppRequest(
+        torrentInfoHash: String,
+        peer: Peer,
+        uuid: String
+    ) {
         appRequests.add(Pair(torrentInfoHash, peer))
     }
 }

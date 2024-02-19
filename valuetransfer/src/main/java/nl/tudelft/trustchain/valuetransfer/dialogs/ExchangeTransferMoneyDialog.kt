@@ -44,7 +44,6 @@ class ExchangeTransferMoneyDialog(
     private val isTransfer: Boolean,
     private val message: String? = ""
 ) : VTDialogFragment() {
-
     private var selectedContact: Contact? = recipient
     private var transactionAmount = 0L
     private var transactionMessage = message ?: ""
@@ -108,7 +107,6 @@ class ExchangeTransferMoneyDialog(
             parentActivity.getBalance(true).observe(
                 this,
                 Observer {
-
                     transactionAmountView.hint =
                         if (isTransfer) resources.getString(R.string.text_balance_max, it) else ""
                 }
@@ -117,15 +115,16 @@ class ExchangeTransferMoneyDialog(
             // Select contact from dropdown, or nobody in case of an unspecified request
             if (recipient == null) {
                 lifecycleScope.launch(Dispatchers.Main) {
-                    val contacts: MutableList<Contact> = getContactStore().getContacts()
-                        .first()
-                        .filter {
-                            it.publicKey != getTrustChainCommunity().myPeer.publicKey
-                        }
-                        .sortedBy {
-                            it.name
-                        }
-                        .toMutableList()
+                    val contacts: MutableList<Contact> =
+                        getContactStore().getContacts()
+                            .first()
+                            .filter {
+                                it.publicKey != getTrustChainCommunity().myPeer.publicKey
+                            }
+                            .sortedBy {
+                                it.name
+                            }
+                            .toMutableList()
 
                     // Add option to select nobody for money request (qrcode only)
                     if (!isTransfer) {
@@ -141,96 +140,101 @@ class ExchangeTransferMoneyDialog(
                     if (!isTransfer || (isTransfer && contacts.isNotEmpty())) {
                         selectedContactView.isVisible = false
 
-                        contactAdapter = object : ArrayAdapter<Contact>(
-                            requireContext(),
-                            android.R.layout.simple_spinner_item,
-                            contacts
-                        ) {
-                            override fun getDropDownView(
-                                position: Int,
-                                convertView: View?,
-                                parent: ViewGroup
-                            ): View {
-                                return (super.getDropDownView(
-                                    position,
-                                    convertView,
-                                    parent
-                                ) as TextView).apply {
-                                    layoutParams.apply {
-                                        height =
-                                            resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                                    }
-                                    gravity = Gravity.CENTER_VERTICAL
-                                    text = contacts[position].name
-
-                                    getPeerChatStore().getContactState(contacts[position].publicKey)?.identityInfo?.let { info ->
-                                        this.setVerifiedIcon(info.isVerified)
-                                    }
-
-                                    // Create a request for an unspecified contact/person
-                                    if (!isTransfer && position == 0) {
-                                        setTextColor(
-                                            ContextCompat.getColor(
-                                                requireContext(),
-                                                R.color.dark_gray
-                                            )
-                                        )
-                                        setTypeface(null, Typeface.ITALIC)
-                                    } else {
-                                        setTextColor(
-                                            ContextCompat.getColor(
-                                                requireContext(),
-                                                R.color.black
-                                            )
-                                        )
-                                    }
-
-                                    // Currently selected item background in dropdown
-                                    background =
-                                        if (position == contactSpinner.selectedItemPosition) {
-                                            ColorDrawable(Color.LTGRAY)
-                                        } else {
-                                            ColorDrawable(Color.WHITE)
+                        contactAdapter =
+                            object : ArrayAdapter<Contact>(
+                                requireContext(),
+                                android.R.layout.simple_spinner_item,
+                                contacts
+                            ) {
+                                override fun getDropDownView(
+                                    position: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup
+                                ): View {
+                                    return (
+                                        super.getDropDownView(
+                                            position,
+                                            convertView,
+                                            parent
+                                        ) as TextView
+                                    ).apply {
+                                        layoutParams.apply {
+                                            height =
+                                                resources.getDimensionPixelSize(R.dimen.textViewHeight)
                                         }
-                                }
-                            }
+                                        gravity = Gravity.CENTER_VERTICAL
+                                        text = contacts[position].name
 
-                            override fun getView(
-                                position: Int,
-                                convertView: View?,
-                                parent: ViewGroup
-                            ): View {
-                                return (super.getView(
-                                    position,
-                                    convertView,
-                                    parent
-                                ) as TextView).apply {
-                                    text = contacts[position].name
+                                        getPeerChatStore().getContactState(contacts[position].publicKey)?.identityInfo?.let { info ->
+                                            this.setVerifiedIcon(info.isVerified)
+                                        }
 
-                                    getPeerChatStore().getContactState(contacts[position].publicKey)?.identityInfo?.let { info ->
-                                        this.setVerifiedIcon(info.isVerified)
-                                    }
-
-                                    // No contact selected option for money request
-                                    if (!isTransfer && position == 0) {
-                                        setTextColor(
-                                            ContextCompat.getColor(
-                                                requireContext(),
-                                                R.color.dark_gray
+                                        // Create a request for an unspecified contact/person
+                                        if (!isTransfer && position == 0) {
+                                            setTextColor(
+                                                ContextCompat.getColor(
+                                                    requireContext(),
+                                                    R.color.dark_gray
+                                                )
                                             )
-                                        )
-                                        setTypeface(null, Typeface.ITALIC)
-                                    } else {
-                                        setTextColor(
-                                            ContextCompat.getColor(
-                                                requireContext(),
-                                                R.color.black
+                                            setTypeface(null, Typeface.ITALIC)
+                                        } else {
+                                            setTextColor(
+                                                ContextCompat.getColor(
+                                                    requireContext(),
+                                                    R.color.black
+                                                )
                                             )
-                                        )
+                                        }
+
+                                        // Currently selected item background in dropdown
+                                        background =
+                                            if (position == contactSpinner.selectedItemPosition) {
+                                                ColorDrawable(Color.LTGRAY)
+                                            } else {
+                                                ColorDrawable(Color.WHITE)
+                                            }
                                     }
                                 }
+
+                                override fun getView(
+                                    position: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup
+                                ): View {
+                                    return (
+                                        super.getView(
+                                            position,
+                                            convertView,
+                                            parent
+                                        ) as TextView
+                                    ).apply {
+                                        text = contacts[position].name
+
+                                        getPeerChatStore().getContactState(contacts[position].publicKey)?.identityInfo?.let { info ->
+                                            this.setVerifiedIcon(info.isVerified)
+                                        }
+
+                                        // No contact selected option for money request
+                                        if (!isTransfer && position == 0) {
+                                            setTextColor(
+                                                ContextCompat.getColor(
+                                                    requireContext(),
+                                                    R.color.dark_gray
+                                                )
+                                            )
+                                            setTypeface(null, Typeface.ITALIC)
+                                        } else {
+                                            setTextColor(
+                                                ContextCompat.getColor(
+                                                    requireContext(),
+                                                    R.color.black
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
                             }
-                        }
                         contactSpinner.adapter = contactAdapter
 
                         // Select item in spinner in case the contact is pre-assigned
@@ -300,7 +304,6 @@ class ExchangeTransferMoneyDialog(
             transferSlider.onSlideCompleteListener =
                 object : SlideToActView.OnSlideCompleteListener {
                     override fun onSlideComplete(view: SlideToActView) {
-
                         @Suppress("DEPRECATION")
                         Handler().postDelayed(
                             {
@@ -319,10 +322,11 @@ class ExchangeTransferMoneyDialog(
                                     }
 
                                     // Create proposal block to the recipient
-                                    val block = getTransactionRepository().sendTransferProposalSync(
-                                        selectedContact!!.publicKey.keyToBin(),
-                                        transactionAmount
-                                    )
+                                    val block =
+                                        getTransactionRepository().sendTransferProposalSync(
+                                            selectedContact!!.publicKey.keyToBin(),
+                                            transactionAmount
+                                        )
                                     if (block == null) {
                                         parentActivity.displayToast(
                                             requireContext(),
@@ -367,12 +371,13 @@ class ExchangeTransferMoneyDialog(
                     override fun onSlideComplete(view: SlideToActView) {
                         requestSlider.text = resources.getString(R.string.text_requesting)
 
-                        val transferRequest = TransferRequest(
-                            transactionMessage,
-                            transactionAmount,
-                            getTrustChainCommunity().myPeer.publicKey,
-                            selectedContact!!.publicKey
-                        )
+                        val transferRequest =
+                            TransferRequest(
+                                transactionMessage,
+                                transactionAmount,
+                                getTrustChainCommunity().myPeer.publicKey,
+                                selectedContact!!.publicKey
+                            )
 
                         @Suppress("DEPRECATION")
                         Handler().postDelayed(
@@ -409,16 +414,19 @@ class ExchangeTransferMoneyDialog(
                     override fun onSlideComplete(view: SlideToActView) {
                         view.closeKeyboard(requireContext())
 
-                        val map = mapOf(
-                            QRScanController.KEY_PUBLIC_KEY to getTrustChainCommunity().myPeer.publicKey.keyToBin()
-                                .toHex(),
-                            QRScanController.KEY_AMOUNT to transactionAmount.toString(),
-                            QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.let {
-                                "${it.givenNames.getInitials()} ${it.surname}"
-                            },
-                            QRScanController.KEY_TYPE to QRScanController.VALUE_TRANSFER,
-                            QRScanController.KEY_MESSAGE to transactionMessage
-                        )
+                        val map =
+                            mapOf(
+                                QRScanController.KEY_PUBLIC_KEY to
+                                    getTrustChainCommunity().myPeer.publicKey.keyToBin()
+                                        .toHex(),
+                                QRScanController.KEY_AMOUNT to transactionAmount.toString(),
+                                QRScanController.KEY_NAME to
+                                    getIdentityStore().getIdentity()!!.content.let {
+                                        "${it.givenNames.getInitials()} ${it.surname}"
+                                    },
+                                QRScanController.KEY_TYPE to QRScanController.VALUE_TRANSFER,
+                                QRScanController.KEY_MESSAGE to transactionMessage
+                            )
 
                         bottomSheetDialog.dismiss()
                         QRCodeDialog(

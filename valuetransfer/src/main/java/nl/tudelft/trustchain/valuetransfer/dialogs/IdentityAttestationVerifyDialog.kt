@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 import android.os.Bundle
 import android.os.Handler
 import android.widget.*
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
@@ -27,7 +26,6 @@ class IdentityAttestationVerifyDialog(
     private val signature: ByteArray,
     private val authorityKey: ByteArray
 ) : VTDialogFragment() {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
@@ -91,20 +89,21 @@ class IdentityAttestationVerifyDialog(
 class IdentityAttestationVerificationResultDialog(
     private val isValid: Boolean
 ) : DialogFragment() {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = if (isValid) {
-                layoutInflater.inflate(R.layout.dialog_identity_attestation_verify_valid, null)
-            } else {
-                layoutInflater.inflate(R.layout.dialog_identity_attestation_verify_invalid, null)
-            }
+            val view =
+                if (isValid) {
+                    layoutInflater.inflate(R.layout.dialog_identity_attestation_verify_valid, null)
+                } else {
+                    layoutInflater.inflate(R.layout.dialog_identity_attestation_verify_invalid, null)
+                }
 
-            bottomSheetDialog.window!!.navigationBarColor = ContextCompat.getColor(
-                requireContext(),
-                if (isValid) R.color.colorPrimaryValueTransfer else R.color.colorRed
-            )
+            bottomSheetDialog.window!!.navigationBarColor =
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (isValid) R.color.colorPrimaryValueTransfer else R.color.colorRed
+                )
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()

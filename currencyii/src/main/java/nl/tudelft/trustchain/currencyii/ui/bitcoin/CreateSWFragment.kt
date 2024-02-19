@@ -22,11 +22,13 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * create an instance of this fragment.
  */
 class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
-
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentCreateSwBinding? = null
     private val binding get() = _binding!!
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
 
         binding.createSwWalletButton.setOnClickListener {
@@ -61,11 +63,12 @@ class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
 
         try {
             // Try to create the bitcoin DAO
-            val newDAO = getCoinCommunity().createBitcoinGenesisWallet(
-                currentEntranceFee,
-                currentThreshold,
-                requireContext()
-            )
+            val newDAO =
+                getCoinCommunity().createBitcoinGenesisWallet(
+                    currentEntranceFee,
+                    currentThreshold,
+                    requireContext()
+                )
             val walletManager = WalletManagerAndroid.getInstance()
             walletManager.addNewNonceKey(newDAO.getData().SW_UNIQUE_ID, requireContext())
 
@@ -84,10 +87,10 @@ class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
 
         activity?.runOnUiThread {
             if (progress >= 1) {
-                binding.alertLabel?.text = "DAO creation progress: completed!"
+                binding.alertLabel.text = "DAO creation progress: completed!"
             } else {
                 val progressString = "%.0f".format(progress * 100)
-                binding.alertLabel?.text = "DAO creation progress: $progressString%..."
+                binding.alertLabel.text = "DAO creation progress: $progressString%..."
             }
         }
     }

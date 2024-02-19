@@ -7,6 +7,7 @@ ktlint {
     android = true
     outputToConsole = true
     ignoreFailures = false
+    verbose = true
 }
 
 android {
@@ -46,7 +47,7 @@ android {
         viewBinding = true
     }
 
-    namespace 'nl.tudelft.trustchain.FOC'
+    namespace 'nl.tudelft.trustchain.foc'
 
 }
 

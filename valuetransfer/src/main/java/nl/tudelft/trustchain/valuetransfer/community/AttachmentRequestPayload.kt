@@ -13,7 +13,10 @@ data class AttachmentRequestPayload(
     }
 
     companion object Deserializer : Deserializable<AttachmentRequestPayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<AttachmentRequestPayload, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<AttachmentRequestPayload, Int> {
             var localOffset = offset
             val (id, idSize) = deserializeVarLen(buffer, localOffset)
             localOffset += idSize

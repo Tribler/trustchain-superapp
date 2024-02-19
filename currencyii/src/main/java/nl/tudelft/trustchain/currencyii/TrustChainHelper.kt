@@ -66,7 +66,10 @@ class TrustChainHelper(
     /**
      * Creates an agreement block to a specified proposal block, using a custom transaction.
      */
-    fun createAgreementBlock(link: TrustChainBlock, transaction: TrustChainTransaction) {
+    fun createAgreementBlock(
+        link: TrustChainBlock,
+        transaction: TrustChainTransaction
+    ) {
         trustChainCommunity.createAgreementBlock(link, transaction)
     }
 

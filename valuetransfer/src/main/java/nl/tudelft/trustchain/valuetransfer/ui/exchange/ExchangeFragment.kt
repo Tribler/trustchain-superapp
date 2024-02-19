@@ -49,6 +49,7 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
 
         adapterTransactions.registerRenderer(
@@ -61,8 +62,9 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
             while (isActive) {
                 refreshTransactions(transactionForceUpdate)
 
-                if (transactionForceUpdate)
+                if (transactionForceUpdate) {
                     verifyBalance()
+                }
 
                 transactionForceUpdate = false
 
@@ -72,7 +74,10 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
     }
 
     @SuppressLint("RestrictedApi")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
@@ -109,20 +114,23 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                             vertical = true
                         )
                     }
-                    R.id.actionTransferToContact -> ExchangeTransferMoneyDialog(
-                        null,
-                        null,
-                        true
-                    ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
-                    R.id.actionRequestTransferContact -> ExchangeTransferMoneyDialog(
-                        null,
-                        null,
-                        false
-                    ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
-                    R.id.actionRequestTransferLink -> ExchangeTransferMoneyLinkDialog(
-                        null,
-                        false
-                    ).show(parentFragmentManager, ExchangeTransferMoneyLinkDialog.TAG)
+                    R.id.actionTransferToContact ->
+                        ExchangeTransferMoneyDialog(
+                            null,
+                            null,
+                            true
+                        ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
+                    R.id.actionRequestTransferContact ->
+                        ExchangeTransferMoneyDialog(
+                            null,
+                            null,
+                            false
+                        ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
+                    R.id.actionRequestTransferLink ->
+                        ExchangeTransferMoneyLinkDialog(
+                            null,
+                            false
+                        ).show(parentFragmentManager, ExchangeTransferMoneyLinkDialog.TAG)
                 }
             }.show(parentFragmentManager, tag)
         }
@@ -148,18 +156,20 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
             binding.btnShowMoreTransactions.isVisible = false
         }
 
-        val onBalanceClickListener = View.OnClickListener {
-            binding.tvBalanceAmountTitle.isVisible = !binding.tvBalanceAmountTitle.isVisible
-            binding.tvBalanceAmount.isVisible = !binding.tvBalanceAmount.isVisible
-            binding.tvBalanceVerifiedAmount.isVisible = !binding.tvBalanceVerifiedAmount.isVisible
-        }
+        val onBalanceClickListener =
+            View.OnClickListener {
+                binding.tvBalanceAmountTitle.isVisible = !binding.tvBalanceAmountTitle.isVisible
+                binding.tvBalanceAmount.isVisible = !binding.tvBalanceAmount.isVisible
+                binding.tvBalanceVerifiedAmount.isVisible = !binding.tvBalanceVerifiedAmount.isVisible
+            }
 
         binding.ivBalanceErrorIcon.setOnClickListener(onBalanceClickListener)
 
-        val onHideBalanceClickListener = View.OnClickListener {
-            binding.llExchangeBalanceHidden.isVisible = !binding.llExchangeBalanceHidden.isVisible
-            binding.llExchangeBalance.isVisible = !binding.llExchangeBalance.isVisible
-        }
+        val onHideBalanceClickListener =
+            View.OnClickListener {
+                binding.llExchangeBalanceHidden.isVisible = !binding.llExchangeBalanceHidden.isVisible
+                binding.llExchangeBalance.isVisible = !binding.llExchangeBalance.isVisible
+            }
 
         binding.llExchangeBalance.setOnClickListener(onHideBalanceClickListener)
         binding.llExchangeBalanceHidden.setOnClickListener(onHideBalanceClickListener)
@@ -203,12 +213,22 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    @Deprecated("Deprecated in Java")
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
+        @Suppress("DEPRECATION")
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let { result ->
             try {
                 val obj = JSONObject(result)
@@ -272,11 +292,12 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         var items: List<Item>
 
         withContext(Dispatchers.IO) {
-            transactionsItems = getTransactionRepository().getLatestNTransactionsOfType(
-                trustchain,
-                transactionShowCount,
-                ALLOWED_EUROTOKEN_TYPES
-            )
+            transactionsItems =
+                getTransactionRepository().getLatestNTransactionsOfType(
+                    trustchain,
+                    transactionShowCount,
+                    ALLOWED_EUROTOKEN_TYPES
+                )
 
             items = createTransactionItems(transactionsItems)
 
@@ -337,11 +358,12 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
     }
 
     companion object {
-        private val ALLOWED_EUROTOKEN_TYPES = listOf(
-            TransactionRepository.BLOCK_TYPE_CREATE,
-            TransactionRepository.BLOCK_TYPE_DESTROY,
-            TransactionRepository.BLOCK_TYPE_TRANSFER,
-        )
+        private val ALLOWED_EUROTOKEN_TYPES =
+            listOf(
+                TransactionRepository.BLOCK_TYPE_CREATE,
+                TransactionRepository.BLOCK_TYPE_DESTROY,
+                TransactionRepository.BLOCK_TYPE_TRANSFER,
+            )
 
         private const val TRANSFER_INTENT = 0
         private const val DEPOSIT_INTENT = 1

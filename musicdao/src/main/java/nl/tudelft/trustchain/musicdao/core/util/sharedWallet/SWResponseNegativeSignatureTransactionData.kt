@@ -14,13 +14,17 @@ data class SWResponseNegativeSignatureBlockTD(
 )
 
 class SWResponseNegativeSignatureTransactionData(data: JsonObject) : SWBlockTransactionData(
-    data, CoinCommunity.SIGNATURE_AGREEMENT_NEGATIVE_BLOCK
+    data,
+    CoinCommunity.SIGNATURE_AGREEMENT_NEGATIVE_BLOCK
 ) {
     fun getData(): SWResponseNegativeSignatureBlockTD {
         return Gson().fromJson(getJsonString(), SWResponseNegativeSignatureBlockTD::class.java)
     }
 
-    fun matchesProposal(walletId: String, proposalId: String): Boolean {
+    fun matchesProposal(
+        walletId: String,
+        proposalId: String
+    ): Boolean {
         val data = getData()
         return data.SW_UNIQUE_ID == walletId && data.SW_UNIQUE_PROPOSAL_ID == proposalId
     }
@@ -41,7 +45,6 @@ class SWResponseNegativeSignatureTransactionData(data: JsonObject) : SWBlockTran
                 nonce
             )
         )
-
     )
 
     constructor(transaction: TrustChainTransaction) : this(SWUtil.parseTransaction(transaction))

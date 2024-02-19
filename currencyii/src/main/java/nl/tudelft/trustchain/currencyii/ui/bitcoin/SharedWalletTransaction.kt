@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +29,7 @@ import java.lang.NumberFormatException
  * create an instance of this fragment.
  */
 class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_transaction) {
-
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentSharedWalletTransactionBinding? = null
     private val binding get() = _binding!!
 
@@ -64,6 +63,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
 
         binding.button.setOnClickListener {
@@ -74,7 +74,6 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             }
         }
     }
-
 
     /**
      * Get the balance of the current wallet
@@ -115,22 +114,23 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             return
         }
 
-        val transferFundsData = try {
-            getCoinCommunity().proposeTransferFunds(
-                swJoinBlock,
-                bitcoinPublicKey,
-                satoshiTransferAmount
-            )
-        } catch (t: Throwable) {
-            Log.i(
-                "Coin",
-                "Proposing transfer funds failed. ${t.message ?: "No further information"}."
-            )
-            activity?.runOnUiThread {
-                binding.alertView.text = t.message ?: "Unexpected error occurred. Try again"
+        val transferFundsData =
+            try {
+                getCoinCommunity().proposeTransferFunds(
+                    swJoinBlock,
+                    bitcoinPublicKey,
+                    satoshiTransferAmount
+                )
+            } catch (t: Throwable) {
+                Log.i(
+                    "Coin",
+                    "Proposing transfer funds failed. ${t.message ?: "No further information"}."
+                )
+                activity?.runOnUiThread {
+                    binding.alertView.text = t.message ?: "Unexpected error occurred. Try again"
+                }
+                return
             }
-            return
-        }
         val context = requireContext()
         val activityRequired = requireActivity()
 
@@ -209,11 +209,12 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
 
     private fun validateTransferInput(): Boolean {
         val bitcoinPublicKey = binding.inputBitcoinPublicKey.text.toString()
-        val satoshiTransferAmount: Long = try {
-            binding.inputSatoshiAmount.text.toString().toLong()
-        } catch (e: NumberFormatException) {
-            0
-        }
+        val satoshiTransferAmount: Long =
+            try {
+                binding.inputSatoshiAmount.text.toString().toLong()
+            } catch (e: NumberFormatException) {
+                0
+            }
         return bitcoinPublicKey != "" && satoshiTransferAmount >= SWUtil.MINIMAL_TRANSACTION_AMOUNT && blockHash != null
     }
 

@@ -14,15 +14,16 @@ data class SongEntity(
         return Song(
             title = title,
             artist = artist,
-            file = file.let {
-                File(it).let {
-                    if (it.exists()) {
-                        it
-                    } else {
-                        null
+            file =
+                file.let {
+                    File(it).let {
+                        if (it.exists()) {
+                            it
+                        } else {
+                            null
+                        }
                     }
                 }
-            }
         )
     }
 }

@@ -19,10 +19,13 @@ import java.io.File
  * create an instance of this fragment.
  */
 class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentDaoLoginChoiceBinding? = null
     private val binding get() = _binding!!
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
 
         binding.loadProductionWallet.setOnClickListener {
@@ -44,11 +47,12 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
             WalletManagerAndroid.close()
         }
 
-        val hideWallets = arrayListOf(
-            BitcoinNetworkOptions.TEST_NET,
-            BitcoinNetworkOptions.PRODUCTION,
-            BitcoinNetworkOptions.REG_TEST
-        )
+        val hideWallets =
+            arrayListOf(
+                BitcoinNetworkOptions.TEST_NET,
+                BitcoinNetworkOptions.PRODUCTION,
+                BitcoinNetworkOptions.REG_TEST
+            )
         hideWallets.remove(params)
 
         // Make sure to hide any other wallets that exists, when creating a new wallet
@@ -93,30 +97,36 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
      * This function "hides" stored wallets of a certain network type by renaming them.
      */
     private fun hideWalletFiles(walletToHide: ArrayList<BitcoinNetworkOptions>) {
-        val vWalletFileMainNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$MAIN_NET_WALLET_NAME.wallet"
-        )
-        val vChainFileMainNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$MAIN_NET_WALLET_NAME.spvchain"
-        )
-        val vWalletFileTestNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$TEST_NET_WALLET_NAME.wallet"
-        )
-        val vChainFileTestNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$TEST_NET_WALLET_NAME.spvchain"
-        )
-        val vWalletFileRegTest = File(
-            this.requireContext().applicationContext.filesDir,
-            "$REG_TEST_WALLET_NAME.wallet"
-        )
-        val vChainFileRegTest = File(
-            this.requireContext().applicationContext.filesDir,
-            "$REG_TEST_WALLET_NAME.spvchain"
-        )
+        val vWalletFileMainNet =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$MAIN_NET_WALLET_NAME.wallet"
+            )
+        val vChainFileMainNet =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$MAIN_NET_WALLET_NAME.spvchain"
+            )
+        val vWalletFileTestNet =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$TEST_NET_WALLET_NAME.wallet"
+            )
+        val vChainFileTestNet =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$TEST_NET_WALLET_NAME.spvchain"
+            )
+        val vWalletFileRegTest =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$REG_TEST_WALLET_NAME.wallet"
+            )
+        val vChainFileRegTest =
+            File(
+                this.requireContext().applicationContext.filesDir,
+                "$REG_TEST_WALLET_NAME.spvchain"
+            )
 
         val fileSuffix = System.currentTimeMillis()
 

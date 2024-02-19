@@ -28,7 +28,6 @@ import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 
 open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
-
     protected val logger = KotlinLogging.logger {}
 
     /**
@@ -50,18 +49,24 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         GatewayStore.getInstance(requireContext())
     }
 
-    private val onReceiveListener = object : BlockListener {
-        override fun onBlockReceived(block: TrustChainBlock) {
-            if (block.isAgreement && block.publicKey.contentEquals(transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin())) {
-                playMoneySound()
-                makeMoneyToast()
+    private val onReceiveListener =
+        object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                if (block.isAgreement &&
+                    block.publicKey.contentEquals(
+                        transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin()
+                    )
+                ) {
+                    playMoneySound()
+                    makeMoneyToast()
+                }
             }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
         trustStore.createContactStateTable()
 
@@ -69,18 +74,17 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         }
     }
 
-    fun makeMoneyToast(){
+    fun makeMoneyToast()  {
         Toast.makeText(requireContext(), "Money received!", Toast.LENGTH_LONG).show()
     }
 
     fun playMoneySound() {
         val afd = activity?.assets?.openFd("Coins.mp3") ?: return
-        val player = MediaPlayer();
-        player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length);
-        player.prepare();
-        player.start();
+        val player = MediaPlayer()
+        player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+        player.prepare()
+        player.start()
     }
-
 
     override fun onResume() {
         transactionRepository.trustChainCommunity.addListener(TransactionRepository.BLOCK_TYPE_TRANSFER, onReceiveListener)
@@ -94,7 +98,10 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         super.onPause()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.eurotoken_options, menu)
         menu.findItem(R.id.toggleDemoMode).setTitle(getDemoModeMenuItemText())
     }
@@ -103,21 +110,23 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
      * Get the text for the demo mode menu item.
      */
     private fun getDemoModeMenuItemText(): String {
-        val pref = requireContext().getSharedPreferences(
-            EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
-            Context.MODE_PRIVATE
-        )
+        val pref =
+            requireContext().getSharedPreferences(
+                EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                Context.MODE_PRIVATE
+            )
         val demoModeEnabled = pref.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
         if (demoModeEnabled) {
-            TransactionRepository.INITIAL_BALANCE = 1000
+            TransactionRepository.initialBalance = 1000
         } else {
-            TransactionRepository.INITIAL_BALANCE = 0
+            TransactionRepository.initialBalance = 0
         }
         return getString(R.string.toggle_demo_mode, if (demoModeEnabled) "OFF" else "ON")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val myPublicKey = getIpv8().myPeer.publicKey.keyToBin().toHex()
+        @Suppress("DEPRECATION")
         return when (item.itemId) {
             R.id.verifyBalance -> {
                 val gateway = transactionRepository.getGatewayPeer()
@@ -147,10 +156,11 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
                 true
             }
             R.id.toggleDemoMode -> {
-                val sharedPreferences = requireContext().getSharedPreferences(
-                    EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
-                    Context.MODE_PRIVATE
-                )
+                val sharedPreferences =
+                    requireContext().getSharedPreferences(
+                        EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                        Context.MODE_PRIVATE
+                    )
                 val edit = sharedPreferences.edit()
                 edit.putBoolean(
                     EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,

@@ -32,12 +32,13 @@ fun EditProfileScreen(navController: NavController) {
 
     fun save() {
         coroutine.launch {
-            val result = ownProfileViewScreenModel.publishEdit(
-                name = name.value ?: "",
-                bitcoinAddress = bitcoinPublicKey.value ?: "",
-                socials = socials.value ?: "",
-                biography = biography.value ?: ""
-            )
+            val result =
+                ownProfileViewScreenModel.publishEdit(
+                    name = name.value ?: "",
+                    bitcoinAddress = bitcoinPublicKey.value ?: "",
+                    socials = socials.value ?: "",
+                    biography = biography.value ?: ""
+                )
             if (result) {
                 navController.popBackStack()
                 SnackbarHandler.displaySnackbar(text = "Successfully published your profile")
@@ -48,9 +49,10 @@ fun EditProfileScreen(navController: NavController) {
     }
 
     Column(
-        modifier = Modifier
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            Modifier
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState())
     ) {
         Column(modifier = Modifier.padding(bottom = 20.dp)) {
             Text(text = "Name", fontWeight = FontWeight.Bold)

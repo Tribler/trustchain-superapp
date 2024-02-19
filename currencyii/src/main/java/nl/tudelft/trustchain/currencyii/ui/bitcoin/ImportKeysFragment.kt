@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import nl.tudelft.trustchain.currencyii.R
@@ -20,35 +19,38 @@ import nl.tudelft.trustchain.currencyii.databinding.FragmentImportKeysBinding
  * create an instance of this fragment.
  */
 class ImportKeysFragment : Fragment() {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentImportKeysBinding? = null
     private val binding get() = _binding!!
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
 
         binding.importBtcAddressBtn.setOnClickListener {
-
             val networkRadioGroup = binding.bitcoinNetworksLayout.bitcoinNetworkRadioGroup
-            val config = WalletManagerConfiguration(
-                when (networkRadioGroup.checkedRadioButtonId) {
-                    R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
-                    R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
-                    R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
-                    else -> {
-                        Toast.makeText(
-                            this.requireContext(),
-                            "Please select a bitcoin network first",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@setOnClickListener
-                    }
-                },
-                null,
-                AddressPrivateKeyPair(
-                    binding.pkInput.text.toString(),
-                    binding.skInput.text.toString()
+            val config =
+                WalletManagerConfiguration(
+                    when (networkRadioGroup.checkedRadioButtonId) {
+                        R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
+                        R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
+                        R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
+                        else -> {
+                            Toast.makeText(
+                                this.requireContext(),
+                                "Please select a bitcoin network first",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@setOnClickListener
+                        }
+                    },
+                    null,
+                    AddressPrivateKeyPair(
+                        binding.pkInput.text.toString(),
+                        binding.skInput.text.toString()
+                    )
                 )
-            )
 
             try {
                 WalletManagerAndroid.Factory(this.requireContext().applicationContext)
@@ -89,8 +91,7 @@ class ImportKeysFragment : Fragment() {
          *
          * @return A new instance of fragment ImportKeysFragment.
          */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance() = ImportKeysFragment()
+        fun newInstance() = ImportKeysFragment() // TODO: Rename and change types and number of parameters
     }
 }

@@ -14,7 +14,6 @@ import org.jmrtd.lds.icao.MRZInfo
 import java.io.IOException
 
 open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.ResultListener {
-
     private lateinit var binding: CaptureActivityBinding
 
     private var cameraSource: CameraSource? = null
@@ -47,6 +46,7 @@ open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.Result
         feedbackText = binding.tvFeedback
 
         binding.btnScanPrevious.setOnClickListener {
+            @Suppress("DEPRECATION")
             onBackPressed()
         }
 

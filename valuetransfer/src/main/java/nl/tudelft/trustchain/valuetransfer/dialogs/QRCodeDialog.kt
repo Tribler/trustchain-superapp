@@ -2,9 +2,6 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.os.Bundle
 import android.os.Handler
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -20,7 +17,6 @@ class QRCodeDialog(
     private val subtitle: String?,
     private val data: String
 ) : VTDialogFragment() {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog =

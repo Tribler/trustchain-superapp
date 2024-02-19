@@ -52,10 +52,11 @@ class MusicCommunity(
         var count = 0
         for ((index, peer) in getPeers().withIndex()) {
             if (index >= maxPeersToAsk) break
-            val packet = serializePacket(
-                MessageId.KEYWORD_SEARCH_MESSAGE,
-                KeywordSearchMessage(originPublicKey, ttl, keyword)
-            )
+            val packet =
+                serializePacket(
+                    MessageId.KEYWORD_SEARCH_MESSAGE,
+                    KeywordSearchMessage(originPublicKey, ttl, keyword)
+                )
             send(peer, packet)
             count += 1
         }

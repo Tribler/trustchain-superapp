@@ -23,7 +23,6 @@ import java.lang.IllegalStateException
 class IdentityAttributeDialog(
     private var attribute: IdentityAttribute?,
 ) : VTDialogFragment() {
-
     private var selectedName = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
@@ -52,50 +51,57 @@ class IdentityAttributeDialog(
             attributeNameSpinner.isVisible = attribute == null
 
             if (attribute == null) {
-                val attributeNameAdapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, unusedAttributes) {
-                    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                        return (super.getView(position, convertView, parent) as TextView).apply {
-                            text = unusedAttributes[position]
-                            setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                val attributeNameAdapter =
+                    object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, unusedAttributes) {
+                        override fun getView(
+                            position: Int,
+                            convertView: View?,
+                            parent: ViewGroup
+                        ): View {
+                            return (super.getView(position, convertView, parent) as TextView).apply {
+                                text = unusedAttributes[position]
+                                setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                            }
                         }
-                    }
 
-                    override fun getDropDownView(
-                        position: Int,
-                        convertView: View?,
-                        parent: ViewGroup
-                    ): View {
-                        return (super.getDropDownView(position, convertView, parent) as TextView).apply {
-                            layoutParams.apply {
-                                height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                            }
-                            gravity = Gravity.CENTER_VERTICAL
-                            setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-                            background = if (position == attributeNameSpinner.selectedItemPosition) {
-                                ColorDrawable(Color.LTGRAY)
-                            } else {
-                                ColorDrawable(Color.WHITE)
+                        override fun getDropDownView(
+                            position: Int,
+                            convertView: View?,
+                            parent: ViewGroup
+                        ): View {
+                            return (super.getDropDownView(position, convertView, parent) as TextView).apply {
+                                layoutParams.apply {
+                                    height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
+                                }
+                                gravity = Gravity.CENTER_VERTICAL
+                                setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                                background =
+                                    if (position == attributeNameSpinner.selectedItemPosition) {
+                                        ColorDrawable(Color.LTGRAY)
+                                    } else {
+                                        ColorDrawable(Color.WHITE)
+                                    }
                             }
                         }
                     }
-                }
 
                 attributeNameSpinner.adapter = attributeNameAdapter
-                attributeNameSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-                        selectedName = ""
-                    }
+                attributeNameSpinner.onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+                            selectedName = ""
+                        }
 
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        selectedName = unusedAttributes[position]
-                        toggleButton(saveButton, selectedName != "" && attributeValueView.text.isNotEmpty())
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+                            selectedName = unusedAttributes[position]
+                            toggleButton(saveButton, selectedName != "" && attributeValueView.text.isNotEmpty())
+                        }
                     }
-                }
             } else {
                 attributeNameView.setText(attribute!!.name)
                 attributeValueView.setText(attribute!!.value)

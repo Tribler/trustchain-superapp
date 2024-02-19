@@ -4,6 +4,6 @@ import org.junit.Test
 
 class TransactionRepositoryTest {
     @Test
-    fun TestInit() {
+    fun testInit() {
     }
 }

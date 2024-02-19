@@ -39,7 +39,13 @@ class IdentityStore(context: Context) {
             PersonalIdentity(
                 name!!,
                 surname!!,
-                if (gender == 0L) GENDER_MALE else if (gender == 1L) GENDER_FEMALE else GENDER_NEUTRAL,
+                if (gender == 0L) {
+                    GENDER_MALE
+                } else if (gender == 1L) {
+                    GENDER_FEMALE
+                } else {
+                    GENDER_NEUTRAL
+                },
                 Date(dateOfBirth!!),
                 placeOfBirth!!,
                 nationality!!,
@@ -99,7 +105,13 @@ class IdentityStore(context: Context) {
             identity.publicKey.keyToBin(),
             identity.content.givenNames,
             identity.content.surname,
-            if (identity.content.gender == GENDER_MALE) 0L else if (identity.content.gender == GENDER_FEMALE) 1L else 2L,
+            if (identity.content.gender == GENDER_MALE) {
+                0L
+            } else if (identity.content.gender == GENDER_FEMALE) {
+                1L
+            } else {
+                2L
+            },
             identity.content.dateOfBirth.time,
             identity.content.placeOfBirth,
             identity.content.nationality,
@@ -117,7 +129,13 @@ class IdentityStore(context: Context) {
             identity.publicKey.keyToBin(),
             identity.content.givenNames,
             identity.content.surname,
-            if (identity.content.gender == GENDER_MALE) 0L else if (identity.content.gender == GENDER_FEMALE) 1L else 2L,
+            if (identity.content.gender == GENDER_MALE) {
+                0L
+            } else if (identity.content.gender == GENDER_FEMALE) {
+                1L
+            } else {
+                2L
+            },
             identity.content.dateOfBirth.time,
             identity.content.placeOfBirth,
             identity.content.nationality,
@@ -175,6 +193,7 @@ class IdentityStore(context: Context) {
 
     companion object {
         private lateinit var instance: IdentityStore
+
         fun getInstance(context: Context): IdentityStore {
             if (!::instance.isInitialized) {
                 instance = IdentityStore(context)

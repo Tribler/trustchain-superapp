@@ -21,7 +21,10 @@ class ContactConnectPayload(
     }
 
     companion object Deserializer : Deserializable<ContactConnectPayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<ContactConnectPayload, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<ContactConnectPayload, Int> {
             var localOffset = offset
             val (sender, senderSize) = deserializeVarLen(buffer, localOffset)
             localOffset += senderSize

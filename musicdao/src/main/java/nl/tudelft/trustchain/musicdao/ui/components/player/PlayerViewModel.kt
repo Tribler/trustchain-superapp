@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package nl.tudelft.trustchain.musicdao.ui.components.player
 
 import android.content.Context
@@ -17,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 
 class PlayerViewModel(context: Context) : ViewModel() {
-
     private val _playingTrack: MutableStateFlow<Song?> = MutableStateFlow(null)
     val playingTrack: StateFlow<Song?> = _playingTrack
 
@@ -28,7 +29,11 @@ class PlayerViewModel(context: Context) : ViewModel() {
         ExoPlayer.Builder(context).build()
     }
 
-    private fun buildMediaSource(uri: Uri, context: Context): MediaSource? {
+    private fun buildMediaSource(
+        uri: Uri,
+        context: Context
+    ): MediaSource {
+        @Suppress("DEPRECATION")
         val dataSourceFactory: DataSource.Factory =
             DefaultDataSourceFactory(context, "musicdao-audioplayer")
         val mediaItem = MediaItem.fromUri(uri)
@@ -36,7 +41,10 @@ class PlayerViewModel(context: Context) : ViewModel() {
             .createMediaSource(mediaItem)
     }
 
-    fun playDownloadedTrack(track: Song, context: Context, cover: File? = null) {
+    fun playDownloadedTrack(
+        track: Song,
+        cover: File? = null
+    ) {
         _playingTrack.value = track
         _coverFile.value = cover
         val mediaItem = MediaItem.fromUri(Uri.fromFile(track.file))
@@ -48,11 +56,15 @@ class PlayerViewModel(context: Context) : ViewModel() {
         exoPlayer.play()
     }
 
-    fun playDownloadingTrack(track: Song, context: Context, cover: File? = null) {
+    fun playDownloadingTrack(
+        track: Song,
+        context: Context,
+        cover: File? = null
+    ) {
         _playingTrack.value = track
         _coverFile.value = cover
-        val mediaSource = buildMediaSource(Uri.fromFile(track.file), context)
-            ?: throw Error("Media source could not be instantiated")
+        val mediaSource =
+            buildMediaSource(Uri.fromFile(track.file), context)
         Log.d("MusicDAOTorrent", "Trying to play ${track.file}")
         exoPlayer.playWhenReady = true
         exoPlayer.seekTo(0, 0)
@@ -67,15 +79,14 @@ class PlayerViewModel(context: Context) : ViewModel() {
     }
 
     companion object {
-        fun provideFactory(
-            context: Context
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return PlayerViewModel(
-                    context
-                ) as T
+        fun provideFactory(context: Context): ViewModelProvider.Factory =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return PlayerViewModel(
+                        context
+                    ) as T
+                }
             }
-        }
     }
 }

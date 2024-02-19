@@ -12,9 +12,12 @@ class AttestationAuthorityItemRenderer(
     private val myPublicKey: String,
     private val onDeleteClickAction: (AuthorityItem) -> Unit,
 ) : ItemLayoutRenderer<AuthorityItem, View>(
-    AuthorityItem::class.java
-) {
-    override fun bindView(item: AuthorityItem, view: View) = with(view) {
+        AuthorityItem::class.java
+    ) {
+    override fun bindView(
+        item: AuthorityItem,
+        view: View
+    ) = with(view) {
         val binding = ItemIdentityAttestationAuthoritiesBinding.bind(view)
         binding.tvAuthorityAddressHash.text = item.publicKeyHash
         binding.tvAuthorityAddressKey.text = item.publicKey.keyToBin().toHex()

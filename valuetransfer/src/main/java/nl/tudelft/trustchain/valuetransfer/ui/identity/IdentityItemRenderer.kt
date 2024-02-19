@@ -21,16 +21,20 @@ class IdentityItemRenderer(
     private val onCopyPublicKeyButtonClick: (Identity) -> Unit,
     private val onIdentityImageClick: (Identity) -> Unit,
 ) : ItemLayoutRenderer<IdentityItem, View>(
-    IdentityItem::class.java
-) {
+        IdentityItem::class.java
+    ) {
     private val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH)
 
-    override fun bindView(item: IdentityItem, view: View) = with(view) {
-        val binding = if (layoutType == 0) {
-            ItemIdentityBinding.bind(view)
-        } else {
-            ItemIdentityDetailBinding.bind(view)
-        }
+    override fun bindView(
+        item: IdentityItem,
+        view: View
+    ) = with(view) {
+        val binding =
+            if (layoutType == 0) {
+                ItemIdentityBinding.bind(view)
+            } else {
+                ItemIdentityDetailBinding.bind(view)
+            }
 
         val publicKeyString = item.identity.publicKey.keyToBin().toHex()
 
@@ -49,9 +53,12 @@ class IdentityItemRenderer(
             binding.ivContactVerifiedStatus.isVisible = item.identity.content.verified
             binding.ivContactUnverifiedStatus.isVisible = !item.identity.content.verified
 
-            binding.flIdenticon.background = if (item.connected) {
-                ContextCompat.getDrawable(view.context, R.drawable.pill_rounded_green)
-            } else ContextCompat.getDrawable(view.context, R.drawable.pill_rounded_red)
+            binding.flIdenticon.background =
+                if (item.connected) {
+                    ContextCompat.getDrawable(view.context, R.drawable.pill_rounded_green)
+                } else {
+                    ContextCompat.getDrawable(view.context, R.drawable.pill_rounded_red)
+                }
 
             if (item.image != null) {
                 binding.ivIdentityPhoto.setImageBitmap(item.image)
@@ -153,22 +160,25 @@ class IdentityItemRenderer(
         }
     }
 
-    private fun setContentVisible(view: View, content: PersonalIdentity, visible: Boolean) =
-        with(view) {
-            val binding = ItemIdentityDetailBinding.bind(view)
-            val dummy = "*".repeat(8)
+    private fun setContentVisible(
+        view: View,
+        content: PersonalIdentity,
+        visible: Boolean
+    ) = with(view) {
+        val binding = ItemIdentityDetailBinding.bind(view)
+        val dummy = "*".repeat(8)
 
-            binding.tvGenderValue.text = if (visible) content.gender else dummy
-            binding.tvDatePlaceOfBirthValue.text =
-                if (visible) dateFormat.format(content.dateOfBirth) else dummy
-            binding.tvDateExpiryValue.text =
-                if (visible) dateFormat.format(content.dateOfExpiry) else dummy
-            binding.tvNationalityValue.text = if (visible) content.nationality else dummy
-            binding.tvPersonalNumberValue.text =
-                if (visible) content.personalNumber.toString() else dummy
-            binding.tvDocumentNumberValue.text =
-                if (visible) content.documentNumber else dummy
-        }
+        binding.tvGenderValue.text = if (visible) content.gender else dummy
+        binding.tvDatePlaceOfBirthValue.text =
+            if (visible) dateFormat.format(content.dateOfBirth) else dummy
+        binding.tvDateExpiryValue.text =
+            if (visible) dateFormat.format(content.dateOfExpiry) else dummy
+        binding.tvNationalityValue.text = if (visible) content.nationality else dummy
+        binding.tvPersonalNumberValue.text =
+            if (visible) content.personalNumber.toString() else dummy
+        binding.tvDocumentNumberValue.text =
+            if (visible) content.documentNumber else dummy
+    }
 
     override fun getLayoutResourceId(): Int {
         return when (layoutType) {

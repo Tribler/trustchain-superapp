@@ -8,6 +8,7 @@ ktlint {
     android = true
     outputToConsole = true
     ignoreFailures = false
+    verbose = true
 }
 
 sqldelight {

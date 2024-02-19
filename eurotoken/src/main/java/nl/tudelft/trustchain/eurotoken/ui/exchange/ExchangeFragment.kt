@@ -29,7 +29,6 @@ import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment
 import org.json.JSONException
 import org.json.JSONObject
 
-
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
@@ -41,6 +40,7 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class ExchangeFragment : EurotokenBaseFragment() {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentExchangeBinding? = null
     private val binding get() = _binding!!
 
@@ -51,9 +51,9 @@ class ExchangeFragment : EurotokenBaseFragment() {
         QRCodeUtils(requireContext())
     }
 
-
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
@@ -67,8 +67,11 @@ class ExchangeFragment : EurotokenBaseFragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         class ConnectionData(json: String) : JSONObject(json) {
             val payment_id = this.optString("payment_id")
             val public_key = this.optString("public_key")
@@ -124,18 +127,20 @@ class ExchangeFragment : EurotokenBaseFragment() {
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
-
                 val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
                 val ownContact =
                     ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
 
-                val pref = requireContext().getSharedPreferences(
-                    EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
-                    Context.MODE_PRIVATE
-                )
-                val demoModeEnabled = pref.getBoolean(
-                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false
-                )
+                val pref =
+                    requireContext().getSharedPreferences(
+                        EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                        Context.MODE_PRIVATE
+                    )
+                val demoModeEnabled =
+                    pref.getBoolean(
+                        EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                        false
+                    )
 
                 if (demoModeEnabled) {
                     binding.txtBalance.text =
@@ -152,7 +157,10 @@ class ExchangeFragment : EurotokenBaseFragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
         binding.txtOwnPublicKey.text = getTrustChainCommunity().myPeer.publicKey.keyToHash().toHex()
         binding.btnCamera.setOnClickListener {
@@ -183,13 +191,16 @@ class ExchangeFragment : EurotokenBaseFragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ExchangeFragment().apply {
-                arguments = Bundle().apply {
+        fun newInstance(
+            param1: String,
+            param2: String
+        ) = ExchangeFragment().apply {
+            arguments =
+                Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
                 }
-            }
+        }
 
         fun EditText.decimalLimiter(string: String): String {
             val amount = TransferFragment.getAmount(string)
@@ -198,35 +209,41 @@ class ExchangeFragment : EurotokenBaseFragment() {
                 return ""
             }
 
-            //val amount = string.replace("[^\\d]", "").toLong()
+            // val amount = string.replace("[^\\d]", "").toLong()
             return (amount / 100).toString() + "." + (amount % 100).toString().padStart(2, '0')
         }
 
         fun EditText.addDecimalLimiter() {
-            this.addTextChangedListener(object : TextWatcher {
+            this.addTextChangedListener(
+                object : TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        val str = this@addDecimalLimiter.text!!.toString()
+                        if (str.isEmpty()) return
+                        val str2 = decimalLimiter(str)
 
-                override fun afterTextChanged(s: Editable?) {
-                    val str = this@addDecimalLimiter.text!!.toString()
-                    if (str.isEmpty()) return
-                    val str2 = decimalLimiter(str)
-
-                    if (str2 != str) {
-                        this@addDecimalLimiter.setText(str2)
-                        val pos = this@addDecimalLimiter.text!!.length
-                        this@addDecimalLimiter.setSelection(pos)
+                        if (str2 != str) {
+                            this@addDecimalLimiter.setText(str2)
+                            val pos = this@addDecimalLimiter.text!!.length
+                            this@addDecimalLimiter.setSelection(pos)
+                        }
                     }
-                }
 
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-                }
+                    override fun beforeTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        count: Int,
+                        after: Int
+                    ) {
+                    }
 
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            })
+                    override fun onTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        before: Int,
+                        count: Int
+                    ) {}
+                }
+            )
         }
     }
 }

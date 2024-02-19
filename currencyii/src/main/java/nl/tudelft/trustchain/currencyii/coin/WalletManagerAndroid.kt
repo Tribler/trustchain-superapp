@@ -2,10 +2,11 @@ package nl.tudelft.trustchain.currencyii.coin
 
 import android.content.Context
 
+// TODO: Clean up Thread usage.
+
 /**
  * Singleton class for WalletManager which also sets-up Android specific things.
  */
-// TODO: Clean up Thread usage.
 object WalletManagerAndroid {
     private var walletManager: WalletManager? = null
     private var context: Context? = null
@@ -28,17 +29,19 @@ object WalletManagerAndroid {
 
         fun init(): WalletManager {
             val walletDir = context.filesDir
-            val configuration = configuration
-                ?: throw IllegalStateException("Configuration is not set")
+            val configuration =
+                configuration
+                    ?: throw IllegalStateException("Configuration is not set")
 
             WalletManagerAndroid.context = context
 
-            val walletManager = WalletManager(
-                configuration,
-                walletDir,
-                configuration.key,
-                configuration.addressPrivateKeyPair
-            )
+            val walletManager =
+                WalletManager(
+                    configuration,
+                    walletDir,
+                    configuration.key,
+                    configuration.addressPrivateKeyPair
+                )
 
             WalletManagerAndroid.walletManager = walletManager
             isRunning = true

@@ -13,7 +13,6 @@ data class Transaction(
     val outgoing: Boolean,
     val timestamp: Date
 ) {
-
     override fun equals(other: Any?): Boolean {
         return other is Transaction &&
             other.block == block

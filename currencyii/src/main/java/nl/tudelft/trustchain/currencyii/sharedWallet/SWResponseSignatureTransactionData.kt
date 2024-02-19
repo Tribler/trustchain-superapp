@@ -14,13 +14,17 @@ data class SWResponseSignatureBlockTD(
 )
 
 class SWResponseSignatureTransactionData(data: JsonObject) : SWBlockTransactionData(
-    data, CoinCommunity.SIGNATURE_AGREEMENT_BLOCK
+    data,
+    CoinCommunity.SIGNATURE_AGREEMENT_BLOCK
 ) {
     fun getData(): SWResponseSignatureBlockTD {
         return Gson().fromJson(getJsonString(), SWResponseSignatureBlockTD::class.java)
     }
 
-    fun matchesProposal(walletId: String, proposalId: String): Boolean {
+    fun matchesProposal(
+        walletId: String,
+        proposalId: String
+    ): Boolean {
         val data = getData()
         return data.SW_UNIQUE_ID == walletId && data.SW_UNIQUE_PROPOSAL_ID == proposalId
     }

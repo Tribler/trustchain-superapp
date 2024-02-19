@@ -1,15 +1,11 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.graphics.Color
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.TextView
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.databinding.FragmentMySharedWalletsBinding
 import nl.tudelft.trustchain.currencyii.databinding.JoinSwRowDataBinding
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
@@ -23,13 +19,17 @@ class SharedWalletListAdapter(
     private val listButtonText: String,
     private val disableOnUserJoined: Boolean? = false
 ) : BaseAdapter() {
-
-    override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
-        val binding = if (p1 != null) {
-            JoinSwRowDataBinding.bind(p1)
-        } else {
-            JoinSwRowDataBinding.inflate(context.layoutInflater)
-        }
+    override fun getView(
+        p0: Int,
+        p1: View?,
+        p2: ViewGroup?
+    ): View {
+        val binding =
+            if (p1 != null) {
+                JoinSwRowDataBinding.bind(p1)
+            } else {
+                JoinSwRowDataBinding.inflate(context.layoutInflater)
+            }
         val view = binding.root
         val blockData = SWJoinBlockTransactionData(items[p0].transaction).getData()
 
@@ -71,7 +71,6 @@ class SharedWalletListAdapter(
         }
 
         return view
-
     }
 
     override fun getItem(p0: Int): Any {

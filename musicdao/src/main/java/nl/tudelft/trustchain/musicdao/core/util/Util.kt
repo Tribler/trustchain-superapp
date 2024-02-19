@@ -5,11 +5,13 @@ import com.frostwire.jlibtorrent.TorrentHandle
 import com.mpatric.mp3agic.Mp3File
 
 object Util {
-
     /**
      * Calculate how much percentage is downloaded of a certain track file based on its file size
      */
-    fun calculateDownloadProgress(fileProgress: Long, fullSize: Long?): Int {
+    fun calculateDownloadProgress(
+        fileProgress: Long,
+        fullSize: Long?
+    ): Int {
         val size = fullSize ?: Long.MAX_VALUE
         val progress: Double = (fileProgress.toDouble() / size.toDouble()) * 100.0
         return progress.toInt()

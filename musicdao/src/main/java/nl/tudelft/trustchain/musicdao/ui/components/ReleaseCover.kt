@@ -13,7 +13,10 @@ import nl.tudelft.trustchain.musicdao.R
 import java.io.File
 
 @Composable
-fun ReleaseCover(file: File? = null, modifier: Modifier = Modifier) {
+fun ReleaseCover(
+    file: File? = null,
+    modifier: Modifier = Modifier
+) {
     if (file != null) {
         BitmapCover(file = file, modifier = modifier)
     } else {
@@ -31,7 +34,10 @@ fun DefaultCover(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun BitmapCover(file: File, modifier: Modifier = Modifier) {
+fun BitmapCover(
+    file: File,
+    modifier: Modifier = Modifier
+) {
     val bitmap: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
     Image(
         bitmap = bitmap.asImageBitmap(),

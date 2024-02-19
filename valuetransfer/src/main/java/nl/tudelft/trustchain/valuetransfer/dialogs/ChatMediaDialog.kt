@@ -51,15 +51,17 @@ class ChatMediaDialog(
             getPeerChatStore().getAllByPublicKey(publicKey),
             filterType.asFlow()
         ) { messages, type ->
-            val filterTypes = when (type) {
-                FILTER_TYPE_IMAGES -> listOf(MessageAttachment.TYPE_IMAGE)
-                FILTER_TYPE_FILES -> listOf(MessageAttachment.TYPE_FILE)
-                else -> listOf(MessageAttachment.TYPE_IMAGE, MessageAttachment.TYPE_FILE)
-            }
+            val filterTypes =
+                when (type) {
+                    FILTER_TYPE_IMAGES -> listOf(MessageAttachment.TYPE_IMAGE)
+                    FILTER_TYPE_FILES -> listOf(MessageAttachment.TYPE_FILE)
+                    else -> listOf(MessageAttachment.TYPE_IMAGE, MessageAttachment.TYPE_FILE)
+                }
 
-            val items = messages.filter {
-                filterTypes.contains(it.attachment?.type) && it.attachment?.getFile(requireContext()) != null
-            }.asReversed()
+            val items =
+                messages.filter {
+                    filterTypes.contains(it.attachment?.type) && it.attachment?.getFile(requireContext()) != null
+                }.asReversed()
             createMediaItems(items)
         }.asLiveData()
     }
@@ -67,9 +69,10 @@ class ChatMediaDialog(
     private lateinit var rvChatMediaItems: RecyclerView
     private val adapterChatMedia = ItemAdapter()
     private var viewPager: ViewPager? = null
-    private val chatMediaDetailAdapter: ChatMediaDetailAdapter = ChatMediaDetailAdapter(c) {
-        galleryView(it)
-    }
+    private val chatMediaDetailAdapter: ChatMediaDetailAdapter =
+        ChatMediaDetailAdapter(c) {
+            galleryView(it)
+        }
 
     private lateinit var actionBar: Toolbar
     private lateinit var galleryView: LinearLayout
@@ -100,6 +103,7 @@ class ChatMediaDialog(
             bottomSheetDialog.setCanceledOnTouchOutside(false)
 
             // Set action bar
+            @Suppress("DEPRECATION")
             setHasOptionsMenu(true)
             actionBar = binding.tbActionBar
             actionBar.inflateMenu(R.menu.contact_chat_media)
@@ -120,17 +124,24 @@ class ChatMediaDialog(
             // Viewpager and custom adapter for the detail display
             viewPager = binding.detail.viewPager
             viewPager!!.adapter = chatMediaDetailAdapter
-            viewPager!!.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-                override fun onPageSelected(p0: Int) {
-                    chatMediaDetailAdapter.getItem(p0).let { item ->
-                        senderTitle.text = item.senderName
-                        dateTitle.text = dateFormat.format(item.sendDate)
+            viewPager!!.addOnPageChangeListener(
+                object : ViewPager.OnPageChangeListener {
+                    override fun onPageSelected(p0: Int) {
+                        chatMediaDetailAdapter.getItem(p0).let { item ->
+                            senderTitle.text = item.senderName
+                            dateTitle.text = dateFormat.format(item.sendDate)
+                        }
                     }
-                }
 
-                override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {}
-                override fun onPageScrollStateChanged(p0: Int) {}
-            })
+                    override fun onPageScrolled(
+                        p0: Int,
+                        p1: Float,
+                        p2: Int
+                    ) {}
+
+                    override fun onPageScrollStateChanged(p0: Int) {}
+                }
+            )
 
             // Recyclerview and adapter for chat image gallery
             adapterChatMedia.registerRenderer(
@@ -229,16 +240,18 @@ class ChatMediaDialog(
                 }
 
                 when (currentItem.type) {
-                    MessageAttachment.TYPE_IMAGE -> BitmapFactory.decodeFile(currentItem.file.path)
-                        .let { bitmap ->
-                            saveImage(c, bitmap, currentItem.file.name)
-                        }
+                    MessageAttachment.TYPE_IMAGE ->
+                        BitmapFactory.decodeFile(currentItem.file.path)
+                            .let { bitmap ->
+                                saveImage(c, bitmap, currentItem.file.name)
+                            }
 
-                    MessageAttachment.TYPE_FILE -> saveFile(
-                        c,
-                        currentItem.file,
-                        currentItem.fileName ?: currentItem.file.name
-                    )
+                    MessageAttachment.TYPE_FILE ->
+                        saveFile(
+                            c,
+                            currentItem.file,
+                            currentItem.fileName ?: currentItem.file.name
+                        )
                 }
             }
 
@@ -260,7 +273,10 @@ class ChatMediaDialog(
         actionBar.menu.getItem(1).isVisible = !isGallery
     }
 
-    private fun TextView.filterMedia(type: String, others: List<TextView>) {
+    private fun TextView.filterMedia(
+        type: String,
+        others: List<TextView>
+    ) {
         if (filterType.value == type) return
         isFiltering = true
         filterType.postValue(type)
@@ -282,14 +298,17 @@ class ChatMediaDialog(
     private fun createMediaItems(messages: List<ChatMessage>): List<ChatMediaItem> {
         val myKey = getTrustChainCommunity().myPeer.publicKey
         return messages.map { item ->
-            val senderName = if (myKey == item.sender) {
-                resources.getString(R.string.text_you)
-            } else getContactStore().getContactFromPublicKey(publicKey)?.name
-                ?: resources.getString(R.string.text_unknown_contact)
+            val senderName =
+                if (myKey == item.sender) {
+                    resources.getString(R.string.text_you)
+                } else {
+                    getContactStore().getContactFromPublicKey(publicKey)?.name
+                        ?: resources.getString(R.string.text_unknown_contact)
+                }
 
             val messageID = item.id
             val attachmentFile = item.attachment!!.getFile(requireContext())
-            val type = item.attachment!!.type
+            val type = item.attachment.type
             val fileName = item.message
 
             ChatMediaItem(

@@ -16,7 +16,6 @@ class DownloadFinishUseCase constructor(
     private val database: CacheDatabase,
     private val cachePath: CachePath
 ) {
-
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     operator fun invoke(infoHash: String) {
@@ -36,22 +35,24 @@ class DownloadFinishUseCase constructor(
                 val mp3Files = FileProcessor.getMP3Files(root)
                 Log.d("MusicDao", "DownloadFinishUseCase: mp3 files in $root: $mp3Files")
 
-                val songs = mp3Files?.map {
-                    SongEntity(
-                        file = it.filename,
-                        title = FileProcessor.getTitle(it),
-                        artist = albumEntity.artist
-                    )
-                } ?: listOf()
+                val songs =
+                    mp3Files?.map {
+                        SongEntity(
+                            file = it.filename,
+                            title = FileProcessor.getTitle(it),
+                            artist = albumEntity.artist
+                        )
+                    } ?: listOf()
 
                 val cover = FileProcessor.getCoverArt(root)
-                val updatedAlbumEntity = albumEntity.copy(
-                    songs = songs,
-                    cover = cover?.absolutePath,
-                    root = root.toString(),
-                    isDownloaded = true,
-                    torrentPath = Paths.get("${cachePath.getPath()}/torrents/$infoHash.torrent").toString()
-                )
+                val updatedAlbumEntity =
+                    albumEntity.copy(
+                        songs = songs,
+                        cover = cover?.absolutePath,
+                        root = root.toString(),
+                        isDownloaded = true,
+                        torrentPath = Paths.get("${cachePath.getPath()}/torrents/$infoHash.torrent").toString()
+                    )
 
                 Log.d("MusicDao", "DownloadFinishUseCase: updated album with $updatedAlbumEntity")
                 database.dao.update(updatedAlbumEntity)

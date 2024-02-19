@@ -13,7 +13,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
@@ -44,22 +43,25 @@ const val BALANCE_THRESHOLD = "5"
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
+class BitcoinFragment :
+    BaseFragment(R.layout.fragment_bitcoin),
     ImportKeyDialog.ImportKeyDialogListener {
-
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentBitcoinBinding? = null
     private val binding get() = _binding!!
 
     private var getBitcoinPressed = false
 
-
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
         initClickListeners()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
     }
 
@@ -69,7 +71,10 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         refresh()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         // TODO: Try catch not too nice.
         try {
             WalletManagerAndroid.getInstance()
@@ -82,6 +87,7 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        @Suppress("DEPRECATION")
         return when (item.itemId) {
             R.id.item_bitcoin_blockchain_download -> {
                 Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
@@ -235,12 +241,13 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         binding.walletBalance.text = walletManager.kit.wallet().balance.toFriendlyString()
         binding.walletEstimatedBalance.text =
             walletManager.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
-        binding.chosenNetwork.text = when (walletManager.params.id) {
-            NetworkParameters.ID_MAINNET -> "Production Network"
-            NetworkParameters.ID_REGTEST -> "RegTest Network"
-            NetworkParameters.ID_TESTNET -> "TestNet Network"
-            else -> "Unknown Network selected"
-        }
+        binding.chosenNetwork.text =
+            when (walletManager.params.id) {
+                NetworkParameters.ID_MAINNET -> "Production Network"
+                NetworkParameters.ID_REGTEST -> "RegTest Network"
+                NetworkParameters.ID_TESTNET -> "TestNet Network"
+                else -> "Unknown Network selected"
+            }
         val seed = walletManager.toSeed()
         binding.walletSeed.text = "${seed.seed}, ${seed.creationTime}"
         binding.yourPublicHex.text = walletManager.networkPublicECKeyHex()
@@ -267,22 +274,25 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
 
         val url = "https://$REG_TEST_FAUCET_DOMAIN/addBTC?address=$address"
 
-        future = executor.submit(object : Callable<Boolean> {
-            override fun call(): Boolean {
-                val connection = URL(url).openConnection() as HttpURLConnection
+        future =
+            executor.submit(
+                object : Callable<Boolean> {
+                    override fun call(): Boolean {
+                        val connection = URL(url).openConnection() as HttpURLConnection
 
-                try {
-                    // If it fails, check if there is enough balance available on the server
-                    // Otherwise reset the bitcoin network on the server (there is only 15k BTC available).
-                    // Also check if the Python server is still running!
-                    Log.i("Coin", url)
-                    Log.i("Coin", connection.responseMessage)
-                    return connection.responseCode == 200
-                } finally {
-                    connection.disconnect()
+                        try {
+                            // If it fails, check if there is enough balance available on the server
+                            // Otherwise reset the bitcoin network on the server (there is only 15k BTC available).
+                            // Also check if the Python server is still running!
+                            Log.i("Coin", url)
+                            Log.i("Coin", connection.responseMessage)
+                            return connection.responseCode == 200
+                        } finally {
+                            connection.disconnect()
+                        }
+                    }
                 }
-            }
-        })
+            )
 
         return try {
             future.get(10, TimeUnit.SECONDS)
@@ -318,13 +328,18 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         fun newInstance() = BitcoinFragment()
     }
 
-    override fun onImport(address: String, privateKey: String, network: BitcoinNetworkOptions) {
+    override fun onImport(
+        address: String,
+        privateKey: String,
+        network: BitcoinNetworkOptions
+    ) {
         if (!WalletManagerAndroid.isRunning) {
-            val config = WalletManagerConfiguration(
-                network,
-                null,
-                AddressPrivateKeyPair(address, privateKey)
-            )
+            val config =
+                WalletManagerConfiguration(
+                    network,
+                    null,
+                    AddressPrivateKeyPair(address, privateKey)
+                )
 
             try {
                 WalletManagerAndroid.Factory(this.requireContext().applicationContext)

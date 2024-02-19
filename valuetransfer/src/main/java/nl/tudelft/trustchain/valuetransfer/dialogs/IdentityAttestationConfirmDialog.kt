@@ -30,19 +30,18 @@ class IdentityAttestationConfirmDialog(
     private val idFormat: String,
     private val parentActivity: ValueTransferMainActivity
 ) : BlockingDialogFragment<String>() {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
-
         @Suppress("DEPRECATION")
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(it, R.style.BaseBottomSheetDialog)
             val binding = DialogIdentityAttestationConfirmBinding.inflate(it.layoutInflater)
             val view = binding.root
 
-            bottomSheetDialog.window!!.navigationBarColor = ContextCompat.getColor(
-                parentActivity.applicationContext,
-                getColorIDFromThemeAttribute(parentActivity, R.attr.colorPrimary)
-            )
+            bottomSheetDialog.window!!.navigationBarColor =
+                ContextCompat.getColor(
+                    parentActivity.applicationContext,
+                    getColorIDFromThemeAttribute(parentActivity, R.attr.colorPrimary)
+                )
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.apply {
@@ -70,13 +69,14 @@ class IdentityAttestationConfirmDialog(
                     resources.getString(R.string.text_attestation_age_automatically_derived, years)
             }
 
-            subtitleView.text = fromHtml(
-                resources.getString(
-                    R.string.text_attestation_confirm,
-                    attributeName,
-                    idFormat
+            subtitleView.text =
+                fromHtml(
+                    resources.getString(
+                        R.string.text_attestation_confirm,
+                        attributeName,
+                        idFormat
+                    )
                 )
-            )
 
             val confirmSlider = binding.slideConfirmRequestedAttestation
             confirmSlider.isLocked = attributeValueView.text.toString().isEmpty()

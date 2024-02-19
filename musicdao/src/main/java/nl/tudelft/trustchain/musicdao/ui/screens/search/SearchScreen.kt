@@ -22,7 +22,10 @@ import nl.tudelft.trustchain.musicdao.ui.components.releases.ReleaseList
 @OptIn(ExperimentalMaterialApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SearchScreen(navController: NavController, screenViewModel: SearchScreenViewModel) {
+fun SearchScreen(
+    navController: NavController,
+    screenViewModel: SearchScreenViewModel
+) {
     val releases by screenViewModel.searchResult.collectAsState(listOf())
     val searchQuery by screenViewModel.searchQuery.collectAsState()
 

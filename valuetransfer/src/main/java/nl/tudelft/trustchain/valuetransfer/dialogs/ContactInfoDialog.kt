@@ -7,12 +7,10 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
-import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
@@ -51,7 +49,6 @@ import nl.tudelft.trustchain.valuetransfer.util.toExchangeTransactionItem
 class ContactInfoDialog(
     val publicKey: PublicKey
 ) : VTDialogFragment() {
-
     private val contact: LiveData<Contact?> by lazy {
         getContactStore().getContactFromPublickey(publicKey).asLiveData()
     }
@@ -146,6 +143,7 @@ class ContactInfoDialog(
                 contact.value.let {
                     val dialogContactRename =
                         ContactRenameDialog(it ?: Contact("", publicKey)).newInstance(123)
+                    @Suppress("DEPRECATION")
                     dialogContactRename.setTargetFragment(this, 1)
 
                     bottomSheetDialog.hide()
@@ -166,10 +164,11 @@ class ContactInfoDialog(
                 if (identityAttributesView.isVisible) return@setOnClickListener
                 showIdentityAttributes.apply {
                     setTypeface(null, Typeface.BOLD)
-                    background = ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.pill_rounded_selected
-                    )
+                    background =
+                        ContextCompat.getDrawable(
+                            requireContext(),
+                            R.drawable.pill_rounded_selected
+                        )
                 }
                 showTransactions.apply {
                     setTypeface(null, Typeface.NORMAL)
@@ -188,10 +187,11 @@ class ContactInfoDialog(
                 }
                 showTransactions.apply {
                     setTypeface(null, Typeface.BOLD)
-                    background = ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.pill_rounded_selected
-                    )
+                    background =
+                        ContextCompat.getDrawable(
+                            requireContext(),
+                            R.drawable.pill_rounded_selected
+                        )
                 }
                 identityAttributesView.exitEnterView(requireContext(), transactionsView)
             }
@@ -207,7 +207,6 @@ class ContactInfoDialog(
             contact.observe(
                 this,
                 Observer {
-
                     nickName.text = it?.name ?: resources.getString(R.string.text_unknown_contact)
                 }
             )
@@ -234,11 +233,12 @@ class ContactInfoDialog(
             rvIdentityAttributes.apply {
                 adapter = adapterIdentityAttributes
                 layoutManager = LinearLayoutManager(context)
-                val drawable = ResourcesCompat.getDrawable(
-                    resources,
-                    R.drawable.divider_identity_attribute,
-                    requireContext().theme
-                )
+                val drawable =
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.divider_identity_attribute,
+                        requireContext().theme
+                    )
                 addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
             }
 
@@ -253,11 +253,12 @@ class ContactInfoDialog(
             rvTransactions.apply {
                 adapter = adapterTransactions
                 layoutManager = LinearLayoutManager(requireContext())
-                val drawable = ResourcesCompat.getDrawable(
-                    resources,
-                    R.drawable.divider_transaction,
-                    requireContext().theme
-                )
+                val drawable =
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.divider_transaction,
+                        requireContext().theme
+                    )
                 addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
             }
 
@@ -275,10 +276,13 @@ class ContactInfoDialog(
                         return@Observer
                     }
 
-                    contactState.identityInfo?.let {
-                        identityName.text = if (it.initials != null && it.surname != null) {
-                            "${it.initials} ${it.surname}"
-                        } else "-"
+                    contactState.identityInfo.let {
+                        identityName.text =
+                            if (it.initials != null && it.surname != null) {
+                                "${it.initials} ${it.surname}"
+                            } else {
+                                "-"
+                            }
 
                         verificationStatus.isVisible = true
                         verifiedStatus.isVisible = it.isVerified
@@ -326,10 +330,11 @@ class ContactInfoDialog(
         var items: List<Item>
 
         withContext(Dispatchers.IO) {
-            transactionsItems = getTransactionRepository().getTransactionsBetweenMeAndOther(
-                publicKey,
-                getTrustChainHelper()
-            )
+            transactionsItems =
+                getTransactionRepository().getTransactionsBetweenMeAndOther(
+                    publicKey,
+                    getTrustChainHelper()
+                )
             items = createTransactionItems(transactionsItems.take(transactionShowCount))
         }
 
@@ -340,14 +345,23 @@ class ContactInfoDialog(
         noTransactionsView.isVisible = items.isEmpty()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        @Suppress("DEPRECATION")
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
-                ContactChatFragment.RENAME_CONTACT -> if (data != null) {
-                    bottomSheetDialog.show()
-                }
+                ContactChatFragment.RENAME_CONTACT ->
+                    if (data != null) {
+                        bottomSheetDialog.show()
+                    }
             }
-        } else super.onActivityResult(requestCode, resultCode, data)
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     private fun createAttributeItems(attachments: List<MessageAttachment>): List<Item> {

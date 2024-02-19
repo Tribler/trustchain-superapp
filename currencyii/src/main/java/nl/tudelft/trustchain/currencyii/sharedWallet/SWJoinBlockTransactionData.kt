@@ -16,7 +16,8 @@ data class SWJoinBlockTD(
 )
 
 class SWJoinBlockTransactionData(data: JsonObject) : SWBlockTransactionData(
-    data, CoinCommunity.JOIN_BLOCK
+    data,
+    CoinCommunity.JOIN_BLOCK
 ) {
     fun getData(): SWJoinBlockTD {
         return Gson().fromJson(getJsonString(), SWJoinBlockTD::class.java)

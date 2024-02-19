@@ -19,7 +19,6 @@ import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 class ContactRenameDialog(
     private val contact: Contact,
 ) : VTDialogFragment() {
-
     fun newInstance(num: Int): ContactRenameDialog {
         val dialogFragment = ContactRenameDialog(contact)
         val bundle = Bundle()
@@ -61,6 +60,7 @@ class ContactRenameDialog(
                 intent.type = "text/plain"
                 intent.data = contactNameView.text.toString().toUri()
 
+                @Suppress("DEPRECATION")
                 targetFragment!!.onActivityResult(
                     ContactChatFragment.RENAME_CONTACT,
                     Activity.RESULT_OK,
@@ -95,7 +95,9 @@ class ContactRenameDialog(
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
 
+        @Suppress("DEPRECATION")
         if (targetFragment is ContactInfoDialog) {
+            @Suppress("DEPRECATION")
             targetFragment!!.onActivityResult(
                 ContactChatFragment.RENAME_CONTACT,
                 Activity.RESULT_OK,

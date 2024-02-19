@@ -36,47 +36,53 @@ data class Event(
     val offers: String,
     val name: String,
     val location: Location
-);
+)
+
 data class Location(val type: String, val addressLocality: String)
 
 class PeerAIFragment : BaseFragment(R.layout.fragment_peer_a_i) {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentPeerAIBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPeerAIBinding.inflate(inflater, container, false)
         val view = binding.root
 
         // on below line we are initializing adapter for our list view.
-        binding.results.adapter = AlbumAdapter(
-            requireContext(),
-            emptyList()
+        binding.results.adapter =
+            AlbumAdapter(
+                requireContext(),
+                emptyList()
+            )
+
+        binding.searchview.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    // on below line we are checking
+                    // if query exist or not.
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String): Boolean {
+                    // if query text is change in that case we
+                    // are filtering our adapter with
+                    // new text on below line.
+                    val list = searchAlbums(newText)
+
+                    val adapter = AlbumAdapter(requireContext(), list)
+                    binding.results.adapter = adapter
+                    (binding.results.adapter as AlbumAdapter).notifyDataSetChanged()
+                    return false
+                }
+            }
         )
 
-        binding.searchview.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                // on below line we are checking
-                // if query exist or not.
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                // if query text is change in that case we
-                // are filtering our adapter with
-                // new text on below line.
-                val list = searchAlbums(newText);
-
-                val adapter = AlbumAdapter(requireContext(), list)
-                binding.results.adapter = adapter
-                (binding.results.adapter as AlbumAdapter).notifyDataSetChanged();
-                return false
-            }
-        })
-
-        return view;
+        return view
     }
 
     override fun onDestroyView() {
@@ -84,13 +90,17 @@ class PeerAIFragment : BaseFragment(R.layout.fragment_peer_a_i) {
         _binding = null
     }
 
-    private fun calculateCosineSimilarity(query: List<String>, document: List<String>): Double {
+    private fun calculateCosineSimilarity(
+        query: List<String>,
+        document: List<String>
+    ): Double {
         val queryTermFrequency = query.groupingBy { it }.eachCount()
         val documentTermFrequency = document.groupingBy { it }.eachCount()
 
-        val dotProduct = queryTermFrequency.entries.sumOf { (term, frequency) ->
-            (frequency * (documentTermFrequency[term] ?: 0))
-        }
+        val dotProduct =
+            queryTermFrequency.entries.sumOf { (term, frequency) ->
+                (frequency * (documentTermFrequency[term] ?: 0))
+            }
 
         val queryVectorLength = sqrt(queryTermFrequency.values.sumOf { it * it }.toDouble())
         val documentVectorLength = sqrt(documentTermFrequency.values.sumOf { it * it }.toDouble())
@@ -103,28 +113,32 @@ class PeerAIFragment : BaseFragment(R.layout.fragment_peer_a_i) {
     }
 
     fun searchAlbums(query: String): List<Album> {
-        val queryTerms = query.lowercase().split(" ");
-        val threshold = 0.15;
+        val queryTerms = query.lowercase().split(" ")
+        val threshold = 0.15
 
         this.context?.let {
-            val albums = loadJsonFromAsset(it.applicationContext);
-            val list = albums.filter { album ->
-                val documentTerms =
-                    (album.artist + " " + album.title + " " + album.tags.joinToString(" ") + " " +
-                        album.songs.joinToString(" ")).lowercase().split(" ")
-                val similarityScore = calculateCosineSimilarity(queryTerms, documentTerms)
-                similarityScore >= threshold
-            }
+            val albums = loadJsonFromAsset(it.applicationContext)
+            val list =
+                albums.filter { album ->
+                    val documentTerms =
+                        (
+                            album.artist + " " + album.title + " " + album.tags.joinToString(" ") + " " +
+                                album.songs.joinToString(" ")
+                        ).lowercase().split(" ")
+                    val similarityScore = calculateCosineSimilarity(queryTerms, documentTerms)
+                    similarityScore >= threshold
+                }
 
-            return list;
+            return list
         }
-        return emptyList();
+        return emptyList()
     }
 
     fun loadJsonFromAsset(context: Context): List<Album> {
-        val jsonFileString = context.assets.open("scraped_data_02.json").bufferedReader().use {
-            it.readText()
-        }
+        val jsonFileString =
+            context.assets.open("scraped_data_02.json").bufferedReader().use {
+                it.readText()
+            }
         val gson = Gson()
         return gson.fromJson(jsonFileString, Array<Album>::class.java).toList()
     }
@@ -145,6 +159,7 @@ class PeerAIFragment : BaseFragment(R.layout.fragment_peer_a_i) {
         private lateinit var titleTextView: TextView
         private lateinit var authorTextView: TextView
         private lateinit var albumImageView: ImageView
+
         override fun getCount(): Int {
             return arrayList.size
         }
@@ -157,12 +172,17 @@ class PeerAIFragment : BaseFragment(R.layout.fragment_peer_a_i) {
             return position.toLong()
         }
 
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
-            val binding = if (convertView != null) {
-                ItemAlbumBinding.bind(convertView)
-            } else {
-                ItemAlbumBinding.inflate(LayoutInflater.from(context))
-            }
+        override fun getView(
+            position: Int,
+            convertView: View?,
+            parent: ViewGroup
+        ): View? {
+            val binding =
+                if (convertView != null) {
+                    ItemAlbumBinding.bind(convertView)
+                } else {
+                    ItemAlbumBinding.inflate(LayoutInflater.from(context))
+                }
             val view = binding.root
 
             view.setOnClickListener {
@@ -177,14 +197,17 @@ class PeerAIFragment : BaseFragment(R.layout.fragment_peer_a_i) {
             titleTextView.text = " " + arrayList[position].title
             authorTextView.text = " " + arrayList[position].artist
 
-            if (arrayList[position].artwork != null && arrayList[position].artwork.isNotEmpty()) {
+            if (arrayList[position].artwork.isNotEmpty()) {
                 Picasso.get().load(arrayList[position].artwork).into(albumImageView)
             }
 
             return convertView
         }
 
-        private fun showAuthorDescriptionDialog(context: Context, album: Album) {
+        private fun showAuthorDescriptionDialog(
+            context: Context,
+            album: Album
+        ) {
             val dialog = Dialog(context)
             val binding = AlbumInfoBinding.inflate(LayoutInflater.from(context))
             dialog.setContentView(binding.root)
@@ -194,8 +217,7 @@ class PeerAIFragment : BaseFragment(R.layout.fragment_peer_a_i) {
             val magnetTextView = binding.magnetTextView
             val yearTextView = binding.yearTextView
 
-
-            if (album.author_image != null && album.author_image.isNotEmpty()) {
+            if (album.author_image.isNotEmpty()) {
                 Picasso.get().load(album.author_image).into(authorImageView)
             }
             magnetTextView.text = album.magnet
@@ -204,7 +226,5 @@ class PeerAIFragment : BaseFragment(R.layout.fragment_peer_a_i) {
 
             dialog.show()
         }
-
     }
-
 }

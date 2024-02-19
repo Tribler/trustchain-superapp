@@ -22,16 +22,20 @@ import dagger.hilt.android.EntryPointAccessors
 @ExperimentalFoundationApi
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ProfileScreen(publicKey: String, navController: NavController) {
+fun ProfileScreen(
+    publicKey: String,
+    navController: NavController
+) {
+    val viewModelFactory =
+        EntryPointAccessors.fromActivity(
+            LocalContext.current as Activity,
+            MusicActivity.ViewModelFactoryProvider::class.java
+        ).profileScreenViewModelFactory()
 
-    val viewModelFactory = EntryPointAccessors.fromActivity(
-        LocalContext.current as Activity,
-        MusicActivity.ViewModelFactoryProvider::class.java
-    ).profileScreenViewModelFactory()
-
-    val viewModel: ProfileScreenViewModel = viewModel(
-        factory = ProfileScreenViewModel.provideFactory(viewModelFactory, publicKey = publicKey)
-    )
+    val viewModel: ProfileScreenViewModel =
+        viewModel(
+            factory = ProfileScreenViewModel.provideFactory(viewModelFactory, publicKey = publicKey)
+        )
 
     val profile = viewModel.profile.collectAsState()
     val releases = viewModel.releases.collectAsState()

@@ -13,13 +13,19 @@ class ImportKeyDialog : DialogFragment() {
     private lateinit var listener: ImportKeyDialogListener
 
     interface ImportKeyDialogListener {
-        fun onImport(address: String, privateKey: String, network: BitcoinNetworkOptions)
+        fun onImport(
+            address: String,
+            privateKey: String,
+            network: BitcoinNetworkOptions
+        )
+
         fun onImportDone()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
+            @Suppress("DEPRECATION")
             listener = targetFragment as ImportKeyDialogListener
         } catch (e: ClassCastException) {
             throw ClassCastException("Calling Fragment must implement Listener")
@@ -48,19 +54,20 @@ class ImportKeyDialog : DialogFragment() {
                     val addressValid = isAddressValid(address)
                     val privateKeyValid = isPrivateKeyValid(privateKey)
 
-                    val param = when (network.checkedRadioButtonId) {
-                        R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
-                        R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
-                        R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
-                        else -> {
-                            Toast.makeText(
-                                this.requireContext(),
-                                "Please select a bitcoin network first",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            return@setPositiveButton
+                    val param =
+                        when (network.checkedRadioButtonId) {
+                            R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
+                            R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
+                            R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
+                            else -> {
+                                Toast.makeText(
+                                    this.requireContext(),
+                                    "Please select a bitcoin network first",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                return@setPositiveButton
+                            }
                         }
-                    }
                     if (addressValid && privateKeyValid) {
                         listener.onImport(address, privateKey, param)
                         ad.setText("")
@@ -79,7 +86,6 @@ class ImportKeyDialog : DialogFragment() {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-
                 }
                 .setNegativeButton(
                     "Cancel"

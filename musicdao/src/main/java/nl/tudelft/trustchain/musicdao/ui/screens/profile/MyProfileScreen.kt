@@ -17,8 +17,10 @@ import nl.tudelft.trustchain.musicdao.ui.components.EmptyState
 @ExperimentalMaterialApi
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MyProfileScreen(navController: NavController, profileScreenViewModel: MyProfileScreenViewModel) {
-
+fun MyProfileScreen(
+    navController: NavController,
+    profileScreenViewModel: MyProfileScreenViewModel
+) {
     val profile = profileScreenViewModel.profile.collectAsState()
 
     profile.value?.let {

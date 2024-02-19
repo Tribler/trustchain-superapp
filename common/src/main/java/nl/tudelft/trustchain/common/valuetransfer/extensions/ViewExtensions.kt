@@ -6,7 +6,10 @@ import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
 import nl.tudelft.trustchain.common.R
 
-fun View.viewEnterFromLeft(context: Context, duration: Long? = null) {
+fun View.viewEnterFromLeft(
+    context: Context,
+    duration: Long? = null
+) {
     val animation = AnimationUtils.loadAnimation(context, R.anim.enter_from_left)
     if (duration != null) animation.duration = duration
 
@@ -16,7 +19,10 @@ fun View.viewEnterFromLeft(context: Context, duration: Long? = null) {
     }
 }
 
-fun View.viewEnterFromRight(context: Context, duration: Long? = null) {
+fun View.viewEnterFromRight(
+    context: Context,
+    duration: Long? = null
+) {
     val animation = AnimationUtils.loadAnimation(context, R.anim.enter_from_right)
     if (duration != null) animation.duration = duration
 
@@ -26,7 +32,10 @@ fun View.viewEnterFromRight(context: Context, duration: Long? = null) {
     }
 }
 
-fun View.viewExitToLeft(context: Context, duration: Long? = null) {
+fun View.viewExitToLeft(
+    context: Context,
+    duration: Long? = null
+) {
     val animation = AnimationUtils.loadAnimation(context, R.anim.exit_to_left)
     if (duration != null) animation.duration = duration
 
@@ -36,7 +45,10 @@ fun View.viewExitToLeft(context: Context, duration: Long? = null) {
     }
 }
 
-fun View.viewExitToRight(context: Context, duration: Long? = null) {
+fun View.viewExitToRight(
+    context: Context,
+    duration: Long? = null
+) {
     val animation = AnimationUtils.loadAnimation(context, R.anim.exit_to_right)
     if (duration != null) animation.duration = duration
 
@@ -46,7 +58,10 @@ fun View.viewExitToRight(context: Context, duration: Long? = null) {
     }
 }
 
-fun View.viewFadeIn(context: Context, duration: Long? = null) {
+fun View.viewFadeIn(
+    context: Context,
+    duration: Long? = null
+) {
     val animation = AnimationUtils.loadAnimation(context, R.anim.fade_in)
     if (duration != null) animation.duration = duration
 
@@ -56,7 +71,10 @@ fun View.viewFadeIn(context: Context, duration: Long? = null) {
     }
 }
 
-fun View.viewFadeOut(context: Context, duration: Long? = null) {
+fun View.viewFadeOut(
+    context: Context,
+    duration: Long? = null
+) {
     val animation = AnimationUtils.loadAnimation(context, R.anim.fade_out)
     if (duration != null) animation.duration = duration
 
@@ -66,7 +84,11 @@ fun View.viewFadeOut(context: Context, duration: Long? = null) {
     }
 }
 
-fun View.exitEnterView(context: Context, destination: View, forward: Boolean = true) {
+fun View.exitEnterView(
+    context: Context,
+    destination: View,
+    forward: Boolean = true
+) {
     if (forward) {
         this.viewExitToLeft(context)
         destination.viewEnterFromRight(context)

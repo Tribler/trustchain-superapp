@@ -19,6 +19,7 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * create an instance of this fragment.
  */
 class MySharedWalletFragment : BaseFragment(R.layout.fragment_my_shared_wallets) {
+    @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentJoinNetworkBinding? = null
     private val binding get() = _binding!!
 
@@ -45,6 +46,7 @@ class MySharedWalletFragment : BaseFragment(R.layout.fragment_my_shared_wallets)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
         initListView()
     }

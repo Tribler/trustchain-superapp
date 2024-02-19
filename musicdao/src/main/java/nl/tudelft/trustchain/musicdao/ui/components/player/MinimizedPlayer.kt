@@ -33,45 +33,48 @@ fun MinimizedPlayer(
     val track by playerViewModel.playingTrack.collectAsState(null)
 
     DisposableEffect(
-        key1 = Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier
-                .height(60.dp)
-                .fillMaxWidth()
-                .background(MaterialTheme.colors.secondary)
-        ) {
-
+        key1 =
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(10.dp)
-                    .clickable { navController.navigate(Screen.FullPlayerScreen.route) }
-                    .fillMaxWidth()
+                modifier =
+                    modifier
+                        .height(60.dp)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colors.secondary)
             ) {
-                Row(modifier = Modifier.padding(end = 10.dp)) {
-                    ReleaseCover(
-                        file = coverFile,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(5))
-                    )
-                    Column(
-                        modifier = Modifier.padding(start = 10.dp),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            track?.title?.uppercase() ?: "SONG NAME",
-                            style = MaterialTheme.typography.button.merge(SpanStyle(fontWeight = FontWeight.Bold))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier =
+                        Modifier
+                            .padding(10.dp)
+                            .clickable { navController.navigate(Screen.FullPlayerScreen.route) }
+                            .fillMaxWidth()
+                ) {
+                    Row(modifier = Modifier.padding(end = 10.dp)) {
+                        ReleaseCover(
+                            file = coverFile,
+                            modifier =
+                                Modifier
+                                    .fillMaxHeight()
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(5))
                         )
-                        Text(
-                            track?.artist?.uppercase() ?: "SONG ARTIST",
-                            style = MaterialTheme.typography.button.merge(SpanStyle(fontWeight = FontWeight.Normal))
-                        )
+                        Column(
+                            modifier = Modifier.padding(start = 10.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                track?.title?.uppercase() ?: "SONG NAME",
+                                style = MaterialTheme.typography.button.merge(SpanStyle(fontWeight = FontWeight.Bold))
+                            )
+                            Text(
+                                track?.artist?.uppercase() ?: "SONG ARTIST",
+                                style = MaterialTheme.typography.button.merge(SpanStyle(fontWeight = FontWeight.Normal))
+                            )
+                        }
                     }
                 }
-            }
-        },
+            },
         effect = {
             onDispose {
                 playerViewModel.release()

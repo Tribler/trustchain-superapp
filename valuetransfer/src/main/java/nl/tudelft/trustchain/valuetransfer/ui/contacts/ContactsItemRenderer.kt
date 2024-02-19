@@ -13,10 +13,12 @@ import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 class ContactsItemRenderer(
     private val onChatClick: (Contact) -> Unit,
 ) : ItemLayoutRenderer<ChatItem, View>(
-    ChatItem::class.java
-) {
-
-    override fun bindView(item: ChatItem, view: View) = with(view) {
+        ChatItem::class.java
+    ) {
+    override fun bindView(
+        item: ChatItem,
+        view: View
+    ) = with(view) {
         val binding = ItemContactsBinding.bind(view)
         binding.tvContactName.text = item.contact.name
 

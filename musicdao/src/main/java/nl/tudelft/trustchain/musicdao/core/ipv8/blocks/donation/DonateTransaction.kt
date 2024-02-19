@@ -18,7 +18,7 @@ data class DonateTransaction(
     val value: String
 ) {
     companion object {
-        const val block_type = "donation"
+        const val BLOCK_TYPE = "donation"
 
         fun toTrustchainTransaction(donateTransaction: DonateTransaction): TrustChainTransaction {
             val map = mutableMapOf<String, Any>()
@@ -37,7 +37,8 @@ data class DonateTransaction(
                 map["transactionId"] as String,
                 map["toBitcoinAddress"] as String,
                 map["fromBitcoinAddress"] as String,
-                map["toTrustchainAddress"] as String, map["fromTrustchainAddress"] as String,
+                map["toTrustchainAddress"] as String,
+                map["fromTrustchainAddress"] as String,
                 map["value"] as String,
             )
         }
@@ -72,56 +73,60 @@ data class DonateTransaction(
             }
         }
 
-        class Signer @Inject constructor(val musicCommunity: MusicCommunity) : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
+        class Signer
+            @Inject
+            constructor(val musicCommunity: MusicCommunity) : BlockSigner {
+                override fun onSignatureRequest(block: TrustChainBlock) {
+                    musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
+                }
             }
-        }
 
         // create a new proposal block
-        class Repository @Inject constructor(val musicCommunity: MusicCommunity) {
+        class Repository
+            @Inject
+            constructor(val musicCommunity: MusicCommunity) {
+                fun createDonationTransactionMessage(
+                    transactionId: String,
+                    toBitcoinAddress: String,
+                    fromBitcoinAddress: String,
+                    toTrustchainAddress: String,
+                    fromTrustchainAddress: String,
+                    value: String
+                ): TrustChainBlock {
+                    return createDonateTransaction(
+                        transactionId = transactionId,
+                        toBitcoinAddress,
+                        fromBitcoinAddress,
+                        toTrustchainAddress,
+                        fromTrustchainAddress,
+                        value
+                    )
+                }
 
-            fun createDonationTransactionMessage(
-                transactionId: String,
-                toBitcoinAddress: String,
-                fromBitcoinAddress: String,
-                toTrustchainAddress: String,
-                fromTrustchainAddress: String,
-                value: String
-            ): TrustChainBlock {
-                return createDonateTransaction(
-                    transactionId = transactionId,
-                    toBitcoinAddress,
-                    fromBitcoinAddress,
-                    toTrustchainAddress,
-                    fromTrustchainAddress,
-                    value
-                )
+                private fun createDonateTransaction(
+                    transactionId: String,
+                    toBitcoinAddress: String,
+                    fromBitcoinAddress: String,
+                    toTrustchainAddress: String,
+                    fromTrustchainAddress: String,
+                    value: String
+                ): TrustChainBlock {
+                    val transaction =
+                        DonateTransaction(
+                            transactionId = transactionId,
+                            toBitcoinAddress = toBitcoinAddress,
+                            fromBitcoinAddress = fromBitcoinAddress,
+                            toTrustchainAddress = toTrustchainAddress,
+                            fromTrustchainAddress = fromTrustchainAddress,
+                            value = value
+                        )
+                    val trustchainTransaction = toTrustchainTransaction(transaction)
+                    return musicCommunity.createProposalBlock(
+                        BLOCK_TYPE,
+                        trustchainTransaction,
+                        musicCommunity.myPeer.publicKey.keyToBin()
+                    )
+                }
             }
-
-            private fun createDonateTransaction(
-                transactionId: String,
-                toBitcoinAddress: String,
-                fromBitcoinAddress: String,
-                toTrustchainAddress: String,
-                fromTrustchainAddress: String,
-                value: String
-            ): TrustChainBlock {
-                val transaction = DonateTransaction(
-                    transactionId = transactionId,
-                    toBitcoinAddress = toBitcoinAddress,
-                    fromBitcoinAddress = fromBitcoinAddress,
-                    toTrustchainAddress = toTrustchainAddress,
-                    fromTrustchainAddress = fromTrustchainAddress,
-                    value = value
-                )
-                val trustchainTransaction = toTrustchainTransaction(transaction)
-                return musicCommunity.createProposalBlock(
-                    block_type,
-                    trustchainTransaction,
-                    musicCommunity.myPeer.publicKey.keyToBin()
-                )
-            }
-        }
     }
 }

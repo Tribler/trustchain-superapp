@@ -8,6 +8,7 @@ ktlint {
     android = true
     outputToConsole = true
     ignoreFailures = false
+    verbose = true
 }
 
 sqldelight {
@@ -59,7 +60,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
-    ndkVersion '21.1.6352462'
+
     namespace 'nl.tudelft.trustchain.valuetransfer'
 }
 
@@ -100,8 +101,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation "androidx.room:room-runtime:$room_version"
     implementation project(path: ':eurotoken')
-    implementation 'com.google.android.gms:play-services-maps:18.0.0'
-    implementation 'com.google.android.gms:play-services-location:18.0.0'
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+    implementation 'com.google.android.gms:play-services-location:21.1.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     // Testing
