@@ -58,17 +58,18 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
         }
 
         fun payBack(transaction: Transaction) {
-            val success: Boolean = if (transaction.block.isAgreement) {
-                transactionRepository.sendTransferProposal(
-                    recipient = transaction.block.linkPublicKey,
-                    amount = transaction.amount
-                )
-            } else {
-                transactionRepository.sendTransferProposal(
-                    recipient = transaction.block.publicKey,
-                    amount = transaction.amount
-                )
-            }
+            val success: Boolean =
+                if (transaction.block.isAgreement) {
+                    transactionRepository.sendTransferProposal(
+                        recipient = transaction.block.linkPublicKey,
+                        amount = transaction.amount
+                    )
+                } else {
+                    transactionRepository.sendTransferProposal(
+                        recipient = transaction.block.publicKey,
+                        amount = transaction.amount
+                    )
+                }
             if (!success) {
                 return Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG)
                     .show()
@@ -118,26 +119,29 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
-
                 val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
                 val ownContact =
                     ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
 
                 // Refresh transactions periodically
-                val items = transactionRepository.getTransactions().map { block: Transaction ->
-                    TransactionItem(
-                        block
-                    )
-                }
+                val items =
+                    transactionRepository.getTransactions().map { block: Transaction ->
+                        TransactionItem(
+                            block
+                        )
+                    }
                 adapter.updateItems(items)
                 adapter.notifyDataSetChanged()
-                val pref = requireContext().getSharedPreferences(
-                    EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
-                    Context.MODE_PRIVATE
-                )
-                val demoModeEnabled = pref.getBoolean(
-                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false
-                )
+                val pref =
+                    requireContext().getSharedPreferences(
+                        EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                        Context.MODE_PRIVATE
+                    )
+                val demoModeEnabled =
+                    pref.getBoolean(
+                        EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                        false
+                    )
 
                 if (demoModeEnabled) {
                     binding.txtBalance.text =
@@ -154,32 +158,40 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
-
 
         binding.list.adapter = adapter
         binding.list.layoutManager = LinearLayoutManager(context)
         binding.list.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
         binding.txtOwnPublicKey.text = getTrustChainCommunity().myPeer.publicKey.keyToHash().toHex()
 
-        items.observe(viewLifecycleOwner, Observer {
-            adapter.updateItems(it)
-            val pref = requireContext().getSharedPreferences(
-                EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
-                Context.MODE_PRIVATE
-            )
-            val demoModeEnabled = pref.getBoolean(
-                EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false
-            )
+        items.observe(
+            viewLifecycleOwner,
+            Observer {
+                adapter.updateItems(it)
+                val pref =
+                    requireContext().getSharedPreferences(
+                        EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                        Context.MODE_PRIVATE
+                    )
+                val demoModeEnabled =
+                    pref.getBoolean(
+                        EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                        false
+                    )
 
-            if (demoModeEnabled) {
-                binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
-            } else {
-                binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                if (demoModeEnabled) {
+                    binding.txtBalance.text =
+                        TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                } else {
+                    binding.txtBalance.text =
+                        TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                }
             }
-        })
+        )
     }
 }

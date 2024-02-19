@@ -1,4 +1,5 @@
 package nl.tudelft.trustchain.eurotoken.db
+
 import android.content.Context
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import nl.tudelft.eurotoken.sqldelight.Database
@@ -10,7 +11,7 @@ import nl.tudelft.trustchain.eurotoken.entity.TrustScore
  * 50 public keys of transactions he/she made. For every public key,
  * a trust score is maintained in order to build the web of trust.
  */
-class TrustStore (context: Context) {
+class TrustStore(context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "eurotoken.db")
     private val database = Database(driver)
 
@@ -18,8 +19,8 @@ class TrustStore (context: Context) {
      * Maps the keys and accompanying trust scores out of the database into a kotlin [TrustScore] object.
      */
     private val messageMapper = {
-            public_key : ByteArray,
-            score : Long
+            public_key: ByteArray,
+            score: Long
         ->
         TrustScore(
             public_key,
@@ -30,14 +31,14 @@ class TrustStore (context: Context) {
     /**
      * Retrieve all [TrustScore]s from the database.
      */
-    fun getAllScores() : List<TrustScore> {
+    fun getAllScores(): List<TrustScore> {
         return database.dbTrustScoreQueries.getAll(messageMapper).executeAsList()
     }
 
     /**
      * Retrieve the [TrustScore]s of a specific public key.
      */
-    fun getScore(publicKey: ByteArray) : Long? {
+    fun getScore(publicKey: ByteArray): Long? {
         return database.dbTrustScoreQueries.getScore(publicKey).executeAsOneOrNull()
     }
 
@@ -46,11 +47,11 @@ class TrustStore (context: Context) {
      * If the score already exists, it will be incremented by 1.
      */
     fun incrementTrust(publicKey: ByteArray) {
-        val score : Long? = getScore(publicKey)
+        val score: Long? = getScore(publicKey)
 
         if (score != null) {
             // Limit score to 100
-            if(score.toInt() >= 100) {
+            if (score.toInt() >= 100) {
                 return
             }
             database.dbTrustScoreQueries.incrementScore(publicKey)
@@ -68,6 +69,7 @@ class TrustStore (context: Context) {
 
     companion object {
         private lateinit var instance: TrustStore
+
         fun getInstance(context: Context): TrustStore {
             if (!::instance.isInitialized) {
                 instance = TrustStore(context)

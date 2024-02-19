@@ -11,9 +11,7 @@ import java.math.BigInteger
 import java.security.SecureRandom
 
 class EthereumWalletService {
-
     companion object {
-
         private var globalWeb3jWallet: EthereumWeb3jWallet? = null
         private var lastDir: File? = null
 
@@ -50,12 +48,13 @@ class EthereumWalletService {
             )
 
             // Create wallet
-            globalWeb3jWallet = EthereumWeb3jWallet(
-                web3j,
-                context.cacheDir,
-                getWalletKeys(context),
-                getWalletPassword(context)
-            )
+            globalWeb3jWallet =
+                EthereumWeb3jWallet(
+                    web3j,
+                    context.cacheDir,
+                    getWalletKeys(context),
+                    getWalletPassword(context)
+                )
 
             return globalWeb3jWallet!!
         }
@@ -65,7 +64,7 @@ class EthereumWalletService {
         private const val SHARED_PREF_KEY_PUBLIC_KEY = "web3j_wallet_public_key"
 
         private fun getWalletPassword(context: Context): String {
-            val preferences = context.getSharedPreferences("web3j_wallet", Context.MODE_PRIVATE);
+            val preferences = context.getSharedPreferences("web3j_wallet", Context.MODE_PRIVATE)
 
             var password = preferences.getString(SHARED_PREF_KEY_WALLET_PASSWORD, null)
             if (password == null) {
@@ -84,7 +83,7 @@ class EthereumWalletService {
         }
 
         private fun getWalletKeys(context: Context): ECKeyPair {
-            val preferences = context.getSharedPreferences("web3j_wallet", Context.MODE_PRIVATE);
+            val preferences = context.getSharedPreferences("web3j_wallet", Context.MODE_PRIVATE)
 
             val privateKey = preferences.getString(SHARED_PREF_KEY_PRIVATE_KEY, null)
             val publicKey = preferences.getString(SHARED_PREF_KEY_PUBLIC_KEY, null)
@@ -106,7 +105,5 @@ class EthereumWalletService {
                 ECKeyPair(BigInteger(privateKey), BigInteger(publicKey))
             }
         }
-
     }
-
 }

@@ -16,7 +16,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentTrustScoresBinding
-import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.eurotoken.entity.TrustScore
 
 /**
@@ -39,14 +38,19 @@ class TrustScoresFragment : EurotokenBaseFragment(R.layout.fragment_trust_scores
         adapter.registerRenderer(TrustScoreItemRenderer())
 
         lifecycleScope.launchWhenResumed {
-            val items = trustStore.getAllScores().map { trustScore: TrustScore -> TrustScoreItem(trustScore) }
+            val items =
+                trustStore.getAllScores()
+                    .map { trustScore: TrustScore -> TrustScoreItem(trustScore) }
             adapter.updateItems(items)
             adapter.notifyDataSetChanged()
             delay(1000L)
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.trustScoresRecyclerView.adapter = adapter

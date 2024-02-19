@@ -47,13 +47,16 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
                 val ownContact =
                     ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
-                val pref = requireContext().getSharedPreferences(
-                    EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
-                    Context.MODE_PRIVATE
-                )
-                val demoModeEnabled = pref.getBoolean(
-                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false
-                )
+                val pref =
+                    requireContext().getSharedPreferences(
+                        EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                        Context.MODE_PRIVATE
+                    )
+                val demoModeEnabled =
+                    pref.getBoolean(
+                        EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                        false
+                    )
 
                 if (demoModeEnabled) {
                     binding.txtBalance.text =
@@ -74,19 +77,25 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
         val ownContact = ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
 
-        val pref = requireContext().getSharedPreferences(
-            EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
-            Context.MODE_PRIVATE
-        )
-        val demoModeEnabled = pref.getBoolean(
-            EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false
-        )
+        val pref =
+            requireContext().getSharedPreferences(
+                EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                Context.MODE_PRIVATE
+            )
+        val demoModeEnabled =
+            pref.getBoolean(
+                EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                false
+            )
 
         if (demoModeEnabled) {
             binding.txtBalance.text =
@@ -173,24 +182,29 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         return null
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
                 val connectionData = ConnectionData(it)
 
                 val args = Bundle()
-                args.putString(SendMoneyFragment.ARG_PUBLIC_KEY, connectionData.public_key)
+                args.putString(SendMoneyFragment.ARG_PUBLIC_KEY, connectionData.publicKey)
                 args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
                 args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
 
                 // Try to send the addresses of the last X transactions to the peer we have just scanned.
                 try {
-                    val peer = findPeer(
-                        defaultCryptoProvider.keyFromPublicBin(connectionData.public_key.hexToBytes())
-                            .toString()
-                    )
+                    val peer =
+                        findPeer(
+                            defaultCryptoProvider.keyFromPublicBin(connectionData.publicKey.hexToBytes())
+                                .toString()
+                        )
                     if (peer == null) {
-                        logger.warn { "Could not find peer from QR code by public key " + connectionData.public_key }
+                        logger.warn { "Could not find peer from QR code by public key " + connectionData.publicKey }
                         Toast.makeText(
                             requireContext(),
                             "Could not find peer from QR code",
@@ -246,12 +260,11 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 }
 
                 true
-
             }
         }
 
         class ConnectionData(json: String) : JSONObject(json) {
-            var public_key = this.optString("public_key")
+            var publicKey = this.optString("public_key")
             var amount = this.optLong("amount", -1L)
             var name = this.optString("name")
             var type = this.optString("type")
@@ -272,44 +285,47 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         }
 
         fun EditText.decimalLimiter(string: String): String {
-
             var amount = getAmount(string)
 
             if (amount == 0L) {
                 return ""
             }
 
-            //val amount = string.replace("[^\\d]", "").toLong()
+            // val amount = string.replace("[^\\d]", "").toLong()
             return (amount / 100).toString() + "." + (amount % 100).toString().padStart(2, '0')
         }
 
         fun EditText.addDecimalLimiter() {
+            this.addTextChangedListener(
+                object : TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        val str = this@addDecimalLimiter.text!!.toString()
+                        if (str.isEmpty()) return
+                        val str2 = decimalLimiter(str)
 
-            this.addTextChangedListener(object : TextWatcher {
-
-                override fun afterTextChanged(s: Editable?) {
-                    val str = this@addDecimalLimiter.text!!.toString()
-                    if (str.isEmpty()) return
-                    val str2 = decimalLimiter(str)
-
-                    if (str2 != str) {
-                        this@addDecimalLimiter.setText(str2)
-                        val pos = this@addDecimalLimiter.text!!.length
-                        this@addDecimalLimiter.setSelection(pos)
+                        if (str2 != str) {
+                            this@addDecimalLimiter.setText(str2)
+                            val pos = this@addDecimalLimiter.text!!.length
+                            this@addDecimalLimiter.setSelection(pos)
+                        }
                     }
-                }
 
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-                }
+                    override fun beforeTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        count: Int,
+                        after: Int
+                    ) {
+                    }
 
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            })
+                    override fun onTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        before: Int,
+                        count: Int
+                    ) {}
+                }
+            )
         }
     }
 }
-

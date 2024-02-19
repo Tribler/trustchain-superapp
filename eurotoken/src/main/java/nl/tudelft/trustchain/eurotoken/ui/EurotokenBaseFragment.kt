@@ -74,7 +74,7 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         }
     }
 
-    fun makeMoneyToast()  {
+    fun makeMoneyToast() {
         Toast.makeText(requireContext(), "Money received!", Toast.LENGTH_LONG).show()
     }
 
@@ -87,14 +87,26 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
     }
 
     override fun onResume() {
-        transactionRepository.trustChainCommunity.addListener(TransactionRepository.BLOCK_TYPE_TRANSFER, onReceiveListener)
-        transactionRepository.trustChainCommunity.addListener(TransactionRepository.BLOCK_TYPE_CREATE, onReceiveListener)
+        transactionRepository.trustChainCommunity.addListener(
+            TransactionRepository.BLOCK_TYPE_TRANSFER,
+            onReceiveListener
+        )
+        transactionRepository.trustChainCommunity.addListener(
+            TransactionRepository.BLOCK_TYPE_CREATE,
+            onReceiveListener
+        )
         super.onResume()
     }
 
     override fun onPause() {
-        transactionRepository.trustChainCommunity.removeListener(onReceiveListener, TransactionRepository.BLOCK_TYPE_TRANSFER)
-        transactionRepository.trustChainCommunity.removeListener(onReceiveListener, TransactionRepository.BLOCK_TYPE_CREATE)
+        transactionRepository.trustChainCommunity.removeListener(
+            onReceiveListener,
+            TransactionRepository.BLOCK_TYPE_TRANSFER
+        )
+        transactionRepository.trustChainCommunity.removeListener(
+            onReceiveListener,
+            TransactionRepository.BLOCK_TYPE_CREATE
+        )
         super.onPause()
     }
 
@@ -115,7 +127,8 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
                 EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
                 Context.MODE_PRIVATE
             )
-        val demoModeEnabled = pref.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+        val demoModeEnabled =
+            pref.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
         if (demoModeEnabled) {
             TransactionRepository.initialBalance = 1000
         } else {
@@ -139,6 +152,7 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
                 }
                 true
             }
+
             R.id.copyKey -> {
                 val clipboard =
                     ContextCompat.getSystemService(requireContext(), ClipboardManager::class.java)
@@ -147,14 +161,17 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
                 Toast.makeText(requireContext(), "Copied to clipboard", Toast.LENGTH_SHORT).show()
                 true
             }
+
             R.id.renameSelf -> {
                 renameSelf()
                 true
             }
+
             R.id.gateways -> {
                 findNavController().navigate(R.id.gatewaysFragment)
                 true
             }
+
             R.id.toggleDemoMode -> {
                 val sharedPreferences =
                     requireContext().getSharedPreferences(
@@ -164,17 +181,22 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
                 val edit = sharedPreferences.edit()
                 edit.putBoolean(
                     EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
-                    !sharedPreferences.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+                    !sharedPreferences.getBoolean(
+                        EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                        false
+                    )
                 )
                 edit.commit()
 
                 item.setTitle(getDemoModeMenuItemText())
                 true
             }
+
             R.id.trustScoresMenuItem -> {
                 findNavController().navigate(R.id.trustScoresFragment)
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

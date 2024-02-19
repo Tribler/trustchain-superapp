@@ -73,8 +73,8 @@ class ExchangeFragment : EurotokenBaseFragment() {
         data: Intent?
     ) {
         class ConnectionData(json: String) : JSONObject(json) {
-            val payment_id = this.optString("payment_id")
-            val public_key = this.optString("public_key")
+            val paymentId = this.optString("payment_id")
+            val publicKey = this.optString("public_key")
             val ip = this.optString("ip")
             val name = this.optString("name")
             val port = this.optInt("port")
@@ -87,23 +87,23 @@ class ExchangeFragment : EurotokenBaseFragment() {
                 Toast.makeText(requireContext(), connectionData.ip, Toast.LENGTH_LONG).show()
                 if (connectionData.type == "destruction") {
                     val args = Bundle()
-                    args.putString(DestroyMoneyFragment.ARG_PUBLIC_KEY, connectionData.public_key)
+                    args.putString(DestroyMoneyFragment.ARG_PUBLIC_KEY, connectionData.publicKey)
                     args.putString(DestroyMoneyFragment.ARG_NAME, connectionData.name)
                     args.putLong(DestroyMoneyFragment.ARG_AMOUNT, connectionData.amount)
                     args.putInt(DestroyMoneyFragment.ARG_PORT, connectionData.port)
                     args.putString(DestroyMoneyFragment.ARG_IP, connectionData.ip)
-                    args.putString(DestroyMoneyFragment.ARG_PAYMENT_ID, connectionData.payment_id)
+                    args.putString(DestroyMoneyFragment.ARG_PAYMENT_ID, connectionData.paymentId)
                     findNavController().navigate(
                         R.id.action_exchangeFragment_to_destroyMoneyFragment,
                         args
                     )
                 } else if (connectionData.type == "creation") {
                     val args = Bundle()
-                    args.putString(CreateMoneyFragment.ARG_PUBLIC_KEY, connectionData.public_key)
+                    args.putString(CreateMoneyFragment.ARG_PUBLIC_KEY, connectionData.publicKey)
                     args.putString(CreateMoneyFragment.ARG_NAME, connectionData.name)
                     args.putInt(CreateMoneyFragment.ARG_PORT, connectionData.port)
                     args.putString(CreateMoneyFragment.ARG_IP, connectionData.ip)
-                    args.putString(CreateMoneyFragment.ARG_PAYMENT_ID, connectionData.payment_id)
+                    args.putString(CreateMoneyFragment.ARG_PAYMENT_ID, connectionData.paymentId)
                     findNavController().navigate(
                         R.id.action_exchangeFragment_to_createMoneyFragment,
                         args
@@ -241,7 +241,8 @@ class ExchangeFragment : EurotokenBaseFragment() {
                         start: Int,
                         before: Int,
                         count: Int
-                    ) {}
+                    ) {
+                    }
                 }
             )
         }

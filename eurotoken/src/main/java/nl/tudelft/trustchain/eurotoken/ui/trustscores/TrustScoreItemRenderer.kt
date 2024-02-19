@@ -13,8 +13,10 @@ import nl.tudelft.trustchain.eurotoken.entity.TrustScore
 class TrustScoreItemRenderer : ItemLayoutRenderer<TrustScoreItem, View>(
     TrustScoreItem::class.java
 ) {
-
-    override fun bindView(item: TrustScoreItem, view: View) = with(view) {
+    override fun bindView(
+        item: TrustScoreItem,
+        view: View
+    ) = with(view) {
         val binding = ItemTrustscoreBinding.bind(view)
         binding.txtPubKey.text = item.trustScore.pubKey.toHex()
         binding.txtTrustScore.text = item.trustScore.trust.toString() + "%"

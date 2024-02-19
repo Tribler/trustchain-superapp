@@ -13,7 +13,10 @@ import java.text.SimpleDateFormat
 class WanLogFragment : BaseFragment(R.layout.fragment_wan_log) {
     private val binding by viewBinding(FragmentWanLogBinding::bind)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenStarted {
@@ -21,10 +24,12 @@ class WanLogFragment : BaseFragment(R.layout.fragment_wan_log) {
                 val discovery = getIpv8().getOverlay<DiscoveryCommunity>()!!
                 val df = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM)
                 binding.txtLog.text =
-                    "Time      Sender               My WAN\n" + discovery.network.wanLog.getLog()
+                    "Time      Sender               My WAN\n" +
+                    discovery.network.wanLog.getLog()
                         .map {
-                            "" + df.format(it.timestamp) + ": " + it.sender.toString()
-                                .padEnd(20) + " " + it.wan
+                            "" + df.format(it.timestamp) + ": " +
+                                it.sender.toString()
+                                    .padEnd(20) + " " + it.wan
                         }.joinToString("\n")
                 delay(1000)
             }

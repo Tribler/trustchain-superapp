@@ -21,19 +21,23 @@ class TransactionItemRenderer(
     private val transactionRepository: TransactionRepository,
     private val onItemLongClick: (Transaction) -> Unit
 ) : ItemLayoutRenderer<TransactionItem, View>(
-    TransactionItem::class.java
-) {
+        TransactionItem::class.java
+    ) {
     private val dateFormat = SimpleDateFormat.getDateTimeInstance()
 
-    override fun bindView(item: TransactionItem, view: View) = with(view) {
+    override fun bindView(
+        item: TransactionItem,
+        view: View
+    ) = with(view) {
         val binding = ItemTransactionBinding.bind(view)
         if (item.transaction.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT) {
-            binding.txtAmount.text = TransactionRepository.prettyAmount(
-                getBalanceForBlock(
-                    item.transaction.block,
-                    transactionRepository.trustChainCommunity.database
-                )!!
-            )
+            binding.txtAmount.text =
+                TransactionRepository.prettyAmount(
+                    getBalanceForBlock(
+                        item.transaction.block,
+                        transactionRepository.trustChainCommunity.database
+                    )!!
+                )
             binding.imageInOut.setImageResource(R.drawable.ic_baseline_check_circle_outline_24)
             binding.imageInOut.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue))
         } else if (item.transaction.type == TransactionRepository.BLOCK_TYPE_ROLLBACK) {
@@ -47,7 +51,12 @@ class TransactionItemRenderer(
                 binding.imageInOut.setColorFilter(ContextCompat.getColor(getContext(), R.color.red))
             } else {
                 binding.imageInOut.setImageResource(R.drawable.ic_baseline_incoming_24)
-                binding.imageInOut.setColorFilter(ContextCompat.getColor(getContext(), R.color.green))
+                binding.imageInOut.setColorFilter(
+                    ContextCompat.getColor(
+                        getContext(),
+                        R.color.green
+                    )
+                )
             }
         }
         val peer: PublicKey
@@ -58,10 +67,12 @@ class TransactionItemRenderer(
                 TransactionRepository.BLOCK_TYPE_CHECKPOINT
             ).contains(item.transaction.type)
         ) {
-            val gateway: Gateway? = GatewayStore.getInstance(view.context).getGatewayFromPublicKey(peer)
+            val gateway: Gateway? =
+                GatewayStore.getInstance(view.context).getGatewayFromPublicKey(peer)
             binding.txtName.text = gateway?.name ?: ""
         } else {
-            val contact: Contact? = ContactStore.getInstance(view.context).getContactFromPublicKey(peer)
+            val contact: Contact? =
+                ContactStore.getInstance(view.context).getContactFromPublicKey(peer)
             binding.txtName.text = contact?.name ?: ""
         }
 
@@ -74,20 +85,24 @@ class TransactionItemRenderer(
         if (item.transaction.block.type == TransactionRepository.BLOCK_TYPE_ROLLBACK) {
             binding.txtType.text = "Rollback of seq: "
             binding.txtProp.text =
-                "(${transactionRepository.trustChainCommunity.database.getBlockWithHash((item.transaction.block.transaction[TransactionRepository.KEY_TRANSACTION_HASH] as String).hexToBytes())!!.sequenceNumber})"
+                "(${transactionRepository.trustChainCommunity.database.getBlockWithHash(
+                    (item.transaction.block.transaction[TransactionRepository.KEY_TRANSACTION_HASH] as String).hexToBytes()
+                )!!.sequenceNumber})"
         } else if (item.transaction.block.isProposal) {
-            val linkedBlock = transactionRepository.trustChainCommunity.database.getLinked(
-                item.transaction.block)
+            val linkedBlock =
+                transactionRepository.trustChainCommunity.database.getLinked(
+                    item.transaction.block
+                )
             if (linkedBlock != null) {
                 binding.txtProp.text = "P+A"
-                binding.txtProp.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+                binding.txtProp.setTextColor(ContextCompat.getColor(getContext(), R.color.green))
             } else {
                 binding.txtProp.text = "P-A"
-                binding.txtProp.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+                binding.txtProp.setTextColor(ContextCompat.getColor(getContext(), R.color.red))
             }
         } else {
             binding.txtProp.text = "A"
-            binding.txtProp.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+            binding.txtProp.setTextColor(ContextCompat.getColor(getContext(), R.color.green))
         }
 
         setOnLongClickListener {
@@ -95,17 +110,17 @@ class TransactionItemRenderer(
             true
         }
 
-        binding.txtBalance.text = "Balance: " + TransactionRepository.prettyAmount(
-            getBalanceForBlock(
-                item.transaction.block,
-                transactionRepository.trustChainCommunity.database
-            )!!
-        )
+        binding.txtBalance.text = "Balance: " +
+            TransactionRepository.prettyAmount(
+                getBalanceForBlock(
+                    item.transaction.block,
+                    transactionRepository.trustChainCommunity.database
+                )!!
+            )
 //        txtVBalance.text = TransactionRepository.prettyAmount(transactionRepository.getVerifiedBalanceForBlock(item.transaction.block, transactionRepository.trustChainCommunity.database)!!)
     }
 
     override fun getLayoutResourceId(): Int {
         return R.layout.item_transaction
     }
-
 }

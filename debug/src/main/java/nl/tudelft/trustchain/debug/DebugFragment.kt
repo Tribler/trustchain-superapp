@@ -30,7 +30,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentDebugBinding
 import java.util.*
 
-
 class DebugFragment : BaseFragment(R.layout.fragment_debug) {
     private val binding by viewBinding(FragmentDebugBinding::bind)
 
@@ -42,7 +41,10 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
     }
 
     @Deprecated("Deprecated in Java")
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.debug_options, menu)
     }
 
@@ -54,15 +56,20 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
                 findNavController().navigate(R.id.wanLogFragment)
                 true
             }
+
             R.id.multiPunch -> {
                 findNavController().navigate(R.id.punctureFragment)
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenStarted {
@@ -82,69 +89,76 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
         binding.txtWanAddress.text = demo.myEstimatedWan.toString()
         binding.txtPeerId.text = ipv8.myPeer.mid
         binding.txtPublicKey.text = ipv8.myPeer.publicKey.keyToBin().toHex()
-        binding.txtOverlays.text = ipv8.overlays.values.toList().joinToString("\n") {
-            it.javaClass.simpleName + " (" + it.getPeers().size + " peers)"
-        }
+        binding.txtOverlays.text =
+            ipv8.overlays.values.toList().joinToString("\n") {
+                it.javaClass.simpleName + " (" + it.getPeers().size + " peers)"
+            }
 
-        binding.txtOverlays.text = buildSpannedString {
-            ipv8.overlays.values.forEachIndexed { index, overlay ->
-                if (index > 0) append("\n")
-                append(overlay.javaClass.simpleName)
-                append(" (")
-                val textColorResId =
-                    if (overlay.getPeers().isNotEmpty()) R.color.green else R.color.red
+        binding.txtOverlays.text =
+            buildSpannedString {
+                ipv8.overlays.values.forEachIndexed { index, overlay ->
+                    if (index > 0) append("\n")
+                    append(overlay.javaClass.simpleName)
+                    append(" (")
+                    val textColorResId =
+                        if (overlay.getPeers().isNotEmpty()) R.color.green else R.color.red
+                    val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
+                    inSpans(ForegroundColorSpan(textColor)) {
+                        val peers = overlay.getPeers()
+                        val peersCountStr =
+                            resources.getQuantityString(
+                                R.plurals.x_peers,
+                                peers.size,
+                                peers.size
+                            )
+                        append(peersCountStr)
+                    }
+                    append(")")
+                }
+
+                append("\n")
+                bold {
+                    append("Total: ")
+                }
+                val totalPeersCount = ipv8.network.verifiedPeers.size
+                val textColorResId = if (totalPeersCount > 0) R.color.green else R.color.red
                 val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
                 inSpans(ForegroundColorSpan(textColor)) {
-                    val peers = overlay.getPeers()
-                    val peersCountStr = resources.getQuantityString(
-                        R.plurals.x_peers, peers.size,
-                        peers.size
+                    append(
+                        resources.getQuantityString(
+                            R.plurals.x_peers,
+                            totalPeersCount,
+                            totalPeersCount
+                        )
                     )
-                    append(peersCountStr)
                 }
-                append(")")
             }
-
-            append("\n")
-            bold {
-                append("Total: ")
-            }
-            val totalPeersCount = ipv8.network.verifiedPeers.size
-            val textColorResId = if (totalPeersCount > 0) R.color.green else R.color.red
-            val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
-            inSpans(ForegroundColorSpan(textColor)) {
-                append(
-                    resources.getQuantityString(
-                        R.plurals.x_peers,
-                        totalPeersCount,
-                        totalPeersCount
-                    )
-                )
-            }
-        }
 
         updateBootstrapList()
 
         lifecycleScope.launchWhenCreated {
-            val blockCount = withContext(Dispatchers.IO) {
-                getTrustChainCommunity().database.getBlockCount(null)
-            }
+            val blockCount =
+                withContext(Dispatchers.IO) {
+                    getTrustChainCommunity().database.getBlockCount(null)
+                }
             if (view != null) {
                 binding.txtBlockCount.text = blockCount.toString()
             }
         }
 
         lifecycleScope.launchWhenCreated {
-            val chainLength = withContext(Dispatchers.IO) {
-                getTrustChainCommunity().getChainLength()
-            }
+            val chainLength =
+                withContext(Dispatchers.IO) {
+                    getTrustChainCommunity().getChainLength()
+                }
             if (view != null) {
                 binding.txtChainLength.text = chainLength.toString()
             }
         }
 
-        binding.txtConnectionType.text = getDemoCommunity().network.wanLog
-            .estimateConnectionType().value
+        binding.txtConnectionType.text =
+            getDemoCommunity().network.wanLog
+                .estimateConnectionType().value
 
         try {
             val pInfo: PackageInfo =
@@ -163,14 +177,19 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
             val lastResponse = demo.lastTrackerResponses[address]
             val isAlive = lastResponse != null && Date().time - lastResponse.time < 120_000
             val view = TextView(requireContext())
-            val layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
+            val layoutParams =
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
             view.layoutParams = layoutParams
             view.text = address.toString()
-            val resId = if (isAlive) R.drawable.indicator_online else
-                R.drawable.indicator_offline
+            val resId =
+                if (isAlive) {
+                    R.drawable.indicator_online
+                } else {
+                    R.drawable.indicator_offline
+                }
             val drawable = resources.getDrawable(resId, null)
             view.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null)
             view.compoundDrawablePadding =

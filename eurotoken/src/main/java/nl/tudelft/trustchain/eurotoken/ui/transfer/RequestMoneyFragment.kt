@@ -20,16 +20,20 @@ class RequestMoneyFragment : EurotokenBaseFragment(R.layout.fragment_request_mon
         QRCodeUtils(requireContext())
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         val json = requireArguments().getString(ARG_DATA)!!
 
         binding.txtRequestData.text = json
         lifecycleScope.launch {
-            val bitmap = withContext(Dispatchers.Default) {
-                qrCodeUtils.createQR(json)
-            }
+            val bitmap =
+                withContext(Dispatchers.Default) {
+                    qrCodeUtils.createQR(json)
+                }
             binding.qr.setImageBitmap(bitmap)
         }
 

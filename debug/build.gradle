@@ -1,5 +1,14 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jlleitschuh.gradle.ktlint'
+
+ktlint {
+    version = "$ktlint_version"
+    android = true
+    outputToConsole = true
+    ignoreFailures = false
+    verbose = true
+}
 
 android {
     defaultConfig {

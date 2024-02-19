@@ -1,10 +1,8 @@
 package nl.tudelft.trustchain.eurotoken.community
 
 import android.content.Context
-import android.os.Build
 import androidx.annotation.RequiresApi
 import kotlin.random.Random
-import mu.KotlinLogging
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
@@ -22,10 +20,9 @@ import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity.EurotokenPreference
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.eurotoken.ui.settings.DefaultGateway
 
-
 class EuroTokenCommunity(
     store: GatewayStore,
-    trustStore : TrustStore,
+    trustStore: TrustStore,
     context: Context,
 ) : Community() {
     override val serviceId = "f0eb36102436bd55c7a3cdca93dcaefb08df0750"
@@ -35,13 +32,12 @@ class EuroTokenCommunity(
     /**
      * The [TrustStore] used to fetch and update trust scores from peers.
      */
-    private var myTrustStore : TrustStore
+    private var myTrustStore: TrustStore
 
     /**
      * The context used to access the shared preferences.
      */
-    private var myContext : Context
-
+    private var myContext: Context
 
     init {
         messageHandlers[MessageId.ROLLBACK_REQUEST] = ::onRollbackRequestPacket
@@ -73,44 +69,58 @@ class EuroTokenCommunity(
      * @param packet : the corresponding packet that contains the right payload.
      */
     private fun onLastAddressPacket(packet: Packet) {
-        val (_, payload) = packet.getDecryptedAuthPayload(
-            TransactionsPayload.Deserializer, myPeer.key as PrivateKey
-        )
+        val (_, payload) =
+            packet.getDecryptedAuthPayload(
+                TransactionsPayload.Deserializer,
+                myPeer.key as PrivateKey
+            )
 
-        val addresses : List<ByteArray> = String(payload.data).split(",").map { it.toByteArray() }
+        val addresses: List<ByteArray> = String(payload.data).split(",").map { it.toByteArray() }
         for (i in addresses.indices) {
             myTrustStore.incrementTrust(addresses[i])
         }
     }
 
-
-    private fun onRollbackRequest(peer: Peer, payload: RollbackRequestPayload) {
+    private fun onRollbackRequest(
+        peer: Peer,
+        payload: RollbackRequestPayload
+    ) {
         transactionRepository.attemptRollback(peer, payload.transactionHash)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun connectToGateway(public_key: String, ip: String, port: Int, payment_id: String) {
+    fun connectToGateway(
+        public_key: String,
+        ip: String,
+        port: Int,
+        payment_id: String
+    ) {
         val key = defaultCryptoProvider.keyFromPublicBin(public_key.hexToBytes())
         val address = IPv4Address(ip, port)
         val peer = Peer(key, address)
 
         val payload = MessagePayload(payment_id)
 
-        val packet = serializePacket(
-            MessageId.GATEWAY_CONNECT,
-            payload
-        )
+        val packet =
+            serializePacket(
+                MessageId.GATEWAY_CONNECT,
+                payload
+            )
 
         send(peer, packet)
     }
 
-    fun requestRollback(transactionHash: ByteArray, peer: Peer) {
+    fun requestRollback(
+        transactionHash: ByteArray,
+        peer: Peer
+    ) {
         val payload = RollbackRequestPayload(transactionHash)
 
-        val packet = serializePacket(
-            MessageId.ROLLBACK_REQUEST,
-            payload
-        )
+        val packet =
+            serializePacket(
+                MessageId.ROLLBACK_REQUEST,
+                payload
+            )
 
         send(peer, packet)
     }
@@ -123,8 +133,8 @@ class EuroTokenCommunity(
 
     class Factory(
         private val store: GatewayStore,
-        private val trustStore : TrustStore,
-        private val context : Context,
+        private val trustStore: TrustStore,
+        private val context: Context,
     ) : Overlay.Factory<EuroTokenCommunity>(EuroTokenCommunity::class.java) {
         override fun create(): EuroTokenCommunity {
             return EuroTokenCommunity(store, trustStore, context)
@@ -135,7 +145,7 @@ class EuroTokenCommunity(
      * Generate a public key based on the [seed].
      * @param seed : the seed used to generate the public key.
      */
-    private fun generatePublicKey(seed : Long) : String {
+    private fun generatePublicKey(seed: Long): String {
         // Initialize Random with seed
         val random = Random(seed)
 
@@ -149,14 +159,16 @@ class EuroTokenCommunity(
      * @param numberOfKeys : the number of keys to generate.
      * @param seed : the seed used to generate the public keys.
      */
-    private fun generatePublicKeys(numberOfKeys: Int, seed : Long = 1337) : List<String> {
+    private fun generatePublicKeys(
+        numberOfKeys: Int,
+        seed: Long = 1337
+    ): List<String> {
         val publicKeys = mutableListOf<String>()
         for (i in 0 until numberOfKeys) {
             publicKeys.add(generatePublicKey(seed + i))
         }
         return publicKeys
     }
-
 
     /**
      * Called after the user has finished a transaction with the other party.
@@ -165,11 +177,14 @@ class EuroTokenCommunity(
      * @param peer : the peer to send the keys to.
      * @param num : the number of keys to send.
      */
-    fun sendAddressesOfLastTransactions(peer: Peer, num: Int = 50) {
+    fun sendAddressesOfLastTransactions(
+        peer: Peer,
+        num: Int = 50
+    ) {
         val pref = myContext.getSharedPreferences(EUROTOKEN_SHARED_PREF_NAME, Context.MODE_PRIVATE)
         val demoModeEnabled = pref.getBoolean(DEMO_MODE_ENABLED, false)
 
-        val addresses : ArrayList<String> = ArrayList()
+        val addresses: ArrayList<String> = ArrayList()
         // Add own public key to list of addresses.
         addresses.add(myPeer.publicKey.keyToBin().toHex())
         if (demoModeEnabled) {
@@ -177,30 +192,35 @@ class EuroTokenCommunity(
             addresses.addAll(generatePublicKeys(num))
         } else {
             // Get all addresses of the last [num] incoming transactions
-            addresses.addAll(transactionRepository.getTransactions(num).map { transaction: Transaction ->
-                transaction.sender.toString()
-            })
+            addresses.addAll(
+                transactionRepository.getTransactions(num).map { transaction: Transaction ->
+                    transaction.sender.toString()
+                }
+            )
         }
 
         val payload = TransactionsPayload(EVAId.EVA_LAST_ADDRESSES, addresses.joinToString(separator = ",").toByteArray())
 
-        val packet = serializePacket(
-            MessageId.ATTACHMENT,
-            payload,
-            encrypt = true,
-            recipient = peer
-        )
+        val packet =
+            serializePacket(
+                MessageId.ATTACHMENT,
+                payload,
+                encrypt = true,
+                recipient = peer
+            )
 
         // Send the list of addresses to the peer using EVA
-        if (evaProtocolEnabled) evaSendBinary(
-            peer,
-            EVAId.EVA_LAST_ADDRESSES,
-            payload.id,
-            packet
-        ) else send(peer, packet)
+        if (evaProtocolEnabled) {
+            evaSendBinary(
+                peer,
+                EVAId.EVA_LAST_ADDRESSES,
+                payload.id,
+                packet
+            )
+        } else {
+            send(peer, packet)
+        }
     }
-
-
 
     /**
      * Every community initializes a different version of the EVA protocol (if enabled).

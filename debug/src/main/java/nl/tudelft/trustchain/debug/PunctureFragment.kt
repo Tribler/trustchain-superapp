@@ -24,7 +24,10 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
     private val firstMessageTimestamps = mutableMapOf<String, Date>()
     private var firstSentMessageTimestamp: Date? = null
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenCreated {
@@ -37,7 +40,7 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
             getDemoCommunity().punctureChannel.collect { (peer, payload) ->
                 Log.i(
                     "PunctureFragment",
-                    "Received puncture from ${peer} on port ${payload.identifier}"
+                    "Received puncture from $peer on port ${payload.identifier}"
                 )
                 received++
                 receivedMap[peer.toString()] = (receivedMap[peer.toString()] ?: 0) + 1
@@ -83,9 +86,12 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
             }
         }
     }
-    */
+     */
 
-    private suspend fun punctureAll(ip: String, slow: Boolean) = with(Dispatchers.Default) {
+    private suspend fun punctureAll(
+        ip: String,
+        slow: Boolean
+    ) = with(Dispatchers.Default) {
         for (i in MIN_PORT..MAX_PORT) {
             val ipv4 = IPv4Address(ip, i)
             getDemoCommunity().sendPuncture(ipv4, i)
@@ -97,8 +103,10 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
         }
     }
 
-
-    private suspend fun punctureSingle(ip: String, port: Int) {
+    private suspend fun punctureSingle(
+        ip: String,
+        port: Int
+    ) {
         while (true) {
             val ipv4 = IPv4Address(ip, port)
             getDemoCommunity().sendPuncture(ipv4, port)
@@ -111,7 +119,8 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
     private fun updateView() {
         val df = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM)
         binding.txtResult.text =
-            "Sent: $sent\nFirst Sent: $firstSentMessageTimestamp\nReceived: $received\n\n" + receivedMap.map {
+            "Sent: $sent\nFirst Sent: $firstSentMessageTimestamp\nReceived: $received\n\n" +
+            receivedMap.map {
                 val date = firstMessageTimestamps[it.key]
                 val time = if (date != null) df.format(date) else null
                 it.key + " (" + time + ") -> " + it.value

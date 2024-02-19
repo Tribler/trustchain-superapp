@@ -1,6 +1,15 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'org.jlleitschuh.gradle.ktlint'
+}
+
+ktlint {
+    version = "$ktlint_version"
+    android = true
+    outputToConsole = true
+    ignoreFailures = false
+    verbose = true
 }
 
 android {

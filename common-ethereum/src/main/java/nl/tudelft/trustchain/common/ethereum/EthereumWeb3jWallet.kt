@@ -14,7 +14,6 @@ class EthereumWeb3jWallet(
     keyPair: ECKeyPair,
     password: String
 ) {
-
     val credentials: Credentials
 
     init {
@@ -28,30 +27,38 @@ class EthereumWeb3jWallet(
     }
 
     fun balance(): BigInteger {
-        return web3j.ethGetBalance(credentials.address, DefaultBlockParameter.valueOf("latest")).sendAsync().get().balance
+        return web3j.ethGetBalance(credentials.address, DefaultBlockParameter.valueOf("latest"))
+            .sendAsync().get().balance
     }
 
     fun nonce(): BigInteger {
-        val ethGetTransactionCount = web3j.ethGetTransactionCount(
-            address(), DefaultBlockParameterName.LATEST
-        ).sendAsync().get()
+        val ethGetTransactionCount =
+            web3j.ethGetTransactionCount(
+                address(),
+                DefaultBlockParameterName.LATEST
+            ).sendAsync().get()
         return ethGetTransactionCount.transactionCount
     }
 
-    fun send(receiveAddress: String, value: BigInteger) {
-        val rawTransaction = RawTransaction.createEtherTransaction(
-            nonce(),
-            BigInteger.valueOf(4),
-            BigInteger.valueOf(8000000),
-            receiveAddress,
-            value
-        )
-        val signedMessage = Numeric.toHexString(
-            TransactionEncoder.signMessage(
-                rawTransaction,
-                credentials
+    fun send(
+        receiveAddress: String,
+        value: BigInteger
+    ) {
+        val rawTransaction =
+            RawTransaction.createEtherTransaction(
+                nonce(),
+                BigInteger.valueOf(4),
+                BigInteger.valueOf(8000000),
+                receiveAddress,
+                value
             )
-        )
+        val signedMessage =
+            Numeric.toHexString(
+                TransactionEncoder.signMessage(
+                    rawTransaction,
+                    credentials
+                )
+            )
         web3j.ethSendRawTransaction(signedMessage).sendAsync().get()
     }
 }

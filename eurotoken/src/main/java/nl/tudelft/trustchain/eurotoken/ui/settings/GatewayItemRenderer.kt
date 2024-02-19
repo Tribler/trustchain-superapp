@@ -9,9 +9,12 @@ import nl.tudelft.trustchain.eurotoken.databinding.ItemGatewayBinding
 class GatewayItemRenderer(
     private val onItemLongClick: (Gateway) -> Unit
 ) : ItemLayoutRenderer<GatewayItem, View>(
-    GatewayItem::class.java
-) {
-    override fun bindView(item: GatewayItem, view: View) = with(view) {
+        GatewayItem::class.java
+    ) {
+    override fun bindView(
+        item: GatewayItem,
+        view: View
+    ) = with(view) {
         val binding = ItemGatewayBinding.bind(view)
 
         binding.txtName.text = item.gateway.name
