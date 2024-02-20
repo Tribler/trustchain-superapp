@@ -1,4 +1,4 @@
-name: debug
+name: Execute checks
 
 on:
   pull_request:
@@ -8,7 +8,6 @@ on:
 jobs:
   test:
     name: Run Checks
-    # TODO: Ubuntu currently broken.
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,9 +21,12 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # TODO: Without assembleDebug, the check will fail on verifyDebugDatabaseMigration.
-      - name: Run assembleDebug
-        run: bash ./gradlew assembleDebug
+      # TODO: Without this step, the build fails with the following error:
+      # Execution failed for task ':common:verifyDebugDatabaseMigration'.
+      # > A failure occurred while executing app.cash.sqldelight.gradle.VerifyMigrationTask$VerifyMigrationAction
+      #   > No suitable driver found for jdbc:sqlite:
+      - name: Run verifyDebugDatabase
+        run: bash ./gradlew verifyDebugDatabaseMigration
 
       - name: Run check
         run: bash ./gradlew check
