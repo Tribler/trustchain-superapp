@@ -67,6 +67,9 @@ android {
 dependencies {
     implementation project(':common')
 
+    api "app.cash.sqldelight:android-driver:$sqldelight_version"
+    api "app.cash.sqldelight:coroutines-extensions:$sqldelight_version"
+
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.9.0'
@@ -110,6 +113,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     annotationProcessor "androidx.room:room-compiler:$room_version"
+    testImplementation "app.cash.sqldelight:sqlite-driver:$sqldelight_version"
 
     // Blocking dialog and top snacbkbar
     implementation 'com.jaredrummler:blocking-dialog:1.0.0'
