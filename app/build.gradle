@@ -157,14 +157,14 @@ dependencies {
     implementation 'com.google.android.material:material:1.7.0'
 
     // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // Logging
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
-    implementation('net.java.dev.jna:jna:5.8.0@aar')
+    implementation('net.java.dev.jna:jna:5.12.1@aar')
     implementation('com.github.tony19:logback-android:2.0.0')
 
     implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
