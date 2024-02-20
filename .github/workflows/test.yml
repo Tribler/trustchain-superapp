@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    name: Run Checks
+    name: Run Tests and Lint
     # TODO: Ubuntu currently broken.
     runs-on: windows-latest
     steps:
@@ -22,8 +22,11 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Run check
-        run: bash ./gradlew check
+      - name: Run tests
+        run: bash ./gradlew test
+
+      - name: Run lint
+        run: bash ./gradlew ktlintCheck
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
