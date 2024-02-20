@@ -84,5 +84,5 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 tasks.withType(Test) {
-    systemProperty "java.library.path", "../common/libs"
+    systemProperty "java.library.path", "../common/native_libs"
 }
