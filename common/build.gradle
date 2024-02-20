@@ -136,6 +136,7 @@ dependencies {
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation 'org.json:json:20190722'
     testImplementation "app.cash.sqldelight:sqlite-driver:$sqldelight_version"
+    testImplementation "org.xerial:sqlite-jdbc:3.44.1.0"
     testImplementation "com.goterl:lazysodium-java:5.1.4"
     annotationProcessor "androidx.room:room-compiler:$room_version"
 }
@@ -143,6 +144,6 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-opt-in=kotlin.RequiresOptIn"
+            "-opt-in=kotlin.RequiresOptIn"
     ]
 }
