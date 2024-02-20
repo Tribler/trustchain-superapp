@@ -110,7 +110,6 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     annotationProcessor "androidx.room:room-compiler:$room_version"
-    testImplementation "app.cash.sqldelight:sqlite-driver:$sqldelight_version"
 
     // Blocking dialog and top snacbkbar
     implementation 'com.jaredrummler:blocking-dialog:1.0.0'
