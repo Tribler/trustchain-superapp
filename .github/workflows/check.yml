@@ -22,15 +22,8 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # TODO: This is currently broken due to SqlDelight.
-      #      - name: Run check
-      #        run: bash ./gradlew check
-
-      - name: Run tests
-        run: bash ./gradlew test
-
-      - name: Run lint
-        run: bash ./gradlew ktlintCheck
+      - name: Run check
+        run: bash ./gradlew check
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
