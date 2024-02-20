@@ -1,2 +1,0 @@
-ALTER TABLE contact_state ADD COLUMN given_names TEXT DEFAULT NULL;
-ALTER TABLE contact_state ADD COLUMN surname TEXT DEFAULT NULL;

@@ -3,6 +3,65 @@
 
 This repository contains a collection of Android apps built on top of [IPv8](https://github.com/MattSkala/kotlin-ipv8) (our P2P networking stack) and [TrustChain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md) (a scalable, distributed, pair-wise ledger). All applications are built into a single APK, following the concept of [super apps](https://home.kpmg/xx/en/home/insights/2019/06/super-app-or-super-disruption.html) – an emerging trend that allows to provide an ecosystem for multiple services within a single all-in-one app experience.
 
+## Build Instructions
+
+If you want to build an APK, run the following command:
+
+```
+./gradlew :app:buildDebug
+```
+
+The resulting APK will be stored in `app/build/outputs/apk/debug/app-debug.apk`.
+
+### Install
+
+You can also build and automatically install the app on all connected Android devices with a single command:
+
+```
+./gradlew :app:installDebug
+```
+
+*Note: It is required to have an Android device connected with USB debugging enabled before running this command.*
+
+### Check
+Run the Gradle check task to verify that the project is correctly set up and that tests pass:
+
+```
+./gradlew check
+```
+
+*Note: this task is also run on the CI, so ensure that it passes before making a PR.*  
+
+### Tests
+
+Run unit tests:
+```
+./gradlew test
+```
+
+Run instrumented tests:
+```
+./gradlew connectedAndroidTest
+```
+
+### Code style
+
+[Ktlint](https://ktlint.github.io/) is used to enforce a consistent code style across the whole project. It is recommended to install the [ktlint plugin](https://plugins.jetbrains.com/plugin/15057-ktlint) for your IDE to get real-time feedback.
+
+
+Check code style:
+```
+./gradlew ktlintCheck
+```
+
+Run code formatter:
+```
+./gradlew ktlintFormat
+```
+
+## Adding Your Own App
+If you want to add your own app to the TrustChain Super App, you can follow the tutorial in the [AppTutorial.md](doc/AppTutorial.md) document.
+
 ## Apps
 
 ### On-Chain Democracy
@@ -104,54 +163,3 @@ A user can publish a Release (which is an album/EP/single/...), after which the 
 Video 1: <a href="doc/musicdao/thesis2.mp4">Load example.</a> This uses a default magnet link for an album that has a decent amount of peers. The user submits the metadata and the block gets proposed and signed. Then playback.
 
 Video 2: <a href="doc/musicdao/thesis3.mp4">Share track.</a> Note: as a fresh magnet link is generated in this video, there is only 1 peer. For this reason it will be difficult to obtain the metadata of the magnet link (cold start issue, write about this in thesis) so the video stops there.
-
-### Do you want to add your own app?
-
-- [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
-
-## Build
-
-If you want to build an APK, run the following command:
-
-```
-./gradlew :app:buildDebug
-```
-
-The resulting APK will be stored in `app/build/outputs/apk/debug/app-debug.apk`.
-
-## Install
-
-You can also build and automatically install the app on all connected Android devices with a single command:
-
-```
-./gradlew :app:installDebug
-```
-
-*Note: It is required to have an Android device connected with USB debugging enabled before running this command.*
-
-## Tests
-
-Run unit tests:
-```
-./gradlew test
-```
-*Note: Currently tests fail on Linux, but pass on Windows and Mac. This is due to the tests relying on a native jlibtorrent binary, of which the linux version cannot be bundled with android builds. We are working on a solution to this problem.*
-
-Run instrumented tests:
-```
-./gradlew connectedAndroidTest
-```
-
-## Code style
-
-[Ktlint](https://ktlint.github.io/) is used to enforce a consistent code style across the whole project. It is recommended to install the [ktlint plugin](https://plugins.jetbrains.com/plugin/15057-ktlint) for your IDE to get real-time feedback.
-
-Check code style:
-```
-./gradlew ktlintCheck
-```
-
-Run code formatter:
-```
-./gradlew ktlintFormat
-```

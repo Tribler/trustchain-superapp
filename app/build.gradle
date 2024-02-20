@@ -58,8 +58,6 @@ android {
 
     sourceSets {
         main {
-            // TODO: Find a way to exclude linux .so
-            // TODO: Reintroduce the jlibtorrent library for linux.
             jniLibs.srcDirs = ['../common/libs']
         }
     }
@@ -164,7 +162,7 @@ dependencies {
 
     // Logging
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
-    implementation('net.java.dev.jna:jna:5.8.0@aar')
+    implementation('net.java.dev.jna:jna:5.12.1@aar')
     implementation('com.github.tony19:logback-android:2.0.0')
 
     implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
