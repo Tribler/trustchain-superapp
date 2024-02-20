@@ -9,7 +9,7 @@ jobs:
   test:
     name: Run Checks
     # TODO: Ubuntu currently broken.
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -22,8 +22,11 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Run check
+      - name: Run verifyDebugDatabaseMigration
         run: bash ./gradlew verifyDebugDatabaseMigration
+
+      - name: Run check
+        run: bash ./gradlew check
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
