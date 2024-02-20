@@ -22,8 +22,9 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Run verifyDebugDatabaseMigration
-        run: bash ./gradlew verifyDebugDatabaseMigration
+      # TODO: Without assembleDebug, the check will fail on verifyDebugDatabaseMigration.
+      - name: Run assembleDebug
+        run: bash ./gradlew assembleDebug
 
       - name: Run check
         run: bash ./gradlew check
