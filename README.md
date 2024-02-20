@@ -5,35 +5,40 @@ This repository contains a collection of Android apps built on top of [IPv8](htt
 
 ## Build Instructions
 
-If you want to build an APK, run the following command:
+### Clone
+Clone the repository **including the submodule** with the following command:
+```
+git clone --recurse-submodules <URL>
+```
 
+If you have already cloned the repository and forgot to include the `--recurse-submodules` flag, you can initialize the submodule with the following command:
+```
+git submodule update --init --recursive
+```
+You can also update the submodule with this command.
+
+### Build
+If you want to build an APK, run the following command:
 ```
 ./gradlew :app:buildDebug
 ```
-
 The resulting APK will be stored in `app/build/outputs/apk/debug/app-debug.apk`.
 
 ### Install
-
 You can also build and automatically install the app on all connected Android devices with a single command:
-
 ```
 ./gradlew :app:installDebug
 ```
-
 *Note: It is required to have an Android device connected with USB debugging enabled before running this command.*
 
 ### Check
 Run the Gradle check task to verify that the project is correctly set up and that tests pass:
-
 ```
 ./gradlew check
 ```
-
 *Note: this task is also run on the CI, so ensure that it passes before making a PR.*  
 
 ### Tests
-
 Run unit tests:
 ```
 ./gradlew test
@@ -45,9 +50,7 @@ Run instrumented tests:
 ```
 
 ### Code style
-
 [Ktlint](https://ktlint.github.io/) is used to enforce a consistent code style across the whole project. It is recommended to install the [ktlint plugin](https://plugins.jetbrains.com/plugin/15057-ktlint) for your IDE to get real-time feedback.
-
 
 Check code style:
 ```
@@ -59,8 +62,12 @@ Run code formatter:
 ./gradlew ktlintFormat
 ```
 
+---
+
 ## Adding Your Own App
 If you want to add your own app to the TrustChain Super App, you can follow the tutorial in the [AppTutorial.md](doc/AppTutorial.md) document.
+
+---
 
 ## Apps
 
