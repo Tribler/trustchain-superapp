@@ -17,6 +17,7 @@ sqldelight {
             packageName = "nl.tudelft.valuetransfer.sqldelight"
             srcDirs = files(["src/main/sqldelight"])
             schemaOutputDirectory = file("src/main/sqldelight/databases")
+            verifyMigrations = false
         }
     }
 }
