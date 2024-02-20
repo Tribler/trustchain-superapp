@@ -17,7 +17,6 @@ sqldelight {
             packageName = "nl.tudelft.eurotoken.sqldelight"
             srcDirs = files(["src/main/sqldelight"])
             schemaOutputDirectory = file("src/main/sqldelight/databases")
-            verifyMigrations = false
         }
     }
 }
@@ -54,9 +53,6 @@ android {
 dependencies {
 
     implementation project(':common')
-
-    api "app.cash.sqldelight:android-driver:$sqldelight_version"
-    api "app.cash.sqldelight:coroutines-extensions:$sqldelight_version"
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.core:core-ktx:1.9.0'

@@ -17,7 +17,6 @@ sqldelight {
             packageName = "nl.tudelft.valuetransfer.sqldelight"
             srcDirs = files(["src/main/sqldelight"])
             schemaOutputDirectory = file("src/main/sqldelight/databases")
-            verifyMigrations = false
         }
     }
 }
@@ -67,9 +66,6 @@ android {
 
 dependencies {
     implementation project(':common')
-
-    api "app.cash.sqldelight:android-driver:$sqldelight_version"
-    api "app.cash.sqldelight:coroutines-extensions:$sqldelight_version"
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'

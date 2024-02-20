@@ -17,7 +17,6 @@ sqldelight {
             packageName = "nl.tudelft.common.sqldelight"
             srcDirs = files(['src/main/sqldelight'])
             schemaOutputDirectory = file("src/main/sqldelight/databases")
-            verifyMigrations = false
         }
     }
 }
@@ -85,8 +84,6 @@ dependencies {
     }
 
     api 'com.google.guava:guava:30.0-android'
-    api "app.cash.sqldelight:android-driver:$sqldelight_version"
-    api "app.cash.sqldelight:coroutines-extensions:$sqldelight_version"
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
