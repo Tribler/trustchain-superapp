@@ -246,7 +246,11 @@ class TransactionRepository(
             return initialBalance
         }
         Log.d("getMyBalance", "latest block found")
-        val myBalance = getBalanceForBlock(latestBlock, trustChainCommunity.database)!!
+        val myBalance = getBalanceForBlock(latestBlock, trustChainCommunity.database)
+        if (myBalance == null) {
+            Log.d("getMyBalance", "no balance found, defaulting to initial balance")
+            return initialBalance
+        }
         Log.d("getMyBalance", "balance = $myBalance")
         return myBalance
     }
