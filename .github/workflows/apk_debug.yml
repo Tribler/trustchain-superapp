@@ -9,8 +9,6 @@ jobs:
   apk:
     name: Build Debug APK
     runs-on: ubuntu-latest
-    environment:
-      name: apk_build
     steps:
       - name: Checkout
         uses: actions/checkout@v3
