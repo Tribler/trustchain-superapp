@@ -1,4 +1,4 @@
-name: Build APK for PR
+name: Build Release APK for pull requests
 
 on:
   pull_request_target:
