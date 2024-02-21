@@ -66,19 +66,19 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun hasBluetoothPermissions(): Boolean {
-        return checkSelfPermission(Companion.BLUETOOTH_PERMISSIONS_ADVERTISE) == PackageManager.PERMISSION_GRANTED &&
-            checkSelfPermission(Companion.BLUETOOTH_PERMISSIONS_CONNECT) == PackageManager.PERMISSION_GRANTED &&
-            checkSelfPermission(Companion.BLUETOOTH_PERMISSIONS_SCAN) == PackageManager.PERMISSION_GRANTED
+        return checkSelfPermission(BLUETOOTH_PERMISSIONS_ADVERTISE) == PackageManager.PERMISSION_GRANTED &&
+            checkSelfPermission(BLUETOOTH_PERMISSIONS_CONNECT) == PackageManager.PERMISSION_GRANTED &&
+            checkSelfPermission(BLUETOOTH_PERMISSIONS_SCAN) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestBluetoothPermissions() {
         requestPermissions(
             arrayOf(
-                Companion.BLUETOOTH_PERMISSIONS_ADVERTISE,
-                Companion.BLUETOOTH_PERMISSIONS_CONNECT,
-                Companion.BLUETOOTH_PERMISSIONS_SCAN
+                BLUETOOTH_PERMISSIONS_ADVERTISE,
+                BLUETOOTH_PERMISSIONS_CONNECT,
+                BLUETOOTH_PERMISSIONS_SCAN
             ),
-            Companion.BLUETOOTH_PERMISSIONS_REQUEST_CODE
+            BLUETOOTH_PERMISSIONS_REQUEST_CODE
         )
     }
 
@@ -88,7 +88,7 @@ class DashboardActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         when (requestCode) {
-            Companion.BLUETOOTH_PERMISSIONS_REQUEST_CODE -> {
+            BLUETOOTH_PERMISSIONS_REQUEST_CODE -> {
                 if (hasBluetoothPermissions()) {
                     (application as TrustChainApplication).initIPv8()
                 } else {
@@ -106,7 +106,7 @@ class DashboardActivity : AppCompatActivity() {
         data: Intent?
     ) {
         when (requestCode) {
-            Companion.SETTINGS_INTENT_CODE -> {
+            SETTINGS_INTENT_CODE -> {
                 if (hasBluetoothPermissions()) {
                     (application as TrustChainApplication).initIPv8()
                 } else {
@@ -132,8 +132,7 @@ class DashboardActivity : AppCompatActivity() {
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         val uri: Uri = Uri.fromParts("package", packageName, null)
                         intent.data = uri
-                        @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
-                        startActivityForResult(intent, Companion.SETTINGS_INTENT_CODE)
+                        startActivityForResult(intent, SETTINGS_INTENT_CODE)
                     }
                 }.create()
             }
