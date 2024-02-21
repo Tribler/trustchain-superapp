@@ -1,4 +1,4 @@
-name: Build APK for master
+name: Build Release APK for main branch
 
 on:
   push:
