@@ -52,17 +52,17 @@ android {
 
 dependencies {
     implementation project(':ipv8-android')
-    implementation project(':common')
+    api project(':common')
 
     // AndroidX
+    api 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation "androidx.recyclerview:recyclerview:1.1.0"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
     // Material
-    implementation 'com.google.android.material:material:1.1.0'
+    api 'com.google.android.material:material:1.1.0'
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -76,10 +76,10 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
 
     // BitcoinJ
-    implementation 'org.bitcoinj:bitcoinj-core:0.15.10'
+    api 'org.bitcoinj:bitcoinj-core:0.15.10'
 
     // GSON
-    implementation 'com.google.code.gson:gson:2.8.6'
+    api 'com.google.code.gson:gson:2.8.6'
 
     // Transitive dependencies
     androidTestImplementation 'androidx.test:monitor:1.6.1'
