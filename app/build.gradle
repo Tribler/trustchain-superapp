@@ -16,7 +16,7 @@ buildscript {
 
     dependencies {
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.2'
-        classpath("com.google.dagger:hilt-android-gradle-plugin:$hilt_ver")
+        classpath("com.google.dagger:hilt-android-gradle-plugin:$dagger_version")
 
     }
 }
@@ -122,10 +122,10 @@ dependencies {
 
     // AndroidX
     implementation "androidx.datastore:datastore-preferences:1.0.0"
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation "androidx.recyclerview:recyclerview:1.2.1"
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
+    implementation "androidx.core:core-ktx:$core_version"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
+    implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
@@ -134,7 +134,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics:18.3.1'
 
     // Material
-    implementation 'com.google.android.material:material:1.7.0'
+    implementation "com.google.android.material:material:$material_version"
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -145,16 +145,16 @@ dependencies {
     // Logging
     implementation('net.java.dev.jna:jna:5.12.1@aar')
 
-    implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
+    implementation "com.github.MattSkala:recyclerview-itemadapter:$recyclerview_adapter_version"
     implementation project(':currencyii')
 
     // Testing
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$android_junit_version"
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:$hilt_ver")
-    kapt("com.google.dagger:hilt-android-compiler:$hilt_ver")
+    implementation("com.google.dagger:hilt-android:$dagger_version")
+    kapt("com.google.dagger:hilt-android-compiler:$dagger_version")
 
     // Room
     implementation "androidx.room:room-runtime:$room_version"
@@ -163,18 +163,18 @@ dependencies {
     androidTestImplementation 'androidx.test:monitor:1.6.1'
     implementation 'androidx.annotation:annotation:1.5.0'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
-    implementation 'androidx.core:core:1.9.0'
+    implementation "androidx.core:core:$core_version"
     implementation 'androidx.datastore:datastore-core:1.0.0'
     implementation 'androidx.datastore:datastore-preferences-core:1.0.0'
-    implementation 'androidx.fragment:fragment:1.5.4'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.0-alpha05'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.6.0-alpha05'
+    implementation "androidx.fragment:fragment:$fragment_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'androidx.sqlite:sqlite:2.4.0'
-    implementation 'app.cash.sqldelight:android-driver:2.0.1'
-    implementation 'app.cash.sqldelight:runtime:2.0.1'
+    implementation "app.cash.sqldelight:android-driver:$sqldelight_version"
+    implementation "app.cash.sqldelight:runtime:$sqldelight_version"
     implementation 'com.google.dagger:dagger:2.50'
-    implementation 'com.google.dagger:hilt-core:2.50'
+    implementation "com.google.dagger:hilt-core:$dagger_version"
     implementation 'com.google.errorprone:error_prone_annotations:2.9.0'
     implementation 'com.google.guava:guava:31.0.1-android'
     implementation 'javax.inject:javax.inject:1'

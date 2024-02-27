@@ -60,7 +60,7 @@ dependencies {
 
     api project(':geth-android')
 
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "junit:junit:$junit_version"
 
     // Transitive dependencies.
     api 'io.reactivex.rxjava2:rxjava:2.2.2'
@@ -71,7 +71,7 @@ dependencies {
         exclude group: 'org.bouncycastle'
     }
     implementation 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation('org.web3j:tuples:4.6.0-android') {
         exclude group: 'org.bouncycastle'
     }

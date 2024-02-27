@@ -54,16 +54,16 @@ dependencies {
     api project(':common')
 
     // AndroidX
-    api 'androidx.constraintlayout:constraintlayout:2.0.1'
-    api 'androidx.recyclerview:recyclerview:1.1.0'
-    api 'com.github.MattSkala:recyclerview-itemadapter:0.4'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    api "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
+    api "androidx.recyclerview:recyclerview:$recyclerview_version"
+    api "com.github.MattSkala:recyclerview-itemadapter:$recyclerview_adapter_version"
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 
     // Material
-    api 'com.google.android.material:material:1.1.0'
+    api "com.google.android.material:material:$material_version"
 
     // Kotlin
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -75,22 +75,22 @@ dependencies {
     api 'io.github.microutils:kotlin-logging:1.7.7'
 
     // Testing
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$android_junit_version"
 
     // Transitive dependencies
     androidTestImplementation 'androidx.test:monitor:1.6.1'
     api(project(':ipv8')) {
         exclude module: 'lazysodium-java'
     }
-    implementation 'androidx.core:core:1.9.0'
-    implementation 'androidx.fragment:fragment:1.5.4'
-    implementation 'androidx.lifecycle:lifecycle-common:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-livedata-core:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
-    implementation 'androidx.navigation:navigation-fragment:2.5.3'
-    implementation 'androidx.navigation:navigation-runtime:2.5.3'
+    implementation "androidx.core:core:$core_version"
+    implementation "androidx.fragment:fragment:$fragment_version"
+    implementation "androidx.lifecycle:lifecycle-common:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-core:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation "androidx.navigation:navigation-fragment:$nav_version"
+    implementation "androidx.navigation:navigation-runtime:$nav_version"
     implementation 'androidx.sqlite:sqlite:2.4.0'
-    implementation 'app.cash.sqldelight:android-driver:2.0.1'
+    implementation "app.cash.sqldelight:android-driver:$sqldelight_version"
 
 }

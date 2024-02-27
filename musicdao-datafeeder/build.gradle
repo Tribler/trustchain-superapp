@@ -22,7 +22,7 @@ dependencies {
     implementation files('../common/libs/jlibtorrent-' + jlibtorrent_version + '.jar')
 
     // Transitive dependencies
-    implementation 'app.cash.sqldelight:runtime:2.0.1'
+    implementation "app.cash.sqldelight:runtime:$sqldelight_version"
     implementation(project(':ipv8')) {
         exclude module: 'lazysodium-java'
     }
