@@ -31,7 +31,13 @@ ktlint {
 
 // Generate a version code from git commit count
 static def generateVersionCode() {
-    return "git rev-list HEAD --count".execute().text.trim().toInteger()
+    // Unix
+    def result = "git rev-list HEAD --count".execute().text.trim()
+    // Windows
+    if (result.empty) result = "PowerShell -Command git rev-list HEAD --count".execute().text.trim()
+    if (result.empty) throw new RuntimeException("Could not generate versioncode: ${result.text}")
+    println("Generated the following version code: " + result.toInteger())
+    return result.toInteger()
 }
 
 
@@ -46,7 +52,6 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
     signingConfigs {
         release {
             keyAlias "trustchain"
