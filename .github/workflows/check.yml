@@ -21,13 +21,6 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # TODO: Without this step, the Gradle check task fails with the following error:
-      # Execution failed for task ':common:verifyDebugDatabaseMigration'.
-      # > A failure occurred while executing app.cash.sqldelight.gradle.VerifyMigrationTask$VerifyMigrationAction
-      #   > No suitable driver found for jdbc:sqlite:
-      - name: Run verifyDebugDatabase
-        run: bash ./gradlew verifyDebugDatabaseMigration
-
       - name: Run check
         run: bash ./gradlew check
 
