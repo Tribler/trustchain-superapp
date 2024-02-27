@@ -46,7 +46,7 @@ dependencies {
     api project(':common')
 
     // AndroidX
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation "androidx.core:core-ktx:$core_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
     // Kotlin
@@ -56,15 +56,14 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // Testing
-    testImplementation 'junit:junit:4.12'
+    testImplementation "junit:junit:$junit_version"
 
     // Transitive dependencies
-    implementation 'androidx.core:core:1.9.0'
-    implementation 'androidx.fragment:fragment:1.5.4'
-    implementation 'androidx.lifecycle:lifecycle-common:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
-    implementation 'androidx.navigation:navigation-fragment:2.5.3'
-    implementation 'androidx.navigation:navigation-runtime:2.5.3'
+    implementation "androidx.fragment:fragment-ktx:$fragment_version"
+    implementation "androidx.lifecycle:lifecycle-common:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-runtime-ktx:$nav_version"
     implementation(project(':ipv8')) {
         exclude module: 'lazysodium-java'
     }

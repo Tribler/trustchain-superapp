@@ -60,7 +60,7 @@ dependencies {
 
     api project(':geth-android')
 
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "junit:junit:$junit_version"
 
     // Transitive dependencies.
     api 'io.reactivex.rxjava2:rxjava:2.2.2'
