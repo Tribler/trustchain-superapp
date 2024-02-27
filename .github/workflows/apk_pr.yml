@@ -11,10 +11,10 @@ jobs:
       name: apk_build
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          ref: refs/pull/${{github.event.pull_request.number}}/merge
           fetch-depth: 0
+          ref: refs/pull/${{github.event.pull_request.number}}/merge
 
       - uses: ./.github/actions/checkout_submodules
 
@@ -29,6 +29,7 @@ jobs:
         run: |
           echo $KEYSTORE_FILE | base64 -d > app/build.keystore
           ./gradlew assembleRelease \
+            --no-daemon \
             -Pandroid.injected.signing.store.file=$(pwd)/app/build.keystore \
             -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
             -Pandroid.injected.signing.key.alias=$KEY_ALIAS \

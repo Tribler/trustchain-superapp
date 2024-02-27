@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -25,7 +25,7 @@ jobs:
           cache: 'gradle'
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v1
