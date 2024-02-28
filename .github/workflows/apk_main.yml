@@ -27,6 +27,7 @@ jobs:
         run: |
           echo $KEYSTORE_FILE | base64 -d > app/build.keystore
           ./gradlew assembleRelease \
+            --no-daemon \
             -Pandroid.injected.signing.store.file=$(pwd)/app/build.keystore \
             -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
             -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
