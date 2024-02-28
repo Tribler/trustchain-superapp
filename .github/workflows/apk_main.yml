@@ -17,10 +17,11 @@ jobs:
       - uses: ./.github/actions/checkout_submodules
 
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: 'gradle'
 
       - name: Build release APK
         run: |
