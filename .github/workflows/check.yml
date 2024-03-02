@@ -16,20 +16,14 @@ jobs:
       - uses: ./.github/actions/checkout_submodules
 
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-
-      # TODO: Without this step, the Gradle check task fails with the following error:
-      # Execution failed for task ':common:verifyDebugDatabaseMigration'.
-      # > A failure occurred while executing app.cash.sqldelight.gradle.VerifyMigrationTask$VerifyMigrationAction
-      #   > No suitable driver found for jdbc:sqlite:
-      - name: Run verifyDebugDatabase
-        run: bash ./gradlew verifyDebugDatabaseMigration
+          cache: 'gradle'
 
       - name: Run check
-        run: bash ./gradlew check
+        run: ./gradlew check --no-daemon
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1

@@ -11,9 +11,18 @@ buildscript {
     ext.lifecycle_version = "2.5.1"
     ext.jlibtorrent_version = '1.2.17.0'
     ext.dokka_version = "0.10.1"
-    ext.hilt_ver = '2.50'
+    ext.dagger_version = '2.50'
     ext.room_version = '2.6.1'
     ext.mockk_version = '1.13.9'
+    ext.material_version = '1.7.0'
+    ext.core_version = '1.9.0'
+    ext.appcompat_version = '1.5.1'
+    ext.constraintlayout_version = '2.1.4'
+    ext.recyclerview_version = '1.2.1'
+    ext.recyclerview_adapter_version = '0.4'
+    ext.junit_version = '4.13.2'
+    ext.android_junit_version = '1.1.5'
+
     repositories {
         google()
         jcenter()

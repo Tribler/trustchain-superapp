@@ -54,20 +54,28 @@ android {
 }
 
 dependencies {
-
-    api project(':common')
-
     api(group: 'org.web3j', name: 'core', version: '4.6.0-android') {
         exclude group: 'org.bouncycastle'
     }
 
     api project(':geth-android')
 
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.1.0'
+    testImplementation "junit:junit:$junit_version"
 
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    // Transitive dependencies.
+    api 'io.reactivex.rxjava2:rxjava:2.2.2'
+    api('org.web3j:abi:4.6.0-android') {
+        exclude group: 'org.bouncycastle'
+    }
+    api('org.web3j:crypto:4.6.0-android') {
+        exclude group: 'org.bouncycastle'
+    }
+    implementation 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.0'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+    implementation('org.web3j:tuples:4.6.0-android') {
+        exclude group: 'org.bouncycastle'
+    }
+    implementation('org.web3j:utils:4.6.0-android') {
+        exclude group: 'org.bouncycastle'
+    }
 }

@@ -17,11 +17,15 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
     implementation "app.cash.sqldelight:sqlite-driver:$sqldelight_version"
     implementation 'com.mpatric:mp3agic:0.9.1'
-    implementation 'com.turn:ttorrent-core:1.5'
-    implementation "app.cash.sqldelight:coroutines-extensions:$sqldelight_version"
     implementation 'org.bitcoinj:bitcoinj-core:0.15.10'
 
     implementation files('../common/libs/jlibtorrent-' + jlibtorrent_version + '.jar')
+
+    // Transitive dependencies
+    implementation "app.cash.sqldelight:runtime:$sqldelight_version"
+    implementation(project(':ipv8')) {
+        exclude module: 'lazysodium-java'
+    }
 }
 
 application {
@@ -30,6 +34,6 @@ application {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-opt-in=kotlin.ExperimentalUnsignedTypes",
+            "-opt-in=kotlin.ExperimentalUnsignedTypes",
     ]
 }

@@ -32,8 +32,8 @@ class DashboardActivity : AppCompatActivity() {
         // Handle init of IPv8 after requesting permissions; only if Android 12 or higher.
         // onPermissionsDenied() is run until user has accepted permissions.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!hasBluetoothPermissions()) {
-                requestBluetoothPermissions()
+            if (!hasBluetoothPermissions() || !hasNotificationPermissions()) {
+                requestPermissions()
             } else {
                 // Only initialize IPv8 if it has not been initialized yet.
                 try {
@@ -71,14 +71,19 @@ class DashboardActivity : AppCompatActivity() {
             checkSelfPermission(BLUETOOTH_PERMISSIONS_SCAN) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun requestBluetoothPermissions() {
+    private fun hasNotificationPermissions(): Boolean {
+        return checkSelfPermission(NOTIFICATION_PERMISSION) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestPermissions() {
         requestPermissions(
             arrayOf(
                 BLUETOOTH_PERMISSIONS_ADVERTISE,
                 BLUETOOTH_PERMISSIONS_CONNECT,
-                BLUETOOTH_PERMISSIONS_SCAN
+                BLUETOOTH_PERMISSIONS_SCAN,
+                NOTIFICATION_PERMISSION
             ),
-            BLUETOOTH_PERMISSIONS_REQUEST_CODE
+            PERMISSIONS_REQUEST_CODE
         )
     }
 
@@ -87,19 +92,17 @@ class DashboardActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        when (requestCode) {
-            BLUETOOTH_PERMISSIONS_REQUEST_CODE -> {
-                if (hasBluetoothPermissions()) {
-                    (application as TrustChainApplication).initIPv8()
-                } else {
-                    onPermissionsDenied()
-                }
+        if (requestCode == PERMISSIONS_REQUEST_CODE) {
+            if (!hasBluetoothPermissions() || !hasNotificationPermissions()) {
+                onPermissionsDenied()
+            } else {
+                (application as TrustChainApplication).initIPv8()
             }
-            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 
-    @Suppress("DEPRECATION")
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
@@ -113,12 +116,11 @@ class DashboardActivity : AppCompatActivity() {
                     onPermissionsDenied()
                 }
             }
+
             else -> {
-                @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
                 super.onActivityResult(requestCode, resultCode, data)
             }
         }
-        @Suppress("DEPRECATION") // TODO: Fix deprecation issue.
         super.onActivityResult(requestCode, resultCode, data)
     }
 
@@ -141,10 +143,11 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val BLUETOOTH_PERMISSIONS_REQUEST_CODE = 200
+        private const val PERMISSIONS_REQUEST_CODE = 200
         private const val SETTINGS_INTENT_CODE = 1000
         private const val BLUETOOTH_PERMISSIONS_SCAN = "android.permission.BLUETOOTH_SCAN"
         private const val BLUETOOTH_PERMISSIONS_CONNECT = "android.permission.BLUETOOTH_CONNECT"
         private const val BLUETOOTH_PERMISSIONS_ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE"
+        private const val NOTIFICATION_PERMISSION = "android.permission.POST_NOTIFICATIONS"
     }
 }
