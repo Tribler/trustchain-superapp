@@ -454,6 +454,11 @@ open class MainActivityFOC : AppCompatActivity() {
             file.createNewFile()
 
             val outStream = FileOutputStream(file)
+
+            // Ensure the apk file is read only see:
+            // https://developer.android.com/about/versions/14/behavior-changes-14#safer-dynamic-code-loading
+            file.setReadOnly()
+
             val buff = ByteArray(this.bufferSize)
 
             var len: Int

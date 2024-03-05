@@ -1,12 +1,22 @@
 package nl.tudelft.trustchain.foc
 
 import android.widget.Toast
-import com.frostwire.jlibtorrent.*
+import com.frostwire.jlibtorrent.AlertListener
+import com.frostwire.jlibtorrent.SessionManager
+import com.frostwire.jlibtorrent.SessionParams
+import com.frostwire.jlibtorrent.SettingsPack
+import com.frostwire.jlibtorrent.TorrentFlags
+import com.frostwire.jlibtorrent.TorrentHandle
+import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.PrivateKey
@@ -14,22 +24,24 @@ import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.eva.PeerBusyException
 import nl.tudelft.ipv8.messaging.eva.TimeoutException
 import nl.tudelft.ipv8.messaging.eva.TransferType
+import nl.tudelft.trustchain.common.freedomOfComputing.AppPayload
 import nl.tudelft.trustchain.foc.community.FOCCommunityBase
 import nl.tudelft.trustchain.foc.community.FOCMessage
-import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.supportedAppExtensions
+import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.APK_EXTENSION
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.TORRENT_EXTENSION
+import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.supportedAppExtensions
 import nl.tudelft.trustchain.foc.util.MagnetUtils.Companion.ADDRESS_TRACKER
 import nl.tudelft.trustchain.foc.util.MagnetUtils.Companion.ADDRESS_TRACKER_APPENDER
-import nl.tudelft.trustchain.foc.util.MagnetUtils.Companion.constructMagnetLink
 import nl.tudelft.trustchain.foc.util.MagnetUtils.Companion.DISPLAY_NAME_APPENDER
 import nl.tudelft.trustchain.foc.util.MagnetUtils.Companion.MAGNET_HEADER_STRING
 import nl.tudelft.trustchain.foc.util.MagnetUtils.Companion.PRE_HASH_STRING
-import nl.tudelft.trustchain.common.freedomOfComputing.AppPayload
+import nl.tudelft.trustchain.foc.util.MagnetUtils.Companion.constructMagnetLink
 import java.io.File
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.Pair
 
 /**
  * This gossips data about 5 random apps with peers on demoCommunity every 10 seconds and fetches new apps from peers every 20 seconds
@@ -236,8 +248,7 @@ class AppGossiper(
             if (!downloadingPaused) {
                 try {
                     downloadPendingFiles()
-                    if (evaDownload.activeDownload && evaDownload.lastRequest?.let {
-                                it ->
+                    if (evaDownload.activeDownload && evaDownload.lastRequest?.let { it ->
                             System.currentTimeMillis() - it
                         } ?: 0 > 30 * 1000
                     ) {
@@ -318,7 +329,12 @@ class AppGossiper(
     }
 
     private fun populateKnownTorrents() {
+        // Ensure the apk file is read only see:
+        // https://developer.android.com/about/versions/14/behavior-changes-14#safer-dynamic-code-loading
         appDirectory.listFiles()?.forEachIndexed { _, file ->
+            if (file.name.endsWith(APK_EXTENSION)) {
+                file.setReadOnly()
+            }
             if (file.name.endsWith(TORRENT_EXTENSION)) {
                 TorrentInfo(file).let { torrentInfo ->
                     if (torrentInfo.isValid) {
@@ -452,6 +468,11 @@ class AppGossiper(
     }
 
     private fun onDownloadSuccess(torrentName: String) {
+        // Ensure the apk file is read only see:
+        // https://developer.android.com/about/versions/14/behavior-changes-14#safer-dynamic-code-loading
+        appDirectory.listFiles { _, file ->
+            file.contains(torrentName) && file.endsWith(APK_EXTENSION)
+        }?.get(0)?.setReadOnly()
         activity.runOnUiThread {
             activity.createTorrent(torrentName)?.let {
                 torrentInfos.add(it)
