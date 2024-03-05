@@ -62,6 +62,11 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
                 true
             }
 
+            R.id.uTPBatch -> {
+                findNavController().navigate(R.id.uTPBatchFragment)
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
