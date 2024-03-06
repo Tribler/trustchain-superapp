@@ -34,4 +34,15 @@ class FOCVoteTracker {
             voteMap[fileName] = mutableSetOf(vote)
         }
     }
+
+    /**
+     * Get the number of votes for an APK
+     * @param fileName APK for which we want to know the number of votes
+     */
+    fun getNumberOfVotes(fileName: String): Int {
+        if (!voteMap.containsKey(fileName)) {
+            return 0
+        }
+        return voteMap[fileName]!!.size
+    }
 }
