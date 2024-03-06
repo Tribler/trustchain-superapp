@@ -35,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.foc.community.FOCCommunity
+import nl.tudelft.trustchain.foc.community.FOCVoteTracker
 import nl.tudelft.trustchain.foc.databinding.ActivityMainFocBinding
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.APK_DOT_EXTENSION
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.TORRENT_DOT_EXTENSION
@@ -63,7 +64,7 @@ open class MainActivityFOC : AppCompatActivity() {
     private var bufferSize = 1024 * 5
     private val s = SessionManager()
     private var torrentAmount = 0
-
+    private val voteTracker: FOCVoteTracker = FOCVoteTracker()
     private var appGossiper: AppGossiper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,6 +107,8 @@ open class MainActivityFOC : AppCompatActivity() {
         } catch (e: Exception) {
             printToast(e.toString())
         }
+
+        voteTracker.loadState()
     }
 
     // TODO: Remove hacky fix.
@@ -155,6 +158,7 @@ open class MainActivityFOC : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         appGossiper?.pause()
+        voteTracker.storeState()
     }
 
     private fun showAllFiles() {
