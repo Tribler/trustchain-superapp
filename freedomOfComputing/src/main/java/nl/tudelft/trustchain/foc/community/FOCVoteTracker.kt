@@ -4,7 +4,7 @@ import android.util.Log
 
 class FOCVoteTracker {
     // Stores the votes for all apks
-    private val voteMap: MutableMap<String, Set<FOCVote>> = mutableMapOf()
+    private val voteMap: MutableMap<String, MutableSet<FOCVote>> = mutableMapOf()
         get() = field
 
     /**
