@@ -26,6 +26,6 @@
         android:label="NAT Puncturing" />
     <fragment
         android:id="@+id/uTPBatchFragment"
-        android:name="nl.tudelft.trustchain.debug.uTPBatchFragment"
+        android:name="nl.tudelft.trustchain.debug.UtpBatchFragment"
         android:label="uTP Batch Send" />
 </navigation>

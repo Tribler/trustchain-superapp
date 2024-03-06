@@ -28,7 +28,7 @@ import java.util.Arrays
 import java.util.Date
 import net.utp4j.channels.UtpSocketState.CLOSED
 
-class uTPBatchFragment : BaseFragment(R.layout.fragment_utpbatch) {
+class UtpBatchFragment : BaseFragment(R.layout.fragment_utpbatch) {
     private val binding by viewBinding(FragmentUtpbatchBinding::bind)
 
     private var sent = 0
