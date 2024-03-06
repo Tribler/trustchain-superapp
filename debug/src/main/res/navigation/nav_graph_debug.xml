@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     android:label="NAT Puncturing"
     app:startDestination="@id/debugFragment">
@@ -15,6 +16,9 @@
         <action
             android:id="@+id/action_debugFragment_to_punctureFragment"
             app:destination="@id/punctureFragment" />
+        <action
+            android:id="@+id/action_debugFragment_to_utpTestFragment"
+            app:destination="@id/utpTestFragment" />
     </fragment>
     <fragment
         android:id="@+id/wanLogFragment"
@@ -24,4 +28,9 @@
         android:id="@+id/punctureFragment"
         android:name="nl.tudelft.trustchain.debug.PunctureFragment"
         android:label="NAT Puncturing" />
+    <fragment
+        android:id="@+id/utpTestFragment"
+        android:name="nl.tudelft.trustchain.debug.UtpTestFragment"
+        android:label="fragment_utp_test"
+        tools:layout="@layout/fragment_utp_test" />
 </navigation>

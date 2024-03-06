@@ -61,6 +61,10 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
                 findNavController().navigate(R.id.punctureFragment)
                 true
             }
+            R.id.utpTest -> {
+                findNavController().navigate(R.id.utpTestFragment)
+                true
+            }
 
             else -> super.onOptionsItemSelected(item)
         }
