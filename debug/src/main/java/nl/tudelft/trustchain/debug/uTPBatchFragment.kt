@@ -28,7 +28,6 @@ import java.util.Arrays
 import java.util.Date
 import net.utp4j.channels.UtpSocketState.CLOSED
 
-
 class uTPBatchFragment : BaseFragment(R.layout.fragment_utpbatch) {
     private val binding by viewBinding(FragmentUtpbatchBinding::bind)
 
@@ -37,7 +36,6 @@ class uTPBatchFragment : BaseFragment(R.layout.fragment_utpbatch) {
 
     private var availablePeers = HashMap<IPv4Address, Peer>()
     private var chosenPeer: Peer? = null
-
 
     private val receivedMap = mutableMapOf<String, Int>()
     private val firstMessageTimestamps = mutableMapOf<String, Date>()
@@ -50,9 +48,6 @@ class uTPBatchFragment : BaseFragment(R.layout.fragment_utpbatch) {
         super.onViewCreated(view, savedInstanceState)
 
         updateAvailablePeers()
-
-
-
 
         lifecycleScope.launchWhenCreated {
             while (isActive) {
@@ -77,7 +72,7 @@ class uTPBatchFragment : BaseFragment(R.layout.fragment_utpbatch) {
         binding.btnSend.setOnClickListener {
             if (sendReceiveValidateInput()) {
                 val transferAmount: Int = getDataSize() * 1024 * 1024
-                val senderPort: Int = getDemoCommunity().myEstimatedWan.port;
+                val senderPort: Int = getDemoCommunity().myEstimatedWan.port
 
                 try {
                     // data to send
@@ -103,7 +98,6 @@ class uTPBatchFragment : BaseFragment(R.layout.fragment_utpbatch) {
                         out.put(bulk)
                         val fut = channel.write(out)
                         fut.block() // block until all data is sent
-
 
                         channel.close()
                         server.close()
@@ -188,7 +182,7 @@ class uTPBatchFragment : BaseFragment(R.layout.fragment_utpbatch) {
         return chosenPeer as Peer
     }
 
-    private fun updateAvailablePeers()  {
+    private fun updateAvailablePeers() {
         // get current peers
         val currPeers: List<Peer> = getDemoCommunity().getPeers()
         val newPeersMap = HashMap<IPv4Address, Peer>()
@@ -204,15 +198,15 @@ class uTPBatchFragment : BaseFragment(R.layout.fragment_utpbatch) {
             val adapter = ArrayAdapter(context, R.layout.peer_item, availablePeers.keys.toList())
 
             autoComplete.setAdapter(adapter)
-            autoComplete.onItemClickListener = AdapterView.OnItemClickListener {
-                    adapterView, view, i, l ->
+            autoComplete.onItemClickListener =
+                AdapterView.OnItemClickListener {
+                        adapterView, view, i, l ->
 
-                val itemSelected = adapterView.getItemAtPosition(i)
-                chosenPeer = availablePeers[itemSelected]
-            }
+                    val itemSelected = adapterView.getItemAtPosition(i)
+                    chosenPeer = availablePeers[itemSelected]
+                }
         }
     }
-
 
     private fun updateView() {
         updateAvailablePeers()
