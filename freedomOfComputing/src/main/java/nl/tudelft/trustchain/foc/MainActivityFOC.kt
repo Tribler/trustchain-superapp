@@ -65,7 +65,7 @@ open class MainActivityFOC : AppCompatActivity() {
     private var bufferSize = 1024 * 5
     private val s = SessionManager()
     private var torrentAmount = 0
-    private val voteTracker: FOCVoteTracker = FOCVoteTracker()
+    private val voteTracker: FOCVoteTracker = FOCVoteTracker(this)
     private var appGossiper: AppGossiper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
