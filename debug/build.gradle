@@ -42,6 +42,10 @@ android {
     namespace 'nl.tudelft.trustchain.debug'
 }
 
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
 dependencies {
     implementation project(':common')
 
@@ -78,6 +82,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    // uTP protocol
+    api 'com.github.PieterCarton:utp4j:master-SNAPSHOT'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
