@@ -35,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.foc.community.FOCCommunity
+import nl.tudelft.trustchain.foc.community.FOCVote
 import nl.tudelft.trustchain.foc.community.FOCVoteTracker
 import nl.tudelft.trustchain.foc.databinding.ActivityMainFocBinding
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.APK_DOT_EXTENSION
@@ -277,7 +278,7 @@ open class MainActivityFOC : AppCompatActivity() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.createAlertDialogTitle))
         builder.setMessage(getString(R.string.createAlertDialogMsg))
-        builder.setPositiveButton(getString(R.string.cancelButton), null)
+        builder.setPositiveButton("Vote") { _, _ -> placeVote(fileName) }
         builder.setNeutralButton(getString(R.string.deleteButton)) { _, _ -> deleteApkFile(fileName) }
         builder.setNegativeButton(getString(R.string.createButton)) { _, _ -> createTorrent(fileName) }
         builder.show()
@@ -339,6 +340,22 @@ open class MainActivityFOC : AppCompatActivity() {
                     appGossiper?.removeTorrent(fileName)
                 }
             }
+        }
+    }
+
+    private fun placeVote(fileName: String) {
+        val files = applicationContext.cacheDir.listFiles()
+        val file =
+            files?.find { file ->
+                getFileName(file.toUri()) == fileName
+            }
+        if (file != null) {
+            val ipv8 = IPv8Android.getInstance()
+            val memberId = ipv8.myPeer.mid
+
+            voteTracker.vote(fileName, FOCVote(memberId))
+        } else {
+            printToast("Couldn't find file '$fileName'")
         }
     }
 

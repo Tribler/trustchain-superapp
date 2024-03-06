@@ -19,4 +19,14 @@ class FOCVoteTracker {
     fun loadState() {
         Log.w("vote-tracker", "load state")
     }
+
+    fun vote(fileName: String, vote: FOCVote) {
+        if (voteMap.containsKey(fileName)) {
+            val count = voteMap[fileName]!!.size
+            Log.w("voting", "Size of set: $count")
+            voteMap[fileName]!!.add(vote)
+        } else {
+            voteMap[fileName] = mutableSetOf(vote)
+        }
+    }
 }
