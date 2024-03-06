@@ -40,28 +40,18 @@ android {
 }
 
 dependencies {
-    // Other classpath declarations
-    implementation project(':common')
     api project(':common')
 
-    implementation 'org.apache.commons:commons-text:1.9'
+    api "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
     implementation 'com.google.code.gson:gson:2.8.8'
-    // ML
-
-    implementation 'com.github.haifengl:smile-kotlin:3.0.1'
-
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.5.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-
+    implementation "com.google.android.material:material:$material_version"
     implementation 'com.squareup.picasso:picasso:2.8'
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$android_junit_version"
 
+    // Transitive dependencies
+    androidTestImplementation 'androidx.test:monitor:1.6.1'
+    androidTestImplementation "junit:junit:$junit_version"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

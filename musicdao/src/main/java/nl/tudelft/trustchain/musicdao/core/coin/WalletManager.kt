@@ -59,7 +59,6 @@ var minBlockchainPeers = MIN_BLOCKCHAIN_PEERS_TEST_NET
  * In these location you can find all information to run the regtest and python server.
  * Make sure to also change the IP's (and URLs) in the kotlin code when swapping to a different server.
  */
-@Suppress("DEPRECATION", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class WalletManager(
     walletManagerConfiguration: WalletManagerConfiguration,
     walletDir: File,
@@ -91,6 +90,8 @@ class WalletManager(
                 BitcoinNetworkOptions.REG_TEST -> RegTestParams.get()
             }
 
+        val customPrefix = MUSIC_DAO_PREFIX
+
         val filePrefix =
             when (walletManagerConfiguration.network) {
                 BitcoinNetworkOptions.TEST_NET -> TEST_NET_WALLET_NAME
@@ -99,7 +100,7 @@ class WalletManager(
             }
 
         kit =
-            object : WalletAppKit(params, walletDir, filePrefix) {
+            object : WalletAppKit(params, walletDir, customPrefix + filePrefix) {
                 override fun onSetupCompleted() {
                     // Make a fresh new key if no keys in stored wallet.
                     if (wallet().keyChainGroupSize < 1) {
@@ -731,6 +732,8 @@ class WalletManager(
             val creationTime = seed.creationTimeSeconds
             return SerializedDeterministicKey(words, creationTime)
         }
+
+        const val MUSIC_DAO_PREFIX = "musicdao-"
     }
 
     fun toSeed(): SerializedDeterministicKey {

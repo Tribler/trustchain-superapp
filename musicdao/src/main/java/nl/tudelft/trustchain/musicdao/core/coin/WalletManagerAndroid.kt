@@ -7,7 +7,6 @@ import android.content.Context
  */
 object WalletManagerAndroid { // TODO: Clean up Thread usage.
     private var walletManager: WalletManager? = null
-    private var context: Context? = null
     var isRunning: Boolean = false
 
     fun getInstance(): WalletManager {
@@ -30,8 +29,6 @@ object WalletManagerAndroid { // TODO: Clean up Thread usage.
             val configuration =
                 configuration
                     ?: throw IllegalStateException("Configuration is not set")
-
-            WalletManagerAndroid.context = context
 
             val walletManager =
                 WalletManager(

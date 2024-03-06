@@ -20,7 +20,7 @@ You can also update the submodule with this command.
 ### Build
 If you want to build an APK, run the following command:
 ```
-./gradlew :app:buildDebug
+./gradlew :app:assembleDebug
 ```
 The resulting APK will be stored in `app/build/outputs/apk/debug/app-debug.apk`.
 
