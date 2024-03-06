@@ -278,7 +278,7 @@ open class MainActivityFOC : AppCompatActivity() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.createAlertDialogTitle))
         builder.setMessage(getString(R.string.createAlertDialogMsg))
-        builder.setPositiveButton("Vote") { _, _ -> placeVote(fileName) }
+        builder.setPositiveButton(R.string.voteButton) { _, _ -> placeVote(fileName) }
         builder.setNeutralButton(getString(R.string.deleteButton)) { _, _ -> deleteApkFile(fileName) }
         builder.setNegativeButton(getString(R.string.createButton)) { _, _ -> createTorrent(fileName) }
         builder.show()

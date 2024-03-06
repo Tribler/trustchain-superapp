@@ -20,6 +20,11 @@ class FOCVoteTracker {
         Log.w("vote-tracker", "load state")
     }
 
+    /**
+     * Gets called when user places a vote
+     * @param fileName APK on which vote is being placed
+     * @param vote Vote that is being placed
+     */
     fun vote(fileName: String, vote: FOCVote) {
         if (voteMap.containsKey(fileName)) {
             val count = voteMap[fileName]!!.size
