@@ -1,6 +1,8 @@
 package nl.tudelft.trustchain.debug
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.format.Formatter
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,16 +15,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import net.utp4j.channels.UtpServerSocketChannel
 import net.utp4j.channels.UtpSocketChannel
 import net.utp4j.examples.SaveFileListener
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentUtpTestBinding
-import java.net.Inet4Address
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
-import java.security.MessageDigest
 import kotlin.random.Random
 
 
@@ -37,6 +36,9 @@ class UtpTestFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Placeholder data
+        binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("192.168.0.102:13377")
 
         binding.openServer.setOnClickListener {
             val address = binding.editIPforUTP.text.toString().split(":")
@@ -66,16 +68,21 @@ class UtpTestFragment : Fragment() {
 
         lifecycleScope.launchWhenCreated {
             scope.launch(Dispatchers.IO) {
+                var startTime = 0L;
+                var endTime = 0L;
                 UtpServerSocketChannel.open().let { server ->
                     server.bind(InetSocketAddress(ip, port))
                     Log.d("uTP Server", "Server started on $ip:$port")
                     server.accept()?.run {
                         block()
+                        Log.d("uTP Server", "Receiving new data!")
+                        startTime = System.currentTimeMillis()
                         channel.let {
                             it.read(buffer)?.run {
                                 setListener(SaveFileListener())
                                 block()
                             }
+                            endTime = System.currentTimeMillis();
                             Log.d("uTP Server", "Finished receiving data!")
                         }
                         channel.close()
@@ -100,14 +107,23 @@ class UtpTestFragment : Fragment() {
                 } else {
                     Log.d("uTP Server", "Correct hash received")
                 }
+                view?.post {
+                    val time = (endTime - startTime) / 1000
+                    val speed = Formatter.formatFileSize(requireView().context, (BUFFER_SIZE / time))
+                    binding.utpLog.text = "Received data with hashes equal ${equalityOfHash} \n " +
+                        "${localHashString} \n ${recHashString} \n\n Transfer time: ${time}s \n" +
+                        "Avg speed: ${speed}/s"
+                }
             }
-            // TODO: This should be updated when the data is actually there
-            binding.utpLog.text = "Received data with hashes equal ${equalityOfHash} \n ${localHashString} \n ${recHashString}"
         }
     }
 
 
     private fun sendTestData(ip: String, port: Int) {
+
+        val csv3 = resources.openRawResource(R.raw.votes3)
+        val csv13 = resources.openRawResource(R.raw.votes13)
+
         scope.launch(Dispatchers.IO) {
             // 100 MB of random bytes + hash
             Log.d("uTP Client", "Start preparing buffer!")
@@ -149,7 +165,7 @@ class UtpTestFragment : Fragment() {
 
     companion object {
         const val MIN_PORT = 1024
-        const val BUFFER_SIZE = 100
+        const val BUFFER_SIZE = 50_000_000
     }
 
 }
