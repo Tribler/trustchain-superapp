@@ -7,13 +7,13 @@ data class FOCVote(val memberId: String) : nl.tudelft.ipv8.messaging.Serializabl
         return memberId.toByteArray()
     }
 
-    companion object Deserializer : Deserializable<FOCMessage> {
+    companion object Deserializer : Deserializable<FOCVote> {
         override fun deserialize(
             buffer: ByteArray,
             offset: Int
-        ): Pair<FOCMessage, Int> {
+        ): Pair<FOCVote, Int> {
             val toReturn = buffer.toString(Charsets.UTF_8)
-            return Pair(FOCMessage(toReturn), buffer.size)
+            return Pair(FOCVote(toReturn), buffer.size)
         }
     }
 }
