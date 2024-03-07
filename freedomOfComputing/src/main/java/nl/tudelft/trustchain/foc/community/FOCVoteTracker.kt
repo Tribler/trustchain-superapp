@@ -38,7 +38,7 @@ class FOCVoteTracker(private val activity: MainActivityFOC) {
             val fileName: String =
                 activity.applicationContext.cacheDir.absolutePath + "/vote-tracker" + ExtensionUtils.DATA_DOT_EXTENSION
             val file = File(fileName)
-            if(file.exists()) {
+            if (file.exists()) {
                 voteMap = deserializeMap(file.readBytes())
             }
         } catch (e: Exception) {
@@ -52,7 +52,10 @@ class FOCVoteTracker(private val activity: MainActivityFOC) {
      * @param fileName APK on which vote is being placed
      * @param vote Vote that is being placed
      */
-    fun vote(fileName: String, vote: FOCVote) {
+    fun vote(
+        fileName: String,
+        vote: FOCVote
+    ) {
         if (voteMap.containsKey(fileName)) {
             val count = voteMap[fileName]!!.size
             Log.w("voting", "Size of set: $count")

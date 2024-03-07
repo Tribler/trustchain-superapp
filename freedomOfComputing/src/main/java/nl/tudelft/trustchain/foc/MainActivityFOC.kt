@@ -244,9 +244,11 @@ open class MainActivityFOC : AppCompatActivity() {
         var button = Button(this)
         val fileName = getFileName(uri)
         button.text = fileName
-        button.layoutParams = RelativeLayout.LayoutParams(
-            750, RelativeLayout.LayoutParams.MATCH_PARENT
-        )
+        button.layoutParams =
+            RelativeLayout.LayoutParams(
+                750,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+            )
         // Replace the failed torrent with the downloaded torrent
         val existingButton = torrentList.find { btn -> btn.text == fileName }
         if (existingButton != null) {
@@ -257,9 +259,11 @@ open class MainActivityFOC : AppCompatActivity() {
         }
         val voteButton = Button(this)
         voteButton.text = getString(R.string.voteButton)
-        val params: RelativeLayout.LayoutParams = RelativeLayout.LayoutParams(
-            RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.MATCH_PARENT
-        )
+        val params: RelativeLayout.LayoutParams =
+            RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+            )
         voteButton.layoutParams = params
         voteButton.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.green))
