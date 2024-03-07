@@ -35,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.foc.community.FOCCommunity
+import nl.tudelft.trustchain.foc.community.FOCVote
 import nl.tudelft.trustchain.foc.community.FOCVoteTracker
 import nl.tudelft.trustchain.foc.databinding.ActivityMainFocBinding
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.APK_DOT_EXTENSION
@@ -64,7 +65,7 @@ open class MainActivityFOC : AppCompatActivity() {
     private var bufferSize = 1024 * 5
     private val s = SessionManager()
     private var torrentAmount = 0
-    private val voteTracker: FOCVoteTracker = FOCVoteTracker()
+    private val voteTracker: FOCVoteTracker = FOCVoteTracker(this)
     private var appGossiper: AppGossiper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -238,23 +239,45 @@ open class MainActivityFOC : AppCompatActivity() {
 
     private fun createSuccessfulTorrentButton(uri: Uri) {
         val torrentListView = binding.contentMainActivityFocLayout.torrentList
+        val row = LinearLayout(this)
+
         var button = Button(this)
         val fileName = getFileName(uri)
         button.text = fileName
+        button.layoutParams =
+            RelativeLayout.LayoutParams(
+                750,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+            )
         // Replace the failed torrent with the downloaded torrent
         val existingButton = torrentList.find { btn -> btn.text == fileName }
         if (existingButton != null) {
             button = existingButton
         } else {
             torrentList.add(button)
-            torrentListView.addView(button)
+            row.addView(button)
         }
+        val voteButton = Button(this)
+        voteButton.text = getString(R.string.voteButton)
+        val params: RelativeLayout.LayoutParams =
+            RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+            )
+        voteButton.layoutParams = params
+        voteButton.backgroundTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.green))
+        row.addView(voteButton)
+        torrentListView.addView(row)
 
         button.isAllCaps = false
         button.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
         button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
         binding.torrentCount.text = getString(R.string.torrentCount, ++torrentAmount)
+        voteButton.setOnClickListener {
+            placeVote(fileName)
+        }
         button.setOnClickListener {
             loadDynamicCode(fileName)
         }
@@ -276,7 +299,8 @@ open class MainActivityFOC : AppCompatActivity() {
     private fun createAlertDialog(fileName: String) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.createAlertDialogTitle))
-        builder.setMessage(getString(R.string.createAlertDialogMsg))
+        val count = voteTracker.getNumberOfVotes(fileName)
+        builder.setMessage(getString(R.string.createAlertDialogMsg, count))
         builder.setPositiveButton(getString(R.string.cancelButton), null)
         builder.setNeutralButton(getString(R.string.deleteButton)) { _, _ -> deleteApkFile(fileName) }
         builder.setNegativeButton(getString(R.string.createButton)) { _, _ -> createTorrent(fileName) }
@@ -339,6 +363,22 @@ open class MainActivityFOC : AppCompatActivity() {
                     appGossiper?.removeTorrent(fileName)
                 }
             }
+        }
+    }
+
+    private fun placeVote(fileName: String) {
+        val files = applicationContext.cacheDir.listFiles()
+        val file =
+            files?.find { file ->
+                getFileName(file.toUri()) == fileName
+            }
+        if (file != null) {
+            val ipv8 = IPv8Android.getInstance()
+            val memberId = ipv8.myPeer.mid
+
+            voteTracker.vote(fileName, FOCVote(memberId))
+        } else {
+            printToast("Couldn't find file '$fileName'")
         }
     }
 
