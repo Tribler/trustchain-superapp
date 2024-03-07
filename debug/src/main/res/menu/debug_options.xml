@@ -6,4 +6,7 @@
     <item
         android:id="@+id/multiPunch"
         android:title="NAT Puncturing" />
+    <item
+        android:id="@+id/uTPBatch"
+        android:title="uTP Batch Send" />
 </menu>
