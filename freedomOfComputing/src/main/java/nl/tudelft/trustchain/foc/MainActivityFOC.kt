@@ -37,6 +37,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.foc.community.FOCCommunity
 import nl.tudelft.trustchain.foc.community.FOCVote
 import nl.tudelft.trustchain.foc.community.FOCVoteTracker
+import nl.tudelft.trustchain.foc.community.VoteType
 import nl.tudelft.trustchain.foc.databinding.ActivityMainFocBinding
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.APK_DOT_EXTENSION
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.TORRENT_DOT_EXTENSION
@@ -282,10 +283,10 @@ open class MainActivityFOC : AppCompatActivity() {
         button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
         binding.torrentCount.text = getString(R.string.torrentCount, ++torrentAmount)
         upVote.setOnClickListener {
-            placeVote(fileName, 1)
+            placeVote(fileName, VoteType.UP)
         }
         downVote.setOnClickListener {
-            placeVote(fileName, 2)
+            placeVote(fileName, VoteType.DOWN)
         }
         button.setOnClickListener {
             loadDynamicCode(fileName)
@@ -308,8 +309,8 @@ open class MainActivityFOC : AppCompatActivity() {
     private fun createAlertDialog(fileName: String) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.createAlertDialogTitle))
-        val upVoteCount = voteTracker.getNumberOfVotes(fileName, 1)
-        val downVoteCount = voteTracker.getNumberOfVotes(fileName, 2)
+        val upVoteCount = voteTracker.getNumberOfVotes(fileName, VoteType.UP)
+        val downVoteCount = voteTracker.getNumberOfVotes(fileName, VoteType.DOWN)
         builder.setMessage(getString(R.string.createAlertDialogMsg, upVoteCount, downVoteCount))
         builder.setPositiveButton(getString(R.string.cancelButton), null)
         builder.setNeutralButton(getString(R.string.deleteButton)) { _, _ -> deleteApkFile(fileName) }
@@ -380,7 +381,7 @@ open class MainActivityFOC : AppCompatActivity() {
 
     private fun placeVote(
         fileName: String,
-        voteType: Int
+        voteType: VoteType
     ) {
         val files = applicationContext.cacheDir.listFiles()
         val file =

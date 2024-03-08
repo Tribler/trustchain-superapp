@@ -66,10 +66,10 @@ class FOCVoteTracker(private val activity: MainActivityFOC) {
         fileName: String,
         vote: FOCVote
     ) {
-        val voteMap = if (vote.voteType == 1) upVoteMap else downVoteMap
+        val voteMap = if (vote.voteType == VoteType.UP) upVoteMap else downVoteMap
         if (voteMap.containsKey(fileName)) {
             val count = voteMap[fileName]!!.size
-            val tag = if (vote.voteType == 1) "upvote" else "downvote"
+            val tag = if (vote.voteType == VoteType.UP) "upvote" else "downvote"
             Log.w(tag, "Size of set: $count")
             voteMap[fileName]!!.add(vote)
         } else {
@@ -84,9 +84,9 @@ class FOCVoteTracker(private val activity: MainActivityFOC) {
      */
     fun getNumberOfVotes(
         fileName: String,
-        voteType: Int
+        voteType: VoteType
     ): Int {
-        val voteMap = if (voteType == 1) upVoteMap else downVoteMap
+        val voteMap = if (voteType == VoteType.UP) upVoteMap else downVoteMap
         if (!voteMap.containsKey(fileName)) {
             return 0
         }
