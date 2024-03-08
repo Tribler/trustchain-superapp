@@ -246,7 +246,7 @@ open class MainActivityFOC : AppCompatActivity() {
         button.text = fileName
         button.layoutParams =
             RelativeLayout.LayoutParams(
-                750,
+                600,
                 RelativeLayout.LayoutParams.MATCH_PARENT
             )
         // Replace the failed torrent with the downloaded torrent
@@ -257,26 +257,35 @@ open class MainActivityFOC : AppCompatActivity() {
             torrentList.add(button)
             row.addView(button)
         }
-        val voteButton = Button(this)
-        voteButton.text = getString(R.string.voteButton)
-        val params: RelativeLayout.LayoutParams =
+        val upVote = Button(this)
+        upVote.text = getString(R.string.upVote)
+        val upVoteParams: RelativeLayout.LayoutParams =
             RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.MATCH_PARENT
             )
-        voteButton.layoutParams = params
-        voteButton.backgroundTintList =
+        upVote.layoutParams = upVoteParams
+        upVote.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.green))
-        row.addView(voteButton)
-        torrentListView.addView(row)
+        row.addView(upVote)
 
+        val downVote = Button(this)
+        downVote.text = getString(R.string.downVote)
+        downVote.backgroundTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.red))
+        row.addView(downVote)
+
+        torrentListView.addView(row)
         button.isAllCaps = false
         button.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
         button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
         binding.torrentCount.text = getString(R.string.torrentCount, ++torrentAmount)
-        voteButton.setOnClickListener {
-            placeVote(fileName)
+        upVote.setOnClickListener {
+            placeVote(fileName, 1)
+        }
+        downVote.setOnClickListener {
+            placeVote(fileName, 2)
         }
         button.setOnClickListener {
             loadDynamicCode(fileName)
@@ -299,8 +308,9 @@ open class MainActivityFOC : AppCompatActivity() {
     private fun createAlertDialog(fileName: String) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.createAlertDialogTitle))
-        val count = voteTracker.getNumberOfVotes(fileName)
-        builder.setMessage(getString(R.string.createAlertDialogMsg, count))
+        val upVoteCount = voteTracker.getNumberOfVotes(fileName, 1)
+        val downVoteCount = voteTracker.getNumberOfVotes(fileName, 2)
+        builder.setMessage(getString(R.string.createAlertDialogMsg, upVoteCount, downVoteCount))
         builder.setPositiveButton(getString(R.string.cancelButton), null)
         builder.setNeutralButton(getString(R.string.deleteButton)) { _, _ -> deleteApkFile(fileName) }
         builder.setNegativeButton(getString(R.string.createButton)) { _, _ -> createTorrent(fileName) }
@@ -355,10 +365,12 @@ open class MainActivityFOC : AppCompatActivity() {
 
             if (deleted != null && deleted) {
                 val buttonToBeDeleted = torrentList.find { button -> button.text == fileName }
+
                 if (buttonToBeDeleted != null) {
                     val torrentListView = binding.contentMainActivityFocLayout.torrentList
                     torrentList.remove(buttonToBeDeleted)
                     torrentListView.removeView(buttonToBeDeleted)
+
                     binding.torrentCount.text = getString(R.string.torrentCount, --torrentAmount)
                     appGossiper?.removeTorrent(fileName)
                 }
@@ -366,7 +378,10 @@ open class MainActivityFOC : AppCompatActivity() {
         }
     }
 
-    private fun placeVote(fileName: String) {
+    private fun placeVote(
+        fileName: String,
+        voteType: Int
+    ) {
         val files = applicationContext.cacheDir.listFiles()
         val file =
             files?.find { file ->
@@ -376,7 +391,7 @@ open class MainActivityFOC : AppCompatActivity() {
             val ipv8 = IPv8Android.getInstance()
             val memberId = ipv8.myPeer.mid
 
-            voteTracker.vote(fileName, FOCVote(memberId))
+            voteTracker.vote(fileName, FOCVote(memberId, voteType))
         } else {
             printToast("Couldn't find file '$fileName'")
         }
