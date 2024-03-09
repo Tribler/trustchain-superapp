@@ -272,7 +272,7 @@ class AppGossiper(
                 payload.message.substringAfter(DISPLAY_NAME_APPENDER)
                     .substringBefore('&')
             activity.runOnUiThread {
-                val existingButton = activity.torrentList.find { btn -> btn.text == torrentName }
+                val existingButton = activity.torrentMap.entries.find { entry -> entry.key.text == torrentName }?.key
                 if (existingButton == null) {
                     addDownloadToQueue()
                     activity.createUnsuccessfulTorrentButton(torrentName)
