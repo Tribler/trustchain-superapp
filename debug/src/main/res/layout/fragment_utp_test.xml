@@ -1,61 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ConstraintView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".UtpTestFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <LinearLayout
+    <TextView
+        android:id="@+id/rubric"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="Test uTP Data"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/sendTestPacket"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="400dp"
+        android:layout_weight="1"
+        android:text="Send"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/recieveTestPacket"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="200dp"
+        android:layout_marginTop="400dp"
+        android:layout_weight="1"
+        android:text="Recieve"
+        app:layout_constraintStart_toEndOf="@+id/sendTestPacket"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/toggleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="64dp"
+        android:text="IPv4/IPv8"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Switch
+        android:id="@+id/toggleSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:checked="false"
+        android:splitTrack="false"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintEnd_toEndOf="@+id/toggleText"
+        app:layout_constraintStart_toStartOf="@+id/toggleText"
+        app:layout_constraintTop_toBottomOf="@+id/toggleText" />
+
+    <EditText
+        android:id="@+id/editIPforUTP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ems="10"
+        android:hint="IP"
+        android:inputType="text"
+        app:layout_constraintBottom_toBottomOf="@+id/toggleSwitch"
+        app:layout_constraintEnd_toEndOf="@+id/IPv_Spinner"
+        app:layout_constraintTop_toTopOf="@+id/toggleSwitch" />
+
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="-9dp"
+        tools:layout_editor_absoluteY="266dp" />
+
+    <Spinner
+        android:id="@+id/IPv_Spinner"
+        android:layout_width="242dp"
+        android:layout_height="23dp"
+        android:spinnerMode="dropdown"
+        android:text="Choose IPv8-peer"
+        app:layout_constraintBottom_toBottomOf="@+id/toggleText"
+        app:layout_constraintEnd_toEndOf="@+id/rubric"
+        app:layout_constraintTop_toTopOf="@+id/toggleText" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="225dp"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="312dp">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/utp_text" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/editIPforUTP"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:hint="IP"
-                android:inputType="text" />
-
-            <Button
-                android:id="@+id/sendTestPacket"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Send" />
-
-            <Button
-                android:id="@+id/openServer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Server" />
-        </LinearLayout>
-
-        <ScrollView
+            android:id="@+id/utpLog"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="TextBox"
+            android:textSize="18sp" />
+    </ScrollView>
 
-            <TextView
-                android:id="@+id/utpLog"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
-        </ScrollView>
 
-    </LinearLayout>
-
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
