@@ -8,11 +8,84 @@
     tools:context=".UtpTestFragment">
 
     <TextView
+        android:id="@+id/DAOToggleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="File/Random"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/IPv_ToggleText"
+        app:layout_constraintStart_toStartOf="@+id/IPv_ToggleText"
+        app:layout_constraintTop_toTopOf="@+id/guideline3" />
+
+    <Switch
+        android:id="@+id/DAOToggleSwitch"
+        android:layout_width="64dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintEnd_toEndOf="@+id/IPv_ToggleSwitch"
+        app:layout_constraintStart_toStartOf="@+id/IPv_ToggleSwitch"
+        app:layout_constraintTop_toBottomOf="@+id/DAOToggleText" />
+
+    <TextView
+        android:id="@+id/IPv_ToggleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="32dp"
+        android:text="IPv4/IPv8"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline2" />
+
+    <Switch
+        android:id="@+id/IPv_ToggleSwitch"
+        android:layout_width="64dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:checked="false"
+        android:splitTrack="false"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintEnd_toEndOf="@+id/IPv_ToggleText"
+        app:layout_constraintStart_toStartOf="@+id/IPv_ToggleText"
+        app:layout_constraintTop_toBottomOf="@+id/IPv_ToggleText" />
+
+    <EditText
+        android:id="@+id/editIPforUTP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:ems="10"
+        android:hint="IPv_ input"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="@+id/IPv_Spinner"
+        app:layout_constraintStart_toStartOf="@+id/IPv_Spinner"
+        app:layout_constraintTop_toBottomOf="@+id/IPv_Spinner" />
+
+    <Spinner
+        android:id="@+id/IPv_Spinner"
+        android:layout_width="242dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="48dp"
+        android:padding="8dp"
+        android:spinnerMode="dropdown"
+        android:text="Choose IPv8-peer"
+        app:layout_constraintBottom_toBottomOf="@+id/IPv_ToggleText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline2" />
+
+    <TextView
         android:id="@+id/rubric"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
         android:text="Test uTP Data"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textStyle="bold"
@@ -21,95 +94,106 @@
 
     <Button
         android:id="@+id/sendTestPacket"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="400dp"
+        android:layout_width="100dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="78dp"
+        android:layout_marginTop="32dp"
         android:layout_weight="1"
         android:text="Send"
+        android:textSize="19sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/guideline4" />
 
     <Button
-        android:id="@+id/recieveTestPacket"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="200dp"
-        android:layout_marginTop="400dp"
+        android:id="@+id/receiveTestPacket"
+        android:layout_width="100dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="48dp"
         android:layout_weight="1"
-        android:text="Recieve"
+        android:text="Receive"
+        android:textSize="19sp"
         app:layout_constraintStart_toEndOf="@+id/sendTestPacket"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/toggleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="64dp"
-        android:text="IPv4/IPv8"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Switch
-        android:id="@+id/toggleSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_weight="1"
-        android:checked="false"
-        android:splitTrack="false"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintEnd_toEndOf="@+id/toggleText"
-        app:layout_constraintStart_toStartOf="@+id/toggleText"
-        app:layout_constraintTop_toBottomOf="@+id/toggleText" />
-
-    <EditText
-        android:id="@+id/editIPforUTP"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:ems="10"
-        android:hint="IP"
-        android:inputType="text"
-        app:layout_constraintBottom_toBottomOf="@+id/toggleSwitch"
-        app:layout_constraintEnd_toEndOf="@+id/IPv_Spinner"
-        app:layout_constraintTop_toTopOf="@+id/toggleSwitch" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="-9dp"
-        tools:layout_editor_absoluteY="266dp" />
-
-    <Spinner
-        android:id="@+id/IPv_Spinner"
-        android:layout_width="242dp"
-        android:layout_height="23dp"
-        android:spinnerMode="dropdown"
-        android:text="Choose IPv8-peer"
-        app:layout_constraintBottom_toBottomOf="@+id/toggleText"
-        app:layout_constraintEnd_toEndOf="@+id/rubric"
-        app:layout_constraintTop_toTopOf="@+id/toggleText" />
+        app:layout_constraintTop_toTopOf="@+id/sendTestPacket" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="225dp"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="312dp">
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sendTestPacket">
 
         <TextView
-            android:id="@+id/utpLog"
+            android:id="@+id/logUTP"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:gravity="center"
             android:text="TextBox"
-            android:textSize="18sp" />
+            android:textSize="34sp" />
     </ScrollView>
+
+    <Spinner
+        android:id="@+id/DAOSpinner"
+        android:layout_width="242dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/DAOToggleText"
+        app:layout_constraintEnd_toEndOf="@+id/IPv_Spinner"
+        app:layout_constraintStart_toStartOf="@+id/IPv_Spinner"
+        app:layout_constraintTop_toTopOf="@+id/guideline3" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="64dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="192dp" />
+
+    <EditText
+        android:id="@+id/editDAOText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="text"
+        android:text="Random data size (in Mb)"
+        app:layout_constraintEnd_toEndOf="@+id/editIPforUTP"
+        app:layout_constraintStart_toStartOf="@+id/editIPforUTP"
+        app:layout_constraintTop_toBottomOf="@+id/DAOSpinner" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="320dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="420dp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintGuide_begin="238dp"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

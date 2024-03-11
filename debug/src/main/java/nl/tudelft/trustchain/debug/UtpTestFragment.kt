@@ -40,7 +40,7 @@ class UtpTestFragment : Fragment() {
         // Placeholder data
         binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("192.168.0.102:13377")
 
-        binding.openServer.setOnClickListener {
+        binding.receiveTestPacket.setOnClickListener {
             val address = binding.editIPforUTP.text.toString().split(":")
             if (address.size == 2) {
                 val ip = address[0]
@@ -110,7 +110,7 @@ class UtpTestFragment : Fragment() {
                 view?.post {
                     val time = (endTime - startTime) / 1000
                     val speed = Formatter.formatFileSize(requireView().context, (BUFFER_SIZE / time))
-                    binding.utpLog.text = "Received data with hashes equal ${equalityOfHash} \n " +
+                    binding.logUTP.text = "Received data with hashes equal ${equalityOfHash} \n " +
                         "${localHashString} \n ${recHashString} \n\n Transfer time: ${time}s \n" +
                         "Avg speed: ${speed}/s"
                 }
