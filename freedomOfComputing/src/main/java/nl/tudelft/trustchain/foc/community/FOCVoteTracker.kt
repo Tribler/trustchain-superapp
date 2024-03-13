@@ -2,7 +2,11 @@ package nl.tudelft.trustchain.foc.community
 
 import android.util.Log
 import android.widget.Toast
-import nl.tudelft.ipv8.messaging.Packet
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.foc.MainActivityFOC
 import nl.tudelft.trustchain.foc.util.ExtensionUtils
 import java.io.ByteArrayInputStream
@@ -12,22 +16,30 @@ import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
-class FOCVoteTracker(private val activity: MainActivityFOC,
-    private val focCommunity: FOCCommunityBase
+class FOCVoteTracker(
+    private val activity: MainActivityFOC, private val focCommunity: FOCCommunity
 ) {
     // Stores the votes for all apks
     private var voteMap: HashMap<String, HashSet<FOCVote>> = HashMap()
+    val GOSSIP_DELAY: Long = 10000
+    private val scope = CoroutineScope(Dispatchers.IO)
+
+    fun start() {
+        scope.launch {
+            iterativelyDownloadVotes()
+        }
+    }
 
     /**
      * Gets called on pause (or shutdown) of the app to persist state
      */
     fun storeState() {
         val votesFileName: String =
-            activity.applicationContext.cacheDir.absolutePath + "/vote-tracker" + ExtensionUtils.DATA_DOT_EXTENSION
+            activity.cacheDir.absolutePath + "/vote-tracker" + ExtensionUtils.DATA_DOT_EXTENSION
         try {
             File(votesFileName).writeBytes(serializeMap(voteMap))
         } catch (e: IOException) {
-            this.printToast(e.toString())
+            printToast(e.toString())
             Log.e("vote-tracker-store", e.toString())
         }
     }
@@ -38,14 +50,14 @@ class FOCVoteTracker(private val activity: MainActivityFOC,
     fun loadState() {
         try {
             val voteFileName: String =
-                activity.applicationContext.cacheDir.absolutePath + "/vote-tracker" + ExtensionUtils.DATA_DOT_EXTENSION
+                activity.cacheDir.absolutePath + "/vote-tracker" + ExtensionUtils.DATA_DOT_EXTENSION
             val voteFile = File(voteFileName)
 
             if (voteFile.exists()) {
                 voteMap = deserializeMap(voteFile.readBytes())
             }
         } catch (e: Exception) {
-            this.printToast(e.toString())
+            printToast(e.toString())
             Log.e("vote-tracker load", e.toString())
         }
     }
@@ -64,7 +76,6 @@ class FOCVoteTracker(private val activity: MainActivityFOC,
         } else {
             voteMap[fileName] = hashSetOf(vote)
         }
-        // Gossip vote
         focCommunity.informAboutVote(fileName, vote)
     }
 
@@ -90,6 +101,17 @@ class FOCVoteTracker(private val activity: MainActivityFOC,
             return 0
         }
         return voteMap[fileName]!!.count { v -> v.voteType == voteType }
+    }
+
+    private suspend fun iterativelyDownloadVotes() {
+        while (scope.isActive) {
+            Log.i("vote-gossip", "${focCommunity.voteMessagesQueue.size} in Queue")
+            while (!focCommunity.voteMessagesQueue.isEmpty()) {
+                val (_, payload) = focCommunity.voteMessagesQueue.remove()
+                insertVote(payload.fileName, payload.focVote)
+            }
+            delay(GOSSIP_DELAY)
+        }
     }
 
     /**

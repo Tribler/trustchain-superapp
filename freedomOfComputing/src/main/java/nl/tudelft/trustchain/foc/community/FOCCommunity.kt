@@ -78,7 +78,7 @@ class FOCCommunity(
     }
 
     override var torrentMessagesList = ArrayList<Pair<Peer, FOCMessage>>()
-    override var voteMessagesList = ArrayList<Pair<Peer, FOCVoteMessage>>()
+    override var voteMessagesQueue: Queue<Pair<Peer, FOCVoteMessage>> = LinkedList()
 
     object MessageId {
         const val FOC_THALIS_MESSAGE = 220
@@ -161,7 +161,8 @@ class FOCCommunity(
                 .substringBefore("&dn=")
         if (torrentMessagesList.none {
                 it.second
-                val existingHash = it.second.message.substringAfter("magnet:?xt=urn:btih:").substringBefore("&dn=")
+                val existingHash =
+                    it.second.message.substringAfter("magnet:?xt=urn:btih:").substringBefore("&dn=")
                 torrentHash == existingHash
             }
         ) {
@@ -170,6 +171,7 @@ class FOCCommunity(
         }
     }
 
+
     private fun onVoteMessage(packet: Packet) {
         Log.i("vote-gossip", "OnVoteMessage Called")
         val (peer, payload) = packet.getAuthPayload(FOCVoteMessage)
@@ -177,13 +179,7 @@ class FOCCommunity(
             "vote-gossip",
             "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focVote.voteType}"
         )
-        if (voteMessagesList.none {
-                it.second
-                it.second.fileName == payload.fileName && it.second.focVote.memberId == payload.focVote.memberId
-            }) {
-            voteMessagesList.add(Pair(peer, payload))
-            Log.i("vote-gossip", peer.mid + ": " + payload.fileName)
-        }
+        voteMessagesQueue.add(Pair(peer, payload))
     }
 
     private fun onAppRequestPacket(packet: Packet) {

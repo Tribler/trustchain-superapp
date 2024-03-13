@@ -100,12 +100,13 @@ open class MainActivityFOC : AppCompatActivity() {
 
             binding.torrentCount.text = getString(R.string.torrentCount, torrentAmount)
             voteTracker?.loadState()
+            voteTracker?.start()
             copyDefaultApp()
             showAllFiles()
 
             appGossiper =
                 IPv8Android.getInstance().getOverlay<FOCCommunity>()
-                    ?.let { AppGossiper.getInstance(s, this, it, voteTracker = voteTracker) }
+                    ?.let { AppGossiper.getInstance(s, this, it) }
             appGossiper?.start()
         } catch (e: Exception) {
             printToast(e.toString())
@@ -258,7 +259,8 @@ open class MainActivityFOC : AppCompatActivity() {
             row.addView(button)
         }
         val upVote = Button(this)
-        upVote.text = getString(R.string.upVote, voteTracker?.getNumberOfVotes(fileName, VoteType.UP))
+        upVote.text =
+            getString(R.string.upVote, voteTracker?.getNumberOfVotes(fileName, VoteType.UP))
         val upVoteParams: RelativeLayout.LayoutParams =
             RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -270,7 +272,8 @@ open class MainActivityFOC : AppCompatActivity() {
         row.addView(upVote)
 
         val downVote = Button(this)
-        downVote.text = getString(R.string.downVote, voteTracker?.getNumberOfVotes(fileName, VoteType.DOWN))
+        downVote.text =
+            getString(R.string.downVote, voteTracker?.getNumberOfVotes(fileName, VoteType.DOWN))
         downVote.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.red))
         row.addView(downVote)
@@ -282,11 +285,13 @@ open class MainActivityFOC : AppCompatActivity() {
         binding.torrentCount.text = getString(R.string.torrentCount, ++torrentAmount)
         upVote.setOnClickListener {
             placeVote(fileName, VoteType.UP)
-            upVote.text = getString(R.string.upVote, voteTracker?.getNumberOfVotes(fileName, VoteType.UP))
+            upVote.text =
+                getString(R.string.upVote, voteTracker?.getNumberOfVotes(fileName, VoteType.UP))
         }
         downVote.setOnClickListener {
             placeVote(fileName, VoteType.DOWN)
-            downVote.text = getString(R.string.downVote, voteTracker?.getNumberOfVotes(fileName, VoteType.DOWN))
+            downVote.text =
+                getString(R.string.downVote, voteTracker?.getNumberOfVotes(fileName, VoteType.DOWN))
         }
         button.setOnClickListener {
             loadDynamicCode(fileName)
@@ -365,7 +370,8 @@ open class MainActivityFOC : AppCompatActivity() {
             }?.delete()
 
             if (deleted != null && deleted) {
-                val buttonToBeDeleted = torrentMap.entries.find { entry -> entry.key.text == fileName }?.key
+                val buttonToBeDeleted =
+                    torrentMap.entries.find { entry -> entry.key.text == fileName }?.key
 
                 if (buttonToBeDeleted != null) {
                     val torrentListView = binding.contentMainActivityFocLayout.torrentList
