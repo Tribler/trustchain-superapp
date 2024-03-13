@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.foc
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.ColorStateList

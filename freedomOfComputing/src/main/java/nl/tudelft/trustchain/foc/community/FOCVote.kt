@@ -10,7 +10,8 @@ enum class VoteType {
     DOWN
 }
 
-data class FOCVote(val memberId: String, val voteType: VoteType) : Serializable,
+data class FOCVote(val memberId: String, val voteType: VoteType) :
+    Serializable,
     nl.tudelft.ipv8.messaging.Serializable {
     override fun serialize(): ByteArray {
         return serializeVarLen(memberId.toByteArray(Charsets.UTF_8)) +
@@ -22,7 +23,7 @@ data class FOCVote(val memberId: String, val voteType: VoteType) : Serializable,
             buffer: ByteArray,
             offset: Int
         ): Pair<FOCVote, Int> {
-            var localOffset = offset;
+            var localOffset = offset
             val (mid, midSize) = deserializeVarLen(buffer, localOffset)
             localOffset += midSize
             val (voteType, voteTypeSize) = deserializeVarLen(buffer, localOffset)

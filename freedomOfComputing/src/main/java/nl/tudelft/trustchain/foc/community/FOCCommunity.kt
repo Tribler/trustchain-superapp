@@ -102,7 +102,10 @@ class FOCCommunity(
         }
     }
 
-    override fun informAboutVote(fileName: String, vote: FOCVote) {
+    override fun informAboutVote(
+        fileName: String,
+        vote: FOCVote
+    ) {
         Log.i(
             "vote-gossip",
             "Informing about ${vote.voteType} vote on $fileName from ${vote.memberId}"
@@ -171,7 +174,6 @@ class FOCCommunity(
         }
     }
 
-
     private fun onVoteMessage(packet: Packet) {
         Log.i("vote-gossip", "OnVoteMessage Called")
         val (peer, payload) = packet.getAuthPayload(FOCVoteMessage)
@@ -181,7 +183,8 @@ class FOCCommunity(
         )
         if (voteMessagesQueue.none {
                 it.second == payload
-            }) {
+            }
+        ) {
             voteMessagesQueue.add(Pair(peer, payload))
         }
     }

@@ -17,11 +17,12 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
 class FOCVoteTracker(
-    private val activity: MainActivityFOC, private val focCommunity: FOCCommunity
+    private val activity: MainActivityFOC,
+    private val focCommunity: FOCCommunity
 ) {
     // Stores the votes for all apks
     private var voteMap: HashMap<String, HashSet<FOCVote>> = HashMap()
-    val GOSSIP_DELAY: Long = 1000
+    private val gossipDelay: Long = 1000
     private val scope = CoroutineScope(Dispatchers.IO)
 
     fun start() {
@@ -84,7 +85,10 @@ class FOCVoteTracker(
      * @param fileName APK on which vote is being placed
      * @param vote Vote that is being placed
      */
-    private fun insertVote(fileName: String, vote: FOCVote) {
+    private fun insertVote(
+        fileName: String,
+        vote: FOCVote
+    ) {
         if (voteMap.containsKey(fileName)) {
             voteMap[fileName]!!.add(vote)
         } else {
@@ -94,7 +98,6 @@ class FOCVoteTracker(
             activity.updateVoteCounts(fileName)
         }
     }
-
 
     /**
      * Get the number of votes for an APK
@@ -121,7 +124,7 @@ class FOCVoteTracker(
                 val (_, payload) = focCommunity.voteMessagesQueue.remove()
                 insertVote(payload.fileName, payload.focVote)
             }
-            delay(GOSSIP_DELAY)
+            delay(gossipDelay)
         }
     }
 

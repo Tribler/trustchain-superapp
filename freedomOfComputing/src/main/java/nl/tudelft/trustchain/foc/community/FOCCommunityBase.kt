@@ -10,6 +10,7 @@ import kotlin.collections.ArrayList
 abstract class FOCCommunityBase : Community() {
     abstract var torrentMessagesList: ArrayList<Pair<Peer, FOCMessage>>
     abstract var voteMessagesQueue: Queue<Pair<Peer, FOCVoteMessage>>
+
     abstract fun setEVAOnReceiveProgressCallback(f: (peer: Peer, info: String, progress: TransferProgress) -> Unit)
 
     abstract fun setEVAOnReceiveCompleteCallback(f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit)
@@ -18,7 +19,10 @@ abstract class FOCCommunityBase : Community() {
 
     abstract fun informAboutTorrent(torrentName: String)
 
-    abstract fun informAboutVote(fileName: String, vote: FOCVote)
+    abstract fun informAboutVote(
+        fileName: String,
+        vote: FOCVote
+    )
 
     abstract fun sendAppRequest(
         torrentInfoHash: String,
