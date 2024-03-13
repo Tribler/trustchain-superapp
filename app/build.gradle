@@ -151,7 +151,6 @@ dependencies {
     implementation('net.java.dev.jna:jna:5.12.1@aar')
 
     implementation "com.github.MattSkala:recyclerview-itemadapter:$recyclerview_adapter_version"
-    implementation project(':currencyii')
 
     // Testing
     testImplementation "junit:junit:$junit_version"
