@@ -13,20 +13,16 @@ import java.io.ObjectOutputStream
 
 class FOCVoteTracker(private val activity: MainActivityFOC) {
     // Stores the votes for all apks
-    private var upVoteMap: HashMap<String, HashSet<FOCVote>> = HashMap()
-    private var downVoteMap: HashMap<String, HashSet<FOCVote>> = HashMap()
+    private var voteMap: HashMap<String, HashSet<FOCVote>> = HashMap()
 
     /**
      * Gets called on pause (or shutdown) of the app to persist state
      */
     fun storeState() {
-        val upVotesFileName: String =
-            activity.applicationContext.cacheDir.absolutePath + "/vote-tracker-upvotes" + ExtensionUtils.DATA_DOT_EXTENSION
-        val downVotesFileName: String =
-            activity.applicationContext.cacheDir.absolutePath + "/vote-tracker-downvotes" + ExtensionUtils.DATA_DOT_EXTENSION
+        val votesFileName: String =
+            activity.applicationContext.cacheDir.absolutePath + "/vote-tracker" + ExtensionUtils.DATA_DOT_EXTENSION
         try {
-            File(upVotesFileName).writeBytes(serializeMap(upVoteMap))
-            File(downVotesFileName).writeBytes(serializeMap(downVoteMap))
+            File(votesFileName).writeBytes(serializeMap(voteMap))
         } catch (e: IOException) {
             this.printToast(e.toString())
             Log.e("vote-tracker-store", e.toString())
@@ -38,18 +34,12 @@ class FOCVoteTracker(private val activity: MainActivityFOC) {
      */
     fun loadState() {
         try {
-            val upVoteFileName: String =
-                activity.applicationContext.cacheDir.absolutePath + "/vote-tracker-upvotes" + ExtensionUtils.DATA_DOT_EXTENSION
-            val downVoteFileName: String =
-                activity.applicationContext.cacheDir.absolutePath + "/vote-tracker-downvotes" + ExtensionUtils.DATA_DOT_EXTENSION
-            val upVoteFile = File(upVoteFileName)
-            val downVoteFile = File(downVoteFileName)
+            val voteFileName: String =
+                activity.applicationContext.cacheDir.absolutePath + "/vote-tracker" + ExtensionUtils.DATA_DOT_EXTENSION
+            val voteFile = File(voteFileName)
 
-            if (upVoteFile.exists()) {
-                upVoteMap = deserializeMap(upVoteFile.readBytes())
-            }
-            if (downVoteFile.exists()) {
-                downVoteMap = deserializeMap(downVoteFile.readBytes())
+            if (voteFile.exists()) {
+                voteMap = deserializeMap(voteFile.readBytes())
             }
         } catch (e: Exception) {
             this.printToast(e.toString())
@@ -66,11 +56,7 @@ class FOCVoteTracker(private val activity: MainActivityFOC) {
         fileName: String,
         vote: FOCVote
     ) {
-        val voteMap = if (vote.voteType == VoteType.UP) upVoteMap else downVoteMap
         if (voteMap.containsKey(fileName)) {
-            val count = voteMap[fileName]!!.size
-            val tag = if (vote.voteType == VoteType.UP) "upvote" else "downvote"
-            Log.w(tag, "Size of set: $count")
             voteMap[fileName]!!.add(vote)
         } else {
             voteMap[fileName] = hashSetOf(vote)
@@ -86,11 +72,10 @@ class FOCVoteTracker(private val activity: MainActivityFOC) {
         fileName: String,
         voteType: VoteType
     ): Int {
-        val voteMap = if (voteType == VoteType.UP) upVoteMap else downVoteMap
         if (!voteMap.containsKey(fileName)) {
             return 0
         }
-        return voteMap[fileName]!!.size
+        return voteMap[fileName]!!.count { v -> v.voteType == voteType }
     }
 
     /**
