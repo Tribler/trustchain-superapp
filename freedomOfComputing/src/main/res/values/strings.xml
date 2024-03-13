@@ -23,6 +23,6 @@
     </string>
     <string name="createDownloadDialogTitle">Enter a URL on which the .apk file can be downloaded</string>
     <string name="noDownloadInProgress">No download in progress</string>
-    <string name="upVote">\uD83D\uDC4D</string>
-    <string name="downVote">\uD83D\uDC4E</string>
+    <string name="upVote">\uD83D\uDC4D %1$d</string>
+    <string name="downVote">\uD83D\uDC4E %1$d</string>
 </resources>
