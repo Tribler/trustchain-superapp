@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.foc.community
 
 import android.util.Log
 import android.widget.Toast
+import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.trustchain.foc.MainActivityFOC
 import nl.tudelft.trustchain.foc.util.ExtensionUtils
 import java.io.ByteArrayInputStream
@@ -11,7 +12,9 @@ import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
-class FOCVoteTracker(private val activity: MainActivityFOC) {
+class FOCVoteTracker(private val activity: MainActivityFOC,
+    private val focCommunity: FOCCommunityBase
+) {
     // Stores the votes for all apks
     private var voteMap: HashMap<String, HashSet<FOCVote>> = HashMap()
 
@@ -61,7 +64,18 @@ class FOCVoteTracker(private val activity: MainActivityFOC) {
         } else {
             voteMap[fileName] = hashSetOf(vote)
         }
+        // Gossip vote
+        focCommunity.informAboutVote(fileName, vote)
     }
+
+    fun insertVote(fileName: String, vote: FOCVote) {
+        if (voteMap.containsKey(fileName)) {
+            voteMap[fileName]!!.add(vote)
+        } else {
+            voteMap[fileName] = hashSetOf(vote)
+        }
+    }
+
 
     /**
      * Get the number of votes for an APK

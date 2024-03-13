@@ -78,12 +78,14 @@ class FOCCommunity(
     }
 
     override var torrentMessagesList = ArrayList<Pair<Peer, FOCMessage>>()
+    override var voteMessagesList = ArrayList<Pair<Peer, FOCVoteMessage>>()
 
     object MessageId {
         const val FOC_THALIS_MESSAGE = 220
         const val TORRENT_MESSAGE = 230
         const val APP_REQUEST = 231
         const val APP = 232
+        const val VOTE_MESSAGE = 233
     }
 
     override fun informAboutTorrent(torrentName: String) {
@@ -97,6 +99,22 @@ class FOCCommunity(
                     )
                 send(peer.address, packet)
             }
+        }
+    }
+
+    override fun informAboutVote(fileName: String, vote: FOCVote) {
+        Log.i(
+            "vote-gossip",
+            "Informing about ${vote.voteType} vote on $fileName from ${vote.memberId}"
+        )
+        for (peer in getPeers()) {
+            val packet =
+                serializePacket(
+                    MessageId.VOTE_MESSAGE,
+                    FOCVoteMessage(fileName, vote),
+                    true
+                )
+            send(peer.address, packet)
         }
     }
 
@@ -116,6 +134,7 @@ class FOCCommunity(
         messageHandlers[MessageId.TORRENT_MESSAGE] = ::onTorrentMessage
         messageHandlers[MessageId.APP_REQUEST] = ::onAppRequestPacket
         messageHandlers[MessageId.APP] = ::onAppPacket
+        messageHandlers[MessageId.VOTE_MESSAGE] = ::onVoteMessage
         evaProtocolEnabled = true
     }
 
@@ -146,6 +165,21 @@ class FOCCommunity(
         ) {
             torrentMessagesList.add(Pair(peer, payload))
             Log.i("personal", peer.mid + ": " + payload.message)
+        }
+    }
+
+    private fun onVoteMessage(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(FOCVoteMessage)
+        Log.i(
+            "vote-gossip",
+            "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focVote.voteType}"
+        )
+        if (voteMessagesList.none {
+                it.second
+                it.second.fileName == payload.fileName && it.second.focVote.memberId == payload.focVote.memberId
+            }) {
+            voteMessagesList.add(Pair(peer, payload))
+            Log.i("vote-gossip", peer.mid + ": " + payload.fileName)
         }
     }
 

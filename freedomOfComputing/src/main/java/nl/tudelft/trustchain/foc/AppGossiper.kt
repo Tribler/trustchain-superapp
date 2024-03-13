@@ -27,6 +27,7 @@ import nl.tudelft.ipv8.messaging.eva.TransferType
 import nl.tudelft.trustchain.common.freedomOfComputing.AppPayload
 import nl.tudelft.trustchain.foc.community.FOCCommunityBase
 import nl.tudelft.trustchain.foc.community.FOCMessage
+import nl.tudelft.trustchain.foc.community.FOCVoteTracker
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.APK_EXTENSION
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.TORRENT_EXTENSION
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.supportedAppExtensions
@@ -59,7 +60,8 @@ class AppGossiper(
     private val sessionManager: SessionManager,
     private val activity: MainActivityFOC,
     private val focCommunity: FOCCommunityBase,
-    private val toastingEnabled: Boolean
+    private val toastingEnabled: Boolean,
+    private val voteTracker: FOCVoteTracker?
 ) {
     private val scope = CoroutineScope(Dispatchers.IO)
     private var evaDownload: EvaDownload = EvaDownload()
@@ -81,11 +83,18 @@ class AppGossiper(
             sessionManager: SessionManager,
             activity: MainActivityFOC,
             focCommunity: FOCCommunityBase,
-            toastingEnabled: Boolean = true
+            toastingEnabled: Boolean = true,
+            voteTracker: FOCVoteTracker? = null
         ): AppGossiper {
             if (!::appGossiperInstance.isInitialized) {
                 appGossiperInstance =
-                    AppGossiper(sessionManager, activity, focCommunity, toastingEnabled)
+                    AppGossiper(
+                        sessionManager,
+                        activity,
+                        focCommunity,
+                        toastingEnabled,
+                        voteTracker
+                    )
             }
             return appGossiperInstance
         }
@@ -109,6 +118,9 @@ class AppGossiper(
         }
         scope.launch {
             iterativelyDownloadApps()
+        }
+        scope.launch {
+            iterativelyFetchVotes()
         }
     }
 
@@ -258,6 +270,15 @@ class AppGossiper(
                 } catch (e: Exception) {
                     activity.runOnUiThread { printToast(e.toString()) }
                 }
+            }
+            delay(DOWNLOAD_DELAY)
+        }
+    }
+
+    private suspend fun iterativelyFetchVotes() {
+        while (scope.isActive) {
+            for ((_, payload) in ArrayList(focCommunity.voteMessagesList)) {
+                voteTracker?.insertVote(payload.fileName, payload.focVote)
             }
             delay(DOWNLOAD_DELAY)
         }
