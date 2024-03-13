@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.foc
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -20,6 +21,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.core.view.allViews
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
@@ -243,6 +245,7 @@ open class MainActivityFOC : AppCompatActivity() {
         val row = LinearLayout(this)
 
         var button = Button(this)
+        button.id = R.id.apkNameId
         val fileName = getFileName(uri)
         button.text = fileName
         button.layoutParams =
@@ -259,6 +262,7 @@ open class MainActivityFOC : AppCompatActivity() {
             row.addView(button)
         }
         val upVote = Button(this)
+        upVote.id = R.id.upVoteId
         upVote.text =
             getString(R.string.upVote, voteTracker?.getNumberOfVotes(fileName, VoteType.UP))
         val upVoteParams: RelativeLayout.LayoutParams =
@@ -272,6 +276,7 @@ open class MainActivityFOC : AppCompatActivity() {
         row.addView(upVote)
 
         val downVote = Button(this)
+        downVote.id = R.id.downVoteId
         downVote.text =
             getString(R.string.downVote, voteTracker?.getNumberOfVotes(fileName, VoteType.DOWN))
         downVote.backgroundTintList =
@@ -300,6 +305,21 @@ open class MainActivityFOC : AppCompatActivity() {
             createAlertDialog(fileName)
             true
         }
+    }
+
+    fun updateVoteCounts(fileName: String) {
+        val torrentListView = binding.contentMainActivityFocLayout.torrentList
+        val row =
+            torrentListView.allViews.find { v -> v is LinearLayout && v.allViews.any { b -> b is Button && b.text == fileName } }
+                ?: return
+
+        val upVote = row.findViewById<Button>(R.id.upVoteId)
+        upVote.text =
+            getString(R.string.upVote, voteTracker?.getNumberOfVotes(fileName, VoteType.UP))
+
+        val downVote = row.findViewById<Button>(R.id.downVoteId)
+        downVote.text =
+            getString(R.string.downVote, voteTracker?.getNumberOfVotes(fileName, VoteType.DOWN))
     }
 
     fun createUnsuccessfulTorrentButton(torrentName: String) {

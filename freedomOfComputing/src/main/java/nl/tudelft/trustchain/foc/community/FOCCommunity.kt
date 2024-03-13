@@ -179,7 +179,11 @@ class FOCCommunity(
             "vote-gossip",
             "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focVote.voteType}"
         )
-        voteMessagesQueue.add(Pair(peer, payload))
+        if (voteMessagesQueue.none {
+                it.second == payload
+            }) {
+            voteMessagesQueue.add(Pair(peer, payload))
+        }
     }
 
     private fun onAppRequestPacket(packet: Packet) {

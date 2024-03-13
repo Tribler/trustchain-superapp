@@ -21,7 +21,7 @@ class FOCVoteTracker(
 ) {
     // Stores the votes for all apks
     private var voteMap: HashMap<String, HashSet<FOCVote>> = HashMap()
-    val GOSSIP_DELAY: Long = 10000
+    val GOSSIP_DELAY: Long = 1000
     private val scope = CoroutineScope(Dispatchers.IO)
 
     fun start() {
@@ -79,11 +79,19 @@ class FOCVoteTracker(
         focCommunity.informAboutVote(fileName, vote)
     }
 
-    fun insertVote(fileName: String, vote: FOCVote) {
+    /**
+     * Gets called when a vote from another user has to be added to our state
+     * @param fileName APK on which vote is being placed
+     * @param vote Vote that is being placed
+     */
+    private fun insertVote(fileName: String, vote: FOCVote) {
         if (voteMap.containsKey(fileName)) {
             voteMap[fileName]!!.add(vote)
         } else {
             voteMap[fileName] = hashSetOf(vote)
+        }
+        activity.runOnUiThread {
+            activity.updateVoteCounts(fileName)
         }
     }
 
@@ -103,6 +111,9 @@ class FOCVoteTracker(
         return voteMap[fileName]!!.count { v -> v.voteType == voteType }
     }
 
+    /**
+     * Method to take votes from the queue and insert them into the tracker
+     */
     private suspend fun iterativelyDownloadVotes() {
         while (scope.isActive) {
             Log.i("vote-gossip", "${focCommunity.voteMessagesQueue.size} in Queue")
