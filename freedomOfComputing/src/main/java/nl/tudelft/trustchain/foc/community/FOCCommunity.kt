@@ -108,12 +108,14 @@ class FOCCommunity(
             "Informing about ${vote.voteType} vote on $fileName from ${vote.memberId}"
         )
         for (peer in getPeers()) {
+            Log.i("vote-gossip", "Sending vote to ${peer.mid}")
             val packet =
                 serializePacket(
                     MessageId.VOTE_MESSAGE,
                     FOCVoteMessage(fileName, vote),
                     true
                 )
+            Log.i("vote-gossip", "Address: ${peer.address}, packet: $packet")
             send(peer.address, packet)
         }
     }
@@ -132,9 +134,9 @@ class FOCCommunity(
     init {
         messageHandlers[MessageId.FOC_THALIS_MESSAGE] = ::onMessage
         messageHandlers[MessageId.TORRENT_MESSAGE] = ::onTorrentMessage
+        messageHandlers[MessageId.VOTE_MESSAGE] = ::onVoteMessage
         messageHandlers[MessageId.APP_REQUEST] = ::onAppRequestPacket
         messageHandlers[MessageId.APP] = ::onAppPacket
-        messageHandlers[MessageId.VOTE_MESSAGE] = ::onVoteMessage
         evaProtocolEnabled = true
     }
 
@@ -169,6 +171,7 @@ class FOCCommunity(
     }
 
     private fun onVoteMessage(packet: Packet) {
+        Log.i("vote-gossip", "OnVoteMessage Called")
         val (peer, payload) = packet.getAuthPayload(FOCVoteMessage)
         Log.i(
             "vote-gossip",

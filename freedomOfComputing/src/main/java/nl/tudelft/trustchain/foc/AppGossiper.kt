@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.foc
 
+import android.util.Log
 import android.widget.Toast
 import com.frostwire.jlibtorrent.AlertListener
 import com.frostwire.jlibtorrent.SessionManager
@@ -277,6 +278,7 @@ class AppGossiper(
 
     private suspend fun iterativelyFetchVotes() {
         while (scope.isActive) {
+            Log.i("vote-gossip", "Fetching votes, size: ${focCommunity.voteMessagesList.size}")
             for ((_, payload) in ArrayList(focCommunity.voteMessagesList)) {
                 voteTracker?.insertVote(payload.fileName, payload.focVote)
             }

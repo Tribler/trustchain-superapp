@@ -26,7 +26,7 @@ data class FOCVoteMessage(val fileName: String, val focVote: FOCVote) : Serializ
         ): Pair<FOCVoteMessage, Int> {
             val byteArrayInputStream = ByteArrayInputStream(buffer)
             val objectInputStream = ObjectInputStream(byteArrayInputStream)
-            return objectInputStream.readObject() as Pair<FOCVoteMessage, Int>
+            return Pair(objectInputStream.readObject() as FOCVoteMessage, buffer.size)
         }
     }
 }
