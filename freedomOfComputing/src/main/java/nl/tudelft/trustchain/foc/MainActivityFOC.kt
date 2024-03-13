@@ -323,10 +323,18 @@ open class MainActivityFOC : AppCompatActivity() {
 
     fun createUnsuccessfulTorrentButton(torrentName: String) {
         val torrentListView = binding.contentMainActivityFocLayout.torrentList
+        val row = LinearLayout(this)
         val button = Button(this)
+        button.id = R.id.apkNameId
         button.text = torrentName
+        button.layoutParams =
+            RelativeLayout.LayoutParams(
+                600,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+            )
         torrentMap[button] = LinearLayout(this)
-        torrentListView.addView(button)
+        row.addView(button)
+        torrentListView.addView(row)
         button.isAllCaps = false
     }
 

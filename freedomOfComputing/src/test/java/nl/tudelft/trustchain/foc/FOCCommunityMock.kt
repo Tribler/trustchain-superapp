@@ -5,6 +5,8 @@ import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.trustchain.foc.community.FOCCommunityBase
 import nl.tudelft.trustchain.foc.community.FOCMessage
+import nl.tudelft.trustchain.foc.community.FOCVote
+import nl.tudelft.trustchain.foc.community.FOCVoteMessage
 import java.util.*
 
 @Suppress("deprecation")
@@ -17,6 +19,7 @@ class FOCCommunityMock(
     }
 
     override var torrentMessagesList = ArrayList<Pair<Peer, FOCMessage>>()
+    override var voteMessagesQueue: Queue<Pair<Peer, FOCVoteMessage>> = LinkedList()
     var appRequests = ArrayList<Pair<String, Peer>>()
     var torrentsInformedAbout = ArrayList<String>()
 
@@ -53,6 +56,12 @@ class FOCCommunityMock(
 
     override fun informAboutTorrent(torrentName: String) {
         torrentsInformedAbout.add(torrentName)
+    }
+
+    override fun informAboutVote(
+        fileName: String,
+        vote: FOCVote
+    ) {
     }
 
     override fun sendAppRequest(
