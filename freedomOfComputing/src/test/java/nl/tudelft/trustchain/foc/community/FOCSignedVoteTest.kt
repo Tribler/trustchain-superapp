@@ -11,7 +11,6 @@ import org.junit.Before
 import org.junit.Test
 
 class FOCSignedVoteTest {
-    private val cryptoProvider = JavaCryptoProvider
     private lateinit var privateKey1: PrivateKey
     private lateinit var privateKey2: PrivateKey
     private val baseVote = FOCVote("0000", VoteType.DOWN)

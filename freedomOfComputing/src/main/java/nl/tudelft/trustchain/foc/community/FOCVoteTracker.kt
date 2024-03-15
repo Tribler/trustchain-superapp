@@ -96,7 +96,7 @@ class FOCVoteTracker(
     ) {
         // Check the signature of the vote
         // TODO should somehow check if pub-key is associated to person that placed the vote
-        if (checkAndGet(vote) != null) {
+        if (checkAndGet(vote) == null) {
             Log.w("vote-gossip", "received vote with invalid pub-key signature combination!")
             return
         }

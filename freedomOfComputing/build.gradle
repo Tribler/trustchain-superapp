@@ -92,6 +92,7 @@ dependencies {
     // Needed to verify keys in `FOCSignedVoteTest.kt`
     // https://mvnrepository.com/artifact/com.goterl/lazysodium-java
     testImplementation group: 'com.goterl', name: 'lazysodium-java', version: '5.1.4'
+    implementation "com.goterl:lazysodium-android:5.0.1@aar"
 
 }
 

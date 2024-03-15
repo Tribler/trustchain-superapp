@@ -1,6 +1,6 @@
 package nl.tudelft.trustchain.foc.community
 
-import nl.tudelft.ipv8.keyvault.JavaCryptoProvider.keyFromPublicBin
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
 import java.io.Serializable
@@ -20,12 +20,11 @@ fun signVote(
  * Wrapper class that holds the regular vote objects this class contains the signature of each vote
  */
 class FOCSignedVote(val vote: FOCVote, private val signature: ByteArray, val publicKeyBin: ByteArray) : Serializable {
-
     /**
      * Constructs a [PublicKey] and returns it
      */
     fun getPublicKey(): PublicKey {
-        return keyFromPublicBin(publicKeyBin)
+        return defaultCryptoProvider.keyFromPublicBin(publicKeyBin)
     }
 
     /**
