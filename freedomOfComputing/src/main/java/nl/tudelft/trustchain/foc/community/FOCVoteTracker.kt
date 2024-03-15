@@ -75,8 +75,7 @@ class FOCVoteTracker(
     ) {
         // Sign the vote with the users private key such that other people can verify it
         val privateKey = focCommunity.myPeer.key as PrivateKey
-        val publicKey = focCommunity.myPeer.publicKey
-        val signedVote = signVote(vote, privateKey, publicKey)
+        val signedVote = signVote(vote, privateKey)
 
         if (voteMap.containsKey(fileName)) {
             voteMap[fileName]!!.add(signedVote)
