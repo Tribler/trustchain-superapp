@@ -5,9 +5,10 @@ import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.trustchain.foc.community.FOCCommunityBase
 import nl.tudelft.trustchain.foc.community.FOCMessage
-import nl.tudelft.trustchain.foc.community.FOCVote
+import nl.tudelft.trustchain.foc.community.FOCSignedVote
 import nl.tudelft.trustchain.foc.community.FOCVoteMessage
-import java.util.*
+import java.util.LinkedList
+import java.util.Queue
 
 @Suppress("deprecation")
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -60,7 +61,7 @@ class FOCCommunityMock(
 
     override fun informAboutVote(
         fileName: String,
-        vote: FOCVote
+        vote: FOCSignedVote
     ) {
     }
 

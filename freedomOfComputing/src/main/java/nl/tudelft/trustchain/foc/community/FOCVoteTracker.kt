@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.foc.MainActivityFOC
 import nl.tudelft.trustchain.foc.util.ExtensionUtils
 import java.io.ByteArrayInputStream
@@ -21,7 +22,7 @@ class FOCVoteTracker(
     private val focCommunity: FOCCommunity
 ) {
     // Stores the votes for all apks
-    private var voteMap: HashMap<String, HashSet<FOCVote>> = HashMap()
+    private var voteMap: HashMap<String, HashSet<FOCSignedVote>> = HashMap()
     private val gossipDelay: Long = 1000
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -72,12 +73,17 @@ class FOCVoteTracker(
         fileName: String,
         vote: FOCVote
     ) {
+        // Sign the vote with the users private key such that other people can verify it
+        val privateKey = focCommunity.myPeer.key as PrivateKey
+        val publicKey = focCommunity.myPeer.publicKey
+        val signedVote = signVote(vote, privateKey, publicKey)
+
         if (voteMap.containsKey(fileName)) {
-            voteMap[fileName]!!.add(vote)
+            voteMap[fileName]!!.add(signedVote)
         } else {
-            voteMap[fileName] = hashSetOf(vote)
+            voteMap[fileName] = hashSetOf(signedVote)
         }
-        focCommunity.informAboutVote(fileName, vote)
+        focCommunity.informAboutVote(fileName, signedVote)
     }
 
     /**
@@ -87,8 +93,15 @@ class FOCVoteTracker(
      */
     private fun insertVote(
         fileName: String,
-        vote: FOCVote
+        vote: FOCSignedVote
     ) {
+        // Check the signature of the vote
+        // TODO should somehow check if pub-key is associated to person that placed the vote
+        if (checkAndGet(vote) != null) {
+            Log.w("vote-gossip", "received vote with invalid pub-key signature combination!")
+            return
+        }
+
         if (voteMap.containsKey(fileName)) {
             voteMap[fileName]!!.add(vote)
         } else {
@@ -111,7 +124,7 @@ class FOCVoteTracker(
         if (!voteMap.containsKey(fileName)) {
             return 0
         }
-        return voteMap[fileName]!!.count { v -> v.voteType == voteType }
+        return voteMap[fileName]!!.stream().map { checkAndGet(it) }.filter { v -> v?.voteType == voteType }.count().toInt()
     }
 
     /**
@@ -122,7 +135,7 @@ class FOCVoteTracker(
             Log.i("vote-gossip", "${focCommunity.voteMessagesQueue.size} in Queue")
             while (!focCommunity.voteMessagesQueue.isEmpty()) {
                 val (_, payload) = focCommunity.voteMessagesQueue.remove()
-                insertVote(payload.fileName, payload.focVote)
+                insertVote(payload.fileName, payload.focSignedVote)
             }
             delay(gossipDelay)
         }
@@ -135,7 +148,7 @@ class FOCVoteTracker(
         Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-    private fun serializeMap(map: HashMap<String, HashSet<FOCVote>>): ByteArray {
+    private fun serializeMap(map: HashMap<String, HashSet<FOCSignedVote>>): ByteArray {
         val byteArrayOutputStream = ByteArrayOutputStream()
         val objectOutputStream = ObjectOutputStream(byteArrayOutputStream)
         objectOutputStream.writeObject(map)
@@ -144,9 +157,17 @@ class FOCVoteTracker(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun deserializeMap(byteArray: ByteArray): HashMap<String, HashSet<FOCVote>> {
+    private fun deserializeMap(byteArray: ByteArray): HashMap<String, HashSet<FOCSignedVote>> {
         val byteArrayInputStream = ByteArrayInputStream(byteArray)
         val objectInputStream = ObjectInputStream(byteArrayInputStream)
-        return objectInputStream.readObject() as HashMap<String, HashSet<FOCVote>>
+        return objectInputStream.readObject() as HashMap<String, HashSet<FOCSignedVote>>
+    }
+
+    /**
+     * Checks the signature of the signed vote and if the signature is correct and the signer is verified returns the vote object else returns null.
+     */
+    private fun checkAndGet(signedVote: FOCSignedVote): FOCVote? {
+        // TODO Should somehow verify the pub-key is associated to a known user
+        return signedVote.checkAndGet()
     }
 }

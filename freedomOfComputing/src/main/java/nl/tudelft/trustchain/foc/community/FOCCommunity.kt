@@ -104,11 +104,11 @@ class FOCCommunity(
 
     override fun informAboutVote(
         fileName: String,
-        vote: FOCVote
+        vote: FOCSignedVote
     ) {
         Log.i(
             "vote-gossip",
-            "Informing about ${vote.voteType} vote on $fileName from ${vote.memberId}"
+            "Informing about ${vote.vote.voteType} vote on $fileName from ${vote.vote.memberId}"
         )
         for (peer in getPeers()) {
             Log.i("vote-gossip", "Sending vote to ${peer.mid}")
@@ -179,7 +179,7 @@ class FOCCommunity(
         val (peer, payload) = packet.getAuthPayload(FOCVoteMessage)
         Log.i(
             "vote-gossip",
-            "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focVote.voteType}"
+            "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focSignedVote.vote.voteType}"
         )
         if (voteMessagesQueue.none {
                 it.second == payload
