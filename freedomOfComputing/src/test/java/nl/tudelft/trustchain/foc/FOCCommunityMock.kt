@@ -10,8 +10,6 @@ import nl.tudelft.trustchain.foc.community.FOCVoteMessage
 import java.util.LinkedList
 import java.util.Queue
 
-@Suppress("deprecation")
-@OptIn(ExperimentalUnsignedTypes::class)
 class FOCCommunityMock(
     override val serviceId: String
 ) : FOCCommunityBase() {
@@ -61,7 +59,8 @@ class FOCCommunityMock(
 
     override fun informAboutVote(
         fileName: String,
-        vote: FOCSignedVote
+        vote: FOCSignedVote,
+        ttl: UInt
     ) {
     }
 

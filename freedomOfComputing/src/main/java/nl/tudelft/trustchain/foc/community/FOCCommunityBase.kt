@@ -21,7 +21,8 @@ abstract class FOCCommunityBase : Community() {
 
     abstract fun informAboutVote(
         fileName: String,
-        vote: FOCSignedVote
+        vote: FOCSignedVote,
+        ttl: UInt
     )
 
     abstract fun sendAppRequest(
