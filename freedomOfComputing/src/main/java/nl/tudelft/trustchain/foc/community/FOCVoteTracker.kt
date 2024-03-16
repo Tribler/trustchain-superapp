@@ -77,7 +77,8 @@ class FOCVoteTracker(
         } else {
             voteMap[fileName] = hashSetOf(vote)
         }
-        focCommunity.informAboutVote(fileName, vote)
+        // Initial TTL set to 2
+        focCommunity.informAboutVote(fileName, vote, 2u)
     }
 
     /**

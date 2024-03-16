@@ -19,6 +19,10 @@ import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
 import java.util.*
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.max
+import kotlin.math.min
 
 private val logger = KotlinLogging.logger {}
 
@@ -90,7 +94,10 @@ class FOCCommunity(
 
     override fun informAboutTorrent(torrentName: String) {
         if (torrentName != "") {
-            for (peer in getPeers()) {
+            val peers = getPeers().shuffled()
+            val n = peers.size
+            // Gossip to log(n) peers
+            for (peer in peers.take(max(floor(log10(n.toDouble())).toInt(), min(n, 3)))) {
                 val packet =
                     serializePacket(
                         MessageId.TORRENT_MESSAGE,
@@ -104,7 +111,8 @@ class FOCCommunity(
 
     override fun informAboutVote(
         fileName: String,
-        vote: FOCVote
+        vote: FOCVote,
+        ttl: UInt
     ) {
         Log.i(
             "vote-gossip",
@@ -115,7 +123,7 @@ class FOCCommunity(
             val packet =
                 serializePacket(
                     MessageId.VOTE_MESSAGE,
-                    FOCVoteMessage(fileName, vote),
+                    FOCVoteMessage(fileName, vote, ttl),
                     true
                 )
             Log.i("vote-gossip", "Address: ${peer.address}, packet: $packet")
@@ -186,6 +194,11 @@ class FOCCommunity(
             }
         ) {
             voteMessagesQueue.add(Pair(peer, payload))
+        }
+
+        // If TTL is > 0 then forward the message further
+        if (payload.TTL > 0u) {
+            informAboutVote(payload.fileName, payload.focVote, payload.TTL - 1u)
         }
     }
 
