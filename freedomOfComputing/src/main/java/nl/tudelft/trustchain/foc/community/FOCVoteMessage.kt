@@ -14,8 +14,9 @@ data class FOCVoteMessage(val fileName: String, val focSignedVote: FOCSignedVote
     nl.tudelft.ipv8.messaging.Serializable {
     override fun serialize(): ByteArray {
         return serializeVarLen(fileName.toByteArray(Charsets.UTF_8)) +
-            serializeVarLen(SerializationUtils.serialize(focSignedVote) +
-            serializeUInt(TTL)
+            serializeVarLen(
+                SerializationUtils.serialize(focSignedVote) +
+                    serializeUInt(TTL)
             )
     }
 
