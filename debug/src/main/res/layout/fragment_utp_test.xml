@@ -61,6 +61,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_weight="1"
                 android:ems="10"
+                android:enabled="false"
                 android:hint="IPv_ input"
                 android:inputType="text" />
         </LinearLayout>
@@ -112,6 +113,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_weight="1"
                 android:ems="10"
+                android:enabled="false"
                 android:inputType="text"
                 android:text="Random data size (in Mb)" />
         </LinearLayout>

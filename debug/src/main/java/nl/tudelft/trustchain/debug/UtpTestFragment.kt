@@ -7,17 +7,22 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.common.hash.HashCode
 import com.google.common.hash.Hashing
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.utp4j.channels.UtpServerSocketChannel
 import net.utp4j.channels.UtpSocketChannel
 import net.utp4j.examples.SaveFileListener
+import nl.tudelft.ipv8.Peer
+import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentUtpTestBinding
 import java.net.InetSocketAddress
@@ -25,10 +30,14 @@ import java.nio.ByteBuffer
 import kotlin.random.Random
 
 
-class UtpTestFragment : Fragment() {
+class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
     private val binding by viewBinding(FragmentUtpTestBinding::bind)
-    private val job = SupervisorJob()
+    private var job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
+
+    private var peerUpdater: Job? = null
+
+    private val peers : MutableList<Peer> = mutableListOf()
 
     private var recHashString: String = "";
     private var localHashString: String = "";
@@ -37,8 +46,57 @@ class UtpTestFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Placeholder data
-        binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("192.168.0.102:13377")
+        // IP Selection
+        binding.IPvToggleSwitch.setOnClickListener {
+            if (binding.IPvToggleSwitch.isChecked) {
+                // IPv8 peers
+                binding.IPvSpinner.isEnabled = true
+                binding.editIPforUTP.isEnabled = false
+                startPeerDiscovery()
+
+            } else {
+                // Usual IPv4 address
+                binding.IPvSpinner.isEnabled = false
+                binding.editIPforUTP.isEnabled = true
+                stopPeerDiscovery()
+
+                // Placeholder data
+                binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("192.168.0.102:13377")
+
+            }
+        }
+
+        // Data selection
+        // Named resources
+        val namedFiles = listOf(
+            object {
+                val name: String = "votes3.csv"
+                val id: Int = R.raw.votes3
+                override fun toString(): String = name
+            },
+            object {
+                val name: String = "votes13.csv"
+                val id: Int = R.raw.votes3
+                override fun toString(): String = name
+            }
+        )
+
+        binding.DAOToggleSwitch.setOnClickListener {
+            if (binding.DAOToggleSwitch.isChecked) {
+                // Use CSV files
+                binding.DAOSpinner.isEnabled = true
+                binding.editDAOText.isEnabled = false
+
+                // Hardcoded files
+                val files = ArrayAdapter(it.context, android.R.layout.simple_spinner_item, namedFiles)
+                binding.DAOSpinner.adapter = files
+                binding.DAOSpinner.setSelection(0)
+            } else {
+                // Use random data
+                binding.DAOSpinner.isEnabled = false
+                binding.editDAOText.isEnabled = true
+            }
+        }
 
         binding.receiveTestPacket.setOnClickListener {
             val address = binding.editIPforUTP.text.toString().split(":")
@@ -153,6 +211,21 @@ class UtpTestFragment : Fragment() {
                 channel.close()
             }
         }
+    }
+
+    private fun startPeerDiscovery() {
+        Log.d("uTP Client", "Start peer discovery!")
+        peerUpdater = lifecycleScope.launchWhenCreated {
+            val freshPeers = getDemoCommunity().getPeers()
+            peers.clear()
+            peers.addAll(freshPeers)
+            delay(1000)
+        }
+    }
+
+    private fun stopPeerDiscovery() {
+        Log.d("uTP Client", "Stop peer discovery!")
+        peerUpdater?.cancel()
     }
 
     override fun onCreateView(
