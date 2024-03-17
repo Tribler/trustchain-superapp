@@ -8,13 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.google.common.hash.HashCode
-import com.google.common.hash.Hashing
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -25,8 +21,10 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentUtpTestBinding
+import nl.tudelft.trustchain.debug.utp.BaseDataListener
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.security.MessageDigest
 import kotlin.random.Random
 
 
@@ -35,13 +33,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
     private var job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
-    private var peerUpdater: Job? = null
-
     private val peers : MutableList<Peer> = mutableListOf()
-
-    private var recHashString: String = "";
-    private var localHashString: String = "";
-    private var equalityOfHash: Boolean = false;
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -52,16 +44,20 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                 // IPv8 peers
                 binding.IPvSpinner.isEnabled = true
                 binding.editIPforUTP.isEnabled = false
-                startPeerDiscovery()
+                getPeers()
 
+                binding.IPvSpinner.adapter = ArrayAdapter(
+                    it.context,
+                    android.R.layout.simple_spinner_item,
+                    peers
+                )
             } else {
                 // Usual IPv4 address
                 binding.IPvSpinner.isEnabled = false
                 binding.editIPforUTP.isEnabled = true
-                stopPeerDiscovery()
 
                 // Placeholder data
-                binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("192.168.0.102:13377")
+                binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("192.168.0.101:13377")
 
             }
         }
@@ -137,7 +133,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                         startTime = System.currentTimeMillis()
                         channel.let {
                             it.read(buffer)?.run {
-                                setListener(SaveFileListener())
+                                setListener(BaseDataListener())
                                 block()
                             }
                             endTime = System.currentTimeMillis();
@@ -148,29 +144,14 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                     server.close()
                     Log.d("uTP Server", "Stopping the server!")
                 }
-                // Unpack received hash
-                val receivedHashData = ByteArray(32)
-                val data = ByteArray(BUFFER_SIZE + 32)
-                buffer.get(data, 0, BUFFER_SIZE)
-                buffer.get(receivedHashData)
 
-                val hash = Hashing.sha256().hashBytes(data)
-                val receivedHash = HashCode.fromBytes(receivedHashData)
-                equalityOfHash = hash.equals(receivedHash)
-                recHashString = receivedHash.toString()
-                localHashString = hash.toString()
+                // Print contents of buffer
+                Log.d("uTP Server", "Buffer contents: ${buffer.array().contentToString()}")
 
-                if (!equalityOfHash) {
-                    Log.d("uTP Server", "Invalid hash received!!!")
-                } else {
-                    Log.d("uTP Server", "Correct hash received")
-                }
                 view?.post {
                     val time = (endTime - startTime) / 1000
                     val speed = Formatter.formatFileSize(requireView().context, (BUFFER_SIZE / time))
-                    binding.logUTP.text = "Received data with hashes equal ${equalityOfHash} \n " +
-                        "${localHashString} \n ${recHashString} \n\n Transfer time: ${time}s \n" +
-                        "Avg speed: ${speed}/s"
+                    binding.logUTP.text = "Transfer time: ${time}s \n Avg speed: ${speed}/s"
                 }
             }
         }
@@ -188,15 +169,12 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
             val rngByteArray = ByteArray(BUFFER_SIZE + 32);
             Random.nextBytes(rngByteArray, 0, BUFFER_SIZE)
             Log.d("uTP Client", "Fill random bytes!")
-            val buffer = ByteBuffer.wrap(rngByteArray)
             // Create hash to check correctness
             Log.d("uTP Client", "Create hash!")
-            val hash = Hashing.sha256().hashBytes(buffer)
-            buffer.position(BUFFER_SIZE)
-            buffer.put(hash.asBytes())
+            MessageDigest.getInstance("SHA-256").digest(rngByteArray, BUFFER_SIZE, 32)
+            val buffer = ByteBuffer.wrap(rngByteArray)
             Log.d("uTP Client", "Finished preparing buffer!")
-
-            Log.d("uTP Client", "Sending random data with hash ${hash}")
+            Log.d("uTP Client", "Sending random data ${rngByteArray.contentToString()}")
             UtpSocketChannel.open().let { channel ->
                 val future = channel.connect(InetSocketAddress(ip, port))?.apply { block() }
                 if (future != null) {
@@ -213,19 +191,14 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
         }
     }
 
-    private fun startPeerDiscovery() {
+    private fun getPeers() {
         Log.d("uTP Client", "Start peer discovery!")
-        peerUpdater = lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenCreated {
             val freshPeers = getDemoCommunity().getPeers()
             peers.clear()
             peers.addAll(freshPeers)
-            delay(1000)
+            Log.d("uTP Client", "Found ${peers.size} peers! ($peers)")
         }
-    }
-
-    private fun stopPeerDiscovery() {
-        Log.d("uTP Client", "Stop peer discovery!")
-        peerUpdater?.cancel()
     }
 
     override fun onCreateView(
@@ -238,7 +211,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 
     companion object {
         const val MIN_PORT = 1024
-        const val BUFFER_SIZE = 50_000_000
+        const val BUFFER_SIZE = 50
     }
 
 }

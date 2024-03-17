@@ -74,7 +74,6 @@ dependencies {
     }
 
     // uTP protocol stuff
-    implementation 'com.google.guava:guava:30.0-android' // For hashing, should probably be deleted later
     api 'com.github.PieterCarton:utp4j:master-SNAPSHOT'
 }
 
