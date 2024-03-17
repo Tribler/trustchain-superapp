@@ -25,6 +25,8 @@ class BaseDataListener : UtpReadListener() {
                     Log.d("uTP Server", "Invalid hash received!")
                 }
 
+                // Display the received data
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }

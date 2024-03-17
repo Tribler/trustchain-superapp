@@ -22,6 +22,7 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentUtpTestBinding
 import nl.tudelft.trustchain.debug.utp.BaseDataListener
+import nl.tudelft.trustchain.debug.utp.RawResourceListener
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.security.MessageDigest
@@ -133,7 +134,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                         startTime = System.currentTimeMillis()
                         channel.let {
                             it.read(buffer)?.run {
-                                setListener(BaseDataListener())
+                                setListener(RawResourceListener())
                                 block()
                             }
                             endTime = System.currentTimeMillis();
@@ -146,7 +147,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                 }
 
                 // Print contents of buffer
-                Log.d("uTP Server", "Buffer contents: ${buffer.array().contentToString()}")
+//                Log.d("uTP Server", "Buffer contents: ${buffer.array().contentToString()}")
 
                 view?.post {
                     val time = (endTime - startTime) / 1000
@@ -165,21 +166,15 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 
         scope.launch(Dispatchers.IO) {
             // 100 MB of random bytes + hash
-            Log.d("uTP Client", "Start preparing buffer!")
-            val rngByteArray = ByteArray(BUFFER_SIZE + 32);
-            Random.nextBytes(rngByteArray, 0, BUFFER_SIZE)
-            Log.d("uTP Client", "Fill random bytes!")
-            // Create hash to check correctness
-            Log.d("uTP Client", "Create hash!")
-            val buffer = ByteBuffer.wrap(rngByteArray)
-            // Create hash to check correctness
-            Log.d("uTP Client", "Create hash!")
-            val hash = MessageDigest.getInstance("SHA-256").digest(rngByteArray)
-            buffer.position(BUFFER_SIZE)
-            buffer.put(hash)
-            Log.d("uTP Client", "Finished preparing buffer!")
+//            val buffer = generateRandomDataBuffer()
 
-            Log.d("uTP Client", "Sending random data with hash $hash")
+            // Send CSV file
+            val buffer = ByteBuffer.allocate(BUFFER_SIZE)
+            buffer.put(csv3.readBytes())
+            csv3.close()
+            csv13.close()
+
+            Log.d("uTP Client", "Finished preparing buffer!")
             UtpSocketChannel.open().let { channel ->
                 val future = channel.connect(InetSocketAddress(ip, port))?.apply { block() }
                 if (future != null) {
@@ -214,9 +209,26 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
         return inflater.inflate(R.layout.fragment_utp_test, container, false)
     }
 
+    private fun generateRandomDataBuffer(): ByteBuffer {
+        Log.d("uTP Client", "Start preparing buffer!")
+        val rngByteArray = ByteArray(BUFFER_SIZE + 32);
+        Random.nextBytes(rngByteArray, 0, BUFFER_SIZE)
+        Log.d("uTP Client", "Fill random bytes!")
+        // Create hash to check correctness
+        Log.d("uTP Client", "Create hash!")
+        val buffer = ByteBuffer.wrap(rngByteArray)
+        // Create hash to check correctness
+        Log.d("uTP Client", "Create hash!")
+        val hash = MessageDigest.getInstance("SHA-256").digest(rngByteArray)
+        buffer.position(BUFFER_SIZE)
+        buffer.put(hash)
+        Log.d("uTP Client", "Generated random data with hash $hash")
+        return buffer
+    }
+
     companion object {
         const val MIN_PORT = 1024
-        const val BUFFER_SIZE = 50
+        const val BUFFER_SIZE = 50_000_000
     }
 
 }
