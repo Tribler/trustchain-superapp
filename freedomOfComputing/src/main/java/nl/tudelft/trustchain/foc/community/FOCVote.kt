@@ -7,4 +7,4 @@ enum class VoteType {
     DOWN
 }
 
-open class FOCVote(val memberId: String, val voteType: VoteType) : Serializable
+data class FOCVote(val memberId: String, val voteType: VoteType) : Serializable
