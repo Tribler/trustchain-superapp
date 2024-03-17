@@ -30,7 +30,7 @@ import kotlin.random.Random
 
 class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
     private val binding by viewBinding(FragmentUtpTestBinding::bind)
-    private var job = SupervisorJob()
+    private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
     private val peers : MutableList<Peer> = mutableListOf()
@@ -171,10 +171,15 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
             Log.d("uTP Client", "Fill random bytes!")
             // Create hash to check correctness
             Log.d("uTP Client", "Create hash!")
-            MessageDigest.getInstance("SHA-256").digest(rngByteArray, BUFFER_SIZE, 32)
             val buffer = ByteBuffer.wrap(rngByteArray)
+            // Create hash to check correctness
+            Log.d("uTP Client", "Create hash!")
+            val hash = MessageDigest.getInstance("SHA-256").digest(rngByteArray)
+            buffer.position(BUFFER_SIZE)
+            buffer.put(hash)
             Log.d("uTP Client", "Finished preparing buffer!")
-            Log.d("uTP Client", "Sending random data ${rngByteArray.contentToString()}")
+
+            Log.d("uTP Client", "Sending random data with hash $hash")
             UtpSocketChannel.open().let { channel ->
                 val future = channel.connect(InetSocketAddress(ip, port))?.apply { block() }
                 if (future != null) {
