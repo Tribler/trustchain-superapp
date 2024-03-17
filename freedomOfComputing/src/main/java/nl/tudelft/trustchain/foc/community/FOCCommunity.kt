@@ -198,7 +198,7 @@ class FOCCommunity(
 
         // If TTL is > 0 then forward the message further
         if (payload.TTL > 0u) {
-            informAboutVote(payload.fileName, payload.focVote, payload.TTL - 1u)
+            informAboutVote(payload.fileName, payload.focSignedVote, payload.TTL - 1u)
         }
     }
 
