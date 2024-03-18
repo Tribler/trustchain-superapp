@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.debug
 
 import android.os.Bundle
 import android.text.Editable
-import android.text.format.Formatter
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,18 +11,13 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import net.utp4j.channels.UtpServerSocketChannel
-import net.utp4j.channels.UtpSocketChannel
-import net.utp4j.examples.SaveFileListener
+import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.messaging.utp.UtpEndpoint
+import nl.tudelft.ipv8.messaging.utp.UtpEndpoint.Companion.BUFFER_SIZE
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentUtpTestBinding
-import nl.tudelft.trustchain.debug.utp.BaseDataListener
-import nl.tudelft.trustchain.debug.utp.RawResourceListener
-import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import kotlin.random.Random
@@ -31,8 +25,8 @@ import kotlin.random.Random
 
 class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
     private val binding by viewBinding(FragmentUtpTestBinding::bind)
-    private val job = SupervisorJob()
-    private val scope = CoroutineScope(Dispatchers.IO + job)
+
+    private val endpoint: UtpEndpoint? = getDemoCommunity().endpoint.utpEndpoint
 
     private val peers : MutableList<Peer> = mutableListOf()
 
@@ -96,13 +90,10 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
         }
 
         binding.receiveTestPacket.setOnClickListener {
-            val address = binding.editIPforUTP.text.toString().split(":")
-            if (address.size == 2) {
-                val ip = address[0]
-                val port = address[1].toIntOrNull() ?: MIN_PORT
-
-                runServer(ip, port)
+            lifecycleScope.launchWhenCreated {
+                fetchData()
             }
+
         }
 
         binding.sendTestPacket.setOnClickListener {
@@ -118,43 +109,22 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
         }
     }
 
-    private fun runServer(ip: String, port: Int) {
-        val buffer = ByteBuffer.allocate(BUFFER_SIZE + 32)
+    private fun fetchData() {
 
-        lifecycleScope.launchWhenCreated {
-            scope.launch(Dispatchers.IO) {
-                var startTime = 0L;
-                var endTime = 0L;
-                UtpServerSocketChannel.open().let { server ->
-                    server.bind(InetSocketAddress(ip, port))
-                    Log.d("uTP Server", "Server started on $ip:$port")
-                    server.accept()?.run {
-                        block()
-                        Log.d("uTP Server", "Receiving new data!")
-                        startTime = System.currentTimeMillis()
-                        channel.let {
-                            it.read(buffer)?.run {
-                                setListener(RawResourceListener())
-                                block()
-                            }
-                            endTime = System.currentTimeMillis();
-                            Log.d("uTP Server", "Finished receiving data!")
-                        }
-                        channel.close()
-                    }
-                    server.close()
-                    Log.d("uTP Server", "Stopping the server!")
-                }
+        val data: String
 
-                // Print contents of buffer
-//                Log.d("uTP Server", "Buffer contents: ${buffer.array().contentToString()}")
+        if (endpoint?.listener!!.queue.size > 0) {
+            data = String(endpoint.listener.queue.removeFirst())
+            Log.d("uTP Client", "Received data!")
+        } else {
+            data = "No data received!"
+            Log.d("uTP Client", "No data received!")
+        }
 
-                view?.post {
-                    val time = (endTime - startTime) / 1000
-                    val speed = Formatter.formatFileSize(requireView().context, (BUFFER_SIZE / time))
-                    binding.logUTP.text = "Transfer time: ${time}s \n Avg speed: ${speed}/s"
-                }
-            }
+        view?.post {
+//            val time = (endTime - startTime) / 1000
+//            val speed = Formatter.formatFileSize(requireView().context, (BUFFER_SIZE / time))
+            binding.logUTP.text = data.takeLast(2000)
         }
     }
 
@@ -164,31 +134,16 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
         val csv3 = resources.openRawResource(R.raw.votes3)
         val csv13 = resources.openRawResource(R.raw.votes13)
 
-        scope.launch(Dispatchers.IO) {
-            // 100 MB of random bytes + hash
+//            // 100 MB of random bytes + hash
 //            val buffer = generateRandomDataBuffer()
+//            // Send CSV file
+//            val buffer = ByteBuffer.allocate(BUFFER_SIZE)
+//            buffer.put(csv3.readBytes())
+        Log.d("uTP Client", "Sending data to $ip:$port")
+        getDemoCommunity().endpoint.utpEndpoint?.send(IPv4Address(ip, port), csv3.readBytes())
+        csv3.close()
+        csv13.close()
 
-            // Send CSV file
-            val buffer = ByteBuffer.allocate(BUFFER_SIZE)
-            buffer.put(csv3.readBytes())
-            csv3.close()
-            csv13.close()
-
-            Log.d("uTP Client", "Finished preparing buffer!")
-            UtpSocketChannel.open().let { channel ->
-                val future = channel.connect(InetSocketAddress(ip, port))?.apply { block() }
-                if (future != null) {
-                    if (future.isSuccessfull) {
-                        channel.write(buffer)?.apply { block() }
-                        Log.d("uTP Client", "Sent buffer")
-                    } else
-                        Log.e("uTP Client", "Did not manage to connect to the server!")
-                } else {
-                    Log.e("uTP Client", "Future is null!")
-                }
-                channel.close()
-            }
-        }
     }
 
     private fun getPeers() {
@@ -228,7 +183,6 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 
     companion object {
         const val MIN_PORT = 1024
-        const val BUFFER_SIZE = 50_000_000
     }
 
 }
