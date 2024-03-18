@@ -85,7 +85,12 @@ class AppGossiper(
         ): AppGossiper {
             if (!::appGossiperInstance.isInitialized) {
                 appGossiperInstance =
-                    AppGossiper(sessionManager, activity, focCommunity, toastingEnabled)
+                    AppGossiper(
+                        sessionManager,
+                        activity,
+                        focCommunity,
+                        toastingEnabled
+                    )
             }
             return appGossiperInstance
         }

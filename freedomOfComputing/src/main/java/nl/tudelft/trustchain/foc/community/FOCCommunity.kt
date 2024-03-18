@@ -19,6 +19,10 @@ import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
 import java.util.*
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.max
+import kotlin.math.min
 
 private val logger = KotlinLogging.logger {}
 
@@ -78,17 +82,22 @@ class FOCCommunity(
     }
 
     override var torrentMessagesList = ArrayList<Pair<Peer, FOCMessage>>()
+    override var voteMessagesQueue: Queue<Pair<Peer, FOCVoteMessage>> = LinkedList()
 
     object MessageId {
         const val FOC_THALIS_MESSAGE = 220
         const val TORRENT_MESSAGE = 230
         const val APP_REQUEST = 231
         const val APP = 232
+        const val VOTE_MESSAGE = 233
     }
 
     override fun informAboutTorrent(torrentName: String) {
         if (torrentName != "") {
-            for (peer in getPeers()) {
+            val peers = getPeers().shuffled()
+            val n = peers.size
+            // Gossip to log(n) peers
+            for (peer in peers.take(max(floor(log10(n.toDouble())).toInt(), min(n, 3)))) {
                 val packet =
                     serializePacket(
                         MessageId.TORRENT_MESSAGE,
@@ -97,6 +106,28 @@ class FOCCommunity(
                     )
                 send(peer.address, packet)
             }
+        }
+    }
+
+    override fun informAboutVote(
+        fileName: String,
+        vote: FOCVote,
+        ttl: UInt
+    ) {
+        Log.i(
+            "vote-gossip",
+            "Informing about ${vote.voteType} vote on $fileName from ${vote.memberId}"
+        )
+        for (peer in getPeers()) {
+            Log.i("vote-gossip", "Sending vote to ${peer.mid}")
+            val packet =
+                serializePacket(
+                    MessageId.VOTE_MESSAGE,
+                    FOCVoteMessage(fileName, vote, ttl),
+                    true
+                )
+            Log.i("vote-gossip", "Address: ${peer.address}, packet: $packet")
+            send(peer.address, packet)
         }
     }
 
@@ -114,6 +145,7 @@ class FOCCommunity(
     init {
         messageHandlers[MessageId.FOC_THALIS_MESSAGE] = ::onMessage
         messageHandlers[MessageId.TORRENT_MESSAGE] = ::onTorrentMessage
+        messageHandlers[MessageId.VOTE_MESSAGE] = ::onVoteMessage
         messageHandlers[MessageId.APP_REQUEST] = ::onAppRequestPacket
         messageHandlers[MessageId.APP] = ::onAppPacket
         evaProtocolEnabled = true
@@ -140,12 +172,33 @@ class FOCCommunity(
                 .substringBefore("&dn=")
         if (torrentMessagesList.none {
                 it.second
-                val existingHash = it.second.message.substringAfter("magnet:?xt=urn:btih:").substringBefore("&dn=")
+                val existingHash =
+                    it.second.message.substringAfter("magnet:?xt=urn:btih:").substringBefore("&dn=")
                 torrentHash == existingHash
             }
         ) {
             torrentMessagesList.add(Pair(peer, payload))
             Log.i("personal", peer.mid + ": " + payload.message)
+        }
+    }
+
+    private fun onVoteMessage(packet: Packet) {
+        Log.i("vote-gossip", "OnVoteMessage Called")
+        val (peer, payload) = packet.getAuthPayload(FOCVoteMessage)
+        Log.i(
+            "vote-gossip",
+            "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focVote.voteType}"
+        )
+        if (voteMessagesQueue.none {
+                it.second == payload
+            }
+        ) {
+            voteMessagesQueue.add(Pair(peer, payload))
+        }
+
+        // If TTL is > 0 then forward the message further
+        if (payload.TTL > 0u) {
+            informAboutVote(payload.fileName, payload.focVote, payload.TTL - 1u)
         }
     }
 

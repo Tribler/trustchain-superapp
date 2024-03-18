@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="apkNameId" type="id" />
+    <item name="upVoteId" type="id" />
+    <item name="downVoteId" type="id" />
+</resources>
