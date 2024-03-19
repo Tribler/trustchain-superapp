@@ -83,6 +83,8 @@ class FOCCommunity(
 
     override var torrentMessagesList = ArrayList<Pair<Peer, FOCMessage>>()
     override var voteMessagesQueue: Queue<Pair<Peer, FOCVoteMessage>> = LinkedList()
+    override var pullVoteMessagesSendQueue: Queue<Peer> = LinkedList()
+    override var pullVoteMessagesReceiveQueue: Queue<FOCPullVoteMessage> = LinkedList()
 
     object MessageId {
         const val FOC_THALIS_MESSAGE = 220
@@ -90,6 +92,7 @@ class FOCCommunity(
         const val APP_REQUEST = 231
         const val APP = 232
         const val VOTE_MESSAGE = 233
+        const val PULL_VOTE_MESSAGE = 234
     }
 
     override fun informAboutTorrent(torrentName: String) {
@@ -131,6 +134,25 @@ class FOCCommunity(
         }
     }
 
+    override fun informAboutPullSendVote() {
+        Log.i("pull based", "telling other peers about my pull request")
+        for (peer in getPeers()) {
+            Log.i("pull based", "sending pull vote request to ${peer.mid}")
+            val packet = serializePacket(MessageId.FOC_THALIS_MESSAGE, FOCMessage("pull request"), true)
+            send(peer.address, packet)
+        }
+    }
+
+    override fun informAboutPullReceiveVote(
+        voteMap: HashMap<String, HashSet<FOCSignedVote>>,
+        originPeer: Peer
+    ) {
+        Log.i("pull based", "sending all my votes to peer")
+        val packet = serializePacket(MessageId.PULL_VOTE_MESSAGE, FOCPullVoteMessage(voteMap), true)
+        Log.i("pull based", "Address ${originPeer.address} , packet : $packet")
+        send(originPeer.address, packet)
+    }
+
     override fun sendAppRequest(
         torrentInfoHash: String,
         peer: Peer,
@@ -146,6 +168,7 @@ class FOCCommunity(
         messageHandlers[MessageId.FOC_THALIS_MESSAGE] = ::onMessage
         messageHandlers[MessageId.TORRENT_MESSAGE] = ::onTorrentMessage
         messageHandlers[MessageId.VOTE_MESSAGE] = ::onVoteMessage
+        messageHandlers[MessageId.PULL_VOTE_MESSAGE] = ::onPullVoteMessage
         messageHandlers[MessageId.APP_REQUEST] = ::onAppRequestPacket
         messageHandlers[MessageId.APP] = ::onAppPacket
         evaProtocolEnabled = true
@@ -163,6 +186,10 @@ class FOCCommunity(
     private fun onMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(FOCMessage)
         Log.i("personal", peer.mid + ": " + payload.message)
+        Log.i("pull based", "onMessage called")
+        if (payload.message.contains("pull")) {
+            pullVoteMessagesSendQueue.add(peer)
+        }
     }
 
     private fun onTorrentMessage(packet: Packet) {
@@ -195,11 +222,17 @@ class FOCCommunity(
         ) {
             voteMessagesQueue.add(Pair(peer, payload))
         }
-
         // If TTL is > 0 then forward the message further
         if (payload.TTL > 0u) {
             informAboutVote(payload.fileName, payload.focSignedVote, payload.TTL - 1u)
         }
+    }
+
+    private fun onPullVoteMessage(packet: Packet) {
+        Log.i("pull based", "onPullVoteMessage called")
+        val (_, payload) = packet.getAuthPayload(FOCPullVoteMessage)
+        Log.i("pull based", "getAuth passed")
+        pullVoteMessagesReceiveQueue.add(payload)
     }
 
     private fun onAppRequestPacket(packet: Packet) {

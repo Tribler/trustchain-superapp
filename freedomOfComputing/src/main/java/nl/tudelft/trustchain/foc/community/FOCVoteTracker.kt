@@ -28,7 +28,7 @@ class FOCVoteTracker(
 
     fun start() {
         scope.launch {
-            iterativelyDownloadVotes()
+            iterativelyCheckQueues()
         }
     }
 
@@ -87,6 +87,13 @@ class FOCVoteTracker(
     }
 
     /**
+     * Gets called when user resumes UI settings
+     */
+    fun requestPullVotes() {
+        focCommunity.informAboutPullSendVote()
+    }
+
+    /**
      * Gets called when a vote from another user has to be added to our state
      * @param fileName APK on which vote is being placed
      * @param vote Vote that is being placed
@@ -113,6 +120,29 @@ class FOCVoteTracker(
     }
 
     /**
+     * Gets called when a user receives incoming voting data
+     * @param incomingMap incoming data
+     */
+    private fun mergeVoteMaps(incomingMap: HashMap<String, HashSet<FOCSignedVote>>) {
+        for ((key, votes) in incomingMap) {
+            if (voteMap.containsKey(key)) {
+                voteMap[key]?.addAll(votes)
+            } else { // this means votes from an apk can be received before the apk itself. Needs to be adjusted
+                voteMap[key] = HashSet()
+                voteMap[key]?.addAll(votes)
+            }
+        }
+        Log.i("pull based", "incoming map: $incomingMap")
+        Log.i("pull based", "new voteMap :$voteMap ")
+
+        activity.runOnUiThread {
+            for (key in voteMap.keys) {
+                activity.updateVoteCounts(key)
+            }
+        }
+    }
+
+    /**
      * Get the number of votes for an APK
      * @param fileName APK for which we want to know the number of votes
      * @param voteType vote type that is for or against the APK
@@ -130,14 +160,31 @@ class FOCVoteTracker(
     /**
      * Method to take votes from the queue and insert them into the tracker
      */
-    private suspend fun iterativelyDownloadVotes() {
+    private suspend fun iterativelyCheckQueues() {
         while (scope.isActive) {
-            Log.i("vote-gossip", "${focCommunity.voteMessagesQueue.size} in Queue")
+            // Log.i("vote-gossip", "${focCommunity.voteMessagesQueue.size} in Queue")
             while (!focCommunity.voteMessagesQueue.isEmpty()) {
                 val (_, payload) = focCommunity.voteMessagesQueue.remove()
                 insertVote(payload.fileName, payload.focSignedVote)
             }
+            // Log.i("pull based", "${focCommunity.pullVoteMessagesSendQueue.size} in  send Queue")
+            while (!focCommunity.pullVoteMessagesSendQueue.isEmpty()) {
+                val payload = focCommunity.pullVoteMessagesSendQueue.remove()
+                focCommunity.informAboutPullReceiveVote(voteMap, payload)
+            }
+            // Log.i("pull based", "${focCommunity.pullVoteMessagesReceiveQueue.size} in receive Queue")
+            while (!focCommunity.pullVoteMessagesReceiveQueue.isEmpty()) {
+                val payload = focCommunity.pullVoteMessagesReceiveQueue.remove()
+                Log.i("pull based", "merge votemaps called")
+                mergeVoteMaps(payload.voteMap)
+            }
             delay(gossipDelay)
+        }
+    }
+
+    fun createFileKey(fileName: String) {
+        if (!voteMap.containsKey(fileName)) {
+            voteMap[fileName] = HashSet()
         }
     }
 
