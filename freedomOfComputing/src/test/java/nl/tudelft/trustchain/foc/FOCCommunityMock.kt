@@ -5,7 +5,6 @@ import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.trustchain.foc.community.FOCCommunityBase
 import nl.tudelft.trustchain.foc.community.FOCMessage
-import nl.tudelft.trustchain.foc.community.FOCPullVoteMessage
 import nl.tudelft.trustchain.foc.community.FOCVote
 import java.util.*
 
@@ -17,8 +16,6 @@ class FOCCommunityMock(
     }
 
     override var torrentMessagesList = ArrayList<Pair<Peer, FOCMessage>>()
-    override var pullVoteMessagesSendQueue: Queue<Peer> = LinkedList()
-    override var pullVoteMessagesReceiveQueue: Queue<FOCPullVoteMessage> = LinkedList()
     var appRequests = ArrayList<Pair<String, Peer>>()
     var torrentsInformedAbout = ArrayList<String>()
 
@@ -64,13 +61,7 @@ class FOCCommunityMock(
     ) {
     }
 
-    override fun informAboutPullSendVote() {
-    }
-
-    override fun informAboutPullReceiveVote(
-        voteMap: HashMap<String, HashSet<FOCVote>>,
-        originPeer: Peer
-    ) {
+    override fun sendPullVotesMessage() {
     }
 
     override fun sendAppRequest(

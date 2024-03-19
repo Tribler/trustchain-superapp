@@ -37,6 +37,7 @@ class FOCCommunity(
 
     private val appDirectory = context.cacheDir
     var activity: MainActivityFOC? = null
+    private val pullRequestString = "pull request"
 
     private lateinit var evaSendCompleteCallback: (
         peer: Peer,
@@ -86,8 +87,6 @@ class FOCCommunity(
     override var torrentMessagesList = ArrayList<Pair<Peer, FOCMessage>>()
 
     private val focVoteTracker: FOCVoteTracker = FOCVoteTracker
-    override var pullVoteMessagesSendQueue: Queue<Peer> = LinkedList()
-    override var pullVoteMessagesReceiveQueue: Queue<FOCPullVoteMessage> = LinkedList()
 
     object MessageId {
         const val FOC_THALIS_MESSAGE = 220
@@ -137,23 +136,13 @@ class FOCCommunity(
         }
     }
 
-    override fun informAboutPullSendVote() {
-        Log.i("pull based", "telling other peers about my pull request")
+    override fun sendPullVotesMessage() {
         for (peer in getPeers()) {
-            Log.i("pull based", "sending pull vote request to ${peer.mid}")
-            val packet = serializePacket(MessageId.FOC_THALIS_MESSAGE, FOCMessage("pull request"), true)
+            Log.i("pull-based", "sending pull vote request to ${peer.mid}")
+            val packet =
+                serializePacket(MessageId.FOC_THALIS_MESSAGE, FOCMessage(pullRequestString), true)
             send(peer.address, packet)
         }
-    }
-
-    override fun informAboutPullReceiveVote(
-        voteMap: HashMap<String, HashSet<FOCVote>>,
-        originPeer: Peer
-    ) {
-        Log.i("pull based", "sending all my votes to peer")
-        val packet = serializePacket(MessageId.PULL_VOTE_MESSAGE, FOCPullVoteMessage(voteMap), true)
-        Log.i("pull based", "Address ${originPeer.address} , packet : $packet")
-        send(originPeer.address, packet)
     }
 
     override fun sendAppRequest(
@@ -189,9 +178,16 @@ class FOCCommunity(
     private fun onMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(FOCMessage)
         Log.i("personal", peer.mid + ": " + payload.message)
-        Log.i("pull based", "onMessage called")
-        if (payload.message.contains("pull")) {
-            pullVoteMessagesSendQueue.add(peer)
+
+        if (payload.message.contains(pullRequestString)) {
+            Log.i("pull-based", "Sending all my votes to ${peer.address}")
+            val m =
+                serializePacket(
+                    MessageId.PULL_VOTE_MESSAGE,
+                    FOCPullVoteMessage(focVoteTracker.getCurrentState()),
+                    true
+                )
+            send(peer.address, m)
         }
     }
 
@@ -232,10 +228,14 @@ class FOCCommunity(
     }
 
     private fun onPullVoteMessage(packet: Packet) {
-        Log.i("pull based", "onPullVoteMessage called")
+        Log.i("pull-based", "onPullVoteMessage called")
         val (_, payload) = packet.getAuthPayload(FOCPullVoteMessage)
-        Log.i("pull based", "getAuth passed")
-        pullVoteMessagesReceiveQueue.add(payload)
+        focVoteTracker.mergeVoteMaps(payload.voteMap)
+        activity?.runOnUiThread {
+            for (key in focVoteTracker.getCurrentState().keys) {
+                activity?.updateVoteCounts(key)
+            }
+        }
     }
 
     private fun onAppRequestPacket(packet: Packet) {
