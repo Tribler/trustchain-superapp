@@ -426,11 +426,11 @@ open class MainActivityFOC : AppCompatActivity() {
             val ipv8 = IPv8Android.getInstance()
             val memberId = ipv8.myPeer.mid
 
-            val vote: FOCVote = FOCVote(memberId, voteType)
+            val vote = FOCVote(memberId, voteType)
             voteTracker.vote(fileName, vote)
 
             // Inform about vote
-            focCommunity?.informAboutVote(fileName, vote, 2u)
+            focCommunity?.informAboutVote(fileName, vote, 2)
         } else {
             printToast("Couldn't find file '$fileName'")
         }

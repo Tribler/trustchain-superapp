@@ -21,7 +21,7 @@ import java.io.FileOutputStream
 import java.lang.Exception
 import java.util.*
 import kotlin.math.floor
-import kotlin.math.log10
+import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 
@@ -97,10 +97,7 @@ class FOCCommunity(
 
     override fun informAboutTorrent(torrentName: String) {
         if (torrentName != "") {
-            val peers = getPeers().shuffled()
-            val n = peers.size
-            // Gossip to log(n) peers
-            for (peer in peers.take(max(floor(log10(n.toDouble())).toInt(), min(n, 3)))) {
+            for (peer in getPeers()) {
                 val packet =
                     serializePacket(
                         MessageId.TORRENT_MESSAGE,
@@ -115,13 +112,16 @@ class FOCCommunity(
     override fun informAboutVote(
         fileName: String,
         vote: FOCVote,
-        ttl: UInt
+        ttl: Int
     ) {
         Log.i(
             "vote-gossip",
             "Informing about ${vote.voteType} vote on $fileName from ${vote.memberId}"
         )
-        for (peer in getPeers()) {
+        val peers = getPeers().shuffled()
+        val n = peers.size
+        // Gossip to log(n) peers
+        for (peer in peers.take(max(floor(ln(n.toDouble())).toInt(), min(n, 3)))) {
             Log.i("vote-gossip", "Sending vote to ${peer.mid}")
             val packet =
                 serializePacket(
@@ -199,8 +199,8 @@ class FOCCommunity(
         }
 
         // If TTL is > 0 then forward the message further
-        if (payload.TTL > 0u) {
-            informAboutVote(payload.fileName, payload.focVote, payload.TTL - 1u)
+        if (payload.TTL > 0) {
+            informAboutVote(payload.fileName, payload.focVote, payload.TTL - 1)
         }
     }
 

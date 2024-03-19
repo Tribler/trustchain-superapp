@@ -57,7 +57,7 @@ class FOCCommunityMock(
     override fun informAboutVote(
         fileName: String,
         vote: FOCVote,
-        ttl: UInt
+        ttl: Int
     ) {
     }
 

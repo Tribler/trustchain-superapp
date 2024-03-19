@@ -4,7 +4,6 @@ import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
-import java.util.*
 import kotlin.collections.ArrayList
 
 abstract class FOCCommunityBase : Community() {
@@ -21,7 +20,7 @@ abstract class FOCCommunityBase : Community() {
     abstract fun informAboutVote(
         fileName: String,
         vote: FOCVote,
-        ttl: UInt
+        ttl: Int
     )
 
     abstract fun sendAppRequest(
