@@ -31,6 +31,6 @@
     <fragment
         android:id="@+id/utpTestFragment"
         android:name="nl.tudelft.trustchain.debug.UtpTestFragment"
-        android:label="fragment_utp_test"
+        android:label="Test uTP Connection"
         tools:layout="@layout/fragment_utp_test" />
 </navigation>
