@@ -156,6 +156,7 @@ open class MainActivityFOC : AppCompatActivity() {
         super.onResume()
         resumeUISettings()
         appGossiper?.resume()
+        voteTracker?.requestPullVotes()
     }
 
     override fun onPause() {
@@ -246,6 +247,7 @@ open class MainActivityFOC : AppCompatActivity() {
         var button = Button(this)
         button.id = R.id.apkNameId
         val fileName = getFileName(uri)
+        voteTracker?.createFileKey(fileName)
         button.text = fileName
         button.layoutParams =
             RelativeLayout.LayoutParams(
