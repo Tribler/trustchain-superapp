@@ -67,6 +67,9 @@ dependencies {
     testImplementation group: 'org.awaitility', name: 'awaitility', version: '3.0.0'
     androidTestImplementation "androidx.test.ext:junit:$android_junit_version"
 
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
+
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
