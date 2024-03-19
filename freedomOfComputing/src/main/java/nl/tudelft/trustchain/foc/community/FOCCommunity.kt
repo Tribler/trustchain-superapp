@@ -15,6 +15,7 @@ import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.trustchain.common.freedomOfComputing.AppPayload
 import nl.tudelft.trustchain.common.freedomOfComputing.AppRequestPayload
+import nl.tudelft.trustchain.foc.MainActivityFOC
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
@@ -35,6 +36,7 @@ class FOCCommunity(
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
 
     private val appDirectory = context.cacheDir
+    var activity: MainActivityFOC? = null
 
     private lateinit var evaSendCompleteCallback: (
         peer: Peer,
@@ -82,7 +84,8 @@ class FOCCommunity(
     }
 
     override var torrentMessagesList = ArrayList<Pair<Peer, FOCMessage>>()
-    override var voteMessagesQueue: Queue<Pair<Peer, FOCVoteMessage>> = LinkedList()
+
+    private val focVoteTracker: FOCVoteTracker = FOCVoteTracker
 
     object MessageId {
         const val FOC_THALIS_MESSAGE = 220
@@ -189,11 +192,10 @@ class FOCCommunity(
             "vote-gossip",
             "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focVote.voteType}"
         )
-        if (voteMessagesQueue.none {
-                it.second == payload
-            }
-        ) {
-            voteMessagesQueue.add(Pair(peer, payload))
+        focVoteTracker.vote(payload.fileName, payload.focVote)
+
+        activity?.runOnUiThread {
+            activity?.updateVoteCounts(payload.fileName)
         }
 
         // If TTL is > 0 then forward the message further

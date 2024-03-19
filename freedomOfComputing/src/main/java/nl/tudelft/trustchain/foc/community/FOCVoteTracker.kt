@@ -1,14 +1,6 @@
 package nl.tudelft.trustchain.foc.community
 
 import android.util.Log
-import android.widget.Toast
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import nl.tudelft.trustchain.foc.MainActivityFOC
-import nl.tudelft.trustchain.foc.util.ExtensionUtils
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -16,31 +8,17 @@ import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
-class FOCVoteTracker(
-    private val activity: MainActivityFOC,
-    private val focCommunity: FOCCommunity
-) {
+object FOCVoteTracker {
     // Stores the votes for all apks
     private var voteMap: HashMap<String, HashSet<FOCVote>> = HashMap()
-    private val gossipDelay: Long = 1000
-    private val scope = CoroutineScope(Dispatchers.IO)
-
-    fun start() {
-        scope.launch {
-            iterativelyDownloadVotes()
-        }
-    }
 
     /**
      * Gets called on pause (or shutdown) of the app to persist state
      */
-    fun storeState() {
-        val votesFileName: String =
-            activity.cacheDir.absolutePath + "/vote-tracker" + ExtensionUtils.DATA_DOT_EXTENSION
+    fun storeState(fileName: String) {
         try {
-            File(votesFileName).writeBytes(serializeMap(voteMap))
+            File(fileName).writeBytes(serializeMap(voteMap))
         } catch (e: IOException) {
-            printToast(e.toString())
             Log.e("vote-tracker-store", e.toString())
         }
     }
@@ -48,17 +26,13 @@ class FOCVoteTracker(
     /**
      * Gets called on start up to load the state from disk
      */
-    fun loadState() {
+    fun loadState(fileName: String) {
         try {
-            val voteFileName: String =
-                activity.cacheDir.absolutePath + "/vote-tracker" + ExtensionUtils.DATA_DOT_EXTENSION
-            val voteFile = File(voteFileName)
-
+            val voteFile = File(fileName)
             if (voteFile.exists()) {
                 voteMap = deserializeMap(voteFile.readBytes())
             }
         } catch (e: Exception) {
-            printToast(e.toString())
             Log.e("vote-tracker load", e.toString())
         }
     }
@@ -77,27 +51,6 @@ class FOCVoteTracker(
         } else {
             voteMap[fileName] = hashSetOf(vote)
         }
-        // Initial TTL set to 2
-        focCommunity.informAboutVote(fileName, vote, 2u)
-    }
-
-    /**
-     * Gets called when a vote from another user has to be added to our state
-     * @param fileName APK on which vote is being placed
-     * @param vote Vote that is being placed
-     */
-    private fun insertVote(
-        fileName: String,
-        vote: FOCVote
-    ) {
-        if (voteMap.containsKey(fileName)) {
-            voteMap[fileName]!!.add(vote)
-        } else {
-            voteMap[fileName] = hashSetOf(vote)
-        }
-        activity.runOnUiThread {
-            activity.updateVoteCounts(fileName)
-        }
     }
 
     /**
@@ -113,27 +66,6 @@ class FOCVoteTracker(
             return 0
         }
         return voteMap[fileName]!!.count { v -> v.voteType == voteType }
-    }
-
-    /**
-     * Method to take votes from the queue and insert them into the tracker
-     */
-    private suspend fun iterativelyDownloadVotes() {
-        while (scope.isActive) {
-            Log.i("vote-gossip", "${focCommunity.voteMessagesQueue.size} in Queue")
-            while (!focCommunity.voteMessagesQueue.isEmpty()) {
-                val (_, payload) = focCommunity.voteMessagesQueue.remove()
-                insertVote(payload.fileName, payload.focVote)
-            }
-            delay(gossipDelay)
-        }
-    }
-
-    /**
-     * Display a short message on the screen
-     */
-    private fun printToast(s: String) {
-        Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
     private fun serializeMap(map: HashMap<String, HashSet<FOCVote>>): ByteArray {
