@@ -154,7 +154,7 @@ class FOCVoteTracker(
         if (!voteMap.containsKey(fileName)) {
             return 0
         }
-        return voteMap[fileName]!!.stream().map { checkAndGet(it) }.filter { v -> v?.voteType == voteType }.count().toInt()
+        return voteMap[fileName]!!.count { v -> v.vote.voteType == voteType }
     }
 
     /**

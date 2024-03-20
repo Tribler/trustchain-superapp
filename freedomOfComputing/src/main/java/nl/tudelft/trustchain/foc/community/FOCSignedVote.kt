@@ -19,7 +19,7 @@ fun signVote(
 /**
  * Wrapper class that holds the regular vote objects this class contains the signature of each vote
  */
-class FOCSignedVote(val vote: FOCVote, private val signature: ByteArray, val publicKeyBin: ByteArray) : Serializable {
+data class FOCSignedVote(val vote: FOCVote, private val signature: ByteArray, val publicKeyBin: ByteArray) : Serializable {
     /**
      * Constructs a [PublicKey] and returns it
      */
@@ -45,5 +45,25 @@ class FOCSignedVote(val vote: FOCVote, private val signature: ByteArray, val pub
         } else {
             null
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as FOCSignedVote
+
+        if (vote != other.vote) return false
+        if (!signature.contentEquals(other.signature)) return false
+        if (!publicKeyBin.contentEquals(other.publicKeyBin)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = vote.hashCode()
+        result = 31 * result + signature.contentHashCode()
+        result = 31 * result + publicKeyBin.contentHashCode()
+        return result
     }
 }
