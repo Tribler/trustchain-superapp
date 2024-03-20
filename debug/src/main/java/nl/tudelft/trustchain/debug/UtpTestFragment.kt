@@ -30,6 +30,8 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 
     private val peers : MutableList<Peer> = mutableListOf()
 
+    private var ipv8Mode : Boolean = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -39,6 +41,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                 // IPv8 peers
                 binding.IPvSpinner.isEnabled = true
                 binding.editIPforUTP.isEnabled = false
+                ipv8Mode = true
                 getPeers()
 
                 binding.IPvSpinner.adapter = ArrayAdapter(
@@ -50,9 +53,10 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                 // Usual IPv4 address
                 binding.IPvSpinner.isEnabled = false
                 binding.editIPforUTP.isEnabled = true
+                ipv8Mode = false
 
                 // Placeholder data
-                binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("192.168.0.101:13377")
+                binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("145.94.193.11:13377")
 
             }
         }
@@ -124,7 +128,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
         view?.post {
 //            val time = (endTime - startTime) / 1000
 //            val speed = Formatter.formatFileSize(requireView().context, (BUFFER_SIZE / time))
-            binding.logUTP.text = data.takeLast(2000)
+            binding.logUTP.text = data.takeLast(2000) + "\n\n" + endpoint.lastTime.toString()
         }
     }
 
@@ -139,8 +143,14 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 //            // Send CSV file
 //            val buffer = ByteBuffer.allocate(BUFFER_SIZE)
 //            buffer.put(csv3.readBytes())
-        Log.d("uTP Client", "Sending data to $ip:$port")
-        getDemoCommunity().endpoint.utpEndpoint?.send(IPv4Address(ip, port), csv3.readBytes())
+        if (ipv8Mode) {
+            val peer = peers[binding.IPvSpinner.selectedItemId.toInt()]
+            Log.d("uTP Client", "Sending data to $peer")
+            getDemoCommunity().endpoint.utpEndpoint?.send(peer, csv13.readBytes())
+        } else {
+            Log.d("uTP Client", "Sending data to $ip:$port")
+            getDemoCommunity().endpoint.utpEndpoint?.send(IPv4Address(ip, port), csv13.readBytes())
+        }
         csv3.close()
         csv13.close()
 
