@@ -88,6 +88,12 @@ dependencies {
     implementation 'androidx.transition:transition:1.4.1'
     implementation project(':ipv8-android')
     testImplementation 'io.mockk:mockk-dsl:1.13.9'
+
+    // Needed to verify keys in `FOCSignedVoteTest.kt`
+    // https://mvnrepository.com/artifact/com.goterl/lazysodium-java
+    testImplementation group: 'com.goterl', name: 'lazysodium-java', version: '5.1.4'
+    implementation "com.goterl:lazysodium-android:5.0.1@aar"
+
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

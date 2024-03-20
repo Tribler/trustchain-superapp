@@ -23,14 +23,14 @@ abstract class FOCCommunityBase : Community() {
 
     abstract fun informAboutVote(
         fileName: String,
-        vote: FOCVote,
+        vote: FOCSignedVote,
         ttl: UInt
     )
 
     abstract fun informAboutPullSendVote()
 
     abstract fun informAboutPullReceiveVote(
-        voteMap: HashMap<String, HashSet<FOCVote>>,
+        voteMap: HashMap<String, HashSet<FOCSignedVote>>,
         originPeer: Peer
     )
 

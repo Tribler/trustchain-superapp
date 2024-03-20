@@ -114,12 +114,12 @@ class FOCCommunity(
 
     override fun informAboutVote(
         fileName: String,
-        vote: FOCVote,
+        vote: FOCSignedVote,
         ttl: UInt
     ) {
         Log.i(
             "vote-gossip",
-            "Informing about ${vote.voteType} vote on $fileName from ${vote.memberId}"
+            "Informing about ${vote.vote.voteType} vote on $fileName from ${vote.vote.memberId}"
         )
         for (peer in getPeers()) {
             Log.i("vote-gossip", "Sending vote to ${peer.mid}")
@@ -144,7 +144,7 @@ class FOCCommunity(
     }
 
     override fun informAboutPullReceiveVote(
-        voteMap: HashMap<String, HashSet<FOCVote>>,
+        voteMap: HashMap<String, HashSet<FOCSignedVote>>,
         originPeer: Peer
     ) {
         Log.i("pull based", "sending all my votes to peer")
@@ -214,7 +214,7 @@ class FOCCommunity(
         val (peer, payload) = packet.getAuthPayload(FOCVoteMessage)
         Log.i(
             "vote-gossip",
-            "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focVote.voteType}"
+            "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focSignedVote.vote.voteType}"
         )
         if (voteMessagesQueue.none {
                 it.second == payload
@@ -224,7 +224,7 @@ class FOCCommunity(
         }
         // If TTL is > 0 then forward the message further
         if (payload.TTL > 0u) {
-            informAboutVote(payload.fileName, payload.focVote, payload.TTL - 1u)
+            informAboutVote(payload.fileName, payload.focSignedVote, payload.TTL - 1u)
         }
     }
 

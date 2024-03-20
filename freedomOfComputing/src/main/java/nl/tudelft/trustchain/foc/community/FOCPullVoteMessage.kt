@@ -6,7 +6,7 @@ import nl.tudelft.ipv8.messaging.deserializeVarLen
 import org.apache.commons.lang3.SerializationUtils
 import nl.tudelft.ipv8.messaging.serializeVarLen
 
-data class FOCPullVoteMessage(val voteMap: HashMap<String, HashSet<FOCVote>>) :
+data class FOCPullVoteMessage(val voteMap: HashMap<String, HashSet<FOCSignedVote>>) :
     Serializable,
     nl.tudelft.ipv8.messaging.Serializable {
     override fun serialize(): ByteArray {
