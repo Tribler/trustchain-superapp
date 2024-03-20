@@ -10,7 +10,7 @@ import java.io.ObjectOutputStream
 
 object FOCVoteTracker {
     // Stores the votes for all apks
-    private var voteMap: HashMap<String, HashSet<FOCVote>> = HashMap()
+    private var voteMap: HashMap<String, HashSet<FOCSignedVote>> = HashMap()
 
     /**
      * Gets called on pause (or shutdown) of the app to persist state
@@ -53,10 +53,14 @@ object FOCVoteTracker {
         fileName: String,
         vote: FOCVote
     ) {
+        // Sign the vote with the users private key such that other people can verify it
+        val privateKey = focCommunity.myPeer.key as PrivateKey
+        val signedVote = signVote(vote, privateKey)
+
         if (voteMap.containsKey(fileName)) {
-            voteMap[fileName]!!.add(vote)
+            voteMap[fileName]!!.add(signedVote)
         } else {
-            voteMap[fileName] = hashSetOf(vote)
+            voteMap[fileName] = hashSetOf(signedVote)
         }
     }
 
@@ -64,7 +68,7 @@ object FOCVoteTracker {
      * Gets called when a user receives incoming voting data
      * @param incomingMap incoming data
      */
-    fun mergeVoteMaps(incomingMap: HashMap<String, HashSet<FOCVote>>) {
+    fun mergeVoteMaps(incomingMap: HashMap<String, HashSet<FOCSignedVote>>) {
         for ((key, votes) in incomingMap) {
             if (voteMap.containsKey(key)) {
                 voteMap[key]?.addAll(votes)
@@ -88,7 +92,7 @@ object FOCVoteTracker {
         if (!voteMap.containsKey(fileName)) {
             return 0
         }
-        return voteMap[fileName]!!.count { v -> v.voteType == voteType }
+        return voteMap[fileName]!!.count { v -> v.vote.voteType == voteType }
     }
 
     fun createFileKey(fileName: String) {
@@ -97,7 +101,7 @@ object FOCVoteTracker {
         }
     }
 
-    private fun serializeMap(map: HashMap<String, HashSet<FOCVote>>): ByteArray {
+    private fun serializeMap(map: HashMap<String, HashSet<FOCSignedVote>>): ByteArray {
         val byteArrayOutputStream = ByteArrayOutputStream()
         val objectOutputStream = ObjectOutputStream(byteArrayOutputStream)
         objectOutputStream.writeObject(map)
@@ -106,9 +110,17 @@ object FOCVoteTracker {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun deserializeMap(byteArray: ByteArray): HashMap<String, HashSet<FOCVote>> {
+    private fun deserializeMap(byteArray: ByteArray): HashMap<String, HashSet<FOCSignedVote>> {
         val byteArrayInputStream = ByteArrayInputStream(byteArray)
         val objectInputStream = ObjectInputStream(byteArrayInputStream)
-        return objectInputStream.readObject() as HashMap<String, HashSet<FOCVote>>
+        return objectInputStream.readObject() as HashMap<String, HashSet<FOCSignedVote>>
+    }
+
+    /**
+     * Checks the signature of the signed vote and if the signature is correct and the signer is verified returns the vote object else returns null.
+     */
+    private fun checkAndGet(signedVote: FOCSignedVote): FOCVote? {
+        // TODO Should somehow verify the pub-key is associated to a known user
+        return signedVote.checkAndGet()
     }
 }

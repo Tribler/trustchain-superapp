@@ -19,7 +19,7 @@ abstract class FOCCommunityBase : Community() {
 
     abstract fun informAboutVote(
         fileName: String,
-        vote: FOCVote,
+        vote: FOCSignedVote,
         ttl: Int
     )
 

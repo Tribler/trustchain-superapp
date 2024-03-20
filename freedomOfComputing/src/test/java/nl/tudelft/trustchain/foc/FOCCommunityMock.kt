@@ -5,7 +5,6 @@ import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.trustchain.foc.community.FOCCommunityBase
 import nl.tudelft.trustchain.foc.community.FOCMessage
-import nl.tudelft.trustchain.foc.community.FOCVote
 import java.util.*
 
 class FOCCommunityMock(
@@ -56,7 +55,7 @@ class FOCCommunityMock(
 
     override fun informAboutVote(
         fileName: String,
-        vote: FOCVote,
+        vote: FOCSignedVote,
         ttl: Int
     ) {
     }
