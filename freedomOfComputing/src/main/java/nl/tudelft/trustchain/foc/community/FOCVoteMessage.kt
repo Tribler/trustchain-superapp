@@ -13,7 +13,8 @@ data class FOCVoteMessage(val fileName: String, val focSignedVote: FOCSignedVote
     Serializable,
     nl.tudelft.ipv8.messaging.Serializable {
     override fun serialize(): ByteArray {
-        return serializeVarLen(SerializationUtils.serialize(focSignedVote)) +
+        return serializeVarLen(fileName.toByteArray(Charsets.UTF_8)) +
+            serializeVarLen(SerializationUtils.serialize(focSignedVote)) +
             serializeUShort(TTL)
     }
 
@@ -25,16 +26,14 @@ data class FOCVoteMessage(val fileName: String, val focSignedVote: FOCSignedVote
             var localOffset = offset
             val (fileName, fileNameSize) = deserializeVarLen(buffer, localOffset)
             localOffset += fileNameSize
-            val (mid, midSize) = deserializeVarLen(buffer, localOffset)
+            val (focSignedVote, midSize) = deserializeVarLen(buffer, localOffset)
             localOffset += midSize
-            val (voteType, voteTypeSize) = deserializeVarLen(buffer, localOffset)
-            localOffset += voteTypeSize
             val ttl = deserializeUShort(buffer, localOffset)
             localOffset += SERIALIZED_USHORT_SIZE
             val payload =
                 FOCVoteMessage(
                     fileName.toString(Charsets.UTF_8),
-                    SerializationUtils.deserialize(mid),
+                    SerializationUtils.deserialize(focSignedVote),
                     ttl
                 )
             return Pair(payload, localOffset - offset)

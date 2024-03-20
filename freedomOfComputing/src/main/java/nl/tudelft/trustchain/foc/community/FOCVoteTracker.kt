@@ -40,23 +40,25 @@ object FOCVoteTracker {
     /**
      * Function to get the current state of votes
      */
-    fun getCurrentState(): HashMap<String, HashSet<FOCVote>> {
+    fun getCurrentState(): HashMap<String, HashSet<FOCSignedVote>> {
         return voteMap
     }
 
     /**
      * Gets called when user places a vote
      * @param fileName APK on which vote is being placed
-     * @param vote Vote that is being placed
+     * @param signedVote Vote that is being placed
      */
     fun vote(
         fileName: String,
-        vote: FOCVote
+        signedVote: FOCSignedVote
     ) {
-        // Sign the vote with the users private key such that other people can verify it
-        val privateKey = focCommunity.myPeer.key as PrivateKey
-        val signedVote = signVote(vote, privateKey)
-
+        // Check the signature of the vote
+        // TODO should somehow check if pub-key is associated to person that placed the vote
+        if (checkAndGet(signedVote) == null) {
+            Log.w("vote-gossip", "received vote with invalid pub-key signature combination!")
+            return
+        }
         if (voteMap.containsKey(fileName)) {
             voteMap[fileName]!!.add(signedVote)
         } else {

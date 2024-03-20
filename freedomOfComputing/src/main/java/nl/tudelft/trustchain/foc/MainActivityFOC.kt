@@ -35,10 +35,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.foc.community.FOCCommunity
 import nl.tudelft.trustchain.foc.community.FOCVote
 import nl.tudelft.trustchain.foc.community.FOCVoteTracker
 import nl.tudelft.trustchain.foc.community.VoteType
+import nl.tudelft.trustchain.foc.community.signVote
 import nl.tudelft.trustchain.foc.databinding.ActivityMainFocBinding
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.APK_DOT_EXTENSION
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.DATA_DOT_EXTENSION
@@ -429,10 +431,14 @@ open class MainActivityFOC : AppCompatActivity() {
             val memberId = ipv8.myPeer.mid
 
             val vote = FOCVote(memberId, voteType)
-            voteTracker.vote(fileName, vote)
+
+            // Sign the vote with the users private key such that other people can verify it
+            val privateKey = focCommunity?.myPeer?.key as PrivateKey
+            val signedVote = signVote(vote, privateKey)
+            voteTracker.vote(fileName, signedVote)
 
             // Inform about vote
-            focCommunity?.informAboutVote(fileName, vote, 2)
+            focCommunity?.informAboutVote(fileName, signedVote, 2)
         } else {
             printToast("Couldn't find file '$fileName'")
         }

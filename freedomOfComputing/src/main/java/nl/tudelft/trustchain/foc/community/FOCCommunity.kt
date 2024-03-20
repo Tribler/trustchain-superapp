@@ -215,7 +215,7 @@ class FOCCommunity(
             "vote-gossip",
             "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focSignedVote.vote.voteType}"
         )
-        focVoteTracker.vote(payload.fileName, payload.focVote)
+        focVoteTracker.vote(payload.fileName, payload.focSignedVote)
 
         activity?.runOnUiThread {
             activity?.updateVoteCounts(payload.fileName)
