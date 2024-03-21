@@ -20,7 +20,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.core.view.allViews
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
@@ -242,12 +241,14 @@ open class MainActivityFOC : AppCompatActivity() {
     }
 
     private fun createSuccessfulTorrentButton(uri: Uri) {
+        val fileName = getFileName(uri)
         val torrentListView = binding.contentMainActivityFocLayout.torrentList
         val row = LinearLayout(this)
+        row.id = fileName.hashCode()
 
         var button = Button(this)
         button.id = R.id.apkNameId
-        val fileName = getFileName(uri)
+
         voteTracker.createFileKey(fileName)
         button.text = fileName
         button.layoutParams =
@@ -311,9 +312,7 @@ open class MainActivityFOC : AppCompatActivity() {
 
     fun updateVoteCounts(fileName: String) {
         val torrentListView = binding.contentMainActivityFocLayout.torrentList
-        val row =
-            torrentListView.allViews.find { v -> v is LinearLayout && v.allViews.any { b -> b is Button && b.text == fileName } }
-                ?: return
+        val row = torrentListView.findViewById<LinearLayout>(fileName.hashCode()) ?: return
 
         val upVote = row.findViewById<Button>(R.id.upVoteId)
         upVote.text =
