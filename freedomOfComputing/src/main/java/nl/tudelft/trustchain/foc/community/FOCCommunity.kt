@@ -373,7 +373,7 @@ class FOCCommunity(
     ) {
         Log.d("DemoCommunity", "ON EVA receive complete callback for '$info'")
 
-        if(info == VOTING_ATTACHMENT) {
+        if (info == VOTING_ATTACHMENT) {
             data?.let {
                 val packet = Packet(peer.address, it)
                 onPullVoteMessage(packet)
