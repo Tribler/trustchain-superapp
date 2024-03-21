@@ -78,23 +78,22 @@ object FOCVoteTracker {
                 voteMap[key] = votes
             }
         }
-        Log.i("pull based", "incoming map: $incomingMap")
-        Log.i("pull based", "new voteMap :$voteMap ")
+        Log.i("pull-based", "Merged maps")
     }
 
     /**
      * Get the number of votes for an APK
      * @param fileName APK for which we want to know the number of votes
-     * @param voteType vote type that is for or against the APK
+     * @param isUpVote defines whether the vote is an upvote or a downvote
      */
     fun getNumberOfVotes(
         fileName: String,
-        voteType: VoteType
+        isUpVote: Boolean
     ): Int {
         if (!voteMap.containsKey(fileName)) {
             return 0
         }
-        return voteMap[fileName]!!.count { v -> v.vote.voteType == voteType }
+        return voteMap[fileName]!!.count { v -> v.vote.isUpVote == isUpVote }
     }
 
     fun createFileKey(fileName: String) {

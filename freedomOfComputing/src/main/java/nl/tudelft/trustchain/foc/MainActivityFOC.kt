@@ -39,7 +39,6 @@ import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.foc.community.FOCCommunity
 import nl.tudelft.trustchain.foc.community.FOCVote
 import nl.tudelft.trustchain.foc.community.FOCVoteTracker
-import nl.tudelft.trustchain.foc.community.VoteType
 import nl.tudelft.trustchain.foc.community.signVote
 import nl.tudelft.trustchain.foc.databinding.ActivityMainFocBinding
 import nl.tudelft.trustchain.foc.util.ExtensionUtils.Companion.APK_DOT_EXTENSION
@@ -267,7 +266,7 @@ open class MainActivityFOC : AppCompatActivity() {
         val upVote = Button(this)
         upVote.id = R.id.upVoteId
         upVote.text =
-            getString(R.string.upVote, voteTracker.getNumberOfVotes(fileName, VoteType.UP))
+            getString(R.string.upVote, voteTracker.getNumberOfVotes(fileName, true))
         val upVoteParams: RelativeLayout.LayoutParams =
             RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -281,7 +280,7 @@ open class MainActivityFOC : AppCompatActivity() {
         val downVote = Button(this)
         downVote.id = R.id.downVoteId
         downVote.text =
-            getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, VoteType.DOWN))
+            getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, false))
         downVote.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.red))
         row.addView(downVote)
@@ -292,14 +291,14 @@ open class MainActivityFOC : AppCompatActivity() {
         button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
         binding.torrentCount.text = getString(R.string.torrentCount, ++torrentAmount)
         upVote.setOnClickListener {
-            placeVote(fileName, VoteType.UP)
+            placeVote(fileName, true)
             upVote.text =
-                getString(R.string.upVote, voteTracker.getNumberOfVotes(fileName, VoteType.UP))
+                getString(R.string.upVote, voteTracker.getNumberOfVotes(fileName, true))
         }
         downVote.setOnClickListener {
-            placeVote(fileName, VoteType.DOWN)
+            placeVote(fileName, false)
             downVote.text =
-                getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, VoteType.DOWN))
+                getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, false))
         }
         button.setOnClickListener {
             loadDynamicCode(fileName)
@@ -318,11 +317,12 @@ open class MainActivityFOC : AppCompatActivity() {
 
         val upVote = row.findViewById<Button>(R.id.upVoteId)
         upVote.text =
-            getString(R.string.upVote, voteTracker.getNumberOfVotes(fileName, VoteType.UP))
+            getString(R.string.upVote, voteTracker.getNumberOfVotes(fileName, true))
 
         val downVote = row.findViewById<Button>(R.id.downVoteId)
         downVote.text =
-            getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, VoteType.DOWN))
+            getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, false))
+        Log.i("vote-gossip", "Vote Count updated!")
     }
 
     fun createUnsuccessfulTorrentButton(torrentName: String) {
@@ -345,9 +345,7 @@ open class MainActivityFOC : AppCompatActivity() {
     private fun createAlertDialog(fileName: String) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.createAlertDialogTitle))
-        val upVoteCount = voteTracker.getNumberOfVotes(fileName, VoteType.UP)
-        val downVoteCount = voteTracker.getNumberOfVotes(fileName, VoteType.DOWN)
-        builder.setMessage(getString(R.string.createAlertDialogMsg, upVoteCount, downVoteCount))
+        builder.setMessage(getString(R.string.createAlertDialogMsg))
         builder.setPositiveButton(getString(R.string.cancelButton), null)
         builder.setNeutralButton(getString(R.string.deleteButton)) { _, _ -> deleteApkFile(fileName) }
         builder.setNegativeButton(getString(R.string.createButton)) { _, _ -> createTorrent(fileName) }
@@ -419,7 +417,7 @@ open class MainActivityFOC : AppCompatActivity() {
 
     private fun placeVote(
         fileName: String,
-        voteType: VoteType
+        isUpVote: Boolean
     ) {
         val files = applicationContext.cacheDir.listFiles()
         val file =
@@ -430,7 +428,7 @@ open class MainActivityFOC : AppCompatActivity() {
             val ipv8 = IPv8Android.getInstance()
             val memberId = ipv8.myPeer.mid
 
-            val vote = FOCVote(memberId, voteType)
+            val vote = FOCVote(memberId, isUpVote)
 
             // Sign the vote with the users private key such that other people can verify it
             val privateKey = focCommunity?.myPeer?.key as PrivateKey

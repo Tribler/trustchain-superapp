@@ -118,7 +118,7 @@ class FOCCommunity(
     ) {
         Log.i(
             "vote-gossip",
-            "Informing about ${vote.vote.voteType} vote on $fileName from ${vote.vote.memberId}"
+            "Informing about ${vote.vote.isUpVote} vote on $fileName from ${vote.vote.memberId}"
         )
         val peers = getPeers().shuffled()
         val n = peers.size
@@ -137,6 +137,7 @@ class FOCCommunity(
     }
 
     override fun sendPullVotesMessage() {
+        Log.i("pull-based", "Sending pull request")
         for (peer in getPeers()) {
             Log.i("pull-based", "sending pull vote request to ${peer.mid}")
             val packet =
@@ -213,14 +214,13 @@ class FOCCommunity(
         val (peer, payload) = packet.getAuthPayload(FOCVoteMessage)
         Log.i(
             "vote-gossip",
-            "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focSignedVote.vote.voteType}"
+            "Received vote message from ${peer.mid} for file ${payload.fileName} and direction ${payload.focSignedVote.vote.isUpVote}"
         )
         focVoteTracker.vote(payload.fileName, payload.focSignedVote)
 
         activity?.runOnUiThread {
             activity?.updateVoteCounts(payload.fileName)
         }
-
         // If TTL is > 0 then forward the message further
         if (payload.TTL > 0) {
             informAboutVote(payload.fileName, payload.focSignedVote, payload.TTL - 1)

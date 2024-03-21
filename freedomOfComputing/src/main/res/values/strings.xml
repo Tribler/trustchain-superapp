@@ -19,7 +19,7 @@
     <string name="createButton">Create</string>
     <string name="createAlertDialogTitle">Create or Delete</string>
     <string name="createAlertDialogMsg">Select whether you want to delete the apk, create a torrent
-        out of it or vote for it. There are  %1$d votes for and %2$d votes against the APK.
+        out of it or vote for it.
     </string>
     <string name="createDownloadDialogTitle">Enter a URL on which the .apk file can be downloaded</string>
     <string name="noDownloadInProgress">No download in progress</string>

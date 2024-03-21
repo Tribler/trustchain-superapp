@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.foc.community
 
+import android.util.Log
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.SERIALIZED_USHORT_SIZE
 import nl.tudelft.ipv8.messaging.deserializeUShort
@@ -36,6 +37,7 @@ data class FOCVoteMessage(val fileName: String, val focSignedVote: FOCSignedVote
                     SerializationUtils.deserialize(focSignedVote),
                     ttl
                 )
+            Log.i("vote-gossip", "${localOffset - offset} Bytes")
             return Pair(payload, localOffset - offset)
         }
     }

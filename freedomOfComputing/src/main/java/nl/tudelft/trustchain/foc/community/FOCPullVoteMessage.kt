@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.foc.community
 
+import android.util.Log
 import nl.tudelft.ipv8.messaging.Deserializable
 import java.io.Serializable
 import nl.tudelft.ipv8.messaging.deserializeVarLen
@@ -18,9 +19,10 @@ data class FOCPullVoteMessage(val voteMap: HashMap<String, HashSet<FOCSignedVote
             buffer: ByteArray,
             offset: Int
         ): Pair<FOCPullVoteMessage, Int> {
-            val (payload, _) = deserializeVarLen(buffer, offset)
+            val (payload, localOffset) = deserializeVarLen(buffer, offset)
             val set = FOCPullVoteMessage(SerializationUtils.deserialize(payload))
 
+            Log.i("pull-based", "${localOffset - offset} Bytes")
             return Pair(set, offset)
         }
     }
