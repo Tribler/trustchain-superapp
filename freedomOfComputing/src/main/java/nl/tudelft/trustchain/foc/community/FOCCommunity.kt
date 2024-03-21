@@ -186,9 +186,10 @@ class FOCCommunity(
                 serializePacket(
                     MessageId.PULL_VOTE_MESSAGE,
                     FOCPullVoteMessage(focVoteTracker.getCurrentState()),
-                    true
+                    encrypt = true,
+                    recipient = peer
                 )
-            send(peer.address, m)
+            evaSendBinary(peer, VOTING_ATTACHMENT, UUID.randomUUID().toString(), m)
         }
     }
 
@@ -229,7 +230,12 @@ class FOCCommunity(
 
     private fun onPullVoteMessage(packet: Packet) {
         Log.i("pull-based", "onPullVoteMessage called")
-        val (_, payload) = packet.getAuthPayload(FOCPullVoteMessage)
+        val (peer, payload) =
+            packet.getDecryptedAuthPayload(
+                FOCPullVoteMessage.Deserializer,
+                myPeer.key as PrivateKey
+            )
+        Log.i("pull-based", "Received votemap from ${peer.address}")
         focVoteTracker.mergeVoteMaps(payload.voteMap)
         activity?.runOnUiThread {
             for (key in focVoteTracker.getCurrentState().keys) {
@@ -318,6 +324,7 @@ class FOCCommunity(
         logger.debug { "<- Received app from ${peer.mid}" }
         val file = appDirectory.toString() + "/" + payload.appName
         val existingFile = File(file)
+        Log.i("send-app", "Received app packet of size: ${payload.data.size} Bytes")
         if (!existingFile.exists()) {
             try {
                 val os = FileOutputStream(file)
@@ -366,6 +373,12 @@ class FOCCommunity(
     ) {
         Log.d("DemoCommunity", "ON EVA receive complete callback for '$info'")
 
+        if(info == VOTING_ATTACHMENT) {
+            data?.let {
+                val packet = Packet(peer.address, it)
+                onPullVoteMessage(packet)
+            }
+        }
         if (info != EVA_FOC_COMMUNITY_ATTACHMENT) return
 
         data?.let {
@@ -400,5 +413,6 @@ class FOCCommunity(
     companion object {
         // Use this until we can commit an id to kotlin ipv8
         const val EVA_FOC_COMMUNITY_ATTACHMENT = "eva_foc_community_attachment"
+        const val VOTING_ATTACHMENT = "voting_attachment"
     }
 }
