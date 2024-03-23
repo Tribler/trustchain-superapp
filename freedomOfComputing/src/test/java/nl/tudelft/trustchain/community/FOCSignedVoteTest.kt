@@ -4,7 +4,6 @@ import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.foc.community.FOCSignedVote
 import nl.tudelft.trustchain.foc.community.FOCVote
-import nl.tudelft.trustchain.foc.community.VoteType
 import nl.tudelft.trustchain.foc.community.signVote
 import org.apache.commons.lang3.SerializationUtils
 import org.junit.Assert.assertEquals
@@ -17,7 +16,7 @@ class FOCSignedVoteTest {
     private val cryptoProvider = JavaCryptoProvider
     private var privateKey1: PrivateKey = cryptoProvider.generateKey()
     private var privateKey2: PrivateKey = cryptoProvider.generateKey()
-    private val baseVote = FOCVote("0000", VoteType.DOWN)
+    private val baseVote = FOCVote("0000", false)
 
     @Test
     fun checkSignatureCorrect() {

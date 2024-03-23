@@ -13,7 +13,7 @@ import org.junit.Test
 class FOCSignedVoteTest {
     private lateinit var privateKey1: PrivateKey
     private lateinit var privateKey2: PrivateKey
-    private val baseVote = FOCVote("0000", VoteType.DOWN)
+    private val baseVote = FOCVote("0000", false)
 
     @Before
     fun setup() {
