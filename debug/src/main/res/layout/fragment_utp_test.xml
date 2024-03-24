@@ -20,69 +20,6 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/IPv_ToggleText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="8dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="32dp"
-                android:text="IPv4/IPv8"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textStyle="bold" />
-
-            <Switch
-                android:id="@+id/IPv_ToggleSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="35dp"
-                android:layout_marginBottom="10dp"
-                android:layout_weight="1"
-                android:checked="false"
-                android:scaleX="2"
-                android:scaleY="2"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <Spinner
-                android:id="@+id/IPv_Spinner"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="32dp"
-                android:layout_marginEnd="8dp"
-                android:padding="8dp"
-                android:spinnerMode="dropdown" />
-
-            <EditText
-                android:id="@+id/editIPforUTP"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                android:layout_weight="1"
-                android:ems="10"
-                android:enabled="false"
-                android:hint="IPv_ input"
-                android:inputType="text" />
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:layout_width="105dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
                 android:id="@+id/DAOToggleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -124,7 +61,7 @@
                 android:ems="10"
                 android:enabled="false"
                 android:inputType="text"
-                android:text="Random data size (in Mb)" />
+                android:hint="Random data size (in Mb)" />
         </LinearLayout>
 
     </LinearLayout>
@@ -155,7 +92,26 @@
             android:textSize="20sp" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/peerListLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:padding="0dp">
+
+        <include
+            android:id="@+id/peerComponent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout="@layout/peer_component">
+
+        </include>
+
+    </LinearLayout>
+
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="16dp">
