@@ -278,7 +278,6 @@ open class MainActivityFOC : AppCompatActivity() {
             getString(R.string.upVote, voteTracker.getNumberOfVotes(fileName, true))
         upVote?.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.green))
-
         downVote?.text =
             getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, false))
         downVote?.backgroundTintList =

@@ -95,7 +95,7 @@ object FOCVoteTracker {
         }
         return voteMap[fileName]!!.count { v -> v.vote.isUpVote == isUpVote }
     }
-
+    
     private fun serializeMap(map: HashMap<String, HashSet<FOCSignedVote>>): ByteArray {
         val byteArrayOutputStream = ByteArrayOutputStream()
         val objectOutputStream = ObjectOutputStream(byteArrayOutputStream)
