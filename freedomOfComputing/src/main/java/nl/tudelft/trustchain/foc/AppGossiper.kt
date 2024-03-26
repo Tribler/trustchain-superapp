@@ -248,6 +248,9 @@ class AppGossiper(
         }
     }
 
+    /**
+     * Method to continuously check for APKs to download.
+     */
     private suspend fun iterativelyDownloadApps() {
         while (scope.isActive) {
             if (!downloadingPaused) {

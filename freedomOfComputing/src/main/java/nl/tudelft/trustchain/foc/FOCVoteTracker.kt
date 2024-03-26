@@ -1,6 +1,8 @@
-package nl.tudelft.trustchain.foc.community
+package nl.tudelft.trustchain.foc
 
 import android.util.Log
+import nl.tudelft.trustchain.foc.community.FOCSignedVote
+import nl.tudelft.trustchain.foc.community.FOCVote
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -8,6 +10,9 @@ import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
+/**
+ * FOCVoteTracker is a singleton which is responsible for keeping track of all the votes placed.
+ */
 object FOCVoteTracker {
     // Stores the votes for all apks
     private var voteMap: HashMap<String, HashSet<FOCSignedVote>> = HashMap()
@@ -24,7 +29,7 @@ object FOCVoteTracker {
     }
 
     /**
-     * Gets called on start up to load the state from disk
+     * Gets called on start up to load the state from memory
      */
     fun loadState(fileName: String) {
         try {
@@ -38,7 +43,7 @@ object FOCVoteTracker {
     }
 
     /**
-     * Function to get the current state of votes
+     * Function to get the current votes that are placed
      */
     fun getCurrentState(): HashMap<String, HashSet<FOCSignedVote>> {
         return voteMap
@@ -96,6 +101,9 @@ object FOCVoteTracker {
         return voteMap[fileName]!!.count { v -> v.vote.isUpVote == isUpVote }
     }
 
+    /**
+     * Used to be able to store the state in a file.
+     */
     private fun serializeMap(map: HashMap<String, HashSet<FOCSignedVote>>): ByteArray {
         val byteArrayOutputStream = ByteArrayOutputStream()
         val objectOutputStream = ObjectOutputStream(byteArrayOutputStream)
@@ -104,6 +112,9 @@ object FOCVoteTracker {
         return byteArrayOutputStream.toByteArray()
     }
 
+    /**
+     * Used to recover the state from a file.
+     */
     @Suppress("UNCHECKED_CAST")
     private fun deserializeMap(byteArray: ByteArray): HashMap<String, HashSet<FOCSignedVote>> {
         val byteArrayInputStream = ByteArrayInputStream(byteArray)

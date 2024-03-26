@@ -15,6 +15,7 @@ import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.trustchain.common.freedomOfComputing.AppPayload
 import nl.tudelft.trustchain.common.freedomOfComputing.AppRequestPayload
+import nl.tudelft.trustchain.foc.FOCVoteTracker
 import nl.tudelft.trustchain.foc.MainActivityFOC
 import java.io.File
 import java.io.FileOutputStream
