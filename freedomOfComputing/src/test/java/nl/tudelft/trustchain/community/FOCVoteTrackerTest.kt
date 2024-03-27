@@ -13,6 +13,7 @@ import org.junit.After
 import org.junit.Before
 import java.io.File
 import io.mockk.*
+import android.util.Log
 
 class FOCVoteTrackerTest {
     private val cryptoProvider = JavaCryptoProvider
@@ -25,7 +26,7 @@ class FOCVoteTrackerTest {
     private val signedVote1 = FOCSignedVote(baseVote1, signKey1, privateKey1.pub().keyToBin())
     private val signKey2 = privateKey2.sign(SerializationUtils.serialize(baseVote2))
     private val signedVote2 = FOCSignedVote(baseVote2, signKey2, privateKey2.pub().keyToBin())
-    val voteTracker: FOCVoteTracker = FOCVoteTracker
+   private val voteTracker: FOCVoteTracker = FOCVoteTracker
 
     @Before
     fun setup() {
@@ -58,6 +59,22 @@ class FOCVoteTrackerTest {
     }
 
     @Test
+    fun voteWrongSignature() {
+        mockkStatic(android.util.Log::class)
+        every { Log.w(any(), any(String::class)) } returns 1
+        val signedVote = FOCSignedVote(baseVote1, signKey1, privateKey2.pub().keyToBin())
+        voteTracker.vote("test", signedVote)
+        verify { Log.w("vote-gossip", "received vote with invalid pub-key signature combination!") }
+    }
+
+    @Test
+    fun checkVoteDuplicate() {
+        voteTracker.vote("test.apk", signedVote1)
+        voteTracker.vote("test.apk", signedVote1)
+        assertEquals(1, voteTracker.getNumberOfVotes("test.apk", true))
+    }
+
+    @Test
     fun checkLoadStateCorrect() {
         voteTracker.vote("test.apk", signedVote1)
         voteTracker.storeState("test")
@@ -68,7 +85,7 @@ class FOCVoteTrackerTest {
     @Test
     fun checkMergeVoteMapsCorrect() {
         mockkStatic(android.util.Log::class)
-        every { android.util.Log.i(any(), any()) } returns 1
+        every { Log.i(any(), any()) } returns 1
         val voteMap3: HashMap<String, HashSet<FOCSignedVote>> = HashMap()
         voteMap3["test.apk"] = HashSet()
         voteMap3["test2.apk"] = HashSet()
@@ -76,7 +93,30 @@ class FOCVoteTrackerTest {
         voteMap3["test2.apk"]?.add(signedVote2)
         voteTracker.vote("test2.apk", signedVote2)
         voteTracker.mergeVoteMaps(voteMap2)
-        verify { android.util.Log.i("pull-based", "Merged maps") }
+        verify { Log.i("pull-based", "Merged maps") }
         assertEquals(voteMap3, voteTracker.getCurrentState())
+    }
+
+    @Test
+    fun checkMergeVoteMapsCorrect2() {
+        mockkStatic(android.util.Log::class)
+        every { Log.i(any(), any()) } returns 1
+        val voteMap3: HashMap<String, HashSet<FOCSignedVote>> = HashMap()
+        voteMap3["test.apk"] = HashSet()
+        voteMap3["test2.apk"] = HashSet()
+        voteMap3["test.apk"]?.add(signedVote1)
+        voteMap3["test2.apk"]?.add(signedVote2)
+        voteTracker.vote("test2.apk", signedVote2)
+        voteTracker.vote("test.apk", signedVote1)
+        voteTracker.mergeVoteMaps(voteMap2)
+        verify { Log.i("pull-based", "Merged maps") }
+        assertEquals(voteMap3, voteTracker.getCurrentState())
+    }
+
+    @Test
+    fun getNumberOfVotesCorrect() {
+        voteTracker.vote("test.apk", signedVote1)
+        assertEquals(0, voteTracker.getNumberOfVotes("test2.apk", true))
+        assertEquals(1, voteTracker.getNumberOfVotes("test.apk", true))
     }
 }
