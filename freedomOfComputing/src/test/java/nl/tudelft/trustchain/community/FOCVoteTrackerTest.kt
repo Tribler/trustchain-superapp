@@ -26,7 +26,7 @@ class FOCVoteTrackerTest {
     private val signedVote1 = FOCSignedVote(baseVote1, signKey1, privateKey1.pub().keyToBin())
     private val signKey2 = privateKey2.sign(SerializationUtils.serialize(baseVote2))
     private val signedVote2 = FOCSignedVote(baseVote2, signKey2, privateKey2.pub().keyToBin())
-   private val voteTracker: FOCVoteTracker = FOCVoteTracker
+    private val voteTracker: FOCVoteTracker = FOCVoteTracker
 
     @Before
     fun setup() {
