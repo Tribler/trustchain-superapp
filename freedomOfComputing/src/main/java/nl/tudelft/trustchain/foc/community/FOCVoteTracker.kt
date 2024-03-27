@@ -74,7 +74,7 @@ object FOCVoteTracker {
         for ((key, votes) in incomingMap) {
             if (voteMap.containsKey(key)) {
                 voteMap[key]?.addAll(votes)
-            } else { // this means votes from an apk can be received before the apk itself. Needs to be adjusted
+            } else { // this means votes from an apk can be received before the apk itself.
                 voteMap[key] = votes
             }
         }
@@ -94,12 +94,6 @@ object FOCVoteTracker {
             return 0
         }
         return voteMap[fileName]!!.count { v -> v.vote.isUpVote == isUpVote }
-    }
-
-    fun createFileKey(fileName: String) {
-        if (!voteMap.containsKey(fileName)) {
-            voteMap[fileName] = HashSet()
-        }
     }
 
     private fun serializeMap(map: HashMap<String, HashSet<FOCSignedVote>>): ByteArray {
@@ -123,5 +117,12 @@ object FOCVoteTracker {
     private fun checkAndGet(signedVote: FOCSignedVote): FOCVote? {
         // TODO Should somehow verify the pub-key is associated to a known user
         return signedVote.checkAndGet()
+    }
+
+    /**
+     * Added method for testing purposes
+     */
+    fun reset() {
+        voteMap.clear()
     }
 }

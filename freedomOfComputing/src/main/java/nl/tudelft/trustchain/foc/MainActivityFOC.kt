@@ -243,13 +243,10 @@ open class MainActivityFOC : AppCompatActivity() {
     private fun createSuccessfulTorrentButton(uri: Uri) {
         val fileName = getFileName(uri)
         val torrentListView = binding.contentMainActivityFocLayout.torrentList
-        val row = LinearLayout(this)
-        row.id = fileName.hashCode()
-
         var button = Button(this)
-        button.id = R.id.apkNameId
-
-        voteTracker.createFileKey(fileName)
+        val row: LinearLayout?
+        val upVote: Button?
+        val downVote: Button?
         button.text = fileName
         button.layoutParams =
             RelativeLayout.LayoutParams(
@@ -259,48 +256,48 @@ open class MainActivityFOC : AppCompatActivity() {
         // Replace the failed torrent with the downloaded torrent
         val existingButton = torrentMap.entries.find { entry -> entry.key.text == fileName }?.key
         if (existingButton != null) {
+            row = torrentListView.findViewById<LinearLayout>(fileName.hashCode()) ?: return
             button = existingButton
+            upVote = row.findViewById<Button>(R.id.upVoteId)
+            downVote = row.findViewById<Button>(R.id.downVoteId)
         } else {
+            button.id = R.id.apkNameId
+            row = LinearLayout(this)
+            row.id = fileName.hashCode()
             torrentMap[button] = row
             row.addView(button)
+            upVote = Button(this)
+            downVote = Button(this)
+            upVote.id = R.id.upVoteId
+            downVote.id = R.id.downVoteId
+            row.addView(upVote)
+            row.addView(downVote)
+            torrentListView.addView(row)
         }
-        val upVote = Button(this)
-        upVote.id = R.id.upVoteId
-        upVote.text =
+        upVote?.text =
             getString(R.string.upVote, voteTracker.getNumberOfVotes(fileName, true))
-        val upVoteParams: RelativeLayout.LayoutParams =
-            RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.MATCH_PARENT
-            )
-        upVote.layoutParams = upVoteParams
-        upVote.backgroundTintList =
+        upVote?.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.green))
-        row.addView(upVote)
-
-        val downVote = Button(this)
-        downVote.id = R.id.downVoteId
-        downVote.text =
+        downVote?.text =
             getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, false))
-        downVote.backgroundTintList =
+        downVote?.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.red))
-        row.addView(downVote)
-        torrentListView.addView(row)
         button.isAllCaps = false
         button.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
         button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
         binding.torrentCount.text = getString(R.string.torrentCount, ++torrentAmount)
-        upVote.setOnClickListener {
+        upVote?.setOnClickListener {
             placeVote(fileName, true)
             upVote.text =
                 getString(R.string.upVote, voteTracker.getNumberOfVotes(fileName, true))
         }
-        downVote.setOnClickListener {
+        downVote?.setOnClickListener {
             placeVote(fileName, false)
             downVote.text =
                 getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, false))
         }
+
         button.setOnClickListener {
             loadDynamicCode(fileName)
         }
@@ -327,6 +324,7 @@ open class MainActivityFOC : AppCompatActivity() {
     fun createUnsuccessfulTorrentButton(torrentName: String) {
         val torrentListView = binding.contentMainActivityFocLayout.torrentList
         val row = LinearLayout(this)
+        row.id = torrentName.hashCode()
         val button = Button(this)
         button.id = R.id.apkNameId
         button.text = torrentName
@@ -335,8 +333,26 @@ open class MainActivityFOC : AppCompatActivity() {
                 600,
                 RelativeLayout.LayoutParams.MATCH_PARENT
             )
+        val upVote = Button(this)
+        upVote.id = R.id.upVoteId
+        upVote.text =
+            getString(R.string.upVote, voteTracker.getNumberOfVotes(torrentName, true))
+        val upVoteParams: RelativeLayout.LayoutParams =
+            RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+            )
+        upVote.layoutParams = upVoteParams
+
+        val downVote = Button(this)
+        downVote.id = R.id.downVoteId
+        downVote.text =
+            getString(R.string.downVote, voteTracker.getNumberOfVotes(torrentName, false))
+
         torrentMap[button] = LinearLayout(this)
         row.addView(button)
+        row.addView(upVote)
+        row.addView(downVote)
         torrentListView.addView(row)
         button.isAllCaps = false
     }
