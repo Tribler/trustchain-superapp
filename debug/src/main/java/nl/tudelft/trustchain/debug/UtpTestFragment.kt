@@ -1,16 +1,17 @@
 package nl.tudelft.trustchain.debug
 
+import android.content.Context
 import android.os.Bundle
-import android.text.Editable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.TextView
+import androidx.core.content.getSystemService
+import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.utp.UtpEndpoint
@@ -33,29 +34,43 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // IP Selection
-        binding.IPvToggleSwitch.setOnClickListener {
-            if (binding.IPvToggleSwitch.isChecked) {
-                // IPv8 peers
-                binding.IPvSpinner.isEnabled = true
-                binding.editIPforUTP.isEnabled = false
-                getPeers()
+        // create list of peers
+        getPeers()
+        for (peer in peers) {
+            println("Adding peer " + peer.toString())
+            val layoutInflater: LayoutInflater = this.context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            val v: View = layoutInflater.inflate(R.layout.peer_component, null)
 
-                binding.IPvSpinner.adapter = ArrayAdapter(
-                    it.context,
-                    android.R.layout.simple_spinner_item,
-                    peers
-                )
-            } else {
-                // Usual IPv4 address
-                binding.IPvSpinner.isEnabled = false
-                binding.editIPforUTP.isEnabled = true
-
-                // Placeholder data
-                binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("192.168.0.101:13377")
-
-            }
+            binding.peerListLayout.addView(v, ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ))
         }
+
+
+        // IP Selection
+//        binding.IPvToggleSwitch.setOnClickListener {
+//            if (binding.IPvToggleSwitch.isChecked) {
+//                // IPv8 peers
+//                binding.IPvSpinner.isEnabled = true
+//                binding.editIPforUTP.isEnabled = false
+//
+//
+//                binding.IPvSpinner.adapter = ArrayAdapter(
+//                    it.context,
+//                    android.R.layout.simple_spinner_item,
+//                    peers
+//                )
+//            } else {
+//                // Usual IPv4 address
+//                binding.IPvSpinner.isEnabled = false
+//                binding.editIPforUTP.isEnabled = true
+//
+//                // Placeholder data
+//                binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("192.168.0.101:13377")
+//
+//            }
+//        }
 
         // Data selection
         // Named resources
@@ -97,14 +112,22 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
         }
 
         binding.sendTestPacket.setOnClickListener {
-            val address = binding.editIPforUTP.text.toString().split(":")
-            if (address.size == 2) {
-                val ip = address[0]
-                val port = address[1].toIntOrNull() ?: MIN_PORT
+//            val address = binding.editIPforUTP.text.toString().split(":")
+//            if (address.size == 2) {
+//                val ip = address[0]
+//                val port = address[1].toIntOrNull() ?: MIN_PORT
+//
+//                lifecycleScope.launchWhenCreated {
+//                    sendTestData(ip, port)
+//                }
+//            }
+        }
 
-                lifecycleScope.launchWhenCreated {
-                    sendTestData(ip, port)
-                }
+//       binding.peerListLayout.children.iterator()
+
+        for (peer in binding.peerListLayout.children.iterator()) {
+            peer.setOnClickListener {
+                println("click")
             }
         }
     }

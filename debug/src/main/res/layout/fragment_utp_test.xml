@@ -104,8 +104,7 @@
             android:id="@+id/peerComponent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout="@layout/peer_component">
-
+            layout="@layout/peer_component">
         </include>
 
     </LinearLayout>
