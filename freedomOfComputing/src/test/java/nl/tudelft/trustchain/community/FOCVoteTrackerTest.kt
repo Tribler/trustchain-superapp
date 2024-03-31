@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.community
 
 import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.trustchain.foc.community.FOCVoteTracker
+import nl.tudelft.trustchain.foc.FOCVoteTracker
 import nl.tudelft.trustchain.foc.community.FOCSignedVote
 import nl.tudelft.trustchain.foc.community.FOCVote
 import org.junit.Assert.assertEquals
