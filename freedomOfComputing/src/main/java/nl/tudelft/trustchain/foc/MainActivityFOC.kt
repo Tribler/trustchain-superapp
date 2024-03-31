@@ -171,6 +171,11 @@ open class MainActivityFOC : AppCompatActivity() {
         voteTracker.storeState(cacheDir.absolutePath + "/vote-tracker" + DATA_DOT_EXTENSION)
     }
 
+    /**
+     *This function retrieves the list of files in the application's cache directory,
+     * clears the existing views in the torrent list view, clears the torrent map,
+     * and creates buttons for each file with the ".apk" extension.
+     */
     private fun showAllFiles() {
         val files = applicationContext.cacheDir.listFiles()
         if (files != null) {
@@ -185,6 +190,12 @@ open class MainActivityFOC : AppCompatActivity() {
         }
     }
 
+    /**
+     * This function retrieves the list of files in the application's cache directory,
+     * finds the file with the specified torrent name, and creates a button for it
+     * if the file exists.
+     * @param torrentName name of the torrent
+     */
     fun showAddedFile(torrentName: String) {
         val files = applicationContext.cacheDir.listFiles()
         if (files != null) {
@@ -198,6 +209,12 @@ open class MainActivityFOC : AppCompatActivity() {
         }
     }
 
+    /**
+     * This function clears the existing views in the torrent list view, clears the torrent map,
+     * retrieves the list of files in the application's cache directory, and creates buttons
+     * for files whose names contain the specified search value and have the ".apk" extension.
+     * @param searchVal The search value to look for in file names.
+     */
     private fun searchAllFiles(searchVal: String) {
         val torrentListView = binding.contentMainActivityFocLayout.torrentList
         torrentListView.removeAllViews()
@@ -456,6 +473,12 @@ open class MainActivityFOC : AppCompatActivity() {
         }
     }
 
+    /**
+     * Method to place vote when button is clicked. Updates own voteMap and also
+     * aims to send its update to other peers
+     * @param fileName name of the torrent
+     * @param isUpVote true if upVote button clicked, false if downVote button clicked
+     */
     private fun placeVote(
         fileName: String,
         isUpVote: Boolean

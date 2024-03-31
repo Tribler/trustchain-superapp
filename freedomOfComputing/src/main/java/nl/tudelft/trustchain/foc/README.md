@@ -103,7 +103,7 @@ placed. It contains the `fileName` of the APK on which the vote is placed, the
 to 2. The `TTL` sets how many times this vote should be forwarded.
 
 ### FOCPullVoteMessage
-
+# todo (change)
 The `FOCPullVoteMessage` data class is the message type that is sent back after doing a pull request
 `onResume`. This message contains all the votes that our peer knows about and as such results in a
 rather big message. This means that it can't be sent using the same protocol as the other message
@@ -119,3 +119,36 @@ available on startup of the FreedomOfComputing app. The `values` subfolder conta
 which is where a lot of the hardcoded strings that are needed for buttons are defined. An example of
 how this works is with the `createAlertDialogTitle` that it defines and is used in the
 `createAlertDialog` method in [FOCMainActivity](#mainactivityfoc) to set the dialog title.
+
+
+## User Guide
+We present the main use cases of our app, step by step, through which our contributions to the whole “superapp” project become visible.
+
+The user has a .apk file they want to distribute to the rest of the peers in the superapp’s network, say “my-special.apk”.
+Suppose this file resides in a publicly accessible location on the internet. The user presses the "+"-button on the main FOC screen
+and enters the URL on which the .apk is published. After confirming this URL, the .apk file will be downloaded into the
+superapp's app-specific directory and a new button will be displayed on the main FOC screen. By long-pressing/holding the newly appeared button, 
+the user will be shown a set of options from which they can choose to either delete the file, create
+a torrent out of it, or vote on the apk. Once the torrent has been created, FOC will automatically share this with other FOC peers
+within the community.
+
+<img height="600" src="../../../../../../../../doc/freedomOfComputing/create_torrent_new.png" alt="Image displaying how to add apks">
+
+<img height="600" src="../../../../../../../../doc/freedomOfComputing/create_torrent_animation.gif" alt="GIF displaying how to create torrents from apks">
+
+### Downloading the seeding torrent, as a recipient
+# todo 
+
+### Executing the downloaded apk
+
+The user can press the displayed buttons containing the name of the specific .apk to execute it.
+<img height="600" src="../../../../../../../../doc/freedomOfComputing/run_search_apk.gif" alt="GIF displaying how to create torrents from apks">
+
+
+### Voting 
+# todo 
+
+### Voting Gossiping 
+# todo (push based and pull based)
+
+

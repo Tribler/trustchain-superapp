@@ -98,6 +98,10 @@ class FOCCommunity(
         const val PULL_VOTE_MESSAGE = 234
     }
 
+    /**
+     * When a user adds a torrent, it is broadcasted to all peers
+     * @param torrentName name of torrent
+     */
     override fun informAboutTorrent(torrentName: String) {
         if (torrentName != "") {
             for (peer in getPeers()) {
@@ -112,6 +116,12 @@ class FOCCommunity(
         }
     }
 
+    /**
+     * When a user votes on an apk, the result of the vote is hot potatoed to a random subset of peers
+     * @param fileName name of APK
+     * @param vote signed vote of the user
+     * @param ttl The Time-To-Live (TTL) value indicating the maximum number of hops the vote information can traverse in the gossip network.
+     */
     override fun informAboutVote(
         fileName: String,
         vote: FOCSignedVote,
@@ -147,6 +157,13 @@ class FOCCommunity(
         }
     }
 
+    /**
+     * Sends an application request to peer. It  constructs an application
+     * request payload with the given torrent info hash and UUID, then sends it to the specified peer.
+     * @param torrentInfoHash the hash of the given torrent
+     * @param peer  the peer
+     * @uuid the uuid (Universally Unique Identifier) uniquely identifies the request in the application layer
+     */
     override fun sendAppRequest(
         torrentInfoHash: String,
         peer: Peer,
@@ -194,6 +211,12 @@ class FOCCommunity(
         }
     }
 
+    /**
+     * Function to process and incoming torrent magnet link in the form of a packet.
+     * checks if the torrent message is already present in the list of received messages,
+     * and adds it if not already present.
+     * @param packet received packet
+     */
     private fun onTorrentMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(FOCMessage)
         val torrentHash =
@@ -211,6 +234,11 @@ class FOCCommunity(
         }
     }
 
+    /**
+     * Invoked when a peer receives an VOTE_MESSAGE. Once received, it updates
+     * the current voteMap and updates the changes in hte UI
+     * @param packet received packet
+     */
     private fun onVoteMessage(packet: Packet) {
         Log.i("vote-gossip", "OnVoteMessage Called")
         val (peer, payload) = packet.getAuthPayload(FOCVoteMessage)
@@ -305,6 +333,15 @@ class FOCCommunity(
         return null
     }
 
+    /***
+     *This function evaluates whether the torrent file
+     * is suitable for downloading based on the directory.
+     * it checks if the file extension is either "jar" or "apk" and if the file size
+     * does not exceed the total size specified.
+     * @param torrentInfo torrent file information
+     * @param saveDirectory the directory where the torrent file will be saved
+     * @return `true` if the torrent file meets the criteria for downloading; `false` otherwise.
+     */
     private fun isTorrentOkay(
         torrentInfo: TorrentInfo,
         saveDirectory: File
@@ -316,6 +353,10 @@ class FOCCommunity(
         return false
     }
 
+    /**
+     *This function decrypts and processes the incoming packet containing an application payload.
+     * @param packet the incoming packet
+     */
     private fun onAppPacket(packet: Packet) {
         val (peer, payload) =
             packet.getDecryptedAuthPayload(
@@ -338,6 +379,13 @@ class FOCCommunity(
         }
     }
 
+    /**
+     * This function is invoked when the EVA send operation to a peer is completed. It logs the
+     *  completion of the send operation with the provided information.
+     *  @param peer peer involved in callback
+     *  @param info additional information associated with send operation
+     *  @param nonce nonce value associated with operation
+     */
     private fun onEVASendCompleteCallback(
         peer: Peer,
         info: String,
@@ -352,6 +400,13 @@ class FOCCommunity(
         }
     }
 
+    /**
+     *This function is invoked when the EVA receive operation progresses with the provided information
+     * It logs the progress of the receive operation with the provided information.
+     * @param peer peer involved in callback
+     * @param info additional information associated with send operation
+     * @param progress the progress details of the receive operation
+     */
     private fun onEVAReceiveProgressCallback(
         peer: Peer,
         info: String,
@@ -366,6 +421,15 @@ class FOCCommunity(
         }
     }
 
+    /**
+     *This function is invoked when the EVA receive operation to a peer is completed. It logs the
+     *completion of the receive operation with the provided information.
+     * @param peer peer involved in callback
+     * @param info additional information associated with send operation
+     * @param id The ID associated with the receive operation.
+     * @param data The data received in the EVA operation, if available.
+     *
+     */
     private fun onEVAReceiveCompleteCallback(
         peer: Peer,
         info: String,
@@ -392,6 +456,12 @@ class FOCCommunity(
         }
     }
 
+    /**
+     *This function is invoked when an error occurs during an EVA operation with the specified
+     *peer and exception details. It logs the error information and invokes the registered callback
+     * @param peer peer involved in callback
+     * @param exception the exception that occurred
+     */
     private fun onEVAErrorCallback(
         peer: Peer,
         exception: TransferException
