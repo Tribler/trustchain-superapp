@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
 import nl.tudelft.ipv8.IPv4Address
@@ -17,6 +18,7 @@ import nl.tudelft.ipv8.messaging.utp.UtpEndpoint.Companion.BUFFER_SIZE
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentUtpTestBinding
+import nl.tudelft.trustchain.debug.databinding.PeerComponentBinding
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import kotlin.random.Random
@@ -40,6 +42,10 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
             println("Adding peer " + peer.toString())
             val layoutInflater: LayoutInflater = this.context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val v: View = layoutInflater.inflate(R.layout.peer_component, null)
+
+            val peerComponentBinding = PeerComponentBinding.bind(v)
+            peerComponentBinding.peerIP.setText(peer.address.ip)
+            peerComponentBinding.peerPublicKey.setText(peer.publicKey.toString().substring(0, 6))
 
             viewToPeerMap[v] = peer
 
@@ -131,7 +137,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                 val address = viewToPeerMap[peer]?.address.toString().split(":")
                 if (address.size == 2) {
                     val ip = address[0]
-                    val port = address[1].toIntOrNull() ?: MIN_PORT
+                    val port = 13377 // address[1].toIntOrNull() ?: MIN_PORT
                     lifecycleScope.launchWhenCreated {
                         sendTestData(ip, port)
                     }
