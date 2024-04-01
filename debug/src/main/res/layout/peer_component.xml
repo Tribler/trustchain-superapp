@@ -10,7 +10,7 @@
         android:id="@+id/peerStatusIndicator"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:background="@drawable/indicator_online"
+        android:background="@drawable/indicator_green"
         android:layout_margin="5dp">
     </View>
 
@@ -36,7 +36,7 @@
                 android:textStyle="bold"/>
 
             <TextView
-                android:id="@+id/peerID"
+                android:id="@+id/peerIP"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"

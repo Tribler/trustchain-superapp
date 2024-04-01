@@ -1,12 +1,14 @@
 package nl.tudelft.trustchain.debug
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+
 import android.widget.TextView
 import android.app.Activity;
 import android.os.SystemClock
@@ -22,6 +24,7 @@ import nl.tudelft.ipv8.messaging.utp.UtpEndpoint.Companion.BUFFER_SIZE
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentUtpTestBinding
+import nl.tudelft.trustchain.debug.databinding.PeerComponentBinding
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.security.MessageDigest
@@ -38,6 +41,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 
     private val peers : MutableList<Peer> = mutableListOf()
 
+    private val viewToPeerMap: MutableMap<View, Peer> = mutableMapOf()
     private val logMap : MutableMap<Short, TextView> = HashMap();
     private val connectionInfoMap : MutableMap<Short, ConnectionInfo> = HashMap();
 
@@ -51,6 +55,12 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
             println("Adding peer " + peer.toString())
             val layoutInflater: LayoutInflater = this.context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val v: View = layoutInflater.inflate(R.layout.peer_component, null)
+
+            val peerComponentBinding = PeerComponentBinding.bind(v)
+            peerComponentBinding.peerIP.setText(peer.address.ip)
+            peerComponentBinding.peerPublicKey.setText(peer.publicKey.toString().substring(0, 6))
+
+            viewToPeerMap[v] = peer
 
             binding.peerListLayout.addView(v, ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -114,12 +124,11 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
             }
         }
 
-        binding.receiveTestPacket.setOnClickListener {
-            lifecycleScope.launchWhenCreated {
-                fetchData()
-            }
-
-        }
+//        binding.receiveTestPacket.setOnClickListener {
+//            lifecycleScope.launchWhenCreated {
+//                fetchData()
+//            }
+//        }
 
         binding.sendTestPacket.setOnClickListener {
 //            val address = binding.editIPforUTP.text.toString().split(":")
@@ -134,11 +143,20 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
             }
         }
 
-//       binding.peerListLayout.children.iterator()
-
+        // Send data after clicking on peer component.
         for (peer in binding.peerListLayout.children.iterator()) {
             peer.setOnClickListener {
-                println("click")
+                val address = viewToPeerMap[peer]?.address.toString().split(":")
+                if (address.size == 2) {
+                    val ip = address[0]
+                    val port = 13377 // address[1].toIntOrNull() ?: MIN_PORT
+                    lifecycleScope.launchWhenCreated {
+                        sendTestData(ip, port)
+                    }
+                }
+                println("sending data to peer $address")
+                updatePeerStatus(viewToPeerMap[peer])
+
             }
         }
 
@@ -304,6 +322,19 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_utp_test, container, false)
+    }
+
+    private fun updatePeerStatus(peer: Peer?) {
+        val statusIndicator = findStatusIndicator(peer)
+        // Change status indicator depending on peer status.
+        // statusIndicator.setBackgroundResource(R.drawable.indicator_yellow)
+    }
+
+    private fun findStatusIndicator(peer: Peer?): View {
+        // Find the status indicator in the UI for this peer
+        val peerLayout = viewToPeerMap.entries.find { it.value == peer }?.key ?: error("Layout for peer $peer not found")
+        val statusIndicator = peerLayout?.findViewById<View>(R.id.peerStatusIndicator) ?: error("Status indicator in layout for peer $peer not found")
+        return statusIndicator
     }
 
     private fun generateRandomDataBuffer(): ByteBuffer {

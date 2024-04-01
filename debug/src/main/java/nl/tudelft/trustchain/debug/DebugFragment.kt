@@ -190,9 +190,9 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
             view.text = address.toString()
             val resId =
                 if (isAlive) {
-                    R.drawable.indicator_online
+                    R.drawable.indicator_green
                 } else {
-                    R.drawable.indicator_offline
+                    R.drawable.indicator_red
                 }
             val drawable = resources.getDrawable(resId, null)
             view.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null)
