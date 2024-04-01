@@ -200,7 +200,8 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 
     private fun updatePeerStatus(peer: Peer?) {
         val statusIndicator = findStatusIndicator(peer)
-        statusIndicator.setBackgroundResource(R.drawable.indicator_yellow)
+        // Change status indicator depending on peer status.
+        // statusIndicator.setBackgroundResource(R.drawable.indicator_yellow)
     }
 
     private fun findStatusIndicator(peer: Peer?): View {
