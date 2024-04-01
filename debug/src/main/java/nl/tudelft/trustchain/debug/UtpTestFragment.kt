@@ -31,6 +31,8 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 
     private val peers : MutableList<Peer> = mutableListOf()
 
+    private val viewToPeerMap: MutableMap<View, Peer> = mutableMapOf()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -40,6 +42,8 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
             println("Adding peer " + peer.toString())
             val layoutInflater: LayoutInflater = this.context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val v: View = layoutInflater.inflate(R.layout.peer_component, null)
+
+            viewToPeerMap[v] = peer
 
             binding.peerListLayout.addView(v, ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -127,7 +131,16 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 
         for (peer in binding.peerListLayout.children.iterator()) {
             peer.setOnClickListener {
-                println("click")
+                val address = viewToPeerMap[peer]?.address.toString().split(":")
+                if (address.size == 2) {
+                    val ip = address[0]
+                    val port = address[1].toIntOrNull() ?: MIN_PORT
+                    lifecycleScope.launchWhenCreated {
+                        sendTestData(ip, port)
+                    }
+                }
+                println("sending data to peer $address")
+
             }
         }
     }
