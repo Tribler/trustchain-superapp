@@ -10,7 +10,7 @@
         android:id="@+id/peerStatusIndicator"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:background="@drawable/indicator_online"
+        android:background="@drawable/indicator_green"
         android:layout_margin="5dp">
     </View>
 

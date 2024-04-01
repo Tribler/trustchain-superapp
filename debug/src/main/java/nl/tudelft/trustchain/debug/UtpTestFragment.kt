@@ -1,15 +1,13 @@
 package nl.tudelft.trustchain.debug
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.TextView
-import androidx.core.content.getSystemService
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
 import nl.tudelft.ipv8.IPv4Address
@@ -127,8 +125,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 //            }
         }
 
-//       binding.peerListLayout.children.iterator()
-
+        // Send data after clicking on peer component.
         for (peer in binding.peerListLayout.children.iterator()) {
             peer.setOnClickListener {
                 val address = viewToPeerMap[peer]?.address.toString().split(":")
@@ -140,6 +137,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                     }
                 }
                 println("sending data to peer $address")
+                updatePeerStatus(viewToPeerMap[peer])
 
             }
         }
@@ -198,6 +196,18 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_utp_test, container, false)
+    }
+
+    private fun updatePeerStatus(peer: Peer?) {
+        val statusIndicator = findStatusIndicator(peer)
+        statusIndicator.setBackgroundResource(R.drawable.indicator_yellow)
+    }
+
+    private fun findStatusIndicator(peer: Peer?): View {
+        // Find the status indicator in the UI for this peer
+        val peerLayout = viewToPeerMap.entries.find { it.value == peer }?.key ?: error("Layout for peer $peer not found")
+        val statusIndicator = peerLayout?.findViewById<View>(R.id.peerStatusIndicator) ?: error("Status indicator in layout for peer $peer not found")
+        return statusIndicator
     }
 
     private fun generateRandomDataBuffer(): ByteBuffer {

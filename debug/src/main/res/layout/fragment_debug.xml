@@ -32,7 +32,7 @@
                     style="@style/TextAppearance.MaterialComponents.Body2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:drawableEnd="@drawable/indicator_offline"
+                    android:drawableEnd="@drawable/indicator_red"
                     android:drawablePadding="8dp"
                     android:text="0.0.0.0:0"
                     app:fontFamily="monospace" />
