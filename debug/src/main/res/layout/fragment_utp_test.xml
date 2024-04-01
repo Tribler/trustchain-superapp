@@ -92,36 +92,43 @@
             android:textSize="20sp" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/peerListLayout"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:padding="0dp">
-
-        <include
-            android:id="@+id/peerComponent"
-            android:layout_width="wrap_content"
+        android:layout_height="200dp">
+        <LinearLayout
+            android:id="@+id/peerListLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            layout="@layout/peer_component">
-        </include>
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:padding="0dp">
 
-    </LinearLayout>
+            <include
+                android:id="@+id/peerComponent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                layout="@layout/peer_component">
+            </include>
+
+
+        </LinearLayout>
+    </ScrollView>
 
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="fill_parent"
         android:layout_marginTop="16dp">
 
-        <TextView
-            android:id="@+id/logUTP"
+        <LinearLayout
+            android:id="@+id/connectionLogLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:textSize="20sp" />
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:padding="0dp">
+
+        </LinearLayout>
     </ScrollView>
 
 
