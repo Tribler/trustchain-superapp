@@ -113,10 +113,11 @@ object FOCVoteTracker {
      */
     fun mergeVoteMaps(incomingMap: HashMap<String, HashSet<FOCSignedVote>>) {
         for ((key, votes) in incomingMap) {
+            val checkedVotes = votes.filter { signedVote -> checkAndGet(signedVote) != null }
             if (voteMap.containsKey(key)) {
-                voteMap[key]?.addAll(votes)
+                voteMap[key]?.addAll(checkedVotes)
             } else { // this means votes from an apk can be received before the apk itself.
-                voteMap[key] = votes
+                voteMap[key] = HashSet(checkedVotes)
             }
         }
         this.checkThresholds()

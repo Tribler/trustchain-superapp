@@ -1,19 +1,22 @@
 package nl.tudelft.trustchain.community
 
+import android.util.Log
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.verify
+import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.foc.FOCVoteTracker
 import nl.tudelft.trustchain.foc.community.FOCSignedVote
 import nl.tudelft.trustchain.foc.community.FOCVote
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
-import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import org.apache.commons.lang3.SerializationUtils
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Test
 import java.io.File
-import io.mockk.*
-import android.util.Log
+import java.util.Collections
 import java.util.UUID
 
 class FOCVoteTrackerTest {
@@ -115,6 +118,24 @@ class FOCVoteTrackerTest {
         voteTracker.mergeVoteMaps(voteMap2)
         verify { Log.i("pull-based", "Merged maps") }
         assertEquals(voteMap3, voteTracker.getCurrentState())
+    }
+
+    @Test
+    fun checkMergeVoteMapsWrongSignature() {
+        mockkStatic(android.util.Log::class)
+        every { Log.i(any(), any()) } returns 1
+        val voteMap: HashMap<String, HashSet<FOCSignedVote>> = HashMap()
+        voteMap["test.apk"] = HashSet()
+
+        // Create incorrectly signed votes
+        val signedVote1 = FOCSignedVote(UUID.randomUUID(), baseVote1, signKey1, privateKey2.pub().keyToBin())
+        val signedVote2 = FOCSignedVote(UUID.randomUUID(), baseVote2, signKey2, privateKey1.pub().keyToBin())
+
+        voteMap["test.apk"]?.add(signedVote1)
+        voteMap["test.apk"]?.add(signedVote2)
+        voteTracker.mergeVoteMaps(voteMap)
+        verify { Log.i("pull-based", "Merged maps") }
+        assertEquals(Collections.emptySet<FOCSignedVote>(), voteTracker.getCurrentState()["test.apk"])
     }
 
     @Test
