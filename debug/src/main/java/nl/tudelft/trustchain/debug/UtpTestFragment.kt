@@ -301,14 +301,8 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 //            // Send CSV file
 //            val buffer = ByteBuffer.allocate(BUFFER_SIZE)
 //            buffer.put(csv3.readBytes())
-        if (ipv8Mode) {
-            val peer = peers[binding.IPvSpinner.selectedItemId.toInt()]
-            Log.d("uTP Client", "Sending data to $peer")
-            getDemoCommunity().endpoint.utpEndpoint?.send(peer, csv13.readBytes())
-        } else {
-            Log.d("uTP Client", "Sending data to $ip:$port")
-            getDemoCommunity().endpoint.utpEndpoint?.send(IPv4Address(ip, port), csv13.readBytes())
-        }
+        Log.d("uTP Client", "Sending data to $ip:$port")
+        getDemoCommunity().endpoint.utpEndpoint?.send(IPv4Address(ip, port), csv3.readBytes())
         csv3.close()
         csv13.close()
 
