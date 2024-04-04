@@ -13,6 +13,7 @@
     <string name="downloadProgressPercentage">%1$s</string>
     <string name="failedCounter">Failed torrent counter map: %1$s</string>
     <string name="evaRetries">Eva retries: %1$d</string>
+    <string name="installButton">Install</string>
     <string name="cancelButton">Cancel</string>
     <string name="downloadButton">Download</string>
     <string name="deleteButton">Delete</string>

@@ -111,6 +111,8 @@ dependencies {
     implementation files('libs/jlibtorrent-android-arm-' + jlibtorrent_version + '.jar')
     implementation files('libs/jlibtorrent-android-x86-' + jlibtorrent_version + '.jar')
     implementation files('libs/jlibtorrent-android-x86_64-' + jlibtorrent_version + '.jar')
+    implementation 'androidx.datastore:datastore-core:1.0.0'
+    implementation 'androidx.datastore:datastore-preferences-core:1.0.0'
 
     // Testing
     testImplementation "junit:junit:$junit_version"

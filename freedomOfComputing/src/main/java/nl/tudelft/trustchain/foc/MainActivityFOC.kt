@@ -34,7 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.trustchain.common.freedomOfComputing.InstalledApps
 import nl.tudelft.trustchain.foc.community.FOCCommunity
 import nl.tudelft.trustchain.foc.community.FOCVote
 import nl.tudelft.trustchain.foc.community.signVote
@@ -51,6 +51,7 @@ import java.io.IOException
 import java.io.OutputStream
 import java.net.URL
 import java.net.URLConnection
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import java.util.UUID
 
 const val CONNECTION_TIMEOUT: Int = 10000
@@ -400,10 +401,14 @@ open class MainActivityFOC : AppCompatActivity() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.createAlertDialogTitle))
         builder.setMessage(getString(R.string.createAlertDialogMsg))
-        builder.setPositiveButton(getString(R.string.cancelButton), null)
+        builder.setPositiveButton(getString(R.string.installButton), { _, _ -> addToHome(fileName) })
         builder.setNeutralButton(getString(R.string.deleteButton)) { _, _ -> deleteApkFile(fileName) }
         builder.setNegativeButton(getString(R.string.createButton)) { _, _ -> createTorrent(fileName) }
         builder.show()
+    }
+
+    private fun addToHome(fileName: String) {
+        InstalledApps.addApp(fileName.removeSuffix(APK_DOT_EXTENSION))
     }
 
     /**

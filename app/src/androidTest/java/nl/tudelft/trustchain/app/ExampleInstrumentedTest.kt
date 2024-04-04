@@ -17,6 +17,10 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("nl.tudelft.trustchain", appContext.packageName)
+        if (appContext.packageName.endsWith("debug")) {
+            assertEquals("nl.tudelft.trustchain.debug", appContext.packageName)
+        } else {
+            assertEquals("nl.tudelft.trustchain", appContext.packageName)
+        }
     }
 }

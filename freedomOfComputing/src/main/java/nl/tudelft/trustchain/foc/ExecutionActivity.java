@@ -1,8 +1,10 @@
 package nl.tudelft.trustchain.foc;
 
+import static nl.tudelft.trustchain.foc.util.ExtensionUtils.DATA_DOT_EXTENSION;
+import static nl.tudelft.trustchain.foc.util.ExtensionUtils.DEX_EXTENSION;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -10,13 +12,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-import androidx.annotation.RequiresApi;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import dalvik.system.DexClassLoader;
-import dalvik.system.DexFile;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,10 +26,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.Objects;
-import nl.tudelft.trustchain.foc.databinding.ActivityExecutionBinding;
 
-import static nl.tudelft.trustchain.foc.util.ExtensionUtils.DATA_DOT_EXTENSION;
-import static nl.tudelft.trustchain.foc.util.ExtensionUtils.DEX_EXTENSION;
+import dalvik.system.DexClassLoader;
+import dalvik.system.DexFile;
+import nl.tudelft.trustchain.common.freedomOfComputing.InstalledApps;
+import nl.tudelft.trustchain.foc.databinding.ActivityExecutionBinding;
 
 public class ExecutionActivity extends AppCompatActivity {
 

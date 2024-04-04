@@ -23,7 +23,9 @@ class DashboardActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        adapter.updateItems((application as TrustChainApplication).appLoader.preferredApps)
+        val appLoader = (application as TrustChainApplication).appLoader
+        appLoader.update()
+        adapter.updateItems(appLoader.preferredApps)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,7 +48,7 @@ class DashboardActivity : AppCompatActivity() {
 
         adapter.registerRenderer(
             DashboardItemRenderer {
-                val intent = Intent(this, it.app.activity)
+                val intent = it.app.getIntent(this)
                 startActivity(intent)
             }
         )
