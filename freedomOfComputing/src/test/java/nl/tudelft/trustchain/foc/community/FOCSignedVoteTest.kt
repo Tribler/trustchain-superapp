@@ -9,6 +9,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.util.UUID
 
 class FOCSignedVoteTest {
     private lateinit var privateKey1: PrivateKey
@@ -32,7 +33,8 @@ class FOCSignedVoteTest {
     fun checkSignatureIncorrect() {
         val signKey2 = privateKey2.sign(SerializationUtils.serialize(baseVote))
         // We create a vote that is signed wit private key 1 but public key 2 is attached
-        val signedVote = FOCSignedVote(baseVote, signKey2, privateKey1.pub().keyToBin())
+        val signedVote =
+            FOCSignedVote(UUID.randomUUID(), baseVote, signKey2, privateKey1.pub().keyToBin())
 
         assertFalse(signedVote.checkSignature())
     }
@@ -48,7 +50,8 @@ class FOCSignedVoteTest {
     fun checkAndGetWrong() {
         val signKey2 = privateKey2.sign(SerializationUtils.serialize(baseVote))
         // We create a vote that is signed wit private key 1 but public key 2 is attached
-        val signedVote = FOCSignedVote(baseVote, signKey2, privateKey1.pub().keyToBin())
+        val signedVote =
+            FOCSignedVote(UUID.randomUUID(), baseVote, signKey2, privateKey1.pub().keyToBin())
 
         assertNull(signedVote.checkAndGet())
     }

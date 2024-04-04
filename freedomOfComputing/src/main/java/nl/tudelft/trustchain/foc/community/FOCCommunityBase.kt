@@ -4,6 +4,7 @@ import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
+import java.util.UUID
 import kotlin.collections.ArrayList
 
 abstract class FOCCommunityBase : Community() {
@@ -23,7 +24,7 @@ abstract class FOCCommunityBase : Community() {
         ttl: Int
     )
 
-    abstract fun sendPullVotesMessage()
+    abstract fun sendPullRequest(ids: HashSet<UUID>)
 
     abstract fun sendAppRequest(
         torrentInfoHash: String,

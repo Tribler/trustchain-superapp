@@ -5,6 +5,7 @@ import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
 import java.io.Serializable
 import org.apache.commons.lang3.SerializationUtils
+import java.util.UUID
 
 fun signVote(
     vote: FOCVote,
@@ -13,13 +14,13 @@ fun signVote(
     val pubKey = myPrivateKey.pub()
     val voteSerialized = SerializationUtils.serialize(vote)
     val signature = myPrivateKey.sign(voteSerialized)
-    return FOCSignedVote(vote, signature, pubKey.keyToBin())
+    return FOCSignedVote(UUID.randomUUID(), vote, signature, pubKey.keyToBin())
 }
 
 /**
  * Wrapper class that holds the regular vote objects this class contains the signature of each vote
  */
-data class FOCSignedVote(val vote: FOCVote, private val signature: ByteArray, val publicKeyBin: ByteArray) : Serializable {
+data class FOCSignedVote(val id: UUID, val vote: FOCVote, private val signature: ByteArray, val publicKeyBin: ByteArray) : Serializable {
     /**
      * Constructs a [PublicKey] and returns it
      */

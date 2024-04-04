@@ -14,6 +14,7 @@ import org.junit.Before
 import java.io.File
 import io.mockk.*
 import android.util.Log
+import java.util.UUID
 
 class FOCVoteTrackerTest {
     private val cryptoProvider = JavaCryptoProvider
@@ -23,9 +24,11 @@ class FOCVoteTrackerTest {
     private val baseVote2 = FOCVote("0001", false)
     private var voteMap2: HashMap<String, HashSet<FOCSignedVote>> = HashMap()
     private val signKey1 = privateKey1.sign(SerializationUtils.serialize(baseVote1))
-    private val signedVote1 = FOCSignedVote(baseVote1, signKey1, privateKey1.pub().keyToBin())
+    private val signedVote1 =
+        FOCSignedVote(UUID.randomUUID(), baseVote1, signKey1, privateKey1.pub().keyToBin())
     private val signKey2 = privateKey2.sign(SerializationUtils.serialize(baseVote2))
-    private val signedVote2 = FOCSignedVote(baseVote2, signKey2, privateKey2.pub().keyToBin())
+    private val signedVote2 =
+        FOCSignedVote(UUID.randomUUID(), baseVote2, signKey2, privateKey2.pub().keyToBin())
     private val voteTracker: FOCVoteTracker = FOCVoteTracker
 
     @Before
@@ -62,7 +65,8 @@ class FOCVoteTrackerTest {
     fun voteWrongSignature() {
         mockkStatic(android.util.Log::class)
         every { Log.w(any(), any(String::class)) } returns 1
-        val signedVote = FOCSignedVote(baseVote1, signKey1, privateKey2.pub().keyToBin())
+        val signedVote =
+            FOCSignedVote(UUID.randomUUID(), baseVote1, signKey1, privateKey2.pub().keyToBin())
         voteTracker.vote("test", signedVote)
         verify { Log.w("vote-gossip", "received vote with invalid pub-key signature combination!") }
     }
