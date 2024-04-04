@@ -75,6 +75,18 @@ dependencies {
     implementation(project(':ipv8')) {
         exclude module: 'lazysodium-java'
     }
+    testImplementation "junit:junit:$junit_version"
+
+    // Transitive dependencies
+    implementation "androidx.core:core:$core_version"
+    implementation "androidx.fragment:fragment:$fragment_version"
+    implementation "androidx.lifecycle:lifecycle-common:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation "androidx.navigation:navigation-fragment:$nav_version"
+    implementation "androidx.navigation:navigation-runtime:$nav_version"
+    implementation(project(':ipv8')) {
+        exclude module: 'lazysodium-java'
+    }
     implementation 'com.github.iiljkic:utp4j:4119f7d268e927cd32bfc44e53f84bb38e7a1264'
 
 }
