@@ -302,7 +302,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 //            val buffer = ByteBuffer.allocate(BUFFER_SIZE)
 //            buffer.put(csv3.readBytes())
         Log.d("uTP Client", "Sending data to $ip:$port")
-        getDemoCommunity().endpoint.utpEndpoint?.send(IPv4Address(ip, port), csv3.readBytes())
+        getDemoCommunity().endpoint.udpEndpoint?.sendUtp(IPv4Address(ip, port), csv3.readBytes())
         csv3.close()
         csv13.close()
 
