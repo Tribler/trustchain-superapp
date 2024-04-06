@@ -19,6 +19,8 @@ import net.utp4j.data.UtpPacket
 import net.utp4j.data.UtpPacketUtils
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.messaging.EndpointListener
+import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.utp.UtpEndpoint
 import nl.tudelft.ipv8.messaging.utp.UtpEndpoint.Companion.BUFFER_SIZE
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -131,16 +133,20 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 //                fetchData()
 //            }
 //        }
+        println("Open by default: " + endpoint?.isOpen())
+        println("Server socket listening on port: " + endpoint)
+//        endpoint?.open()
 
         binding.sendTestPacket.setOnClickListener {
 //            val address = binding.editIPforUTP.text.toString().split(":")
+            val myWan = getDemoCommunity().myEstimatedLan
             val address = arrayOf("localhost", "13377")
             if (address.size == 2) {
                 val ip = address[0]
                 val port = address[1].toIntOrNull() ?: MIN_PORT
 
                 lifecycleScope.launchWhenCreated {
-                    sendTestData(ip, port)
+                    sendTestData(myWan.ip, myWan.port)
                 }
             }
         }
@@ -162,7 +168,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
             }
         }
 
-        endpoint?.getUtpServerSocket()?.packetListener = {packet ->
+        getDemoCommunity().endpoint.udpEndpoint?.utpIPv8Endpoint?.rawPacketListeners?.add { packet ->
             val utpPacket = UtpPacketUtils.extractUtpPacket(packet)
             if (UtpPacketUtils.isSynPkt(utpPacket)) {
                 startConnectionLog(utpPacket.connectionId, packet.address)
@@ -172,6 +178,17 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                 updateConnectionLog(utpPacket, packet.address)
             }
         }
+
+//        getDemoCommunity().endpoint.udpEndpoint?.addListener(object : EndpointListener {
+//            override fun onPacket(packet: Packet) {
+//                println("receive udp pkt")
+//            }
+//
+//            override fun onEstimatedLanChanged(address: IPv4Address) {
+//                println("lan changes")
+//            }
+//
+//        })
 //
 //        fixedRateTimer("logUpdateTimer", daemon = true, period = 500, action = {
 //            updateConnectionLogs()

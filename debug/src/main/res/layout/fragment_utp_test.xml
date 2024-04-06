@@ -94,15 +94,15 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="500dp">
+        android:layout_height="242dp">
+
         <LinearLayout
             android:id="@+id/peerListLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:gravity="center_vertical"
-            android:padding="0dp">
-        </LinearLayout>
+            android:orientation="vertical"
+            android:padding="0dp"></LinearLayout>
     </ScrollView>
 
     <ScrollView
