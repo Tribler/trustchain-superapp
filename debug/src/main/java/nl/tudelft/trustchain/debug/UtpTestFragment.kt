@@ -134,37 +134,26 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 //            }
 //        }
         println("Open by default: " + endpoint?.isOpen())
-        println("Server socket listening on port: " + endpoint)
+        println("Server socket listening on port: " + endpoint?.port)
 //        endpoint?.open()
 
         binding.sendTestPacket.setOnClickListener {
-//            val address = binding.editIPforUTP.text.toString().split(":")
             val myWan = getDemoCommunity().myEstimatedLan
-            val address = arrayOf("localhost", "13377")
-            if (address.size == 2) {
-                val ip = address[0]
-                val port = address[1].toIntOrNull() ?: MIN_PORT
-
-                lifecycleScope.launchWhenCreated {
-                    sendTestData(myWan.ip, myWan.port)
-                }
+            lifecycleScope.launchWhenCreated {
+                sendTestData(myWan.ip, myWan.port)
             }
         }
 
         // Send data after clicking on peer component.
-        for (peer in binding.peerListLayout.children.iterator()) {
-            peer.setOnClickListener {
-                val address = viewToPeerMap[peer]?.address.toString().split(":")
-                if (address.size == 2) {
-                    val ip = address[0]
-                    val port = 13377 // address[1].toIntOrNull() ?: MIN_PORT
-                    lifecycleScope.launchWhenCreated {
-                        sendTestData(ip, port)
-                    }
+        for (peerView in binding.peerListLayout.children.iterator()) {
+            peerView.setOnClickListener {
+                val peer = viewToPeerMap[peerView] ?: error("Peer not found for view")
+                val address = peer.address.toString()
+                lifecycleScope.launchWhenCreated {
+                    sendTestData(peer)
                 }
                 println("sending data to peer $address")
-                updatePeerStatus(viewToPeerMap[peer])
-
+                updatePeerStatus(peer)
             }
         }
 
@@ -307,7 +296,9 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
         }
     }
 
-
+    private fun sendTestData(peer: Peer) {
+        sendTestData(peer.address.ip, peer.address.port)
+    }
     private fun sendTestData(ip: String, port: Int) {
 
         val csv3 = resources.openRawResource(R.raw.votes3)
