@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.debug
 
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,19 +9,15 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 
 import android.widget.TextView
-import android.app.Activity;
 import android.os.SystemClock
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
-import net.utp4j.channels.impl.read.UtpReadingRunnable
 import net.utp4j.data.UtpPacket
 import net.utp4j.data.UtpPacketUtils
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.messaging.EndpointListener
-import nl.tudelft.ipv8.messaging.Packet
-import nl.tudelft.ipv8.messaging.utp.UtpEndpoint
-import nl.tudelft.ipv8.messaging.utp.UtpEndpoint.Companion.BUFFER_SIZE
+import nl.tudelft.ipv8.messaging.utp.UtpIPv8Endpoint
+import nl.tudelft.ipv8.messaging.utp.UtpIPv8Endpoint.Companion.BUFFER_SIZE
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentUtpTestBinding
@@ -30,18 +25,15 @@ import nl.tudelft.trustchain.debug.databinding.PeerComponentBinding
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.security.MessageDigest
-import java.sql.Connection
-import kotlin.concurrent.fixedRateTimer
 import kotlin.random.Random
-import kotlin.system.measureTimeMillis
 
 
 class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
     private val binding by viewBinding(FragmentUtpTestBinding::bind)
 
-    private val endpoint: UtpEndpoint? = getDemoCommunity().endpoint.utpEndpoint
-
     private val peers : MutableList<Peer> = mutableListOf()
+
+    private val endpoint: UtpIPv8Endpoint? = getDemoCommunity().endpoint.udpEndpoint?.utpIPv8Endpoint
 
     private var ipv8Mode : Boolean = false
     private val viewToPeerMap: MutableMap<View, Peer> = mutableMapOf()
@@ -56,7 +48,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
         getPeers()
 
         for (peer in peers) {
-            println("Adding peer " + peer.toString())
+            Log.d(LOG_TAG, "Adding peer " + peer.toString())
             val layoutInflater: LayoutInflater = this.context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val v: View = layoutInflater.inflate(R.layout.peer_component, null)
 
@@ -71,30 +63,6 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ))
         }
-
-        // IP Selection
-//        binding.IPvToggleSwitch.setOnClickListener {
-//            if (binding.IPvToggleSwitch.isChecked) {
-//                // IPv8 peers
-//                binding.IPvSpinner.isEnabled = true
-//                binding.editIPforUTP.isEnabled = false
-//
-//
-//                binding.IPvSpinner.adapter = ArrayAdapter(
-//                    it.context,
-//                    android.R.layout.simple_spinner_item,
-//                    peers
-//                )
-//            } else {
-//                // Usual IPv4 address
-//                binding.IPvSpinner.isEnabled = false
-//                binding.editIPforUTP.isEnabled = true
-//
-//                // Placeholder data
-//                binding.editIPforUTP.text = Editable.Factory.getInstance().newEditable("192.168.0.101:13377")
-//
-//            }
-//        }
 
         // Data selection
         // Named resources
@@ -128,15 +96,6 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
             }
         }
 
-//        binding.receiveTestPacket.setOnClickListener {
-//            lifecycleScope.launchWhenCreated {
-//                fetchData()
-//            }
-//        }
-        println("Open by default: " + endpoint?.isOpen())
-        println("Server socket listening on port: " + endpoint?.port)
-//        endpoint?.open()
-
         binding.sendTestPacket.setOnClickListener {
             val myWan = getDemoCommunity().myEstimatedLan
             lifecycleScope.launchWhenCreated {
@@ -152,7 +111,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
                 lifecycleScope.launchWhenCreated {
                     sendTestData(peer)
                 }
-                println("sending data to peer $address")
+                Log.d(LOG_TAG,"sending data to peer $address")
                 updatePeerStatus(peer)
             }
         }
@@ -277,30 +236,10 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
         }
     }
 
-    private fun fetchData() {
-
-        val data: String
-
-        if (endpoint?.listener!!.queue.size > 0) {
-            data = String(endpoint.listener.queue.removeFirst())
-            Log.d("uTP Client", "Received data!")
-        } else {
-            data = "No data received!"
-            Log.d("uTP Client", "No data received!")
-        }
-
-        view?.post {
-//            val time = (endTime - startTime) / 1000
-//            val speed = Formatter.formatFileSize(requireView().context, (BUFFER_SIZE / time))
-//            binding.logUTP.text = data.takeLast(2000)
-        }
-    }
-
     private fun sendTestData(peer: Peer) {
         sendTestData(peer.address.ip, peer.address.port)
     }
     private fun sendTestData(ip: String, port: Int) {
-
         val csv3 = resources.openRawResource(R.raw.votes3)
         val csv13 = resources.openRawResource(R.raw.votes13)
 
@@ -366,6 +305,7 @@ class UtpTestFragment : BaseFragment(R.layout.fragment_utp_test) {
 
     companion object {
         const val MIN_PORT = 1024
+        const val LOG_TAG = "uTP Debug"
     }
 
     private data class ConnectionInfo(val source: InetAddress, val connectionStartTimestamp: Long, var dataTransferred: Int)
