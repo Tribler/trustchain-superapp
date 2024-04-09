@@ -76,7 +76,6 @@ dependencies {
         exclude module: 'lazysodium-java'
     }
     implementation 'com.github.iiljkic:utp4j:4119f7d268e927cd32bfc44e53f84bb38e7a1264'
-
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
