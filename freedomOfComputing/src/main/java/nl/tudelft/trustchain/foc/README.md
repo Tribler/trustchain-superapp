@@ -142,13 +142,31 @@ within the community.
 ### Executing the downloaded apk
 
 The user can press the displayed buttons containing the name of the specific .apk to execute it.
-<img height="600" src="../../../../../../../../doc/freedomOfComputing/run_search_apk.gif" alt="GIF displaying how to create torrents from apks">
+<img height="600" src="../../../../../../../../doc/freedomOfComputing/run_search_apk.gif" alt="GIF displaying how to execute apks">
 
 
 ### Voting 
-# todo 
+A new component to the FOC superapp is the voting. When a user first joins the FOC community, or opens the FOC community screen
+, it makes a pull request to the other peers in the community asking for votes on apks it does not have. These votes are then gossiped
+to the user and is updated on the screen. The gif below displays the first time a new user joins the FOC community. The default 
+search.apk is already loaded in but the two new apks with their associated votes have been gossiped. 
 
-### Voting Gossiping 
-# todo (push based and pull based)
+<img height="600" src="../../../../../../../../doc/freedomOfComputing/pull_based.gif" alt="GIF displaying pull based gossip">
+
+When a user is using the FOC community app and peers are voting for apks. The new votes are pushed to the user using "hot potato"
+gossiping. 
+
+<img height="600" src="../../../../../../../../doc/freedomOfComputing/push_based.gif" alt="GIF displaying push based gossip">
+
+Once an apk reaches a certain threshold of positive votes (# of upvotes - # of downvotes), the apk will be moved to the user's 
+homescreen and they can execute the apk on the homescreen as well. The gif below displays this happening with a threshold of three
+votes. 
+
+<img height="600" src="../../../../../../../../doc/freedomOfComputing/add_to_homescreen.gif" alt="GIF displaying apk being added to homescreen">
+
+
+
+
+
 
 

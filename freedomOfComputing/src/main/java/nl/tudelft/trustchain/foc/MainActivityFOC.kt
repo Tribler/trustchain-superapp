@@ -101,7 +101,7 @@ open class MainActivityFOC : AppCompatActivity() {
                 toggleDebugPopUp(binding.debugLayout.debugPopUp)
             }
 
-            binding.torrentCount.text = getString(R.string.torrentCount, torrentAmount)
+            binding.torrentCount.text = getString(R.string.torrentCount, torrentMap.size)
             copyDefaultApp()
             showAllFiles()
 
@@ -316,7 +316,7 @@ open class MainActivityFOC : AppCompatActivity() {
         button.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
         button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
-        binding.torrentCount.text = getString(R.string.torrentCount, ++torrentAmount)
+        binding.torrentCount.text = getString(R.string.torrentCount, torrentMap.size)
         upVote?.setOnClickListener {
             placeVote(fileName, true)
             upVote.text =
@@ -474,7 +474,7 @@ open class MainActivityFOC : AppCompatActivity() {
                     val viewsToRemove = torrentMap[buttonToBeDeleted]
                     torrentMap.remove(buttonToBeDeleted)
                     torrentListView.removeView(viewsToRemove)
-                    binding.torrentCount.text = getString(R.string.torrentCount, --torrentAmount)
+                    binding.torrentCount.text = getString(R.string.torrentCount, torrentMap.size)
                     appGossiper?.removeTorrent(fileName)
                 }
             }
