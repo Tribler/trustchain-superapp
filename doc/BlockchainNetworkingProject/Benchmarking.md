@@ -4,6 +4,7 @@
     <img src="images/bm1.png" alt="Varying Package size/mode">
 </div>
 
+
 [Skipped packages needed before fast retransmit](images/bm2.png)
 
 [Target Delay of Congestion Control](images/bm3.png)
