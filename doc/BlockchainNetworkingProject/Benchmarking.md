@@ -1,6 +1,8 @@
 # Benchmarking
-Varying Package size/mode 
-<img src = "images/bm1.png">
+<div style="text-align: center;">
+    <p>Varying Package size/mode</p>
+    <img src="images/bm1.png" alt="Varying Package size/mode">
+</div>
 
 [Skipped packages needed before fast retransmit](images/bm2.png)
 
