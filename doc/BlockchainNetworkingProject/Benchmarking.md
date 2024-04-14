@@ -1,5 +1,6 @@
 # Benchmarking
-[Varying Package size/mode](images/bm1.png)
+Varying Package size/mode 
+<img src = "images/bm1.png">
 
 [Skipped packages needed before fast retransmit](images/bm2.png)
 
