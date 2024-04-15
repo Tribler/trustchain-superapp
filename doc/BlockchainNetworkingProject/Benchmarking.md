@@ -1,10 +1,10 @@
 # Benchmarking
 <div style="text-align: center;">
-    <p>Varying Package size/mode</p>
+    <p style="font-weight: bold;">Varying Package size/mode</p>
     <img src="images/bm1.png" alt="Varying Package size/mode"><br>
-    <p>Skipped packages needed before fast retransmit</p>
+    <p style="font-weight: bold;">Skipped packages needed before fast retransmit</p>
     <img src="images/bm2.png" alt="Skipped packages needed before fast retransmit"><br>
-    <p>Target Delay of Congestion Control</p>
+    <p style="font-weight: bold;">Target Delay of Congestion Control</p>
     <img src="images/bm3.png" alt="Target Delay of Congestion Control">
 </div>
 
@@ -22,9 +22,9 @@ Test performed with 1% package loss under 250 ms latency, transfer speed taken a
   - Likely congestion window too small -> congestion control not optimally configured for medium to large latencies
 
 <div style="text-align: center;">
-    <p>Example: fast retransmission Benchmark without latency</p>
+    <p style="font-weight: bold;">Example: fast retransmission Benchmark without latency</p>
     <img src="images/bm4.png" alt="Fast retransmission Benchmark without latency"><br>
-    <p>Example: same fast retransmission Benchmark with 50ms latency</p>
+    <p style="font-weight: bold;">Example: same fast retransmission Benchmark with 50ms latency</p>
     <img src="images/bm5.png" alt="Same fast retransmission Benchmark with 50ms latency"><br>
 </div>
 
@@ -40,11 +40,11 @@ Benchmark results (performed on 4mB file):
 (Benchmark script found [here](https://github.com/PieterCarton/UTPBenchmark/blob/186d5a8a10a0e6afb857330ed2d96cdbaac05663/benchmark.bash).)
 
 <div style="text-align: center;">
-    <p>At 500ms delay, with 10ms jitter and 1% pkt loss</p>
+    <p style="font-weight: bold;">At 500ms delay, with 10ms jitter and 1% pkt loss</p>
     <img src="images/bm6.png" alt="At 500ms delay, with 10ms jitter and 1% pkt loss"><br>
-    <p>At 50ms delay, with 2ms jitter and 1% pkt loss</p>
+    <p style="font-weight: bold;">At 50ms delay, with 2ms jitter and 1% pkt loss</p>
     <img src="images/bm7.png" alt="At 50ms delay, with 2ms jitter and 1% pkt loss"><br>
-    <p>At 0ms delay with 1% pkt loss</p>
+    <p style="font-weight: bold;">At 0ms delay with 1% pkt loss</p>
     <img src="images/bm8.png" alt="At 0ms delay with 1% pkt loss">
 </div>
 
@@ -54,6 +54,6 @@ Benchmark results (performed on 4mB file):
 - Some benchmarks were rerun with larger file sizes, effectiveness of boosting congestion window gain is decreased.
 
 <div style="text-align: center;">
-    <p>Example: Benchmark of transfer of 50mB file at 50ms latency</p>
+    <p style="font-weight: bold;">Example: Benchmark of transfer of 50mB file at 50ms latency</p>
     <img src="images/bm9.png" alt="Benchmark of transfer of 50mB file at 50ms latency"><br>
 </div>
