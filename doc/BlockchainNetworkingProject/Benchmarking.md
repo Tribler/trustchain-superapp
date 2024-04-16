@@ -1,4 +1,6 @@
 # Benchmarking
+To see details on the benchmarking code, how to run it, its configuration, etc., see the [Benchmarking](https://github.com/PieterCarton/UTPBenchmark/tree/186d5a8a10a0e6afb857330ed2d96cdbaac05663).
+
 <div style="text-align: center;">
     <p style="font-weight: bold;">Varying Package size/mode</p>
     <img src="images/bm1.png" alt="Varying Package size/mode"><br>
