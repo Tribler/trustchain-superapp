@@ -34,6 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.trustchain.common.freedomOfComputing.InstalledApps
 import nl.tudelft.trustchain.foc.community.FOCCommunity
 import nl.tudelft.trustchain.foc.community.FOCVote
@@ -51,7 +52,6 @@ import java.io.IOException
 import java.io.OutputStream
 import java.net.URL
 import java.net.URLConnection
-import nl.tudelft.ipv8.keyvault.PrivateKey
 import java.util.UUID
 
 const val CONNECTION_TIMEOUT: Int = 10000
@@ -321,11 +321,13 @@ open class MainActivityFOC : AppCompatActivity() {
             placeVote(fileName, true)
             upVote.text =
                 getString(R.string.upVote, voteTracker.getNumberOfVotes(fileName, true))
+            binding.debugLayout.numberVotesTotalCounter.text = getString(R.string.numberVotesTotal, voteTracker.getTotalNumberOfVotes())
         }
         downVote?.setOnClickListener {
             placeVote(fileName, false)
             downVote.text =
                 getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, false))
+            binding.debugLayout.numberVotesTotalCounter.text = getString(R.string.numberVotesTotal, voteTracker.getTotalNumberOfVotes())
         }
 
         button.setOnClickListener {
@@ -353,6 +355,7 @@ open class MainActivityFOC : AppCompatActivity() {
         downVote.text =
             getString(R.string.downVote, voteTracker.getNumberOfVotes(fileName, false))
         Log.i("vote-gossip", "Vote Count updated!")
+        binding.debugLayout.numberVotesTotalCounter.text = getString(R.string.numberVotesTotal, voteTracker.getTotalNumberOfVotes())
     }
 
     /**
@@ -667,5 +670,7 @@ open class MainActivityFOC : AppCompatActivity() {
             getString(R.string.evaRetries, appGossiper?.evaRetries)
         binding.debugLayout.failedCounter.text =
             getString(R.string.failedCounter, appGossiper?.failedTorrents.toString())
+        binding.debugLayout.numberVotesTotalCounter.text = getString(R.string.numberVotesTotal, voteTracker.getTotalNumberOfVotes())
+        binding.debugLayout.thresholdForInstall.text = getString(R.string.thresholdForInstall, voteTracker.thresholdForInstall)
     }
 }

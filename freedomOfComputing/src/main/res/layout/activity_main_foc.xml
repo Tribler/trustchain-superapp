@@ -117,7 +117,8 @@
     <include
         android:id="@+id/debugLayout"
         layout="@layout/fragment_debugging"
-        android:visibility="gone" />
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <include
         android:id="@+id/popUpLayout"

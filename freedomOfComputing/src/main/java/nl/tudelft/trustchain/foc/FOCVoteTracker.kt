@@ -19,7 +19,7 @@ import java.util.UUID
 object FOCVoteTracker {
     // Stores the votes for all apks
     private var voteMap: HashMap<String, HashSet<FOCSignedVote>> = HashMap()
-    private val thresholdForInstall = 10
+    val thresholdForInstall = 10
 
     /**
      * Gets called on pause (or shutdown) of the app to persist state
@@ -137,6 +137,13 @@ object FOCVoteTracker {
             return 0
         }
         return voteMap[fileName]!!.count { v -> v.vote.isUpVote == isUpVote }
+    }
+
+    /**
+     * Gets the total number of up and down votes for all APKs
+     */
+    fun getTotalNumberOfVotes(): Int {
+        return voteMap.values.sumOf { it.size }
     }
 
     /**

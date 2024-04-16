@@ -13,6 +13,8 @@
     <string name="downloadProgressPercentage">%1$s</string>
     <string name="failedCounter">Failed torrent counter map: %1$s</string>
     <string name="evaRetries">Eva retries: %1$d</string>
+    <string name="numberVotesTotal">Total number of stored votes: %1$d</string>
+    <string name="thresholdForInstall">Number of votes for automatic install: %1$d</string>
     <string name="installButton">Install</string>
     <string name="cancelButton">Cancel</string>
     <string name="downloadButton">Download</string>

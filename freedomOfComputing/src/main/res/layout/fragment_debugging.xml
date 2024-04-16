@@ -23,4 +23,18 @@
         android:paddingTop="5dp"
         android:text="@string/evaRetries" />
 
+    <TextView
+        android:id="@+id/numberVotesTotalCounter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:text="@string/numberVotesTotal" />
+
+    <TextView
+        android:id="@+id/thresholdForInstall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:text="@string/thresholdForInstall" />
+
 </LinearLayout>
