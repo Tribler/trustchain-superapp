@@ -30,8 +30,9 @@ class FOCVoteTrackerTest {
     private val signedVote1 =
         FOCSignedVote(UUID.randomUUID(), baseVote1, signKey1, privateKey1.pub().keyToBin())
     private val signKey2 = privateKey2.sign(SerializationUtils.serialize(baseVote2))
+    private val id2 = UUID.randomUUID()
     private val signedVote2 =
-        FOCSignedVote(UUID.randomUUID(), baseVote2, signKey2, privateKey2.pub().keyToBin())
+        FOCSignedVote(id2, baseVote2, signKey2, privateKey2.pub().keyToBin())
     private val voteTracker: FOCVoteTracker = FOCVoteTracker
 
     @Before
@@ -143,5 +144,33 @@ class FOCVoteTrackerTest {
         voteTracker.vote("test.apk", signedVote1)
         assertEquals(0, voteTracker.getNumberOfVotes("test2.apk", true))
         assertEquals(1, voteTracker.getNumberOfVotes("test.apk", true))
+    }
+
+    @Test
+    fun getVotesToSendTest() {
+        voteTracker.vote("test.apk", signedVote1)
+        voteTracker.vote("test.apk", signedVote2)
+        val ids = HashSet<UUID>()
+        ids.add(id2)
+        val res = HashMap<String, HashSet<FOCSignedVote>>()
+        res["test.apk"] = hashSetOf(signedVote1)
+        assertEquals(res, voteTracker.getVotesToSend(ids))
+    }
+
+    @Test
+    fun getVotesToSendTest2() {
+        val privateKey3: PrivateKey = cryptoProvider.generateKey()
+        val baseVote3 = FOCVote("0003", false)
+        val signKey3 = privateKey3.sign(SerializationUtils.serialize(baseVote3))
+        val signedVote3 =
+            FOCSignedVote(UUID.randomUUID(), baseVote3, signKey3, privateKey3.pub().keyToBin())
+        voteTracker.vote("test.apk", signedVote1)
+        voteTracker.vote("test.apk", signedVote2)
+        voteTracker.vote("test.apk", signedVote3)
+        val ids = HashSet<UUID>()
+        ids.add(id2)
+        val res = HashMap<String, HashSet<FOCSignedVote>>()
+        res["test.apk"] = hashSetOf(signedVote1, signedVote3)
+        assertEquals(res, voteTracker.getVotesToSend(ids))
     }
 }
