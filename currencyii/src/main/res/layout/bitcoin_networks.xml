@@ -16,7 +16,6 @@
         android:id="@+id/testnet_radiobutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:enabled="false"
         android:text="TestNet" />
 
     <RadioButton
