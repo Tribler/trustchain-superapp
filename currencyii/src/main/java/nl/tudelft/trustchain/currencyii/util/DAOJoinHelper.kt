@@ -197,6 +197,7 @@ class DAOJoinHelper {
         )
     }
 
+
     companion object {
         /**
          * Given a shared wallet proposal block, calculate the signature and send an agreement block.

@@ -42,6 +42,9 @@ android {
 
     testOptions {
         unitTests.returnDefaultValues = true
+        unitTests.all {
+            useJUnitPlatform()
+        }
     }
 
     namespace 'nl.tudelft.trustchain.currencyii'
@@ -61,6 +64,9 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
+
+    testImplementation "com.goterl:lazysodium-java:5.1.4"
+
     // Material
     api "com.google.android.material:material:$material_version"
 
@@ -71,8 +77,11 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // Testing
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    testImplementation 'junit:junit:4.12'
     testImplementation "io.mockk:mockk:$mockk_version"
+    testImplementation project(':musicdao')
+    testImplementation project(':ipv8')
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     androidTestImplementation "androidx.test.ext:junit:$android_junit_version"
 
     // BitcoinJ
