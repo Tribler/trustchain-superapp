@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.currencyii
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import androidx.core.content.ContentProviderCompat.requireContext
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -24,6 +23,7 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
     override val serviceId = serviceId
     private var currentLeader: HashMap<String, Peer?> = HashMap()
     private var candidates: HashMap<String, ArrayList<Peer>> = HashMap()
+
     init {
         messageHandlers[MessageId.ELECTION_REQUEST] = ::onElectionRequestPacket
         messageHandlers[MessageId.ELECTED_RESPONSE] = ::onElectedResponsePacket
@@ -230,20 +230,17 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
         )
     }
 
-    internal fun createElectionRequest(dAOid: ByteArray,
-    ): ByteArray {
+    internal fun createElectionRequest(dAOid: ByteArray): ByteArray {
         val payload = ElectionPayload(dAOid)
         return serializePacket(MessageId.ELECTION_REQUEST, payload)
     }
 
-    internal fun createElectedResponse(dAOid: ByteArray,
-    ): ByteArray {
+    internal fun createElectedResponse(dAOid: ByteArray): ByteArray {
         val payload = ElectedPayload(dAOid)
         return serializePacket(MessageId.ELECTED_RESPONSE, payload)
     }
 
-    internal fun createAliveResponse(dAOid: ByteArray,
-    ): ByteArray {
+    internal fun createAliveResponse(dAOid: ByteArray): ByteArray {
         val payload = AlivePayload(dAOid)
         return serializePacket(MessageId.ALIVE_RESPONSE, payload)
     }
@@ -258,22 +255,27 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
         return serializePacket(MessageId.SIGNATURE_ASK, payload)
     }
 
-    fun onAliveResponsePacket(packet: Packet){
-        val (peer, payload) = packet.getAuthPayload(
-            AlivePayload.Deserializer
-        )
+    fun onAliveResponsePacket(packet: Packet) {
+        val (peer, payload) =
+            packet.getAuthPayload(
+                AlivePayload.Deserializer
+            )
         this.onAliveResponse(peer, payload)
     }
 
-    fun onSignPayloadResponsePacket(packet: Packet){
-        val (peer, payload) = packet.getAuthPayload(
-            SignPayload.Deserializer
-        )
+    fun onSignPayloadResponsePacket(packet: Packet) {
+        val (peer, payload) =
+            packet.getAuthPayload(
+                SignPayload.Deserializer
+            )
         this.onSignPayloadResponse(peer, payload)
     }
 
-    fun onSignPayloadResponse(peer: Peer, payload: SignPayload){
-        //TODO: Implement adding to the wallet without a Context
+    fun onSignPayloadResponse(
+        peer: Peer,
+        payload: SignPayload
+    ) {
+        // TODO: Implement adding to the wallet without a Context
 //        try {
 //            joinBitcoinWallet(
 //                payload.mostRecentSWBlock.transaction,
@@ -286,35 +288,45 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
 //        } catch (t: Throwable) {
 //            Log.e("Coin", "Joining failed. ${t.message ?: "No further information"}.")
 //        }
-
     }
 
-    fun onAliveResponse(peer: Peer, payload: AlivePayload) {
+    fun onAliveResponse(
+        peer: Peer,
+        payload: AlivePayload
+    ) {
         this.getCandidates()[payload.DAOid.decodeToString()]?.add(peer)
     }
-    fun onElectedResponsePacket(packet: Packet){
-        val (peer, payload) = packet.getAuthPayload(
-            ElectedPayload.Deserializer
-        )
+
+    fun onElectedResponsePacket(packet: Packet) {
+        val (peer, payload) =
+            packet.getAuthPayload(
+                ElectedPayload.Deserializer
+            )
         this.onElectedResponse(peer, payload)
     }
-    fun onElectedResponse(peer: Peer, payload: ElectedPayload) {
+
+    fun onElectedResponse(
+        peer: Peer,
+        payload: ElectedPayload
+    ) {
         Log.d("LEADER", "Elected: " + peer.publicKey)
         getCurrentLeader()[payload.DAOid.decodeToString()] = peer
     }
 
-    fun onElectionRequestPacket(packet: Packet){
-        val (peer, payload) = packet.getAuthPayload(
-            ElectionPayload.Deserializer
-        )
+    fun onElectionRequestPacket(packet: Packet) {
+        val (peer, payload) =
+            packet.getAuthPayload(
+                ElectionPayload.Deserializer
+            )
         Log.d("Leader", "Election packet received.")
-        getCandidates()[payload.DAOid.decodeToString()]  = ArrayList()
+        getCandidates()[payload.DAOid.decodeToString()] = ArrayList()
         onElectionRequest(peer, payload)
     }
 
-    fun getPeersPKInDao(DAOid: ByteArray): ArrayList<String>{
-        val mostRecentWalletBlock = fetchLatestSharedWalletBlock(DAOid)
-            ?: throw IllegalStateException("Most recent DAO block not found")
+    fun getPeersPKInDao(DAOid: ByteArray): ArrayList<String> {
+        val mostRecentWalletBlock =
+            fetchLatestSharedWalletBlock(DAOid)
+                ?: throw IllegalStateException("Most recent DAO block not found")
         val peerPK: ArrayList<String> = ArrayList<String>()
         val blockData = SWJoinBlockTransactionData(mostRecentWalletBlock.transaction).getData()
         for (swParticipantPk in blockData.SW_TRUSTCHAIN_PKS) {
@@ -323,8 +335,10 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
         return peerPK
     }
 
-    fun onElectionRequest(peer: Peer, payload:ElectionPayload) {
-
+    fun onElectionRequest(
+        peer: Peer,
+        payload: ElectionPayload
+    ) {
         val peerPK = getPeersPKInDao(payload.DAOid)
 
         Log.d("Leader", "Election started.")
@@ -343,12 +357,12 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
         }
         Log.d("Leader", "peers with higher ips:$higherPeers")
 
-        if(higherPeers.isEmpty()) {
+        if (higherPeers.isEmpty()) {
             Log.d("Leader", "Elected: " + this.myPeer.publicKey)
 
             val electedPayload = this.createElectedResponse(payload.DAOid)
             this.sendPayload(peer, electedPayload)
-            getCurrentLeader()[payload.DAOid.decodeToString()] =  this.myPeer
+            getCurrentLeader()[payload.DAOid.decodeToString()] = this.myPeer
             return
         }
         var lastTime = System.currentTimeMillis()
@@ -358,19 +372,20 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
             val generatedPayload = this.createElectionRequest(payload.DAOid)
             i++
             this.sendPayload(p, generatedPayload)
-            if(i == higherPeers.size) {
+            if (i == higherPeers.size) {
                 lastTime = System.currentTimeMillis()
             }
         }
         while (System.currentTimeMillis() - lastTime < 1000) {
             // Wait for responses
         }
-        if(this.candidates[payload.DAOid.decodeToString()]?.isEmpty() == true){
-            getCurrentLeader()[payload.DAOid.decodeToString()] =  this.myPeer
+        if (this.candidates[payload.DAOid.decodeToString()]?.isEmpty() == true) {
+            getCurrentLeader()[payload.DAOid.decodeToString()] = this.myPeer
             val electedPayload = this.createElectedResponse(payload.DAOid)
             this.sendPayload(peer, electedPayload)
         }
     }
+
     fun getCandidates(): HashMap<String, ArrayList<Peer>> {
         return this.candidates
     }
@@ -378,7 +393,8 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
     fun getCurrentLeader(): HashMap<String, Peer?> {
         return this.currentLeader
     }
-    fun getServiceIdNew(): String{
+
+    fun getServiceIdNew(): String {
         return serviceId
     }
 
@@ -401,7 +417,8 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
         }
         Log.d("LEADER", "Leader found.")
         Log.d("LEADER", "sending proposal to leader...")
-        sendPayload(getCurrentLeader()[publicKeyBlock.decodeToString()]!!,
+        sendPayload(
+            getCurrentLeader()[publicKeyBlock.decodeToString()]!!,
             SignPayload(
                 getServiceIdNew().toByteArray(),
                 mostRecentSWBlock,
@@ -409,10 +426,12 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
                 signatures
             ).serialize()
         )
-}
-    private fun checkLeaderExists(dAOid: ByteArray): Boolean {
+    }
+
+    fun checkLeaderExists(dAOid: ByteArray): Boolean {
         return getCurrentLeader()[dAOid.decodeToString()] != null
     }
+
     fun fetchSignatureRequestProposalId(block: TrustChainBlock): String {
         if (block.type == SIGNATURE_ASK_BLOCK) {
             return SWSignatureAskTransactionData(block.transaction).getData().SW_UNIQUE_PROPOSAL_ID
@@ -482,7 +501,6 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
                 SWResponseNegativeSignatureTransactionData(it.transaction).getData()
             }
     }
-
 
     /**
      * Given a shared wallet proposal block, calculate the signature and respond with a trust chain block.
@@ -599,13 +617,13 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
 
         return requiredVotes <= totalVoters.size - againstSignatures.size
     }
+
     object MessageId {
         const val ELECTION_REQUEST = 1
         const val ELECTED_RESPONSE = 2
         const val ALIVE_RESPONSE = 3
         const val SIGNATURE_ASK = 4
     }
-
 
     companion object {
         // Default maximum wait timeout for bitcoin transaction broadcasts in seconds

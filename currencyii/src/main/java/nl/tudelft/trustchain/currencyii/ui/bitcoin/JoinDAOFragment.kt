@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
@@ -20,7 +19,6 @@ import nl.tudelft.trustchain.currencyii.databinding.FragmentJoinNetworkBinding
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureBlockTD
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 
 /**
@@ -235,8 +233,9 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
             mostRecentSWBlock,
             proposeBlockData,
             signatures,
-            latestHash)
-//
+            latestHash
+        )
+
         try {
             getCoinCommunity().joinBitcoinWallet(
                 mostRecentSWBlock.transaction,

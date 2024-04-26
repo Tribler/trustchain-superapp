@@ -208,23 +208,6 @@ class LeaderElectionTest {
         }
         verify { handler(any()) }
     }
-
-//    @Test
-//    fun handleElectionPacketTest() {
-//
-//        init()
-//        val spykedCommunity = spyk(community)
-//        spykedCommunity.createElectionRequest(
-//            "x".repeat(64).toByteArray()
-//        ).let { packet ->
-//            println(packet.size)
-//            spykedCommunity.onElectionRequestPacket(Packet(myPeer.address, packet))
-//        }
-//        verify { spykedCommunity.onElectionRequest(any(), any()) }
-//        verify { spykedCommunity.createAliveResponse(any()) }
-//        verify { spykedCommunity.sendPayload(any(), any()) }
-//        verify { spykedCommunity.getCandidates() }
-//    }
 }
 
 class OnElectionpayloadTest() {
@@ -300,7 +283,6 @@ class OnElectionpayloadTest() {
             retPK.add("4")
 
             every { community.getPeersPKInDao(any()) } returns retPK
-
 
             every {
                 community.onElectionRequest(
@@ -401,105 +383,108 @@ class OnElectionpayloadTest() {
     }
 }
 
-//class LeaderSignProposalTests() {
-//    companion object {
-//        lateinit var currentLeader: HashMap<String, Peer?>
-//        lateinit var community: CoinCommunity
-//
-//        lateinit var mostRecentSWBlock: TrustChainBlock
-//        lateinit var proposeBlockData: SWSignatureAskBlockTD
-//        lateinit var signatures: List<SWResponseSignatureBlockTD>
-//        lateinit var context: Context
-//
-//        lateinit var peer1: Peer
-//        lateinit var peer2: Peer
-//        lateinit var peer3: Peer
-//        lateinit var peer4: Peer
-//
-//        lateinit var ipv4P1: IPv4Address
-//        lateinit var ipv4P2: IPv4Address
-//        lateinit var ipv4P3: IPv4Address
-//        lateinit var ipv4P4: IPv4Address
-//
-//        val daoID: ByteArray = "x".repeat(64).toByteArray()
-//
-//        val mostRecentSWBlockArray: String = "y".repeat(64)
-//        val proposeBlockDataArray: String = "p".repeat(64)
-//        val contextArray: String = "c".repeat(64)
-//
-//        val electionPacket: ByteArray = "e".repeat(64).toByteArray()
-//
-//        @BeforeAll
-//        @JvmStatic
-//        fun setup() {
-//            community = mockk<CoinCommunity>(relaxed = true)
-//
-//            peer1 = mockk<Peer>()
-//            peer2 = mockk<Peer>()
-//            peer3 = mockk<Peer>()
-//            peer4 = mockk<Peer>()
-//
-//            ipv4P1 = mockk<IPv4Address>()
-//            ipv4P2 = mockk<IPv4Address>()
-//            ipv4P3 = mockk<IPv4Address>()
-//            ipv4P4 = mockk<IPv4Address>()
-//
-//            every { peer1.address } returns ipv4P1
-//            every { peer2.address } returns ipv4P2
-//            every { peer3.address } returns ipv4P3
-//            every { peer4.address } returns ipv4P4
-//
-//            every { ipv4P1.toString() } returns "1"
-//            every { ipv4P2.toString() } returns "2"
-//            every { ipv4P3.toString() } returns "3"
-//            every { ipv4P4.toString() } returns "4"
-//
-//            mostRecentSWBlock = mockk<TrustChainBlock>()
-//            proposeBlockData = mockk<SWSignatureAskBlockTD>()
-//            signatures = emptyList()
-//            context = mockk<Context>()
-//
-//            every { mostRecentSWBlock.toString() } returns mostRecentSWBlockArray
-//            every { proposeBlockData.toString() } returns proposeBlockDataArray
-//            every { context.toString() } returns contextArray
-//
-//            every { community.sendPayload(any(), any()) } just runs
-//
-//            currentLeader = HashMap()
-//            currentLeader[daoID.decodeToString()] = peer4
-//            every { community.getCurrentLeader() } returns currentLeader
-//
-//            every {
-//                community.createElectionRequest(
-//                    any()
-//                )
-//            } returns electionPacket
-//
-//            every { community.leaderSignProposal(any(), any(), any(), any()) } answers { callOriginal() }
-//
-//        }
-//    }
-//
-//    @Test
-//    fun leaderSingProposalTest() {
-//        val payload =
-//            SignPayload(
-//                "02313685c1912a141279f8248fc8db5899c5df5b".toByteArray(),
-//                mostRecentSWBlock,
-//                proposeBlockData,
-//                signatures
-//            ).serialize()
-//
-//
-//        every { community.getPeers() } answers { listOf(peer1, peer3, peer4) }
-//        every { community.getServiceIdNew() } returns "02313685c1912a141279f8248fc8db5899c5df5b"
-//
-//        community.leaderSignProposal(mostRecentSWBlock, proposeBlockData, signatures, daoID)
-//
-//        verify { community.sendPayload(peer1, electionPacket) }
-//        verify { community.sendPayload(peer3, electionPacket) }
-//        verify { community.sendPayload(peer4, electionPacket) }
-//
-//        verify { community.sendPayload(peer4, payload) }
-//    }
-//}
+class LeaderSignProposalTests() {
+    companion object {
+        lateinit var currentLeader: HashMap<String, Peer?>
+        lateinit var community: CoinCommunity
+
+        lateinit var mostRecentSWBlock: TrustChainBlock
+        lateinit var proposeBlockData: SWSignatureAskBlockTD
+        lateinit var signatures: List<SWResponseSignatureBlockTD>
+        lateinit var context: Context
+
+        lateinit var peer1: Peer
+        lateinit var peer2: Peer
+        lateinit var peer3: Peer
+        lateinit var peer4: Peer
+
+        lateinit var ipv4P1: IPv4Address
+        lateinit var ipv4P2: IPv4Address
+        lateinit var ipv4P3: IPv4Address
+        lateinit var ipv4P4: IPv4Address
+
+        val daoID: ByteArray = "x".repeat(64).toByteArray()
+
+        val mostRecentSWBlockArray: String = "y".repeat(64)
+        val proposeBlockDataArray: String = "p".repeat(64)
+        val contextArray: String = "c".repeat(64)
+
+        val electionPacket: ByteArray = "e".repeat(64).toByteArray()
+
+        @BeforeAll
+        @JvmStatic
+        fun setup() {
+            community = mockk<CoinCommunity>(relaxed = true)
+
+            peer1 = mockk<Peer>()
+            peer2 = mockk<Peer>()
+            peer3 = mockk<Peer>()
+            peer4 = mockk<Peer>()
+
+            ipv4P1 = mockk<IPv4Address>()
+            ipv4P2 = mockk<IPv4Address>()
+            ipv4P3 = mockk<IPv4Address>()
+            ipv4P4 = mockk<IPv4Address>()
+
+            every { peer1.address } returns ipv4P1
+            every { peer2.address } returns ipv4P2
+            every { peer3.address } returns ipv4P3
+            every { peer4.address } returns ipv4P4
+
+            every { ipv4P1.toString() } returns "1"
+            every { ipv4P2.toString() } returns "2"
+            every { ipv4P3.toString() } returns "3"
+            every { ipv4P4.toString() } returns "4"
+
+            mostRecentSWBlock = mockk<TrustChainBlock>()
+            proposeBlockData = mockk<SWSignatureAskBlockTD>()
+            signatures = emptyList()
+            context = mockk<Context>()
+
+            every { mostRecentSWBlock.toString() } returns mostRecentSWBlockArray
+            every { proposeBlockData.toString() } returns proposeBlockDataArray
+            every { context.toString() } returns contextArray
+
+            every { community.checkLeaderExists(any()) } returns true
+
+            every { community.sendPayload(any(), any()) } just runs
+
+            currentLeader = HashMap()
+            currentLeader[daoID.decodeToString()] = peer4
+
+            every { community.getCurrentLeader() } returns currentLeader
+
+            every {
+                community.createElectionRequest(
+                    any()
+                )
+            } returns electionPacket
+
+            every { community.leaderSignProposal(any(), any(), any(), any()) } answers { callOriginal() }
+        }
+    }
+
+    @Test
+    fun leaderSingProposalTest() {
+        val payload =
+            SignPayload(
+                "02313685c1912a141279f8248fc8db5899c5df5b".toByteArray(),
+                mostRecentSWBlock,
+                proposeBlockData,
+                signatures
+            ).serialize()
+
+        every { community.getPeers() } answers { listOf(peer1, peer3, peer4) }
+        every { community.getServiceIdNew() } returns "02313685c1912a141279f8248fc8db5899c5df5b"
+
+        community.leaderSignProposal(mostRecentSWBlock, proposeBlockData, signatures, daoID)
+
+        verify { community.sendPayload(peer1, electionPacket) }
+        verify { community.sendPayload(peer3, electionPacket) }
+        verify { community.sendPayload(peer4, electionPacket) }
+
+        verify { community.sendPayload(peer4, payload) }
+
+        verify { community.checkLeaderExists(daoID) }
+    }
+}

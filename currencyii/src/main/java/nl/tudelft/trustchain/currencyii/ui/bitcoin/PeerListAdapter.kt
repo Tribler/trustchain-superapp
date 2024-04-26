@@ -14,7 +14,6 @@ class PeerListAdapter(
     private val context: BaseFragment,
     private var items: List<Peer>
 ) : BaseAdapter() {
-
     override fun getView(
         p0: Int,
         p1: View?,
@@ -33,8 +32,8 @@ class PeerListAdapter(
         val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm")
 
         val ipv4 = binding.ipv4
-        val lastRequest = binding.lastRequest;
-        val lastResponse = binding.lastResponse;
+        val lastRequest = binding.lastRequest
+        val lastResponse = binding.lastResponse
         val publicKey = binding.publicKey
         var pingIcon = binding.pingIcon
 
@@ -43,8 +42,15 @@ class PeerListAdapter(
         lastResponse.text = peer.lastResponse?.let { formatter.format(it) }
         publicKey.text = peer.publicKey.toString()
 
-        val color = if (peer.lastResponse != null && peer.lastResponse!!.time + 3000 >
-            Calendar.getInstance().timeInMillis) Color.GREEN else Color.RED
+        val color =
+            if (
+                peer.lastResponse != null &&
+                peer.lastResponse!!.time + 3000 > Calendar.getInstance().timeInMillis
+            ) {
+                Color.GREEN
+            } else {
+                Color.RED
+            }
         pingIcon.setColorFilter(color)
 
         return view

@@ -332,3 +332,30 @@ In the codebase, we left several TODOs (especially inside WalletManager) with po
 Next to those TODOs, we highlighted before to use FROST instead of MuSig (or another threshold scheme), port the code to Production and TestNet once possible and use BitcoinJ when they add Taproot support. Lastly, we highly recommend to further refactor the codebase.
     
 For future work related to the server part, please check out the corresponding repository.
+
+## Version 3
+### Introduction
+Throughout this iteration of the project the goal was to add some new features to the application, and upgrade and refactor existing features. This includes a debug dashboard that can be used to retrieve statistics and debugging information, the ability to use the app on the testnest, and a more efficient and secure leader election algorithm than MuSig. More information on each of these features is mentioned in the following sections.
+
+### Server update
+Firstly, to get the application working with testnet we had to set up the local Regtest server, as mentioned in previous versions, to ensure the Regtest Server was working locally. Afterwards, we proceeeded with updating the bitcoin core version to the latest version (v26.0) and refactor the server configuration such that the application would also work on the testnet.
+
+More details on this refactor can be found on the [repository](https://github.com/Tribler/Bitcoin-Regtest-Server) corresponding to the server.
+
+### Leader Election Algorithm
+A new leader election has been implemented. Whenever a new node joins the [leaderSignProposal](src/main/java/nl/tudelft/trustchain/currencyii/CoinCommunity.kt) function is called. This function checks whether there is a leader, by using the [checkLeaderExists](src/main/java/nl/tudelft/trustchain/currencyii/CoinCommunity.kt) function, and sends a [SignPayload](src/main/java/nl/tudelft/trustchain/currencyii/payload/SignPayload.kt) instance to the leader. If there is no leader, a new leader will be elected first using the [onElectionRequest](src/main/java/nl/tudelft/trustchain/currencyii/CoinCommunity.kt) function.
+
+![leader election diagram](docs/images/leader_election_diagram.png)
+
+Also, several test cases were written to test the new functions that were implemented. These tests can be found [here](src/test/java/nl/tudelft/trustchain/currencyii/leaderElection/LeaderElectionTest.kt).
+
+### Debug Dashboard
+A debug dashboad has been implemented, which shows the peers that are currently connected to the network, their IP address, last response, last request, and public key. It also shows the user their own IP address (both LAN and WAN IP) and public key.
+
+What this looks like visually can be seen in the following screenshot:
+![debug dashboard](docs/images/debug_dashboard_be.jpeg)
+
+More implementation details can be found in the corresponding [code](src/main/java/nl/tudelft/trustchain/currencyii/ui/bitcoin/DebugDashboardFragment.kt).
+
+### Future work
+There are TODOs left in the codebase, which should be picked up as soon as possible. Also, BitcoinJ should be used as they have added Taproot support. Finally, a FROST or SPRINT library implementation would be extremely beneficial to use. 
