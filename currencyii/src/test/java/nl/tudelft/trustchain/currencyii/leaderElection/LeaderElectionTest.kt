@@ -1,13 +1,17 @@
 package nl.tudelft.trustchain.currencyii.leaderElection
 
 import android.content.Context
+import com.goterl.lazysodium.LazySodiumJava
+import com.goterl.lazysodium.SodiumJava
 import io.mockk.every
-import nl.tudelft.ipv8.Peer
-import nl.tudelft.trustchain.currencyii.CoinCommunity
-import org.junit.jupiter.api.Test
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
+import nl.tudelft.ipv8.IPv4Address
+import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.keyvault.Key
 import nl.tudelft.ipv8.keyvault.LibNaClSK
 import nl.tudelft.ipv8.keyvault.PublicKey
@@ -15,24 +19,22 @@ import nl.tudelft.ipv8.messaging.EndpointAggregator
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.hexToBytes
-import org.junit.jupiter.api.Assertions.*
-
-import com.goterl.lazysodium.LazySodiumJava
-import com.goterl.lazysodium.SodiumJava
-import io.mockk.just
-import io.mockk.runs
-import nl.tudelft.ipv8.IPv4Address
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.payload.ElectionPayload
 import nl.tudelft.trustchain.currencyii.payload.SignPayload
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureBlockTD
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 class PayloadTest {
+
+
     @Test
     fun alivePayloadTest() {
-        val coinCommunity = CoinCommunity()
+        val context = mockk<Context>()
+        val coinCommunity = CoinCommunity(context)
         val dAOid = "Dao_id"
         val me = mockk<Peer>()
 
@@ -57,7 +59,8 @@ class PayloadTest {
 
     @Test
     fun electionPayloadTest() {
-        val coinCommunity = CoinCommunity()
+        val context = mockk<Context>()
+        val coinCommunity = CoinCommunity(context)
         val dAOid = "Dao_id"
         val me = mockk<Peer>()
 
@@ -82,7 +85,8 @@ class PayloadTest {
 
     @Test
     fun electionPayloadRequestTest() {
-        val coinCommunity = CoinCommunity()
+        val context = mockk<Context>()
+        val coinCommunity = CoinCommunity(context)
         val dAOid = "Dao_id"
         val me = mockk<Peer>()
 
@@ -127,7 +131,8 @@ class LeaderElectionTest {
 
         val myPeer = Peer(key)
 
-        val community = CoinCommunity()
+        val context = mockk<Context>()
+        val coinCommunity = CoinCommunity(context)
         val network = Network()
         val endpoint = spyk(EndpointAggregator(mockk(relaxed = true), null))
         val handler = mockk<(Packet) -> Unit>(relaxed = true)
