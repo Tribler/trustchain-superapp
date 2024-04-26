@@ -52,7 +52,6 @@ import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.foc.community.FOCCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
@@ -62,6 +61,7 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
+import nl.tudelft.trustchain.foc.community.FOCCommunity
 import nl.tudelft.trustchain.musicdao.core.dao.DaoCommunity
 import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
@@ -87,6 +87,7 @@ class TrustChainApplication : Application() {
             }
             defaultCryptoProvider = AndroidCryptoProvider
 
+            appContext = applicationContext
             // Only start IPv8 here if we are on Android 11 or below.
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 initIPv8()
@@ -323,9 +324,8 @@ class TrustChainApplication : Application() {
     private fun createCoinCommunity(): OverlayConfiguration<CoinCommunity> {
         val randomWalk = RandomWalk.Factory()
         val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
-
         return OverlayConfiguration(
-            Overlay.Factory(CoinCommunity::class.java),
+            CoinCommunity.Factory(appContext),
             listOf(randomWalk, nsd)
         )
     }
@@ -414,5 +414,6 @@ class TrustChainApplication : Application() {
         private const val PREF_ID_METADATA_RANGE_18PLUS_KEY = "id_metadata_range_18plus"
         private const val BLOCK_TYPE = "demo_block"
         private const val FIRST_RUN = "first_run"
+        lateinit var appContext: Context
     }
 }

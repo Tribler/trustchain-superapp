@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -12,14 +13,40 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.currencyii.payload.*
-import nl.tudelft.trustchain.currencyii.sharedWallet.*
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
+import nl.tudelft.trustchain.currencyii.payload.AlivePayload
+import nl.tudelft.trustchain.currencyii.payload.ElectedPayload
+import nl.tudelft.trustchain.currencyii.payload.ElectionPayload
+import nl.tudelft.trustchain.currencyii.payload.SignPayload
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTD
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseNegativeSignatureBlockTD
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseNegativeSignatureTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureBlockTD
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferDoneTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskBlockTD
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.util.DAOCreateHelper
 import nl.tudelft.trustchain.currencyii.util.DAOJoinHelper
 import nl.tudelft.trustchain.currencyii.util.DAOTransferFundsHelper
 
 @Suppress("UNCHECKED_CAST")
-open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8248fc8db5899c5df5b") : Community() {
+open class CoinCommunity constructor(
+    private val context: Context,
+    serviceId: String = "02313685c1912a141279f8248fc8db5899c5df5b",
+    ) : Community() {
+
+    class Factory(
+        private val context: Context,
+    ) : Overlay.Factory<CoinCommunity>(CoinCommunity::class.java) {
+        override fun create(): CoinCommunity {
+            return CoinCommunity(context)
+        }
+    }
+
     override val serviceId = serviceId
     private var currentLeader: HashMap<String, Peer?> = HashMap()
     private var candidates: HashMap<String, ArrayList<Peer>> = HashMap()
@@ -275,19 +302,20 @@ open class CoinCommunity constructor(serviceId: String = "02313685c1912a141279f8
         peer: Peer,
         payload: SignPayload
     ) {
-        // TODO: Implement adding to the wallet without a Context
-//        try {
-//            joinBitcoinWallet(
-//                payload.mostRecentSWBlock.transaction,
-//                payload.proposeBlockData,
-//                payload.signatures
-//            )
-//            // Add new nonceKey after joining a DAO
-//            WalletManagerAndroid.getInstance()
-//                .addNewNonceKey(payload.proposeBlockData.SW_UNIQUE_ID)
-//        } catch (t: Throwable) {
-//            Log.e("Coin", "Joining failed. ${t.message ?: "No further information"}.")
-//        }
+        //TODO: Implement adding to the wallet without a Context
+        try {
+            joinBitcoinWallet(
+                payload.mostRecentSWBlock.transaction,
+                payload.proposeBlockData,
+                payload.signatures,
+                this.context
+            )
+            // Add new nonceKey after joining a DAO
+            WalletManagerAndroid.getInstance()
+                .addNewNonceKey(payload.proposeBlockData.SW_UNIQUE_ID, this.context)
+        } catch (t: Throwable) {
+            Log.e("Coin", "Joining failed. ${t.message ?: "No further information"}.")
+        }
     }
 
     fun onAliveResponse(

@@ -235,7 +235,6 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
             signatures,
             latestHash
         )
-
         try {
             getCoinCommunity().joinBitcoinWallet(
                 mostRecentSWBlock.transaction,
