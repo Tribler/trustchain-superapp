@@ -27,6 +27,7 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.util.Calendar
 
 class PayloadTest {
 
@@ -84,12 +85,12 @@ class PayloadTest {
     }
 
     @Test
-    fun electionPayloadRequestTest() {
+    fun electionPayloadSerializeTest() {
+
         val context = mockk<Context>()
         val coinCommunity = CoinCommunity(context)
         val dAOid = "Dao_id"
         val me = mockk<Peer>()
-
         val meKey = mockk<PublicKey>()
 
         coinCommunity.myPeer = me
@@ -101,11 +102,47 @@ class PayloadTest {
         every { me.updateClock(any<ULong>()) } returns Unit
         every { me.key } returns mockk<Key>()
 
-        val daoIdBytes = dAOid.toByteArray()
-        val packet = coinCommunity.createElectionRequest(daoIdBytes)
-        val packetLastElements = packet.takeLast(daoIdBytes.size)
+        val sig1 = SWResponseSignatureBlockTD("SignatureId1", "ProposalId", "SignatureId1Serialized", "BTC_PK1", "NONCE1")
+        val sig2 = SWResponseSignatureBlockTD("SignatureId2", "ProposalId", "SignatureId2Serialized", "BTC_PK2", "NONCE2")
+        val sig3 = SWResponseSignatureBlockTD("SignatureId3", "ProposalId", "SignatureId3Serialized", "BTC_PK3", "NONCE3")
 
-        assertEquals(daoIdBytes.toList(), packetLastElements)
+        val daoIdBytes = dAOid.toByteArray()
+        val signatures = listOf(sig1, sig2, sig3)
+        val trustChainBlock = TrustChainBlock("type", "rawTransaction".toByteArray(), "publicKey".toByteArray(), 42U, "linkPublicKey".toByteArray(),
+            12U, "previousHash".toByteArray(), "signature".toByteArray(), Calendar.getInstance().time)
+        val proposeBlockData = SWSignatureAskBlockTD("SW_UNIQUE_ID", "SW_UNIQUE_PROPOSAL_ID",
+            "SW_TRANSACTION_SERIALIZED", "SW_PREVIOUS_BLOCK_HASH", 5, "SW_RECEIVER_PK")
+
+        val payload = SignPayload(daoIdBytes, trustChainBlock, proposeBlockData, signatures)
+        val serialized = payload.serialize()
+        val deserialized = SignPayload.deserialize(serialized)
+
+
+        assertEquals(payload.DAOid.decodeToString(), deserialized.first.DAOid.decodeToString())
+        assertEquals(payload.mostRecentSWBlock.type, deserialized.first.mostRecentSWBlock.type)
+        assertEquals(payload.mostRecentSWBlock.rawTransaction.decodeToString(), deserialized.first.mostRecentSWBlock.rawTransaction.decodeToString())
+        assertEquals(payload.mostRecentSWBlock.publicKey.decodeToString(), deserialized.first.mostRecentSWBlock.publicKey.decodeToString())
+        assertEquals(payload.mostRecentSWBlock.sequenceNumber, deserialized.first.mostRecentSWBlock.sequenceNumber)
+        assertEquals(payload.mostRecentSWBlock.linkPublicKey.decodeToString(), deserialized.first.mostRecentSWBlock.linkPublicKey.decodeToString())
+        assertEquals(payload.mostRecentSWBlock.linkSequenceNumber, deserialized.first.mostRecentSWBlock.linkSequenceNumber)
+        assertEquals(payload.mostRecentSWBlock.previousHash.decodeToString(), deserialized.first.mostRecentSWBlock.previousHash.decodeToString())
+        assertEquals(payload.mostRecentSWBlock.signature.decodeToString(), deserialized.first.mostRecentSWBlock.signature.decodeToString())
+        assertEquals(payload.mostRecentSWBlock.timestamp.time, deserialized.first.mostRecentSWBlock.timestamp.time)
+
+        assertEquals(payload.signatures.first().SW_UNIQUE_ID, deserialized.first.signatures.first().SW_UNIQUE_ID)
+        assertEquals(payload.signatures.first().SW_BITCOIN_PK, deserialized.first.signatures.first().SW_BITCOIN_PK)
+        assertEquals(payload.signatures.last().SW_NONCE, deserialized.first.signatures.last().SW_NONCE)
+        assertEquals(payload.signatures.size, deserialized.first.signatures.size)
+        assertEquals(payload.signatures.last().SW_UNIQUE_PROPOSAL_ID, deserialized.first.signatures.last().SW_UNIQUE_PROPOSAL_ID)
+
+        assertEquals(payload.proposeBlockData.SW_UNIQUE_PROPOSAL_ID, deserialized.first.proposeBlockData.SW_UNIQUE_PROPOSAL_ID)
+        assertEquals(payload.proposeBlockData.SW_TRANSACTION_SERIALIZED, deserialized.first.proposeBlockData.SW_TRANSACTION_SERIALIZED)
+        assertEquals(payload.proposeBlockData.SW_SIGNATURES_REQUIRED, deserialized.first.proposeBlockData.SW_SIGNATURES_REQUIRED)
+        assertEquals(payload.proposeBlockData.SW_PREVIOUS_BLOCK_HASH, deserialized.first.proposeBlockData.SW_PREVIOUS_BLOCK_HASH)
+        assertEquals(payload.proposeBlockData.SW_UNIQUE_ID, deserialized.first.proposeBlockData.SW_UNIQUE_ID)
+        assertEquals(payload.proposeBlockData.SW_RECEIVER_PK, deserialized.first.proposeBlockData.SW_RECEIVER_PK)
+
+
     }
 }
 

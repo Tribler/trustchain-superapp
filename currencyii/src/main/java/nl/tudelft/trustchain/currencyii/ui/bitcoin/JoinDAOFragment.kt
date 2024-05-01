@@ -14,7 +14,6 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.databinding.FragmentJoinNetworkBinding
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureBlockTD
@@ -235,20 +234,21 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
             signatures,
             latestHash
         )
-        try {
-            getCoinCommunity().joinBitcoinWallet(
-                mostRecentSWBlock.transaction,
-                proposeBlockData,
-                signatures,
-                context
-            )
-            // Add new nonceKey after joining a DAO
-            WalletManagerAndroid.getInstance()
-                .addNewNonceKey(proposeBlockData.SW_UNIQUE_ID, context)
-        } catch (t: Throwable) {
-            Log.e("Coin", "Joining failed. ${t.message ?: "No further information"}.")
-            setAlertText(t.message ?: "Unexpected error occurred. Try again")
-        }
+
+//        try {
+//            getCoinCommunity().joinBitcoinWallet(
+//                mostRecentSWBlock.transaction,
+//                proposeBlockData,
+//                signatures,
+//                context
+//            )
+//            // Add new nonceKey after joining a DAO
+//            WalletManagerAndroid.getInstance()
+//                .addNewNonceKey(proposeBlockData.SW_UNIQUE_ID, context)
+//        } catch (t: Throwable) {
+//            Log.e("Coin", "Joining failed. ${t.message ?: "No further information"}.")
+//            setAlertText(t.message ?: "Unexpected error occurred. Try again")
+//        }
 
         // Update wallets UI list
         fetchSharedWalletsAndUpdateUI()
