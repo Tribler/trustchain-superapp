@@ -20,7 +20,7 @@ class SignPayload(
     val signatures: List<SWResponseSignatureBlockTD>
 ) : Serializable {
     override fun serialize(): ByteArray {
-        val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create();
+        val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create()
 
         val daoIdSizeBytes = serializeUShort(DAOid.size)
 
@@ -45,8 +45,6 @@ class SignPayload(
         val timeStampBytes = gson.toJson(mostRecentSWBlock.timestamp).toByteArray()
         val timeStampSizeBytes = serializeUShort(timeStampBytes.size)
 
-
-
         val proposeBlockDataJson = gson.toJson(proposeBlockData)
         val proposeBlockDataBytes = proposeBlockDataJson.toByteArray()
         val proposeBlockDataSizeBytes = serializeUShort(proposeBlockDataBytes.size)
@@ -70,7 +68,7 @@ class SignPayload(
     }
 
     companion object Deserializer : Deserializable<SignPayload> {
-        val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create();
+        val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create()
 
         override fun deserialize(
             buffer: ByteArray,
@@ -132,9 +130,18 @@ class SignPayload(
             localOffset += timestampSize
 
             val date = gson.fromJson(timestamp.decodeToString(), Date::class.java)
-            val mostRecentSWBlock = TrustChainBlock(type.decodeToString(), rawTransaction, publicKey, deserializeUInt(sequenceNumber),
-                linkPublicKey, deserializeUInt(linkSequenceNumber), previousHash, signature, date)
-
+            val mostRecentSWBlock =
+                TrustChainBlock(
+                    type.decodeToString(),
+                    rawTransaction,
+                    publicKey,
+                    deserializeUInt(sequenceNumber),
+                    linkPublicKey,
+                    deserializeUInt(linkSequenceNumber),
+                    previousHash,
+                    signature,
+                    date
+                )
 
             val proposeBlockDataSize = deserializeUShort(buffer, offset + localOffset)
             localOffset += SERIALIZED_USHORT_SIZE

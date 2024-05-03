@@ -11,6 +11,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -38,8 +39,7 @@ import nl.tudelft.trustchain.currencyii.util.DAOTransferFundsHelper
 open class CoinCommunity constructor(
     private val context: Context,
     serviceId: String = "02313685c1912a141279f8248fc8db5899c5df5b",
-    ) : Community() {
-
+) : Community() {
     class Factory(
         private val context: Context,
     ) : Overlay.Factory<CoinCommunity>(CoinCommunity::class.java) {
@@ -56,9 +56,7 @@ open class CoinCommunity constructor(
         messageHandlers[MessageId.ELECTION_REQUEST] = ::onElectionRequestPacket
         messageHandlers[MessageId.ELECTED_RESPONSE] = ::onElectedResponsePacket
         messageHandlers[MessageId.ALIVE_RESPONSE] = ::onAliveResponsePacket
-        messageHandlers[MessageId.SIGNATURE_ASK] = ::onSignPayloadResponsePacket
         messageHandlers[MessageId.JOIN_DAO_DATA] = ::onDaoJoinDataPacket
-
     }
 
     private fun getTrustChainCommunity(): TrustChainCommunity {
@@ -282,7 +280,7 @@ open class CoinCommunity constructor(
         signatures: List<SWResponseSignatureBlockTD>
     ): ByteArray {
         val payload = SignPayload(dAOid, recentSWBlock, proposeBlockData, signatures)
-        return serializePacket(MessageId.SIGNATURE_ASK, payload)
+        return serializePacket(MessageId.JOIN_DAO_DATA, payload)
     }
 
     fun onAliveResponsePacket(packet: Packet) {
@@ -291,14 +289,6 @@ open class CoinCommunity constructor(
                 AlivePayload.Deserializer
             )
         this.onAliveResponse(peer, payload)
-    }
-
-    fun onSignPayloadResponsePacket(packet: Packet) {
-        val (peer, payload) =
-            packet.getAuthPayload(
-                SignPayload.Deserializer
-            )
-        this.onSignPayloadResponse(peer, payload)
     }
 
     private fun onDaoJoinDataPacket(packet: Packet) {
@@ -328,7 +318,7 @@ open class CoinCommunity constructor(
         peer: Peer,
         payload: SignPayload
     ) {
-        //TODO: Implement adding to the wallet without a Context
+        // TODO: Implement adding to the wallet without a Context
         try {
             joinBitcoinWallet(
                 payload.mostRecentSWBlock.transaction,
@@ -343,8 +333,6 @@ open class CoinCommunity constructor(
             Log.e("Coin", "Joining failed. ${t.message ?: "No further information"}.")
         }
     }
-
-
 
     fun onAliveResponse(
         peer: Peer,
@@ -463,9 +451,12 @@ open class CoinCommunity constructor(
         Log.d("LEADER", "Leader doesn't exists.")
         Log.d("LEADER", "Requesting election...")
         val peers = this.getPeers()
+        val peerPK = getPeersPKInDao(publicKeyBlock)
         for (peer in peers) {
-            sendPayload(peer, this.createElectionRequest(publicKeyBlock))
-            Log.d("LEADER", "Sending to peer at " + peer.address + " in " + serviceId + "...")
+            if (peerPK.contains(peer.publicKey.keyToBin().decodeToString())) {
+                sendPayload(peer, this.createElectionRequest(publicKeyBlock))
+                Log.d("LEADER", "Sending to peer at " + peer.address + " in " + serviceId + "...")
+            }
         }
         Log.d("LEADER", "Waiting for leader...")
         while (!this.checkLeaderExists(publicKeyBlock)) {
@@ -473,33 +464,27 @@ open class CoinCommunity constructor(
         }
         Log.d("LEADER", "Leader found.")
 
-
-
         val currentLeader = getCurrentLeader()[publicKeyBlock.decodeToString()]!!
         Log.d("LEADER", "sending dao join transaction data to leader ${currentLeader.publicKey}")
-        val payload = SignPayload(
-            getServiceIdNew().toByteArray(),
-            mostRecentSWBlock,
-            proposeBlockData,
-            signatures);
-        val packet = serializePacket(MessageId.JOIN_DAO_DATA, payload)
-        send(currentLeader, packet)
-
-        Toast.makeText(
-            context,
-            "Sending DAO join data to ${currentLeader.publicKey}",
-            Toast.LENGTH_SHORT
-        ).show()
-
-        sendPayload(
-            getCurrentLeader()[publicKeyBlock.decodeToString()]!!,
+        val payload =
             SignPayload(
                 getServiceIdNew().toByteArray(),
                 mostRecentSWBlock,
                 proposeBlockData,
                 signatures
-            ).serialize()
-        )
+            )
+        val packet = serializePacket(MessageId.JOIN_DAO_DATA, payload)
+        sendPayload(currentLeader, packet)
+
+        toastLeaderSignProposal(currentLeader.publicKey)
+    }
+
+    fun toastLeaderSignProposal(publicKey: PublicKey) {
+        Toast.makeText(
+            context,
+            "Sending DAO join data to $publicKey",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     fun checkLeaderExists(dAOid: ByteArray): Boolean {
@@ -696,9 +681,7 @@ open class CoinCommunity constructor(
         const val ELECTION_REQUEST = 1
         const val ELECTED_RESPONSE = 2
         const val ALIVE_RESPONSE = 3
-        const val SIGNATURE_ASK = 4
-        const val JOIN_DAO_DATA = 5
-
+        const val JOIN_DAO_DATA = 4
     }
 
     companion object {
