@@ -5,8 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -161,6 +163,12 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                         Log.i("Coin", "Clicked: $view, $position, $id")
                         joinSharedWalletClicked(uniqueWallets[position])
                     }
+                }
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    Toast.makeText(context,
+                        "Sending JOIN proposal",
+                        Toast.LENGTH_LONG).show()
                 }
             }
 
