@@ -335,7 +335,7 @@ For future work related to the server part, please check out the corresponding r
 
 ## Version 3
 ### Introduction
-Throughout this iteration of the project the goal was to add some new features to the application, and upgrade and refactor existing features. This includes a debug dashboard that can be used to retrieve statistics and debugging information, the ability to use the app on the testnest, and a more efficient and secure leader election algorithm than MuSig. More information on each of these features is mentioned in the following sections.
+Throughout this iteration of the project the goal was to add some new features to the application, and upgrade and refactor existing features. This includes a debug dashboard that can be used to retrieve statistics and debugging information, the ability to use the app on the testnest, and an efficient and secure leader election algorithm instead of using MuSig. More information on each of these features is mentioned in the following sections.
 
 ### Server update
 Firstly, to get the application working with testnet we had to set up the local Regtest server, as mentioned in previous versions, to ensure the Regtest Server was working locally. Afterwards, we proceeeded with updating the bitcoin core version to the latest version (v26.0) and refactor the server configuration such that the application would also work on the testnet.
@@ -357,5 +357,17 @@ What this looks like visually can be seen in the following screenshot:
 
 More implementation details can be found in the corresponding [code](src/main/java/nl/tudelft/trustchain/currencyii/ui/bitcoin/DebugDashboardFragment.kt).
 
+### Tests & Coverage
+For the leader election algorithm that has been implemented, we have also written some test cases to cover as much as possible of the newly written code. These test cases can be in the file named [LeaderElectionTest.kt](src/test/java/nl/tudelft/trustchain/currencyii/leaderElection/LeaderElectionTest.kt).
+
+The results of running the tests with coverage can be seen in the table below.
+| Element        | Class, %   | Method, %  | Line, %        |
+|----------------|------------|------------|----------------|
+| AlivePayload   | 100% (2/2) | 75% (3/4)  | 50% (4/8)      |
+| ElectedPayload | 100% (2/2) | 75% (3/4)  | 50% (4/8)      |
+| SignPayload    | 100% (3/3) | 100% (7/7) | 100% (119/119) |
+
+The AlivePayload and ElectedPayload classes both only contain a method to deserialize the respective payload. These methods have been tested, but the coverage shows 1 method that is not being tested in both classes, this must be a method that is being called, but which is not directly implemented by us. The most important class, containing the largest portion of what has been implemented, is SignPayload. This class seems to be tested quite thoroughly, as it scores 100% on all metrics. However, these metrics indicate how much of a class or method is tested, and how many lines are passed while executing the tests. A tool should be used that performs a more in depth analysis of the code coverage, showing (additional) metrics such as branch coverage, statement coverage, cyclomatic complexity, etc. in order to gain more insights into the test performance. Currently, this was not in the scope of this project, but we strongly recommend to add it in the future.
+
 ### Future work
-There are TODOs left in the codebase, which should be picked up as soon as possible. Also, BitcoinJ should be used as they have added Taproot support. Finally, a FROST or SPRINT library implementation would be extremely beneficial to use. 
+There are TODOs left in the codebase, which should be picked up as soon as possible. Also, BitcoinJ should be used as they have added Taproot support. Furthermore, in order to gain more insight into the coverage of tests a code coverage analysis tool should be used, e.g.: Kover. Finally, a FROST or SPRINT library implementation would be extremely beneficial to use. 
