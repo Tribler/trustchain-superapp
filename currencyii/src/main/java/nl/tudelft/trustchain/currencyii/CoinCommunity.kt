@@ -396,7 +396,7 @@ open class CoinCommunity constructor(
                 ?: throw IllegalStateException("Most recent DAO block not found")
         val peerPK: ArrayList<String> = ArrayList<String>()
         val blockData = SWJoinBlockTransactionData(mostRecentWalletBlock.transaction).getData()
-        for (swParticipantPk in blockData.SW_TRUSTCHAIN_PKS) {
+        for (swParticipantPk in blockData.SW_BITCOIN_PKS) {
             peerPK.add(swParticipantPk)
         }
         return peerPK
@@ -417,8 +417,9 @@ open class CoinCommunity constructor(
         getCurrentLeader()[payload.DAOid.decodeToString()] = null
 
         val higherPeers = ArrayList<Peer>()
+
         for (p in this.getPeers()) {
-            if (peerPK.contains(p.publicKey.keyToBin().decodeToString()) && p.address.hashCode() > this.myPeer.address.hashCode()) {
+            if (peerPK.contains(p.publicKey.keyToBin().toHex()) && p.address.hashCode() > this.myPeer.address.hashCode()) {
                 higherPeers.add(p)
             }
         }
@@ -480,7 +481,7 @@ open class CoinCommunity constructor(
         val peerPK = getPeersPKInDao(publicKeyBlock)
         for (peer in peers) {
             if (peer.publicKey == this.myPeer.publicKey) continue
-            if (peerPK.contains(peer.publicKey.keyToBin().decodeToString())) {
+            if (peerPK.contains(peer.publicKey.keyToBin().toHex())) {
                 sendPayload(peer, this.createElectionRequest(publicKeyBlock))
                 Log.d("LEADER", "Sending to peer at " + peer.address + " in " + serviceId + "...")
             }
