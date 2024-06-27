@@ -396,7 +396,7 @@ open class CoinCommunity constructor(
                 ?: throw IllegalStateException("Most recent DAO block not found")
         val peerPK: ArrayList<String> = ArrayList<String>()
         val blockData = SWJoinBlockTransactionData(mostRecentWalletBlock.transaction).getData()
-        for (swParticipantPk in blockData.SW_BITCOIN_PKS) {
+        for (swParticipantPk in blockData.SW_TRUSTCHAIN_PKS) {
             peerPK.add(swParticipantPk)
         }
         return peerPK
@@ -419,7 +419,8 @@ open class CoinCommunity constructor(
         val higherPeers = ArrayList<Peer>()
 
         for (p in this.getPeers()) {
-            if (peerPK.contains(p.publicKey.keyToBin().toHex()) && p.address.hashCode() > this.myPeer.address.hashCode()) {
+            if (peerPK.contains(p.publicKey.keyToBin().toHex()) &&
+                p.address.hashCode() > this.myPeer.address.hashCode()) {
                 higherPeers.add(p)
             }
         }
