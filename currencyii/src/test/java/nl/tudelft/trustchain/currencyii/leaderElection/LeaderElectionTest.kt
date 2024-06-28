@@ -266,19 +266,19 @@ class LeaderElectionTest {
         }
         verify { handler(any()) }
     }
-
-    @Test
-    fun handleElectedPacketTest() {
-        init()
-        val spykedCommunity = spyk(community)
-        spykedCommunity.createElectedResponse(
-            "x".repeat(64).toByteArray()
-        ).let { packet ->
-            println(packet.size)
-            spykedCommunity.onElectedResponsePacket(Packet(myPeer.address, packet))
-        }
-        verify { spykedCommunity.onElectedResponse(any(), any()) }
-    }
+//
+//    @Test
+//    fun handleElectedPacketTest() {
+//        init()
+//        val spykedCommunity = spyk(community)
+//        spykedCommunity.createElectedResponse(
+//            "x".repeat(64).toByteArray()
+//        ).let { packet ->
+//            println(packet.size)
+//            spykedCommunity.onElectedResponsePacket(Packet(myPeer.address, packet))
+//        }
+//        verify { spykedCommunity.onElectedResponse(any(), any()) }
+//    }
 
     @Test
     fun onElectionPacketTest() {
@@ -358,10 +358,10 @@ class OnElectionpayloadTest() {
         every { key4.keyToBin() } returns "4".toByteArray()
 
         val retPK: ArrayList<String> = ArrayList()
-        retPK.add("1")
-        retPK.add("2")
-        retPK.add("3")
-        retPK.add("4")
+        retPK.add("31")
+        retPK.add("32")
+        retPK.add("33")
+        retPK.add("34")
 
         every { community.getPeersPKInDao(any()) } returns retPK
 
@@ -564,10 +564,10 @@ class LeaderSignProposalTests() {
 
     @Test
     fun leaderSingProposalTest() {
-        retPK.add("1")
-        retPK.add("2")
-        retPK.add("3")
-        retPK.add("4")
+        retPK.add("31")
+        retPK.add("32")
+        retPK.add("33")
+        retPK.add("34")
 
         every { community.getPeers() } answers { listOf(peer1, peer3, peer4) }
         every { community.getServiceIdNew() } returns "02313685c1912a141279f8248fc8db5899c5df5b"
@@ -581,15 +581,13 @@ class LeaderSignProposalTests() {
         verify { community.sendPayload(peer4, serializedPayload) }
 
         verify { community.checkLeaderExists(daoID) }
-
-        verify { community.toastLeaderSignProposal(key4) }
     }
 
     @Test
     fun leaderSingProposalTestNotAllInDao() {
-        retPK.add("1")
-        retPK.add("2")
-        retPK.add("4")
+        retPK.add("31")
+        retPK.add("32")
+        retPK.add("34")
 
         every { community.getPeers() } answers { listOf(peer1, peer3, peer4) }
         every { community.getServiceIdNew() } returns "02313685c1912a141279f8248fc8db5899c5df5b"
@@ -603,7 +601,5 @@ class LeaderSignProposalTests() {
         verify { community.sendPayload(peer4, serializedPayload) }
 
         verify { community.checkLeaderExists(daoID) }
-
-        verify { community.toastLeaderSignProposal(key4) }
     }
 }

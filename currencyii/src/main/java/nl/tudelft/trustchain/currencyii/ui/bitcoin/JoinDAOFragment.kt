@@ -166,9 +166,11 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 }
 
                 CoroutineScope(Dispatchers.Main).launch {
-                    Toast.makeText(context,
+                    Toast.makeText(
+                        context,
                         "Sending JOIN proposal",
-                        Toast.LENGTH_LONG).show()
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
 

@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -297,16 +296,23 @@ open class CoinCommunity constructor(
         this.onAliveResponse(peer, payload)
     }
 
-    private fun makeToast(text: String, duration: Int = Toast.LENGTH_SHORT, dispatcher: CoroutineContext = Dispatchers.Main) {
+    private fun makeToast(
+        text: String,
+        duration: Int = Toast.LENGTH_SHORT,
+        dispatcher: CoroutineContext = Dispatchers.Main
+    ) {
         CoroutineScope(dispatcher).launch {
-            Toast.makeText(context, text, duration).show()
+            Toast.makeText(
+                context,
+                text,
+                duration
+            ).show()
         }
     }
 
     private fun onDaoJoinDataPacket(packet: Packet) {
         Log.d("LEADER", "Received data from Peer wanting to join")
         makeToast("Received data from Peer wanting to join")
-
 
         val (peer, payload) =
             packet.getAuthPayload(
@@ -420,7 +426,8 @@ open class CoinCommunity constructor(
 
         for (p in this.getPeers()) {
             if (peerPK.contains(p.publicKey.keyToBin().toHex()) &&
-                p.address.hashCode() > this.myPeer.address.hashCode()) {
+                p.address.hashCode() > this.myPeer.address.hashCode()
+            ) {
                 higherPeers.add(p)
             }
         }
@@ -495,8 +502,10 @@ open class CoinCommunity constructor(
 
         val currentLeader = getCurrentLeader()[publicKeyBlock.decodeToString()]!!
         Log.d("LEADER", "sending dao join transaction data to leader ${currentLeader.publicKey}")
-        makeToast("sending dao join transaction data to leader ${currentLeader.publicKey}",
-            Toast.LENGTH_LONG)
+        makeToast(
+            "sending dao join transaction data to leader ${currentLeader.publicKey}",
+            Toast.LENGTH_LONG
+        )
 
         val payload =
             SignPayload(
@@ -509,8 +518,10 @@ open class CoinCommunity constructor(
         sendPayload(currentLeader, packet)
 
 //        toastLeaderSignProposal(currentLeader.publicKey)
-        makeToast("Sending DAO join data to ${currentLeader.publicKey}",
-            Toast.LENGTH_LONG)
+        makeToast(
+            "Sending DAO join data to ${currentLeader.publicKey}",
+            Toast.LENGTH_LONG
+        )
     }
 
     fun toastLeaderSignProposal(publicKey: PublicKey) {
