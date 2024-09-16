@@ -212,4 +212,10 @@
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.MyProposalsFragment"
         android:label="@string/proposals"
         tools:layout="@layout/fragment_my_proposals" />
+    <fragment
+        android:id="@+id/debugDashboardFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DebugDashboardFragment"
+        android:label="@string/debug_dash"
+        tools:layout="@layout/fragment_debug_dashboard" />
+
 </navigation>

@@ -5,8 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -14,7 +16,6 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.databinding.FragmentJoinNetworkBinding
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureBlockTD
@@ -163,6 +164,14 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                         joinSharedWalletClicked(uniqueWallets[position])
                     }
                 }
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    Toast.makeText(
+                        context,
+                        "Sending JOIN proposal",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
 
             if (fetchedWallets.isEmpty()) {
@@ -216,7 +225,6 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 setAlertText(t.message ?: "Unexpected error occurred. Try again")
                 return
             }
-
         val context = requireContext()
         // Wait and collect signatures
         var signatures: List<SWResponseSignatureBlockTD>? = null
@@ -227,24 +235,33 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
 
         // Create a new shared wallet using the signatures of the others.
         // Broadcast the new shared bitcoin wallet on trust chain.
-        try {
-            getCoinCommunity().joinBitcoinWallet(
-                mostRecentSWBlock.transaction,
-                proposeBlockData,
-                signatures,
-                context
-            )
-            // Add new nonceKey after joining a DAO
-            WalletManagerAndroid.getInstance()
-                .addNewNonceKey(proposeBlockData.SW_UNIQUE_ID, context)
-        } catch (t: Throwable) {
-            Log.e("Coin", "Joining failed. ${t.message ?: "No further information"}.")
-            setAlertText(t.message ?: "Unexpected error occurred. Try again")
-        }
+        Log.e("LEADER", "requesting signing...")
+        val latestHash = block.calculateHash()
+
+        getCoinCommunity().leaderSignProposal(
+            mostRecentSWBlock,
+            proposeBlockData,
+            signatures,
+            latestHash
+        )
+
+//        try {
+//            getCoinCommunity().joinBitcoinWallet(
+//                mostRecentSWBlock.transaction,
+//                proposeBlockData,
+//                signatures,
+//                context
+//            )
+//            // Add new nonceKey after joining a DAO
+//            WalletManagerAndroid.getInstance()
+//                .addNewNonceKey(proposeBlockData.SW_UNIQUE_ID, context)
+//        } catch (t: Throwable) {
+//            Log.e("Coin", "Joining failed. ${t.message ?: "No further information"}.")
+//            setAlertText(t.message ?: "Unexpected error occurred. Try again")
+//        }
 
         // Update wallets UI list
         fetchSharedWalletsAndUpdateUI()
-        setAlertText("You joined ${proposeBlockData.SW_UNIQUE_ID}!")
     }
 
     /**

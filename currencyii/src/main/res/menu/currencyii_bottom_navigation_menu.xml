@@ -20,5 +20,9 @@
         android:id="@+id/bitcoinFragment"
         android:icon="@drawable/ic_account_balance_wallet_black_24dp"
         android:title="@string/my_wallet" />
+    <item
+        android:id="@+id/debugDashboardFragment"
+        android:title="@string/debug_menu"
+        android:icon="@drawable/ic_bug_report_black_24dp" />
 
 </menu>

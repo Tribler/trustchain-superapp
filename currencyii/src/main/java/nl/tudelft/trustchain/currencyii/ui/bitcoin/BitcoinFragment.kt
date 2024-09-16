@@ -182,7 +182,7 @@ class BitcoinFragment :
         val walletManager = WalletManagerAndroid.getInstance()
         binding.addBtc.isClickable = true
         binding.addBtc.setOnClickListener {
-            if (!getBitcoinPressed) {
+            if (!getBitcoinPressed or true) {
                 getBitcoinPressed = true
 
                 if (!addBTC(walletManager.protocolAddress().toString())) {

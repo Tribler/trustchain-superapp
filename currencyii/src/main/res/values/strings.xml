@@ -25,6 +25,7 @@
     <string name="all_daos">All DAOs</string>
     <string name="my_wallet">My Wallet</string>
     <string name="my_daos">My DAOs</string>
+    <string name="debug_menu">Debug</string>
 
     <string name="my_daos_join_or_create">Join or Create?</string>
     <string-array name="my_daos_options">
@@ -32,8 +33,7 @@
         <item>Create New DAO</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="proposals">Proposals</string>
+    <string name="debug_dash">Debug Dashboard</string>
 
 </resources>

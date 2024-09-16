@@ -13,7 +13,14 @@ import nl.tudelft.trustchain.currencyii.CoinCommunity.Companion.SIGNATURE_AGREEM
 import nl.tudelft.trustchain.currencyii.CoinCommunity.Companion.SIGNATURE_ASK_BLOCK
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.sharedWallet.*
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTD
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseNegativeSignatureTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureBlockTD
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import nl.tudelft.trustchain.currencyii.util.taproot.MuSig
 import org.bitcoinj.core.Coin

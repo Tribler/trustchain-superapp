@@ -6,8 +6,13 @@
         <!--        This is for RegTest faucet, to claim some starter money -->
         <domain includeSubdomains="true">131.180.27.224</domain>
         <!--        IP address of the host machine when ran from the Android emulator -->
-<!--        <domain includeSubdomains="true">10.0.2.2</domain>-->
+        <domain includeSubdomains="true">10.0.2.2</domain>
 
+
+        <domain includeSubdomains="true">145.94.149.176</domain>
+        <!--<trust-anchors>
+           <certificates src="@raw/fullchain"/>
+       </trust-anchors>-->
         <!--        This is for RegTest faucet, to claim some starter money -->
         <domain includeSubdomains="true">95.179.182.243</domain>
     </domain-config>

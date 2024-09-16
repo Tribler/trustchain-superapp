@@ -32,6 +32,10 @@ const val MAIN_NET_WALLET_NAME = "forwarding-service"
 const val MIN_BLOCKCHAIN_PEERS_TEST_NET = 5
 const val MIN_BLOCKCHAIN_PEERS_REG_TEST = 1
 const val MIN_BLOCKCHAIN_PEERS_PRODUCTION = 5
+
+// const val REG_TEST_FAUCET_IP = "10.0.2.2"
+// const val REG_TEST_FAUCET_DOMAIN = "10.0.2.2:443"
+
 const val REG_TEST_FAUCET_IP = "131.180.27.224"
 const val REG_TEST_FAUCET_DOMAIN = "taproot.tribler.org"
 
