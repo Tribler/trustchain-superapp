@@ -51,11 +51,17 @@ allprojects {
     }
 
     // Temp fix for issue https://github.com/mockk/mockk/issues/281
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy {
             force("org.objenesis:objenesis:2.6")
             force('com.google.inject:guice:4.2.1')
             force('com.google.inject:guice-multibindings:4.2.1')
+        }
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_17.toString()
         }
     }
 
