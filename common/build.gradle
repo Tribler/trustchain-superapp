@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'app.cash.sqldelight'
@@ -81,6 +83,7 @@ dependencies {
     implementation project(':ipv8-android')
 
     implementation 'com.google.guava:guava:30.0-android'
+    implementation "app.cash.sqldelight:sqlite-driver:$sqldelight_version"
 
     // AndroidX
     api "androidx.appcompat:appcompat:$appcompat_version"
@@ -116,7 +119,6 @@ dependencies {
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "io.mockk:mockk:$mockk_version"
-    testImplementation "app.cash.sqldelight:sqlite-driver:$sqldelight_version"
     testImplementation "com.goterl:lazysodium-java:5.1.4"
 
     // Transitive dependencies
@@ -139,8 +141,12 @@ dependencies {
 }
 
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+tasks.withType(KotlinCompile).configureEach {
     kotlinOptions.freeCompilerArgs += [
             "-opt-in=kotlin.RequiresOptIn"
     ]
+}
+
+tasks.named("verifyDebugDatabaseMigration") {
+    dependsOn("generateDebugDatabaseSchema")
 }

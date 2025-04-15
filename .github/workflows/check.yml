@@ -23,7 +23,7 @@ jobs:
           cache: 'gradle'
 
       - name: Run check
-        run: ./gradlew check --no-daemon
+        run: ./gradlew check --no-daemon --stacktrace
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
