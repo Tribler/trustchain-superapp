@@ -120,7 +120,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "com.goterl:lazysodium-java:5.1.4"
-    testImplementation "org.xerial:sqlite-jdbc:3.44.1.0"
+    runtimeOnly "org.xerial:sqlite-jdbc:3.43.2.0"
 
 
     // Transitive dependencies
@@ -147,4 +147,12 @@ tasks.withType(KotlinCompile).configureEach {
     kotlinOptions.freeCompilerArgs += [
             "-opt-in=kotlin.RequiresOptIn"
     ]
+}
+
+tasks.named("verifyReleaseDatabaseMigration") {
+    dependsOn("generateDebugDatabaseSchema")
+}
+
+tasks.named("verifyDebugDatabaseMigration") {
+    dependsOn("generateDebugDatabaseSchema")
 }
