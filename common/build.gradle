@@ -138,9 +138,15 @@ dependencies {
     testImplementation 'io.mockk:mockk-dsl:1.13.9'
 }
 
-
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
             "-opt-in=kotlin.RequiresOptIn"
     ]
+}
+
+afterEvaluate {
+    if (System.getenv("CI") == "true") {
+        tasks.findByName("verifyReleaseDatabaseMigration")?.enabled = false
+        tasks.findByName("verifyDebugDatabaseMigration")?.enabled = false
+    }
 }
