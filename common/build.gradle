@@ -149,10 +149,18 @@ tasks.withType(KotlinCompile).configureEach {
     ]
 }
 
-tasks.named("verifyReleaseDatabaseMigration") {
-    dependsOn("generateDebugDatabaseSchema")
-}
+afterEvaluate {
+    def generateDebugSchema = tasks.findByName("generateDebugDatabaseSchema")
+    def verifyDebugMigration = tasks.findByName("verifyDebugDatabaseMigration")
 
-tasks.named("verifyDebugDatabaseMigration") {
-    dependsOn("generateDebugDatabaseSchema")
+    if (generateDebugSchema && verifyDebugMigration) {
+        verifyDebugMigration.dependsOn(generateDebugSchema)
+    }
+
+    def generateReleaseSchema = tasks.findByName("generateReleaseDatabaseSchema")
+    def verifyReleaseMigration = tasks.findByName("verifyReleaseDatabaseMigration")
+
+    if (generateReleaseSchema && verifyReleaseMigration) {
+        verifyReleaseMigration.dependsOn(generateReleaseSchema)
+    }
 }
