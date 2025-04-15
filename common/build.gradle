@@ -15,7 +15,7 @@ ktlint {
 
 sqldelight {
     databases {
-        Database {
+        create("Database") {
             packageName = "nl.tudelft.common.sqldelight"
             srcDirs = files(['src/main/sqldelight'])
             schemaOutputDirectory = file("src/main/sqldelight/databases")
