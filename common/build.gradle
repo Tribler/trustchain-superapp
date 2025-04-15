@@ -120,6 +120,8 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "com.goterl:lazysodium-java:5.1.4"
+    testImplementation "org.xerial:sqlite-jdbc:3.44.1.0"
+
 
     // Transitive dependencies
     api "androidx.fragment:fragment:$fragment_version"
