@@ -24,6 +24,7 @@ class OptionsDialog(
     private val bigOptionsCols: Int = 4,
     private val bigOptionsTextEnabled: Boolean? = true,
     private val bigOptionsIconEnabled: Boolean? = true,
+    @SuppressLint("RestrictedApi") // TODO: This is extremely bad practice.
     private val menuMods: ((MenuBuilder) -> MenuBuilder)? = null,
     private val optionSelected: ((BottomSheetDialog, MenuItem) -> Unit)
 ) : VTDialogFragment() {
