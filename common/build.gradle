@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'app.cash.sqldelight'
@@ -15,7 +13,7 @@ ktlint {
 
 sqldelight {
     databases {
-        create("Database") {
+        Database {
             packageName = "nl.tudelft.common.sqldelight"
             srcDirs = files(['src/main/sqldelight'])
             schemaOutputDirectory = file("src/main/sqldelight/databases")
@@ -83,7 +81,6 @@ dependencies {
     implementation project(':ipv8-android')
 
     implementation 'com.google.guava:guava:30.0-android'
-    implementation "app.cash.sqldelight:sqlite-driver:$sqldelight_version"
 
     // AndroidX
     api "androidx.appcompat:appcompat:$appcompat_version"
@@ -119,9 +116,8 @@ dependencies {
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "io.mockk:mockk:$mockk_version"
+    testImplementation "app.cash.sqldelight:sqlite-driver:$sqldelight_version"
     testImplementation "com.goterl:lazysodium-java:5.1.4"
-    runtimeOnly "org.xerial:sqlite-jdbc:3.43.2.0"
-
 
     // Transitive dependencies
     api "androidx.fragment:fragment:$fragment_version"
@@ -143,40 +139,8 @@ dependencies {
 }
 
 
-tasks.withType(KotlinCompile).configureEach {
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
             "-opt-in=kotlin.RequiresOptIn"
     ]
-}
-
-afterEvaluate {
-    def generateDebugSchema = tasks.findByName("generateDebugDatabaseSchema")
-    def verifyDebugMigration = tasks.findByName("verifyDebugDatabaseMigration")
-
-    if (generateDebugSchema && verifyDebugMigration) {
-        verifyDebugMigration.dependsOn(generateDebugSchema)
-    }
-
-    def generateReleaseSchema = tasks.findByName("generateReleaseDatabaseSchema")
-    def verifyReleaseMigration = tasks.findByName("verifyReleaseDatabaseMigration")
-
-    if (generateReleaseSchema && verifyReleaseMigration) {
-        verifyReleaseMigration.dependsOn(generateReleaseSchema)
-    }
-}
-
-configurations {
-    sqldelightMigration
-}
-
-dependencies {
-    sqldelightMigration "org.xerial:sqlite-jdbc:3.43.2.0"
-}
-
-tasks.withType(app.cash.sqldelight.gradle.VerifyMigrationTask).configureEach {
-    classpath += configurations.sqldelightMigration
-}
-
-tasks.withType(app.cash.sqldelight.gradle.GenerateSchemaTask).configureEach {
-    classpath += configurations.sqldelightMigration
 }

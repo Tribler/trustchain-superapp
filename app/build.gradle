@@ -187,7 +187,6 @@ dependencies {
     }
     implementation project(':ipv8-android')
     kapt 'com.google.dagger:dagger-compiler:2.50'
-    runtimeOnly "org.xerial:sqlite-jdbc:3.43.2.0"
 }
 
 
