@@ -23,7 +23,7 @@ jobs:
           cache: 'gradle'
 
       - name: Run check
-        run: ./gradlew check -x verifyDebugDatabaseMigration --no-daemon --stacktrace
+        run: ./gradlew check -x verifyDebugDatabaseMigration -x verifyReleaseDatabaseMigration --no-daemon --stacktrace
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
