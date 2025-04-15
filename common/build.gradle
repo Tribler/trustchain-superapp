@@ -164,3 +164,19 @@ afterEvaluate {
         verifyReleaseMigration.dependsOn(generateReleaseSchema)
     }
 }
+
+configurations {
+    sqldelightMigration
+}
+
+dependencies {
+    sqldelightMigration "org.xerial:sqlite-jdbc:3.43.2.0"
+}
+
+tasks.withType(app.cash.sqldelight.gradle.VerifyMigrationTask).configureEach {
+    classpath += configurations.sqldelightMigration
+}
+
+tasks.withType(app.cash.sqldelight.gradle.GenerateSchemaTask).configureEach {
+    classpath += configurations.sqldelightMigration
+}
