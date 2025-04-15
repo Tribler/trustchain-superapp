@@ -23,7 +23,9 @@ jobs:
           cache: 'gradle'
 
       - name: Run check
-        run: ./gradlew check -x verifyDebugDatabaseMigration -x verifyReleaseDatabaseMigration -x verifyMainDatabaseMigration --no-daemon --stacktrace
+        # This is a workaround for the failing migration actions. They fail due to a lack of sqlite driver. We currently have no migrations.
+        # TODO: Remove this workaround when we have migrations.
+        run: ./gradlew check -x verifyDebugDatabaseMigration -x verifyReleaseDatabaseMigration -x verifyMainDatabaseMigration --no-daemon
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
