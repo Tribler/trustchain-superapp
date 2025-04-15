@@ -146,9 +146,3 @@ tasks.withType(KotlinCompile).configureEach {
             "-opt-in=kotlin.RequiresOptIn"
     ]
 }
-
-tasks.whenTaskAdded { task ->
-    if (task.name == "verifyDebugDatabaseMigration") {
-        task.dependsOn("generateDebugDatabaseSchema")
-    }
-}
