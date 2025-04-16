@@ -28,11 +28,16 @@ dependencies {
     }
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 application {
     mainClassName = 'nl.trustchain.tudelft.musicdaodatafeeder.DataFeederKt'
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions.freeCompilerArgs += [
             "-opt-in=kotlin.ExperimentalUnsignedTypes",
     ]

@@ -138,7 +138,6 @@ dependencies {
     testImplementation 'io.mockk:mockk-dsl:1.13.9'
 }
 
-
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
             "-opt-in=kotlin.RequiresOptIn"
