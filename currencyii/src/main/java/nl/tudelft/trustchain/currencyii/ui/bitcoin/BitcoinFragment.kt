@@ -43,14 +43,12 @@ const val BALANCE_THRESHOLD = "5"
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment :
-    BaseFragment(R.layout.fragment_bitcoin),
-    ImportKeyDialog.ImportKeyDialogListener {
+class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin), ImportKeyDialog.ImportKeyDialogListener {
     @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentBitcoinBinding? = null
     private val binding get() = _binding!!
 
-    private var getBitcoinPressed = false
+    private var lastGetBitcoinTime: Long = 0
 
     @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -179,28 +177,33 @@ class BitcoinFragment :
      * Enable the get BTC button, set the color and the onclick listener correctly.
      */
     private fun enableGetBitcoinButton() {
-        val walletManager = WalletManagerAndroid.getInstance()
         binding.addBtc.isClickable = true
         binding.addBtc.setOnClickListener {
-            if (!getBitcoinPressed) {
-                getBitcoinPressed = true
-
+            val walletManager = WalletManagerAndroid.getInstance()
+            val elapsedSeconds = (System.currentTimeMillis() - lastGetBitcoinTime) / 1000
+            val balance = walletManager.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED)
+            if (elapsedSeconds > 60 && balance.isLessThan(Coin.parseCoin(BALANCE_THRESHOLD))) {
                 if (!addBTC(walletManager.protocolAddress().toString())) {
                     Log.e("Coin", "The server response is failing")
                     Toast.makeText(
                         this.requireContext(),
-                        "Something went wrong, please delete system32",
+                        "Bitcoin node is not responding, please try again later.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Thread.sleep(1000)
+                    Toast.makeText(
+                        this.requireContext(),
+                        "If this problem persists, please contact the developers.",
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
+                    lastGetBitcoinTime = System.currentTimeMillis()
                     Toast.makeText(
                         this.requireContext(),
                         "Successfully added 0.10 BTC",
                         Toast.LENGTH_SHORT
                     ).show()
-
                     Thread.sleep(1000)
-
                     Toast.makeText(
                         this.requireContext(),
                         "It can take up to a minute to register in your balance",
@@ -209,11 +212,19 @@ class BitcoinFragment :
                     this.refresh(true)
                 }
             } else {
-                Toast.makeText(
-                    this.requireContext(),
-                    "You are already given an amount of BTC, please wait a little longer",
-                    Toast.LENGTH_SHORT
-                ).show()
+                if (balance.isGreaterThan(Coin.parseCoin(BALANCE_THRESHOLD))) {
+                    Toast.makeText(
+                        this.requireContext(),
+                        "You already have enough bitcoin don't you think?",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        this.requireContext(),
+                        "You have to wait ${60 - elapsedSeconds} seconds before you can request more bitcoin",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
@@ -269,8 +280,7 @@ class BitcoinFragment :
      * @return Boolean - if the transaction was successful
      */
     private fun addBTC(address: String): Boolean {
-        val executor: ExecutorService =
-            Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+        val executor: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         val future: Future<Boolean>
 
         val url = "https://$REG_TEST_FAUCET_DOMAIN/addBTC?address=$address"
@@ -343,15 +353,12 @@ class BitcoinFragment :
                 )
 
             try {
-                WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                    .setConfiguration(config)
-                    .init()
+                WalletManagerAndroid.Factory(this.requireContext().applicationContext).setConfiguration(config).init()
             } catch (t: Throwable) {
                 Toast.makeText(
                     this.requireContext(),
                     "Something went wrong while initializing the new wallet. ${
-                        t.message
-                            ?: "No further information"
+                        t.message ?: "No further information"
                     }.",
                     Toast.LENGTH_SHORT
                 ).show()
