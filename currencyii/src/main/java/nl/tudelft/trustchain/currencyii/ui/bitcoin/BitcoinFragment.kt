@@ -43,9 +43,7 @@ const val BALANCE_THRESHOLD = "5"
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment :
-    BaseFragment(R.layout.fragment_bitcoin),
-    ImportKeyDialog.ImportKeyDialogListener {
+class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin), ImportKeyDialog.ImportKeyDialogListener {
     @Suppress("ktlint:standard:property-naming") // False positive
     private var _binding: FragmentBitcoinBinding? = null
     private val binding get() = _binding!!
@@ -198,7 +196,6 @@ class BitcoinFragment :
                         "If this problem persists, please contact the developers.",
                         Toast.LENGTH_SHORT
                     ).show()
-
                 } else {
                     lastGetBitcoinTime = System.currentTimeMillis()
                     Toast.makeText(
@@ -283,8 +280,7 @@ class BitcoinFragment :
      * @return Boolean - if the transaction was successful
      */
     private fun addBTC(address: String): Boolean {
-        val executor: ExecutorService =
-            Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+        val executor: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         val future: Future<Boolean>
 
         val url = "https://$REG_TEST_FAUCET_DOMAIN/addBTC?address=$address"
@@ -357,15 +353,12 @@ class BitcoinFragment :
                 )
 
             try {
-                WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                    .setConfiguration(config)
-                    .init()
+                WalletManagerAndroid.Factory(this.requireContext().applicationContext).setConfiguration(config).init()
             } catch (t: Throwable) {
                 Toast.makeText(
                     this.requireContext(),
                     "Something went wrong while initializing the new wallet. ${
-                        t.message
-                            ?: "No further information"
+                        t.message ?: "No further information"
                     }.",
                     Toast.LENGTH_SHORT
                 ).show()
