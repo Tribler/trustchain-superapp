@@ -1,5 +1,7 @@
 package nl.tudelft.trustchain.eurotoken.ui.transfer
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.lifecycleScope
@@ -12,12 +14,32 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentRequestMoneyBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
-
+import android.widget.Toast
+import nl.tudelft.trustchain.eurotoken.viewModel.WalletViewModel
+import androidx.fragment.app.activityViewModels
+import com.google.android.material.snackbar.Snackbar
+import nl.tudelft.trustchain.eurotoken.ui.NfcReaderActivity
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 class RequestMoneyFragment : EurotokenBaseFragment(R.layout.fragment_request_money) {
-    private val binding by viewBinding(FragmentRequestMoneyBinding::bind)
+    private var _binding: FragmentRequestMoneyBinding? = null
+//    private val walletViewModel: WalletViewModel by activityViewModels()
+    private val binding get() = _binding!!
 
     private val qrCodeUtils by lazy {
         QRCodeUtils(requireContext())
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentRequestMoneyBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(
@@ -26,6 +48,7 @@ class RequestMoneyFragment : EurotokenBaseFragment(R.layout.fragment_request_mon
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Assumed non-null with !! in original
         val json = requireArguments().getString(ARG_DATA)!!
 
         binding.txtRequestData.text = json
@@ -40,9 +63,37 @@ class RequestMoneyFragment : EurotokenBaseFragment(R.layout.fragment_request_mon
         binding.btnContinue.setOnClickListener {
             findNavController().navigate(R.id.action_requestMoneyFragment_to_transactionsFragment)
         }
+
+        //nfc
+        //still static
+        binding.btnNfcRequest.setOnClickListener {
+            // TODO: potentially prepare data??
+
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.receive_via_nfc),
+                Toast.LENGTH_LONG
+            ).show()
+
+            //maybe feedback too?
+        }
+        binding.btnContinue.setOnClickListener {
+            findNavController().popBackStack()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+    }
+
+    override fun onDestroyView() {
+        // TODO
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {
         const val ARG_DATA = "data"
+        const val TAG = "RequestMoneyFragment"
     }
 }

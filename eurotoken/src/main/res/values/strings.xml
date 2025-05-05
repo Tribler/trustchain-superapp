@@ -10,4 +10,20 @@
     <string name="toggle_demo_mode">Turn %s Demo Mode</string>
     <string name="trust_scores_menu_item">Trustscores DB</string>
     <string name="trust_scores_db_item_score">%d%%</string>
+
+    <string name="receive_via_nfc">Receive via NFC Tap</string>
+    <string name="nfc_activated">Ready for NFC Tap (Sending).</string>
+    <string name="start_reader_mode">Enable Tap to Receive</string>
+    <string name="nfc_tap_confirmed">NFC Tap Confirmed!</string>
+    <string name="nfc_tap_failed_mismatch">NFC Tap Failed: Data mismatch.</string>
+    <string name="nfc_tap_failed_generic">NFC Tap Failed: %s</string>
+
+    <string name="apdu_service_desc">EuroToken HCE Service</string>
+    <string name="aid_group_desc">EuroToken Transaction</string>
+    <string name="waiting_for_nfc_tap">Waiting for NFC tap</string>
+
+    <string name="nfc_confirmation_failed">NFC Failed: %1$s</string>
+
+    <string name="insufficient_balance_or_error">Insufficient balance or send error</string>
+
 </resources>

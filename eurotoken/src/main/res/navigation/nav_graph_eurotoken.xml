@@ -42,6 +42,9 @@
         <action
             android:id="@+id/action_sendMoneyFragment_to_transactionsFragment"
             app:destination="@id/transactionsFragment" />
+        <action
+            android:id="@+id/action_sendMoneyFragment_to_nfcResultFragment"
+            app:destination="@id/nfcResultFragment" />
         <argument
             android:name="amount"
             app:argType="long" />
@@ -117,5 +120,13 @@
         <action
             android:id="@+id/action_createMoneyFragment_to_transactionsFragment"
             app:destination="@id/transactionsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/nfcResultFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.nfc.NfcResultFragment"
+        android:label="NFC Result">
+        <argument
+            android:name="nfcData"
+            app:argType="string" />
     </fragment>
 </navigation>

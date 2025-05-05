@@ -37,6 +37,9 @@
            devices. -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
+    <!-- NFC -->
+    <uses-permission android:name="android.permission.NFC" />
+
     <application
         android:name="nl.tudelft.trustchain.app.TrustChainApplication"
         android:allowBackup="true"

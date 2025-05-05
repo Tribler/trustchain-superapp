@@ -3,6 +3,43 @@
 
     <application>
         <activity android:name=".EuroTokenMainActivity"></activity>
+        
+        <activity
+            android:name="nl.tudelft.trustchain.eurotoken.ui.NfcActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <!-- <data android:mimeType="application/vnd.eurotoken" /> -->
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <!-- TESTING -->
+            <!-- <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter> -->
+        </activity>
+
+        <!-- hceService -->
+        <service
+            android:name=".nfc.EuroTokenHCEService"
+            android:exported="true"
+            android:permission="android.permission.BIND_NFC_SERVICE">
+            <intent-filter>
+                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.nfc.cardemulation.host_apdu_service"
+                android:resource="@xml/apduservice" />
+        </service>
+
+        <activity
+            android:name=".ui.NfcReaderActivity"
+            android:exported="false"
+            android:label="NFC Reader"> </activity>
+        
     </application>
 
 </manifest>
