@@ -134,6 +134,11 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name="nl.tudelft.trustchain.p2playstore.MainActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity"
+            tools:ignore="InnerclassSeparator" />
+
         <service
             android:name="nl.tudelft.trustchain.app.service.TrustChainService"
             android:exported="false"
