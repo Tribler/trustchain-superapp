@@ -32,6 +32,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
 import kotlinx.coroutines.*
+import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
 import nl.tudelft.trustchain.musicdao.core.coin.WalletManager
 import javax.inject.Inject
 
@@ -64,6 +65,9 @@ class MusicActivity : AppCompatActivity() {
 
     @Inject
     lateinit var setupMusicCommunity: SetupMusicCommunity
+
+    @Inject
+    lateinit var database: CacheDatabase
 
     lateinit var mService: MusicGossipingService
     var mBound: Boolean = false
@@ -164,7 +168,7 @@ class MusicActivity : AppCompatActivity() {
         }
 
         setContent {
-            MusicDAOApp()
+            MusicDAOApp(database)
         }
     }
 

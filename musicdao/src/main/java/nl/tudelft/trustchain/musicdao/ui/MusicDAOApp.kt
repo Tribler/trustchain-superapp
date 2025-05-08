@@ -24,6 +24,7 @@ import nl.tudelft.trustchain.musicdao.ui.navigation.Screen
 import nl.tudelft.trustchain.musicdao.ui.screens.profile.MyProfileScreenViewModel
 import nl.tudelft.trustchain.musicdao.ui.styling.MusicDAOTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
 import nl.tudelft.trustchain.musicdao.ui.navigation.BottomNavigationBar
 
 @ExperimentalAnimationApi
@@ -31,7 +32,7 @@ import nl.tudelft.trustchain.musicdao.ui.navigation.BottomNavigationBar
 @ExperimentalMaterialApi
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun MusicDAOApp() {
+fun MusicDAOApp(database: CacheDatabase) {
     MaterialTheme(colors = MusicDAOTheme.DarkColors, shapes = MusicDAOTheme.Shapes) {
         val navController = rememberAnimatedNavController()
 
@@ -61,7 +62,7 @@ fun MusicDAOApp() {
                     )
                 }
             },
-            drawerContent = { Drawer(navController, ownProfileViewScreenModel) },
+            drawerContent = { Drawer(navController, ownProfileViewScreenModel, database) },
             content = { paddingValues ->
                 Column(modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())) {
                     Column(modifier = Modifier.weight(2f)) {

@@ -7,21 +7,34 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
+import nl.tudelft.trustchain.musicdao.core.cache.entities.AlbumEntity
+import nl.tudelft.trustchain.musicdao.core.repositories.AlbumRepository
+import nl.tudelft.trustchain.musicdao.core.repositories.model.Album
 import nl.tudelft.trustchain.musicdao.ui.screens.profile.MyProfileScreenViewModel
 
 @ExperimentalMaterialApi
 @Composable
 fun Drawer(
     navController: NavController,
-    profileScreenViewModel: MyProfileScreenViewModel
+    profileScreenViewModel: MyProfileScreenViewModel,
+    database: CacheDatabase
 ) {
     val profile = profileScreenViewModel.profile.collectAsState()
+    val albumStatsState = remember { mutableStateOf(emptyList<AlbumEntity>()) }
+
+    LaunchedEffect(Unit) {
+        albumStatsState.value = database.dao.getAll()
+    }
 
     Column {
         Column(
@@ -64,6 +77,16 @@ fun Drawer(
             DropdownMenuItem(onClick = { navController.navigate(Screen.Settings.route) }) {
                 Text("Settings")
             }
+        }
+
+        Divider()
+        Column (modifier = Modifier.padding(top = 20.dp)){
+            val downloadedCount = albumStatsState.value.count { it.isDownloaded }
+
+            Text("Statistics", style = MaterialTheme.typography.h6)
+            Text("Downloaded Albums: $downloadedCount")
+            Text("Total Discovered Albums: ${albumStatsState.value.size}")
+
         }
     }
 }
