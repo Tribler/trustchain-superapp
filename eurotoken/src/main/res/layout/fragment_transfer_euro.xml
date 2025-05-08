@@ -1,65 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.transfer.TransferFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/missingNameLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="#EEEEEE" android:padding="16dp" app:layout_constraintTop_toTopOf="parent" tools:layout_editor_absoluteX="1dp">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/missingNameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:visibility="gone"
+        tools:visibility="visible">
 
-        <LinearLayout android:id="@+id/missingInfoLayout" android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toStartOf="@id/btnAdd" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textFieldMissingName"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Your Name" app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnAdd"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Add your name:" android:textStyle="bold" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtMissingName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText android:id="@+id/edtMissingName" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:hint="Name" android:imeOptions="actionDone" android:singleLine="true" tools:text="Your name" />
-
-        </LinearLayout>
-
-        <com.google.android.material.button.MaterialButton android:id="@+id/btnAdd" style="@style/Button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Save" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" />
+        <Button
+            android:id="@+id/btnAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Add" app:layout_constraintBottom_toBottomOf="@+id/textFieldMissingName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textFieldMissingName"
+            app:layout_constraintTop_toTopOf="@+id/textFieldMissingName" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/balanceLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" app:layout_constraintTop_toTopOf="parent" tools:layout_editor_absoluteX="1dp">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/balanceLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="#EEEEEE" android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/missingNameLayout">
 
-        <TextView android:id="@+id/txtOwnPublicKey" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:lines="1" android:typeface="monospace" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" android:visibility="gone" tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
+        <TextView
+            android:id="@+id/txtOwnName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Your Name Here" />
 
-        <TextView android:id="@+id/txtOwnName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Your balance" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toBottomOf="@id/txtOwnPublicKey" android:textStyle="bold" />
+        <TextView
+            android:id="@+id/txtOwnPublicKey"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:lines="1"
+            android:typeface="monospace"
+            app:layout_constraintEnd_toStartOf="@+id/txtBalance"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/txtOwnName"
+            tools:text="YOUR_PUB_KEY_HERE_LONG..." />
 
-        <TextView android:id="@+id/txtBalance" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="20.00" android:textSize="60dp" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toBottomOf="@id/txtOwnName" />
+        <TextView
+            android:id="@+id/txtBalance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="123.45 EUR" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@android:color/darker_gray"/>
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="?android:attr/listDivider" />
 
-    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
-        <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:clipToPadding="false" android:orientation="vertical" android:padding="16dp">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
 
-            <TextView android:id="@+id/txtIntro" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Request or transfer Euro token:" app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/txtIntro"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Select Payment Method" android:textAppearance="?attr/textAppearanceHeadline6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <EditText android:id="@+id/edtAmount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:hint="0.00" android:inputType="numberDecimal" android:textSize="32dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/txtIntro" />
+            <EditText
+                android:id="@+id/edtAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:hint="0.00"
+                android:inputType="numberDecimal"
+                android:minWidth="120dp"
+                android:textSize="32sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtIntro" />
 
-            <LinearLayout android:id="@+id/actionsLayout" android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="24dp" app:layout_constraintTop_toBottomOf="@id/edtAmount" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" android:baselineAligned="false">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRequestQR"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/action_request_payment"
+                app:icon="@drawable/ic_baseline_incoming_24"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/edtAmount" />
 
-                <LinearLayout android:id="@+id/requestSectionLayout" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSendQR"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/action_send_payment"
+                app:icon="@drawable/ic_baseline_outgoing_24"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnRequestQR" />
 
-                    <TextView android:id="@+id/txtRequestTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Request Money" android:textStyle="bold" android:layout_marginBottom="8dp"/>
-
-                    <com.google.android.material.button.MaterialButton android:id="@+id/btnRequestQR" style="@style/Button" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" android:text="Via QR" />
-
-                    <com.google.android.material.button.MaterialButton android:id="@+id/btnRequestNFC" style="@style/Button" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Via NFC" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/sendSectionLayout" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
-
-                    <TextView android:id="@+id/txtSendTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Send Money" android:textStyle="bold" android:layout_marginBottom="8dp"/>
-
-                    <com.google.android.material.button.MaterialButton android:id="@+id/btnSendQR" style="@style/Button" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" android:text="Via QR" app:icon="@drawable/ic_baseline_photo_camera_24" />
-
-                    <com.google.android.material.button.MaterialButton android:id="@+id/btnSendNFC" style="@style/Button" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Via NFC" />
-                </LinearLayout>
-            </LinearLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-
-
 </LinearLayout>

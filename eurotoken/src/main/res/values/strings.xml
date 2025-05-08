@@ -26,4 +26,7 @@
 
     <string name="insufficient_balance_or_error">Insufficient balance or send error</string>
 
+    <string name="action_request_payment">Request Payment</string>
+    <string name="action_send_payment">Send Payment</string>
+    <string name="recent_activity">Recent Activity</string>
 </resources>
