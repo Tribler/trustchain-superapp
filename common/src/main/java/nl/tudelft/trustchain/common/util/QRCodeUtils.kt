@@ -16,25 +16,17 @@ import com.google.zxing.integration.android.IntentIntegrator
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.common.ui.QRCodeActivityPortrait
 
-/**
- * Helper class for creating
- */
+/** Helper class for creating */
 class QRCodeUtils(private val context: Context) {
-    /**
-     * Start the QR scanner, which if successful, calls onActivityResult() on the fragment
-     */
-    fun startQRScanner(
-        fragment: Fragment,
-        promptText: String? = null,
-        vertical: Boolean = false
-    ) {
+    /** Start the QR scanner, which if successful, calls onActivityResult() on the fragment */
+    fun startQRScanner(fragment: Fragment, promptText: String? = null, vertical: Boolean = false) {
         run {
             val integrator =
-                FragmentIntentIntegrator(fragment)
-                    .setPrompt(promptText ?: "Scan QR Code")
-                    .setOrientationLocked(false)
-                    .setBeepEnabled(true)
-                    .setCameraId(0)
+                    FragmentIntentIntegrator(fragment)
+                            .setPrompt(promptText ?: "Scan QR Code")
+                            .setOrientationLocked(false)
+                            .setBeepEnabled(true)
+                            .setCameraId(0)
             if (vertical) {
                 integrator.captureActivity = QRCodeActivityPortrait::class.java
             }
@@ -42,23 +34,16 @@ class QRCodeUtils(private val context: Context) {
         }
     }
 
-    fun parseActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ): String? {
+    fun parseActivityResult(requestCode: Int, resultCode: Int, data: Intent?): String? {
         return IntentIntegrator.parseActivityResult(requestCode, resultCode, data)?.contents
     }
 
-    /**
-     * from: https://demonuts.com/kotlin-generate-qr-code/
-     * Creates a QR code from text
-     */
+    /** from: https://demonuts.com/kotlin-generate-qr-code/ Creates a QR code from text */
     fun createQR(
-        text: String,
-        size: Int = QR_CODE_SIZE,
-        pColor: Int = pixelColor,
-        bColor: Int = backgroundColor
+            text: String,
+            size: Int = QR_CODE_SIZE,
+            pColor: Int = pixelColor,
+            bColor: Int = backgroundColor
     ): Bitmap? {
         if (text.isEmpty()) {
             Toast.makeText(context, "Enter String!", Toast.LENGTH_SHORT).show()
@@ -72,26 +57,17 @@ class QRCodeUtils(private val context: Context) {
         return null
     }
 
-    /**
-     * Encode the text into a bitmap
-     */
+    /** Encode the text into a bitmap */
     @Throws(WriterException::class)
     private fun textToImageEncode(
-        value: String,
-        size: Int = QR_CODE_SIZE,
-        pColor: Int = pixelColor,
-        bColor: Int = backgroundColor
+            value: String,
+            size: Int = QR_CODE_SIZE,
+            pColor: Int = pixelColor,
+            bColor: Int = backgroundColor
     ): Bitmap? {
         val bitMatrix: BitMatrix
         try {
-            bitMatrix =
-                MultiFormatWriter().encode(
-                    value,
-                    BarcodeFormat.QR_CODE,
-                    size,
-                    size,
-                    null
-                )
+            bitMatrix = MultiFormatWriter().encode(value, BarcodeFormat.QR_CODE, size, size, null)
         } catch (IllegalArgumentException: IllegalArgumentException) {
             return null
         }
@@ -104,11 +80,11 @@ class QRCodeUtils(private val context: Context) {
             val offset = y * bitMatrixWidth
             for (x in 0 until bitMatrixWidth) {
                 pixels[offset + x] =
-                    if (bitMatrix.get(x, y)) {
-                        ContextCompat.getColor(context, pColor)
-                    } else {
-                        ContextCompat.getColor(context, bColor)
-                    }
+                        if (bitMatrix.get(x, y)) {
+                            ContextCompat.getColor(context, pColor)
+                        } else {
+                            ContextCompat.getColor(context, bColor)
+                        }
             }
         }
         val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_8888)

@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.eurotoken.viewModel
+package nl.tudelft.trustchain.eurotoken.view
 
 import androidx.lifecycle.*
 import nl.tudelft.ipv8.keyvault.PublicKey
