@@ -84,8 +84,11 @@ fun Drawer(
             val downloadedCount = albumStatsState.value.count { it.isDownloaded }
 
             Text("Statistics", style = MaterialTheme.typography.h6)
-            Text("Downloaded Albums: $downloadedCount")
+
             Text("Total Discovered Albums: ${albumStatsState.value.size}")
+            Text("Download In Progress: ${albumStatsState.value.size - downloadedCount}")
+            Text("Downloaded Albums: $downloadedCount")
+
 
         }
     }
