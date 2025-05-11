@@ -17,15 +17,18 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.eurotoken.R
+import nl.tudelft.trustchain.eurotoken.benchmarks.UsageLogger
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransferEuroBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
@@ -131,27 +134,67 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         binding.edtAmount.addDecimalLimiter()
 
         binding.btnRequestQR.setOnClickListener {
-            val amount = getAmount(binding.edtAmount.text.toString())
-            if (amount > 0) {
-                val myPeer = transactionRepository.trustChainCommunity.myPeer
-                val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
-
-                val connectionData = JSONObject()
-                connectionData.put("public_key", myPeer.publicKey.keyToBin().toHex())
-                connectionData.put("amount", amount)
-                connectionData.put("name", contact?.name ?: "")
-                connectionData.put("type", "transfer")
-
-                val args = Bundle()
-
-                args.putString(RequestMoneyFragment.ARG_DATA, connectionData.toString())
-
-                findNavController()
-                        .navigate(R.id.action_transferFragment_to_requestMoneyFragment, args)
-            }
+            initTransaction(view, ownKey)
         }
 
         binding.btnSendQR.setOnClickListener { qrCodeUtils.startQRScanner(this) }
+
+        binding.btnRequestNFC.setOnClickListener {
+            initTransaction(view, ownKey)
+        }
+
+        binding.btnSendNFC.setOnClickListener {
+            Toast.makeText(requireContext(), "Recipient needs to initiate NFC tap. This device will send data when tapped.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+
+    /**
+     * Starts a new transaction with the given amount and the user's own peer.
+     * @param view : The view used to get the amount from.
+     * @param ownKey : The public key of the user's own peer.
+     */
+    private fun initTransaction(view: View, ownKey: PublicKey) {
+        val amount = getAmount(binding.edtAmount.text.toString())
+        if (amount > 0) {
+            val myPeer = transactionRepository.trustChainCommunity.myPeer
+            val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
+
+            val connectionData = generateRequestJsonObject(myPeer, amount, contact)
+
+            val args = Bundle()
+            args.putString(RequestMoneyFragment.ARG_DATA, connectionData.toString())
+
+            UsageLogger.logTransactionStart(connectionData.toString())
+
+            findNavController()
+                .navigate(R.id.action_transferFragment_to_requestMoneyFragment, args)
+        } else {
+            Toast.makeText(requireContext(), "Can't request €0.00", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Generate a JSON object with the necessary data for requesting money from a peer.
+     * @param myPeer : The peer sending the request.
+     * @param amount : The amount of money to request.
+     * @param contact : The contact associated with [myPeer].
+     * @param type : The type of request. Currently only "transfer" is supported.
+     * @return A JSON object with the public key of the sender, the amount of money to request,
+     * the name of the sender (if available), and the type of request.
+     */
+    private fun generateRequestJsonObject(
+        myPeer: Peer,
+        amount: Long,
+        contact: Contact?,
+        type: String = "transfer"
+    ): JSONObject {
+        val connectionData = JSONObject()
+        connectionData.put("public_key", myPeer.publicKey.keyToBin().toHex())
+        connectionData.put("amount", amount)
+        connectionData.put("name", contact?.name ?: "")
+        connectionData.put("type", type)
+        return connectionData
     }
 
     /**
@@ -175,6 +218,8 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
                 val connectionData = ConnectionData(it)
+                // Log transaction start for sending money via QR scan
+                UsageLogger.logTransactionStart(connectionData.toString())
 
                 val args = Bundle()
                 args.putString(SendMoneyFragment.ARG_PUBLIC_KEY, connectionData.publicKey)
@@ -259,7 +304,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         }
 
         fun getAmount(amount: String): Long {
-            val regex = """[^\d]""".toRegex()
+            val regex = """\D""".toRegex()
             if (amount.isEmpty()) {
                 return 0L
             }
