@@ -29,9 +29,9 @@ class EuroTokenCheckpointValidatorTest {
                 key = g,
                 blockType = TransactionRepository.BLOCK_TYPE_CREATE,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
+                ),
                 links = a.pub()
             )
 
@@ -40,9 +40,9 @@ class EuroTokenCheckpointValidatorTest {
                 key = a,
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
+                ),
                 linked = g1
             )
         db.addBlock(g1)
@@ -52,9 +52,9 @@ class EuroTokenCheckpointValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 10L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 10L
+                ),
                 previous = a1,
                 links = g.pub()
             )
@@ -67,9 +67,9 @@ class EuroTokenCheckpointValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_CREATE,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
+                ),
                 previous = g1,
                 links = a.pub()
             )
@@ -79,9 +79,9 @@ class EuroTokenCheckpointValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_CREATE,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
+                ),
                 previous = a2,
                 linked = g2
             )
@@ -94,9 +94,9 @@ class EuroTokenCheckpointValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 20L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 20L
+                ),
                 previous = a3,
                 links = g.pub()
             )
@@ -109,10 +109,10 @@ class EuroTokenCheckpointValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 0L,
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(20)
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 0L,
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(20)
+                ),
                 previous = a4
             )
 
@@ -124,9 +124,9 @@ class EuroTokenCheckpointValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 10L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 10L
+                ),
                 previous = g2,
                 linked = a2
             )

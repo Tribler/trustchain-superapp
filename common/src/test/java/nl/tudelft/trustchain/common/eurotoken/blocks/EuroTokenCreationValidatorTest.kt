@@ -39,9 +39,9 @@ class EuroTokenCreationValidatorTest {
                 key = g,
                 blockType = TransactionRepository.BLOCK_TYPE_CREATE,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 10L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 10L
+                ),
                 links = a.pub()
             )
         db.addBlock(g1)
@@ -50,9 +50,9 @@ class EuroTokenCreationValidatorTest {
                 key = a,
                 blockType = TransactionRepository.BLOCK_TYPE_CREATE,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 10L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 10L
+                ),
                 linked = g1
             )
         val result = validate(a1, db)

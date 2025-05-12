@@ -25,19 +25,19 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    )
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                )
             )
         val a1 =
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                ),
                 linked = b1
             )
         db.addBlock(b1)
@@ -51,11 +51,11 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_ROLLBACK,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L,
-                        TransactionRepository.KEY_TRANSACTION_HASH to a1.calculateHash().toHex()
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L,
+                    TransactionRepository.KEY_TRANSACTION_HASH to a1.calculateHash().toHex()
+                ),
                 previous = a1
             )
 
@@ -73,19 +73,19 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    )
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                )
             )
         val a1 =
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                ),
                 linked = b1
             )
         db.addBlock(b1)
@@ -99,11 +99,11 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_ROLLBACK,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L,
-                        TransactionRepository.KEY_TRANSACTION_HASH to "ABCD"
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L,
+                    TransactionRepository.KEY_TRANSACTION_HASH to "ABCD"
+                ),
                 previous = a1
             )
 
@@ -121,19 +121,19 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    )
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                )
             )
         val a1 =
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                ),
                 linked = b1
             )
         db.addBlock(b1)
@@ -147,10 +147,10 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_ROLLBACK,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 0L,
-                        TransactionRepository.KEY_TRANSACTION_HASH to a1.calculateHash().toHex()
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 0L,
+                    TransactionRepository.KEY_TRANSACTION_HASH to a1.calculateHash().toHex()
+                ),
                 previous = a1
             )
 
@@ -172,19 +172,19 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    )
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                )
             )
         val a1 =
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                ),
                 linked = b1
             )
         db.addBlock(b1)
@@ -198,10 +198,10 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_ROLLBACK,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                ),
                 previous = a1
             )
 
@@ -223,19 +223,19 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    )
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                )
             )
         val a1 =
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                ),
                 linked = b1
             )
         db.addBlock(b1)
@@ -249,11 +249,11 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_ROLLBACK,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L,
-                        TransactionRepository.KEY_TRANSACTION_HASH to a1.calculateHash().toHex()
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L,
+                    TransactionRepository.KEY_TRANSACTION_HASH to a1.calculateHash().toHex()
+                ),
                 previous = a1
             )
 
@@ -271,19 +271,19 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    )
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                )
             )
         val a1 =
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                ),
                 linked = b1
             )
         db.addBlock(b1)
@@ -297,11 +297,11 @@ class EuroTokenRollbackValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_ROLLBACK,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5),
-                        TransactionRepository.KEY_BALANCE to 5L,
-                        TransactionRepository.KEY_TRANSACTION_HASH to a1.calculateHash().toHex()
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5),
+                    TransactionRepository.KEY_BALANCE to 5L,
+                    TransactionRepository.KEY_TRANSACTION_HASH to a1.calculateHash().toHex()
+                ),
                 previous = a1
             )
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"  android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/txtSheetTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:layout_marginBottom="12dp"
+        tools:text="Choose Transfer Method" /> <Button
+        android:id="@+id/btnSendQr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send via QR" />
+
+    <Button
+        android:id="@+id/btnSendNfc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send via NFC"
+        android:layout_marginTop="8dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:layout_marginVertical="12dp" />
+
+    <Button
+        android:id="@+id/btnReceiveQr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Receive via QR" />
+
+    <Button
+        android:id="@+id/btnReceiveNfc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Receive via NFC"
+        android:layout_marginTop="8dp" />
+</LinearLayout>

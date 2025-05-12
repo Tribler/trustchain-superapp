@@ -28,11 +28,11 @@ class EuroTokenDestructionValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_DESTROY,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L,
-                        TransactionRepository.KEY_PAYMENT_ID to "ID"
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L,
+                    TransactionRepository.KEY_PAYMENT_ID to "ID"
+                ),
                 previous = a2
             )
 
@@ -54,11 +54,11 @@ class EuroTokenDestructionValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_DESTROY,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L,
-                        TransactionRepository.KEY_IBAN to "IBAN"
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L,
+                    TransactionRepository.KEY_IBAN to "IBAN"
+                ),
                 previous = a2
             )
 
@@ -80,10 +80,10 @@ class EuroTokenDestructionValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_DESTROY,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 0L,
-                        TransactionRepository.KEY_IBAN to "IBAN"
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 0L,
+                    TransactionRepository.KEY_IBAN to "IBAN"
+                ),
                 previous = a2
             )
 
@@ -109,10 +109,10 @@ class EuroTokenDestructionValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_DESTROY,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 0L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 0L
+                ),
                 previous = a2
             )
 
@@ -139,11 +139,11 @@ class EuroTokenDestructionValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_DESTROY,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to 10L,
-                        TransactionRepository.KEY_IBAN to "IBAN"
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to 10L,
+                    TransactionRepository.KEY_IBAN to "IBAN"
+                ),
                 previous = a2
             )
 
@@ -164,11 +164,11 @@ class EuroTokenDestructionValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_DESTROY,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
-                        TransactionRepository.KEY_BALANCE to -10L,
-                        TransactionRepository.KEY_IBAN to "IBAN"
-                    )
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
+                    TransactionRepository.KEY_BALANCE to -10L,
+                    TransactionRepository.KEY_IBAN to "IBAN"
+                )
             )
 
         val result = validate(a1, db)

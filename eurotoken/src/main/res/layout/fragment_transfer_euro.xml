@@ -114,7 +114,7 @@
                 android:id="@+id/txtIntro"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Select Payment Method" android:textAppearance="?attr/textAppearanceHeadline6"
+                android:text="@string/intro_transfer_method" android:textAppearance="?attr/textAppearanceHeadline6"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -134,8 +134,7 @@
                 app:layout_constraintTop_toBottomOf="@id/txtIntro" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnRequestQR"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:id="@+id/btnRequestQR" style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
@@ -146,8 +145,7 @@
                 app:layout_constraintTop_toBottomOf="@id/edtAmount" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSendQR"
-                style="@style/Widget.MaterialComponents.Button"
+                android:id="@+id/btnSendQR" style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -157,6 +155,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnRequestQR" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </LinearLayout>

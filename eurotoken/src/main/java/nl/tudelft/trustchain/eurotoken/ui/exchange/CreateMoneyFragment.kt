@@ -26,19 +26,19 @@ class CreateMoneyFragment : EurotokenBaseFragment(R.layout.fragment_create_money
 
     private val ownPublicKey by lazy {
         defaultCryptoProvider.keyFromPublicBin(
-                transactionRepository
-                        .trustChainCommunity
-                        .myPeer
-                        .publicKey
-                        .keyToBin()
-                        .toHex()
-                        .hexToBytes()
+            transactionRepository
+                .trustChainCommunity
+                .myPeer
+                .publicKey
+                .keyToBin()
+                .toHex()
+                .hexToBytes()
         )
     }
 
     private fun getEuroTokenCommunity(): EuroTokenCommunity {
         return getIpv8().getOverlay()
-                ?: throw java.lang.IllegalStateException("EuroTokenCommunity is not configured")
+            ?: throw java.lang.IllegalStateException("EuroTokenCommunity is not configured")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -95,21 +95,21 @@ class CreateMoneyFragment : EurotokenBaseFragment(R.layout.fragment_create_money
         }
 
         val pref =
-                requireContext()
-                        .getSharedPreferences(
-                                EuroTokenMainActivity.EurotokenPreferences
-                                        .EUROTOKEN_SHARED_PREF_NAME,
-                                Context.MODE_PRIVATE
-                        )
+            requireContext()
+                .getSharedPreferences(
+                    EuroTokenMainActivity.EurotokenPreferences
+                        .EUROTOKEN_SHARED_PREF_NAME,
+                    Context.MODE_PRIVATE
+                )
         val demoModeEnabled =
-                pref.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+            pref.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
 
         if (demoModeEnabled) {
             binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
         } else {
             binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         }
 
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
@@ -119,7 +119,7 @@ class CreateMoneyFragment : EurotokenBaseFragment(R.layout.fragment_create_money
             val newName = binding.newGatewayName.text.toString()
             if (addGateway && newName.isNotEmpty()) {
                 GatewayStore.getInstance(requireContext())
-                        .addGateway(key, newName, ip, port.toLong(), setPreferred)
+                    .addGateway(key, newName, ip, port.toLong(), setPreferred)
             } else if (setPreferred && gateway != null) {
                 GatewayStore.getInstance(requireContext()).setPreferred(gateway)
             }

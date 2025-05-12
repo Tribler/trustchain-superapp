@@ -1,48 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/nav_graph_eurotoken" app:startDestination="@id/transferFragment">
-    <fragment android:id="@+id/transactionsFragment" android:name="nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionsFragment" android:label="Transaction History" tools:layout="@layout/fragment_transactions" />
-    <fragment android:id="@+id/exchangeFragment" android:name="nl.tudelft.trustchain.eurotoken.ui.exchange.ExchangeFragment" android:label="Buy / Sell" tools:layout="@layout/fragment_exchange">
-        <action android:id="@+id/action_exchangeFragment_to_destroyMoneyFragment" app:destination="@id/destroyMoneyFragment" />
-        <action android:id="@+id/action_exchangeFragment_to_createMoneyFragment" app:destination="@id/createMoneyFragment" />
-        <action android:id="@+id/action_exchangeFragment_to_transactionsFragment" app:destination="@id/transactionsFragment" />
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_eurotoken"
+    app:startDestination="@id/transferFragment">
+
+    <fragment
+        android:id="@+id/transactionsFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionsFragment"
+        android:label="Transaction History"
+        tools:layout="@layout/fragment_transactions" />
+
+    <fragment
+        android:id="@+id/exchangeFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.exchange.ExchangeFragment"
+        android:label="Buy / Sell"
+        tools:layout="@layout/fragment_exchange">
+        <action
+            android:id="@+id/action_exchangeFragment_to_destroyMoneyFragment"
+            app:destination="@id/destroyMoneyFragment" />
+        <action
+            android:id="@+id/action_exchangeFragment_to_createMoneyFragment"
+            app:destination="@id/createMoneyFragment" />
+        <action
+            android:id="@+id/action_exchangeFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
     </fragment>
-    <fragment android:id="@+id/transferFragment" android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment" android:label="Balance">
-        <action android:id="@+id/action_transferFragment_to_sendMoneyFragment" app:destination="@id/sendMoneyFragment" />
-        <action android:id="@+id/action_transferFragment_to_requestMoneyFragment" app:destination="@id/requestMoneyFragment" />
+
+     <fragment
+        android:id="@+id/transferFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment"
+        android:label="Balance"
+        tools:layout="@layout/fragment_transfer_euro">
+        <action
+            android:id="@+id/action_transferFragment_to_transportChoiceSheet"
+            app:destination="@id/transportChoiceSheet" />
+        
+        <action
+            android:id="@+id/action_transferFragment_to_sendMoneyFragment"
+            app:destination="@id/sendMoneyFragment" />
+        <action
+            android:id="@+id/action_transferFragment_to_requestMoneyFragment"
+            app:destination="@id/requestMoneyFragment" />
     </fragment>
-    <fragment android:id="@+id/sendMoneyFragment" android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.SendMoneyFragment" android:label="Send Money">
-        <action android:id="@+id/action_sendMoneyFragment_to_transactionsFragment" app:destination="@id/transactionsFragment" />
-        <action android:id="@+id/action_sendMoneyFragment_to_nfcResultFragment" app:destination="@id/nfcResultFragment" />
-        <argument android:name="amount" app:argType="long" />
-        <argument android:name="pubkey" />
-        <argument android:name="name" app:argType="string" />
+
+    <fragment
+        android:id="@+id/sendMoneyFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.SendMoneyFragment"
+        android:label="Send Money"
+        tools:layout="@layout/fragment_send_money"> <action
+            android:id="@+id/action_sendMoneyFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
+        <action
+            android:id="@+id/action_sendMoneyFragment_to_nfcResultFragment"
+            app:destination="@id/nfcResultFragment" />
+        <argument
+            android:name="transaction_args" app:argType="nl.tudelft.trustchain.eurotoken.common.TransactionArgs" />
     </fragment>
-    <fragment android:id="@+id/requestMoneyFragment" android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.RequestMoneyFragment" android:label="Request Money">
-        <action android:id="@+id/action_requestMoneyFragment_to_transactionsFragment" app:destination="@id/transactionsFragment" />
-        <argument android:name="data" app:argType="string" />
+
+    <fragment
+        android:id="@+id/requestMoneyFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.RequestMoneyFragment"
+        android:label="Request Money"
+        tools:layout="@layout/fragment_request_money"> <action
+            android:id="@+id/action_requestMoneyFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
+        <argument
+            android:name="transaction_args" app:argType="nl.tudelft.trustchain.eurotoken.common.TransactionArgs" />
     </fragment>
-    <fragment android:id="@+id/gatewaysFragment" android:name="nl.tudelft.trustchain.eurotoken.ui.settings.GatewaysFragment" android:label="Manage gateways" />
-    <fragment android:id="@+id/trustScoresFragment" android:name="nl.tudelft.trustchain.eurotoken.ui.trustscores.TrustScoresFragment" android:label="Trust Scores database" />
-    <fragment android:id="@+id/destroyMoneyFragment" android:name="nl.tudelft.trustchain.eurotoken.ui.exchange.DestroyMoneyFragment" android:label="Selling EuroToken">
-        <argument android:name="amount" app:argType="long" />
+
+    <fragment
+        android:id="@+id/gatewaysFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.settings.GatewaysFragment"
+        android:label="Manage gateways"
+        tools:layout="@layout/fragment_gateways" /> <fragment
+        android:id="@+id/trustScoresFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.trustscores.TrustScoresFragment"
+        android:label="Trust Scores database"
+        tools:layout="@layout/fragment_trust_scores" /> <fragment
+        android:id="@+id/destroyMoneyFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.exchange.DestroyMoneyFragment"
+        android:label="Selling EuroToken"
+        tools:layout="@layout/fragment_destroy_money"> <argument android:name="amount" app:argType="long" />
         <argument android:name="name" app:argType="string" />
         <argument android:name="payment_id" app:argType="string" />
         <argument android:name="ip" app:argType="string" />
         <argument android:name="port" app:argType="integer" />
         <argument android:name="public_key" app:argType="string" />
-        <action android:id="@+id/action_destroyMoneyFragment_to_transactionsFragment" app:destination="@id/transactionsFragment" />
+        <action
+            android:id="@+id/action_destroyMoneyFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
     </fragment>
-    <fragment android:id="@+id/createMoneyFragment" android:name="nl.tudelft.trustchain.eurotoken.ui.exchange.CreateMoneyFragment" android:label="Buying EuroToken">
-        <argument android:name="name" app:argType="string" />
+
+    <fragment
+        android:id="@+id/createMoneyFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.exchange.CreateMoneyFragment"
+        android:label="Buying EuroToken"
+        tools:layout="@layout/fragment_create_money"> <argument android:name="name" app:argType="string" />
         <argument android:name="public_key" app:argType="string" />
         <argument android:name="ip" app:argType="string" />
         <argument android:name="port" app:argType="integer" />
         <argument android:name="payment_id" app:argType="string" />
-        <action android:id="@+id/action_createMoneyFragment_to_transactionsFragment" app:destination="@id/transactionsFragment" />
+        <action
+            android:id="@+id/action_createMoneyFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
     </fragment>
-    <fragment android:id="@+id/nfcResultFragment" android:name="nl.tudelft.trustchain.eurotoken.ui.nfc.NfcResultFragment" android:label="NFC Result">
-        <argument android:name="nfcData" app:argType="string" />
+
+    <fragment
+        android:id="@+id/nfcResultFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.nfc.NfcResultFragment"
+        android:label="NFC Result"
+        tools:layout="@layout/fragment_nfc_result"> <argument
+            android:name="nfcData"
+            app:argType="string" />
     </fragment>
+
+    <dialog
+        android:id="@+id/transportChoiceSheet"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.TransportChoiceSheet"
+        android:label="Choose Transport"
+        tools:layout="@layout/fragment_transport_choice">
+        <argument
+            android:name="transaction_args_for_choicesheet"
+            app:argType="nl.tudelft.trustchain.eurotoken.common.TransactionArgs" />
+        <action
+            android:id="@+id/action_transportChoiceSheet_to_sendMoneyFragment"
+            app:destination="@id/sendMoneyFragment" />
+        <action
+            android:id="@+id/action_transportChoiceSheet_to_requestMoneyFragment"
+            app:destination="@id/requestMoneyFragment" />
+    </dialog>
+
 </navigation>

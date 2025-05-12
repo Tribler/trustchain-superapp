@@ -28,10 +28,10 @@ class EuroTokenTransferValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 0L,
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 0L,
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
+                ),
                 previous = a2
             )
 
@@ -53,9 +53,9 @@ class EuroTokenTransferValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 0L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 0L
+                ),
                 previous = a2
             )
 
@@ -81,10 +81,10 @@ class EuroTokenTransferValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 10L,
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 10L,
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
+                ),
                 previous = a2
             )
 
@@ -104,10 +104,10 @@ class EuroTokenTransferValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to -10L,
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
-                    )
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to -10L,
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
+                )
             )
         val result = validate(a1, db)
         assertTrue(result is ValidationResult.Invalid)

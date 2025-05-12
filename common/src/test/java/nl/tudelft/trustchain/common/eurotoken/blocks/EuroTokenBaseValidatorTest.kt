@@ -36,10 +36,10 @@ class EuroTokenBaseValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 1L,
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5)
-                    )
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 1L,
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5)
+                )
             )
         val result = validate(block, db)
         assertTrue(result is ValidationResult.Invalid)
@@ -101,10 +101,10 @@ class EuroTokenBaseValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5),
-                        TransactionRepository.KEY_BALANCE to 5L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5),
+                    TransactionRepository.KEY_BALANCE to 5L
+                ),
                 previous = a1
             )
         result = validate(a2, db)
@@ -206,10 +206,10 @@ class EuroTokenBaseValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_BALANCE to 0L,
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5)
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_BALANCE to 0L,
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5)
+                ),
                 previous = a2,
                 links = g.pub()
             )
@@ -242,10 +242,10 @@ class EuroTokenBaseValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5),
-                        TransactionRepository.KEY_BALANCE to 5L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5),
+                    TransactionRepository.KEY_BALANCE to 5L
+                ),
                 previous = b2,
                 links = a.pub()
             )
@@ -257,10 +257,10 @@ class EuroTokenBaseValidatorTest {
             testBlock(
                 blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
                 transaction =
-                    mapOf(
-                        TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5),
-                        TransactionRepository.KEY_BALANCE to 5L
-                    ),
+                mapOf(
+                    TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5),
+                    TransactionRepository.KEY_BALANCE to 5L
+                ),
                 previous = a1,
                 linked = b3
             )

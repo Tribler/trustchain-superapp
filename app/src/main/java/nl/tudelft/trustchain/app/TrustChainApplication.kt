@@ -97,21 +97,21 @@ class TrustChainApplication : Application() {
         val config =
             IPv8Configuration(
                 overlays =
-                    listOf(
-                        createDiscoveryCommunity(),
-                        createTrustChainCommunity(),
-                        createPeerChatCommunity(),
-                        createEuroTokenCommunity(),
-                        createTFTPCommunity(),
-                        createDemoCommunity(),
-                        createWalletCommunity(),
-                        createMarketCommunity(),
-                        createCoinCommunity(),
-                        createDaoCommunity(),
-                        createMusicCommunity(),
-                        createIdentityCommunity(),
-                        createFOCCommunity(),
-                    ),
+                listOf(
+                    createDiscoveryCommunity(),
+                    createTrustChainCommunity(),
+                    createPeerChatCommunity(),
+                    createEuroTokenCommunity(),
+                    createTFTPCommunity(),
+                    createDemoCommunity(),
+                    createWalletCommunity(),
+                    createMarketCommunity(),
+                    createCoinCommunity(),
+                    createDaoCommunity(),
+                    createMusicCommunity(),
+                    createIdentityCommunity(),
+                    createFOCCommunity(),
+                ),
                 walkerInterval = 5.0
             )
 

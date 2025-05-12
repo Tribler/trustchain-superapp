@@ -29,11 +29,18 @@ import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransferEuroBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
+// import nl.tudelft.trustchain.eurotoken.ui.transport.TransportChoiceSheet
 import org.json.JSONException
 import org.json.JSONObject
+import nl.tudelft.trustchain.eurotoken.common.Mode
+import androidx.core.os.bundleOf
+import nl.tudelft.trustchain.eurotoken.common.TransactionArgs
+import nl.tudelft.trustchain.eurotoken.common.Channel
 
 class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) {
     private val binding by viewBinding(FragmentTransferEuroBinding::bind)
+
+//    private val navArgs: SendMoneyFragmentArgs by navArgs()
 
     private val qrCodeUtils by lazy { QRCodeUtils(requireContext()) }
 
@@ -44,28 +51,28 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             while (isActive) {
                 val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
                 val ownContact =
-                        ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
+                    ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
                 val pref =
-                        requireContext()
-                                .getSharedPreferences(
-                                        EuroTokenMainActivity.EurotokenPreferences
-                                                .EUROTOKEN_SHARED_PREF_NAME,
-                                        Context.MODE_PRIVATE
-                                )
-                val demoModeEnabled =
-                        pref.getBoolean(
-                                EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
-                                false
+                    requireContext()
+                        .getSharedPreferences(
+                            EuroTokenMainActivity.EurotokenPreferences
+                                .EUROTOKEN_SHARED_PREF_NAME,
+                            Context.MODE_PRIVATE
                         )
+                val demoModeEnabled =
+                    pref.getBoolean(
+                        EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                        false
+                    )
 
                 if (demoModeEnabled) {
                     binding.txtBalance.text =
-                            TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                        TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
                 } else {
                     binding.txtBalance.text =
-                            TransactionRepository.prettyAmount(
-                                    transactionRepository.getMyVerifiedBalance()
-                            )
+                        TransactionRepository.prettyAmount(
+                            transactionRepository.getMyVerifiedBalance()
+                        )
                 }
                 if (ownContact?.name != null) {
                     binding.missingNameLayout.visibility = View.GONE
@@ -79,28 +86,32 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
         val ownContact = ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
 
         val pref =
-                requireContext()
-                        .getSharedPreferences(
-                                EuroTokenMainActivity.EurotokenPreferences
-                                        .EUROTOKEN_SHARED_PREF_NAME,
-                                Context.MODE_PRIVATE
-                        )
+            requireContext().getSharedPreferences(
+                EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                Context.MODE_PRIVATE
+            )
         val demoModeEnabled =
-                pref.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+            pref.getBoolean(
+                EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                false
+            )
 
         if (demoModeEnabled) {
             binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
         } else {
             binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         }
         binding.txtOwnPublicKey.text = ownKey.keyToHash().toHex()
 
@@ -112,46 +123,81 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         fun addName() {
             val newName = binding.edtMissingName.text.toString()
             if (newName.isNotEmpty()) {
-                ContactStore.getInstance(requireContext()).addContact(ownKey, newName)
+                ContactStore.getInstance(requireContext())
+                    .addContact(ownKey, newName)
                 if (ownContact?.name != null) {
                     binding.missingNameLayout.visibility = View.GONE
-                    binding.txtOwnName.text = "Your balance (" + ownContact.name + ")"
+                    binding.txtOwnName.text = "Your balance (" + ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)?.name + ")"
                 }
                 val inputMethodManager =
-                        requireContext().getSystemService(Activity.INPUT_METHOD_SERVICE) as
-                                InputMethodManager
+                    requireContext().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
             }
         }
 
-        binding.btnAdd.setOnClickListener { addName() }
+        binding.btnAdd.setOnClickListener {
+            addName()
+        }
 
-        binding.edtMissingName.onSubmit { addName() }
+        binding.edtMissingName.onSubmit {
+            addName()
+        }
 
         binding.edtAmount.addDecimalLimiter()
 
+        // leads to bottomsheetfragment for request options
         binding.btnRequestQR.setOnClickListener {
             val amount = getAmount(binding.edtAmount.text.toString())
-            if (amount > 0) {
-                val myPeer = transactionRepository.trustChainCommunity.myPeer
-                val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
-
-                val connectionData = JSONObject()
-                connectionData.put("public_key", myPeer.publicKey.keyToBin().toHex())
-                connectionData.put("amount", amount)
-                connectionData.put("name", contact?.name ?: "")
-                connectionData.put("type", "transfer")
-
-                val args = Bundle()
-
-                args.putString(RequestMoneyFragment.ARG_DATA, connectionData.toString())
-
-                findNavController()
-                        .navigate(R.id.action_transferFragment_to_requestMoneyFragment, args)
+            if (amount <= 0) {
+                Toast.makeText(requireContext(), "Please enter a positive amount.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+
+            val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToHash().toHex()
+            val myName = ContactStore.getInstance(requireContext()).getContactFromPublicKey(getTrustChainCommunity().myPeer.publicKey)?.name ?: ""
+
+            val qrJsonData = JSONObject().apply {
+                put("type", "request")
+                put("amount", amount)
+                put("public_key", myPublicKey)
+                put("name", myName)
+            }.toString()
+
+            val transactionArgs = TransactionArgs(
+                mode = Mode.RECEIVE,
+                channel = Channel.QR,
+                amount = amount,
+                publicKey = myPublicKey,
+                name = myName,
+                qrData = qrJsonData
+            )
+
+            val bundle = bundleOf(TransportChoiceSheet.ARG_TRANSACTION_ARGS_RECEIVED to transactionArgs)
+            val transportChoiceSheet = TransportChoiceSheet()
+            transportChoiceSheet.arguments = bundle
+            transportChoiceSheet.show(childFragmentManager, "TransportChoiceReceive")
         }
 
-        binding.btnSendQR.setOnClickListener { qrCodeUtils.startQRScanner(this) }
+        // leads to bottomsheetfragment for SEND options
+        binding.btnSendQR.setOnClickListener {
+            val amount = getAmount(binding.edtAmount.text.toString())
+            if (amount <= 0) {
+                Toast.makeText(requireContext(), "Please enter a positive amount to send.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val transactionArgs = TransactionArgs(
+                mode = Mode.SEND,
+                channel = Channel.QR,
+                amount = amount
+            )
+
+            // todo: bottomsheet instaed?
+            val bundle = bundleOf(TransportChoiceSheet.ARG_TRANSACTION_ARGS_RECEIVED to transactionArgs)
+            val transportSheet = TransportChoiceSheet.newInstance(transactionArgs)
+//            transportSheet.arguments = bundle
+            transportSheet.show(childFragmentManager, "TransportChoiceSend")
+        }
     }
 
     /**
@@ -176,57 +222,67 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             try {
                 val connectionData = ConnectionData(it)
 
-                val args = Bundle()
-                args.putString(SendMoneyFragment.ARG_PUBLIC_KEY, connectionData.publicKey)
-                args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
-                args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
-
-                // Try to send the addresses of the last X transactions to the peer we have just
-                // scanned.
-                try {
-                    val peer =
-                            findPeer(
-                                    defaultCryptoProvider
-                                            .keyFromPublicBin(connectionData.publicKey.hexToBytes())
-                                            .toString()
-                            )
-                    if (peer == null) {
-                        logger.warn {
-                            "Could not find peer from QR code by public key " +
-                                    connectionData.publicKey
-                        }
-                        Toast.makeText(
-                                        requireContext(),
-                                        "Could not find peer from QR code",
-                                        Toast.LENGTH_LONG
-                                )
-                                .show()
-                    }
-                    val euroTokenCommunity = getIpv8().getOverlay<EuroTokenCommunity>()
-                    if (euroTokenCommunity == null) {
-                        Toast.makeText(
-                                        requireContext(),
-                                        "Could not find community",
-                                        Toast.LENGTH_LONG
-                                )
-                                .show()
-                    }
-                    if (peer != null && euroTokenCommunity != null) {
-                        euroTokenCommunity.sendAddressesOfLastTransactions(peer)
-                    }
-                } catch (e: Exception) {
-                    logger.error { e }
-                    Toast.makeText(
-                                    requireContext(),
-                                    "Failed to send transactions",
-                                    Toast.LENGTH_LONG
-                            )
-                            .show()
-                }
-
                 if (connectionData.type == "transfer") {
-                    findNavController()
-                            .navigate(R.id.action_transferFragment_to_sendMoneyFragment, args)
+                    val args = Bundle()
+                    args.putString(SendMoneyFragment.ARG_PUBLIC_KEY, connectionData.publicKey)
+                    args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
+                    args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
+
+                    try {
+                        val peer =
+                            findPeer(
+                                defaultCryptoProvider
+                                    .keyFromPublicBin(connectionData.publicKey.hexToBytes())
+                                    .toString()
+                            )
+
+                        // caused some errors, so more error handling
+                        if (peer == null) {
+                            logger.warn {
+                                "Could not find peer from QR code by public key " +
+                                    connectionData.publicKey
+                            }
+                            Toast.makeText(
+                                requireContext(),
+                                "Could not find peer from QR code",
+                                Toast.LENGTH_LONG
+                            )
+                                .show()
+                        }
+                        val euroTokenCommunity = getIpv8().getOverlay<EuroTokenCommunity>()
+                        if (euroTokenCommunity == null) {
+                            Toast.makeText(
+                                requireContext(),
+                                "Could not find community",
+                                Toast.LENGTH_LONG
+                            )
+                                .show()
+                        }
+                        if (peer != null && euroTokenCommunity != null) {
+                            euroTokenCommunity.sendAddressesOfLastTransactions(peer)
+                        }
+                    } catch (e: Exception) {
+                        logger.error { e }
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to send transactions",
+                            Toast.LENGTH_LONG
+                        )
+                            .show()
+                    }
+
+                    val transactionArgs = TransactionArgs(
+                        mode = Mode.SEND,
+                        channel = Channel.QR,
+                        amount = connectionData.amount,
+                        publicKey = connectionData.publicKey,
+                        name = connectionData.name,
+                        qrData = null
+                    )
+                    findNavController().navigate(
+                        R.id.sendMoneyFragment,
+                        bundleOf("transaction_args_received" to transactionArgs)
+                    )
                 } else {
                     Toast.makeText(requireContext(), "Invalid QR", Toast.LENGTH_LONG).show()
                 }
@@ -234,7 +290,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 Toast.makeText(requireContext(), "Scan failed, try again", Toast.LENGTH_LONG).show()
             }
         }
-                ?: Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
+            ?: Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
         return
     }
 
@@ -268,7 +324,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
 
         fun Context.hideKeyboard(view: View) {
             val inputMethodManager =
-                    getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+                getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
         }
 
@@ -285,33 +341,33 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
 
         fun EditText.addDecimalLimiter() {
             this.addTextChangedListener(
-                    object : TextWatcher {
-                        override fun afterTextChanged(s: Editable?) {
-                            val str = this@addDecimalLimiter.text!!.toString()
-                            if (str.isEmpty()) return
-                            val str2 = decimalLimiter(str)
+                object : TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        val str = this@addDecimalLimiter.text!!.toString()
+                        if (str.isEmpty()) return
+                        val str2 = decimalLimiter(str)
 
-                            if (str2 != str) {
-                                this@addDecimalLimiter.setText(str2)
-                                val pos = this@addDecimalLimiter.text!!.length
-                                this@addDecimalLimiter.setSelection(pos)
-                            }
+                        if (str2 != str) {
+                            this@addDecimalLimiter.setText(str2)
+                            val pos = this@addDecimalLimiter.text!!.length
+                            this@addDecimalLimiter.setSelection(pos)
                         }
-
-                        override fun beforeTextChanged(
-                                s: CharSequence?,
-                                start: Int,
-                                count: Int,
-                                after: Int
-                        ) {}
-
-                        override fun onTextChanged(
-                                s: CharSequence?,
-                                start: Int,
-                                before: Int,
-                                count: Int
-                        ) {}
                     }
+
+                    override fun beforeTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        count: Int,
+                        after: Int
+                    ) {}
+
+                    override fun onTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        before: Int,
+                        count: Int
+                    ) {}
+                }
             )
         }
     }

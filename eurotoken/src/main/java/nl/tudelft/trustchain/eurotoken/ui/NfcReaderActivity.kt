@@ -7,7 +7,6 @@ import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
@@ -23,12 +22,12 @@ import nl.tudelft.trustchain.eurotoken.databinding.ActivityNfcReaderBinding
 import java.util.*
 import nl.tudelft.trustchain.eurotoken.nfc.EuroTokenHCEService
 
-//TODO check if we can delete nfchandler, nfcState, and nfcViewModel
+// TODO check if we can delete nfchandler, nfcState, and nfcViewModel
 // not for now
 
-//activity handles reading dtaa from nfc HCE service
+// activity handles reading dtaa from nfc HCE service
 // on other device -> uses NFC reader mode
-//apdu exchange
+// apdu exchange
 class NfcReaderActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
 
     private var nfcAdapter: NfcAdapter? = null
@@ -39,8 +38,7 @@ class NfcReaderActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
         private const val READER_FLAGS = NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK
         private const val CONNECTION_TIMEOUT_MS = 5000
 
-
-        //extra
+        // extra
 //        const val EXTRA_NFC_DATA = "nl.tudelft.trustchain.eurotoken.NFC_DATA"
 //        const val EXTRA_NFC_STATUS = "nl.tudelft.trustchain.eurotoken.NFC_STATUS"
 //        const val EXTRA_NFC_ERROR = "nl.tudelft.trustchain.eurotoken.NFC_ERROR"
@@ -55,17 +53,25 @@ class NfcReaderActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
         // follows ISO/IEC 7816-4 (AID) and ISO/IEC 7816-3 (SELECT)
         // CLA | INS | P1 | P2 | Lc | Data
         val CMD_SELECT_AID: ByteArray = byteArrayOf(
-            0x00.toByte(), 0xA4.toByte(), 0x04.toByte(), 0x00.toByte(),
+            0x00.toByte(),
+            0xA4.toByte(),
+            0x04.toByte(),
+            0x00.toByte(),
             HCE_GOAL_AID.length.div(2).toByte() // Lc field = AID length
         ) + HCE_GOAL_AID.hexToBytes()
 
         // Command to request the data after successful selection
         val CMD_READ_DATA: ByteArray = byteArrayOf(
-            0x00.toByte(), 0xB0.toByte(), 0x00.toByte(), 0x00.toByte(), 0x00.toByte()
+            0x00.toByte(),
+            0xB0.toByte(),
+            0x00.toByte(),
+            0x00.toByte(),
+            0x00.toByte()
         )
 
         // Status words
-        private val SW_OK = byteArrayOf(0x90.toByte(), 0x00.toByte()) //success
+        private val SW_OK = byteArrayOf(0x90.toByte(), 0x00.toByte()) // success
+
         // private val SW_CONDITIONS_NOT_SATISFIED = byteArrayOf(0x69, 0x85.toByte())
         // private val SW_UNKNOWN_ERROR = byteArrayOf(0x6F.toByte(), 0x00.toByte())
         // private val SW_INS_NOT_SUPPORTED = byteArrayOf(0x6D.toByte(), 0x00.toByte())
@@ -102,12 +108,11 @@ class NfcReaderActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
     }
 
     override fun onPause() {
-        //TODO check if sufficient!
+        // TODO check if sufficient!
         super.onPause()
         nfcAdapter?.disableReaderMode(this)
         Log.d(TAG, "Reader Mode disabled.")
     }
-
 
     // nfc tag is found that matches the rquired flags --> NFC-A
     override fun onTagDiscovered(tag: Tag?) {
@@ -207,7 +212,7 @@ class NfcReaderActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
         }
     }
 
-    // helpers 
+    // helpers
 
     private fun finishWithSuccess(data: String) {
         val resultIntent = Intent()
@@ -236,7 +241,7 @@ class NfcReaderActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
         runOnUiThread {
             binding.tvReaderResult.text = result
             binding.tvReaderResult.visibility = View.VISIBLE
-            //binding.tvReaderResult.visibility = View.VISIBLE
+            // binding.tvReaderResult.visibility = View.VISIBLE
         }
     }
 
@@ -262,7 +267,4 @@ class NfcReaderActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
     }
 
     private fun ByteArray.toHex(): String = joinToString(separator = "") { "%02x".format(it) }.uppercase()
-
-
-
 }

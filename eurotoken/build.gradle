@@ -2,7 +2,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'app.cash.sqldelight'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
-
+apply plugin: 'androidx.navigation.safeargs.kotlin'
+apply plugin: 'kotlin-parcelize'
 ktlint {
     version = "$ktlint_version"
     android = true

@@ -22,11 +22,11 @@ class QRCodeUtils(private val context: Context) {
     fun startQRScanner(fragment: Fragment, promptText: String? = null, vertical: Boolean = false) {
         run {
             val integrator =
-                    FragmentIntentIntegrator(fragment)
-                            .setPrompt(promptText ?: "Scan QR Code")
-                            .setOrientationLocked(false)
-                            .setBeepEnabled(true)
-                            .setCameraId(0)
+                FragmentIntentIntegrator(fragment)
+                    .setPrompt(promptText ?: "Scan QR Code")
+                    .setOrientationLocked(false)
+                    .setBeepEnabled(true)
+                    .setCameraId(0)
             if (vertical) {
                 integrator.captureActivity = QRCodeActivityPortrait::class.java
             }
@@ -40,10 +40,10 @@ class QRCodeUtils(private val context: Context) {
 
     /** from: https://demonuts.com/kotlin-generate-qr-code/ Creates a QR code from text */
     fun createQR(
-            text: String,
-            size: Int = QR_CODE_SIZE,
-            pColor: Int = pixelColor,
-            bColor: Int = backgroundColor
+        text: String,
+        size: Int = QR_CODE_SIZE,
+        pColor: Int = pixelColor,
+        bColor: Int = backgroundColor
     ): Bitmap? {
         if (text.isEmpty()) {
             Toast.makeText(context, "Enter String!", Toast.LENGTH_SHORT).show()
@@ -60,10 +60,10 @@ class QRCodeUtils(private val context: Context) {
     /** Encode the text into a bitmap */
     @Throws(WriterException::class)
     private fun textToImageEncode(
-            value: String,
-            size: Int = QR_CODE_SIZE,
-            pColor: Int = pixelColor,
-            bColor: Int = backgroundColor
+        value: String,
+        size: Int = QR_CODE_SIZE,
+        pColor: Int = pixelColor,
+        bColor: Int = backgroundColor
     ): Bitmap? {
         val bitMatrix: BitMatrix
         try {
@@ -80,11 +80,11 @@ class QRCodeUtils(private val context: Context) {
             val offset = y * bitMatrixWidth
             for (x in 0 until bitMatrixWidth) {
                 pixels[offset + x] =
-                        if (bitMatrix.get(x, y)) {
-                            ContextCompat.getColor(context, pColor)
-                        } else {
-                            ContextCompat.getColor(context, bColor)
-                        }
+                    if (bitMatrix.get(x, y)) {
+                        ContextCompat.getColor(context, pColor)
+                    } else {
+                        ContextCompat.getColor(context, bColor)
+                    }
             }
         }
         val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_8888)

@@ -8,9 +8,9 @@ import nl.tudelft.trustchain.app.databinding.ItemDashboardBinding
 class DashboardItemRenderer(
     private val onItemClick: (DashboardItem) -> Unit
 ) : BindingItemRenderer<DashboardItem, ItemDashboardBinding>(
-        DashboardItem::class.java,
-        ItemDashboardBinding::inflate
-    ) {
+    DashboardItem::class.java,
+    ItemDashboardBinding::inflate
+) {
     override fun bindView(
         item: DashboardItem,
         binding: ItemDashboardBinding
