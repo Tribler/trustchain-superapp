@@ -25,13 +25,13 @@ class DestroyMoneyFragment : EurotokenBaseFragment(R.layout.fragment_destroy_mon
 
     private val ownPublicKey by lazy {
         defaultCryptoProvider.keyFromPublicBin(
-                transactionRepository
-                        .trustChainCommunity
-                        .myPeer
-                        .publicKey
-                        .keyToBin()
-                        .toHex()
-                        .hexToBytes()
+            transactionRepository
+                .trustChainCommunity
+                .myPeer
+                .publicKey
+                .keyToBin()
+                .toHex()
+                .hexToBytes()
         )
     }
 
@@ -90,21 +90,21 @@ class DestroyMoneyFragment : EurotokenBaseFragment(R.layout.fragment_destroy_mon
         }
 
         val pref =
-                requireContext()
-                        .getSharedPreferences(
-                                EuroTokenMainActivity.EurotokenPreferences
-                                        .EUROTOKEN_SHARED_PREF_NAME,
-                                Context.MODE_PRIVATE
-                        )
+            requireContext()
+                .getSharedPreferences(
+                    EuroTokenMainActivity.EurotokenPreferences
+                        .EUROTOKEN_SHARED_PREF_NAME,
+                    Context.MODE_PRIVATE
+                )
         val demoModeEnabled =
-                pref.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+            pref.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
 
         if (demoModeEnabled) {
             binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
         } else {
             binding.txtBalance.text =
-                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         }
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtAmount.text = TransactionRepository.prettyAmount(amount)
@@ -114,16 +114,16 @@ class DestroyMoneyFragment : EurotokenBaseFragment(R.layout.fragment_destroy_mon
             val newName = binding.newGatewayName.text.toString()
             if (addGateway && newName.isNotEmpty()) {
                 GatewayStore.getInstance(requireContext())
-                        .addGateway(key, newName, ip, port.toLong(), setPreferred)
+                    .addGateway(key, newName, ip, port.toLong(), setPreferred)
             } else if (setPreferred && gateway != null) {
                 GatewayStore.getInstance(requireContext()).setPreferred(gateway)
             }
             transactionRepository.sendDestroyProposalWithPaymentID(
-                    publicKey.hexToBytes(),
-                    ip,
-                    port,
-                    paymentId,
-                    amount
+                publicKey.hexToBytes(),
+                ip,
+                port,
+                paymentId,
+                amount
             )
             findNavController().navigate(R.id.action_destroyMoneyFragment_to_transactionsFragment)
         }

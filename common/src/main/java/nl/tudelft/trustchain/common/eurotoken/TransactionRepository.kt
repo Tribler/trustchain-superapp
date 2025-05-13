@@ -197,12 +197,12 @@ class TransactionRepository(
         }
         return if ( // block contains balance (base case)
             (
-                listOf(
-                    BLOCK_TYPE_TRANSFER,
-                    BLOCK_TYPE_DESTROY,
-                    BLOCK_TYPE_CHECKPOINT,
-                    BLOCK_TYPE_ROLLBACK
-                ).contains(block.type) && block.isProposal
+            listOf(
+                BLOCK_TYPE_TRANSFER,
+                BLOCK_TYPE_DESTROY,
+                BLOCK_TYPE_CHECKPOINT,
+                BLOCK_TYPE_ROLLBACK
+            ).contains(block.type) && block.isProposal
             )
         ) {
             (block.transaction[KEY_BALANCE] as Long)

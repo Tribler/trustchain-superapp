@@ -12,7 +12,7 @@ class WalletViewModel(
     private val _balance = MutableLiveData<Long>()
     val balance: LiveData<Long> get() = _balance
 
-    //TODO can potentailly be deleted
+    // TODO can potentailly be deleted
     // might be handy for later transactions
     // now solely for test
     init {

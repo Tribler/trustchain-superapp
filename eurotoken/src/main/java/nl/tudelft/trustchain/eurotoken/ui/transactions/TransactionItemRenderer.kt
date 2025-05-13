@@ -21,8 +21,8 @@ class TransactionItemRenderer(
     private val transactionRepository: TransactionRepository,
     private val onItemLongClick: (Transaction) -> Unit
 ) : ItemLayoutRenderer<TransactionItem, View>(
-        TransactionItem::class.java
-    ) {
+    TransactionItem::class.java
+) {
     private val dateFormat = SimpleDateFormat.getDateTimeInstance()
 
     override fun bindView(

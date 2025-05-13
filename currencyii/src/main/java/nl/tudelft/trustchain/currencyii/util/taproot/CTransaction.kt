@@ -205,7 +205,7 @@ class CTransaction(
                         } else {
                             0
                         }
-                    ) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptPath) 1 else 0) * 35
+                        ) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptPath) 1 else 0) * 35
             )
 
             return taggedHash("TapSighash", ssBuf)

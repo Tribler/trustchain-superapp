@@ -159,7 +159,7 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                             (
                                 it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
                                     it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
-                            ) && !getCoinCommunity().checkEnoughFavorSignatures(it)
+                                ) && !getCoinCommunity().checkEnoughFavorSignatures(it)
                         }
                 Log.i(
                     "Coin",

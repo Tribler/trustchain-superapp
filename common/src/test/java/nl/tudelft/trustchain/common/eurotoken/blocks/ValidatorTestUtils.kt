@@ -37,29 +37,29 @@ fun getWalletBlockWithBalance(
             key = new,
             blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
             transaction =
+            mapOf(
+                TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(balance),
+                TransactionRepository.KEY_BALANCE to 0L
+            ),
+            linked =
+            testBlock(
+                key = gateway,
+                blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
+                transaction =
                 mapOf(
                     TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(balance),
                     TransactionRepository.KEY_BALANCE to 0L
-                ),
-            linked =
-                testBlock(
-                    key = gateway,
-                    blockType = TransactionRepository.BLOCK_TYPE_TRANSFER,
-                    transaction =
-                        mapOf(
-                            TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(balance),
-                            TransactionRepository.KEY_BALANCE to 0L
-                        )
                 )
+            )
         )
     val req =
         testBlock(
             key = new,
             blockType = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
             transaction =
-                mapOf(
-                    TransactionRepository.KEY_BALANCE to balance
-                ),
+            mapOf(
+                TransactionRepository.KEY_BALANCE to balance
+            ),
             previous = before,
             links = gateway.pub()
         )
@@ -69,9 +69,9 @@ fun getWalletBlockWithBalance(
             key = gateway,
             blockType = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
             transaction =
-                mapOf(
-                    TransactionRepository.KEY_BALANCE to balance
-                ),
+            mapOf(
+                TransactionRepository.KEY_BALANCE to balance
+            ),
             linked = req
         )
     )

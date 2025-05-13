@@ -8,9 +8,9 @@ import nl.tudelft.trustchain.app.databinding.ItemSelectorBinding
 class DashboardSelectorRenderer(
     private val onItemClick: (DashboardItem, Boolean) -> Unit
 ) : BindingItemRenderer<DashboardItem, ItemSelectorBinding>(
-        DashboardItem::class.java,
-        ItemSelectorBinding::inflate
-    ) {
+    DashboardItem::class.java,
+    ItemSelectorBinding::inflate
+) {
     override fun bindView(
         item: DashboardItem,
         binding: ItemSelectorBinding
