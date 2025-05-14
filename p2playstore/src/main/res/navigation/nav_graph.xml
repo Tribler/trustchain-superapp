@@ -17,93 +17,93 @@
             app:popUpTo="@+id/homeFragment" />
     </fragment>
 
-    <fragment
-        android:id="@+id/myDaosFragment"
-        android:name="nl.tudelft.trustchain.p2playstore.ui.mydaos.MyDaosFragment"
-        android:label="My DAOs"
-        tools:layout="@layout/fragment_my_daos">
-        <action
-            android:id="@+id/action_myDaosFragment_to_createJoinDaoFragment"
-            app:destination="@+id/createJoinDaoFragment" />
-        <action
-            android:id="@+id/action_myDaosFragment_to_daoDetailsFragment"
-            app:destination="@+id/daoDetailsFragment" />
-    </fragment>
+<!--    <fragment-->
+<!--        android:id="@+id/myDaosFragment"-->
+<!--        android:name="nl.tudelft.trustchain.p2playstore.ui.mydaos.MyDaosFragment"-->
+<!--        android:label="My DAOs"-->
+<!--        tools:layout="@layout/fragment_home">-->
+<!--        <action-->
+<!--            android:id="@+id/action_myDaosFragment_to_createJoinDaoFragment"-->
+<!--            app:destination="@+id/createJoinDaoFragment" />-->
+<!--        <action-->
+<!--            android:id="@+id/action_myDaosFragment_to_daoDetailsFragment"-->
+<!--            app:destination="@+id/daoDetailsFragment" />-->
+<!--    </fragment>-->
 
-    <fragment
-        android:id="@+id/createJoinDaoFragment"
-        android:name="nl.tudelft.trustchain.p2playstore.ui.createjoindao.CreateJoinDaoFragment"
-        android:label="Create or Join DAO"
-        tools:layout="@layout/fragment_create_join_dao">
-        <action
-            android:id="@+id/action_createJoinDaoFragment_to_myDaosFragment"
-            app:destination="@+id/myDaosFragment"
-            app:popUpTo="@+id/myDaosFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
+<!--    <fragment-->
+<!--        android:id="@+id/createJoinDaoFragment"-->
+<!--        android:name="nl.tudelft.trustchain.p2playstore.ui.createjoindao.CreateJoinDaoFragment"-->
+<!--        android:label="Create or Join DAO"-->
+<!--        tools:layout="@layout/fragment_create_join_dao">-->
+<!--        <action-->
+<!--            android:id="@+id/action_createJoinDaoFragment_to_myDaosFragment"-->
+<!--            app:destination="@+id/myDaosFragment"-->
+<!--            app:popUpTo="@+id/myDaosFragment"-->
+<!--            app:popUpToInclusive="true" />-->
+<!--    </fragment>-->
 
-    <fragment
-        android:id="@+id/daoDetailsFragment"
-        android:name="nl.tudelft.trustchain.p2playstore.ui.daodetails.DaoDetailsFragment"
-        android:label="DAO Details"
-        tools:layout="@layout/fragment_dao_details">
-        <argument
-            android:name="daoId"
-            app:argType="string" />
-        <action
-            android:id="@+id/action_daoDetailsFragment_to_proposeUpdateFragment"
-            app:destination="@+id/proposeUpdateFragment" />
-        <action
-            android:id="@+id/action_daoDetailsFragment_to_voteOnUpdateFragment"
-            app:destination="@+id/voteOnUpdateFragment" />
-        <action
-            android:id="@+id/action_daoDetailsFragment_to_acceptedUpdatesFragment"
-            app:destination="@+id/acceptedUpdatesFragment" />
-    </fragment>
+<!--    <fragment-->
+<!--        android:id="@+id/daoDetailsFragment"-->
+<!--        android:name="nl.tudelft.trustchain.p2playstore.ui.daodetails.DaoDetailsFragment"-->
+<!--        android:label="DAO Details"-->
+<!--        tools:layout="@layout/fragment_dao_details">-->
+<!--        <argument-->
+<!--            android:name="daoId"-->
+<!--            app:argType="string" />-->
+<!--        <action-->
+<!--            android:id="@+id/action_daoDetailsFragment_to_proposeUpdateFragment"-->
+<!--            app:destination="@+id/proposeUpdateFragment" />-->
+<!--        <action-->
+<!--            android:id="@+id/action_daoDetailsFragment_to_voteOnUpdateFragment"-->
+<!--            app:destination="@+id/voteOnUpdateFragment" />-->
+<!--        <action-->
+<!--            android:id="@+id/action_daoDetailsFragment_to_acceptedUpdatesFragment"-->
+<!--            app:destination="@+id/acceptedUpdatesFragment" />-->
+<!--    </fragment>-->
 
-    <fragment
-        android:id="@+id/proposeUpdateFragment"
-        android:name="nl.tudelft.trustchain.p2playstore..ui.proposeupdate.ProposeUpdateFragment"
-        android:label="Propose Update"
-        tools:layout="@layout/fragment_propose_update">
-        <argument
-            android:name="daoId"
-            app:argType="string" />
-        <action
-            android:id="@+id/action_proposeUpdateFragment_to_daoDetailsFragment"
-            app:destination="@+id/daoDetailsFragment"
-            app:popUpTo="@+id/daoDetailsFragment"
-            app:popUpToInclusive="true"/>
-    </fragment>
+<!--    <fragment-->
+<!--        android:id="@+id/proposeUpdateFragment"-->
+<!--        android:name="nl.tudelft.trustchain.p2playstore..ui.proposeupdate.ProposeUpdateFragment"-->
+<!--        android:label="Propose Update"-->
+<!--        tools:layout="@layout/fragment_propose_update">-->
+<!--        <argument-->
+<!--            android:name="daoId"-->
+<!--            app:argType="string" />-->
+<!--        <action-->
+<!--            android:id="@+id/action_proposeUpdateFragment_to_daoDetailsFragment"-->
+<!--            app:destination="@+id/daoDetailsFragment"-->
+<!--            app:popUpTo="@+id/daoDetailsFragment"-->
+<!--            app:popUpToInclusive="true"/>-->
+<!--    </fragment>-->
 
-    <fragment
-        android:id="@+id/voteOnUpdateFragment"
-        android:name="nl.tudelft.trustchain.p2playstore.ui.voteonupdate.VoteOnUpdateFragment"
-        android:label="Vote on Updates"
-        tools:layout="@layout/fragment_vote_on_update">
-        <argument
-            android:name="daoId"
-            app:argType="string" />
-        <action
-            android:id="@+id/action_voteOnUpdateFragment_to_daoDetailsFragment"
-            app:destination="@+id/daoDetailsFragment"
-            app:popUpTo="@+id/daoDetailsFragment"
-            app:popUpToInclusive="true"/>
-    </fragment>
+<!--    <fragment-->
+<!--        android:id="@+id/voteOnUpdateFragment"-->
+<!--        android:name="nl.tudelft.trustchain.p2playstore.ui.voteonupdate.VoteOnUpdateFragment"-->
+<!--        android:label="Vote on Updates"-->
+<!--        tools:layout="@layout/fragment_vote_on_update">-->
+<!--        <argument-->
+<!--            android:name="daoId"-->
+<!--            app:argType="string" />-->
+<!--        <action-->
+<!--            android:id="@+id/action_voteOnUpdateFragment_to_daoDetailsFragment"-->
+<!--            app:destination="@+id/daoDetailsFragment"-->
+<!--            app:popUpTo="@+id/daoDetailsFragment"-->
+<!--            app:popUpToInclusive="true"/>-->
+<!--    </fragment>-->
 
-    <fragment
-        android:id="@+id/acceptedUpdatesFragment"
-        android:name="nl.tudelft.trustchain.p2playstore.ui.acceptedupdates.AcceptedUpdatesFragment"
-        android:label="Accepted Updates"
-        tools:layout="@layout/fragment_accepted_updates">
-        <argument
-            android:name="daoId"
-            app:argType="string" />
-        <action
-            android:id="@+id/action_acceptedUpdatesFragment_to_daoDetailsFragment"
-            app:destination="@+id/daoDetailsFragment"
-            app:popUpTo="@+id/daoDetailsFragment"
-            app:popUpToInclusive="true"/>
-    </fragment>
+<!--    <fragment-->
+<!--        android:id="@+id/acceptedUpdatesFragment"-->
+<!--        android:name="nl.tudelft.trustchain.p2playstore.ui.acceptedupdates.AcceptedUpdatesFragment"-->
+<!--        android:label="Accepted Updates"-->
+<!--        tools:layout="@layout/fragment_accepted_updates">-->
+<!--        <argument-->
+<!--            android:name="daoId"-->
+<!--            app:argType="string" />-->
+<!--        <action-->
+<!--            android:id="@+id/action_acceptedUpdatesFragment_to_daoDetailsFragment"-->
+<!--            app:destination="@+id/daoDetailsFragment"-->
+<!--            app:popUpTo="@+id/daoDetailsFragment"-->
+<!--            app:popUpToInclusive="true"/>-->
+<!--    </fragment>-->
 
 </navigation>

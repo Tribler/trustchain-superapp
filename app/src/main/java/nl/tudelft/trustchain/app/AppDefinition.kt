@@ -9,7 +9,7 @@ import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
-import nl.tudelft.trustchain.p2playstore.MainActivity
+import nl.tudelft.trustchain.p2playstore.P2PMainActivity
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.peerai.PeerAIActivity
 
@@ -67,6 +67,6 @@ enum class AppDefinition(
         R.drawable.ic_p2playstore,
         "P2Playstore",
         R.color.purple,
-        MainActivity::class.java
+        P2PMainActivity::class.java
     )
 }

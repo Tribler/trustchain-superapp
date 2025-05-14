@@ -135,7 +135,7 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name="nl.tudelft.trustchain.p2playstore.MainActivity"
+            android:name="nl.tudelft.trustchain.p2playstore.P2PMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             tools:ignore="InnerclassSeparator" />
 

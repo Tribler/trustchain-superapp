@@ -34,7 +34,7 @@ android {
 
 dependencies {
     implementation project(':common')
-    implementation project(':currencyii')
+    //implementation project(':currencyii')
 
     //implementation project(':freedomofcomputing')
 
@@ -43,6 +43,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.activity:activity:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation "androidx.navigation:navigation-fragment-ktx:2.7.0"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
