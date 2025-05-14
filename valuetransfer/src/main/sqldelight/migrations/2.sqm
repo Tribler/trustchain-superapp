@@ -1,2 +1,0 @@
-ALTER TABLE identities ADD COLUMN verified INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE identities ADD COLUMN date_of_expiry INTEGER;

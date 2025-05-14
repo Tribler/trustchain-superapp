@@ -4,7 +4,7 @@ import android.app.Application
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.os.Build
-import android.util.Log
+// import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -12,7 +12,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.preference.PreferenceManager
-import app.cash.sqldelight.db.SqlDriver
+// import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -30,17 +30,17 @@ import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.messaging.bluetooth.BluetoothLeDiscovery
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
 import nl.tudelft.ipv8.attestation.schema.SchemaManager
-import nl.tudelft.ipv8.attestation.trustchain.BlockListener
-import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+// import nl.tudelft.ipv8.attestation.trustchain.BlockListener
+// import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
+// import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
-import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
-import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
-import nl.tudelft.ipv8.attestation.wallet.AttestationSQLiteStore
+// import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+// import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
+// import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
+// import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+// import nl.tudelft.ipv8.attestation.wallet.AttestationSQLiteStore
 import nl.tudelft.ipv8.attestation.wallet.cryptography.bonehexact.BonehPrivateKey
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
@@ -52,22 +52,12 @@ import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.foc.community.FOCCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
-import nl.tudelft.trustchain.common.bitcoin.WalletService
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
-import nl.tudelft.trustchain.eurotoken.db.TrustStore
+// import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.musicdao.core.dao.DaoCommunity
 import nl.tudelft.trustchain.musicdao.core.ipv8.MusicCommunity
-import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
-import nl.tudelft.trustchain.valuetransfer.community.PeerChatCommunity
-import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import nl.tudelft.trustchain.valuetransfer.util.PeerChatStore
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -100,17 +90,11 @@ class TrustChainApplication : Application() {
                     listOf(
                         createDiscoveryCommunity(),
                         createTrustChainCommunity(),
-                        createPeerChatCommunity(),
-                        createEuroTokenCommunity(),
                         createTFTPCommunity(),
                         createDemoCommunity(),
-                        createWalletCommunity(),
                         createMarketCommunity(),
-                        createCoinCommunity(),
                         createDaoCommunity(),
                         createMusicCommunity(),
-                        createIdentityCommunity(),
-                        createFOCCommunity(),
                     ),
                 walkerInterval = 5.0
             )
@@ -122,7 +106,7 @@ class TrustChainApplication : Application() {
             .init()
 
         initWallet()
-        initTrustChain()
+//        initTrustChain()
     }
 
     @OptIn(DelicateCoroutinesApi::class) // TODO: Verify whether usage is correct.
@@ -136,89 +120,89 @@ class TrustChainApplication : Application() {
         }
     }
 
-    private fun initTrustChain() {
-        val ipv8 = IPv8Android.getInstance()
-        val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
-        val tr = TransactionRepository(trustchain, GatewayStore.getInstance(this))
-        tr.initTrustChainCommunity() // register eurotoken listeners
-        val euroTokenCommunity = ipv8.getOverlay<EuroTokenCommunity>()!!
-        euroTokenCommunity.setTransactionRepository(tr)
+//    private fun initTrustChain() {
+//        val ipv8 = IPv8Android.getInstance()
+//        val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
+//        val tr = TransactionRepository(trustchain, GatewayStore.getInstance(this))
+//        tr.initTrustChainCommunity() // register eurotoken listeners
+// //        val euroTokenCommunity = ipv8.getOverlay<EuroTokenCommunity>()!!
+// //        euroTokenCommunity.setTransactionRepository(tr)
+//
+//        WalletService.createGlobalWallet(this.cacheDir ?: throw Error("CacheDir not found"))
+//
+//        trustchain.registerTransactionValidator(
+//            BLOCK_TYPE,
+//            object : TransactionValidator {
+//                override fun validate(
+//                    block: TrustChainBlock,
+//                    database: TrustChainStore
+//                ): ValidationResult {
+//                    if (block.transaction["message"] != null || block.isAgreement) {
+//                        return ValidationResult.Valid
+//                    } else {
+//                        return ValidationResult.Invalid(listOf("Proposal must have a message"))
+//                    }
+//                }
+//            }
+//        )
+//
+//        trustchain.registerBlockSigner(
+//            BLOCK_TYPE,
+//            object : BlockSigner {
+//                override fun onSignatureRequest(block: TrustChainBlock) {
+//                    trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+//                }
+//            }
+//        )
+//
+//        trustchain.addListener(
+//            BLOCK_TYPE,
+//            object : BlockListener {
+//                override fun onBlockReceived(block: TrustChainBlock) {
+//                    Log.d(
+//                        "TrustChainDemo",
+//                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+//                    )
+//                }
+//            }
+//        )
+//
+//        trustchain.addListener(
+//            CoinCommunity.JOIN_BLOCK,
+//            object : BlockListener {
+//                override fun onBlockReceived(block: TrustChainBlock) {
+//                    Log.d(
+//                        "Coin",
+//                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+//                    )
+//                }
+//            }
+//        )
+//
+//        trustchain.addListener(
+//            CoinCommunity.SIGNATURE_ASK_BLOCK,
+//            object : BlockListener {
+//                override fun onBlockReceived(block: TrustChainBlock) {
+//                    Log.d(
+//                        "Coin",
+//                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+//                    )
+//                }
+//            }
+//        )
+//    }
 
-        WalletService.createGlobalWallet(this.cacheDir ?: throw Error("CacheDir not found"))
-
-        trustchain.registerTransactionValidator(
-            BLOCK_TYPE,
-            object : TransactionValidator {
-                override fun validate(
-                    block: TrustChainBlock,
-                    database: TrustChainStore
-                ): ValidationResult {
-                    if (block.transaction["message"] != null || block.isAgreement) {
-                        return ValidationResult.Valid
-                    } else {
-                        return ValidationResult.Invalid(listOf("Proposal must have a message"))
-                    }
-                }
-            }
-        )
-
-        trustchain.registerBlockSigner(
-            BLOCK_TYPE,
-            object : BlockSigner {
-                override fun onSignatureRequest(block: TrustChainBlock) {
-                    trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
-                }
-            }
-        )
-
-        trustchain.addListener(
-            BLOCK_TYPE,
-            object : BlockListener {
-                override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d(
-                        "TrustChainDemo",
-                        "onBlockReceived: ${block.blockId} ${block.transaction}"
-                    )
-                }
-            }
-        )
-
-        trustchain.addListener(
-            CoinCommunity.JOIN_BLOCK,
-            object : BlockListener {
-                override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d(
-                        "Coin",
-                        "onBlockReceived: ${block.blockId} ${block.transaction}"
-                    )
-                }
-            }
-        )
-
-        trustchain.addListener(
-            CoinCommunity.SIGNATURE_ASK_BLOCK,
-            object : BlockListener {
-                override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d(
-                        "Coin",
-                        "onBlockReceived: ${block.blockId} ${block.transaction}"
-                    )
-                }
-            }
-        )
-    }
-
-    private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {
-        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "wallet.db")
-        val database = Database(driver)
-        val store = AttestationSQLiteStore(database)
-        val randomWalk = RandomWalk.Factory()
-
-        return OverlayConfiguration(
-            AttestationCommunity.Factory(store),
-            listOf(randomWalk)
-        )
-    }
+//    private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {
+//        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "wallet.db")
+//        val database = Database(driver)
+//        val store = AttestationSQLiteStore(database)
+//        val randomWalk = RandomWalk.Factory()
+//
+//        return OverlayConfiguration(
+//            AttestationCommunity.Factory(store),
+//            listOf(randomWalk)
+//        )
+//    }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
         val randomWalk = RandomWalk.Factory()
@@ -259,34 +243,6 @@ class TrustChainApplication : Application() {
         )
     }
 
-    private fun createEuroTokenCommunity(): OverlayConfiguration<EuroTokenCommunity> {
-        val randomWalk = RandomWalk.Factory()
-        val store = GatewayStore.getInstance(this)
-        val trustStore = TrustStore.getInstance(this)
-        return OverlayConfiguration(
-            EuroTokenCommunity.Factory(store, trustStore, this),
-            listOf(randomWalk)
-        )
-    }
-
-    private fun createPeerChatCommunity(): OverlayConfiguration<PeerChatCommunity> {
-        val randomWalk = RandomWalk.Factory()
-        val store = PeerChatStore.getInstance(this)
-        return OverlayConfiguration(
-            PeerChatCommunity.Factory(store, this),
-            listOf(randomWalk)
-        )
-    }
-
-    private fun createIdentityCommunity(): OverlayConfiguration<IdentityCommunity> {
-        val randomWalk = RandomWalk.Factory()
-        val store = IdentityStore.getInstance(this)
-        return OverlayConfiguration(
-            IdentityCommunity.Factory(store, this),
-            listOf(randomWalk)
-        )
-    }
-
     private fun createTFTPCommunity(): OverlayConfiguration<TFTPCommunity> {
         return OverlayConfiguration(
             Overlay.Factory(TFTPCommunity::class.java),
@@ -320,15 +276,15 @@ class TrustChainApplication : Application() {
         )
     }
 
-    private fun createCoinCommunity(): OverlayConfiguration<CoinCommunity> {
-        val randomWalk = RandomWalk.Factory()
-        val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
-
-        return OverlayConfiguration(
-            Overlay.Factory(CoinCommunity::class.java),
-            listOf(randomWalk, nsd)
-        )
-    }
+//    private fun createCoinCommunity(): OverlayConfiguration<CoinCommunity> {
+//        val randomWalk = RandomWalk.Factory()
+//        val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
+//
+//        return OverlayConfiguration(
+//            Overlay.Factory(CoinCommunity::class.java),
+//            listOf(randomWalk, nsd)
+//        )
+//    }
 
     private fun createMusicCommunity(): OverlayConfiguration<MusicCommunity> {
         val settings = TrustChainSettings()
@@ -338,14 +294,6 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             MusicCommunity.Factory(settings, store),
-            listOf(randomWalk)
-        )
-    }
-
-    private fun createFOCCommunity(): OverlayConfiguration<FOCCommunity> {
-        val randomWalk = RandomWalk.Factory()
-        return OverlayConfiguration(
-            FOCCommunity.Factory(this),
             listOf(randomWalk)
         )
     }

@@ -72,11 +72,7 @@ class AppLoader(
         val PREFERRED_APPS = stringSetPreferencesKey("preferred_apps")
         val DEFAULT_APPS =
             setOf(
-                AppDefinition.CURRENCY_II.appName,
-                AppDefinition.VALUETRANSFER.appName,
                 AppDefinition.MUSIC_DAO.appName,
-                AppDefinition.EUROTOKEN.appName,
-                AppDefinition.FREEDOM_OF_COMPUTING.appName
             )
     }
 }

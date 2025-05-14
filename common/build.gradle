@@ -103,7 +103,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     api group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.10'
-    api project(':geth-android')
 
     // BitTorrent
     implementation files('libs/jlibtorrent-' + jlibtorrent_version + '.jar')

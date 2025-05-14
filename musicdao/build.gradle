@@ -86,6 +86,8 @@ dependencies {
     api "androidx.appcompat:appcompat:$appcompat_version"
     implementation "com.google.android.material:material:$material_version"
 
+
+
     // BitTorrent/Libtorrent libraries
     implementation 'com.turn:ttorrent-core:1.5'
 
@@ -102,6 +104,8 @@ dependencies {
     // Reading MP3 metadata
     api 'com.mpatric:mp3agic:0.9.1'
 
+
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     // Integration with activities
     implementation 'androidx.activity:activity-compose:1.3.1'
     // Compose Material Design

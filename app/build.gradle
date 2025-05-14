@@ -117,12 +117,12 @@ allprojects {
 
 dependencies {
     implementation project(':debug')
-    implementation project(':freedomOfComputing')
-    implementation project(':eurotoken')
-    implementation project(':valuetransfer')
-    implementation project(':peerai')
+//    implementation project(':freedomOfComputing')
+//    implementation project(':eurotoken')
+//    implementation project(':valuetransfer')
+//    implementation project(':peerai')
     implementation project(':common')
-    implementation project(':currencyii')
+//    implementation project(':currencyii')
     implementation project(':musicdao')
 
     // AndroidX

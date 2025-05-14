@@ -77,62 +77,12 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
-            android:name="nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
-
-        <activity
-            android:name="nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:theme="@style/Theme.PeerChat" />
-
-        <activity
-            android:name="nl.tudelft.trustchain.foc.MainActivityFOC"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            tools:ignore="InnerclassSeparator" />
-
-        <activity
-            android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.ValueTransfer">
-            <tools:validation testUrl="http://trustchain.tudelft.nl/requestMoney?receiver=Tat&amp;amount=15.23&amp;message=party" />
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="http" />
-                <data android:scheme="https" />
-                <data android:host="trustchain.tudelft.nl" />
-                <data android:pathPrefix="/requestMoney" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name="nl.tudelft.trustchain.valuetransfer.passport.PassportCaptureActivity"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:stateNotNeeded="true"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-
-        <activity
             android:name="nl.tudelft.trustchain.musicdao.MusicActivity"
             android:exported="true"
             android:label="Music App"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MusicDaoTheme" />
-
-
-        <activity
-            android:name="nl.tudelft.trustchain.peerai.PeerAIActivity"
-            android:exported="true"
-            android:label="PeerAI App"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait" />
 
         <service
             android:name="nl.tudelft.trustchain.app.service.TrustChainService"
