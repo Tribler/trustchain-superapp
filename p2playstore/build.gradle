@@ -34,7 +34,7 @@ android {
 
 dependencies {
     implementation project(':common')
-    //implementation project(':currencyii')
+    implementation project(':currencyii')
 
     //implementation project(':freedomofcomputing')
 
