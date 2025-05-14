@@ -31,7 +31,7 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
     val faucetInProgress = bitcoinWalletViewModel.faucetInProgress.collectAsState()
     val walletTransactions = bitcoinWalletViewModel.walletTransactions.collectAsState()
     val isStarted = bitcoinWalletViewModel.isStarted.collectAsState()
-
+    val donationAddress by bitcoinWalletViewModel.donationAddress.collectAsState()
     var state by remember { mutableStateOf(0) }
     val titles = listOf("ACTIONS", "TRANSACTIONS")
 
@@ -132,7 +132,13 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
                         onClick = { },
                         enabled = false
                     )
-
+                    CustomMenuItem(
+                        text = "Donate to all artists",
+                        onClick = {
+                            // bitcoinWalletViewModel.donateToGlobalWallet("0.1")
+                        },
+                        enabled = true
+                    )
                     Column(modifier = Modifier.padding(bottom = 20.dp)) {
                         Text(text = "Public Key", fontWeight = FontWeight.Bold)
                         Text(text = bitcoinWalletViewModel.publicKey.value ?: "No Public Key")
@@ -142,6 +148,29 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
                         Text(text = "Wallet Status", fontWeight = FontWeight.Bold)
                         Text(text = status.value ?: "No Status")
                     }
+                    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                        Text(text = "Donation Wallet", fontWeight = FontWeight.Bold)
+                        when {
+                            donationAddress != "" -> {
+                                Text(
+                                    text = donationAddress,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
+                            else -> {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Initializing...")
+                                }
+                            }
+                        }
+                    }
+
+                    // Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                    //     Text(text = "Donation Wallet Balance", fontWeight = FontWeight.Bold)
+                    //     Text(text =  bitcoinWalletViewModel.donationWalletBalance.value ?: "Not found")
+                    // }
                 }
             }
             1 -> {

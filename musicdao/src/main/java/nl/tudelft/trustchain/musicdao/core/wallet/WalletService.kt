@@ -29,6 +29,8 @@ class WalletService(val config: WalletConfig, private val app: WalletAppKit) {
     }
 
     init {
+        config.cacheDir.mkdirs()
+
         app.setDownloadListener(
             object : DownloadProgressTracker() {
                 override fun progress(

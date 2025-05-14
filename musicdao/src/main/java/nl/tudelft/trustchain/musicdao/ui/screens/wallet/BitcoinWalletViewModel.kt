@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import nl.tudelft.trustchain.musicdao.core.repositories.ArtistRepository
 import nl.tudelft.trustchain.musicdao.core.wallet.UserWalletTransaction
 import nl.tudelft.trustchain.musicdao.core.wallet.WalletService
+import nl.tudelft.trustchain.musicdao.core.wallet.DonationWalletManager
 import nl.tudelft.trustchain.musicdao.ui.SnackbarHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -18,7 +19,11 @@ import javax.inject.Inject
 @HiltViewModel
 class BitcoinWalletViewModel
     @Inject
-    constructor(val walletService: WalletService, val artistRepository: ArtistRepository) : ViewModel() {
+    constructor(
+        val walletService: WalletService,
+        val artistRepository: ArtistRepository,
+        val donationWalletManager: DonationWalletManager
+    ) : ViewModel() {
         val publicKey: MutableStateFlow<String?> = MutableStateFlow(null)
         val confirmedBalance: MutableStateFlow<Coin?> = MutableStateFlow(null)
         val estimatedBalance: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -28,6 +33,8 @@ class BitcoinWalletViewModel
 
         val faucetInProgress: MutableStateFlow<Boolean> = MutableStateFlow(false)
         val isStarted: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+        val donationAddress: MutableStateFlow<String> = MutableStateFlow("")
 
         init {
 
@@ -44,6 +51,9 @@ class BitcoinWalletViewModel
                         confirmedBalance.value = walletService.confirmedBalance()
                         walletTransactions.value = walletService.walletTransactions()
                     }
+
+                    donationAddress.value = donationWalletManager.globalDonationAddress
+
                     delay(REFRESH_DELAY)
                 }
             }

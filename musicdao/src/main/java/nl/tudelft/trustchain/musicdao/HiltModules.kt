@@ -16,6 +16,7 @@ import nl.tudelft.trustchain.musicdao.core.wallet.WalletConfig.Companion.DEFAULT
 import nl.tudelft.trustchain.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_REGTEST_BOOTSTRAP_IP
 import nl.tudelft.trustchain.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_REGTEST_BOOTSTRAP_PORT
 import nl.tudelft.trustchain.musicdao.core.wallet.WalletService
+import nl.tudelft.trustchain.musicdao.core.wallet.DonationWalletManager
 import nl.tudelft.trustchain.musicdao.core.dao.DaoCommunity
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.SessionParams
@@ -32,6 +33,7 @@ import nl.tudelft.trustchain.musicdao.core.coin.*
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Singleton
+import java.io.File
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -126,6 +128,24 @@ class HiltModules {
 
     @Provides
     @Singleton
+    fun provideDonationWalletManager(
+        @ApplicationContext applicationContext: Context
+    ): DonationWalletManager {
+        return DonationWalletManager(
+            applicationContext,
+            WalletConfig(
+                networkParams = DEFAULT_NETWORK_PARAMS,
+                filePrefix = "${DEFAULT_FILE_PREFIX}-donation",
+                cacheDir = File(applicationContext.cacheDir, "donation_wallet"),
+                regtestFaucetEndPoint = DEFAULT_FAUCET_ENDPOINT,
+                regtestBootstrapIp = DEFAULT_REGTEST_BOOTSTRAP_IP,
+                regtestBootstrapPort = DEFAULT_REGTEST_BOOTSTRAP_PORT
+            )
+        )
+    }
+
+    @Provides
+    @Singleton
     fun provideWalletService(
         @ApplicationContext applicationContext: Context,
         walletManager: WalletManager
@@ -134,7 +154,7 @@ class HiltModules {
             WalletConfig(
                 networkParams = DEFAULT_NETWORK_PARAMS,
                 filePrefix = DEFAULT_FILE_PREFIX,
-                cacheDir = Paths.get("${applicationContext.cacheDir}").toFile(),
+                cacheDir = File(applicationContext.cacheDir, "main_wallet"),
                 regtestFaucetEndPoint = DEFAULT_FAUCET_ENDPOINT,
                 regtestBootstrapIp = DEFAULT_REGTEST_BOOTSTRAP_IP,
                 regtestBootstrapPort = DEFAULT_REGTEST_BOOTSTRAP_PORT
