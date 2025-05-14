@@ -59,8 +59,6 @@ dependencies {
     }
 
     api project(':geth-android')
-    implementation project(':common')
-    implementation 'com.google.firebase:firebase-encoders-json:16.1.0'
 
     testImplementation "junit:junit:$junit_version"
 

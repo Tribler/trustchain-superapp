@@ -116,7 +116,6 @@ allprojects {
 }
 
 dependencies {
-    implementation project(':p2playstore')
     implementation project(':debug')
     implementation project(':freedomOfComputing')
     implementation project(':eurotoken')
@@ -125,6 +124,7 @@ dependencies {
     implementation project(':common')
     implementation project(':currencyii')
     implementation project(':musicdao')
+    implementation project(':p2playstore')
 
     // AndroidX
     implementation "androidx.datastore:datastore-preferences:1.0.0"
@@ -134,21 +134,6 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
-
-    // Core library
-    androidTestImplementation("androidx.test:core:1.5.0")
-
-    // AndroidJUnitRunner and JUnit Rules
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("androidx.test:rules:1.5.0")
-
-    // Assertions
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.ext:truth:1.5.0")
-
-    // Espresso dependencies
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.5.1")
 
     // Firebase
     implementation 'com.google.firebase:firebase-analytics:21.2.0'
@@ -203,7 +188,6 @@ dependencies {
     }
     implementation project(':ipv8-android')
     kapt 'com.google.dagger:dagger-compiler:2.50'
-    implementation 'org.xerial:sqlite-jdbc:3.43.0.0'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
