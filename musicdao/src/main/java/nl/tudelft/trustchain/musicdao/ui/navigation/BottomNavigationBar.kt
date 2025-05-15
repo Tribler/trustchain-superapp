@@ -21,7 +21,8 @@ fun BottomNavigationBar(navController: NavHostController) {
         listOf(
             BottomNavigationItem("Home", Screen.Home.route, Icons.Filled.Home),
             BottomNavigationItem("Creator", Screen.CreatorMenu.route, Icons.Filled.Person),
-            BottomNavigationItem("DAO", Screen.DaoRoute.route, Icons.Filled.Person)
+            BottomNavigationItem("DAO", Screen.DaoRoute.route, Icons.Filled.Person),
+            BottomNavigationItem("Contribute", Screen.Contribute.route, Icons.Filled.Person)
         )
 
     BottomNavigation {

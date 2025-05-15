@@ -43,6 +43,15 @@ class ArtistRepository
             return current
         }
 
+//        // write a method that, given a user id, returns List<Artist>? of all the artists
+//        // that the user has listened to
+//        suspend fun getMyArtists(): List<Artist>? {
+//            val publicKey = musicCommunity.publicKeyHex()
+//            return artistAnnounceBlockRepository.getAllLocal().map { toArtist(it) }
+//        }
+
+
+
         suspend fun refreshArtistStateFlow(publicKey: String) {
             val current = stateFlows.get(publicKey)
 

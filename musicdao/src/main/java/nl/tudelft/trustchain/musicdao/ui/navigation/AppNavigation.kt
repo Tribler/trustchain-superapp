@@ -32,6 +32,9 @@ import nl.tudelft.trustchain.musicdao.ui.screens.wallet.BitcoinWalletScreen
 import nl.tudelft.trustchain.musicdao.ui.screens.wallet.BitcoinWalletViewModel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
+import nl.tudelft.trustchain.musicdao.ui.screens.contribute.ContributeCreateScreen
+import nl.tudelft.trustchain.musicdao.ui.screens.contribute.ContributeScreen
+import nl.tudelft.trustchain.musicdao.ui.screens.contribute.ContributeViewModel
 import nl.tudelft.trustchain.musicdao.ui.screens.dao.*
 import nl.tudelft.trustchain.musicdao.ui.screens.debug.DebugScreenViewModel
 import nl.tudelft.trustchain.musicdao.ui.screens.profile.EditProfileScreen
@@ -51,6 +54,7 @@ fun AppNavigation(
 ) {
     val bitcoinWalletViewModel: BitcoinWalletViewModel = hiltViewModel()
     val daoViewModel: DaoViewModel = hiltViewModel()
+    val contributeViewModel: ContributeViewModel = hiltViewModel()
 
     daoViewModel.initManager()
 
@@ -121,6 +125,22 @@ fun AppNavigation(
             }
             composable(Screen.CreateRelease.route) {
                 CreateReleaseDialog(navController = navController)
+            }
+
+            composable(Screen.Contribute.route) {
+                ContributeScreen(
+                    navController = navController,
+                    contributeViewModel = contributeViewModel,
+                    bitcoinWalletViewModel = bitcoinWalletViewModel
+                )
+            }
+
+            composable(Screen.NewContributionRoute.route) {
+                ContributeCreateScreen(
+                    bitcoinWalletViewModel = bitcoinWalletViewModel,
+                    contributeViewModel = contributeViewModel,
+                    navController = navController
+                )
             }
 
             composable(
