@@ -122,7 +122,7 @@ class UsageBenchmarkCalculator(private val dao: UsageEventsDao) {
             return@onIO 0.0
         }
         val allCancelEvents = dao.getAllTransactionCancelEvents()
-        val manualCancels = allCancelEvents.count {it.reason == TransactionCancelReason.MANUAL}
+        val manualCancels = allCancelEvents.count { it.reason == TransactionCancelReason.MANUAL }
         (manualCancels.toDouble() / totalStarted) * 100.0
     }
 

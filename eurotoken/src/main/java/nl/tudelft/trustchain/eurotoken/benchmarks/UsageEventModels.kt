@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.eurotoken.benchmarks // Adjusted package
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 /**
@@ -25,7 +24,6 @@ data class TransactionErrorEvent(
     val timestamp: Long,
     val error: String
 )
-
 
 /**
  * Logged when a transaction is stopped before completion

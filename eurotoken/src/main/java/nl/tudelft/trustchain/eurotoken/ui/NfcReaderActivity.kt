@@ -20,7 +20,6 @@ import android.view.View
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.eurotoken.databinding.ActivityNfcReaderBinding
 import java.util.*
-import nl.tudelft.trustchain.eurotoken.nfc.EuroTokenHCEService
 
 // TODO check if we can delete nfchandler, nfcState, and nfcViewModel
 // not for now
@@ -37,6 +36,9 @@ class NfcReaderActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
         private const val TAG = "NfcReader"
         private const val READER_FLAGS = NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK
         private const val CONNECTION_TIMEOUT_MS = 5000
+
+        // isodep apdu max size 255 bytes -> saftey margin
+        private const val MAX_EXPECTED_CHUNK_SIZE = 250
 
         // extra
 //        const val EXTRA_NFC_DATA = "nl.tudelft.trustchain.eurotoken.NFC_DATA"
@@ -161,25 +163,37 @@ class NfcReaderActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
                 Log.d(TAG, "READ DATA response: ${readResult.toHex()}")
 
                 if (checkSuccess(readResult)) {
-                    val payloadBytes = readResult.copyOfRange(0, readResult.size - 2)
+                    val payloadBytes = readResult.copyOfRange(0, readResult.size - 2) // no SW1,SW2
+                    if (payloadBytes.isEmpty()) {
+                        Log.w(TAG, "No data payload received from HCE service (empty response).")
+                        finishWithError(NfcError.READ_FAILED)
+                        return@withContext
+                    }
                     val payloadString = String(payloadBytes, Charsets.UTF_8)
                     Log.i(TAG, "Data read successfully: $payloadString")
 
-                    // is the received payload the static value? -->TODO change
-                    val confirmationStatus: String
-                    if (payloadString == EuroTokenHCEService.NFC_TEST_TXT) {
-                        confirmationStatus = "NFC Confirmation OK!"
-                        Log.i(TAG, confirmationStatus)
-                    } else {
-                        confirmationStatus = "Received unexpected data: $payloadString"
-                        Log.w(TAG, confirmationStatus)
-                    }
-
+//                    // is the received payload the static value? -->TODO change
+//                    val confirmationStatus: String
+//                    if (payloadString == EuroTokenHCEService.NFC_TEST_TXT) {
+//                        confirmationStatus = "NFC Confirmation OK!"
+//                        Log.i(TAG, confirmationStatus)
+//                    } else {
+//                        confirmationStatus = "Received unexpected data: $payloadString"
+//                        Log.w(TAG, confirmationStatus)
+//                    }
+                    val confirmationStatus = "Received data: $payloadString"
                     runOnUiThread {
+                        binding.progressSpinner.visibility = View.GONE
+                        binding.ivNfcResultIcon.visibility = View.VISIBLE
                         updateStatus("Data received.")
                         updateResult(confirmationStatus)
+
+                        binding.btnConfirm.visibility = View.VISIBLE
+                        binding.btnConfirm.setOnClickListener {
+                            finishWithSuccess(payloadString)
+                        }
                     }
-                    finishWithSuccess(payloadString)
+//                    finishWithSuccess(payloadString)
                 } else {
                     val statusString = readResult.getStatusString()
                     Log.e(TAG, "READ DATA failed. Status: $statusString")
@@ -188,7 +202,7 @@ class NfcReaderActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
                         else -> NfcError.READ_FAILED
                     }
                     runOnUiThread { updateStatus("Failed to read data. Status: $statusString") }
-                    finishWithError(error)
+//                    finishWithError(error)
                 }
             }
         } catch (e: TagLostException) {

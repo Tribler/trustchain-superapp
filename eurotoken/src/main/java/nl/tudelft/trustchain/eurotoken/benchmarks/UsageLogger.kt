@@ -44,7 +44,7 @@ object UsageLogger {
         scope.launch { dao?.insertTransactionErrorEvent(event) }
     }
 
-    fun logTransactionCancel(transactionId: String, reason: TransactionCancelReason) { 
+    fun logTransactionCancel(transactionId: String, reason: TransactionCancelReason) {
         val event = TransactionCancelEvent(
             transactionId = transactionId,
             timestamp = getCurrentTimestamp(),
@@ -53,7 +53,7 @@ object UsageLogger {
         scope.launch { dao?.insertTransactionCancelEvent(event) }
     }
 
-    fun logTransactionDone(transactionId: String) { 
+    fun logTransactionDone(transactionId: String) {
         val event = TransactionDoneEvent(
             transactionId = transactionId,
             timestamp = getCurrentTimestamp()
@@ -61,7 +61,7 @@ object UsageLogger {
         scope.launch { dao?.insertTransactionDoneEvent(event) }
     }
 
-    fun logTransferStart(transactionId: String, payloadSize: Long, direction: TransferDirection): String { 
+    fun logTransferStart(transactionId: String, payloadSize: Long, direction: TransferDirection): String {
         val transferId = generateTransferId()
         val event = TransferStartEvent(
             transactionId = transactionId,
@@ -74,7 +74,7 @@ object UsageLogger {
         return transferId // Return to caller for correlating end/error events
     }
 
-    fun logTransferDone(transferId: String) { 
+    fun logTransferDone(transferId: String) {
         val event = TransferDoneEvent(
             transferId = transferId,
             timestamp = getCurrentTimestamp()
@@ -82,7 +82,7 @@ object UsageLogger {
         scope.launch { dao?.insertTransferDoneEvent(event) }
     }
 
-    fun logTransferError(transferId: String, error: TransferError) { 
+    fun logTransferError(transferId: String, error: TransferError) {
         val event = TransferErrorEvent(
             transferId = transferId,
             timestamp = getCurrentTimestamp(),
@@ -90,5 +90,4 @@ object UsageLogger {
         )
         scope.launch { dao?.insertTransferErrorEvent(event) }
     }
-
 }

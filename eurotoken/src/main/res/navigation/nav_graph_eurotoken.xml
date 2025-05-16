@@ -54,6 +54,7 @@
         <action
             android:id="@+id/action_sendMoneyFragment_to_nfcResultFragment"
             app:destination="@id/nfcResultFragment" />
+        
         <argument
             android:name="transaction_args" app:argType="nl.tudelft.trustchain.eurotoken.common.TransactionArgs" />
     </fragment>

@@ -19,6 +19,7 @@ interface UsageEventsDao {
 
     @Insert
     suspend fun insertTransactionDoneEvent(event: TransactionDoneEvent)
+
     @Insert
     suspend fun insertTransferStartEvent(event: TransferStartEvent)
 
@@ -59,6 +60,7 @@ interface UsageEventsDao {
 
     @Query("SELECT * FROM transfer_done_events")
     suspend fun getAllTransferDoneEvents(): List<TransferDoneEvent>
+
     @Query("SELECT * FROM transfer_done_events WHERE transferId = :transferId")
     suspend fun getTransferDoneEvent(transferId: String): TransferDoneEvent?
 
@@ -122,5 +124,4 @@ interface UsageEventsDao {
 
     @Query("SELECT COUNT(*) FROM transaction_done_events")
     suspend fun getTransactionDoneCount(): Long
-
 }

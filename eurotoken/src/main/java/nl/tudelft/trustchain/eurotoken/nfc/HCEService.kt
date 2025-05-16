@@ -12,12 +12,16 @@ class EuroTokenHCEService : HostApduService() {
     companion object {
         private const val TAG = "EuroTokenHCE"
 
+        // isodep apdu max size 255 bytes -> saftey margin
+        private const val MAX_EXPECTED_CHUNK_SIZE = 250 // now apdu ? potentially chunkking?
+
         // Status words
         private val SW_OK = byteArrayOf(0x90.toByte(), 0x00.toByte()) // success
         private val SW_CONDITIONS_NOT_SATISFIED = byteArrayOf(0x69, 0x85.toByte())
         private val SW_UNKNOWN_ERROR = byteArrayOf(0x6F.toByte(), 0x00.toByte())
         private val SW_INS_NOT_SUPPORTED = byteArrayOf(0x6D.toByte(), 0x00.toByte())
         private val SW_CLA_NOT_SUPPORTED = byteArrayOf(0x6E.toByte(), 0x00.toByte())
+        private val SW_WRONG_LENGTH = byteArrayOf(0x67.toByte(), 0x00.toByte()) // for chunking
 
         // AID ->HCE service only activated when read specific AID
         const val AID_EUROTOKEN = "F222222222"
@@ -38,10 +42,52 @@ class EuroTokenHCEService : HostApduService() {
             0x00.toByte() // Le = 00 (Request maximum available data)
         )
 
+        // didnt work without
+        // so now shared mutable state
+        @Volatile
+        private var currentPayloadBytes: ByteArray? = null
+
         // TODO still static data testing
         // Potentially clear after retrieval?
-        const val NFC_TEST_TXT = "NFC_TESTING"
-        val NFC_TEST = NFC_TEST_TXT.toByteArray(Charsets.UTF_8)
+//        const val NFC_TEST_TXT = "NFC_TESTING"
+//        val NFC_TEST = NFC_TEST_TXT.toByteArray(Charsets.UTF_8)
+
+        // potentially chunking if size bigger than max NFC??
+
+//        fun setPayload(payload: ByteArray?) {
+//            synchronized(this) {
+//                currentPayloadBytes = payload
+//                if (payload != null && payload.isNotEmpty()) {
+//                    dataChunks = payload.asList().chunked(MAX_CHUNK_SIZE)
+//                        .map { it.toByteArray() }
+//                    currentChunkIndex = 0
+//                    Log.d(TAG, "Payload set for HCE. Total size: ${payload.size}, Chunks: ${dataChunks?.size ?: 0}")
+//                } else {
+//                    dataChunks = null
+//                    currentChunkIndex = 0
+//                    if (payload == null) Log.d(TAG, "Payload cleared for HCE.")
+//                    else Log.d(TAG, "Empty payload provided to HCE.")
+//                }
+//            }
+//        }
+
+        fun setPayload(payload: ByteArray?) {
+            synchronized(this) {
+                currentPayloadBytes = payload
+                if (payload != null) {
+                    if (payload.size > MAX_EXPECTED_CHUNK_SIZE) {
+                        Log.w(TAG, "Payload size (${payload.size}) exceeds MAX_EXPECTED_CHUNK_SZE ($MAX_EXPECTED_CHUNK_SIZE). .")
+                    }
+                    Log.d(TAG, "Payload set for HCE. Size: ${payload.size}")
+                } else {
+                    Log.d(TAG, "Payload cleared for HCE.")
+                }
+            }
+        }
+
+        fun clearPayload() {
+            setPayload(null)
+        }
     }
 
     // android sys calls this when apdu command is received from the reader
@@ -64,8 +110,24 @@ class EuroTokenHCEService : HostApduService() {
                 return SW_CLA_NOT_SUPPORTED
             }
         }
-        if (Arrays.equals(CMD_READ_DATA, commandApdu)) {
-            return NFC_TEST + SW_OK
+        val cmd_read_data_ins = 0xB0.toByte()
+        if (commandApdu.size >= 4 && commandApdu[0] == 0x00.toByte() && commandApdu[1] == cmd_read_data_ins) {
+            synchronized(EuroTokenHCEService) {
+                val payloadToSend = currentPayloadBytes
+                if (payloadToSend == null) {
+                    Log.w(TAG, "READ DATA: No payload available.")
+                    return SW_CONDITIONS_NOT_SATISFIED
+                }
+
+                //  check if our payload is too big.
+                if (payloadToSend.size > MAX_EXPECTED_CHUNK_SIZE) {
+                    Log.e(TAG, "READ DATA: Payload size (${payloadToSend.size}) is too large for a single APDU response without chunking.")
+                    return SW_WRONG_LENGTH
+                }
+
+                Log.d(TAG, "Sending entire payload (size: ${payloadToSend.size})")
+                return payloadToSend + SW_OK
+            }
         }
         return SW_INS_NOT_SUPPORTED
     }

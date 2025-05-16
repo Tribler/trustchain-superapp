@@ -34,4 +34,7 @@
 
     <string name="intro_transfer_method">Select how to transfer EuroToken:</string>
 
+    <string name="nfc_activated_for_receiving">NFC Active: Ready to receive %1$s. Ask sender to tap.</string>
+    <string name="confirm_send_nfc">Confirm Send (NFC)</string>
+
 </resources>

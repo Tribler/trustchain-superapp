@@ -5,7 +5,6 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-
 @Database(
     entities = [
         TransactionStartEvent::class,
@@ -34,8 +33,8 @@ abstract class UsageAnalyticsDatabase : RoomDatabase() {
                     UsageAnalyticsDatabase::class.java,
                     "eurotoken_usage_analytics_db"
                 )
-                // Add migrations here if you change schema later
-                .build()
+                    // Add migrations here if you change schema later
+                    .build()
                 INSTANCE = instance
                 instance
             }
