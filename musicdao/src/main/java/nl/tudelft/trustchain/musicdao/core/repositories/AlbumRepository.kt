@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.musicdao.core.repositories
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.DelicateCoroutinesApi
 import nl.tudelft.trustchain.musicdao.core.cache.CacheDatabase
 import nl.tudelft.trustchain.musicdao.core.cache.entities.AlbumEntity
@@ -19,14 +20,31 @@ class AlbumRepository
     @Inject
     constructor(
         private val database: CacheDatabase,
-        private val releasePublishBlockRepository: ReleasePublishBlockRepository
+        private val releasePublishBlockRepository: ReleasePublishBlockRepository,
+        private val releaseRepository: ReleaseRepository
     ) {
-        suspend fun getAlbums(): List<Album> {
-            return database.dao.getAll().map { it.toAlbum() }
+        suspend fun getReleaseById(releaseId: String): Album? {
+            return database.dao.get(releaseId)?.toAlbum()
         }
 
-        fun getAlbumsFlow(): LiveData<List<Album>> {
-            return database.dao.getAllLiveData().map { it.map { it.toAlbum() } }
+        suspend fun getAlbums(userPublicKey: String): List<Album> {
+            return database.dao.getAll().map { entity ->
+                val magnetLink = releaseRepository.getFullRelease(entity.id, userPublicKey)
+                entity.toAlbum().copy(
+                    magnet = magnetLink ?: "access_restricted"
+                )
+            }
+        }
+
+        fun getAlbumsFlow(userPublicKey: String): LiveData<List<Album>> {
+            return database.dao.getAllLiveData().map { entities ->
+                entities.map { entity ->
+                    val magnetLink = releaseRepository.getFullRelease(entity.id, userPublicKey)
+                    entity.toAlbum().copy(
+                        magnet = magnetLink ?: "access_restricted"
+                    )
+                }
+            }
         }
 
         suspend fun getAlbumsFromArtist(publicKey: String): List<Album> {
@@ -45,23 +63,22 @@ class AlbumRepository
             artist: String,
             releaseDate: String
         ): Boolean {
-            // Create and publish the Trustchain block.
-            val block =
-                releasePublishBlockRepository.create(
-                    releaseId = releaseId,
-                    magnet = magnet,
-                    title = title,
-                    artist = artist,
-                    releaseDate = releaseDate
-                )
+            // Create and publish the Trustchain block with preview
+            val block = releasePublishBlockRepository.create(
+                releaseId = releaseId,
+                magnet = "",
+                title = title,
+                artist = artist,
+                releaseDate = releaseDate
+            )
 
-            // If successful, we optimistically add it to our local cache.
+            // If successful, add to local cache
             block?.let {
                 val transaction: ReleasePublishBlock = releasePublishBlockRepository.toBlock(block)
                 database.dao.insert(
                     AlbumEntity(
                         id = transaction.releaseId,
-                        magnet = transaction.magnet,
+                        magnet = magnet,  // Store the magnet link locally for the artist
                         title = transaction.title,
                         artist = transaction.artist,
                         publisher = transaction.publisher,
@@ -70,7 +87,7 @@ class AlbumRepository
                         cover = null,
                         root = null,
                         isDownloaded = false,
-                        infoHash = TorrentEngine.magnetToInfoHash(transaction.magnet),
+                        infoHash = TorrentEngine.magnetToInfoHash(magnet),
                         torrentPath = null
                     )
                 )
@@ -87,7 +104,7 @@ class AlbumRepository
                 database.dao.insert(
                     AlbumEntity(
                         id = it.releaseId,
-                        magnet = it.magnet,
+                        magnet = "access_restricted",  // Full release not available in preview
                         title = it.title,
                         artist = it.artist,
                         publisher = it.publisher,
@@ -96,7 +113,7 @@ class AlbumRepository
                         cover = null,
                         root = null,
                         isDownloaded = false,
-                        infoHash = TorrentEngine.magnetToInfoHash(it.magnet),
+                        infoHash = null,  // Will be set when full release is accessed
                         torrentPath = null
                     )
                 )

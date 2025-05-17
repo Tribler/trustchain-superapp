@@ -19,8 +19,8 @@ class BatchPublisher
         val albumRepository: AlbumRepository
     ) {
         @OptIn(DelicateCoroutinesApi::class)
-        suspend fun publish(file: File) {
-            val currentAlbums = albumRepository.getAlbums()
+        suspend fun publish(file: File, userPublicKey: String) {
+            val currentAlbums = albumRepository.getAlbums(userPublicKey)
 
             if (!file.exists()) {
                 Log.d("MusicDao", "BatchPublisher: file not found $file")

@@ -9,7 +9,7 @@ import java.time.Instant
 @Entity
 data class AlbumEntity(
     @PrimaryKey val id: String,
-    val magnet: String,
+    val magnet: String,  // For artist: full magnet link, For others: "access_restricted"
     val title: String,
     val artist: String,
     val publisher: String,

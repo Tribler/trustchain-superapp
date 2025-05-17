@@ -41,9 +41,10 @@ class SearchScreenViewModel
 
         init {
             viewModelScope.launch {
-                _searchResult.value = downloadedFirstInListOfAlbums(albumRepository.getAlbums())
+                val userPublicKey = musicCommunity.publicKeyHex()
+                _searchResult.value = downloadedFirstInListOfAlbums(albumRepository.getAlbums(userPublicKey))
                 _peerAmount.value = musicCommunity.getPeers().size
-                _totalReleaseAmount.value = albumRepository.getAlbums().size
+                _totalReleaseAmount.value = albumRepository.getAlbums(userPublicKey).size
             }
         }
 
@@ -68,8 +69,9 @@ class SearchScreenViewModel
         }
 
         private suspend fun search(searchText: String) {
+            val userPublicKey = musicCommunity.publicKeyHex()
             if (searchText.isEmpty()) {
-                _searchResult.value = downloadedFirstInListOfAlbums(albumRepository.getAlbums())
+                _searchResult.value = downloadedFirstInListOfAlbums(albumRepository.getAlbums(userPublicKey))
             } else {
                 val result = albumRepository.searchAlbums(searchText)
                 _searchResult.value = downloadedFirstInListOfAlbums(result)
@@ -80,11 +82,12 @@ class SearchScreenViewModel
             viewModelScope.launch {
                 _isRefreshing.value = true
                 delay(500)
+                val userPublicKey = musicCommunity.publicKeyHex()
                 if (_searchQuery.value.isEmpty()) {
-                    _searchResult.value = downloadedFirstInListOfAlbums(albumRepository.getAlbums())
+                    _searchResult.value = downloadedFirstInListOfAlbums(albumRepository.getAlbums(userPublicKey))
                 }
                 _peerAmount.value = musicCommunity.getPeers().size
-                _totalReleaseAmount.value = albumRepository.getAlbums().size
+                _totalReleaseAmount.value = albumRepository.getAlbums(userPublicKey).size
                 _isRefreshing.value = false
             }
         }

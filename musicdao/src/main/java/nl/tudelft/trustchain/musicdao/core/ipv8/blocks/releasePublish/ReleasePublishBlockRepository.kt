@@ -52,7 +52,6 @@ class ReleasePublishBlockRepository
 
         fun toBlock(block: TrustChainBlock): ReleasePublishBlock {
             val releaseId = block.transaction["releaseId"] as String
-            val magnet = block.transaction["magnet"] as String
             val title = block.transaction["title"] as String
             val artist = block.transaction["artist"] as String
             val publisher = block.transaction["publisher"] as String
@@ -61,7 +60,6 @@ class ReleasePublishBlockRepository
 
             return ReleasePublishBlock(
                 releaseId = releaseId,
-                magnet = magnet,
                 title = title,
                 artist = artist,
                 publisher = publisher,
