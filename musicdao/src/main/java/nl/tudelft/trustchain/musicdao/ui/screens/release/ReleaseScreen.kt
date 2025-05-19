@@ -247,11 +247,13 @@ fun Header(
             style = MaterialTheme.typography.body2.merge(SpanStyle(fontWeight = FontWeight.SemiBold)),
             modifier = Modifier.padding(bottom = 5.dp)
         )
-        Text(
-            "Artist Public Key",
-            style = MaterialTheme.typography.body2.merge(SpanStyle(fontWeight = FontWeight.SemiBold)),
-            modifier = Modifier.padding(bottom = 5.dp)
-        )
+        if (!album.id.startsWith("cc:")) {
+            Text(
+                "Artist Public Key",
+                style = MaterialTheme.typography.body2.merge(SpanStyle(fontWeight = FontWeight.SemiBold)),
+                modifier = Modifier.padding(bottom = 5.dp)
+            )
+        }
         Text(
             album.publisher,
             style = MaterialTheme.typography.body2.merge(SpanStyle(fontWeight = FontWeight.SemiBold)),
@@ -278,29 +280,31 @@ fun Header(
                         contentDescription = null
                     )
                 }
-                IconButton(
-                    onClick = {
-                        navController.navigate(
-                            Screen.Profile.createRoute(publicKey = album.publisher)
+                if (!album.id.startsWith("cc:")) {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(
+                                Screen.Profile.createRoute(publicKey = album.publisher)
+                            )
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Person,
+                            contentDescription = null
                         )
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Person,
-                        contentDescription = null
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        navController.navigate(
-                            Screen.Donate.createRoute(publicKey = album.publisher)
+                    IconButton(
+                        onClick = {
+                            navController.navigate(
+                                Screen.Donate.createRoute(publicKey = album.publisher)
+                            )
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = null
                         )
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = null
-                    )
                 }
 
                 var expanded by remember { mutableStateOf(false) }
@@ -315,23 +319,25 @@ fun Header(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        DropdownMenuItem(
-                            onClick = {
-                                navController.navigate(
-                                    Screen.Profile.createRoute(publicKey = album.publisher)
-                                )
+                        if (!album.id.startsWith("cc:")) {
+                            DropdownMenuItem(
+                                onClick = {
+                                    navController.navigate(
+                                        Screen.Profile.createRoute(publicKey = album.publisher)
+                                    )
+                                }
+                            ) {
+                                Text("View Artist")
                             }
-                        ) {
-                            Text("View Artist")
-                        }
-                        DropdownMenuItem(
-                            onClick = {
-                                navController.navigate(
-                                    Screen.Donate.createRoute(publicKey = album.publisher)
-                                )
+                            DropdownMenuItem(
+                                onClick = {
+                                    navController.navigate(
+                                        Screen.Donate.createRoute(publicKey = album.publisher)
+                                    )
+                                }
+                            ) {
+                                Text("Donate")
                             }
-                        ) {
-                            Text("Donate")
                         }
                         DropdownMenuItem(onClick = { }) {
                             Text("View Meta-data")

@@ -34,7 +34,7 @@ class DownloadFinishUseCase(
                     val songMetadata = line.split('|');
                     database.dao.insert(
                         AlbumEntity(
-                            id = "pandacd-" + songMetadata[0],
+                            id = "cc:pandacd-" + songMetadata[0],
                             magnet = songMetadata[2],
                             title = songMetadata[0].substringAfter(" – ").substringBefore(" ["),
                             artist = songMetadata[1],
