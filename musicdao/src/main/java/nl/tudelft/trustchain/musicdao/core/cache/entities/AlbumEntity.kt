@@ -28,7 +28,7 @@ data class AlbumEntity(
             title = title,
             artist = artist,
             publisher = publisher,
-            releaseDate = Instant.parse(releaseDate),
+            releaseDate = if (releaseDate.isNotEmpty()) Instant.parse(releaseDate) else Instant.now(),
             songs = songs.map { it.toSong() },
             cover =
                 cover?.let { path ->
