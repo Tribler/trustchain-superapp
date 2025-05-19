@@ -119,9 +119,10 @@ class HiltModules {
     @Singleton
     fun downloadFinishUseCase(
         database: CacheDatabase,
-        cachePath: CachePath
+        cachePath: CachePath,
+        @ApplicationContext applicationContext: Context
     ): DownloadFinishUseCase {
-        return DownloadFinishUseCase(database = database, cachePath = cachePath)
+        return DownloadFinishUseCase(database = database, cachePath = cachePath, context = applicationContext)
     }
 
     @Provides

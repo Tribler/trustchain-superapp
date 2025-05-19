@@ -26,6 +26,7 @@ import nl.tudelft.trustchain.musicdao.ui.MusicDAOApp
 import nl.tudelft.trustchain.musicdao.ui.screens.profile.ProfileScreenViewModel
 import nl.tudelft.trustchain.musicdao.ui.screens.release.ReleaseScreenViewModel
 import com.frostwire.jlibtorrent.SessionManager
+import com.frostwire.jlibtorrent.TorrentStatus
 import com.google.common.util.concurrent.Service
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -81,6 +82,10 @@ class MusicActivity : AppCompatActivity() {
             setupMusicCommunity.registerListeners()
             albumRepository.refreshCache()
             torrentEngine.seedStrategy()
+
+            // download creative common music metadata
+            val magnetUri = getString(R.string.bootstrap_cc_music_metadata);
+            torrentEngine.download(magnetUri);
         }
         iterativelyFetchReleases()
         Intent(this, MusicGossipingService::class.java).also { intent ->

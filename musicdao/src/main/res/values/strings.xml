@@ -2,5 +2,6 @@
 <resources>
     <string name="app_label">MusicDAO</string>
     <string name="search_hint">Search through music</string>
+    <string name="bootstrap_cc_music_metadata">magnet:?xt=urn:btih:acaf6367a327fb2b68315baaf0d27b4fb7611c4c&amp;xt=urn:btmh:1220db9d7935c342b00b8e5fdb8380fe5d8e6a0e9b7d40ff41a9955f95093d1c7a27&amp;dn=metadata.psv&amp;xl=82730&amp;tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce</string>
 </resources>
 
