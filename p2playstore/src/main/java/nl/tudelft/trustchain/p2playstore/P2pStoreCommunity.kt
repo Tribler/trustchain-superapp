@@ -9,17 +9,17 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTD
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseNegativeSignatureBlockTD
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseNegativeSignatureTransactionData
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureBlockTD
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureTransactionData
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferDoneTransactionData
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskBlockTD
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWJoinBlockTD
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWResponseNegativeSignatureBlockTD
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWResponseNegativeSignatureTransactionData
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWResponseSignatureBlockTD
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWResponseSignatureTransactionData
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWSignatureAskBlockTD
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWSignatureAskTransactionData
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWTransferDoneTransactionData
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWTransferFundsAskBlockTD
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.p2playstore.utils.DAOCreateHelper
 import nl.tudelft.trustchain.p2playstore.utils.DAOJoinHelper
 import nl.tudelft.trustchain.p2playstore.utils.DAOTransferFundsHelper
@@ -406,21 +406,21 @@ class P2pStoreCommunity : Community() {
         const val DEFAULT_BITCOIN_MAX_TIMEOUT: Long = 10
 
         // Block type for join DAO blocks
-        const val JOIN_BLOCK = "v1DAO_JOIN"
+        const val JOIN_BLOCK = "P2P_v1DAO_JOIN"
 
         // Block type for transfer funds (from a DAO)
-        const val TRANSFER_FINAL_BLOCK = "v1DAO_TRANSFER_FINAL"
+        const val TRANSFER_FINAL_BLOCK = "P2P_v1DAO_TRANSFER_FINAL"
 
         // Block type for basic signature requests
-        const val SIGNATURE_ASK_BLOCK = "v1DAO_ASK_SIGNATURE"
+        const val SIGNATURE_ASK_BLOCK = "P2P_v1DAO_ASK_SIGNATURE"
 
         // Block type for transfer funds signature requests
-        const val TRANSFER_FUNDS_ASK_BLOCK = "v1DAO_TRANSFER_ASK_SIGNATURE"
+        const val TRANSFER_FUNDS_ASK_BLOCK = "P2P_v1DAO_TRANSFER_ASK_SIGNATURE"
 
         // Block type for responding to a signature request with a (should be valid) signature
-        const val SIGNATURE_AGREEMENT_BLOCK = "v1DAO_SIGNATURE_AGREEMENT"
+        const val SIGNATURE_AGREEMENT_BLOCK = "P2P_v1DAO_SIGNATURE_AGREEMENT"
 
         // Block type for responding with a negative vote to a signature request with a signature
-        const val SIGNATURE_AGREEMENT_NEGATIVE_BLOCK = "v1DAO_SIGNATURE_AGREEMENT_NEGATIVE"
+        const val SIGNATURE_AGREEMENT_NEGATIVE_BLOCK = "P2P_v1DAO_SIGNATURE_AGREEMENT_NEGATIVE"
     }
 }

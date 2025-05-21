@@ -6,8 +6,10 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.util.taproot.TaprootUtil
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.p2playstore.sharedWallet.SWUtil
+import nl.tudelft.trustchain.p2playstore.P2pStoreCommunity
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 

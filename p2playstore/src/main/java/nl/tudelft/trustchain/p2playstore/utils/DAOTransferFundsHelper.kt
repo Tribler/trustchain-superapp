@@ -13,8 +13,8 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.sharedWallet.*
 import nl.tudelft.trustchain.currencyii.util.taproot.MuSig
+import nl.tudelft.trustchain.p2playstore.sharedWallet.*
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.ECKey
 import java.math.BigInteger
